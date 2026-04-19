@@ -31,6 +31,13 @@ app.use('/api/upload', uploadRoutes);
 // Health check
 app.get('/api/health', (req, res) => res.json({ ok: true }));
 
+// Serve React build in production
+const distPath = path.join(__dirname, '..', 'dist');
+app.use(express.static(distPath));
+app.get('*', (req, res) => {
+  res.sendFile(path.join(distPath, 'index.html'));
+});
+
 app.listen(PORT, () => {
   console.log(`API server running on http://localhost:${PORT}`);
 });
