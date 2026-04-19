@@ -20,6 +20,7 @@ import ProjectsAdmin from "./pages/admin/ProjectsAdmin";
 import ProjectForm from "./pages/admin/ProjectForm";
 import ContactAdmin from "./pages/admin/ContactAdmin";
 import NewsletterAdmin from "./pages/admin/NewsletterAdmin";
+import MediaAdmin from "./pages/admin/MediaAdmin";
 
 function Layout({ children }) {
   return (
@@ -46,6 +47,7 @@ export default function App() {
               <Route path="projects/:id" element={<ProjectForm />} />
               <Route path="contacts" element={<ContactAdmin />} />
               <Route path="newsletter" element={<NewsletterAdmin />} />
+              <Route path="media" element={<MediaAdmin />} />
             </Route>
           </Route>
 

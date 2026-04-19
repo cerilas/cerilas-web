@@ -25,7 +25,9 @@
     "postprocessing": "^6.36.0",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
+    "react-easy-crop": "^5.5.7",
     "react-router-dom": "^7.14.1",
+    "sharp": "^0.34.5",
     "three": "^0.167.1"
   },
   "devDependencies": {

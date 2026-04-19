@@ -51,9 +51,17 @@ export const api = {
   deleteSubscriber: (id) => request(`/newsletter/${id}`, { method: 'DELETE' }),
 
   // Upload
-  uploadImage: async (file) => {
+  uploadImage: async (file, opts = {}) => {
     const formData = new FormData();
-    formData.append('image', file);
+    formData.append('file', file);
+    if (opts.quality) formData.append('quality', opts.quality);
+    if (opts.maxWidth) formData.append('maxWidth', opts.maxWidth);
+    if (opts.maxHeight) formData.append('maxHeight', opts.maxHeight);
+    if (opts.format) formData.append('format', opts.format);
+    if (opts.cropX != null) formData.append('cropX', Math.round(opts.cropX));
+    if (opts.cropY != null) formData.append('cropY', Math.round(opts.cropY));
+    if (opts.cropWidth) formData.append('cropWidth', Math.round(opts.cropWidth));
+    if (opts.cropHeight) formData.append('cropHeight', Math.round(opts.cropHeight));
     const res = await fetch(`${API}/upload`, {
       method: 'POST',
       headers: authHeaders(),
@@ -68,6 +76,7 @@ export const api = {
     if (!res.ok) throw new Error(data.error || 'Upload failed');
     return data;
   },
+  cropImage: (body) => request('/upload/crop', { method: 'POST', body: JSON.stringify(body) }),
   getUploads: () => request('/upload'),
   deleteUpload: (filename) => request(`/upload/${filename}`, { method: 'DELETE' }),
 };
