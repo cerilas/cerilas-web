@@ -157,7 +157,7 @@ export default function Home() {
               </h2>
               <p className="mt-6 text-lg text-gray-400 leading-relaxed">{h.valueDesc}</p>
               <div className="mt-8 flex flex-wrap gap-2">
-                {["AI", "Robotics", "RPA", "Data", "Sustainability"].map((tag) => (
+                {["Health Tech", "Mechatronics", "Embedded", "AI", "Prototyping"].map((tag) => (
                   <Badge key={tag}>{tag}</Badge>
                 ))}
               </div>

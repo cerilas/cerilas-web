@@ -9,6 +9,7 @@ import Projects from "./pages/Projects";
 import ProjectDetail from "./pages/ProjectDetail";
 import Consultancy from "./pages/Consultancy";
 import Careers from "./pages/Careers";
+import Apply from "./pages/Apply";
 import Contact from "./pages/Contact";
 import Legal from "./pages/Legal";
 
@@ -21,6 +22,7 @@ import ProjectForm from "./pages/admin/ProjectForm";
 import ContactAdmin from "./pages/admin/ContactAdmin";
 import NewsletterAdmin from "./pages/admin/NewsletterAdmin";
 import MediaAdmin from "./pages/admin/MediaAdmin";
+import ApplicationsAdmin from "./pages/admin/ApplicationsAdmin";
 
 function Layout({ children }) {
   return (
@@ -48,6 +50,7 @@ export default function App() {
               <Route path="contacts" element={<ContactAdmin />} />
               <Route path="newsletter" element={<NewsletterAdmin />} />
               <Route path="media" element={<MediaAdmin />} />
+              <Route path="applications" element={<ApplicationsAdmin />} />
             </Route>
           </Route>
 
@@ -59,6 +62,7 @@ export default function App() {
           <Route path="/projects/:id" element={<Layout><ProjectDetail /></Layout>} />
           <Route path="/consultancy" element={<Layout><Consultancy /></Layout>} />
           <Route path="/careers" element={<Layout><Careers /></Layout>} />
+          <Route path="/careers/apply" element={<Layout><Apply /></Layout>} />
           <Route path="/contact" element={<Layout><Contact /></Layout>} />
           <Route path="/legal/:slug" element={<Layout><Legal /></Layout>} />
         </Routes>

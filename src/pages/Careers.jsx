@@ -1,4 +1,5 @@
 import { useLang } from "../context/LanguageContext";
+import { Link } from "react-router-dom";
 import { SectionTitle, FadeIn, GlowCard } from "../components/ui";
 import imgTeam from "../assets/images/vlad-hilitanu-1FI2QAYPa-Y-unsplash.jpg";
 
@@ -66,12 +67,12 @@ export default function Careers() {
                         <span>{pos.location}</span>
                       </div>
                     </div>
-                    <a
-                      href={`mailto:${c.applyEmail}?subject=Application: ${pos.title}`}
+                    <Link
+                      to={`/careers/apply?position=${encodeURIComponent(pos.title)}`}
                       className="shrink-0 px-4 py-2 text-xs font-semibold bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 rounded-lg hover:bg-cyan-500/20 transition-colors"
                     >
                       {common.applyShort}
-                    </a>
+                    </Link>
                   </div>
                 </GlowCard>
               </FadeIn>
@@ -86,12 +87,12 @@ export default function Careers() {
           <FadeIn>
             <h2 className="text-2xl font-bold text-white">{c.applyTitle}</h2>
             <p className="mt-3 text-gray-400">{c.applyDesc}</p>
-            <a
-              href={`mailto:${c.applyEmail}`}
+            <Link
+              to="/careers/apply"
               className="mt-8 inline-flex items-center gap-2 px-8 py-4 bg-cyan-500 hover:bg-cyan-400 text-gray-950 font-semibold rounded-xl text-sm transition-colors"
             >
-              {c.applyButton} — {c.applyEmail}
-            </a>
+              {c.applyButton}
+            </Link>
           </FadeIn>
         </div>
       </section>

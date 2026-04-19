@@ -99,4 +99,33 @@ export const api = {
     a.click();
     URL.revokeObjectURL(url);
   },
+
+  // Job Applications
+  submitApplication: async (formData) => {
+    const res = await fetch(`${API}/applications`, {
+      method: 'POST',
+      body: formData,
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Submit failed');
+    return data;
+  },
+  getApplications: () => request('/applications'),
+  updateApplicationStatus: (id, status) => request(`/applications/${id}/review`, { method: 'PATCH', body: JSON.stringify({ status }) }),
+  deleteApplication: (id) => request(`/applications/${id}`, { method: 'DELETE' }),
+  downloadCV: async (id) => {
+    const res = await fetch(`${API}/applications/${id}/cv`, {
+      headers: authHeaders(),
+    });
+    if (!res.ok) throw new Error('Download failed');
+    const disposition = res.headers.get('content-disposition');
+    const filename = disposition?.match(/filename="?([^"]+)"?/)?.[1] || `cv-${id}.pdf`;
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(url);
+  },
 };

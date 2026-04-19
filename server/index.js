@@ -8,6 +8,7 @@ import projectRoutes from './routes/projects.js';
 import contactRoutes from './routes/contacts.js';
 import newsletterRoutes from './routes/newsletter.js';
 import uploadRoutes from './routes/upload.js';
+import applicationRoutes from './routes/applications.js';
 import pool from './db.js';
 
 dotenv.config();
@@ -28,6 +29,7 @@ app.use('/api/projects', projectRoutes);
 app.use('/api/contacts', contactRoutes);
 app.use('/api/newsletter', newsletterRoutes);
 app.use('/api/upload', uploadRoutes);
+app.use('/api/applications', applicationRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => res.json({ ok: true }));
@@ -59,8 +61,23 @@ app.listen(PORT, async () => {
       CREATE INDEX IF NOT EXISTS idx_media_type ON media(type);
       CREATE INDEX IF NOT EXISTS idx_media_created ON media(created_at DESC);
     `);
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS job_applications (
+        id SERIAL PRIMARY KEY,
+        first_name VARCHAR(100) NOT NULL,
+        last_name VARCHAR(100) NOT NULL,
+        email VARCHAR(255) NOT NULL,
+        phone VARCHAR(30),
+        position VARCHAR(200) NOT NULL,
+        cover_letter TEXT,
+        cv_filename VARCHAR(500),
+        cv_original_name VARCHAR(500),
+        status VARCHAR(20) DEFAULT 'new',
+        created_at TIMESTAMP DEFAULT NOW()
+      );
+    `);
   } catch (err) {
-    console.error('Media table init error:', err.message);
+    console.error('Table init error:', err.message);
   }
   console.log(`API server running on http://localhost:${PORT}`);
 });

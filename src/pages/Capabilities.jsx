@@ -2,25 +2,13 @@ import { useLang } from "../context/LanguageContext";
 import { SectionTitle, FadeIn, GlowCard, Badge } from "../components/ui";
 
 const capabilityIcons = {
-  ai: (
+  health: (
     <svg viewBox="0 0 24 24" fill="none" className="w-6 h-6" stroke="currentColor" strokeWidth="1.8">
-      <rect x="7" y="8" width="10" height="8" rx="2" />
-      <path d="M9 12h.01M15 12h.01M12 8V5M6 12H4M20 12h-2M9 16v2h6v-2" strokeLinecap="round" />
+      <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" strokeLinejoin="round" />
+      <path d="M9 10h6M12 7v6" strokeLinecap="round" />
     </svg>
   ),
-  rpa: (
-    <svg viewBox="0 0 24 24" fill="none" className="w-6 h-6" stroke="currentColor" strokeWidth="1.8">
-      <path d="M10.5 3.5h3l.5 2.1a7 7 0 0 1 1.5.9l2-.9 1.5 2.6-1.6 1.4c.1.5.1 1 .1 1.5s0 1-.1 1.5l1.6 1.4-1.5 2.6-2-.9a7 7 0 0 1-1.5.9l-.5 2.1h-3l-.5-2.1a7 7 0 0 1-1.5-.9l-2 .9-1.5-2.6 1.6-1.4A8 8 0 0 1 7 12c0-.5 0-1 .1-1.5L5.5 9.1 7 6.5l2 .9c.5-.4 1-.7 1.5-.9l.5-2.1Z" strokeLinejoin="round" />
-      <circle cx="12" cy="12" r="2.4" />
-    </svg>
-  ),
-  data: (
-    <svg viewBox="0 0 24 24" fill="none" className="w-6 h-6" stroke="currentColor" strokeWidth="1.8">
-      <circle cx="11" cy="11" r="5.5" />
-      <path d="m15.2 15.2 4.3 4.3M8.5 11h5M11 8.5v5" strokeLinecap="round" />
-    </svg>
-  ),
-  robotics: (
+  mechatronics: (
     <svg viewBox="0 0 24 24" fill="none" className="w-6 h-6" stroke="currentColor" strokeWidth="1.8">
       <path d="M7 13.5V9.8a2.8 2.8 0 0 1 2.8-2.8h1.8A2.4 2.4 0 0 0 14 4.6V4" strokeLinecap="round" />
       <path d="M17 10.5v3.7a2.8 2.8 0 0 1-2.8 2.8h-1.8A2.4 2.4 0 0 0 10 19.4V20" strokeLinecap="round" />
@@ -28,10 +16,27 @@ const capabilityIcons = {
       <rect x="16" y="8.5" width="4" height="4" rx="1.2" />
     </svg>
   ),
-  upcycling: (
+  embedded: (
     <svg viewBox="0 0 24 24" fill="none" className="w-6 h-6" stroke="currentColor" strokeWidth="1.8">
-      <path d="M12 3c-2.4 2-4.6 4.8-4.6 8.1A4.6 4.6 0 0 0 12 15.7a4.6 4.6 0 0 0 4.6-4.6C16.6 7.8 14.4 5 12 3Z" />
-      <path d="M5 17c1.9 2.5 4.3 4 7 4s5.1-1.5 7-4M9.3 12.8c.7.7 1.6 1.1 2.7 1.1s2-.4 2.7-1.1" strokeLinecap="round" />
+      <rect x="5" y="5" width="14" height="14" rx="2" />
+      <rect x="8" y="8" width="8" height="8" rx="1" />
+      <path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.5 5.5 4 4M18.5 5.5 20 4M5.5 18.5 4 20M18.5 18.5 20 20" strokeLinecap="round" />
+    </svg>
+  ),
+  ai: (
+    <svg viewBox="0 0 24 24" fill="none" className="w-6 h-6" stroke="currentColor" strokeWidth="1.8">
+      <rect x="7" y="8" width="10" height="8" rx="2" />
+      <path d="M9 12h.01M15 12h.01M12 8V5M6 12H4M20 12h-2M9 16v2h6v-2" strokeLinecap="round" />
+    </svg>
+  ),
+  software: (
+    <svg viewBox="0 0 24 24" fill="none" className="w-6 h-6" stroke="currentColor" strokeWidth="1.8">
+      <path d="M8 9l-4 3 4 3M16 9l4 3-4 3M14 4l-4 16" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  ),
+  prototyping: (
+    <svg viewBox="0 0 24 24" fill="none" className="w-6 h-6" stroke="currentColor" strokeWidth="1.8">
+      <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09zM12 15l-3-3M22 2l-5 5M15 7l-1.5 1.5M17 9l-1.5 1.5M6.5 12.5l5-5" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   ),
   consultancy: (

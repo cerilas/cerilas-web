@@ -7,6 +7,7 @@ const navItems = [
   { path: '/admin/projects', label: 'Projeler', icon: '◈' },
   { path: '/admin/media', label: 'Görsel Paylaşım', icon: '⬡' },
   { path: '/admin/contacts', label: 'İletişim Formları', icon: '✉' },
+  { path: '/admin/applications', label: 'İş Başvuruları', icon: '📋' },
   { path: '/admin/newsletter', label: 'Newsletter', icon: '◎' },
 ];
 
