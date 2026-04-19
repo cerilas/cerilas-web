@@ -1,12 +1,23 @@
+import { useEffect, useState } from "react";
 import { useLang } from "../context/LanguageContext";
 import { Link } from "react-router-dom";
 import { SectionTitle, FadeIn, GlowCard } from "../components/ui";
+import { api } from "../lib/api";
 import imgTeam from "../assets/images/vlad-hilitanu-1FI2QAYPa-Y-unsplash.jpg";
 
 export default function Careers() {
   const { t } = useLang();
   const c = t.careers;
   const common = t.common;
+  const [positions, setPositions] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    api.getJobListings()
+      .then(setPositions)
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
 
   return (
     <div className="pt-16">
@@ -54,9 +65,16 @@ export default function Careers() {
       <section className="py-24 bg-gray-950">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <SectionTitle title={c.openTitle} subtitle={c.openDesc} center={false} />
+          {loading ? (
+            <div className="flex justify-center py-12">
+              <div className="w-8 h-8 border-2 border-cyan-500 border-t-transparent rounded-full animate-spin" />
+            </div>
+          ) : positions.length === 0 ? (
+            <p className="text-gray-400">{c.noPositions}</p>
+          ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {c.positions.map((pos, i) => (
-              <FadeIn key={pos.title} delay={i * 0.08}>
+            {positions.map((pos, i) => (
+              <FadeIn key={pos.id} delay={i * 0.08}>
                 <GlowCard>
                   <div className="flex items-start justify-between gap-4">
                     <div>
@@ -66,6 +84,9 @@ export default function Careers() {
                         <span className="text-gray-600">·</span>
                         <span>{pos.location}</span>
                       </div>
+                      {pos.description && (
+                        <p className="mt-2 text-sm text-gray-500 line-clamp-2">{pos.description}</p>
+                      )}
                     </div>
                     <Link
                       to={`/careers/apply?position=${encodeURIComponent(pos.title)}`}
@@ -78,6 +99,7 @@ export default function Careers() {
               </FadeIn>
             ))}
           </div>
+          )}
         </div>
       </section>
 

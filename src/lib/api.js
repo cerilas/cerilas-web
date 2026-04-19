@@ -128,4 +128,12 @@ export const api = {
     a.click();
     URL.revokeObjectURL(url);
   },
+
+  // Job Listings
+  getJobListings: () => request('/job-listings'),
+  getAdminJobListings: () => request('/job-listings/admin/all'),
+  createJobListing: (data) => request('/job-listings', { method: 'POST', body: JSON.stringify(data) }),
+  updateJobListing: (id, data) => request(`/job-listings/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+  toggleJobListing: (id) => request(`/job-listings/${id}/toggle`, { method: 'PATCH' }),
+  deleteJobListing: (id) => request(`/job-listings/${id}`, { method: 'DELETE' }),
 };

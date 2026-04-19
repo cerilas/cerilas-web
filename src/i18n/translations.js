@@ -279,6 +279,7 @@ export const translations = {
         "We're an agile, collaborative, innovation-first team. We debate ideas openly, move fast, and trust each person to own their work. We value multidisciplinary thinking, curiosity, and a genuine passion for building projects that make a difference.",
       openTitle: "Open Positions",
       openDesc: "We're always looking for talented people. If you don't see a role that fits, send us your CV anyway.",
+      noPositions: "No open positions at the moment. Check back soon or send us your CV.",
       positions: [
         { title: "AI / ML Engineer", type: "Full-time", location: "Gaziantep / Remote" },
         { title: "Embedded Systems Engineer", type: "Full-time", location: "Gaziantep" },
@@ -631,6 +632,7 @@ export const translations = {
         "Çevik, iş birliğine dayalı ve inovasyon odaklı bir ekibiz. Fikirleri açıkça tartışır, hızlı hareket eder ve her bireyin kendi işinin sahibi olmasına güveniriz. Disiplinler arası çalışmayı, merakı ve gerçekten fark yaratan projeler geliştirme tutkusunu değer biliriz.",
       openTitle: "Açık Pozisyonlar",
       openDesc: "Her zaman yetenekli insanlar arıyoruz. Uygun bir pozisyon görmüyorsanız, CV'nizi yine de gönderin.",
+      noPositions: "Şu anda açık pozisyon bulunmamaktadır. Kısa süre sonra tekrar kontrol edin veya CV'nizi gönderin.",
       positions: [
         { title: "Yapay Zeka / Makine Öğrenmesi Mühendisi", type: "Tam zamanlı", location: "Gaziantep / Uzaktan" },
         { title: "Gömülü Sistemler Mühendisi", type: "Tam zamanlı", location: "Gaziantep" },

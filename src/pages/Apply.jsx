@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useSearchParams, Link } from "react-router-dom";
 import { useLang } from "../context/LanguageContext";
 import { SectionTitle, FadeIn, GlowCard } from "../components/ui";
@@ -7,9 +7,14 @@ import { api } from "../lib/api";
 export default function Apply() {
   const { t } = useLang();
   const a = t.application;
-  const c = t.careers;
   const [searchParams] = useSearchParams();
   const preselected = searchParams.get("position") || "";
+
+  const [positions, setPositions] = useState([]);
+
+  useEffect(() => {
+    api.getJobListings().then(setPositions).catch(() => {});
+  }, []);
 
   const [form, setForm] = useState({
     firstName: "",
@@ -180,8 +185,8 @@ export default function Apply() {
                     className={inputCls("position")}
                   >
                     <option value="">{a.selectPosition}</option>
-                    {c.positions.map((pos) => (
-                      <option key={pos.title} value={pos.title}>
+                    {positions.map((pos) => (
+                      <option key={pos.id} value={pos.title}>
                         {pos.title}
                       </option>
                     ))}

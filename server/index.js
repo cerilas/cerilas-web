@@ -9,6 +9,7 @@ import contactRoutes from './routes/contacts.js';
 import newsletterRoutes from './routes/newsletter.js';
 import uploadRoutes from './routes/upload.js';
 import applicationRoutes from './routes/applications.js';
+import jobListingRoutes from './routes/jobListings.js';
 import pool from './db.js';
 
 dotenv.config();
@@ -30,6 +31,7 @@ app.use('/api/contacts', contactRoutes);
 app.use('/api/newsletter', newsletterRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/applications', applicationRoutes);
+app.use('/api/job-listings', jobListingRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => res.json({ ok: true }));
@@ -60,6 +62,18 @@ app.listen(PORT, async () => {
       );
       CREATE INDEX IF NOT EXISTS idx_media_type ON media(type);
       CREATE INDEX IF NOT EXISTS idx_media_created ON media(created_at DESC);
+    `);
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS job_listings (
+        id SERIAL PRIMARY KEY,
+        title VARCHAR(200) NOT NULL,
+        type VARCHAR(100) NOT NULL,
+        location VARCHAR(200) NOT NULL,
+        description TEXT,
+        is_active BOOLEAN DEFAULT true,
+        created_at TIMESTAMP DEFAULT NOW(),
+        updated_at TIMESTAMP DEFAULT NOW()
+      );
     `);
     await pool.query(`
       CREATE TABLE IF NOT EXISTS job_applications (
