@@ -23,7 +23,7 @@ function mapProject(row, lang) {
 }
 
 export function useProjects() {
-  const { lang, t } = useLang();
+  const { lang } = useLang();
   const [projects, setProjects] = useState(null);
 
   useEffect(() => {
@@ -33,12 +33,11 @@ export function useProjects() {
       .catch(() => setProjects(null));
   }, [lang]);
 
-  // Fallback to translations if API fails
-  return projects ?? t.projects.list;
+  return projects ?? [];
 }
 
 export function useProject(id) {
-  const { lang, t } = useLang();
+  const { lang } = useLang();
   const [project, setProject] = useState(undefined); // undefined = loading
 
   useEffect(() => {
@@ -50,9 +49,7 @@ export function useProject(id) {
 
   if (project === undefined) return { loading: true, project: null };
   if (project === null) {
-    // Fallback to translations
-    const fallback = t.projects.list.find((p) => p.id === id) || null;
-    return { loading: false, project: fallback };
+    return { loading: false, project: null };
   }
   return { loading: false, project };
 }

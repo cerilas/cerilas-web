@@ -1,6 +1,59 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useLang } from "../context/LanguageContext";
 import { FadeIn, GlowCard } from "../components/ui";
+
+function CategoryDropdown({ label, value, options, onChange }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+
+  useEffect(() => {
+    const handler = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  return (
+    <div ref={ref} className="relative">
+      <label className="block text-xs text-gray-400 mb-1.5">{label}</label>
+      <button
+        type="button"
+        onClick={() => setOpen(!open)}
+        className={`w-full bg-gray-900 border rounded-xl px-4 py-3 text-sm text-left flex items-center justify-between transition-colors ${
+          open ? "border-cyan-500 ring-1 ring-cyan-500/20" : "border-gray-700 hover:border-gray-600"
+        }`}
+      >
+        <span className="text-white truncate">{value}</span>
+        <svg
+          className={`w-4 h-4 text-gray-400 shrink-0 ml-2 transition-transform ${open ? "rotate-180" : ""}`}
+          fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor"
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+        </svg>
+      </button>
+      {open && (
+        <div className="absolute z-50 mt-1.5 w-full bg-gray-900 border border-gray-700 rounded-xl shadow-2xl shadow-black/40 overflow-hidden py-1">
+          {options.map((opt) => (
+            <button
+              key={opt}
+              type="button"
+              onClick={() => { onChange(opt); setOpen(false); }}
+              className={`w-full text-left px-4 py-2.5 text-sm transition-colors ${
+                opt === value
+                  ? "bg-cyan-500/10 text-cyan-400"
+                  : "text-gray-300 hover:bg-gray-800 hover:text-white"
+              }`}
+            >
+              {opt === value && (
+                <span className="inline-block w-1.5 h-1.5 bg-cyan-400 rounded-full mr-2.5 -translate-y-px" />
+              )}
+              {opt}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
 
 const mapsUrl = "https://www.google.com/maps?ll=37.027409,37.307163&z=14&t=m&hl=tr&gl=TR&mapclient=embed&cid=15052496142500458302";
 const embedMapsUrl = "https://www.google.com/maps?q=37.027409,37.307163&z=14&hl=tr&output=embed";
@@ -89,18 +142,12 @@ export default function Contact() {
                         className="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-cyan-500 transition-colors"
                       />
                     </div>
-                    <div>
-                      <label className="block text-xs text-gray-400 mb-1.5">{c.categoryLabel}</label>
-                      <select
-                        value={form.category}
-                        onChange={(e) => setForm({ ...form, category: e.target.value })}
-                        className="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-cyan-500 transition-colors"
-                      >
-                        {c.categories.map((cat) => (
-                          <option key={cat} value={cat}>{cat}</option>
-                        ))}
-                      </select>
-                    </div>
+                    <CategoryDropdown
+                      label={c.categoryLabel}
+                      value={form.category}
+                      options={c.categories}
+                      onChange={(val) => setForm({ ...form, category: val })}
+                    />
                     <textarea
                       required
                       rows={6}
