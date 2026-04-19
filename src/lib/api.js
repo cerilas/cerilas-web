@@ -77,6 +77,10 @@ export const api = {
     return data;
   },
   cropImage: (body) => request('/upload/crop', { method: 'POST', body: JSON.stringify(body) }),
-  getUploads: () => request('/upload'),
+  getUploads: (page = 1, limit = 30, type = '') => {
+    const params = new URLSearchParams({ page, limit });
+    if (type) params.set('type', type);
+    return request(`/upload?${params}`);
+  },
   deleteUpload: (filename) => request(`/upload/${filename}`, { method: 'DELETE' }),
 };

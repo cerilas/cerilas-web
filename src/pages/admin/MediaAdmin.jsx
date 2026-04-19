@@ -39,6 +39,8 @@ function formatBytes(bytes) {
   return `${(bytes / Math.pow(k, i)).toFixed(1)} ${sizes[i]}`;
 }
 
+const ITEMS_PER_PAGE = 30;
+
 export default function MediaAdmin() {
   const [files, setFiles] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -48,6 +50,11 @@ export default function MediaAdmin() {
   const [copied, setCopied] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [viewFile, setViewFile] = useState(null);
+
+  // Pagination
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(0);
+  const [total, setTotal] = useState(0);
 
   // Upload settings
   const [quality, setQuality] = useState(80);
@@ -63,14 +70,19 @@ export default function MediaAdmin() {
 
   const fileRef = useRef(null);
 
-  const load = () => {
-    api.getUploads()
-      .then(setFiles)
+  const load = (p = page, f = filter) => {
+    api.getUploads(p, ITEMS_PER_PAGE, f === 'all' ? '' : f)
+      .then((data) => {
+        setFiles(data.files);
+        setTotal(data.total);
+        setTotalPages(data.totalPages);
+        setPage(data.page);
+      })
       .catch(() => {})
       .finally(() => setLoading(false));
   };
 
-  useEffect(load, []);
+  useEffect(() => { load(1, filter); }, [filter]);
 
   const handleUpload = async (fileList) => {
     if (!fileList?.length) return;
@@ -101,9 +113,9 @@ export default function MediaAdmin() {
   const handleDelete = async () => {
     if (!deleteTarget) return;
     await api.deleteUpload(deleteTarget);
-    setFiles((prev) => prev.filter((f) => f.filename !== deleteTarget));
     if (viewFile?.filename === deleteTarget) setViewFile(null);
     setDeleteTarget(null);
+    load();
   };
 
   const copyUrl = (url) => {
@@ -133,8 +145,6 @@ export default function MediaAdmin() {
       setUploading(false);
     }
   };
-
-  const filtered = filter === 'all' ? files : files.filter((f) => f.type === filter);
 
   const filters = [
     { key: 'all', label: 'Tümü' },
@@ -270,7 +280,7 @@ export default function MediaAdmin() {
         {filters.map((f) => (
           <button
             key={f.key}
-            onClick={() => setFilter(f.key)}
+            onClick={() => { setFilter(f.key); setPage(1); }}
             className={`text-xs px-3 py-1.5 rounded-lg transition-colors ${
               filter === f.key
                 ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/30'
@@ -278,19 +288,17 @@ export default function MediaAdmin() {
             }`}
           >
             {f.label}
-            {f.key === 'all'
-              ? ` (${files.length})`
-              : ` (${files.filter((x) => x.type === f.key).length})`}
+            {filter === f.key ? ` (${total})` : ''}
           </button>
         ))}
       </div>
 
       {/* Gallery */}
-      {filtered.length === 0 ? (
+      {files.length === 0 ? (
         <p className="text-gray-500 text-center py-12">Henüz dosya yüklenmedi.</p>
       ) : (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-          {filtered.map((file) => (
+          {files.map((file) => (
             <div
               key={file.filename}
               className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden group hover:border-gray-700 transition-colors"
@@ -351,6 +359,51 @@ export default function MediaAdmin() {
               </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-center gap-2 mt-8">
+          <button
+            disabled={page <= 1}
+            onClick={() => { const p = page - 1; setPage(p); load(p); }}
+            className="px-3 py-1.5 text-xs rounded-lg border border-gray-700 text-gray-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed"
+          >
+            ← Önceki
+          </button>
+          {Array.from({ length: totalPages }, (_, i) => i + 1)
+            .filter((p) => p === 1 || p === totalPages || Math.abs(p - page) <= 2)
+            .reduce((acc, p, i, arr) => {
+              if (i > 0 && p - arr[i - 1] > 1) acc.push('...');
+              acc.push(p);
+              return acc;
+            }, [])
+            .map((p, i) =>
+              p === '...' ? (
+                <span key={`dot-${i}`} className="text-gray-600 text-xs px-1">...</span>
+              ) : (
+                <button
+                  key={p}
+                  onClick={() => { setPage(p); load(p); }}
+                  className={`w-8 h-8 text-xs rounded-lg transition-colors ${
+                    p === page
+                      ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/30'
+                      : 'border border-gray-700 text-gray-400 hover:text-white'
+                  }`}
+                >
+                  {p}
+                </button>
+              )
+            )}
+          <button
+            disabled={page >= totalPages}
+            onClick={() => { const p = page + 1; setPage(p); load(p); }}
+            className="px-3 py-1.5 text-xs rounded-lg border border-gray-700 text-gray-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed"
+          >
+            Sonraki →
+          </button>
+          <span className="text-[10px] text-gray-600 ml-2">{total} dosya</span>
         </div>
       )}
 

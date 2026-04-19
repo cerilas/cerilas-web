@@ -183,10 +183,14 @@ router.post('/crop', authMiddleware, async (req, res) => {
   }
 });
 
-// List uploaded files (admin only)
+// List uploaded files (admin only) — with pagination
 router.get('/', authMiddleware, (req, res) => {
   try {
-    const files = fs.readdirSync(uploadsDir)
+    const page = Math.max(1, parseInt(req.query.page) || 1);
+    const limit = Math.min(100, Math.max(1, parseInt(req.query.limit) || 30));
+    const typeFilter = req.query.type || '';
+
+    let files = fs.readdirSync(uploadsDir)
       .filter((f) => !f.startsWith('.'))
       .map((f) => {
         const stat = fs.statSync(path.join(uploadsDir, f));
@@ -199,9 +203,18 @@ router.get('/', authMiddleware, (req, res) => {
         return { filename: f, url: `/uploads/${f}`, size: stat.size, created: stat.birthtime, type, ext };
       })
       .sort((a, b) => new Date(b.created) - new Date(a.created));
-    res.json(files);
+
+    if (typeFilter && typeFilter !== 'all') {
+      files = files.filter((f) => f.type === typeFilter);
+    }
+
+    const total = files.length;
+    const totalPages = Math.ceil(total / limit);
+    const paginated = files.slice((page - 1) * limit, page * limit);
+
+    res.json({ files: paginated, total, page, totalPages, limit });
   } catch {
-    res.json([]);
+    res.json({ files: [], total: 0, page: 1, totalPages: 0, limit: 30 });
   }
 });
 
