@@ -8,6 +8,7 @@ import projectRoutes from './routes/projects.js';
 import contactRoutes from './routes/contacts.js';
 import newsletterRoutes from './routes/newsletter.js';
 import uploadRoutes from './routes/upload.js';
+import pool from './db.js';
 
 dotenv.config();
 
@@ -38,6 +39,28 @@ app.get('{*path}', (req, res) => {
   res.sendFile(path.join(distPath, 'index.html'));
 });
 
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
+  // Auto-create media table if not exists
+  try {
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS media (
+        id SERIAL PRIMARY KEY,
+        filename VARCHAR(255) NOT NULL,
+        original_name VARCHAR(500),
+        url TEXT NOT NULL,
+        mimetype VARCHAR(100),
+        size INTEGER DEFAULT 0,
+        original_size INTEGER DEFAULT 0,
+        type VARCHAR(20) DEFAULT 'other',
+        ext VARCHAR(20),
+        uploaded_by INTEGER REFERENCES users(id),
+        created_at TIMESTAMP DEFAULT NOW()
+      );
+      CREATE INDEX IF NOT EXISTS idx_media_type ON media(type);
+      CREATE INDEX IF NOT EXISTS idx_media_created ON media(created_at DESC);
+    `);
+  } catch (err) {
+    console.error('Media table init error:', err.message);
+  }
   console.log(`API server running on http://localhost:${PORT}`);
 });

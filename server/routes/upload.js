@@ -5,6 +5,7 @@ import fs from 'fs';
 import { fileURLToPath } from 'url';
 import sharp from 'sharp';
 import authMiddleware from '../middleware/auth.js';
+import pool from '../db.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const uploadsDir = path.join(__dirname, '..', 'uploads');
@@ -119,6 +120,21 @@ router.post('/', authMiddleware, upload.single('file'), async (req, res) => {
     const stat = fs.statSync(filePath);
     const url = `/uploads/${filename}`;
 
+    // Determine file type
+    const ext = finalExt.toLowerCase();
+    let type = 'other';
+    if (['.jpg', '.jpeg', '.png', '.webp', '.gif', '.svg', '.avif', '.bmp'].includes(ext)) type = 'image';
+    else if (['.mp4', '.webm', '.mov', '.avi'].includes(ext)) type = 'video';
+    else if (ext === '.pdf') type = 'pdf';
+    else if (['.doc', '.docx', '.xls', '.xlsx', '.ppt', '.pptx'].includes(ext)) type = 'document';
+
+    // Save metadata to DB
+    await pool.query(
+      `INSERT INTO media (filename, original_name, url, mimetype, size, original_size, type, ext, uploaded_by)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
+      [filename, req.file.originalname, url, req.file.mimetype, stat.size, req.file.size, type, ext, req.user.id]
+    );
+
     res.json({
       url,
       filename,
@@ -172,8 +188,20 @@ router.post('/crop', authMiddleware, async (req, res) => {
     await pipeline.toFile(destPath);
 
     const stat = fs.statSync(destPath);
+    const url = `/uploads/${newFilename}`;
+
+    // Determine type from ext
+    let type = 'image';
+
+    // Save cropped file metadata to DB
+    await pool.query(
+      `INSERT INTO media (filename, original_name, url, mimetype, size, original_size, type, ext, uploaded_by)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
+      [newFilename, `cropped-${safeName}`, url, `image/${ext.replace('.', '')}`, stat.size, 0, type, ext, req.user.id]
+    );
+
     res.json({
-      url: `/uploads/${newFilename}`,
+      url,
       filename: newFilename,
       size: stat.size,
     });
@@ -183,49 +211,64 @@ router.post('/crop', authMiddleware, async (req, res) => {
   }
 });
 
-// List uploaded files (admin only) — with pagination
-router.get('/', authMiddleware, (req, res) => {
+// List uploaded files (admin only) — with pagination from DB
+router.get('/', authMiddleware, async (req, res) => {
   try {
     const page = Math.max(1, parseInt(req.query.page) || 1);
     const limit = Math.min(100, Math.max(1, parseInt(req.query.limit) || 30));
     const typeFilter = req.query.type || '';
+    const offset = (page - 1) * limit;
 
-    let files = fs.readdirSync(uploadsDir)
-      .filter((f) => !f.startsWith('.'))
-      .map((f) => {
-        const stat = fs.statSync(path.join(uploadsDir, f));
-        const ext = path.extname(f).toLowerCase();
-        let type = 'other';
-        if (['.jpg', '.jpeg', '.png', '.webp', '.gif', '.svg', '.avif', '.bmp'].includes(ext)) type = 'image';
-        else if (['.mp4', '.webm', '.mov', '.avi'].includes(ext)) type = 'video';
-        else if (ext === '.pdf') type = 'pdf';
-        else if (['.doc', '.docx', '.xls', '.xlsx', '.ppt', '.pptx'].includes(ext)) type = 'document';
-        return { filename: f, url: `/uploads/${f}`, size: stat.size, created: stat.birthtime, type, ext };
-      })
-      .sort((a, b) => new Date(b.created) - new Date(a.created));
+    let countQuery = 'SELECT COUNT(*) FROM media';
+    let listQuery = 'SELECT id, filename, original_name, url, mimetype, size, original_size, type, ext, created_at FROM media';
+    const params = [];
 
     if (typeFilter && typeFilter !== 'all') {
-      files = files.filter((f) => f.type === typeFilter);
+      countQuery += ' WHERE type = $1';
+      listQuery += ' WHERE type = $1';
+      params.push(typeFilter);
     }
 
-    const total = files.length;
-    const totalPages = Math.ceil(total / limit);
-    const paginated = files.slice((page - 1) * limit, page * limit);
+    listQuery += ` ORDER BY created_at DESC LIMIT $${params.length + 1} OFFSET $${params.length + 2}`;
 
-    res.json({ files: paginated, total, page, totalPages, limit });
-  } catch {
+    const [countResult, listResult] = await Promise.all([
+      pool.query(countQuery, params),
+      pool.query(listQuery, [...params, limit, offset]),
+    ]);
+
+    const total = parseInt(countResult.rows[0].count);
+    const totalPages = Math.ceil(total / limit);
+
+    const files = listResult.rows.map((r) => ({
+      id: r.id,
+      filename: r.filename,
+      originalName: r.original_name,
+      url: r.url,
+      size: r.size,
+      originalSize: r.original_size,
+      created: r.created_at,
+      type: r.type,
+      ext: r.ext,
+    }));
+
+    res.json({ files, total, page, totalPages, limit });
+  } catch (err) {
+    console.error('List error:', err);
     res.json({ files: [], total: 0, page: 1, totalPages: 0, limit: 30 });
   }
 });
 
 // Delete uploaded file (admin only)
-router.delete('/:filename', authMiddleware, (req, res) => {
+router.delete('/:filename', authMiddleware, async (req, res) => {
   const filename = path.basename(req.params.filename);
   const filePath = path.join(uploadsDir, filename);
   try {
+    // Delete from disk
     if (fs.existsSync(filePath)) {
       fs.unlinkSync(filePath);
     }
+    // Delete from DB
+    await pool.query('DELETE FROM media WHERE filename = $1', [filename]);
     res.json({ deleted: true });
   } catch {
     res.status(500).json({ error: 'Dosya silinemedi' });
