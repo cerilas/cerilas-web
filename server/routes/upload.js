@@ -4,6 +4,7 @@ import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
 import sharp from 'sharp';
+import archiver from 'archiver';
 import authMiddleware from '../middleware/auth.js';
 import pool from '../db.js';
 
@@ -33,7 +34,7 @@ const COMPRESSIBLE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/avif
 
 const upload = multer({
   storage: memStorage,
-  limits: { fileSize: 50 * 1024 * 1024 }, // 50MB
+  limits: { fileSize: 2 * 1024 * 1024 * 1024 }, // 2GB
   fileFilter: (req, file, cb) => {
     if (ALLOWED_TYPES.includes(file.mimetype)) {
       cb(null, true);
@@ -273,6 +274,52 @@ router.delete('/:filename', authMiddleware, async (req, res) => {
   } catch {
     res.status(500).json({ error: 'Dosya silinemedi' });
   }
+});
+
+// Bulk delete (admin only)
+router.post('/bulk-delete', authMiddleware, async (req, res) => {
+  const { filenames } = req.body;
+  if (!Array.isArray(filenames) || filenames.length === 0) {
+    return res.status(400).json({ error: 'Dosya listesi gerekli' });
+  }
+  try {
+    const safeNames = filenames.map((f) => path.basename(f));
+    // Delete from disk
+    for (const filename of safeNames) {
+      const filePath = path.join(uploadsDir, filename);
+      if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+    }
+    // Delete from DB
+    const placeholders = safeNames.map((_, i) => `$${i + 1}`).join(',');
+    await pool.query(`DELETE FROM media WHERE filename IN (${placeholders})`, safeNames);
+    res.json({ deleted: safeNames.length });
+  } catch {
+    res.status(500).json({ error: 'Toplu silme başarısız' });
+  }
+});
+
+// Bulk download as zip (admin only)
+router.post('/bulk-download', authMiddleware, (req, res) => {
+  const { filenames } = req.body;
+  if (!Array.isArray(filenames) || filenames.length === 0) {
+    return res.status(400).json({ error: 'Dosya listesi gerekli' });
+  }
+  const safeNames = filenames.map((f) => path.basename(f));
+  const validFiles = safeNames.filter((f) => fs.existsSync(path.join(uploadsDir, f)));
+  if (validFiles.length === 0) {
+    return res.status(404).json({ error: 'Dosya bulunamadı' });
+  }
+
+  res.setHeader('Content-Type', 'application/zip');
+  res.setHeader('Content-Disposition', `attachment; filename="cerilas-media-${Date.now()}.zip"`);
+
+  const archive = archiver('zip', { zlib: { level: 5 } });
+  archive.on('error', () => res.status(500).end());
+  archive.pipe(res);
+  for (const filename of validFiles) {
+    archive.file(path.join(uploadsDir, filename), { name: filename });
+  }
+  archive.finalize();
 });
 
 export default router;

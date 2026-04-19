@@ -83,4 +83,20 @@ export const api = {
     return request(`/upload?${params}`);
   },
   deleteUpload: (filename) => request(`/upload/${filename}`, { method: 'DELETE' }),
+  bulkDeleteUploads: (filenames) => request('/upload/bulk-delete', { method: 'POST', body: JSON.stringify({ filenames }) }),
+  bulkDownloadUploads: async (filenames) => {
+    const res = await fetch(`${API}/upload/bulk-download`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ...authHeaders() },
+      body: JSON.stringify({ filenames }),
+    });
+    if (!res.ok) throw new Error('Download failed');
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `cerilas-media-${Date.now()}.zip`;
+    a.click();
+    URL.revokeObjectURL(url);
+  },
 };
