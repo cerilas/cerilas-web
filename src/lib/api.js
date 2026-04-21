@@ -41,6 +41,16 @@ export const api = {
   updateProject: (id, data) => request(`/projects/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
   deleteProject: (id) => request(`/projects/${id}`, { method: 'DELETE' }),
 
+  // Use cases
+  getUseCases: (params = {}) => request(`/use-cases?${new URLSearchParams(params)}`),
+  getUseCaseTags: (params = {}) => request(`/use-cases/tags?${new URLSearchParams(params)}`),
+  getUseCase: (slug) => request(`/use-cases/${slug}`),
+  getAdminUseCases: (params = {}) => request(`/use-cases/admin/all?${new URLSearchParams(params)}`),
+  getAdminUseCase: (id) => request(`/use-cases/admin/${id}`),
+  createUseCase: (data) => request('/use-cases', { method: 'POST', body: JSON.stringify(data) }),
+  updateUseCase: (id, data) => request(`/use-cases/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+  deleteUseCase: (id) => request(`/use-cases/${id}`, { method: 'DELETE' }),
+
   // Contact submissions
   getContacts: () => request('/contacts'),
   markContactRead: (id) => request(`/contacts/${id}/read`, { method: 'PATCH' }),

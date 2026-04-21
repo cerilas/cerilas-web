@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { api } from "../lib/api";
 
 export default function Apply() {
-  const { t } = useLang();
+  const { t, lang } = useLang();
   const a = t.application;
   const [searchParams] = useSearchParams();
   const preselected = searchParams.get("position") || "";
@@ -44,18 +44,25 @@ export default function Apply() {
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
-  const selectedPosition = positions.find((p) => p.title === form.position);
+  // Helper to get localized field
+  const l = (pos, field) => {
+    const trKey = `${field}_tr`;
+    const enKey = `${field}_en`;
+    return (lang === 'en' ? (pos[enKey] || pos[field]) : (pos[trKey] || pos[field])) || '';
+  };
+
+  const selectedPosition = positions.find((p) => l(p, 'title') === form.position);
 
   const selectPosition = useCallback((pos) => {
-    setForm((prev) => ({ ...prev, position: pos.title }));
+    setForm((prev) => ({ ...prev, position: l(pos, 'title') }));
     if (errors.position) setErrors((prev) => ({ ...prev, position: undefined }));
     setDropdownOpen(false);
-  }, [errors.position]);
+  }, [errors.position, lang]);
 
   const typeBadgeColor = (type) => {
-    if (type?.includes("Staj")) return "bg-purple-500/15 text-purple-400 border-purple-500/25";
-    if (type?.includes("Yarı")) return "bg-amber-500/15 text-amber-400 border-amber-500/25";
-    if (type?.includes("Sözleşmeli")) return "bg-orange-500/15 text-orange-400 border-orange-500/25";
+    if (type?.includes('Staj') || type?.includes('Internship')) return "bg-purple-500/15 text-purple-400 border-purple-500/25";
+    if (type?.includes('Yarı') || type?.includes('Part')) return "bg-amber-500/15 text-amber-400 border-amber-500/25";
+    if (type?.includes('Sözleşmeli') || type?.includes('Contract')) return "bg-orange-500/15 text-orange-400 border-orange-500/25";
     return "bg-cyan-500/15 text-cyan-400 border-cyan-500/25";
   };
 
@@ -219,9 +226,9 @@ export default function Apply() {
                     >
                       {selectedPosition ? (
                         <div className="flex items-center gap-3 min-w-0">
-                          <span className="text-white truncate">{selectedPosition.title}</span>
-                          <span className={`shrink-0 text-[11px] font-medium px-2 py-0.5 rounded-full border ${typeBadgeColor(selectedPosition.type)}`}>
-                            {selectedPosition.type}
+                          <span className="text-white truncate">{l(selectedPosition, 'title')}</span>
+                          <span className={`shrink-0 text-[11px] font-medium px-2 py-0.5 rounded-full border ${typeBadgeColor(l(selectedPosition, 'type'))}`}>
+                            {l(selectedPosition, 'type')}
                           </span>
                         </div>
                       ) : (
@@ -257,17 +264,17 @@ export default function Apply() {
                                   type="button"
                                   onClick={() => selectPosition(pos)}
                                   className={`w-full text-left px-4 py-3 transition-colors ${
-                                    form.position === pos.title
+                                    form.position === l(pos, 'title')
                                       ? "bg-cyan-500/10"
                                       : "hover:bg-gray-800/60"
                                   }`}
                                 >
                                   <div className="flex items-center justify-between gap-3">
-                                    <span className={`font-medium truncate ${form.position === pos.title ? "text-cyan-400" : "text-white"}`}>
-                                      {pos.title}
+                                    <span className={`font-medium truncate ${form.position === l(pos, 'title') ? "text-cyan-400" : "text-white"}`}>
+                                      {l(pos, 'title')}
                                     </span>
-                                    <span className={`shrink-0 text-[11px] font-medium px-2 py-0.5 rounded-full border ${typeBadgeColor(pos.type)}`}>
-                                      {pos.type}
+                                    <span className={`shrink-0 text-[11px] font-medium px-2 py-0.5 rounded-full border ${typeBadgeColor(l(pos, 'type'))}`}>
+                                      {l(pos, 'type')}
                                     </span>
                                   </div>
                                   <div className="flex items-center gap-1.5 mt-1">
@@ -275,7 +282,7 @@ export default function Apply() {
                                       <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                                       <path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                                     </svg>
-                                    <span className="text-xs text-gray-500">{pos.location}</span>
+                                    <span className="text-xs text-gray-500">{l(pos, 'location')}</span>
                                   </div>
                                 </button>
                               ))

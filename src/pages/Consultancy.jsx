@@ -74,6 +74,47 @@ export default function Consultancy() {
           </div>
         </div>
       </section>
+
+      {/* Program-Based Consultancy */}
+      <section className="py-24 bg-gray-950">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <FadeIn>
+            <h2 className="text-3xl font-bold text-white mb-12 text-center">{c.programBasedTitle}</h2>
+          </FadeIn>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {c.programBasedItems.map((item, i) => (
+              <FadeIn key={item.title} delay={i * 0.1}>
+                <GlowCard className="h-full flex flex-col">
+                  <h3 className="text-xl font-semibold text-white mb-3">{item.title}</h3>
+                  <p className="text-sm text-gray-400 leading-relaxed mb-4">{item.desc}</p>
+                  
+                  {/* Details list */}
+                  <div className="mb-6 flex-grow">
+                    <ul className="space-y-2">
+                      {item.details?.slice(0, 4).map((detail, idx) => (
+                        <li key={idx} className="text-xs text-gray-500 flex items-start gap-2">
+                          <span className="text-cyan-400 mt-1">•</span>
+                          <span>{detail}</span>
+                        </li>
+                      ))}
+                    </ul>
+                    {item.details && item.details.length > 4 && (
+                      <p className="text-xs text-gray-600 mt-3 italic">+ {item.details.length - 4} {c.moreServices}</p>
+                    )}
+                  </div>
+                  
+                  <Link
+                    to="/contact"
+                    className="inline-flex items-center gap-2 px-6 py-3 bg-cyan-500 hover:bg-cyan-400 text-gray-950 font-semibold rounded-lg text-sm transition-colors w-full justify-center"
+                  >
+                    {item.button}
+                  </Link>
+                </GlowCard>
+              </FadeIn>
+            ))}
+          </div>
+        </div>
+      </section>
     </div>
   );
 }

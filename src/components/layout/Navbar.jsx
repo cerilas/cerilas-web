@@ -8,6 +8,7 @@ const navRoutes = [
   { key: "about", path: "/about" },
   { key: "capabilities", path: "/capabilities" },
   { key: "projects", path: "/projects" },
+  { key: "useCases", path: "/use-cases" },
   { key: "consultancy", path: "/consultancy" },
   { key: "careers", path: "/careers" },
   { key: "contact", path: "/contact" },
@@ -38,12 +39,12 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-2 group">
+          <Link to="/" className="group inline-flex flex-col items-start leading-none">
             <span className="text-xl font-bold tracking-tight text-white group-hover:text-cyan-400 transition-colors">
               {t.brand.shortName}
             </span>
-            <span className="hidden sm:block text-xs text-gray-400 font-medium tracking-widest uppercase mt-0.5">
-              {t.brand.fullName}
+            <span className="hidden sm:block w-full max-w-full text-[10px] text-gray-400 font-medium tracking-wide mt-1 text-center whitespace-nowrap overflow-hidden text-ellipsis">
+              Yüksek Teknoloji
             </span>
           </Link>
 

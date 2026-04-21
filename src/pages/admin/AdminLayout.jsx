@@ -5,6 +5,7 @@ import { api } from '../../lib/api';
 const navItems = [
   { path: '/admin/dashboard', label: 'Dashboard', icon: '⊞' },
   { path: '/admin/projects', label: 'Projeler', icon: '◈' },
+  { path: '/admin/use-cases', label: 'Use Case\'ler', icon: '⌘' },
   { path: '/admin/media', label: 'Görsel Paylaşım', icon: '⬡' },
   { path: '/admin/contacts', label: 'İletişim Formları', icon: '✉' },
   { path: '/admin/job-listings', label: 'İş İlanları', icon: '◇' },
@@ -66,7 +67,7 @@ export default function AdminLayout() {
               key={item.path}
               to={item.path}
               className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors ${
-                location.pathname === item.path
+                location.pathname === item.path || location.pathname.startsWith(`${item.path}/`)
                   ? 'bg-cyan-500/10 text-cyan-400'
                   : 'text-gray-400 hover:text-white hover:bg-gray-800'
               }`}

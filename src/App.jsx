@@ -7,6 +7,8 @@ import About from "./pages/About";
 import Capabilities from "./pages/Capabilities";
 import Projects from "./pages/Projects";
 import ProjectDetail from "./pages/ProjectDetail";
+import UseCases from "./pages/UseCases";
+import UseCaseDetail from "./pages/UseCaseDetail";
 import Consultancy from "./pages/Consultancy";
 import Careers from "./pages/Careers";
 import Apply from "./pages/Apply";
@@ -19,6 +21,8 @@ import AdminLayout from "./pages/admin/AdminLayout";
 import Dashboard from "./pages/admin/Dashboard";
 import ProjectsAdmin from "./pages/admin/ProjectsAdmin";
 import ProjectForm from "./pages/admin/ProjectForm";
+import UseCasesAdmin from "./pages/admin/UseCasesAdmin";
+import UseCaseForm from "./pages/admin/UseCaseForm";
 import ContactAdmin from "./pages/admin/ContactAdmin";
 import NewsletterAdmin from "./pages/admin/NewsletterAdmin";
 import MediaAdmin from "./pages/admin/MediaAdmin";
@@ -48,6 +52,9 @@ export default function App() {
               <Route path="projects" element={<ProjectsAdmin />} />
               <Route path="projects/new" element={<ProjectForm />} />
               <Route path="projects/:id" element={<ProjectForm />} />
+              <Route path="use-cases" element={<UseCasesAdmin />} />
+              <Route path="use-cases/new" element={<UseCaseForm />} />
+              <Route path="use-cases/:id" element={<UseCaseForm />} />
               <Route path="contacts" element={<ContactAdmin />} />
               <Route path="newsletter" element={<NewsletterAdmin />} />
               <Route path="media" element={<MediaAdmin />} />
@@ -62,6 +69,8 @@ export default function App() {
           <Route path="/capabilities" element={<Layout><Capabilities /></Layout>} />
           <Route path="/projects" element={<Layout><Projects /></Layout>} />
           <Route path="/projects/:id" element={<Layout><ProjectDetail /></Layout>} />
+          <Route path="/use-cases" element={<Layout><UseCases /></Layout>} />
+          <Route path="/use-cases/:slug" element={<Layout><UseCaseDetail /></Layout>} />
           <Route path="/consultancy" element={<Layout><Consultancy /></Layout>} />
           <Route path="/careers" element={<Layout><Careers /></Layout>} />
           <Route path="/careers/apply" element={<Layout><Apply /></Layout>} />

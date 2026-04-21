@@ -1,3 +1,4 @@
+import process from 'node:process';
 import pool from './db.js';
 import bcrypt from 'bcryptjs';
 
@@ -67,6 +68,32 @@ async function seed() {
     );
     CREATE INDEX IF NOT EXISTS idx_media_type ON media(type);
     CREATE INDEX IF NOT EXISTS idx_media_created ON media(created_at DESC);
+
+    CREATE TABLE IF NOT EXISTS use_cases (
+      id SERIAL PRIMARY KEY,
+      slug VARCHAR(220) NOT NULL UNIQUE,
+      title_tr VARCHAR(300) NOT NULL,
+      title_en VARCHAR(300) NOT NULL,
+      problem_tr TEXT NOT NULL,
+      problem_en TEXT NOT NULL,
+      solution_tr TEXT NOT NULL,
+      solution_en TEXT NOT NULL,
+      seo_title_tr VARCHAR(320),
+      seo_title_en VARCHAR(320),
+      seo_description_tr TEXT,
+      seo_description_en TEXT,
+      cover_image_url TEXT,
+      tags_tr TEXT[] DEFAULT '{}',
+      tags_en TEXT[] DEFAULT '{}',
+      keywords_tr TEXT[] DEFAULT '{}',
+      keywords_en TEXT[] DEFAULT '{}',
+      status VARCHAR(20) NOT NULL DEFAULT 'draft',
+      published_at TIMESTAMP,
+      created_at TIMESTAMP DEFAULT NOW(),
+      updated_at TIMESTAMP DEFAULT NOW()
+    );
+    CREATE INDEX IF NOT EXISTS idx_use_cases_status ON use_cases(status);
+    CREATE INDEX IF NOT EXISTS idx_use_cases_published_at ON use_cases(published_at DESC);
   `);
 
   // Seed admin user
@@ -75,6 +102,44 @@ async function seed() {
     const hash = await bcrypt.hash('24232423', 12);
     await pool.query('INSERT INTO users (email, password_hash) VALUES ($1, $2)', ['deniz@cerilas.com', hash]);
     console.log('Admin user created');
+  }
+
+  const sampleMedia = [
+    {
+      filename: '1776621026540-zzlv4a.png',
+      original_name: 'use-case-healthcare-dashboard.png',
+      url: '/uploads/1776621026540-zzlv4a.png',
+      mimetype: 'image/png',
+      type: 'image',
+      ext: 'png',
+    },
+    {
+      filename: '1776621456098-fyphzn.webp',
+      original_name: 'use-case-manufacturing-vision.webp',
+      url: '/uploads/1776621456098-fyphzn.webp',
+      mimetype: 'image/webp',
+      type: 'image',
+      ext: 'webp',
+    },
+    {
+      filename: '1776629124600-knq23z.webp',
+      original_name: 'use-case-operations-analytics.webp',
+      url: '/uploads/1776629124600-knq23z.webp',
+      mimetype: 'image/webp',
+      type: 'image',
+      ext: 'webp',
+    },
+  ];
+
+  for (const media of sampleMedia) {
+    await pool.query(
+      `INSERT INTO media (filename, original_name, url, mimetype, type, ext)
+       SELECT $1::varchar, $2::varchar, $3::text, $4::varchar, $5::varchar, $6::varchar
+       WHERE NOT EXISTS (
+         SELECT 1 FROM media WHERE filename = $1::varchar
+       )`,
+      [media.filename, media.original_name, media.url, media.mimetype, media.type, media.ext]
+    );
   }
 
   // Seed projects from existing translations
@@ -184,6 +249,160 @@ async function seed() {
     }
     console.log('Site content seeded');
   }
+
+  const useCases = [
+      {
+        slug: 'fizyoterapi-klinikleri-icin-dijital-hasta-takip',
+        title_tr: 'Fizyoterapi klinikleri için dijital hasta takip sistemi',
+        title_en: 'Digital patient tracking system for physiotherapy clinics',
+        problem_tr: 'Birden fazla terapist ile çalışan fizyoterapi kliniklerinde randevu, seans notu, egzersiz planı ve ilerleme takibi çoğu zaman dağınık araçlarla yürütülür. Bu durum hasta memnuniyetini düşürür, operasyonel görünürlüğü azaltır ve yönetimin ölçeklenmesini zorlaştırır.',
+        problem_en: 'In physiotherapy clinics operating with multiple therapists, appointment handling, session notes, exercise plans, and progress tracking are often managed across fragmented tools. This reduces patient satisfaction, weakens operational visibility, and makes scaling difficult.',
+        solution_tr: 'Cerilas, klinik akışlarını tek bir dijital çatı altında toplayan bir çözüm kurgular. Randevu yönetimi, terapist ekranları, hasta egzersiz geçmişi, otomatik hatırlatmalar ve yönetici raporları aynı platformda birleşir. Böylece klinik ekipleri daha az operasyonel yükle daha yüksek hasta deneyimi sunar.',
+        solution_en: 'Cerilas designs a unified digital workflow for clinics. Appointment management, therapist dashboards, patient exercise history, automated reminders, and management reports are consolidated on one platform. This helps clinic teams deliver a better patient experience with less operational overhead.',
+        seo_title_tr: 'Fizyoterapi klinikleri için dijital hasta takip çözümü | Cerilas',
+        seo_title_en: 'Digital patient tracking solution for physiotherapy clinics | Cerilas',
+        seo_description_tr: 'Cerilas ile fizyoterapi kliniklerinde dijital hasta takibi, terapist verimliliği ve operasyonel görünürlük sağlayan use-case örneği.',
+        seo_description_en: 'A Cerilas use case showing how physiotherapy clinics can improve patient tracking, therapist efficiency, and operational visibility.',
+        cover_image_url: '/uploads/1776621026540-zzlv4a.png',
+        tags_tr: ['Sağlık Teknolojileri', 'Klinik Operasyonları', 'Hasta Takibi'],
+        tags_en: ['Health Tech', 'Clinic Operations', 'Patient Tracking'],
+        keywords_tr: ['fizyoterapi yazılımı', 'hasta takip sistemi', 'klinik dijitalleşme'],
+        keywords_en: ['physiotherapy software', 'patient tracking system', 'clinic digitization'],
+        published_at: '2026-04-01T10:00:00Z',
+      },
+      {
+        slug: 'uretim-hatlarinda-goruntu-isleme-ile-hata-tespiti',
+        title_tr: 'Üretim hatlarında görüntü işleme ile hata tespiti',
+        title_en: 'Defect detection with computer vision on production lines',
+        problem_tr: 'Manuel kalite kontrol ekipleri yoğun üretim hatlarında her ürünü aynı doğrulukla inceleyemez. Gözden kaçan kusurlar iade oranlarını artırırken, gereksiz hatalı alarm üretimi de operasyonel verimi düşürür.',
+        problem_en: 'Manual quality control teams cannot inspect every product with consistent accuracy on high-volume lines. Missed defects increase returns, while excessive false positives reduce operational efficiency.',
+        solution_tr: 'Cerilas, kamera altyapısı ve derin öğrenme modelleri ile gerçek zamanlı kusur tespit hattı kurar. Sistem üretimden gelen görüntüleri anlık işler, kusur sınıflandırması yapar ve MES ya da ERP sistemlerine uyarı akışı sağlar.',
+        solution_en: 'Cerilas deploys a real-time defect detection line using industrial cameras and deep learning models. The system processes imagery instantly, classifies defects, and routes alerts into MES or ERP systems.',
+        seo_title_tr: 'Üretim hatlarında görüntü işleme ile kalite kontrol use-case | Cerilas',
+        seo_title_en: 'Production line quality control use case with computer vision | Cerilas',
+        seo_description_tr: 'Bilgisayarlı görü ile üretim hatlarında kusur tespiti, kalite kontrol otomasyonu ve iade azaltımı için Cerilas örnek use-case içeriği.',
+        seo_description_en: 'A Cerilas use case for defect detection, quality control automation, and return reduction on production lines with computer vision.',
+        cover_image_url: '/uploads/1776621456098-fyphzn.webp',
+        tags_tr: ['Üretim', 'Kalite Kontrol', 'Bilgisayarlı Görü'],
+        tags_en: ['Manufacturing', 'Quality Control', 'Computer Vision'],
+        keywords_tr: ['görüntü işleme kalite kontrol', 'kusur tespiti', 'üretim hattı yapay zeka'],
+        keywords_en: ['computer vision quality control', 'defect detection', 'AI for production lines'],
+        published_at: '2026-04-03T09:30:00Z',
+      },
+      {
+        slug: 'lojistik-operasyonlarinda-rotalama-ve-saha-ekibi-optimizasyonu',
+        title_tr: 'Lojistik operasyonlarında rotalama ve saha ekibi optimizasyonu',
+        title_en: 'Route planning and field team optimization in logistics operations',
+        problem_tr: 'Günlük teslimat ve saha görevleri Excel dosyaları veya bireysel planlama alışkanlıklarıyla yönetildiğinde rota çakışmaları, gecikmeler ve atıl ekip süreleri artar. Müşteri tarafında ise öngörülemeyen teslimat saatleri memnuniyetsizlik yaratır.',
+        problem_en: 'When daily deliveries and field tasks are managed with spreadsheets or individual planning habits, route conflicts, delays, and idle team time increase. On the customer side, unpredictable delivery windows create dissatisfaction.',
+        solution_tr: 'Cerilas, sipariş yoğunluğu, bölgesel dağılım ve ekip kapasitesini aynı modelde ele alan bir karar destek katmanı geliştirir. Böylece rota önerileri, görev atamaları ve operasyon panelleri tek ekranda yönetilir; yöneticiler anlık darboğazları görebilir.',
+        solution_en: 'Cerilas builds a decision-support layer that combines order density, geographic distribution, and team capacity in one model. Route suggestions, task assignments, and operations dashboards are managed from a single interface, giving managers live visibility into bottlenecks.',
+        seo_title_tr: 'Lojistikte rota optimizasyonu ve saha planlama use-case | Cerilas',
+        seo_title_en: 'Logistics route optimization and field planning use case | Cerilas',
+        seo_description_tr: 'Teslimat planlama, saha ekibi yönetimi ve rota optimizasyonu için Cerilas tarafından hazırlanmış lojistik use-case örneği.',
+        seo_description_en: 'A Cerilas logistics use case focused on delivery planning, field team management, and route optimization.',
+        cover_image_url: '/uploads/1776629124600-knq23z.webp',
+        tags_tr: ['Lojistik', 'Operasyon Optimizasyonu', 'Karar Destek'],
+        tags_en: ['Logistics', 'Operations Optimization', 'Decision Support'],
+        keywords_tr: ['rota optimizasyonu', 'lojistik yazılımı', 'saha ekibi planlama'],
+        keywords_en: ['route optimization', 'logistics software', 'field team planning'],
+        published_at: '2026-04-05T11:15:00Z',
+      },
+      {
+        slug: 'perakende-zincirleri-icin-talep-tahmini-ve-stok-gorunurlugu',
+        title_tr: 'Perakende zincirleri için talep tahmini ve stok görünürlüğü',
+        title_en: 'Demand forecasting and inventory visibility for retail chains',
+        problem_tr: 'Mağaza bazlı talep farklılaşmaları doğru tahmin edilemediğinde bazı şubelerde stok tükenmesi yaşanırken bazı şubelerde fazla stok maliyeti oluşur. Pazarlama kampanyaları ile tedarik planı arasındaki kopukluk bu sorunu büyütür.',
+        problem_en: 'When store-level demand variability is not forecast accurately, some branches face stockouts while others accumulate excess inventory. A weak link between marketing campaigns and supply planning makes the issue worse.',
+        solution_tr: 'Cerilas, satış geçmişi, kampanya etkisi, sezon etkisi ve lokasyon davranışı verilerini aynı tahminleme motorunda birleştirir. Sonuç olarak kategori bazlı talep tahmini, stok uyarıları ve satın alma önerileri merkezi panellerde sunulur.',
+        solution_en: 'Cerilas combines sales history, campaign impact, seasonality, and location behavior in one forecasting engine. The result is category-level demand forecasting, stock alerts, and purchasing recommendations surfaced through centralized dashboards.',
+        seo_title_tr: 'Perakendede talep tahmini ve stok yönetimi use-case | Cerilas',
+        seo_title_en: 'Retail demand forecasting and inventory management use case | Cerilas',
+        seo_description_tr: 'Perakende zincirleri için talep tahmini, stok görünürlüğü ve satın alma planlaması konusunda Cerilas use-case içeriği.',
+        seo_description_en: 'A Cerilas use case for retail demand forecasting, inventory visibility, and purchase planning.',
+        cover_image_url: '/uploads/1776621026540-zzlv4a.png',
+        tags_tr: ['Perakende', 'Talep Tahmini', 'Stok Yönetimi'],
+        tags_en: ['Retail', 'Demand Forecasting', 'Inventory Management'],
+        keywords_tr: ['talep tahmini yazılımı', 'stok yönetimi', 'perakende analitiği'],
+        keywords_en: ['demand forecasting software', 'inventory management', 'retail analytics'],
+        published_at: '2026-04-07T08:45:00Z',
+      },
+      {
+        slug: 'enerji-sirketleri-icin-saha-bakim-onceliklendirme-platformu',
+        title_tr: 'Enerji şirketleri için saha bakım önceliklendirme platformu',
+        title_en: 'Field maintenance prioritization platform for energy companies',
+        problem_tr: 'Dağıtık enerji altyapılarında bakım ekiplerinin hangi saha noktasına önce gitmesi gerektiği çoğu zaman geçmiş tecrübeye dayalı belirlenir. Bu yaklaşım arıza riskini artırır ve bakım bütçesinin verimsiz kullanılmasına neden olur.',
+        problem_en: 'In distributed energy infrastructures, deciding which field point maintenance teams should prioritize is often based on experience alone. That approach increases failure risk and leads to inefficient maintenance spending.',
+        solution_tr: 'Cerilas, sensör verileri, geçmiş arıza kayıtları ve kritik ekipman skorlarını tek bir önceliklendirme modeli altında toplar. Ekipler risk bazlı bakım önerileri ile yönlendirilir, yöneticiler ise bakım yatırımlarını veriyle savunabilir hale gelir.',
+        solution_en: 'Cerilas brings sensor telemetry, historical failure records, and critical equipment scores into a unified prioritization model. Teams are guided by risk-based maintenance recommendations, and managers gain defensible, data-backed investment visibility.',
+        seo_title_tr: 'Enerji şirketleri için kestirimci bakım use-case | Cerilas',
+        seo_title_en: 'Predictive maintenance use case for energy companies | Cerilas',
+        seo_description_tr: 'Enerji altyapılarında saha bakım önceliklendirme, risk bazlı planlama ve kestirimci bakım için Cerilas örnek use-case.',
+        seo_description_en: 'A Cerilas use case for field maintenance prioritization, risk-based planning, and predictive maintenance in energy infrastructure.',
+        cover_image_url: '/uploads/1776621456098-fyphzn.webp',
+        tags_tr: ['Enerji', 'Kestirimci Bakım', 'Saha Operasyonları'],
+        tags_en: ['Energy', 'Predictive Maintenance', 'Field Operations'],
+        keywords_tr: ['kestirimci bakım', 'enerji bakım yazılımı', 'saha operasyon yönetimi'],
+        keywords_en: ['predictive maintenance', 'energy maintenance software', 'field operations management'],
+        published_at: '2026-04-09T13:20:00Z',
+      },
+    ];
+
+  for (const item of useCases) {
+    await pool.query(
+      `INSERT INTO use_cases (
+        slug, title_tr, title_en, problem_tr, problem_en, solution_tr, solution_en,
+        seo_title_tr, seo_title_en, seo_description_tr, seo_description_en,
+        cover_image_url, tags_tr, tags_en, keywords_tr, keywords_en,
+        status, published_at
+      ) VALUES (
+        $1, $2, $3, $4, $5, $6, $7,
+        $8, $9, $10, $11,
+        $12, $13, $14, $15, $16,
+        $17, $18
+      )
+      ON CONFLICT (slug) DO UPDATE SET
+        title_tr = EXCLUDED.title_tr,
+        title_en = EXCLUDED.title_en,
+        problem_tr = EXCLUDED.problem_tr,
+        problem_en = EXCLUDED.problem_en,
+        solution_tr = EXCLUDED.solution_tr,
+        solution_en = EXCLUDED.solution_en,
+        seo_title_tr = EXCLUDED.seo_title_tr,
+        seo_title_en = EXCLUDED.seo_title_en,
+        seo_description_tr = EXCLUDED.seo_description_tr,
+        seo_description_en = EXCLUDED.seo_description_en,
+        cover_image_url = EXCLUDED.cover_image_url,
+        tags_tr = EXCLUDED.tags_tr,
+        tags_en = EXCLUDED.tags_en,
+        keywords_tr = EXCLUDED.keywords_tr,
+        keywords_en = EXCLUDED.keywords_en,
+        status = EXCLUDED.status,
+        published_at = EXCLUDED.published_at,
+        updated_at = NOW()`,
+      [
+        item.slug,
+        item.title_tr,
+        item.title_en,
+        item.problem_tr,
+        item.problem_en,
+        item.solution_tr,
+        item.solution_en,
+        item.seo_title_tr,
+        item.seo_title_en,
+        item.seo_description_tr,
+        item.seo_description_en,
+        item.cover_image_url,
+        item.tags_tr,
+        item.tags_en,
+        item.keywords_tr,
+        item.keywords_en,
+        'published',
+        item.published_at,
+      ]
+    );
+  }
+  console.log('Use cases seeded');
 
   console.log('Seed complete!');
   await pool.end();
