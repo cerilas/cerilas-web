@@ -9,7 +9,9 @@ import authMiddleware from '../middleware/auth.js';
 import pool from '../db.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const uploadsDir = path.join(__dirname, '..', 'uploads');
+const uploadsDir = process.env.UPLOAD_DIR 
+  ? (path.isAbsolute(process.env.UPLOAD_DIR) ? process.env.UPLOAD_DIR : path.join(process.cwd(), process.env.UPLOAD_DIR))
+  : path.join(__dirname, '..', 'uploads');
 
 // Ensure uploads dir exists
 if (!fs.existsSync(uploadsDir)) {
