@@ -1,5 +1,5 @@
-import { useState } from 'react';
 import { api } from '../../lib/api';
+import logoImg from '../../assets/logo.png';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -26,8 +26,8 @@ export default function Login() {
     <div className="min-h-screen bg-gray-950 flex items-center justify-center px-4">
       <div className="max-w-md w-full">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-white">Cerilas Admin</h1>
-          <p className="text-gray-400 mt-2">Yönetim paneline giriş yapın</p>
+          <img src={logoImg} alt="Cerilas" className="h-12 w-auto mx-auto mb-4" />
+          <p className="text-gray-400">Yönetim paneline giriş yapın</p>
         </div>
         <form onSubmit={handleSubmit} className="bg-gray-900 rounded-2xl p-8 border border-gray-800 space-y-6">
           {error && (

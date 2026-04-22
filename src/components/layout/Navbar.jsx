@@ -2,22 +2,29 @@ import { useState, useEffect } from "react";
 import { Link, NavLink, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLang } from "../../context/LanguageContext";
+import logoImg from "../../assets/logo.png";
 
-const navRoutes = [
+const mainRoutes = [
   { key: "home", path: "/" },
   { key: "about", path: "/about" },
   { key: "capabilities", path: "/capabilities" },
   { key: "projects", path: "/projects" },
+];
+
+const secondaryRoutes = [
   { key: "useCases", path: "/use-cases" },
   { key: "consultancy", path: "/consultancy" },
   { key: "careers", path: "/careers" },
   { key: "contact", path: "/contact" },
 ];
 
+const navRoutes = [...mainRoutes, ...secondaryRoutes];
+
 export default function Navbar() {
   const { t, lang, toggleLang } = useLang();
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [moreOpen, setMoreOpen] = useState(false);
   const location = useLocation();
 
   useEffect(() => {
@@ -39,33 +46,90 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link to="/" className="group inline-flex flex-col items-start leading-none">
-            <span className="text-xl font-bold tracking-tight text-white group-hover:text-cyan-400 transition-colors">
-              {t.brand.shortName}
-            </span>
-            <span className="hidden sm:block w-full max-w-full text-[10px] text-gray-400 font-medium tracking-wide mt-1 text-center whitespace-nowrap overflow-hidden text-ellipsis">
-              Yüksek Teknoloji
-            </span>
+          <Link to="/" className="flex items-center gap-2 group">
+            <img src={logoImg} alt="Cerilas" className="h-9 sm:h-12 w-auto transition-transform duration-300 group-hover:scale-105" />
           </Link>
 
           {/* Desktop nav */}
-          <nav className="hidden lg:flex items-center gap-1">
-            {navRoutes.map(({ key, path }) => (
-              <NavLink
-                key={key}
-                to={path}
-                end={path === "/"}
-                className={({ isActive }) =>
-                  `px-3 py-2 text-sm font-medium rounded-md transition-colors ${
-                    isActive
-                      ? "text-cyan-400 bg-cyan-400/10"
-                      : "text-gray-300 hover:text-white hover:bg-white/5"
-                  }`
-                }
+          <nav className="hidden lg:flex items-center">
+            {/* Show all on XL and up */}
+            <div className="hidden xl:flex items-center gap-1">
+              {navRoutes.map(({ key, path }) => (
+                <NavLink
+                  key={key}
+                  to={path}
+                  end={path === "/"}
+                  className={({ isActive }) =>
+                    `px-2 xl:px-3 py-2 text-[13px] xl:text-sm font-medium rounded-md transition-colors ${
+                      isActive
+                        ? "text-cyan-400 bg-cyan-400/10"
+                        : "text-gray-300 hover:text-white hover:bg-white/5"
+                    }`
+                  }
+                >
+                  {t.nav[key]}
+                </NavLink>
+              ))}
+            </div>
+
+            {/* Show Main + Dropdown on LG screens */}
+            <div className="flex xl:hidden items-center gap-0.5">
+              {mainRoutes.map(({ key, path }) => (
+                <NavLink
+                  key={key}
+                  to={path}
+                  end={path === "/"}
+                  className={({ isActive }) =>
+                    `px-2 py-2 text-[13px] font-medium rounded-md transition-colors ${
+                      isActive
+                        ? "text-cyan-400 bg-cyan-400/10"
+                        : "text-gray-300 hover:text-white hover:bg-white/5"
+                    }`
+                  }
+                >
+                  {t.nav[key]}
+                </NavLink>
+              ))}
+              
+              {/* More Dropdown */}
+              <div 
+                className="relative"
+                onMouseEnter={() => setMoreOpen(true)}
+                onMouseLeave={() => setMoreOpen(false)}
               >
-                {t.nav[key]}
-              </NavLink>
-            ))}
+                <button className={`px-3 py-2 text-[13px] font-medium rounded-md transition-colors flex items-center gap-1 ${moreOpen ? "text-white bg-white/5" : "text-gray-300"}`}>
+                  {t.nav.more}
+                  <svg className={`w-3 h-3 transition-transform duration-200 ${moreOpen ? "rotate-180" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                
+                <AnimatePresence>
+                  {moreOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                      className="absolute right-0 top-full mt-1 w-48 bg-gray-900 border border-gray-800 rounded-xl shadow-2xl py-2 z-[60]"
+                    >
+                      {secondaryRoutes.map(({ key, path }) => (
+                        <NavLink
+                          key={key}
+                          to={path}
+                          className={({ isActive }) =>
+                            `block px-4 py-2 text-sm transition-colors ${
+                              isActive ? "text-cyan-400 bg-cyan-400/5" : "text-gray-400 hover:text-white hover:bg-white/5"
+                            }`
+                          }
+                        >
+                          {t.nav[key]}
+                        </NavLink>
+                      ))}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            </div>
           </nav>
 
           {/* Right actions */}

@@ -66,6 +66,12 @@ const capIcons = [
       <path d="M4 8.5 12 4l8 4.5-8 4.5L4 8.5Zm3 4.2 5 2.8 5-2.8M7 16.4l5 2.8 5-2.8" strokeLinejoin="round" />
     </svg>
   ),
+  (
+    <svg viewBox="0 0 24 24" fill="none" className="w-6 h-6" stroke="currentColor" strokeWidth="1.8">
+      <path d="M22 10v6M2 10l10-5 10 5-10 5z" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M6 12v5c3 3 9 3 12 0v-5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  ),
 ];
 
 export default function Home() {
@@ -202,13 +208,15 @@ export default function Home() {
                   </p>
                 </div>
 
-                <div className="rounded-2xl border border-cyan-400/25 bg-gray-950/70 p-6 text-center">
-                  <div className="text-xs uppercase tracking-widest text-cyan-300 mb-2">
+                <div className="rounded-2xl border border-white/20 bg-white p-6 flex flex-col items-center justify-center">
+                  <div className="text-[10px] uppercase tracking-widest text-gray-500 font-bold mb-3">
                     {h.tubitakStatLabel}
                   </div>
-                  <div className="text-5xl sm:text-6xl font-black text-white leading-none">
-                    {h.tubitakStatValue}
-                  </div>
+                  <img
+                    src={partnerLogos[1].src}
+                    alt="TUBITAK"
+                    className="h-16 sm:h-20 w-auto object-contain transition-all duration-300"
+                  />
                 </div>
               </div>
             </div>

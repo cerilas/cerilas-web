@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { api } from '../../lib/api';
+import logoImg from '../../assets/logo.png';
 
 const navItems = [
   { path: '/admin/dashboard', label: 'Dashboard', icon: '⊞' },
@@ -53,7 +54,13 @@ export default function AdminLayout() {
       {/* Sidebar */}
       <aside className={`${sidebarOpen ? 'w-64' : 'w-16'} bg-gray-900 border-r border-gray-800 flex flex-col transition-all duration-200`}>
         <div className="p-4 border-b border-gray-800 flex items-center justify-between">
-          {sidebarOpen && <span className="text-lg font-bold text-white">Cerilas</span>}
+          {sidebarOpen ? (
+            <img src={logoImg} alt="Cerilas" className="h-6 w-auto" />
+          ) : (
+            <div className="w-10 h-10 flex items-center justify-center shrink-0">
+               <img src={logoImg} alt="C" className="h-4 w-auto object-left" style={{ objectPosition: '0 0' }} />
+            </div>
+          )}
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
             className="text-gray-400 hover:text-white p-1"

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useLang } from "../../context/LanguageContext";
+import logoImg from "../../assets/logo.png";
 
 const navRoutes = [
   { key: "home", path: "/" },
@@ -25,8 +26,8 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
           {/* Brand */}
           <div className="lg:col-span-1">
-            <Link to="/" className="text-xl font-bold text-white tracking-tight">
-              {t.brand.shortName}
+            <Link to="/">
+              <img src={logoImg} alt="Cerilas" className="h-11 w-auto mb-2" />
             </Link>
             <p className="mt-2 text-sm text-cyan-400 font-medium tracking-wide">{f.tagline}</p>
             <p className="mt-4 text-sm text-gray-400 leading-relaxed">

@@ -13,6 +13,7 @@ export const translations = {
       consultancy: "Consultancy",
       careers: "Careers",
       contact: "Contact",
+      more: "More",
     },
     common: {
       learnMore: "Learn more",
@@ -86,10 +87,10 @@ export const translations = {
         "A strong academic and technological partnership network including Gaziantep University Technopark, Hasan Kalyoncu University Technopark, and Istanbul University Technopark.",
       tubitakTitle: "TUBITAK Partnership",
       tubitakDesc:
-        "CERILAS is a technology company with direct public R&D alignment. TUBITAK holds a 3% equity stake in the company.",
+        "CERILAS is a technology company with direct public R&D alignment. We maintain a strategic partnership with TUBITAK.",
       tubitakChip: "TUBITAK-Backed Company",
-      tubitakStatLabel: "TUBITAK Equity Share",
-      tubitakStatValue: "3%",
+      tubitakStatLabel: "Official Partnership",
+      tubitakStatValue: "",
       tubitakNote:
         "This structure reinforces our long-term innovation capacity and institutional trust for strategic partnerships.",
       metricsTitle: "Cerilas by the Numbers",
@@ -535,6 +536,7 @@ export const translations = {
       consultancy: "Danışmanlık",
       careers: "Kariyer",
       contact: "İletişim",
+      more: "Daha Fazla",
     },
     common: {
       learnMore: "Daha Fazla",
@@ -608,10 +610,10 @@ export const translations = {
         "Gaziantep Üniversitesi Teknopark, Hasan Kalyoncu Üniversitesi Teknopark ve İstanbul Üniversitesi Teknopark başta olmak üzere güçlü bir akademik ve teknolojik iş birliği ağı.",
       tubitakTitle: "TÜBİTAK Ortaklığı",
       tubitakDesc:
-        "CERİLAS, kamu destekli Ar-Ge vizyonuna doğrudan bağlı bir teknoloji şirketidir. Şirketin %3 hissesi TÜBİTAK'a aittir.",
+        "CERİLAS, kamu destekli Ar-Ge vizyonuna doğrudan bağlı bir teknoloji şirketidir. TÜBİTAK ile stratejik bir ortaklık yapısı sürdürmektedir.",
       tubitakChip: "TÜBİTAK Yatırım Yaptığı Şirket",
-      tubitakStatLabel: "TÜBİTAK Hisse Oranı",
-      tubitakStatValue: "%3",
+      tubitakStatLabel: "Resmi Ortaklık",
+      tubitakStatValue: "",
       tubitakNote:
         "Bu ortaklık yapısı, uzun vadeli inovasyon kapasitemizi ve stratejik iş birlikleri için kurumsal güvenilirliğimizi güçlendirir.",
       metricsTitle: "Rakamlarla Cerilas",
