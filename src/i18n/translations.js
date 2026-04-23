@@ -41,6 +41,8 @@ export const translations = {
       legal: "Legal",
       switchToEnglish: "Switch to English",
       switchToTurkish: "Switch to Turkish",
+      showAllTags: "Show all tags",
+      showLess: "Show less",
     },
     useCases: {
       title: "Use Cases",
@@ -564,6 +566,8 @@ export const translations = {
       legal: "Yasal",
       switchToEnglish: "İngilizceye Geç",
       switchToTurkish: "Türkçeye Geç",
+      showAllTags: "Tüm etiketleri göster",
+      showLess: "Daha az göster",
     },
     useCases: {
       title: "Use Case'ler",
