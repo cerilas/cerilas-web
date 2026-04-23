@@ -75,36 +75,46 @@ export default function UseCases() {
             </form>
             {allTags.length > 0 && (
               <div className="mt-10">
-                <div
-                  className={`flex flex-wrap justify-center gap-2 transition-all duration-500 overflow-hidden ${
-                    isTagsExpanded ? 'max-h-[1000px]' : 'max-h-[100px]'
-                  }`}
-                >
-                  <button
-                    type="button"
-                    onClick={() => setSearchParams(buildNextParams(searchParams, { tag: '', page: 1 }))}
-                    className={`px-3 py-1.5 rounded-full text-xs border transition-colors ${
-                      !tag
-                        ? 'border-cyan-400/40 bg-cyan-400/10 text-cyan-300'
-                        : 'border-gray-700 text-gray-400 hover:text-white hover:border-gray-500'
+                <div className="relative">
+                  <div
+                    className={`flex flex-wrap justify-center gap-2 transition-all duration-500 overflow-hidden ${
+                      isTagsExpanded ? 'max-h-[1000px]' : 'max-h-[128px]'
                     }`}
+                    style={
+                      !isTagsExpanded && allTags.length > 12
+                        ? {
+                            maskImage: 'linear-gradient(to bottom, black 70%, transparent 100%)',
+                            WebkitMaskImage: 'linear-gradient(to bottom, black 70%, transparent 100%)',
+                          }
+                        : {}
+                    }
                   >
-                    {common.allTags}
-                  </button>
-                  {allTags.map((value) => (
                     <button
                       type="button"
-                      key={value}
-                      onClick={() => setSearchParams(buildNextParams(searchParams, { tag: value, page: 1 }))}
+                      onClick={() => setSearchParams(buildNextParams(searchParams, { tag: '', page: 1 }))}
                       className={`px-3 py-1.5 rounded-full text-xs border transition-colors ${
-                        tag === value
+                        !tag
                           ? 'border-cyan-400/40 bg-cyan-400/10 text-cyan-300'
                           : 'border-gray-700 text-gray-400 hover:text-white hover:border-gray-500'
                       }`}
                     >
-                      {value}
+                      {common.allTags}
                     </button>
-                  ))}
+                    {allTags.map((value) => (
+                      <button
+                        type="button"
+                        key={value}
+                        onClick={() => setSearchParams(buildNextParams(searchParams, { tag: value, page: 1 }))}
+                        className={`px-3 py-1.5 rounded-full text-xs border transition-colors ${
+                          tag === value
+                            ? 'border-cyan-400/40 bg-cyan-400/10 text-cyan-300'
+                            : 'border-gray-700 text-gray-400 hover:text-white hover:border-gray-500'
+                        }`}
+                      >
+                        {value}
+                      </button>
+                    ))}
+                  </div>
                 </div>
                 {!isTagsExpanded && allTags.length > 12 && (
                   <button
