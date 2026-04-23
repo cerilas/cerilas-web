@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import ConfirmModal from '../../components/ui/ConfirmModal';
+import { ConfirmModal, Dropdown } from '../../components/ui';
 import { api } from '../../lib/api';
 
 const PAGE_SIZE = 15;
@@ -72,15 +72,15 @@ export default function UseCasesAdmin() {
           placeholder="Başlık, slug veya problem metninde ara"
           className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500"
         />
-        <select
+        <Dropdown
           value={filters.status}
-          onChange={(event) => setFilters((prev) => ({ ...prev, status: event.target.value, page: 1 }))}
-          className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-cyan-500"
-        >
-          <option value="all">Tüm durumlar</option>
-          <option value="published">Yayında</option>
-          <option value="draft">Taslak</option>
-        </select>
+          options={[
+            { value: 'all', label: 'Tüm durumlar' },
+            { value: 'published', label: 'Yayında' },
+            { value: 'draft', label: 'Taslak' },
+          ]}
+          onChange={(val) => setFilters((prev) => ({ ...prev, status: val, page: 1 }))}
+        />
       </div>
 
       {loading ? (

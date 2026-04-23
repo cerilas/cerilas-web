@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { api } from '../../lib/api';
+import { ConfirmModal } from '../../components/ui';
 
 export default function UsersAdmin() {
   const [users, setUsers] = useState([]);
@@ -7,6 +8,7 @@ export default function UsersAdmin() {
   const [error, setError] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
+  const [deleteConfirm, setDeleteConfirm] = useState({ open: false, id: null });
   
   const [formData, setFormData] = useState({
     email: '',
@@ -51,13 +53,16 @@ export default function UsersAdmin() {
     setIsModalOpen(true);
   };
 
-  const handleDelete = async (id) => {
-    if (!confirm('Bu kullanıcıyı silmek istediğinizden emin misiniz?')) return;
+  const handleDelete = async () => {
+    const { id } = deleteConfirm;
+    if (!id) return;
     try {
       await api.deleteUser(id);
       fetchUsers();
     } catch (err) {
       alert(err.message);
+    } finally {
+      setDeleteConfirm({ open: false, id: null });
     }
   };
 
@@ -107,7 +112,7 @@ export default function UsersAdmin() {
                     Düzenle
                   </button>
                   <button
-                    onClick={() => handleDelete(user.id)}
+                    onClick={() => setDeleteConfirm({ open: true, id: user.id })}
                     className="text-red-400 hover:text-red-300 transition-colors"
                   >
                     Sil
@@ -118,6 +123,14 @@ export default function UsersAdmin() {
           </tbody>
         </table>
       </div>
+
+      <ConfirmModal
+        open={deleteConfirm.open}
+        title="Kullanıcıyı Sil"
+        message="Bu kullanıcıyı silmek istediğinizden emin misiniz? Bu işlem geri alınamaz."
+        onConfirm={handleDelete}
+        onCancel={() => setDeleteConfirm({ open: false, id: null })}
+      />
 
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">

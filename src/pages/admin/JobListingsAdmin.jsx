@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { api } from '../../lib/api';
-import ConfirmModal from '../../components/ui/ConfirmModal';
+import { ConfirmModal, Dropdown } from '../../components/ui';
 
 const EMPTY = {
   title_tr: '', title_en: '',
@@ -248,19 +248,15 @@ export default function JobListingsAdmin() {
               </div>
 
               <div className="grid grid-cols-2 gap-4">
-                <div>
+                <div className="flex-1">
                   <label className="block text-sm font-medium text-gray-300 mb-1.5">
                     Çalışma Tipi ({lang === 'tr' ? 'Türkçe' : 'English'}) *
                   </label>
-                  <select
+                  <Dropdown
                     value={lang === 'tr' ? editing.type_tr : editing.type_en}
-                    onChange={(e) => setEditing({ ...editing, [lang === 'tr' ? 'type_tr' : 'type_en']: e.target.value })}
-                    className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-cyan-500/60"
-                  >
-                    {(lang === 'tr' ? TYPE_OPTIONS_TR : TYPE_OPTIONS_EN).map((t) => (
-                      <option key={t} value={t}>{t}</option>
-                    ))}
-                  </select>
+                    options={(lang === 'tr' ? TYPE_OPTIONS_TR : TYPE_OPTIONS_EN).map(t => ({ value: t, label: t }))}
+                    onChange={(val) => setEditing({ ...editing, [lang === 'tr' ? 'type_tr' : 'type_en']: val })}
+                  />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-1.5">

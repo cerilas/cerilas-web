@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { api } from '../../lib/api';
+import { Dropdown } from '../../components/ui';
 
 const emptyProject = {
   slug: '', title_tr: '', title_en: '',
@@ -123,14 +124,14 @@ export default function ProjectForm() {
             <Field label="Sıralama" type="number" value={form.sort_order} onChange={(v) => handleChange('sort_order', v)} />
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">Durum</label>
-              <select
+              <Dropdown
                 value={form.status}
-                onChange={(e) => handleChange('status', e.target.value)}
-                className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-cyan-500"
-              >
-                <option value="active">Aktif</option>
-                <option value="draft">Taslak</option>
-              </select>
+                options={[
+                  { value: 'active', label: 'Aktif' },
+                  { value: 'draft', label: 'Taslak' },
+                ]}
+                onChange={(val) => handleChange('status', val)}
+              />
             </div>
           </div>
         </Section>

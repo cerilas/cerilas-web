@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { api } from '../../lib/api';
+import { Dropdown } from '../../components/ui';
 
 const emptyForm = {
   slug: '',
@@ -117,14 +118,14 @@ export default function UseCaseForm() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">Durum</label>
-              <select
+              <Dropdown
                 value={form.status}
-                onChange={(event) => handleChange('status', event.target.value)}
-                className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-cyan-500"
-              >
-                <option value="draft">Taslak</option>
-                <option value="published">Yayında</option>
-              </select>
+                options={[
+                  { value: 'draft', label: 'Taslak' },
+                  { value: 'published', label: 'Yayında' },
+                ]}
+                onChange={(val) => handleChange('status', val)}
+              />
             </div>
             <Field
               label="Yayın Tarihi"
