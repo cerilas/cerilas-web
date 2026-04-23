@@ -146,4 +146,10 @@ export const api = {
   updateJobListing: (id, data) => request(`/job-listings/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
   toggleJobListing: (id) => request(`/job-listings/${id}/toggle`, { method: 'PATCH' }),
   deleteJobListing: (id) => request(`/job-listings/${id}`, { method: 'DELETE' }),
+
+  // Users
+  getUsers: () => request('/users'),
+  createUser: (data) => request('/users', { method: 'POST', body: JSON.stringify(data) }),
+  updateUser: (id, data) => request(`/users/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+  deleteUser: (id) => request(`/users/${id}`, { method: 'DELETE' }),
 };

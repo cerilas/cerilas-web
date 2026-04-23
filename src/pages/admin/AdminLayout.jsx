@@ -44,6 +44,11 @@ const Icons = {
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
     </svg>
   ),
+  Users: () => (
+    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+    </svg>
+  ),
   Logout: () => (
     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
@@ -60,6 +65,7 @@ const navItems = [
   { path: '/admin/job-listings', label: 'İş İlanları', icon: <Icons.JobListings /> },
   { path: '/admin/applications', label: 'İş Başvuruları', icon: <Icons.Applications /> },
   { path: '/admin/newsletter', label: 'Newsletter', icon: <Icons.Newsletter /> },
+  { path: '/admin/users', label: 'Kullanıcılar', icon: <Icons.Users /> },
 ];
 
 export default function AdminLayout() {

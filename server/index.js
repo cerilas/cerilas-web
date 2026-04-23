@@ -11,6 +11,7 @@ import uploadRoutes from './routes/upload.js';
 import applicationRoutes from './routes/applications.js';
 import jobListingRoutes from './routes/jobListings.js';
 import useCaseRoutes from './routes/useCases.js';
+import usersRoutes from './routes/users.js';
 import pool from './db.js';
 
 dotenv.config();
@@ -37,6 +38,7 @@ app.use('/api/upload', uploadRoutes);
 app.use('/api/applications', applicationRoutes);
 app.use('/api/job-listings', jobListingRoutes);
 app.use('/api/use-cases', useCaseRoutes);
+app.use('/api/users', usersRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => res.json({ ok: true }));
