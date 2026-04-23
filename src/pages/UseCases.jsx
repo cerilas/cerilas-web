@@ -22,6 +22,7 @@ export default function UseCases() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [searchDraft, setSearchDraft] = useState(searchParams.get('q') || '');
   const [allTags, setAllTags] = useState([]);
+  const [isTagsExpanded, setIsTagsExpanded] = useState(false);
 
   const page = Number(searchParams.get('page') || 1);
   const q = searchParams.get('q') || '';
