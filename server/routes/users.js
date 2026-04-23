@@ -103,10 +103,17 @@ router.delete('/:id', async (req, res) => {
   try {
     const { id } = req.params;
     
-    // Prevent self-deletion if needed, but for now allow with caution
+    // Prevent deleting self
     if (parseInt(id) === req.user.id) {
-       // Optional: block self deletion if you want
-       // return res.status(400).json({ error: 'Cannot delete yourself' });
+      return res.status(400).json({ error: 'Kendi hesabınızı silemezsiniz.' });
+    }
+
+    // Prevent deleting the last remaining user
+    const countResult = await pool.query('SELECT COUNT(*) FROM users');
+    const userCount = parseInt(countResult.rows[0].count);
+    
+    if (userCount <= 1) {
+      return res.status(400).json({ error: 'Sistemdeki son kullanıcıyı silemezsiniz.' });
     }
 
     const result = await pool.query('DELETE FROM users WHERE id = $1 RETURNING id', [id]);
