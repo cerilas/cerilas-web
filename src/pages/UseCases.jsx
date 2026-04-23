@@ -38,10 +38,6 @@ export default function UseCases() {
 
   useSeoMeta(copy.seoPageTitle, copy.seoPageDescription);
 
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, [page]);
-
   const handleSearchSubmit = (event) => {
     event.preventDefault();
     setSearchParams(buildNextParams(searchParams, { q: searchDraft.trim(), page: 1 }));

@@ -10,6 +10,7 @@ export default function UseCaseDetail() {
   const copy = t.useCases;
   const common = t.common;
   const { loading, useCase } = useUseCase(slug);
+  const { lang } = useLang();
 
   useSeoMeta(
     useCase?.seoTitle || copy.seoFallbackTitle,

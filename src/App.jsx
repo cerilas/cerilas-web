@@ -14,6 +14,7 @@ import Careers from "./pages/Careers";
 import Apply from "./pages/Apply";
 import Contact from "./pages/Contact";
 import Legal from "./pages/Legal";
+import ScrollToTop from "./components/ScrollToTop";
 
 // Admin
 import Login from "./pages/admin/Login";
@@ -43,6 +44,7 @@ export default function App() {
   return (
     <LanguageProvider>
       <BrowserRouter>
+        <ScrollToTop />
         <Routes>
           {/* Admin routes - no Navbar/Footer */}
           <Route path="/admin">

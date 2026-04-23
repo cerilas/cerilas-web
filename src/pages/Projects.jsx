@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useLang } from "../context/LanguageContext";
 import { SectionTitle, FadeIn, GlowCard, Badge } from "../components/ui";
