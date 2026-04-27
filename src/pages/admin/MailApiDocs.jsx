@@ -118,15 +118,16 @@ export default function MailApiDocs() {
                 </select>
               </div>
               <div>
-                <label className="block text-xs font-medium text-gray-500 mb-1.5 uppercase tracking-wider">Alıcı Email</label>
+                <label className="block text-xs font-medium text-gray-500 mb-1.5 uppercase tracking-wider">Alıcı Email(ler)</label>
                 <input
-                  type="email"
+                  type="text"
                   required
                   value={testForm.to}
                   onChange={(e) => setTestForm({ ...testForm, to: e.target.value })}
                   className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500"
-                  placeholder="alici@example.com"
+                  placeholder="alici1@mail.com, alici2@mail.com"
                 />
+                <p className="mt-1.5 text-[10px] text-gray-500">Birden fazla alıcı için virgül kullanabilirsiniz.</p>
               </div>
             </div>
             
