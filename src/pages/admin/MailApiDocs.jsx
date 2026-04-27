@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { api } from '../../lib/api';
+import Dropdown from '../../components/admin/Dropdown';
 
 export default function MailApiDocs() {
   const baseUrl = window.location.origin;
@@ -176,17 +177,12 @@ Cerilas Mail API, sistemdeki tanımlı göndericiler üzerinden e-posta gönderm
             <div className="space-y-4">
               <div>
                 <label className="block text-xs font-medium text-gray-500 mb-1.5 uppercase tracking-wider">Gönderici Seçin</label>
-                <select
-                  required
+                <Dropdown
                   value={testForm.senderId}
-                  onChange={(e) => setTestForm({ ...testForm, senderId: e.target.value })}
-                  className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500 appearance-none"
-                >
-                  <option value="">Gönderici Seçin...</option>
-                  {senders.map(s => (
-                    <option key={s.id} value={s.id}>{s.name} ({s.email})</option>
-                  ))}
-                </select>
+                  onChange={(val) => setTestForm({ ...testForm, senderId: val })}
+                  options={senders.map(s => ({ value: s.id, label: `${s.name} (${s.email})` }))}
+                  placeholder="Gönderici Seçin..."
+                />
               </div>
               <div>
                 <label className="block text-xs font-medium text-gray-500 mb-1.5 uppercase tracking-wider">Alıcı Email(ler)</label>

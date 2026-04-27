@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { api } from '../../lib/api';
+import Dropdown from '../../components/admin/Dropdown';
 
 export default function MailSettings() {
   const [settings, setSettings] = useState({
@@ -62,17 +63,12 @@ export default function MailSettings() {
           <h2 className="text-lg font-semibold text-white mb-4">Bildirim Göndericisi</h2>
           <div className="max-w-md">
             <label className="block text-xs font-medium text-gray-500 mb-2 uppercase tracking-wider">Gönderici E-posta</label>
-            <select
-              value={settings.sender_id || ''}
-              onChange={(e) => setSettings({ ...settings, sender_id: e.target.value })}
-              className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-cyan-500 appearance-none"
-              required
-            >
-              <option value="">Bir gönderici seçin...</option>
-              {senders.map(s => (
-                <option key={s.id} value={s.id}>{s.name} ({s.email})</option>
-              ))}
-            </select>
+            <Dropdown
+              value={settings.sender_id}
+              onChange={(val) => setSettings({ ...settings, sender_id: val })}
+              options={senders.map(s => ({ value: s.id, label: `${s.name} (${s.email})` }))}
+              placeholder="Bir gönderici seçin..."
+            />
             <p className="mt-2 text-xs text-gray-500 italic">* Bildirimlerin hangi mail üzerinden gönderileceğini seçin.</p>
           </div>
         </div>
