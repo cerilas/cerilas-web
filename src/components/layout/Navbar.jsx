@@ -47,7 +47,7 @@ export default function Navbar() {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2 group">
-            <img src={logoImg} alt="Cerilas" className="h-9 sm:h-12 w-auto transition-transform duration-300 group-hover:scale-105" />
+            <img src={logoImg} alt="Cerilas" className="h-11 sm:h-14 w-auto transition-transform duration-300 group-hover:scale-105" />
           </Link>
 
           {/* Desktop nav */}
