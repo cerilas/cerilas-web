@@ -1,0 +1,47 @@
+
+> app@0.0.0 build
+> vite build
+
+vite v8.0.8 building client environment for production...
+[2Ktransforming...✓ 496 modules transformed.
+✗ Build failed in 87ms
+error during build:
+Build failed with 2 errors:
+
+[31m[UNRESOLVED_IMPORT] Error:[0m Could not resolve '../../components/admin/Dropdown' in src/pages/admin/MailSettings.jsx
+   [38;5;246m╭[0m[38;5;246m─[0m[38;5;246m[[0m src/pages/admin/MailSettings.jsx:4:22 [38;5;246m][0m
+   [38;5;246m│[0m
+ [38;5;246m4 │[0m [38;5;249mi[0m[38;5;249mm[0m[38;5;249mp[0m[38;5;249mo[0m[38;5;249mr[0m[38;5;249mt[0m[38;5;249m [0m[38;5;249mD[0m[38;5;249mr[0m[38;5;249mo[0m[38;5;249mp[0m[38;5;249md[0m[38;5;249mo[0m[38;5;249mw[0m[38;5;249mn[0m[38;5;249m [0m[38;5;249mf[0m[38;5;249mr[0m[38;5;249mo[0m[38;5;249mm[0m[38;5;249m [0m"../../components/admin/Dropdown"[38;5;249m;[0m
+ [38;5;240m  │[0m                      ────────────────┬────────────────  
+ [38;5;240m  │[0m                                      ╰────────────────── Module not found.
+ [38;5;240m  │[0m 
+ [38;5;240m  │[0m [38;5;115mHelp[0m: 'src/pages/admin/MailSettings.jsx' is imported by the following path:
+ [38;5;240m  │[0m         - src/pages/admin/MailSettings.jsx
+ [38;5;240m  │[0m         - src/App.jsx
+ [38;5;240m  │[0m         - src/main.jsx
+ [38;5;240m  │[0m         - index.html
+[38;5;246m───╯[0m
+
+[31m[UNRESOLVED_IMPORT] Error:[0m Could not resolve '../../components/admin/Dropdown' in src/pages/admin/MailApiDocs.jsx
+   [38;5;246m╭[0m[38;5;246m─[0m[38;5;246m[[0m src/pages/admin/MailApiDocs.jsx:4:22 [38;5;246m][0m
+   [38;5;246m│[0m
+ [38;5;246m4 │[0m [38;5;249mi[0m[38;5;249mm[0m[38;5;249mp[0m[38;5;249mo[0m[38;5;249mr[0m[38;5;249mt[0m[38;5;249m [0m[38;5;249mD[0m[38;5;249mr[0m[38;5;249mo[0m[38;5;249mp[0m[38;5;249md[0m[38;5;249mo[0m[38;5;249mw[0m[38;5;249mn[0m[38;5;249m [0m[38;5;249mf[0m[38;5;249mr[0m[38;5;249mo[0m[38;5;249mm[0m[38;5;249m [0m"../../components/admin/Dropdown"[38;5;249m;[0m
+ [38;5;240m  │[0m                      ────────────────┬────────────────  
+ [38;5;240m  │[0m                                      ╰────────────────── Module not found.
+ [38;5;240m  │[0m 
+ [38;5;240m  │[0m [38;5;115mHelp[0m: 'src/pages/admin/MailApiDocs.jsx' is imported by the following path:
+ [38;5;240m  │[0m         - src/pages/admin/MailApiDocs.jsx
+ [38;5;240m  │[0m         - src/App.jsx
+ [38;5;240m  │[0m         - src/main.jsx
+ [38;5;240m  │[0m         - index.html
+[38;5;246m───╯[0m
+
+    at aggregateBindingErrorsIntoJsError (file:///Users/denizcanilgin/Documents/cerilas-web/app/node_modules/rolldown/dist/shared/error-w0u7biK-.mjs:48:18)
+    at unwrapBindingResult (file:///Users/denizcanilgin/Documents/cerilas-web/app/node_modules/rolldown/dist/shared/error-w0u7biK-.mjs:18:128)
+    at #build (file:///Users/denizcanilgin/Documents/cerilas-web/app/node_modules/rolldown/dist/shared/rolldown-build-DtGk-m96.mjs:3313:34)
+    at async buildEnvironment (file:///Users/denizcanilgin/Documents/cerilas-web/app/node_modules/vite/dist/node/chunks/node.js:32954:64)
+    at async Object.build (file:///Users/denizcanilgin/Documents/cerilas-web/app/node_modules/vite/dist/node/chunks/node.js:33376:19)
+    at async Object.buildApp (file:///Users/denizcanilgin/Documents/cerilas-web/app/node_modules/vite/dist/node/chunks/node.js:33373:153)
+    at async CAC.<anonymous> (file:///Users/denizcanilgin/Documents/cerilas-web/app/node_modules/vite/dist/node/cli.js:778:3) {
+  errors: [Getter/Setter]
+}

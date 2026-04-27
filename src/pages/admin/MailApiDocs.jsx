@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { api } from '../../lib/api';
-import Dropdown from '../../components/admin/Dropdown';
+import Dropdown from '../../components/ui/Dropdown';
 
 export default function MailApiDocs() {
   const baseUrl = window.location.origin;
