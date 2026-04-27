@@ -14,7 +14,7 @@ router.get('/senders', authMiddleware, async (req, res) => {
     res.json(result.rows);
   } catch (err) {
     console.error('Get senders error:', err);
-    res.status(500).json({ error: 'Server error' });
+    res.status(500).json({ error: err.message });
   }
 });
 
@@ -30,7 +30,7 @@ router.post('/senders', authMiddleware, async (req, res) => {
     res.status(201).json(result.rows[0]);
   } catch (err) {
     console.error('Create sender error:', err);
-    res.status(500).json({ error: 'Server error' });
+    res.status(500).json({ error: err.message });
   }
 });
 
@@ -48,7 +48,7 @@ router.put('/senders/:id', authMiddleware, async (req, res) => {
     res.json(result.rows[0]);
   } catch (err) {
     console.error('Update sender error:', err);
-    res.status(500).json({ error: 'Server error' });
+    res.status(500).json({ error: err.message });
   }
 });
 
