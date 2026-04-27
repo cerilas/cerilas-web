@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Link } from "react-router-dom";
-import { motion } from "framer-motion";
+import { motion, useScroll, useTransform } from "framer-motion";
 import { useLang } from "../context/LanguageContext";
 import { SectionTitle, FadeIn, GlowCard, Badge } from "../components/ui";
 import { useProjects } from "../hooks/useProjects";
@@ -8,6 +8,7 @@ import { api } from "../lib/api";
 import LiquidEther from "../components/effects/LiquidEther";
 import imgConsult from "../assets/images/ux-indonesia-ywwuOBJy60c-unsplash.jpg";
 import heroBg from "../assets/images/boitumelo-zqhZH1Khf_I-unsplash.jpg";
+import capBg from "../assets/images/albert-stoynov-b_GcLCaKt94-unsplash.jpg";
 
 const partnerLogoModules = import.meta.glob("../cerilas-partners-logos/*.{png,jpg,jpeg,svg,webp}", {
   eager: true,
@@ -79,6 +80,13 @@ export default function Home() {
   const caps = t.capabilities.areas;
   const projects = useProjects();
   const [stats, setStats] = useState({ projects: 0, useCases: 0, uniqueTags: 0 });
+
+  const capsRef = useRef(null);
+  const { scrollYProgress } = useScroll({
+    target: capsRef,
+    offset: ["start end", "end start"]
+  });
+  const capBgY = useTransform(scrollYProgress, [0, 1], ["0%", "20%"]);
 
   useEffect(() => {
     api.getStats().then(setStats).catch(console.error);
@@ -243,8 +251,18 @@ export default function Home() {
       </section>
 
       {/* Capabilities */}
-      <section className="py-24 bg-gray-900/30">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section ref={capsRef} className="relative py-24 bg-gray-900/30 overflow-hidden">
+        {/* Parallax Background */}
+        <motion.div 
+          className="absolute inset-0 z-0 opacity-[0.05] pointer-events-none"
+          style={{
+            backgroundImage: `url(${capBg})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            y: capBgY
+          }}
+        />
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <SectionTitle title={h.capTitle} subtitle={h.capDesc} />
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {caps.map((cap, i) => (
