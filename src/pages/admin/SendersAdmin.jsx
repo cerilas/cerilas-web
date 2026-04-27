@@ -49,7 +49,7 @@ export default function SendersAdmin() {
     setSaving(true);
     setError('');
     try {
-      if (editing) {
+      if (editing && editing !== 'new') {
         await api.updateSender(editing, form);
       } else {
         await api.createSender(form);
