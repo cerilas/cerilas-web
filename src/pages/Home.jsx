@@ -96,7 +96,7 @@ export default function Home() {
       <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gray-950">
         {/* Background Image with low transparency */}
         <div 
-          className="absolute inset-0 z-0 opacity-20 pointer-events-none"
+          className="absolute inset-0 z-0 opacity-[0.08] pointer-events-none"
           style={{
             backgroundImage: `url(${heroBg})`,
             backgroundSize: 'cover',
