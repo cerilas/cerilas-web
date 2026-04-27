@@ -30,6 +30,8 @@ import MediaAdmin from "./pages/admin/MediaAdmin";
 import ApplicationsAdmin from "./pages/admin/ApplicationsAdmin";
 import JobListingsAdmin from "./pages/admin/JobListingsAdmin";
 import UsersAdmin from "./pages/admin/UsersAdmin";
+import SendersAdmin from "./pages/admin/SendersAdmin";
+import MailApiDocs from "./pages/admin/MailApiDocs";
 
 function Layout({ children }) {
   return (
@@ -64,6 +66,8 @@ export default function App() {
               <Route path="job-listings" element={<JobListingsAdmin />} />
               <Route path="applications" element={<ApplicationsAdmin />} />
               <Route path="users" element={<UsersAdmin />} />
+            <Route path="mail-senders" element={<SendersAdmin />} />
+            <Route path="mail-docs" element={<MailApiDocs />} />
             </Route>
           </Route>
 

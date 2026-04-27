@@ -13,6 +13,7 @@ import jobListingRoutes from './routes/jobListings.js';
 import useCaseRoutes from './routes/useCases.js';
 import usersRoutes from './routes/users.js';
 import statsRoutes from './routes/stats.js';
+import mailRoutes from './routes/mail.js';
 import pool from './db.js';
 
 dotenv.config();
@@ -41,6 +42,7 @@ app.use('/api/job-listings', jobListingRoutes);
 app.use('/api/use-cases', useCaseRoutes);
 app.use('/api/users', usersRoutes);
 app.use('/api/stats', statsRoutes);
+app.use('/api/mail', mailRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => res.json({ ok: true }));

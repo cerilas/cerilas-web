@@ -155,4 +155,11 @@ export const api = {
 
   // Stats
   getStats: () => request('/stats'),
+
+  // Mail
+  getSenders: () => request('/mail/senders'),
+  createSender: (data) => request('/mail/senders', { method: 'POST', body: JSON.stringify(data) }),
+  updateSender: (id, data) => request(`/mail/senders/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+  deleteSender: (id) => request(`/mail/senders/${id}`, { method: 'DELETE' }),
+  sendMail: (data) => request('/mail/send', { method: 'POST', body: JSON.stringify(data) }),
 };
