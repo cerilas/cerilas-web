@@ -5,6 +5,7 @@ import fs from 'fs';
 import { fileURLToPath } from 'url';
 import pool from '../db.js';
 import authMiddleware from '../middleware/auth.js';
+import { sendNotificationMail } from './mail.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const cvDir = path.join(__dirname, '..', 'uploads', 'cv');
@@ -55,6 +56,9 @@ router.post('/', upload.single('cv'), async (req, res) => {
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id`,
       [firstName, lastName, email, phone || null, position, coverLetter || null, cvFilename, cvOriginalName]
     );
+
+    // Send notification
+    sendNotificationMail('job', { firstName, lastName, email, position });
 
     res.status(201).json({ ok: true, id: result.rows[0].id });
   } catch (err) {

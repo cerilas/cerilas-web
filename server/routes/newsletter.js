@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import pool from '../db.js';
 import authMiddleware from '../middleware/auth.js';
+import { sendNotificationMail } from './mail.js';
 
 const router = Router();
 
@@ -13,6 +14,10 @@ router.post('/', async (req, res) => {
       'INSERT INTO newsletter_subscribers (email) VALUES ($1) ON CONFLICT (email) DO NOTHING',
       [email]
     );
+
+    // Send notification
+    sendNotificationMail('newsletter', { email });
+
     res.status(201).json({ ok: true });
   } catch (err) {
     console.error('Newsletter subscribe error:', err);

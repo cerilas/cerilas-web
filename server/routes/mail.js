@@ -60,7 +60,45 @@ router.delete('/senders/:id', authMiddleware, async (req, res) => {
     res.json({ deleted: true });
   } catch (err) {
     console.error('Delete sender error:', err);
-    res.status(500).json({ error: 'Server error' });
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// --- PLATFORM MAIL SETTINGS ---
+
+// Get settings
+router.get('/settings', authMiddleware, async (req, res) => {
+  try {
+    const result = await pool.query('SELECT * FROM mail_settings LIMIT 1');
+    res.json(result.rows[0] || {});
+  } catch (err) {
+    console.error('Get mail settings error:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Update settings
+router.put('/settings', authMiddleware, async (req, res) => {
+  try {
+    const { 
+      sender_id, 
+      newsletter_active, newsletter_recipients,
+      contact_active, contact_recipients,
+      job_active, job_recipients
+    } = req.body;
+
+    const result = await pool.query(
+      `UPDATE mail_settings SET
+        sender_id=$1, newsletter_active=$2, newsletter_recipients=$3,
+        contact_active=$4, contact_recipients=$5,
+        job_active=$6, job_recipients=$7, updated_at=NOW()
+       RETURNING *`,
+      [sender_id, newsletter_active, newsletter_recipients, contact_active, contact_recipients, job_active, job_recipients]
+    );
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error('Update mail settings error:', err);
+    res.status(500).json({ error: err.message });
   }
 });
 
@@ -128,5 +166,73 @@ router.post('/send', authMiddleware, async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+
+// --- INTERNAL NOTIFICATION UTILITY ---
+
+export async function sendNotificationMail(type, data) {
+  try {
+    const settingsResult = await pool.query('SELECT * FROM mail_settings LIMIT 1');
+    if (settingsResult.rows.length === 0) return;
+    const s = settingsResult.rows[0];
+
+    let active = false;
+    let recipients = '';
+    let subject = '';
+    let html = '';
+
+    if (type === 'newsletter') {
+      active = s.newsletter_active;
+      recipients = s.newsletter_recipients;
+      subject = 'Yeni Newsletter Kaydı! 📬';
+      html = `<p>Yeni bir newsletter abonesi geldi: <b>${data.email}</b></p>`;
+    } else if (type === 'contact') {
+      active = s.contact_active;
+      recipients = s.contact_recipients;
+      subject = 'Yeni İletişim Formu Mesajı! ✉️';
+      html = `
+        <h3>Yeni İletişim Formu Detayları:</h3>
+        <p><b>Ad Soyad:</b> ${data.name}</p>
+        <p><b>Email:</b> ${data.email}</p>
+        <p><b>Konu:</b> ${data.subject}</p>
+        <p><b>Mesaj:</b> ${data.message}</p>
+      `;
+    } else if (type === 'job') {
+      active = s.job_active;
+      recipients = s.job_recipients;
+      subject = 'Yeni İş Başvurusu! 💼';
+      html = `
+        <h3>Yeni İş Başvurusu Detayları:</h3>
+        <p><b>Ad Soyad:</b> ${data.firstName} ${data.lastName}</p>
+        <p><b>Email:</b> ${data.email}</p>
+        <p><b>Pozisyon:</b> ${data.position}</p>
+        <p>Görüntülemek için admin paneline bakabilirsiniz.</p>
+      `;
+    }
+
+    if (!active || !recipients || !s.sender_id) return;
+
+    const senderResult = await pool.query('SELECT * FROM email_senders WHERE id = $1', [s.sender_id]);
+    if (senderResult.rows.length === 0) return;
+    const sender = senderResult.rows[0];
+
+    const transporter = nodemailer.createTransport({
+      host: sender.host,
+      port: sender.port,
+      secure: sender.secure,
+      auth: { user: sender.auth_user, pass: sender.auth_pass }
+    });
+
+    await transporter.sendMail({
+      from: `"${sender.name}" <${sender.email}>`,
+      to: recipients,
+      subject,
+      html
+    });
+
+    console.log(`Notification mail sent for ${type}`);
+  } catch (err) {
+    console.error('sendNotificationMail error:', err);
+  }
+}
 
 export default router;

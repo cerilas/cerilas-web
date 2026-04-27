@@ -162,4 +162,6 @@ export const api = {
   updateSender: (id, data) => request(`/mail/senders/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
   deleteSender: (id) => request(`/mail/senders/${id}`, { method: 'DELETE' }),
   sendMail: (data) => request('/mail/send', { method: 'POST', body: JSON.stringify(data) }),
+  getMailSettings: () => request('/mail/settings'),
+  updateMailSettings: (data) => request('/mail/settings', { method: 'PUT', body: JSON.stringify(data) }),
 };

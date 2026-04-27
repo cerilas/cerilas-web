@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import pool from '../db.js';
 import authMiddleware from '../middleware/auth.js';
+import { sendNotificationMail } from './mail.js';
 
 const router = Router();
 
@@ -15,6 +16,10 @@ router.post('/', async (req, res) => {
       'INSERT INTO contact_submissions (name, email, category, message) VALUES ($1, $2, $3, $4) RETURNING id',
       [name, email, category || null, message]
     );
+
+    // Send notification mail
+    sendNotificationMail('contact', { name, email, subject: category, message });
+
     res.status(201).json({ ok: true, id: result.rows[0].id });
   } catch (err) {
     console.error('Contact submit error:', err);
