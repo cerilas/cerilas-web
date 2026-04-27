@@ -169,6 +169,25 @@ router.post('/send', authMiddleware, async (req, res) => {
 
 // --- INTERNAL NOTIFICATION UTILITY ---
 
+const getEmailTemplate = (title, content, buttonText, buttonUrl) => `
+  <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; background-color: #f9f9f9; border-radius: 16px; overflow: hidden; border: 1px solid #eee;">
+    <div style="background-color: #0891b2; padding: 30px; text-align: center;">
+      <h1 style="color: white; margin: 0; font-size: 24px; letter-spacing: 1px;">CERİLAS</h1>
+      <p style="color: rgba(255,255,255,0.8); margin: 5px 0 0 0; font-size: 14px;">Yüksek Teknoloji</p>
+    </div>
+    <div style="padding: 40px; background-color: white;">
+      <h2 style="color: #111; margin-top: 0; font-size: 20px;">${title}</h2>
+      <div style="color: #444; line-height: 1.6; font-size: 15px; margin-bottom: 30px;">
+        ${content}
+      </div>
+      <a href="${buttonUrl}" style="display: inline-block; background-color: #0891b2; color: white; padding: 14px 28px; text-decoration: none; border-radius: 10px; font-weight: bold; font-size: 14px; box-shadow: 0 4px 12px rgba(8,145,178,0.2);">
+        ${buttonText}
+      </a>
+      <p style="margin-top: 30px; font-size: 12px; color: #999;">Bu email www.cerilas.com üzerinden otomatik olarak gönderilmiştir.</p>
+    </div>
+  </div>
+`;
+
 export async function sendNotificationMail(type, data) {
   try {
     const settingsResult = await pool.query('SELECT * FROM mail_settings LIMIT 1');
@@ -179,37 +198,48 @@ export async function sendNotificationMail(type, data) {
     let recipients = '';
     let subject = '';
     let html = '';
+    let title = '';
+    let content = '';
+    let btnText = 'Paneli Görüntüle';
+    let btnUrl = `${process.env.FRONTEND_URL || 'https://www.cerilas.com'}/admin`;
 
     if (type === 'newsletter') {
       active = s.newsletter_active;
       recipients = s.newsletter_recipients;
       subject = 'Yeni Newsletter Kaydı! 📬';
-      html = `<p>Yeni bir newsletter abonesi geldi: <b>${data.email}</b></p>`;
+      title = 'Yeni Bir Aboneniz Var!';
+      content = `Web siteniz üzerinden yeni bir kullanıcı newsletter bültenine kayıt oldu:<br><br><b>Email:</b> ${data.email}`;
+      btnUrl += '/newsletter';
     } else if (type === 'contact') {
       active = s.contact_active;
       recipients = s.contact_recipients;
       subject = 'Yeni İletişim Formu Mesajı! ✉️';
-      html = `
-        <h3>Yeni İletişim Formu Detayları:</h3>
-        <p><b>Ad Soyad:</b> ${data.name}</p>
-        <p><b>Email:</b> ${data.email}</p>
-        <p><b>Konu:</b> ${data.subject}</p>
-        <p><b>Mesaj:</b> ${data.message}</p>
+      title = 'Yeni İletişim Formu Bildirimi';
+      content = `
+        Siteniz üzerinden yeni bir mesaj aldınız:<br><br>
+        <b>Ad Soyad:</b> ${data.name}<br>
+        <b>Email:</b> ${data.email}<br>
+        <b>Kategori:</b> ${data.subject || 'Genel'}<br>
+        <b>Mesaj:</b><br>${data.message}
       `;
+      btnUrl += '/contacts';
     } else if (type === 'job') {
       active = s.job_active;
       recipients = s.job_recipients;
       subject = 'Yeni İş Başvurusu! 💼';
-      html = `
-        <h3>Yeni İş Başvurusu Detayları:</h3>
-        <p><b>Ad Soyad:</b> ${data.firstName} ${data.lastName}</p>
-        <p><b>Email:</b> ${data.email}</p>
-        <p><b>Pozisyon:</b> ${data.position}</p>
-        <p>Görüntülemek için admin paneline bakabilirsiniz.</p>
+      title = 'Yeni Kariyer Başvurusu';
+      content = `
+        Kariyer sayfanız üzerinden yeni bir başvuru yapıldı:<br><br>
+        <b>Aday:</b> ${data.firstName} ${data.lastName}<br>
+        <b>Email:</b> ${data.email}<br>
+        <b>Pozisyon:</b> ${data.position}
       `;
+      btnUrl += '/applications';
     }
 
     if (!active || !recipients || !s.sender_id) return;
+
+    html = getEmailTemplate(title, content, btnText, btnUrl);
 
     const senderResult = await pool.query('SELECT * FROM email_senders WHERE id = $1', [s.sender_id]);
     if (senderResult.rows.length === 0) return;
