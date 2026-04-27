@@ -615,7 +615,7 @@ export const translations = {
       tubitakTitle: "TÜBİTAK Ortaklığı",
       tubitakDesc:
         "CERİLAS, kamu destekli Ar-Ge vizyonuna doğrudan bağlı bir teknoloji şirketidir. TÜBİTAK ile stratejik bir ortaklık yapısı sürdürmektedir.",
-      tubitakChip: "TÜBİTAK Yatırım Yaptığı Şirket",
+      tubitakChip: "TÜBİTAK'ın Yatırım Yaptığı Şirket",
       tubitakStatLabel: "Resmi Ortaklık",
       tubitakStatValue: "",
       tubitakNote:
