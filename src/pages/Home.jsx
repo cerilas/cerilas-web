@@ -1,10 +1,13 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useLang } from "../context/LanguageContext";
 import { SectionTitle, FadeIn, GlowCard, Badge } from "../components/ui";
 import { useProjects } from "../hooks/useProjects";
+import { api } from "../lib/api";
 import LiquidEther from "../components/effects/LiquidEther";
 import imgConsult from "../assets/images/ux-indonesia-ywwuOBJy60c-unsplash.jpg";
+import heroBg from "../assets/images/boitumelo-zqhZH1Khf_I-unsplash.jpg";
 
 const partnerLogoModules = import.meta.glob("../cerilas-partners-logos/*.{png,jpg,jpeg,svg,webp}", {
   eager: true,
@@ -22,11 +25,6 @@ const partnerLogos = Object.entries(partnerLogoModules)
     alt: `Strategic Partner ${index + 1}`,
   }));
 
-const metrics = [
-  { key: "metric1Label", value: "4" },
-  { key: "metric2Label", value: "7" },
-  { key: "metric3Label", valueKey: "metric3Value" },
-];
 
 const capIcons = [
   (
@@ -80,11 +78,31 @@ export default function Home() {
   const common = t.common;
   const caps = t.capabilities.areas;
   const projects = useProjects();
+  const [stats, setStats] = useState({ projects: 0, useCases: 0, uniqueTags: 0 });
+
+  useEffect(() => {
+    api.getStats().then(setStats).catch(console.error);
+  }, []);
+
+  const metrics = [
+    { key: "metric1Label", value: stats.projects },
+    { key: "metric2Label", value: stats.useCases },
+    { key: "metric3Label", value: stats.uniqueTags },
+  ];
 
   return (
     <div>
       {/* Hero */}
       <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gray-950">
+        {/* Background Image with low transparency */}
+        <div 
+          className="absolute inset-0 z-0 opacity-20 pointer-events-none"
+          style={{
+            backgroundImage: `url(${heroBg})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+          }}
+        />
         <div style={{ width: '100%', height: '100%', position: 'absolute', top: 0, left: 0, zIndex: 0 }}>
           <LiquidEther
             colors={['#06b6d4', '#3b82f6', '#0e7490']}

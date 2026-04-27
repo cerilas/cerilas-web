@@ -2,7 +2,7 @@ export const translations = {
   en: {
     brand: {
       shortName: "CERILAS",
-      fullName: "Cerilas High Technologies Inc.",
+      fullName: "CERILAS High Tech",
     },
     nav: {
       home: "Home",
@@ -96,10 +96,10 @@ export const translations = {
       tubitakNote:
         "This structure reinforces our long-term innovation capacity and institutional trust for strategic partnerships.",
       metricsTitle: "Cerilas by the Numbers",
-      metric1Label: "Active R&D Projects",
-      metric2Label: "Patents",
-      metric3Label: "R&D Budget / Project",
-      metric3Value: "₺5M",
+      metric1Label: "R&D Projects",
+      metric2Label: "Use Cases",
+      metric3Label: "Service Verticals",
+      metric3Value: "",
       consultTitle: "Consultancy & Training",
       consultDesc:
         "From AI strategy to digital transformation roadmaps, embedded system training to project management consulting — we design programs tailored to your team's needs.",
@@ -527,7 +527,7 @@ export const translations = {
   tr: {
     brand: {
       shortName: "CERİLAS",
-      fullName: "CERİLAS Yüksek Teknoloji Sanayi ve Ticaret A.Ş.",
+      fullName: "CERİLAS Yüksek Teknoloji",
     },
     nav: {
       home: "Ana Sayfa",
@@ -621,10 +621,10 @@ export const translations = {
       tubitakNote:
         "Bu ortaklık yapısı, uzun vadeli inovasyon kapasitemizi ve stratejik iş birlikleri için kurumsal güvenilirliğimizi güçlendirir.",
       metricsTitle: "Rakamlarla Cerilas",
-      metric1Label: "Aktif Ar-Ge Projesi",
-      metric2Label: "Patent",
-      metric3Label: "Ar-Ge Bütçesi / Proje",
-      metric3Value: "₺5M",
+      metric1Label: "Ar-Ge Projesi",
+      metric2Label: "Use-Case Sayısı",
+      metric3Label: "Faaliyet Dikeyleri",
+      metric3Value: "",
       consultTitle: "Danışmanlık ve Eğitim",
       consultDesc:
         "Yapay zeka stratejisinden dijital dönüşüm yol haritalarına, gömülü sistem eğitiminden proje yönetimi danışmanlığına kadar ekibinize özel programlar tasarlıyoruz.",

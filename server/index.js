@@ -12,6 +12,7 @@ import applicationRoutes from './routes/applications.js';
 import jobListingRoutes from './routes/jobListings.js';
 import useCaseRoutes from './routes/useCases.js';
 import usersRoutes from './routes/users.js';
+import statsRoutes from './routes/stats.js';
 import pool from './db.js';
 
 dotenv.config();
@@ -39,6 +40,7 @@ app.use('/api/applications', applicationRoutes);
 app.use('/api/job-listings', jobListingRoutes);
 app.use('/api/use-cases', useCaseRoutes);
 app.use('/api/users', usersRoutes);
+app.use('/api/stats', statsRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => res.json({ ok: true }));

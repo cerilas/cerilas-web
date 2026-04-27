@@ -9,7 +9,7 @@ export default function UsersAdmin() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
   const [deleteConfirm, setDeleteConfirm] = useState({ open: false, id: null });
-  
+
   const [formData, setFormData] = useState({
     email: '',
     password: ''
