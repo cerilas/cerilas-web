@@ -294,15 +294,25 @@ export default function Home() {
             {projects.map((proj, i) => (
               <FadeIn key={proj.id} delay={i * 0.1}>
                 <Link to={`/projects/${proj.id}`}>
-                  <GlowCard className="h-full cursor-pointer">
-                    <div className="flex flex-wrap gap-1.5 mb-4">
-                      {proj.tags.slice(0, 3).map((tag) => (
-                        <Badge key={tag}>{tag}</Badge>
-                      ))}
+                  <GlowCard className="h-full cursor-pointer p-0 overflow-hidden">
+                    {proj.imageUrl && (
+                      <img 
+                        src={proj.imageUrl} 
+                        alt={proj.title} 
+                        className="w-full h-40 object-cover" 
+                        loading="lazy" 
+                      />
+                    )}
+                    <div className="p-6">
+                      <div className="flex flex-wrap gap-1.5 mb-4">
+                        {proj.tags.slice(0, 3).map((tag) => (
+                          <Badge key={tag}>{tag}</Badge>
+                        ))}
+                      </div>
+                      <h3 className="text-xl font-bold text-white mb-2">{proj.title}</h3>
+                      <p className="text-sm text-gray-400 leading-relaxed">{proj.shortDesc}</p>
+                      <div className="mt-4 text-xs text-gray-500">{proj.date}</div>
                     </div>
-                    <h3 className="text-xl font-bold text-white mb-2">{proj.title}</h3>
-                    <p className="text-sm text-gray-400 leading-relaxed">{proj.shortDesc}</p>
-                    <div className="mt-4 text-xs text-gray-500">{proj.date}</div>
                   </GlowCard>
                 </Link>
               </FadeIn>

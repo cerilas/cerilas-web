@@ -61,11 +61,11 @@ export default function ProjectDetail() {
         </div>
       </section>
 
-      {/* Visual placeholder */}
+      {/* Project Image */}
       <section className="pb-8">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <FadeIn>
-            <img src={imgProject} alt={project.title} className="w-full h-64 rounded-2xl border border-cyan-500/20 object-cover" loading="lazy" />
+            <img src={project.imageUrl || imgProject} alt={project.title} className="w-full h-64 rounded-2xl border border-cyan-500/20 object-cover" loading="lazy" />
           </FadeIn>
         </div>
       </section>
