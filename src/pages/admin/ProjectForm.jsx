@@ -14,6 +14,7 @@ const emptyProject = {
   technologies: [],
   grant_info: '', university: '', academic_staff: '', partner: '', budget: '',
   image_url: '', sort_order: 0, status: 'active',
+  seo_title_tr: '', seo_title_en: '', seo_description_tr: '', seo_description_en: ''
 };
 
 export default function ProjectForm() {
@@ -181,6 +182,18 @@ export default function ProjectForm() {
             value={form.image_url || ''}
             onChange={(v) => handleChange('image_url', v)}
           />
+        </Section>
+
+        {/* SEO Settings */}
+        <Section title="SEO Ayarları">
+          <div className="grid grid-cols-2 gap-4">
+            <Field label="SEO Başlık (TR)" value={form.seo_title_tr} onChange={(v) => handleChange('seo_title_tr', v)} placeholder="Google'da görünecek Türkçe başlık" />
+            <Field label="SEO Title (EN)" value={form.seo_title_en} onChange={(v) => handleChange('seo_title_en', v)} placeholder="English title for Google" />
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <TextArea label="SEO Açıklama (TR)" value={form.seo_description_tr} onChange={(v) => handleChange('seo_description_tr', v)} placeholder="Meta description for TR" />
+            <TextArea label="SEO Description (EN)" value={form.seo_description_en} onChange={(v) => handleChange('seo_description_en', v)} placeholder="Meta description for EN" />
+          </div>
         </Section>
 
         <div className="flex gap-3">

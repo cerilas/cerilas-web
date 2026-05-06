@@ -49,15 +49,17 @@ router.post('/', authMiddleware, async (req, res) => {
       `INSERT INTO projects (slug, title_tr, title_en, short_desc_tr, short_desc_en,
         challenge_tr, challenge_en, solution_tr, solution_en, impact_tr, impact_en,
         date_tr, date_en, tags_tr, tags_en, technologies, grant_info, university,
-        academic_staff, partner, budget, image_url, sort_order, status)
-      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24)
+        academic_staff, partner, budget, image_url, sort_order, status,
+        seo_title_tr, seo_title_en, seo_description_tr, seo_description_en)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28)
       RETURNING *`,
       [p.slug, p.title_tr, p.title_en, p.short_desc_tr, p.short_desc_en,
        p.challenge_tr, p.challenge_en, p.solution_tr, p.solution_en, p.impact_tr, p.impact_en,
        p.date_tr, p.date_en, p.tags_tr || [], p.tags_en || [], p.technologies || [],
        p.grant_info || null, p.university || null, p.academic_staff || null,
        p.partner || null, p.budget || null, p.image_url || null,
-       p.sort_order || 0, p.status || 'active']
+       p.sort_order || 0, p.status || 'active',
+       p.seo_title_tr || null, p.seo_title_en || null, p.seo_description_tr || null, p.seo_description_en || null]
     );
     res.status(201).json(result.rows[0]);
   } catch (err) {
@@ -77,15 +79,18 @@ router.put('/:id', authMiddleware, async (req, res) => {
         impact_tr=$10, impact_en=$11, date_tr=$12, date_en=$13,
         tags_tr=$14, tags_en=$15, technologies=$16, grant_info=$17,
         university=$18, academic_staff=$19, partner=$20, budget=$21,
-        image_url=$22, sort_order=$23, status=$24, updated_at=NOW()
-      WHERE id=$25 RETURNING *`,
+        image_url=$22, sort_order=$23, status=$24, updated_at=NOW(),
+        seo_title_tr=$25, seo_title_en=$26, seo_description_tr=$27, seo_description_en=$28
+      WHERE id=$29 RETURNING *`,
       [p.slug, p.title_tr, p.title_en, p.short_desc_tr, p.short_desc_en,
        p.challenge_tr, p.challenge_en, p.solution_tr, p.solution_en,
        p.impact_tr, p.impact_en, p.date_tr, p.date_en,
        p.tags_tr || [], p.tags_en || [], p.technologies || [],
        p.grant_info || null, p.university || null, p.academic_staff || null,
        p.partner || null, p.budget || null, p.image_url || null,
-       p.sort_order || 0, p.status || 'active', req.params.id]
+       p.sort_order || 0, p.status || 'active',
+       p.seo_title_tr || null, p.seo_title_en || null, p.seo_description_tr || null, p.seo_description_en || null,
+       req.params.id]
     );
     if (result.rows.length === 0) return res.status(404).json({ error: 'Not found' });
     res.json(result.rows[0]);
