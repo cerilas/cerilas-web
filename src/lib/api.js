@@ -164,4 +164,9 @@ export const api = {
   sendMail: (data) => request('/mail/send', { method: 'POST', body: JSON.stringify(data) }),
   getMailSettings: () => request('/mail/settings'),
   updateMailSettings: (data) => request('/mail/settings', { method: 'PUT', body: JSON.stringify(data) }),
+
+  // SMS
+  sendSms: (data) => request('/sms/send', { method: 'POST', body: JSON.stringify(data) }),
+  getSmsSettings: () => request('/sms/settings'),
+  updateSmsSettings: (data) => request('/sms/settings', { method: 'PUT', body: JSON.stringify(data) }),
 };

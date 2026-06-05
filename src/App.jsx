@@ -33,6 +33,8 @@ import UsersAdmin from "./pages/admin/UsersAdmin";
 import SendersAdmin from "./pages/admin/SendersAdmin";
 import MailApiDocs from "./pages/admin/MailApiDocs";
 import MailSettings from "./pages/admin/MailSettings";
+import SmsSettings from "./pages/admin/SmsSettings";
+import SmsApiDocs from "./pages/admin/SmsApiDocs";
 
 function Layout({ children }) {
   return (
@@ -70,6 +72,8 @@ export default function App() {
             <Route path="mail-senders" element={<SendersAdmin />} />
             <Route path="mail-docs" element={<MailApiDocs />} />
             <Route path="mail-settings" element={<MailSettings />} />
+            <Route path="sms-settings" element={<SmsSettings />} />
+            <Route path="sms-docs" element={<SmsApiDocs />} />
             </Route>
           </Route>
 

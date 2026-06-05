@@ -86,7 +86,10 @@ const navItems = [
   { type: 'divider', label: 'EMAIL API PLATFORM' },
   { path: '/admin/mail-senders', label: 'Gönderici Ayarları', icon: <Icons.Mail /> },
   { path: '/admin/mail-settings', label: 'Platform Bildirimleri', icon: <Icons.Settings /> },
-  { path: '/admin/mail-docs', label: 'API Dokümantasyonu', icon: <Icons.Docs /> },
+  { path: '/admin/mail-docs', label: 'Mail API Dokümanı', icon: <Icons.Docs /> },
+  { type: 'divider', label: 'SMS API PLATFORM' },
+  { path: '/admin/sms-settings', label: 'SMS Ayarları', icon: <Icons.Settings /> },
+  { path: '/admin/sms-docs', label: 'SMS API Dokümanı', icon: <Icons.Docs /> },
 ];
 
 export default function AdminLayout() {

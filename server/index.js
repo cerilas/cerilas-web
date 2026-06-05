@@ -15,6 +15,7 @@ import useCaseRoutes from './routes/useCases.js';
 import usersRoutes from './routes/users.js';
 import statsRoutes from './routes/stats.js';
 import mailRoutes from './routes/mail.js';
+import smsRoutes from './routes/sms.js';
 import pool from './db.js';
 
 dotenv.config();
@@ -44,6 +45,7 @@ app.use('/api/use-cases', useCaseRoutes);
 app.use('/api/users', usersRoutes);
 app.use('/api/stats', statsRoutes);
 app.use('/api/mail', mailRoutes);
+app.use('/api/sms', smsRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => res.json({ ok: true }));
@@ -180,6 +182,18 @@ app.listen(PORT, async () => {
       );
       CREATE INDEX IF NOT EXISTS idx_media_type ON media(type);
       CREATE INDEX IF NOT EXISTS idx_media_created ON media(created_at DESC);
+      
+      CREATE TABLE IF NOT EXISTS sms_settings (
+        id SERIAL PRIMARY KEY,
+        netgsm_usercode VARCHAR(100),
+        netgsm_password VARCHAR(100),
+        netgsm_header VARCHAR(100),
+        is_active BOOLEAN DEFAULT true,
+        updated_at TIMESTAMP DEFAULT NOW()
+      );
+      INSERT INTO sms_settings (netgsm_usercode, netgsm_password, netgsm_header, is_active)
+      SELECT 'deniz@cerilas.com', 'Dnz.24232423', 'CERILAS AS', true
+      WHERE NOT EXISTS (SELECT 1 FROM sms_settings);
     `);
     await pool.query(`
       CREATE TABLE IF NOT EXISTS job_listings (
