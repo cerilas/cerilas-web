@@ -169,4 +169,5 @@ export const api = {
   sendSms: (data) => request('/sms/send', { method: 'POST', body: JSON.stringify(data) }),
   getSmsSettings: () => request('/sms/settings'),
   updateSmsSettings: (data) => request('/sms/settings', { method: 'PUT', body: JSON.stringify(data) }),
+  getSmsHeaders: (data) => request('/sms/headers', { method: 'POST', body: JSON.stringify(data) }),
 };
