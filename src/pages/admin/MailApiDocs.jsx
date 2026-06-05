@@ -44,6 +44,14 @@ Cerilas Mail API, sistemdeki tanımlı göndericiler üzerinden e-posta gönderm
 ## Kimlik Doğrulama
 İstek başlığına şu parametreyi ekleyin:
 \`Authorization: Bearer YOUR_ADMIN_TOKEN\`
+
+Token almak için \`/api/auth/login\` adresine POST isteği atabilirsiniz:
+\`\`\`json
+{
+  "email": "admin_emailiniz@cerilas.com",
+  "password": "sifreniz"
+}
+\`\`\`
 `;
 
   const handleDownloadMd = () => {
@@ -153,10 +161,22 @@ Cerilas Mail API, sistemdeki tanımlı göndericiler üzerinden e-posta gönderm
           </h2>
           <p className="text-sm text-gray-400 mb-4 leading-relaxed">
             API istekleri, Admin paneline giriş yaptığınızda kullanılan JWT token ile yetkilendirilmelidir. 
-            İstek başlığına (header) aşağıdaki parametreyi ekleyin:
+            Eğer bir token'ınız yoksa, öncelikle <code>/api/auth/login</code> adresine e-posta ve şifrenizle POST isteği atarak bir token almalısınız.
+            Ardından Mail API isteklerinizin başlığına (header) aşağıdaki parametreyi ekleyin:
           </p>
-          <div className="bg-gray-950 p-4 rounded-lg border border-gray-800">
+          <div className="bg-gray-950 p-4 rounded-lg border border-gray-800 mb-4">
             <code className="text-xs text-yellow-400">Authorization: Bearer YOUR_ADMIN_TOKEN</code>
+          </div>
+          <div className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
+            <div className="px-4 py-2 bg-gray-800 border-b border-gray-700">
+              <span className="text-[10px] text-gray-400 uppercase font-bold tracking-widest">Token Alma İsteği (POST /api/auth/login)</span>
+            </div>
+            <pre className="p-4 text-xs text-cyan-300 overflow-x-auto leading-relaxed">
+{`{
+  "email": "admin_emailiniz@cerilas.com",
+  "password": "sifreniz"
+}`}
+            </pre>
           </div>
         </section>
 
