@@ -32,6 +32,36 @@ router.put('/settings', authMiddleware, async (req, res) => {
   }
 });
 
+// Get Headers from Netgsm
+router.post('/headers', authMiddleware, async (req, res) => {
+  try {
+    const { netgsm_usercode, netgsm_password } = req.body;
+    if (!netgsm_usercode || !netgsm_password) {
+      return res.status(400).json({ error: 'Kullanıcı adı ve şifre gereklidir.' });
+    }
+
+    const authString = Buffer.from(`${netgsm_usercode}:${netgsm_password}`).toString('base64');
+    
+    const response = await fetch('https://api.netgsm.com.tr/sms/rest/v2/msgheader', {
+      method: 'GET',
+      headers: {
+        'Authorization': `Basic ${authString}`
+      }
+    });
+
+    const data = await response.json();
+
+    if (data.code === "00" && Array.isArray(data.msgheaders)) {
+      res.json({ headers: data.msgheaders });
+    } else {
+      res.status(400).json({ error: data.description || 'Başlıklar alınamadı.', code: data.code });
+    }
+  } catch (err) {
+    console.error('Get headers error:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 /**
  * POST /api/sms/send
  * 

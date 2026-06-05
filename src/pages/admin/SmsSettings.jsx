@@ -8,6 +8,8 @@ export default function SmsSettings() {
     netgsm_header: '',
     is_active: true
   });
+  const [availableHeaders, setAvailableHeaders] = useState([]);
+  const [fetchingHeaders, setFetchingHeaders] = useState(false);
   const [saving, setSaving] = useState(false);
   const [status, setStatus] = useState(null);
 
@@ -18,6 +20,36 @@ export default function SmsSettings() {
       }
     }).catch(err => console.error('Error fetching sms settings:', err));
   }, []);
+
+  const handleFetchHeaders = async () => {
+    if (!settings.netgsm_usercode || !settings.netgsm_password) {
+      setStatus({ success: false, message: 'Önce Netgsm kullanıcı adı ve şifrenizi girmelisiniz.' });
+      setTimeout(() => setStatus(null), 3000);
+      return;
+    }
+    setFetchingHeaders(true);
+    setStatus(null);
+    try {
+      const res = await api.getSmsHeaders({ 
+        netgsm_usercode: settings.netgsm_usercode, 
+        netgsm_password: settings.netgsm_password 
+      });
+      if (res.headers && res.headers.length > 0) {
+        setAvailableHeaders(res.headers);
+        if (!res.headers.includes(settings.netgsm_header)) {
+          setSettings({ ...settings, netgsm_header: res.headers[0] });
+        }
+        setStatus({ success: true, message: 'Başlıklar başarıyla çekildi!' });
+      } else {
+        setStatus({ success: false, message: 'Hesabınıza tanımlı bir başlık bulunamadı.' });
+      }
+    } catch (err) {
+      setStatus({ success: false, message: err.message || 'Başlıklar çekilirken hata oluştu.' });
+    } finally {
+      setFetchingHeaders(false);
+      setTimeout(() => setStatus(null), 3000);
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -71,16 +103,40 @@ export default function SmsSettings() {
           </div>
 
           <div className="mb-6">
-            <label className="block text-sm font-medium text-gray-400 mb-2">Gönderici Başlığı (Mesaj Başlığı)</label>
-            <input
-              type="text"
-              required
-              value={settings.netgsm_header || ''}
-              onChange={(e) => setSettings({ ...settings, netgsm_header: e.target.value })}
-              className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-cyan-500"
-              placeholder="Örn: CERILAS AS"
-              maxLength={11}
-            />
+            <div className="flex justify-between items-end mb-2">
+              <label className="block text-sm font-medium text-gray-400">Gönderici Başlığı (Mesaj Başlığı)</label>
+              <button
+                type="button"
+                onClick={handleFetchHeaders}
+                disabled={fetchingHeaders || !settings.netgsm_usercode || !settings.netgsm_password}
+                className="text-xs bg-cyan-600/20 hover:bg-cyan-600/30 text-cyan-400 border border-cyan-500/30 px-3 py-1 rounded transition-all disabled:opacity-50"
+              >
+                {fetchingHeaders ? 'Sorgulanıyor...' : 'Başlıkları Netgsm\'den Getir'}
+              </button>
+            </div>
+            
+            {availableHeaders.length > 0 ? (
+              <select
+                required
+                value={settings.netgsm_header || ''}
+                onChange={(e) => setSettings({ ...settings, netgsm_header: e.target.value })}
+                className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-cyan-500"
+              >
+                {availableHeaders.map((h, i) => (
+                  <option key={i} value={h}>{h}</option>
+                ))}
+              </select>
+            ) : (
+              <input
+                type="text"
+                required
+                value={settings.netgsm_header || ''}
+                onChange={(e) => setSettings({ ...settings, netgsm_header: e.target.value })}
+                className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                placeholder="Örn: CERILAS AS (Veya yukarıdaki butonla otomatik getirin)"
+                maxLength={11}
+              />
+            )}
             <p className="text-xs text-gray-500 mt-2">Netgsm panelinde tanımlı ve onaylı bir mesaj başlığı olmalıdır (Maksimum 11 karakter).</p>
           </div>
 
