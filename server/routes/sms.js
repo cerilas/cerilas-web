@@ -71,20 +71,24 @@ router.post('/headers', authMiddleware, async (req, res) => {
  * 
  * Body:
  * {
- *   "messages": [
- *       {
- *           "msg": "test mesajı",
- *           "no": "510xxxxxxx"
- *       }
- *   ]
+ *   "msg": "Doğrulama kodunuz: 1234",
+ *   "no": "510xxxxxxx"
  * }
  */
 router.post('/send', authMiddleware, async (req, res) => {
   try {
-    const { messages } = req.body;
+    const { msg, no, messages } = req.body;
+    
+    // Geriye dönük uyumluluk veya dizi olarak gelme ihtimali
+    let messageBody = msg;
+    let phoneNumber = no;
+    if (messages && Array.isArray(messages) && messages.length > 0) {
+      messageBody = messages[0].msg;
+      phoneNumber = messages[0].no;
+    }
 
-    if (!messages || !Array.isArray(messages) || messages.length === 0) {
-      return res.status(400).json({ error: 'messages array is required' });
+    if (!messageBody || !phoneNumber) {
+      return res.status(400).json({ error: 'msg (mesaj) ve no (numara) alanları gereklidir.' });
     }
 
     const settingsResult = await pool.query('SELECT * FROM sms_settings LIMIT 1');
@@ -105,16 +109,11 @@ router.post('/send', authMiddleware, async (req, res) => {
 
     const netgsmPayload = {
       msgheader: settings.netgsm_header,
-      messages: messages.map(m => ({
-        msg: m.msg,
-        no: m.no.replace(/\D/g, '') // remove non-digits
-      })),
-      encoding: "TR",
-      iysfilter: "0",
-      appname: "cerilas"
+      msg: messageBody,
+      no: phoneNumber.replace(/\D/g, '') // remove non-digits
     };
 
-    const response = await fetch('https://api.netgsm.com.tr/sms/rest/v2/send', {
+    const response = await fetch('https://api.netgsm.com.tr/sms/rest/v2/otp', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -125,7 +124,6 @@ router.post('/send', authMiddleware, async (req, res) => {
 
     const data = await response.json();
     
-    // Netgsm responds with {"code": "00", "jobid": "...", "description": "queued"} on success
     if (data.code === "00") {
       return res.json({ success: true, netgsmResponse: data });
     } else {

@@ -14,9 +14,8 @@ export default function SmsApiDocs() {
     setStatus(null);
     try {
       await api.sendSms({
-        messages: [
-          { msg: testForm.msg, no: testForm.no }
-        ]
+        msg: testForm.msg,
+        no: testForm.no
       });
       setStatus({ success: true, message: 'Test SMS başarıyla gönderildi (veya kuyruğa eklendi)!' });
     } catch (err) {
@@ -54,12 +53,8 @@ export default function SmsApiDocs() {
             </div>
             <pre className="p-4 text-xs text-cyan-300 overflow-x-auto leading-relaxed">
 {`{
-  "messages": [
-    {
-      "msg": "Gönderilecek mesaj metni",
-      "no": "510xxxxxxx"  // Hedef numara (başında 0 olmadan)
-    }
-  ]
+  "msg": "Gönderilecek mesaj metni",
+  "no": "510xxxxxxx"  // Hedef numara (başında 0 olmadan)
 }`}
             </pre>
           </div>
@@ -155,9 +150,8 @@ export default function SmsApiDocs() {
     'Authorization': 'Bearer ' + token
   },
   body: JSON.stringify({
-    messages: [
-      { msg: 'Doğrulama kodunuz: 123456', no: '5551234567' }
-    ]
+    msg: 'Doğrulama kodunuz: 123456',
+    no: '5551234567'
   })
 })
 .then(res => res.json())
