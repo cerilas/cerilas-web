@@ -106,6 +106,16 @@ router.put('/settings', authMiddleware, async (req, res) => {
 
 /**
  * POST /api/mail/send
+ * 
+ * Authentication:
+ * Requires a valid JWT token in the Authorization header.
+ * Header: `Authorization: Bearer <token>`
+ * 
+ * To get a token:
+ * POST /api/auth/login
+ * Body: { "email": "admin_email", "password": "admin_password" }
+ * Returns: { "token": "...", "user": { ... } }
+ * 
  * Body:
  * {
  *   senderId: number,
