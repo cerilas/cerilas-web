@@ -299,7 +299,7 @@ router.get('/cron/opportunities-digest', async (req, res) => {
     const sender = senderResult.rows[0];
 
     // Fetch data
-    const oppResult = await pool.query("SELECT * FROM opportunities WHERE status != 'Arşiv'");
+    const oppResult = await pool.query("SELECT * FROM opportunities");
     const payResult = await pool.query("SELECT * FROM opportunity_payments");
     
     // Top 5 urgent tasks
@@ -331,9 +331,13 @@ router.get('/cron/opportunities-digest', async (req, res) => {
     });
 
     const groupedExpected = {};
+    const groupedAllTimeExpected = {};
     opps.forEach(o => {
+      const val = parseFloat(o.budget || 0);
+      groupedAllTimeExpected[o.currency] = (groupedAllTimeExpected[o.currency] || 0) + val;
+      
       if (o.status !== 'Pasif' && o.status !== 'Arşiv') {
-         groupedExpected[o.currency] = (groupedExpected[o.currency] || 0) + parseFloat(o.budget || 0);
+         groupedExpected[o.currency] = (groupedExpected[o.currency] || 0) + val;
       }
     });
 
@@ -341,6 +345,12 @@ router.get('/cron/opportunities-digest', async (req, res) => {
       const keys = Object.keys(obj);
       if (keys.length === 0) return '0 TRY';
       return keys.map(k => `<div style="margin-bottom: 4px;">${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 }).format(obj[k])} <span style="font-size: 13px; color: #9ca3af;">${k}</span></div>`).join('');
+    };
+
+    const formatCurrInline = (obj) => {
+      const keys = Object.keys(obj);
+      if (keys.length === 0) return '0 TRY';
+      return keys.map(k => `${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 }).format(obj[k])} ${k}`).join(' | ');
     };
 
     const title = 'Genel İhtimal ve Proje Özeti';
@@ -363,18 +373,65 @@ router.get('/cron/opportunities-digest', async (req, res) => {
       todosHtml = `<div style="color: #9ca3af; font-size: 14px; padding: 10px;">Harika! Bekleyen görev bulunmuyor.</div>`;
     }
 
-    const content = `
-      <div style="font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #f3f4f6; background-color: #111827; padding: 20px; border-radius: 12px;">
-        
+    const html = `<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    @media screen and (max-width: 600px) {
+      .stack-column {
+        display: block !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+      }
+      .stack-table {
+        display: block !important;
+        width: 100% !important;
+      }
+      .stack-margin {
+        margin-bottom: 12px !important;
+      }
+      .stats-container {
+        border-spacing: 0 !important;
+        margin-left: 0 !important;
+      }
+      .stats-td {
+        display: block !important;
+        width: 100% !important;
+        margin-bottom: 15px !important;
+      }
+      .fin-border {
+        border-right: none !important;
+        border-bottom: 1px solid #374151 !important;
+        border-radius: 8px 8px 0 0 !important;
+      }
+      .fin-radius {
+        border-radius: 0 0 8px 8px !important;
+      }
+      .padding-mobile {
+        padding: 20px 15px !important;
+      }
+    }
+  </style>
+</head>
+<body style="margin: 0; padding: 0; background-color: #030712; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%;">
+  <div style="background-color: #030712; padding: 40px 15px; width: 100%; box-sizing: border-box;">
+    <div style="max-width: 600px; margin: 0 auto;">
+      <div style="text-align: center; margin-bottom: 30px;">
+        <h1 style="color: #fff; margin: 0; font-size: 24px; letter-spacing: 1px; font-family: 'Inter', sans-serif;">CERİLAS</h1>
+        <p style="color: #9ca3af; margin: 5px 0 0 0; font-size: 14px; font-family: 'Inter', sans-serif;">Yüksek Teknoloji</p>
+      </div>
+      
+      <div class="padding-mobile" style="font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #f3f4f6; background-color: #111827; padding: 30px; border-radius: 12px;">
         <!-- Header text -->
-        <p style="font-size: 15px; color: #9ca3af; margin-bottom: 30px;">
+        <p style="font-size: 15px; color: #9ca3af; margin-top: 0; margin-bottom: 30px; line-height: 1.5;">
           Merhaba, sistemde kayıtlı olan projelerin ve ihtimallerin tüm zamanlara ait (All Time) istatistikleri ve acil bekleyen görevleriniz aşağıdadır.
         </p>
 
         <!-- Top 5 Tasks -->
         <div style="margin-bottom: 35px;">
           <h3 style="margin-top: 0; color: #22d3ee; font-size: 18px; margin-bottom: 15px; border-bottom: 1px solid #374151; padding-bottom: 10px; display: flex; align-items: center; gap: 8px;">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle;"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
             <span style="vertical-align: middle;">Öncelikli Görevler (İlk 5)</span>
           </h3>
           ${todosHtml}
@@ -382,17 +439,17 @@ router.get('/cron/opportunities-digest', async (req, res) => {
         </div>
 
         <!-- Quick Stats Grid -->
-        <table style="width: 100%; border-collapse: separate; border-spacing: 12px 0; margin-bottom: 30px; margin-left: -12px;">
+        <table class="stack-table stats-container" style="width: 100%; border-collapse: separate; border-spacing: 12px 0; margin-bottom: 30px; margin-left: -12px;">
           <tr>
-            <td style="padding: 20px; background: #1f2937; border-radius: 12px; width: 33%; border-top: 3px solid #10b981; text-align: center;">
+            <td class="stats-td" style="padding: 20px; background: #1f2937; border-radius: 12px; width: 33%; border-top: 3px solid #10b981; text-align: center; box-sizing: border-box;">
               <div style="font-size: 11px; color: #9ca3af; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;">Aktif Projeler</div>
               <div style="font-size: 28px; color: #f3f4f6; font-weight: 800;">${activeCount}</div>
             </td>
-            <td style="padding: 20px; background: #1f2937; border-radius: 12px; width: 33%; border-top: 3px solid #3b82f6; text-align: center;">
+            <td class="stats-td" style="padding: 20px; background: #1f2937; border-radius: 12px; width: 33%; border-top: 3px solid #3b82f6; text-align: center; box-sizing: border-box;">
               <div style="font-size: 11px; color: #9ca3af; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;">Tamamlanan</div>
               <div style="font-size: 28px; color: #f3f4f6; font-weight: 800;">${completedCount}</div>
             </td>
-            <td style="padding: 20px; background: #1f2937; border-radius: 12px; width: 33%; border-top: 3px solid #ef4444; text-align: center;">
+            <td class="stats-td" style="padding: 20px; background: #1f2937; border-radius: 12px; width: 33%; border-top: 3px solid #ef4444; text-align: center; box-sizing: border-box;">
               <div style="font-size: 11px; color: #9ca3af; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;">Pasif (İptal)</div>
               <div style="font-size: 28px; color: #f3f4f6; font-weight: 800;">${passiveCount}</div>
             </td>
@@ -400,32 +457,33 @@ router.get('/cron/opportunities-digest', async (req, res) => {
         </table>
 
         <!-- Financial Summary -->
-        <div style="background: #1f2937; border-radius: 12px; padding: 25px; margin-bottom: 30px; border: 1px solid #374151;">
+        <div class="padding-mobile" style="background: #1f2937; border-radius: 12px; padding: 25px; margin-bottom: 30px; border: 1px solid #374151;">
           <h3 style="margin-top: 0; color: #10b981; font-size: 16px; margin-bottom: 20px; display: flex; align-items: center; gap: 8px;">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle;"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
             <span style="vertical-align: middle;">Tüm Zamanlar Finansal Özet</span>
           </h3>
-          <table style="width: 100%; border-collapse: collapse;">
+          <table class="stack-table" style="width: 100%; border-collapse: collapse;">
             <tr>
-              <td style="padding: 15px; background: #111827; border-radius: 8px 0 0 8px; width: 50%; border-right: 1px solid #374151;">
-                <div style="color: #9ca3af; font-size: 12px; margin-bottom: 5px;">Gerçekleşen Tahsilat (Ödenen)</div>
+              <td class="stack-column fin-border" style="padding: 15px; background: #111827; border-radius: 8px 0 0 8px; width: 50%; border-right: 1px solid #374151; vertical-align: top;">
+                <div style="color: #9ca3af; font-size: 12px; margin-bottom: 8px;">Gerçekleşen Tahsilat (Ödenen)</div>
                 <div style="color: #10b981; font-size: 16px; font-weight: 700;">${formatCurr(groupedReceived)}</div>
               </td>
-              <td style="padding: 15px; background: #111827; border-radius: 0 8px 8px 0; width: 50%;">
-                <div style="color: #9ca3af; font-size: 12px; margin-bottom: 5px;">Bekleyen Tahsilat Hacmi (Aktif)</div>
+              <td class="stack-column fin-radius" style="padding: 15px; background: #111827; border-radius: 0 8px 8px 0; width: 50%; vertical-align: top;">
+                <div style="color: #9ca3af; font-size: 12px; margin-bottom: 8px;">Bekleyen Tahsilat Hacmi (Aktif)</div>
                 <div style="color: #22d3ee; font-size: 16px; font-weight: 700;">${formatCurr(groupedExpected)}</div>
               </td>
             </tr>
           </table>
+          <div style="margin-top: 15px; font-size: 11px; color: #4b5563; text-align: right;">
+            Sisteme girilmiş tüm projelerin (arşiv ve pasifler dahil) brüt bütçe hacmi: ${formatCurrInline(groupedAllTimeExpected)}
+          </div>
         </div>
 
         <!-- Detail Stats -->
-        <div style="background: #1f2937; border-radius: 12px; padding: 25px; border: 1px solid #374151;">
+        <div class="padding-mobile" style="background: #1f2937; border-radius: 12px; padding: 25px; border: 1px solid #374151;">
           <h3 style="margin-top: 0; color: #e5e7eb; font-size: 16px; margin-bottom: 15px; border-bottom: 1px solid #374151; padding-bottom: 10px; display: flex; align-items: center; gap: 8px;">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle;"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"></path><path d="M22 12A10 10 0 0 0 12 2v10z"></path></svg>
             <span style="vertical-align: middle;">Aktivite Detayları</span>
           </h3>
-          <table style="width: 100%; font-size: 14px;">
+          <table style="width: 100%; font-size: 14px; border-collapse: collapse;">
             <tr>
               <td style="padding: 12px 0; color: #9ca3af;">Kesinleşen Aktif Projeler:</td>
               <td style="padding: 12px 0; font-weight: 700; text-align: right; color: #10b981;">${certainCount}</td>
@@ -437,25 +495,17 @@ router.get('/cron/opportunities-digest', async (req, res) => {
           </table>
         </div>
       </div>
-    `;
 
-    const html = `
-      <div style="background-color: #030712; padding: 40px 20px; width: 100%; box-sizing: border-box;">
-        <div style="max-width: 600px; margin: 0 auto;">
-          <div style="text-align: center; margin-bottom: 30px;">
-            <h1 style="color: #fff; margin: 0; font-size: 24px; letter-spacing: 1px; font-family: sans-serif;">CERİLAS</h1>
-            <p style="color: #9ca3af; margin: 5px 0 0 0; font-size: 14px; font-family: sans-serif;">Yüksek Teknoloji</p>
-          </div>
-          ${content}
-          <div style="text-align: center; margin-top: 30px; font-family: sans-serif;">
-            <a href="${process.env.FRONTEND_URL || 'https://www.cerilas.com'}/admin" style="display: inline-block; background-color: #0891b2; color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 14px;">
-              Sisteme Giriş Yap
-            </a>
-            <p style="margin-top: 20px; font-size: 12px; color: #4b5563;">Bu otomatik bir sistem bilgilendirmesidir.</p>
-          </div>
-        </div>
+      <div style="text-align: center; margin-top: 30px; font-family: 'Inter', sans-serif;">
+        <a href="${process.env.FRONTEND_URL || 'https://www.cerilas.com'}/admin" style="display: inline-block; background-color: #0891b2; color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 14px;">
+          Sisteme Giriş Yap
+        </a>
+        <p style="margin-top: 20px; font-size: 12px; color: #4b5563;">Bu otomatik bir sistem bilgilendirmesidir.</p>
       </div>
-    `;
+    </div>
+  </div>
+</body>
+</html>`;
 
     const transporter = nodemailer.createTransport({
       host: sender.host,
