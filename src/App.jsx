@@ -37,6 +37,7 @@ import SmsSettings from "./pages/admin/SmsSettings";
 import SmsApiDocs from "./pages/admin/SmsApiDocs";
 import OpportunitiesList from "./pages/admin/OpportunitiesList";
 import OpportunityDetail from "./pages/admin/OpportunityDetail";
+import { Toaster } from 'react-hot-toast';
 
 function Layout({ children }) {
   return (
@@ -53,6 +54,19 @@ export default function App() {
     <LanguageProvider>
       <BrowserRouter>
         <ScrollToTop />
+        <Toaster position="top-right" toastOptions={{
+          style: {
+            background: '#1f2937',
+            color: '#fff',
+            border: '1px solid #374151',
+          },
+          success: {
+            iconTheme: {
+              primary: '#22c55e',
+              secondary: '#fff',
+            },
+          },
+        }} />
         <Routes>
           {/* Admin routes - no Navbar/Footer */}
           <Route path="/admin">

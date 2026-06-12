@@ -182,5 +182,6 @@ export const api = {
   addOpportunityTodo: (id, data) => request(`/opportunities/${id}/todos`, { method: 'POST', body: JSON.stringify(data) }),
   toggleOpportunityTodo: (id, todoId, is_completed) => request(`/opportunities/${id}/todos/${todoId}`, { method: 'PATCH', body: JSON.stringify({ is_completed }) }),
   deleteOpportunityTodo: (id, todoId) => request(`/opportunities/${id}/todos/${todoId}`, { method: 'DELETE' }),
+  reorderOpportunityTodos: (id, items) => request(`/opportunities/${id}/todos/reorder/bulk`, { method: 'PATCH', body: JSON.stringify({ items }) }),
   getExchangeRates: () => request('/opportunities/rates'),
 };

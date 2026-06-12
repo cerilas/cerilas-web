@@ -30,10 +30,59 @@ router.get('/rates', authMiddleware, async (req, res) => {
   }
 });
 
+const fetchHistoricalRates = async (dateString) => {
+  try {
+    let dateObj = new Date(dateString);
+    if (isNaN(dateObj.getTime())) dateObj = new Date();
+
+    for (let i = 0; i < 5; i++) {
+      const year = dateObj.getFullYear();
+      const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+      const day = String(dateObj.getDate()).padStart(2, '0');
+      
+      const isToday = (new Date()).toISOString().slice(0, 10) === dateObj.toISOString().slice(0, 10);
+      let url = `https://www.tcmb.gov.tr/kurlar/${year}${month}/${day}${month}${year}.xml`;
+      if (isToday) {
+        url = 'https://www.tcmb.gov.tr/kurlar/today.xml';
+      }
+
+      const res = await fetch(url);
+      if (res.ok) {
+        const xml = await res.text();
+        const extractRate = (currencyCode) => {
+          const regex = new RegExp(`<Currency[^>]*CurrencyCode="${currencyCode}"[^>]*>[\\s\\S]*?<BanknoteSelling>([\\d.]+)</BanknoteSelling>`);
+          const match = xml.match(regex);
+          return match ? parseFloat(match[1]) : null;
+        };
+        const usd = extractRate('USD');
+        const eur = extractRate('EUR');
+        if (usd || eur) {
+          return { TRY: 1, USD: usd || 35, EUR: eur || 38 };
+        }
+      }
+      dateObj.setDate(dateObj.getDate() - 1);
+    }
+  } catch (err) {
+    console.error('Historical rates error:', err);
+  }
+  return { TRY: 1, USD: 35, EUR: 38 };
+};
+
 // Get all opportunities
 router.get('/', authMiddleware, async (req, res) => {
   try {
-    const result = await pool.query('SELECT * FROM opportunities ORDER BY created_at DESC');
+    const query = `
+      SELECT o.*, 
+        COALESCE(
+          (SELECT json_agg(json_build_object('id', op.id, 'amount', op.amount, 'currency', op.currency, 'payment_date', op.payment_date, 'exchange_rates', op.exchange_rates)) 
+           FROM opportunity_payments op WHERE op.opportunity_id = o.id), 
+          '[]'::json
+        ) as payments,
+        (SELECT COUNT(*)::int FROM opportunity_todos ot WHERE ot.opportunity_id = o.id AND ot.is_completed = false) as active_todos
+      FROM opportunities o 
+      ORDER BY o.created_at DESC
+    `;
+    const result = await pool.query(query);
     res.json(result.rows);
   } catch (err) {
     console.error('Get opportunities error:', err);
@@ -49,7 +98,7 @@ router.get('/:id', authMiddleware, async (req, res) => {
     if (oppResult.rows.length === 0) return res.status(404).json({ error: 'Not found' });
 
     const paymentsResult = await pool.query('SELECT * FROM opportunity_payments WHERE opportunity_id = $1 ORDER BY payment_date DESC', [id]);
-    const todosResult = await pool.query('SELECT * FROM opportunity_todos WHERE opportunity_id = $1 ORDER BY is_completed ASC, deadline ASC', [id]);
+    const todosResult = await pool.query('SELECT * FROM opportunity_todos WHERE opportunity_id = $1 ORDER BY sort_order ASC, created_at ASC', [id]);
 
     const opportunity = oppResult.rows[0];
     opportunity.payments = paymentsResult.rows;
@@ -67,19 +116,19 @@ router.post('/', authMiddleware, async (req, res) => {
   try {
     const {
       name, description, application_url, drive_url,
-      focus_rating, probability_rating, total_income, currency,
+      focus_rating, probability_rating, institution, application_point, application_point_other, total_income, currency, status,
       application_date, expected_end_date
     } = req.body;
 
     const result = await pool.query(
       `INSERT INTO opportunities (
         name, description, application_url, drive_url,
-        focus_rating, probability_rating, total_income, currency,
+        focus_rating, probability_rating, institution, application_point, application_point_other, total_income, currency, status,
         application_date, expected_end_date
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *`,
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14) RETURNING *`,
       [
         name, description, application_url, drive_url,
-        focus_rating || 0, probability_rating || 0, total_income || 0, currency || 'TRY',
+        focus_rating || 0, probability_rating || 0, institution || null, application_point || null, application_point_other || null, total_income || 0, currency || 'TRY', status || 'Aktif',
         application_date || null, expected_end_date || null
       ]
     );
@@ -96,20 +145,21 @@ router.put('/:id', authMiddleware, async (req, res) => {
     const { id } = req.params;
     const {
       name, description, application_url, drive_url,
-      focus_rating, probability_rating, total_income, currency,
+      focus_rating, probability_rating, institution, application_point, application_point_other, total_income, currency, status,
       application_date, expected_end_date
     } = req.body;
 
     const result = await pool.query(
       `UPDATE opportunities SET
         name = $1, description = $2, application_url = $3, drive_url = $4,
-        focus_rating = $5, probability_rating = $6, total_income = $7, currency = $8,
-        application_date = $9, expected_end_date = $10, updated_at = NOW()
-       WHERE id = $11 RETURNING *`,
+        focus_rating = $5, probability_rating = $6, institution = $7, application_point = $8, application_point_other = $9, total_income = $10, currency = $11, status = $12,
+        application_date = $13, expected_end_date = $14, updated_at = NOW()
+      WHERE id = $15 RETURNING *`,
       [
         name, description, application_url, drive_url,
-        focus_rating, probability_rating, total_income, currency,
-        application_date || null, expected_end_date || null, id
+        focus_rating || 0, probability_rating || 0, institution || null, application_point || null, application_point_other || null, total_income || 0, currency || 'TRY', status || 'Aktif',
+        application_date || null, expected_end_date || null,
+        id
       ]
     );
 
@@ -141,10 +191,12 @@ router.post('/:id/payments', authMiddleware, async (req, res) => {
     
     if (!amount || !payment_date) return res.status(400).json({ error: 'Amount and payment_date required' });
 
+    const exchangeRates = await fetchHistoricalRates(payment_date);
+
     const result = await pool.query(
-      `INSERT INTO opportunity_payments (opportunity_id, amount, currency, payment_date)
-       VALUES ($1, $2, $3, $4) RETURNING *`,
-      [id, amount, currency || 'TRY', payment_date]
+      `INSERT INTO opportunity_payments (opportunity_id, amount, currency, payment_date, exchange_rates)
+       VALUES ($1, $2, $3, $4, $5) RETURNING *`,
+      [id, amount, currency || 'TRY', payment_date, JSON.stringify(exchangeRates)]
     );
     res.status(201).json(result.rows[0]);
   } catch (err) {
@@ -198,6 +250,30 @@ router.patch('/:id/todos/:todoId', authMiddleware, async (req, res) => {
     res.json(result.rows[0]);
   } catch (err) {
     console.error('Toggle todo error:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Reorder Todos
+router.patch('/:id/todos/reorder/bulk', authMiddleware, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { items } = req.body; // Array of { id: todo_id, sort_order: index }
+    
+    // Begin transaction
+    await pool.query('BEGIN');
+    for (const item of items) {
+      await pool.query(
+        'UPDATE opportunity_todos SET sort_order = $1 WHERE id = $2 AND opportunity_id = $3',
+        [item.sort_order, item.id, id]
+      );
+    }
+    await pool.query('COMMIT');
+    
+    res.json({ success: true });
+  } catch (err) {
+    await pool.query('ROLLBACK');
+    console.error('Reorder todos error:', err);
     res.status(500).json({ error: err.message });
   }
 });

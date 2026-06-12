@@ -205,8 +205,12 @@ app.listen(PORT, async () => {
         drive_url TEXT,
         focus_rating INTEGER DEFAULT 0,
         probability_rating INTEGER DEFAULT 0,
+        institution VARCHAR(100),
+        application_point VARCHAR(100),
+        application_point_other VARCHAR(100),
         total_income NUMERIC(15, 2) DEFAULT 0,
         currency VARCHAR(10) DEFAULT 'TRY',
+        status VARCHAR(50) DEFAULT 'Aktif',
         application_date DATE,
         expected_end_date DATE,
         created_at TIMESTAMP DEFAULT NOW(),
@@ -230,6 +234,13 @@ app.listen(PORT, async () => {
         deadline DATE,
         created_at TIMESTAMP DEFAULT NOW()
       );
+
+      ALTER TABLE opportunity_todos ADD COLUMN IF NOT EXISTS sort_order INTEGER DEFAULT 0;
+      ALTER TABLE opportunity_payments ADD COLUMN IF NOT EXISTS exchange_rates JSONB;
+      ALTER TABLE opportunities ADD COLUMN IF NOT EXISTS status VARCHAR(50) DEFAULT 'Aktif';
+      ALTER TABLE opportunities ADD COLUMN IF NOT EXISTS institution VARCHAR(100);
+      ALTER TABLE opportunities ADD COLUMN IF NOT EXISTS application_point VARCHAR(100);
+      ALTER TABLE opportunities ADD COLUMN IF NOT EXISTS application_point_other VARCHAR(100);
     `);
     await pool.query(`
       CREATE TABLE IF NOT EXISTS job_listings (

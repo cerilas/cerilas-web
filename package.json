@@ -13,11 +13,13 @@
     "start": "node server/index.js"
   },
   "dependencies": {
+    "@hello-pangea/dnd": "^18.0.1",
     "@react-three/fiber": "^9.3.0",
     "@react-three/postprocessing": "^3.0.4",
     "archiver": "^7.0.1",
     "bcryptjs": "^3.0.3",
     "cors": "^2.8.6",
+    "date-fns": "^4.4.0",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "framer-motion": "^12.38.0",
@@ -27,9 +29,12 @@
     "pg": "^8.20.0",
     "postprocessing": "^6.36.0",
     "react": "^19.2.4",
+    "react-datepicker": "^9.1.0",
     "react-dom": "^19.2.4",
     "react-easy-crop": "^5.5.7",
+    "react-hot-toast": "^2.6.0",
     "react-router-dom": "^7.14.1",
+    "recharts": "^3.8.1",
     "sharp": "^0.34.5",
     "three": "^0.167.1"
   },

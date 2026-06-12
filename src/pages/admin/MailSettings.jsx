@@ -11,7 +11,9 @@ export default function MailSettings() {
     contact_active: false,
     contact_recipients: '',
     job_active: false,
-    job_recipients: ''
+    job_recipients: '',
+    opp_digest_active: false,
+    opp_digest_recipients: ''
   });
   const [senders, setSenders] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -188,6 +190,46 @@ export default function MailSettings() {
                   value={settings.job_recipients || ''}
                   onChange={(e) => setSettings({ ...settings, job_recipients: e.target.value })}
                 />
+              </div>
+            )}
+          </div>
+
+          {/* İhtimaller Bildirimi */}
+          <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 transition-all hover:border-gray-700">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-cyan-500/10 text-cyan-400 flex items-center justify-center">
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="text-white font-semibold">İhtimaller İstatistik Bildirimi</h3>
+                  <p className="text-xs text-gray-500">Cron servisi tetiklendiğinde özet rapor gönder.</p>
+                </div>
+              </div>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input 
+                  type="checkbox" 
+                  className="sr-only peer" 
+                  checked={settings.opp_digest_active}
+                  onChange={(e) => setSettings({ ...settings, opp_digest_active: e.target.checked })}
+                />
+                <div className="w-11 h-6 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-cyan-500"></div>
+              </label>
+            </div>
+            
+            {settings.opp_digest_active && (
+              <div className="animate-in fade-in slide-in-from-top-2 duration-300">
+                <label className="block text-xs font-medium text-gray-500 mb-2 uppercase tracking-wider">Rapor Gidecek Adresler</label>
+                <input
+                  type="text"
+                  placeholder="deniz@cerilas.com"
+                  className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                  value={settings.opp_digest_recipients || ''}
+                  onChange={(e) => setSettings({ ...settings, opp_digest_recipients: e.target.value })}
+                />
+                <p className="mt-2 text-xs text-gray-500">Bu bildirim Cron URL üzerinden tetiklenir: <code>{window.location.origin}/api/mail/cron/opportunities-digest?token=cerilas-cron-secret-123</code></p>
               </div>
             )}
           </div>

@@ -84,16 +84,18 @@ router.put('/settings', authMiddleware, async (req, res) => {
       sender_id, 
       newsletter_active, newsletter_recipients,
       contact_active, contact_recipients,
-      job_active, job_recipients
+      job_active, job_recipients,
+      opp_digest_active, opp_digest_recipients
     } = req.body;
 
     const result = await pool.query(
       `UPDATE mail_settings SET
         sender_id=$1, newsletter_active=$2, newsletter_recipients=$3,
         contact_active=$4, contact_recipients=$5,
-        job_active=$6, job_recipients=$7, updated_at=NOW()
+        job_active=$6, job_recipients=$7,
+        opp_digest_active=$8, opp_digest_recipients=$9, updated_at=NOW()
        RETURNING *`,
-      [sender_id, newsletter_active, newsletter_recipients, contact_active, contact_recipients, job_active, job_recipients]
+      [sender_id, newsletter_active, newsletter_recipients, contact_active, contact_recipients, job_active, job_recipients, opp_digest_active, opp_digest_recipients]
     );
     res.json(result.rows[0]);
   } catch (err) {
@@ -274,5 +276,206 @@ export async function sendNotificationMail(type, data) {
     console.error('sendNotificationMail error:', err);
   }
 }
+
+// --- CRON ENDPOINTS ---
+
+router.get('/cron/opportunities-digest', async (req, res) => {
+  try {
+    const token = req.query.token;
+    if (token !== 'cerilas-cron-secret-123') {
+      return res.status(401).json({ error: 'Unauthorized. Invalid token.' });
+    }
+
+    const settingsResult = await pool.query('SELECT * FROM mail_settings LIMIT 1');
+    if (settingsResult.rows.length === 0) return res.status(404).json({ error: 'No settings' });
+    const s = settingsResult.rows[0];
+
+    if (!s.opp_digest_active || !s.opp_digest_recipients || !s.sender_id) {
+      return res.json({ message: 'Digest not active or missing configuration' });
+    }
+
+    const senderResult = await pool.query('SELECT * FROM email_senders WHERE id = $1', [s.sender_id]);
+    if (senderResult.rows.length === 0) return res.status(404).json({ error: 'Sender not found' });
+    const sender = senderResult.rows[0];
+
+    // Fetch data
+    const oppResult = await pool.query("SELECT * FROM opportunities WHERE status != 'Arşiv'");
+    const payResult = await pool.query("SELECT * FROM opportunity_payments");
+    
+    // Top 5 urgent tasks
+    const todosResult = await pool.query(`
+      SELECT t.*, o.name as opp_name 
+      FROM opportunity_todos t
+      JOIN opportunities o ON t.opportunity_id = o.id
+      WHERE t.is_completed = false
+      ORDER BY t.deadline ASC NULLS LAST
+      LIMIT 5
+    `);
+    const allTodosCountResult = await pool.query("SELECT count(*) as total FROM opportunity_todos WHERE is_completed = false");
+
+    const opps = oppResult.rows;
+    const payments = payResult.rows;
+    const topTodos = todosResult.rows;
+    const totalTodosCount = parseInt(allTodosCountResult.rows[0].total);
+
+    // Stats
+    const activeCount = opps.filter(o => o.status === 'Aktif').length;
+    const completedCount = opps.filter(o => o.status === 'Tamamlandı').length;
+    const certainCount = opps.filter(o => o.probability === 'Kesinleşti' && o.status === 'Aktif').length;
+    const highCount = opps.filter(o => o.probability === 'Yüksek' && o.status === 'Aktif').length;
+    const passiveCount = opps.filter(o => o.status === 'Pasif').length;
+
+    const groupedReceived = {};
+    payments.forEach(p => {
+      groupedReceived[p.currency] = (groupedReceived[p.currency] || 0) + parseFloat(p.amount);
+    });
+
+    const groupedExpected = {};
+    opps.forEach(o => {
+      if (o.status !== 'Pasif' && o.status !== 'Arşiv') {
+         groupedExpected[o.currency] = (groupedExpected[o.currency] || 0) + parseFloat(o.budget || 0);
+      }
+    });
+
+    const formatCurr = (obj) => {
+      const keys = Object.keys(obj);
+      if (keys.length === 0) return '0 TRY';
+      return keys.map(k => `<div style="margin-bottom: 4px;">${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 }).format(obj[k])} <span style="font-size: 13px; color: #9ca3af;">${k}</span></div>`).join('');
+    };
+
+    const title = 'Genel İhtimal ve Proje Özeti';
+    
+    let todosHtml = '';
+    if (topTodos.length > 0) {
+      todosHtml = topTodos.map(t => `
+        <div style="background: #1f2937; border-left: 4px solid #f59e0b; padding: 12px 16px; margin-bottom: 12px; border-radius: 4px;">
+          <div style="font-size: 13px; color: #9ca3af; margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle;"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+            <span style="vertical-align: middle;">${t.opp_name}</span>
+            ${t.deadline ? `<span style="margin-left: auto; color: #ef4444; font-size: 11px;">Son: ${new Date(t.deadline).toLocaleDateString('tr-TR')}</span>` : ''}
+          </div>
+          <div style="color: #e5e7eb; font-size: 14px; font-weight: 500;">
+            ${t.text}
+          </div>
+        </div>
+      `).join('');
+    } else {
+      todosHtml = `<div style="color: #9ca3af; font-size: 14px; padding: 10px;">Harika! Bekleyen görev bulunmuyor.</div>`;
+    }
+
+    const content = `
+      <div style="font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #f3f4f6; background-color: #111827; padding: 20px; border-radius: 12px;">
+        
+        <!-- Header text -->
+        <p style="font-size: 15px; color: #9ca3af; margin-bottom: 30px;">
+          Merhaba, sistemde kayıtlı olan projelerin ve ihtimallerin tüm zamanlara ait (All Time) istatistikleri ve acil bekleyen görevleriniz aşağıdadır.
+        </p>
+
+        <!-- Top 5 Tasks -->
+        <div style="margin-bottom: 35px;">
+          <h3 style="margin-top: 0; color: #22d3ee; font-size: 18px; margin-bottom: 15px; border-bottom: 1px solid #374151; padding-bottom: 10px; display: flex; align-items: center; gap: 8px;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle;"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+            <span style="vertical-align: middle;">Öncelikli Görevler (İlk 5)</span>
+          </h3>
+          ${todosHtml}
+          <div style="text-align: right; margin-top: 10px; font-size: 12px; color: #6b7280;">Toplam ${totalTodosCount} aktif görev bekliyor.</div>
+        </div>
+
+        <!-- Quick Stats Grid -->
+        <table style="width: 100%; border-collapse: separate; border-spacing: 12px 0; margin-bottom: 30px; margin-left: -12px;">
+          <tr>
+            <td style="padding: 20px; background: #1f2937; border-radius: 12px; width: 33%; border-top: 3px solid #10b981; text-align: center;">
+              <div style="font-size: 11px; color: #9ca3af; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;">Aktif Projeler</div>
+              <div style="font-size: 28px; color: #f3f4f6; font-weight: 800;">${activeCount}</div>
+            </td>
+            <td style="padding: 20px; background: #1f2937; border-radius: 12px; width: 33%; border-top: 3px solid #3b82f6; text-align: center;">
+              <div style="font-size: 11px; color: #9ca3af; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;">Tamamlanan</div>
+              <div style="font-size: 28px; color: #f3f4f6; font-weight: 800;">${completedCount}</div>
+            </td>
+            <td style="padding: 20px; background: #1f2937; border-radius: 12px; width: 33%; border-top: 3px solid #ef4444; text-align: center;">
+              <div style="font-size: 11px; color: #9ca3af; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;">Pasif (İptal)</div>
+              <div style="font-size: 28px; color: #f3f4f6; font-weight: 800;">${passiveCount}</div>
+            </td>
+          </tr>
+        </table>
+
+        <!-- Financial Summary -->
+        <div style="background: #1f2937; border-radius: 12px; padding: 25px; margin-bottom: 30px; border: 1px solid #374151;">
+          <h3 style="margin-top: 0; color: #10b981; font-size: 16px; margin-bottom: 20px; display: flex; align-items: center; gap: 8px;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle;"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+            <span style="vertical-align: middle;">Tüm Zamanlar Finansal Özet</span>
+          </h3>
+          <table style="width: 100%; border-collapse: collapse;">
+            <tr>
+              <td style="padding: 15px; background: #111827; border-radius: 8px 0 0 8px; width: 50%; border-right: 1px solid #374151;">
+                <div style="color: #9ca3af; font-size: 12px; margin-bottom: 5px;">Gerçekleşen Tahsilat (Ödenen)</div>
+                <div style="color: #10b981; font-size: 16px; font-weight: 700;">${formatCurr(groupedReceived)}</div>
+              </td>
+              <td style="padding: 15px; background: #111827; border-radius: 0 8px 8px 0; width: 50%;">
+                <div style="color: #9ca3af; font-size: 12px; margin-bottom: 5px;">Bekleyen Tahsilat Hacmi (Aktif)</div>
+                <div style="color: #22d3ee; font-size: 16px; font-weight: 700;">${formatCurr(groupedExpected)}</div>
+              </td>
+            </tr>
+          </table>
+        </div>
+
+        <!-- Detail Stats -->
+        <div style="background: #1f2937; border-radius: 12px; padding: 25px; border: 1px solid #374151;">
+          <h3 style="margin-top: 0; color: #e5e7eb; font-size: 16px; margin-bottom: 15px; border-bottom: 1px solid #374151; padding-bottom: 10px; display: flex; align-items: center; gap: 8px;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle;"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"></path><path d="M22 12A10 10 0 0 0 12 2v10z"></path></svg>
+            <span style="vertical-align: middle;">Aktivite Detayları</span>
+          </h3>
+          <table style="width: 100%; font-size: 14px;">
+            <tr>
+              <td style="padding: 12px 0; color: #9ca3af;">Kesinleşen Aktif Projeler:</td>
+              <td style="padding: 12px 0; font-weight: 700; text-align: right; color: #10b981;">${certainCount}</td>
+            </tr>
+            <tr>
+              <td style="padding: 12px 0; color: #9ca3af; border-top: 1px solid #374151;">Yüksek İhtimalli Projeler:</td>
+              <td style="padding: 12px 0; font-weight: 700; text-align: right; color: #3b82f6; border-top: 1px solid #374151;">${highCount}</td>
+            </tr>
+          </table>
+        </div>
+      </div>
+    `;
+
+    const html = `
+      <div style="background-color: #030712; padding: 40px 20px; width: 100%; box-sizing: border-box;">
+        <div style="max-width: 600px; margin: 0 auto;">
+          <div style="text-align: center; margin-bottom: 30px;">
+            <h1 style="color: #fff; margin: 0; font-size: 24px; letter-spacing: 1px; font-family: sans-serif;">CERİLAS</h1>
+            <p style="color: #9ca3af; margin: 5px 0 0 0; font-size: 14px; font-family: sans-serif;">Yüksek Teknoloji</p>
+          </div>
+          ${content}
+          <div style="text-align: center; margin-top: 30px; font-family: sans-serif;">
+            <a href="${process.env.FRONTEND_URL || 'https://www.cerilas.com'}/admin" style="display: inline-block; background-color: #0891b2; color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 14px;">
+              Sisteme Giriş Yap
+            </a>
+            <p style="margin-top: 20px; font-size: 12px; color: #4b5563;">Bu otomatik bir sistem bilgilendirmesidir.</p>
+          </div>
+        </div>
+      </div>
+    `;
+
+    const transporter = nodemailer.createTransport({
+      host: sender.host,
+      port: sender.port,
+      secure: sender.secure,
+      auth: { user: sender.auth_user, pass: sender.auth_pass }
+    });
+
+    await transporter.sendMail({
+      from: `"${sender.name}" <${sender.email}>`,
+      to: s.opp_digest_recipients,
+      subject: 'Genel Proje ve İhtimal Özeti',
+      html
+    });
+
+    res.json({ success: true, message: 'Digest email sent successfully' });
+  } catch (err) {
+    console.error('Cron Digest Error:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
 
 export default router;
