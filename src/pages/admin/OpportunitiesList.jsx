@@ -3,6 +3,119 @@ import { Link, useNavigate } from 'react-router-dom';
 import { BarChart, Bar, XAxis, YAxis, Tooltip as RechartsTooltip, ResponsiveContainer, Cell, AreaChart, Area } from 'recharts';
 import { api } from '../../lib/api';
 
+const MultiSelectFilter = ({ options, value, onChange, placeholder }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  
+  const toggleOption = (optValue) => {
+    if (value.includes(optValue)) {
+      onChange(value.filter(v => v !== optValue));
+    } else {
+      onChange([...value, optValue]);
+    }
+  };
+
+  const clearAll = (e) => {
+    e.stopPropagation();
+    onChange([]);
+  };
+
+  return (
+    <div className="relative w-full sm:w-auto sm:min-w-[140px]">
+      <div 
+        className="w-full h-full min-h-[38px] bg-gray-800/80 border border-gray-700 hover:border-cyan-500/50 rounded-lg px-3 py-1.5 text-white text-sm cursor-pointer flex justify-between items-center transition-colors shadow-inner"
+        onClick={() => setIsOpen(!isOpen)}
+      >
+        <div className="flex flex-wrap gap-1 items-center overflow-hidden flex-1">
+          {value.length === 0 ? (
+            <span className="text-gray-400 select-none truncate">{placeholder}</span>
+          ) : (
+            <div className="flex items-center gap-1.5">
+              <span className="text-cyan-400 font-semibold select-none">{value.length} seçili</span>
+              <button onClick={clearAll} className="p-0.5 hover:bg-gray-700 rounded-full text-gray-400 hover:text-white transition-colors focus:outline-none">
+                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+              </button>
+            </div>
+          )}
+        </div>
+        <svg className={`w-4 h-4 text-gray-500 transition-transform flex-shrink-0 ml-2 ${isOpen ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+      </div>
+
+      {isOpen && (
+        <>
+          <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
+          <div className="absolute top-full left-0 mt-1.5 w-full sm:w-max sm:min-w-[200px] bg-gray-800 border border-gray-700 rounded-xl shadow-2xl z-50 py-2 overflow-hidden">
+            <div className="max-h-60 overflow-y-auto custom-scrollbar">
+              {options.map(opt => (
+                <div 
+                  key={opt.value} 
+                  className="flex items-center gap-3 px-4 py-2 hover:bg-gray-700/50 cursor-pointer text-sm text-gray-200 transition-colors"
+                  onClick={() => toggleOption(opt.value)}
+                >
+                  <div className={`w-4 h-4 rounded flex-shrink-0 border flex items-center justify-center transition-colors ${value.includes(opt.value) ? 'bg-cyan-500 border-cyan-500 text-white' : 'border-gray-500'}`}>
+                    {value.includes(opt.value) && <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>}
+                  </div>
+                  <span className="select-none">{opt.label}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </>
+      )}
+    </div>
+  );
+};
+
+const SingleSelectFilter = ({ options, value, onChange, placeholder, icon, onIconClick, iconTitle }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const selectedOption = options.find(o => o.value === value);
+
+  return (
+    <div className="relative w-full sm:w-auto sm:min-w-[160px] flex gap-2">
+      <div 
+        className="flex-1 h-full min-h-[38px] bg-gray-800/80 border border-gray-700 hover:border-cyan-500/50 rounded-lg px-3 py-1.5 text-white text-sm cursor-pointer flex justify-between items-center transition-colors shadow-inner"
+        onClick={() => setIsOpen(!isOpen)}
+      >
+        <span className="text-gray-200 select-none truncate">
+          {selectedOption ? selectedOption.label : placeholder}
+        </span>
+        <svg className={`w-4 h-4 text-gray-500 transition-transform flex-shrink-0 ml-2 ${isOpen ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+      </div>
+
+      {icon && (
+        <button 
+          onClick={onIconClick}
+          title={iconTitle}
+          className="h-full min-h-[38px] px-3 bg-gray-800/80 border border-gray-700 hover:border-cyan-500/50 rounded-lg flex items-center justify-center text-gray-400 hover:text-cyan-400 transition-colors shadow-inner focus:outline-none flex-shrink-0"
+        >
+          {icon}
+        </button>
+      )}
+
+      {isOpen && (
+        <>
+          <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
+          <div className="absolute top-full right-0 mt-1.5 w-full sm:w-max sm:min-w-[200px] bg-gray-800 border border-gray-700 rounded-xl shadow-2xl z-50 py-2 overflow-hidden">
+            <div className="max-h-60 overflow-y-auto custom-scrollbar">
+              {options.map(opt => (
+                <div 
+                  key={opt.value} 
+                  className={`flex items-center gap-3 px-4 py-2 hover:bg-gray-700/50 cursor-pointer text-sm transition-colors ${value === opt.value ? 'text-cyan-400 font-medium' : 'text-gray-200'}`}
+                  onClick={() => { onChange(opt.value); setIsOpen(false); }}
+                >
+                  <span className="select-none flex-1">{opt.label}</span>
+                  {value === opt.value && (
+                    <svg className="w-4 h-4 text-cyan-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        </>
+      )}
+    </div>
+  );
+};
+
 export default function OpportunitiesList() {
   const [opportunities, setOpportunities] = useState([]);
   const [rates, setRates] = useState({ TRY: 1, USD: 35, EUR: 38 });
@@ -12,13 +125,14 @@ export default function OpportunitiesList() {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('application_date');
   const [sortOrder, setSortOrder] = useState('desc');
-  const [filterProb, setFilterProb] = useState('all');
-  const [filterStatus, setFilterStatus] = useState('all');
-  const [filterInstitution, setFilterInstitution] = useState('all');
+  const [filterProb, setFilterProb] = useState([]);
+  const [filterStatus, setFilterStatus] = useState([]);
+  const [filterInstitution, setFilterInstitution] = useState([]);
   const [ganttZoom, setGanttZoom] = useState(1);
   const [ganttFullscreen, setGanttFullscreen] = useState(false);
   const [ganttProbFilter, setGanttProbFilter] = useState(['1-2', '3-4', '5-6', '7-9', '10']);
   const [showGanttFilter, setShowGanttFilter] = useState(false);
+  const [selectedMonthDetails, setSelectedMonthDetails] = useState(null);
 
   const ganttProbGroups = [
     { id: '0', label: 'Başarısız (0)' },
@@ -52,24 +166,26 @@ export default function OpportunitiesList() {
       );
     }
 
-    if (filterProb !== 'all') {
+    if (filterProb.length > 0) {
       result = result.filter(o => {
         const p = parseInt(o.probability_rating) || 0;
-        if (filterProb === 'certain') return p === 10;
-        if (filterProb === 'high') return p >= 7 && p <= 9;
-        if (filterProb === 'medium') return p >= 5 && p <= 6;
-        if (filterProb === 'low') return p >= 1 && p <= 4;
-        if (filterProb === 'failed') return p === 0;
-        return true;
+        return filterProb.some(f => {
+          if (f === 'certain') return p === 10;
+          if (f === 'high') return p >= 7 && p <= 9;
+          if (f === 'medium') return p >= 5 && p <= 6;
+          if (f === 'low') return p >= 1 && p <= 4;
+          if (f === 'failed') return p === 0;
+          return false;
+        });
       });
     }
 
-    if (filterStatus !== 'all') {
-      result = result.filter(o => (o.status || 'Aktif') === filterStatus);
+    if (filterStatus.length > 0) {
+      result = result.filter(o => filterStatus.includes(o.status || 'Aktif'));
     }
 
-    if (filterInstitution !== 'all') {
-      result = result.filter(o => (o.institution || '') === filterInstitution);
+    if (filterInstitution.length > 0) {
+      result = result.filter(o => filterInstitution.includes(o.institution || ''));
     }
 
     result.sort((a, b) => {
@@ -171,6 +287,7 @@ export default function OpportunitiesList() {
     let totalHighProbBudget = 0; // 7-9
     let totalCertainBudget = 0; // 10
     let totalCertainRemaining = 0; // 10
+    let currentActiveFocusSum = 0;
     const paymentsByMonth = {};
     
     let totalAllTimeGrossBudget = 0;
@@ -189,6 +306,15 @@ export default function OpportunitiesList() {
       else if (p === 10) probData[5].count++;
 
       totalFocus += (parseInt(opp.focus_rating) || 0);
+
+      if (opp.status === 'Aktif' && opp.application_date && opp.expected_end_date) {
+        const s = new Date(opp.application_date).getTime();
+        const e = new Date(opp.expected_end_date).getTime();
+        const now = new Date().getTime();
+        if (now >= s && now <= e) {
+          currentActiveFocusSum += (parseInt(opp.focus_rating) || 0);
+        }
+      }
 
       const todos = opp.todos || [];
       totalActiveTodos += todos.filter(t => !t.is_completed).length;
@@ -212,14 +338,23 @@ export default function OpportunitiesList() {
         }
         const paymentInTry = convertAmount(payment.amount, payment.currency, baseCurr, pRates);
 
-        if (!paymentsByMonth[monthKey]) paymentsByMonth[monthKey] = 0;
-        paymentsByMonth[monthKey] += paymentInTry;
+        if (!paymentsByMonth[monthKey]) paymentsByMonth[monthKey] = { total: 0, details: [] };
+        paymentsByMonth[monthKey].total += paymentInTry;
+        paymentsByMonth[monthKey].details.push({
+          oppName: opp.name,
+          amountInTry: paymentInTry,
+          originalAmount: payment.amount,
+          currency: payment.currency,
+          date: payment.payment_date,
+          notes: payment.notes
+        });
       });
     });
 
     const timelineData = Object.keys(paymentsByMonth).sort().map(k => ({
       name: k,
-      total: paymentsByMonth[k]
+      total: paymentsByMonth[k].total,
+      details: paymentsByMonth[k].details
     }));
 
     const totalReceivedInTry = timelineData.reduce((sum, item) => sum + item.total, 0);
@@ -301,10 +436,25 @@ export default function OpportunitiesList() {
     const totalMonthsCount = months.length;
     const timelineMinWidth = Math.max(800, totalMonthsCount * 120) * ganttZoom;
 
+    const now = new Date();
+    const getPastMonthKeys = (monthsCount) => {
+      const keys = [];
+      for (let i = 0; i < monthsCount; i++) {
+        const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+        keys.push(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`);
+      }
+      return keys;
+    };
+
+    const avg3 = getPastMonthKeys(3).reduce((sum, key) => sum + (paymentsByMonth[key]?.total || 0), 0) / 3;
+    const avg6 = getPastMonthKeys(6).reduce((sum, key) => sum + (paymentsByMonth[key]?.total || 0), 0) / 6;
+    const avg12 = getPastMonthKeys(12).reduce((sum, key) => sum + (paymentsByMonth[key]?.total || 0), 0) / 12;
+
     return { 
       probData, timelineData, totalReceivedInTry, totalHighProbBudget, totalCertainBudget, 
-      totalCertainRemaining, totalActiveTodos, avgFocus, baseCurr, 
-      projectTimeline, timelineMonths: months, todayPercent, timelineMinWidth, totalAllTimeGrossBudget
+      totalCertainRemaining, totalActiveTodos, avgFocus, baseCurr, currentActiveFocusSum,
+      projectTimeline, timelineMonths: months, todayPercent, timelineMinWidth, totalAllTimeGrossBudget,
+      averages: { avg3, avg6, avg12 }
     };
   }, [filteredAndSortedOpps, opportunities, rates, ganttZoom, ganttProbFilter]);
 
@@ -314,10 +464,10 @@ export default function OpportunitiesList() {
 
 
   return (
-    <div className="max-w-7xl mx-auto pb-20">
-      <div className="flex justify-between items-center mb-8">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20 pt-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-white mb-2">Hibe & Teşvik Takibi</h1>
+          <h1 className="text-3xl font-bold text-white mb-2">İhtimal Listesi</h1>
           <p className="text-gray-400">Proje başvurularını, ihtimalleri ve süreçleri buradan takip edin.</p>
         </div>
         <button
@@ -404,12 +554,21 @@ export default function OpportunitiesList() {
                     <div className="relative group flex items-center">
                       <svg className="w-3.5 h-3.5 text-gray-600 hover:text-white cursor-pointer transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                       <div className="absolute z-50 bottom-full right-0 mb-2 w-48 p-2 bg-gray-800 border border-gray-700 text-[11px] text-gray-300 rounded shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 pointer-events-none text-right">
-                        Listelenen projelerin sistemdeki 'Odak' puanlarının genel aritmetik ortalamasıdır. Ekibin dikkatinin nerede olduğunu gösterir.
+                        Durumu "Aktif" olan ve tarih aralığı "bugün"ü kapsayan projelerin toplam odak (efor) puanıdır. Ekibin anlık olarak ne kadar dolu olduğunu gösterir. Toplam kapasite 10 olarak kabul edilir.
                       </div>
                     </div>
-                    <span className="text-xs text-gray-500 font-bold uppercase tracking-wider block">Ort. Odak</span>
+                    <span className="text-xs text-gray-500 font-bold uppercase tracking-wider block">Anlık Kapasite</span>
                   </div>
-                  <span className="text-2xl font-black text-white">{getDashboardStats.avgFocus} <span className="text-sm text-gray-500">/ 10</span></span>
+                  <div className="flex flex-col items-end mt-1">
+                    <span className={`text-2xl font-black ${getDashboardStats.currentActiveFocusSum > 10 ? 'text-red-400' : 'text-white'}`}>
+                      {getDashboardStats.currentActiveFocusSum} <span className="text-sm text-gray-500">/ 10</span>
+                    </span>
+                    <span className="text-[10px] text-gray-500 mt-0.5">
+                      {getDashboardStats.currentActiveFocusSum > 10 
+                        ? `Kapasite ${getDashboardStats.currentActiveFocusSum - 10} puan aşıldı!` 
+                        : `${10 - getDashboardStats.currentActiveFocusSum} boş odak noktası`}
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -454,7 +613,16 @@ export default function OpportunitiesList() {
               <div className="h-64">
                 {getDashboardStats.timelineData.length > 0 ? (
                   <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart data={getDashboardStats.timelineData} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
+                    <AreaChart 
+                      data={getDashboardStats.timelineData} 
+                      margin={{ top: 0, right: 0, left: 0, bottom: 0 }}
+                      onClick={(e) => {
+                        if (e && e.activePayload && e.activePayload.length > 0) {
+                          setSelectedMonthDetails(e.activePayload[0].payload);
+                        }
+                      }}
+                      style={{ cursor: 'pointer' }}
+                    >
                       <defs>
                         <linearGradient id="colorTotal" x1="0" y1="0" x2="0" y2="1">
                           <stop offset="5%" stopColor="#06b6d4" stopOpacity={0.3}/>
@@ -464,9 +632,34 @@ export default function OpportunitiesList() {
                       <XAxis dataKey="name" stroke="#4b5563" fontSize={10} tickLine={false} axisLine={false} />
                       <YAxis stroke="#4b5563" fontSize={10} tickLine={false} axisLine={false} tickFormatter={(val) => `₺${(val/1000).toFixed(0)}k`} />
                       <RechartsTooltip 
-                        contentStyle={{ backgroundColor: '#1f2937', border: 'none', borderRadius: '0.5rem', color: '#fff' }}
-                        itemStyle={{ color: '#e5e7eb' }}
-                        formatter={(value) => [formatMoney(value, getDashboardStats.baseCurr), 'Tahsilat']}
+                        content={({ active, payload, label }) => {
+                          if (active && payload && payload.length) {
+                            const data = payload[0].payload;
+                            return (
+                              <div className="bg-gray-800 border border-gray-700 p-4 rounded-xl shadow-xl z-50">
+                                <p className="font-bold text-white mb-1">{label}</p>
+                                <p className="text-cyan-400 font-medium mb-3">Tahsilat: {formatMoney(data.total, getDashboardStats.baseCurr)}</p>
+                                {data.details && data.details.length > 0 && (
+                                  <div className="space-y-2 border-t border-gray-700 pt-3">
+                                    {data.details.map((d, i) => (
+                                      <div key={i} className="text-xs flex flex-col gap-0.5">
+                                        <span className="text-gray-400 font-semibold">{d.oppName}</span>
+                                        <div className="flex items-center justify-between gap-4">
+                                          <span className="text-gray-500">{new Date(d.date).toLocaleDateString('tr-TR')}</span>
+                                          <span className="text-white font-medium">
+                                            {formatMoney(d.originalAmount, d.currency)}
+                                            {d.currency !== getDashboardStats.baseCurr && ` (${formatMoney(d.amountInTry, getDashboardStats.baseCurr)})`}
+                                          </span>
+                                        </div>
+                                      </div>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          }
+                          return null;
+                        }}
                       />
                       <Area type="monotone" dataKey="total" stroke="#06b6d4" strokeWidth={2} fillOpacity={1} fill="url(#colorTotal)" />
                     </AreaChart>
@@ -475,12 +668,30 @@ export default function OpportunitiesList() {
                   <div className="h-full flex items-center justify-center text-gray-600 text-sm">Henüz tahsilat verisi yok</div>
                 )}
               </div>
+
+              {/* Averages */}
+              {getDashboardStats.timelineData.length > 0 && (
+                <div className="mt-6 flex flex-wrap gap-4 justify-between border-t border-gray-800 pt-4">
+                  <div className="flex flex-col">
+                    <span className="text-[10px] text-gray-500 font-bold uppercase tracking-wider mb-1">Son 3 Ay Ort.</span>
+                    <span className="text-sm font-bold text-gray-200">{formatMoney(getDashboardStats.averages.avg3, getDashboardStats.baseCurr)}</span>
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-[10px] text-gray-500 font-bold uppercase tracking-wider mb-1">Son 6 Ay Ort.</span>
+                    <span className="text-sm font-bold text-cyan-400/80">{formatMoney(getDashboardStats.averages.avg6, getDashboardStats.baseCurr)}</span>
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-[10px] text-gray-500 font-bold uppercase tracking-wider mb-1">Son 12 Ay Ort.</span>
+                    <span className="text-sm font-bold text-cyan-500">{formatMoney(getDashboardStats.averages.avg12, getDashboardStats.baseCurr)}</span>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
           {/* Gantt Timeline Row */}
-          <div className={ganttFullscreen ? 'fixed inset-0 z-[100] bg-gray-950 p-6 sm:p-10 flex flex-col overflow-x-auto overflow-y-hidden' : 'mt-6 bg-gray-900 border border-gray-800 rounded-2xl p-6 shadow-lg overflow-x-auto relative hidden md:block custom-scrollbar'}>
-            <div className="flex justify-between items-center mb-6 sticky left-0 z-[60]">
+          <div className={ganttFullscreen ? 'fixed inset-0 z-[100] bg-gray-950 p-4 sm:p-10 flex flex-col overflow-x-auto overflow-y-hidden' : 'mt-6 bg-gray-900 border border-gray-800 rounded-2xl p-4 sm:p-6 shadow-lg overflow-x-auto relative block custom-scrollbar'}>
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 sticky left-0 z-[60]">
               <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider">Proje Zaman Çizelgesi (Gantt)</h3>
               <div className="flex items-center gap-3 relative">
                 
@@ -599,7 +810,7 @@ export default function OpportunitiesList() {
                         <div key={pt.id} className="relative h-6 group">
                           {/* Name Label */}
                           <div 
-                            className="absolute -top-5 text-[10px] font-bold text-gray-300 w-max max-w-xs truncate opacity-0 group-hover:opacity-100 transition-opacity z-20 pointer-events-none drop-shadow-md"
+                            className="absolute -top-5 text-[10px] font-bold text-gray-300 w-max max-w-xs truncate z-20 pointer-events-none drop-shadow-md"
                             style={{ left: `${pt.leftPercent}%` }}
                           >
                             {pt.name}
@@ -633,8 +844,8 @@ export default function OpportunitiesList() {
       )}
 
       {opportunities.length > 0 && (
-        <div className="bg-gray-900 border border-gray-800 rounded-xl p-4 mb-6 flex flex-col lg:flex-row gap-4 items-center justify-between shadow-lg">
-          <div className="flex-1 w-full relative">
+        <div className="bg-gray-900 border border-gray-800 rounded-xl p-4 mb-6 flex flex-col gap-4 shadow-lg">
+          <div className="w-full relative">
             <svg className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
             <input 
               type="text" 
@@ -644,66 +855,62 @@ export default function OpportunitiesList() {
               className="w-full bg-gray-800/50 border border-gray-700 rounded-lg pl-10 pr-4 py-2 text-white focus:outline-none focus:ring-1 focus:border-transparent focus:ring-cyan-500 shadow-inner"
             />
           </div>
-          <div className="flex flex-wrap gap-4 w-full lg:w-auto">
-            <select 
-              value={filterProb} 
-              onChange={(e) => setFilterProb(e.target.value)}
-              className="bg-gray-800/50 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:ring-1 focus:ring-cyan-500"
-            >
-              <option value="all">Tüm İhtimaller</option>
-              <option value="certain">Kesin (10)</option>
-              <option value="high">Yüksek (7-9)</option>
-              <option value="medium">Orta (5-6)</option>
-              <option value="low">Düşük/Çok Düşük (1-4)</option>
-              <option value="failed">Başarısız (0)</option>
-            </select>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:flex md:flex-wrap gap-3 w-full">
+            <MultiSelectFilter 
+              placeholder="Tüm İhtimaller"
+              value={filterProb}
+              onChange={setFilterProb}
+              options={[
+                { value: 'certain', label: 'Kesin (10)' },
+                { value: 'high', label: 'Yüksek (7-9)' },
+                { value: 'medium', label: 'Orta (5-6)' },
+                { value: 'low', label: 'Düşük (1-4)' },
+                { value: 'failed', label: 'Başarısız (0)' }
+              ]}
+            />
 
-            <select 
-              value={filterStatus} 
-              onChange={(e) => setFilterStatus(e.target.value)}
-              className="bg-gray-800/50 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:ring-1 focus:ring-cyan-500"
-            >
-              <option value="all">Tüm Durumlar</option>
-              <option value="Aktif">Aktif Projeler</option>
-              <option value="Pasif">Pasif Projeler</option>
-              <option value="Beklemede">Beklemede Olanlar</option>
-              <option value="Tamamlandı">Tamamlananlar</option>
-              <option value="Arşiv">Arşivlenenler</option>
-            </select>
+            <MultiSelectFilter 
+              placeholder="Tüm Durumlar"
+              value={filterStatus}
+              onChange={setFilterStatus}
+              options={[
+                { value: 'Aktif', label: 'Aktif Projeler' },
+                { value: 'Pasif', label: 'Pasif Projeler' },
+                { value: 'Beklemede', label: 'Beklemede' },
+                { value: 'Tamamlandı', label: 'Tamamlananlar' },
+                { value: 'Arşiv', label: 'Arşivlenenler' }
+              ]}
+            />
 
-            <select 
-              value={filterInstitution} 
-              onChange={(e) => setFilterInstitution(e.target.value)}
-              className="bg-gray-800/50 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:ring-1 focus:ring-cyan-500"
-            >
-              <option value="all">Tüm Kurumlar</option>
-              {institutionOptions.map(opt => (
-                <option key={opt.value} value={opt.value}>{opt.label}</option>
-              ))}
-            </select>
+            <MultiSelectFilter 
+              placeholder="Tüm Kurumlar"
+              value={filterInstitution}
+              onChange={setFilterInstitution}
+              options={institutionOptions.map(o => ({ value: o.value, label: o.label }))}
+            />
 
-            <select 
-              value={sortBy} 
-              onChange={(e) => setSortBy(e.target.value)}
-              className="bg-gray-800/50 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:ring-1 focus:ring-cyan-500"
-            >
-              <option value="application_date">Başvuru Tarihine Göre</option>
-              <option value="probability">Olma Olasılığına Göre</option>
-              <option value="focus">Odak Seviyesine Göre</option>
-            </select>
-
-            <button 
-              onClick={() => setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc')}
-              className="bg-gray-800 border border-gray-700 hover:border-cyan-500 rounded-lg p-2 text-gray-400 hover:text-cyan-400 transition-colors"
-              title={sortOrder === 'asc' ? 'Artan' : 'Azalan'}
-            >
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                {sortOrder === 'asc' 
-                  ? <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12" />
-                  : <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4h13M3 8h9m-9 4h9m5-4v12m0 0l-4-4m4 4l4-4" />
+            <div className="ml-auto flex w-full md:w-auto">
+              <SingleSelectFilter 
+                placeholder="Sıralama"
+                value={sortBy}
+                onChange={setSortBy}
+                options={[
+                  { value: 'application_date', label: 'Başvuru Tarihi' },
+                  { value: 'probability', label: 'Olasılık' },
+                  { value: 'focus', label: 'Odak Seviyesi' }
+                ]}
+                iconTitle={sortOrder === 'asc' ? 'Artan' : 'Azalan'}
+                onIconClick={() => setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc')}
+                icon={
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    {sortOrder === 'asc' 
+                      ? <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12" />
+                      : <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4h13M3 8h9m-9 4h9m5-4v12m0 0l-4-4m4 4l4-4" />
+                    }
+                  </svg>
                 }
-              </svg>
-            </button>
+              />
+            </div>
           </div>
         </div>
       )}
@@ -814,6 +1021,65 @@ export default function OpportunitiesList() {
               </div>
             </Link>
           ))}
+        </div>
+      )}
+
+      {/* Selected Month Details Modal */}
+      {selectedMonthDetails && (
+        <div className="fixed inset-0 z-[200] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-gray-900 border border-gray-700 rounded-2xl p-6 shadow-2xl max-w-lg w-full max-h-[90vh] flex flex-col">
+            <div className="flex justify-between items-center mb-6">
+              <div>
+                <h3 className="text-xl font-bold text-white">{selectedMonthDetails.name} Tahsilat Detayları</h3>
+                <p className="text-sm text-cyan-400 font-medium mt-1">
+                  Toplam: {formatMoney(selectedMonthDetails.total, getDashboardStats.baseCurr)}
+                </p>
+              </div>
+              <button 
+                onClick={() => setSelectedMonthDetails(null)} 
+                className="p-2 text-gray-400 hover:text-white bg-gray-800 hover:bg-gray-700 rounded-xl transition-colors"
+              >
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            
+            <div className="overflow-y-auto custom-scrollbar flex-1 -mx-2 px-2">
+              {selectedMonthDetails.details && selectedMonthDetails.details.length > 0 ? (
+                <div className="space-y-4">
+                  {selectedMonthDetails.details.map((d, idx) => (
+                    <div key={idx} className="bg-gray-800/50 border border-gray-700/50 rounded-xl p-4">
+                      <h4 className="text-white font-bold mb-2">{d.oppName}</h4>
+                      <div className="grid grid-cols-2 gap-4 text-sm mb-2">
+                        <div>
+                          <span className="text-gray-500 block text-xs mb-0.5">Tutar</span>
+                          <span className="text-gray-200 font-medium">{formatMoney(d.originalAmount, d.currency)}</span>
+                          {d.currency !== getDashboardStats.baseCurr && (
+                            <span className="text-gray-500 text-xs ml-1">
+                              ({formatMoney(d.amountInTry, getDashboardStats.baseCurr)})
+                            </span>
+                          )}
+                        </div>
+                        <div>
+                          <span className="text-gray-500 block text-xs mb-0.5">Tarih</span>
+                          <span className="text-gray-200">{new Date(d.date).toLocaleDateString('tr-TR')}</span>
+                        </div>
+                      </div>
+                      {d.notes && (
+                        <div className="text-sm mt-3 pt-3 border-t border-gray-700/50">
+                          <span className="text-gray-500 block text-xs mb-0.5">Not</span>
+                          <p className="text-gray-300">{d.notes}</p>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-gray-500 text-sm text-center py-4">Bu ay için detaylı işlem bulunamadı.</p>
+              )}
+            </div>
+          </div>
         </div>
       )}
     </div>
