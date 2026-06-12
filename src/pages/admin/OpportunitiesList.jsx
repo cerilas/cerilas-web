@@ -133,6 +133,7 @@ export default function OpportunitiesList() {
   const [ganttProbFilter, setGanttProbFilter] = useState(['1-2', '3-4', '5-6', '7-9', '10']);
   const [showGanttFilter, setShowGanttFilter] = useState(false);
   const [selectedMonthDetails, setSelectedMonthDetails] = useState(null);
+  const [showActiveTasksModal, setShowActiveTasksModal] = useState(false);
 
   const ganttProbGroups = [
     { id: '0', label: 'Başarısız (0)' },
@@ -289,6 +290,7 @@ export default function OpportunitiesList() {
     let totalCertainRemaining = 0; // 10
     let currentActiveFocusSum = 0;
     const paymentsByMonth = {};
+    const activeTasksBreakdown = [];
     
     let totalAllTimeGrossBudget = 0;
     opportunities.forEach(opp => {
@@ -316,8 +318,15 @@ export default function OpportunitiesList() {
         }
       }
 
-      const todos = opp.todos || [];
-      totalActiveTodos += todos.filter(t => !t.is_completed).length;
+      const activeTodosCount = parseInt(opp.active_todos) || 0;
+      totalActiveTodos += activeTodosCount;
+      if (activeTodosCount > 0) {
+        activeTasksBreakdown.push({
+          id: opp.id,
+          name: opp.name,
+          count: activeTodosCount
+        });
+      }
 
       const oppTotalIncomeInTry = convertAmount(opp.total_income, opp.currency, baseCurr);
       const oppRemainingInTry = convertAmount(calculateRemaining(opp), opp.currency, baseCurr);
@@ -454,7 +463,8 @@ export default function OpportunitiesList() {
       probData, timelineData, totalReceivedInTry, totalHighProbBudget, totalCertainBudget, 
       totalCertainRemaining, totalActiveTodos, avgFocus, baseCurr, currentActiveFocusSum,
       projectTimeline, timelineMonths: months, todayPercent, timelineMinWidth, totalAllTimeGrossBudget,
-      averages: { avg3, avg6, avg12 }
+      averages: { avg3, avg6, avg12 },
+      activeTasksBreakdown
     };
   }, [filteredAndSortedOpps, opportunities, rates, ganttZoom, ganttProbFilter]);
 
@@ -537,9 +547,12 @@ export default function OpportunitiesList() {
 
             <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5 flex flex-col shadow-lg overflow-visible">
               <div className="flex justify-between items-center h-full">
-                <div className="flex-1">
+                <div 
+                  className="flex-1 cursor-pointer group/task hover:bg-gray-800/40 p-2 rounded-xl transition-colors -m-2"
+                  onClick={() => setShowActiveTasksModal(true)}
+                >
                   <div className="flex items-center gap-1.5 z-10">
-                    <span className="text-xs text-gray-500 font-bold uppercase tracking-wider block">Aktif Görevler</span>
+                    <span className="text-xs text-gray-500 group-hover/task:text-gray-300 font-bold uppercase tracking-wider block transition-colors">Aktif Görevler</span>
                     <div className="relative group flex items-center">
                       <svg className="w-3.5 h-3.5 text-gray-600 hover:text-white cursor-pointer transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                       <div className="absolute z-50 bottom-full left-0 mb-2 w-48 p-2 bg-gray-800 border border-gray-700 text-[11px] text-gray-300 rounded shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 pointer-events-none text-left">
@@ -1077,6 +1090,57 @@ export default function OpportunitiesList() {
                 </div>
               ) : (
                 <p className="text-gray-500 text-sm text-center py-4">Bu ay için detaylı işlem bulunamadı.</p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Active Tasks Modal */}
+      {showActiveTasksModal && (
+        <div className="fixed inset-0 z-[200] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-gray-900 border border-gray-700 rounded-2xl p-6 shadow-2xl max-w-lg w-full max-h-[90vh] flex flex-col">
+            <div className="flex justify-between items-center mb-6">
+              <div>
+                <h3 className="text-xl font-bold text-white">Aktif Görev Dağılımı</h3>
+                <p className="text-sm text-cyan-400 font-medium mt-1">
+                  Toplam: {getDashboardStats.totalActiveTodos} Görev
+                </p>
+              </div>
+              <button 
+                onClick={() => setShowActiveTasksModal(false)} 
+                className="p-2 text-gray-400 hover:text-white bg-gray-800 hover:bg-gray-700 rounded-xl transition-colors"
+              >
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            
+            <div className="overflow-y-auto custom-scrollbar flex-1 -mx-2 px-2">
+              {getDashboardStats.activeTasksBreakdown && getDashboardStats.activeTasksBreakdown.length > 0 ? (
+                <div className="space-y-3">
+                  {getDashboardStats.activeTasksBreakdown.map((item, index) => (
+                    <Link
+                      key={item.id}
+                      to={`/admin/opportunities/${item.id}`}
+                      className="flex items-center justify-between p-4 bg-gray-800/50 hover:bg-gray-800 rounded-xl border border-gray-700/50 hover:border-cyan-500/50 transition-all group"
+                      onClick={() => setShowActiveTasksModal(false)}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-lg bg-cyan-500/10 text-cyan-400 flex items-center justify-center font-bold text-sm">
+                          {index + 1}
+                        </div>
+                        <span className="font-medium text-gray-200 group-hover:text-cyan-400 transition-colors">{item.name}</span>
+                      </div>
+                      <span className="bg-gray-900 px-3 py-1 rounded-lg text-sm font-bold text-white border border-gray-700 shadow-inner whitespace-nowrap">
+                        {item.count} Görev
+                      </span>
+                    </Link>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-gray-500 text-sm text-center py-4">Aktif görev bulunamadı.</p>
               )}
             </div>
           </div>
