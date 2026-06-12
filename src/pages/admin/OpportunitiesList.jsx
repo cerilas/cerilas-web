@@ -15,6 +15,19 @@ export default function OpportunitiesList() {
   const [filterProb, setFilterProb] = useState('all');
   const [filterStatus, setFilterStatus] = useState('all');
   const [filterInstitution, setFilterInstitution] = useState('all');
+  const [ganttZoom, setGanttZoom] = useState(1);
+  const [ganttFullscreen, setGanttFullscreen] = useState(false);
+  const [ganttProbFilter, setGanttProbFilter] = useState(['1-2', '3-4', '5-6', '7-9', '10']);
+  const [showGanttFilter, setShowGanttFilter] = useState(false);
+
+  const ganttProbGroups = [
+    { id: '0', label: 'Başarısız (0)' },
+    { id: '1-2', label: 'Çok Düşük (1-2)' },
+    { id: '3-4', label: 'Düşük (3-4)' },
+    { id: '5-6', label: 'Orta (5-6)' },
+    { id: '7-9', label: 'Yüksek (7-9)' },
+    { id: '10', label: 'Kesin (10)' }
+  ];
 
   const institutionOptions = [
     { value: 'EIC', label: 'EIC', logo: '/logos/eic-logo.png' },
@@ -224,11 +237,20 @@ export default function OpportunitiesList() {
         const start = opp.application_date ? new Date(opp.application_date) : new Date(opp.expected_end_date);
         const end = opp.expected_end_date ? new Date(opp.expected_end_date) : new Date(opp.application_date);
         
-        if (start < minDate) minDate = new Date(start);
-        if (end > maxDate) maxDate = new Date(end);
+        const p = parseInt(opp.probability_rating) || 0;
+        let groupId = '0';
+        if (p === 10) groupId = '10';
+        else if (p >= 7) groupId = '7-9';
+        else if (p >= 5) groupId = '5-6';
+        else if (p >= 3) groupId = '3-4';
+        else if (p >= 1) groupId = '1-2';
 
-        projectTimeline.push({
-          id: opp.id,
+        if (ganttProbFilter.includes(groupId)) {
+          if (start < minDate) minDate = new Date(start);
+          if (end > maxDate) maxDate = new Date(end);
+
+          projectTimeline.push({
+            id: opp.id,
           name: opp.name,
           start: start,
           end: end,
@@ -238,6 +260,7 @@ export default function OpportunitiesList() {
           status: opp.status || 'Aktif',
           colorClass: getProbabilityColor(parseInt(opp.probability_rating) || 0)
         });
+        }
       }
     });
 
@@ -276,14 +299,14 @@ export default function OpportunitiesList() {
 
     // Calculate dynamic width based on number of months (e.g. 120px per month)
     const totalMonthsCount = months.length;
-    const timelineMinWidth = Math.max(800, totalMonthsCount * 120);
+    const timelineMinWidth = Math.max(800, totalMonthsCount * 120) * ganttZoom;
 
     return { 
       probData, timelineData, totalReceivedInTry, totalHighProbBudget, totalCertainBudget, 
       totalCertainRemaining, totalActiveTodos, avgFocus, baseCurr, 
       projectTimeline, timelineMonths: months, todayPercent, timelineMinWidth, totalAllTimeGrossBudget
     };
-  }, [filteredAndSortedOpps, opportunities, rates]);
+  }, [filteredAndSortedOpps, opportunities, rates, ganttZoom, ganttProbFilter]);
 
   if (loading) {
     return <div className="text-white">Yükleniyor...</div>;
@@ -313,33 +336,79 @@ export default function OpportunitiesList() {
         <div className="mb-10 flex flex-col gap-6">
           {/* Top Stats Row */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5 flex flex-col shadow-lg relative overflow-hidden">
-              <div className="absolute top-0 right-0 p-4 opacity-10">
+            <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5 flex flex-col shadow-lg relative overflow-visible">
+              <div className="absolute top-0 right-0 p-4 opacity-10 pointer-events-none">
                 <svg className="w-16 h-16 text-cyan-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
               </div>
-              <span className="text-xs text-gray-500 font-bold uppercase tracking-wider">Toplam Tahsilat (Tüm Zamanlar)</span>
-              <span className="text-2xl font-black text-white mt-1">{formatMoney(getDashboardStats.totalReceivedInTry, getDashboardStats.baseCurr)}</span>
+              <div className="flex items-center gap-1.5 z-10">
+                <span className="text-xs text-gray-500 font-bold uppercase tracking-wider">Toplam Tahsilat</span>
+                <div className="relative group flex items-center">
+                  <svg className="w-4 h-4 text-gray-600 hover:text-cyan-400 cursor-pointer transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                  <div className="absolute z-50 bottom-full left-1/2 -translate-x-1/2 mb-2 w-56 p-2.5 bg-gray-800 border border-gray-700 text-xs text-gray-300 rounded shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 pointer-events-none text-center">
+                    Arşivlenmiş veya pasif olanlar dahil, bugüne kadar sisteme girilmiş tüm projelerden alınan ödemelerin güncel kur ile {getDashboardStats.baseCurr} karşılığının toplamıdır.
+                    <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-800"></div>
+                  </div>
+                </div>
+              </div>
+              <span className="text-2xl font-black text-white mt-1 z-10">{formatMoney(getDashboardStats.totalReceivedInTry, getDashboardStats.baseCurr)}</span>
             </div>
-            <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5 flex flex-col shadow-lg relative overflow-hidden">
-              <div className="absolute top-0 right-0 p-4 opacity-10">
+            
+            <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5 flex flex-col shadow-lg relative overflow-visible">
+              <div className="absolute top-0 right-0 p-4 opacity-10 pointer-events-none">
                 <svg className="w-16 h-16 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" /></svg>
               </div>
-              <span className="text-xs text-gray-500 font-bold uppercase tracking-wider">Kesinleşenler Kalan Bütçe</span>
-              <span className="text-2xl font-black text-green-400 mt-1">{formatMoney(getDashboardStats.totalCertainRemaining, getDashboardStats.baseCurr)}</span>
-              <span className="text-xs text-gray-500 mt-1">Toplam Bütçe: {formatMoney(getDashboardStats.totalCertainBudget, getDashboardStats.baseCurr)}</span>
+              <div className="flex items-center gap-1.5 z-10">
+                <span className="text-xs text-gray-500 font-bold uppercase tracking-wider">Kesinleşen Kalan</span>
+                <div className="relative group flex items-center">
+                  <svg className="w-4 h-4 text-gray-600 hover:text-green-400 cursor-pointer transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                  <div className="absolute z-50 bottom-full left-1/2 -translate-x-1/2 mb-2 w-56 p-2.5 bg-gray-800 border border-gray-700 text-xs text-gray-300 rounded shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 pointer-events-none text-center">
+                    İhtimal derecesi 10 (Kesin) olan projelerin toplam bütçesinden (KDV Hariç), bugüne kadar alınan tahsilatların çıkarılmasıyla elde edilen bekleyen aktif bakiye.
+                    <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-800"></div>
+                  </div>
+                </div>
+              </div>
+              <span className="text-2xl font-black text-green-400 mt-1 z-10">{formatMoney(getDashboardStats.totalCertainRemaining, getDashboardStats.baseCurr)}</span>
+              <span className="text-xs text-gray-500 mt-1 z-10">Toplam Bütçe: {formatMoney(getDashboardStats.totalCertainBudget, getDashboardStats.baseCurr)}</span>
             </div>
-            <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5 flex flex-col shadow-lg relative overflow-hidden">
-              <span className="text-xs text-gray-500 font-bold uppercase tracking-wider">Yüksek İhtimal (7-9) Toplamı</span>
-              <span className="text-2xl font-black text-cyan-400 mt-1">{formatMoney(getDashboardStats.totalHighProbBudget, getDashboardStats.baseCurr)}</span>
+
+            <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5 flex flex-col shadow-lg relative overflow-visible">
+              <div className="flex items-center gap-1.5 z-10">
+                <span className="text-xs text-gray-500 font-bold uppercase tracking-wider">Yüksek İhtimal (7-9)</span>
+                <div className="relative group flex items-center">
+                  <svg className="w-4 h-4 text-gray-600 hover:text-cyan-400 cursor-pointer transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                  <div className="absolute z-50 bottom-full left-1/2 -translate-x-1/2 mb-2 w-56 p-2.5 bg-gray-800 border border-gray-700 text-xs text-gray-300 rounded shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 pointer-events-none text-center">
+                    İhtimal derecesi 7, 8 veya 9 olarak seçilen, yüksek potansiyelli projelerin henüz kesinleşmese de güncel kur ile hesaplanan brüt bütçe beklentisidir.
+                    <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-800"></div>
+                  </div>
+                </div>
+              </div>
+              <span className="text-2xl font-black text-cyan-400 mt-1 z-10">{formatMoney(getDashboardStats.totalHighProbBudget, getDashboardStats.baseCurr)}</span>
             </div>
-            <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5 flex flex-col shadow-lg">
+
+            <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5 flex flex-col shadow-lg overflow-visible">
               <div className="flex justify-between items-center h-full">
-                <div>
-                  <span className="text-xs text-gray-500 font-bold uppercase tracking-wider block">Aktif Görevler</span>
+                <div className="flex-1">
+                  <div className="flex items-center gap-1.5 z-10">
+                    <span className="text-xs text-gray-500 font-bold uppercase tracking-wider block">Aktif Görevler</span>
+                    <div className="relative group flex items-center">
+                      <svg className="w-3.5 h-3.5 text-gray-600 hover:text-white cursor-pointer transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                      <div className="absolute z-50 bottom-full left-0 mb-2 w-48 p-2 bg-gray-800 border border-gray-700 text-[11px] text-gray-300 rounded shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 pointer-events-none text-left">
+                        Aşağıdaki tabloda listelenen, durumu Pasif/Arşiv OLMAYAN projelerin içindeki henüz "Tamamlandı" olarak işaretlenmemiş olan aktif yapılacaklar sayısı.
+                      </div>
+                    </div>
+                  </div>
                   <span className="text-2xl font-black text-white">{getDashboardStats.totalActiveTodos}</span>
                 </div>
-                <div className="text-right">
-                  <span className="text-xs text-gray-500 font-bold uppercase tracking-wider block">Ort. Odak</span>
+                <div className="text-right flex-1 border-l border-gray-800 pl-4 ml-4">
+                  <div className="flex items-center justify-end gap-1.5 z-10">
+                    <div className="relative group flex items-center">
+                      <svg className="w-3.5 h-3.5 text-gray-600 hover:text-white cursor-pointer transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                      <div className="absolute z-50 bottom-full right-0 mb-2 w-48 p-2 bg-gray-800 border border-gray-700 text-[11px] text-gray-300 rounded shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 pointer-events-none text-right">
+                        Listelenen projelerin sistemdeki 'Odak' puanlarının genel aritmetik ortalamasıdır. Ekibin dikkatinin nerede olduğunu gösterir.
+                      </div>
+                    </div>
+                    <span className="text-xs text-gray-500 font-bold uppercase tracking-wider block">Ort. Odak</span>
+                  </div>
                   <span className="text-2xl font-black text-white">{getDashboardStats.avgFocus} <span className="text-sm text-gray-500">/ 10</span></span>
                 </div>
               </div>
@@ -410,10 +479,74 @@ export default function OpportunitiesList() {
           </div>
 
           {/* Gantt Timeline Row */}
-          <div className="mt-6 bg-gray-900 border border-gray-800 rounded-2xl p-6 shadow-lg overflow-x-auto relative hidden md:block custom-scrollbar">
-            <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-6">Proje Zaman Çizelgesi (Gantt)</h3>
+          <div className={ganttFullscreen ? 'fixed inset-0 z-[100] bg-gray-950 p-6 sm:p-10 flex flex-col overflow-x-auto overflow-y-hidden' : 'mt-6 bg-gray-900 border border-gray-800 rounded-2xl p-6 shadow-lg overflow-x-auto relative hidden md:block custom-scrollbar'}>
+            <div className="flex justify-between items-center mb-6 sticky left-0 z-[60]">
+              <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider">Proje Zaman Çizelgesi (Gantt)</h3>
+              <div className="flex items-center gap-3 relative">
+                
+                {/* Gantt Filter Dropdown */}
+                <div className="relative">
+                  <button 
+                    onClick={() => setShowGanttFilter(!showGanttFilter)} 
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border transition text-xs font-semibold ${showGanttFilter || ganttProbFilter.length < 6 ? 'bg-cyan-900/50 text-cyan-400 border-cyan-800' : 'bg-gray-800 text-gray-400 border-gray-700 hover:text-white hover:bg-gray-700'}`}
+                    title="İhtimal Filtresi"
+                  >
+                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" /></svg>
+                    Filtre ({ganttProbFilter.length})
+                  </button>
+                  
+                  {showGanttFilter && (
+                    <div className="absolute top-full right-0 mt-2 w-48 bg-gray-800 border border-gray-700 rounded-lg shadow-xl z-50 p-2 overflow-hidden flex flex-col gap-1">
+                      <div className="text-[10px] text-gray-500 font-bold uppercase px-2 py-1 mb-1 border-b border-gray-700">İhtimal Grupları</div>
+                      {ganttProbGroups.map(group => (
+                        <label key={group.id} className="flex items-center gap-2 px-2 py-1.5 hover:bg-gray-700/50 rounded cursor-pointer text-sm text-gray-300">
+                          <input 
+                            type="checkbox" 
+                            className="w-3.5 h-3.5 bg-gray-900 border-gray-600 rounded text-cyan-500 focus:ring-cyan-500/20"
+                            checked={ganttProbFilter.includes(group.id)}
+                            onChange={(e) => {
+                              if (e.target.checked) {
+                                setGanttProbFilter([...ganttProbFilter, group.id]);
+                              } else {
+                                setGanttProbFilter(ganttProbFilter.filter(id => id !== group.id));
+                              }
+                            }}
+                          />
+                          {group.label}
+                        </label>
+                      ))}
+                      <div className="flex justify-between items-center mt-2 px-1 pt-2 border-t border-gray-700">
+                        <button onClick={() => setGanttProbFilter([])} className="text-[10px] text-gray-400 hover:text-white transition">Temizle</button>
+                        <button onClick={() => setGanttProbFilter(ganttProbGroups.map(g=>g.id))} className="text-[10px] text-cyan-500 hover:text-cyan-400 transition">Tümü</button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex items-center bg-gray-800 rounded-lg p-1 border border-gray-700">
+                  <button onClick={() => setGanttZoom(z => Math.max(0.1, z - 0.1))} className="px-2 py-1 text-gray-400 hover:text-white hover:bg-gray-700 rounded transition" title="Uzaklaştır">
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" /></svg>
+                  </button>
+                  <div className="text-[11px] font-bold text-cyan-400 px-2 min-w-[50px] text-center">%{(ganttZoom * 100).toFixed(0)}</div>
+                  <button onClick={() => setGanttZoom(z => Math.min(4, z + 0.1))} className="px-2 py-1 text-gray-400 hover:text-white hover:bg-gray-700 rounded transition" title="Yakınlaştır">
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
+                  </button>
+                  <button onClick={() => setGanttZoom(1)} className="px-2 py-1 text-gray-500 hover:text-white hover:bg-gray-700 rounded border-l border-gray-700 ml-1 transition text-xs font-bold" title="Sıfırla">
+                    1x
+                  </button>
+                </div>
+                <button onClick={() => setGanttFullscreen(!ganttFullscreen)} className="p-2 bg-gray-800 text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg border border-gray-700 transition" title={ganttFullscreen ? 'Tam Ekrandan Çık' : 'Tam Ekran Yap'}>
+                  {ganttFullscreen ? (
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8h4V4m0 4l-5-5m15 5h-4V4m0 4l5-5M4 16h4v4m0-4l-5 5m15-5h-4v4m0-4l5 5" /></svg>
+                  ) : (
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" /></svg>
+                  )}
+                </button>
+              </div>
+            </div>
+            
             {getDashboardStats.projectTimeline && getDashboardStats.projectTimeline.length > 0 ? (
-              <div className="mt-8 flex flex-col" style={{ minWidth: `${getDashboardStats.timelineMinWidth}px` }}>
+              <div className={`mt-8 flex flex-col ${ganttFullscreen ? 'flex-1 min-h-0' : ''}`} style={{ minWidth: `${getDashboardStats.timelineMinWidth}px` }}>
                 {/* Months Header */}
                 <div className="relative h-6 w-full">
                   {getDashboardStats.timelineMonths.map((m, i) => (
@@ -439,7 +572,7 @@ export default function OpportunitiesList() {
                 </div>
 
                 {/* Scrollable Container */}
-                <div className="max-h-[400px] overflow-y-auto custom-scrollbar border-t border-gray-800 relative">
+                <div className={(ganttFullscreen ? 'flex-1 ' : 'max-h-[400px] ') + "overflow-y-auto custom-scrollbar border-t border-gray-800 relative"}>
                   <div className="relative min-h-full pb-4">
                     {/* Grid Lines */}
                     <div className="absolute top-0 left-0 right-0 bottom-0 pointer-events-none">
