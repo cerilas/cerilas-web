@@ -170,4 +170,17 @@ export const api = {
   getSmsSettings: () => request('/sms/settings'),
   updateSmsSettings: (data) => request('/sms/settings', { method: 'PUT', body: JSON.stringify(data) }),
   getSmsHeaders: (data) => request('/sms/headers', { method: 'POST', body: JSON.stringify(data) }),
+
+  // Opportunities
+  getOpportunities: () => request('/opportunities'),
+  getOpportunity: (id) => request(`/opportunities/${id}`),
+  createOpportunity: (data) => request('/opportunities', { method: 'POST', body: JSON.stringify(data) }),
+  updateOpportunity: (id, data) => request(`/opportunities/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+  deleteOpportunity: (id) => request(`/opportunities/${id}`, { method: 'DELETE' }),
+  addOpportunityPayment: (id, data) => request(`/opportunities/${id}/payments`, { method: 'POST', body: JSON.stringify(data) }),
+  deleteOpportunityPayment: (id, paymentId) => request(`/opportunities/${id}/payments/${paymentId}`, { method: 'DELETE' }),
+  addOpportunityTodo: (id, data) => request(`/opportunities/${id}/todos`, { method: 'POST', body: JSON.stringify(data) }),
+  toggleOpportunityTodo: (id, todoId, is_completed) => request(`/opportunities/${id}/todos/${todoId}`, { method: 'PATCH', body: JSON.stringify({ is_completed }) }),
+  deleteOpportunityTodo: (id, todoId) => request(`/opportunities/${id}/todos/${todoId}`, { method: 'DELETE' }),
+  getExchangeRates: () => request('/opportunities/rates'),
 };

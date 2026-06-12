@@ -35,6 +35,8 @@ import MailApiDocs from "./pages/admin/MailApiDocs";
 import MailSettings from "./pages/admin/MailSettings";
 import SmsSettings from "./pages/admin/SmsSettings";
 import SmsApiDocs from "./pages/admin/SmsApiDocs";
+import OpportunitiesList from "./pages/admin/OpportunitiesList";
+import OpportunityDetail from "./pages/admin/OpportunityDetail";
 
 function Layout({ children }) {
   return (
@@ -69,6 +71,8 @@ export default function App() {
               <Route path="job-listings" element={<JobListingsAdmin />} />
               <Route path="applications" element={<ApplicationsAdmin />} />
               <Route path="users" element={<UsersAdmin />} />
+              <Route path="opportunities" element={<OpportunitiesList />} />
+              <Route path="opportunities/:id" element={<OpportunityDetail />} />
             <Route path="mail-senders" element={<SendersAdmin />} />
             <Route path="mail-docs" element={<MailApiDocs />} />
             <Route path="mail-settings" element={<MailSettings />} />

@@ -16,6 +16,7 @@ import usersRoutes from './routes/users.js';
 import statsRoutes from './routes/stats.js';
 import mailRoutes from './routes/mail.js';
 import smsRoutes from './routes/sms.js';
+import opportunitiesRoutes from './routes/opportunities.js';
 import pool from './db.js';
 
 dotenv.config();
@@ -46,6 +47,7 @@ app.use('/api/users', usersRoutes);
 app.use('/api/stats', statsRoutes);
 app.use('/api/mail', mailRoutes);
 app.use('/api/sms', smsRoutes);
+app.use('/api/opportunities', opportunitiesRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => res.json({ ok: true }));
@@ -194,6 +196,40 @@ app.listen(PORT, async () => {
       INSERT INTO sms_settings (netgsm_usercode, netgsm_password, netgsm_header, is_active)
       SELECT 'deniz@cerilas.com', 'Dnz.24232423', 'CERILAS AS', true
       WHERE NOT EXISTS (SELECT 1 FROM sms_settings);
+
+      CREATE TABLE IF NOT EXISTS opportunities (
+        id SERIAL PRIMARY KEY,
+        name VARCHAR(300) NOT NULL,
+        description TEXT,
+        application_url TEXT,
+        drive_url TEXT,
+        focus_rating INTEGER DEFAULT 0,
+        probability_rating INTEGER DEFAULT 0,
+        total_income NUMERIC(15, 2) DEFAULT 0,
+        currency VARCHAR(10) DEFAULT 'TRY',
+        application_date DATE,
+        expected_end_date DATE,
+        created_at TIMESTAMP DEFAULT NOW(),
+        updated_at TIMESTAMP DEFAULT NOW()
+      );
+
+      CREATE TABLE IF NOT EXISTS opportunity_payments (
+        id SERIAL PRIMARY KEY,
+        opportunity_id INTEGER REFERENCES opportunities(id) ON DELETE CASCADE,
+        amount NUMERIC(15, 2) NOT NULL,
+        currency VARCHAR(10) DEFAULT 'TRY',
+        payment_date DATE NOT NULL,
+        created_at TIMESTAMP DEFAULT NOW()
+      );
+
+      CREATE TABLE IF NOT EXISTS opportunity_todos (
+        id SERIAL PRIMARY KEY,
+        opportunity_id INTEGER REFERENCES opportunities(id) ON DELETE CASCADE,
+        text TEXT NOT NULL,
+        is_completed BOOLEAN DEFAULT false,
+        deadline DATE,
+        created_at TIMESTAMP DEFAULT NOW()
+      );
     `);
     await pool.query(`
       CREATE TABLE IF NOT EXISTS job_listings (
