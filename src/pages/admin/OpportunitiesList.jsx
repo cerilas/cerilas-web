@@ -159,6 +159,12 @@ export default function OpportunitiesList() {
     let totalCertainBudget = 0; // 10
     let totalCertainRemaining = 0; // 10
     const paymentsByMonth = {};
+    
+    let totalAllTimeGrossBudget = 0;
+    opportunities.forEach(opp => {
+      const oppTotalIncomeInTry = convertAmount(opp.total_income, opp.currency, baseCurr);
+      totalAllTimeGrossBudget += oppTotalIncomeInTry;
+    });
 
     filteredAndSortedOpps.forEach(opp => {
       const p = parseInt(opp.probability_rating) || 0;
@@ -275,9 +281,9 @@ export default function OpportunitiesList() {
     return { 
       probData, timelineData, totalReceivedInTry, totalHighProbBudget, totalCertainBudget, 
       totalCertainRemaining, totalActiveTodos, avgFocus, baseCurr, 
-      projectTimeline, timelineMonths: months, todayPercent, timelineMinWidth
+      projectTimeline, timelineMonths: months, todayPercent, timelineMinWidth, totalAllTimeGrossBudget
     };
-  }, [filteredAndSortedOpps, rates]);
+  }, [filteredAndSortedOpps, opportunities, rates]);
 
   if (loading) {
     return <div className="text-white">Yükleniyor...</div>;
@@ -337,6 +343,13 @@ export default function OpportunitiesList() {
                   <span className="text-2xl font-black text-white">{getDashboardStats.avgFocus} <span className="text-sm text-gray-500">/ 10</span></span>
                 </div>
               </div>
+            </div>
+          </div>
+
+          {/* All-Time Budget Note */}
+          <div className="flex justify-end mb-4">
+            <div className="text-[10px] text-gray-500/70 italic bg-gray-800/30 px-3 py-1.5 rounded-lg border border-gray-800/50">
+              Sisteme girilmiş tüm projelerin (arşiv ve pasifler dahil) brüt bütçe hacmi: <span className="font-semibold text-gray-400/80">{formatMoney(getDashboardStats.totalAllTimeGrossBudget, getDashboardStats.baseCurr)}</span>
             </div>
           </div>
 

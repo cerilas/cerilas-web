@@ -333,7 +333,7 @@ router.get('/cron/opportunities-digest', async (req, res) => {
     const groupedExpected = {};
     const groupedAllTimeExpected = {};
     opps.forEach(o => {
-      const val = parseFloat(o.budget || 0);
+      const val = parseFloat(o.total_income || 0);
       groupedAllTimeExpected[o.currency] = (groupedAllTimeExpected[o.currency] || 0) + val;
       
       if (o.status !== 'Pasif' && o.status !== 'Arşiv') {
