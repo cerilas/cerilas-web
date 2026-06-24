@@ -17,6 +17,7 @@ import statsRoutes from './routes/stats.js';
 import mailRoutes from './routes/mail.js';
 import smsRoutes from './routes/sms.js';
 import opportunitiesRoutes from './routes/opportunities.js';
+import pomodoroRoutes from './routes/pomodoro.js';
 import pool from './db.js';
 
 dotenv.config();
@@ -48,6 +49,7 @@ app.use('/api/stats', statsRoutes);
 app.use('/api/mail', mailRoutes);
 app.use('/api/sms', smsRoutes);
 app.use('/api/opportunities', opportunitiesRoutes);
+app.use('/api/pomodoro', pomodoroRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => res.json({ ok: true }));
@@ -336,6 +338,19 @@ app.listen(PORT, async () => {
       CREATE INDEX IF NOT EXISTS idx_use_cases_tags_en_gin ON use_cases USING GIN(tags_en);
       CREATE INDEX IF NOT EXISTS idx_use_cases_keywords_tr_gin ON use_cases USING GIN(keywords_tr);
       CREATE INDEX IF NOT EXISTS idx_use_cases_keywords_en_gin ON use_cases USING GIN(keywords_en);
+    `);
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS pomodoro_sessions (
+        id SERIAL PRIMARY KEY,
+        user_id INTEGER REFERENCES users(id),
+        duration_minutes INTEGER NOT NULL,
+        date_string VARCHAR(10) NOT NULL,
+        created_at TIMESTAMP DEFAULT NOW()
+      );
+      CREATE INDEX IF NOT EXISTS idx_pomodoro_user_date ON pomodoro_sessions(user_id, date_string);
+      
+      ALTER TABLE users ADD COLUMN IF NOT EXISTS pomodoro_sound VARCHAR(50) DEFAULT 'beep1';
+      ALTER TABLE pomodoro_sessions ADD COLUMN IF NOT EXISTS task_label VARCHAR(255);
     `);
   } catch (err) {
     console.error('Table init error:', err.message);

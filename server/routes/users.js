@@ -39,6 +39,35 @@ router.get('/', async (req, res) => {
   }
 });
 
+// GET user settings
+router.get('/settings/me', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT pomodoro_sound FROM users WHERE id = $1', [req.user.id]);
+    if (result.rows.length === 0) return res.status(404).json({ error: 'User not found' });
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error('Fetch user settings error:', err);
+    res.status(500).json({ error: 'Failed to fetch settings' });
+  }
+});
+
+// PUT update user settings
+router.put('/settings/me', async (req, res) => {
+  try {
+    const { pomodoro_sound } = req.body;
+    if (!pomodoro_sound) return res.status(400).json({ error: 'Sound is required' });
+
+    const result = await pool.query(
+      'UPDATE users SET pomodoro_sound = $1 WHERE id = $2 RETURNING pomodoro_sound',
+      [pomodoro_sound, req.user.id]
+    );
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error('Update user settings error:', err);
+    res.status(500).json({ error: 'Failed to update settings' });
+  }
+});
+
 // POST create user
 router.post('/', async (req, res) => {
   try {

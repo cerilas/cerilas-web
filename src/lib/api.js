@@ -152,6 +152,8 @@ export const api = {
   createUser: (data) => request('/users', { method: 'POST', body: JSON.stringify(data) }),
   updateUser: (id, data) => request(`/users/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
   deleteUser: (id) => request(`/users/${id}`, { method: 'DELETE' }),
+  getSettings: () => request('/users/settings/me'),
+  updateSettings: (data) => request('/users/settings/me', { method: 'PUT', body: JSON.stringify(data) }),
 
   // Stats
   getStats: () => request('/stats'),
@@ -184,4 +186,11 @@ export const api = {
   deleteOpportunityTodo: (id, todoId) => request(`/opportunities/${id}/todos/${todoId}`, { method: 'DELETE' }),
   reorderOpportunityTodos: (id, items) => request(`/opportunities/${id}/todos/reorder/bulk`, { method: 'PATCH', body: JSON.stringify({ items }) }),
   getExchangeRates: () => request('/opportunities/rates'),
+
+  // Pomodoro
+  getPomodoroToday: () => request('/pomodoro/today'),
+  getPomodoroStats: () => request('/pomodoro/stats'),
+  getPomodoroHistory: (days = 7) => request(`/pomodoro/history?days=${days}`),
+  getPomodoroDailySessions: (date) => request(`/pomodoro/sessions?date=${date}`),
+  savePomodoroSession: (data) => request('/pomodoro', { method: 'POST', body: JSON.stringify(data) }),
 };

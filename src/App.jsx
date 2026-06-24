@@ -37,6 +37,7 @@ import SmsSettings from "./pages/admin/SmsSettings";
 import SmsApiDocs from "./pages/admin/SmsApiDocs";
 import OpportunitiesList from "./pages/admin/OpportunitiesList";
 import OpportunityDetail from "./pages/admin/OpportunityDetail";
+import Pomodoro from "./pages/admin/Pomodoro";
 import { Toaster } from 'react-hot-toast';
 
 function Layout({ children }) {
@@ -73,6 +74,7 @@ export default function App() {
             <Route index element={<Login />} />
             <Route element={<AdminLayout />}>
               <Route path="dashboard" element={<Dashboard />} />
+              <Route path="pomodoro" element={<Pomodoro />} />
               <Route path="projects" element={<ProjectsAdmin />} />
               <Route path="projects/new" element={<ProjectForm />} />
               <Route path="projects/:id" element={<ProjectForm />} />
