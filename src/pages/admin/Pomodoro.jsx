@@ -13,22 +13,22 @@ export default function Pomodoro() {
         Çalışma sürelerinizi takip edin ve gün sonu odak puanınızı yükseltin. Pomodoro tekniği ile daha verimli çalışabilirsiniz.
       </p>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-10">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
         {/* Sol Sütun: Sayaç ve İstatistikler */}
         <div className="lg:col-span-1 flex flex-col gap-6">
           <PomodoroTracker />
           <PomodoroStats />
         </div>
         
-        {/* Sağ Sütun: Geçmiş Grafikleri */}
+        {/* Sağ Sütun: Geçmiş Grafikleri (Sütun Grafik) */}
         <div className="lg:col-span-2 flex flex-col gap-6">
           <PomodoroHistory />
-          <PomodoroHeatmap />
         </div>
       </div>
 
-      {/* Tam Genişlik: Günlük Kayıt Defteri */}
-      <div>
+      {/* Tam Genişlik Bileşenler */}
+      <div className="flex flex-col gap-6">
+        <PomodoroHeatmap />
         <PomodoroDailyLog />
       </div>
     </div>
