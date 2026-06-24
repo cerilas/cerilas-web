@@ -4,10 +4,20 @@ import authMiddleware from '../middleware/auth.js';
 
 const router = express.Router();
 
+// Helper to get current date in TRT (Europe/Istanbul) timezone as YYYY-MM-DD
+const getTodayTRT = () => {
+  return new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Europe/Istanbul',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit'
+  }).format(new Date());
+};
+
 // Get today's total focus minutes
 router.get('/today', authMiddleware, async (req, res) => {
   try {
-    const today = new Date().toISOString().split('T')[0];
+    const today = getTodayTRT();
     const userId = req.user.id;
 
     const result = await pool.query(
@@ -161,7 +171,7 @@ router.post('/', authMiddleware, async (req, res) => {
   try {
     const { duration_minutes, task_label } = req.body;
     const userId = req.user.id;
-    const today = new Date().toISOString().split('T')[0];
+    const today = getTodayTRT();
 
     if (!duration_minutes || typeof duration_minutes !== 'number' || duration_minutes <= 0) {
       return res.status(400).json({ error: 'Invalid duration' });
