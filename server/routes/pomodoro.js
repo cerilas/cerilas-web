@@ -14,6 +14,12 @@ const getTodayTRT = () => {
   }).format(new Date());
 };
 
+const decrementDateString = (dateStr) => {
+  const d = new Date(dateStr);
+  d.setDate(d.getDate() - 1);
+  return d.toISOString().split('T')[0];
+};
+
 // Get today's total focus minutes
 router.get('/today', authMiddleware, async (req, res) => {
   try {
@@ -59,23 +65,16 @@ router.get('/stats', authMiddleware, async (req, res) => {
     
     let currentStreak = 0;
     
-    // Create Date objects in local time equivalent using UTC strings to avoid timezone shift
-    const today = new Date();
-    // Use manual string split based on timezone offset for safety, or just standard string
-    const offset = today.getTimezoneOffset();
-    const todayLocal = new Date(today.getTime() - (offset*60*1000));
-    const todayStr = todayLocal.toISOString().split('T')[0];
-    
-    const yesterdayLocal = new Date(todayLocal.getTime() - 24*60*60*1000);
-    const yesterdayStr = yesterdayLocal.toISOString().split('T')[0];
+    const todayStr = getTodayTRT();
+    const yesterdayStr = decrementDateString(todayStr);
 
     if (dates.length > 0) {
       if (dates[0] === todayStr || dates[0] === yesterdayStr) {
-        let expectedDate = new Date(dates[0]);
+        let expectedDateStr = dates[0];
         for (const dateStr of dates) {
-          if (dateStr === expectedDate.toISOString().split('T')[0]) {
+          if (dateStr === expectedDateStr) {
             currentStreak++;
-            expectedDate.setDate(expectedDate.getDate() - 1);
+            expectedDateStr = decrementDateString(expectedDateStr);
           } else {
             break;
           }
