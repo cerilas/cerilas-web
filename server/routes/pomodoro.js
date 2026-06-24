@@ -132,6 +132,30 @@ router.get('/sessions', authMiddleware, async (req, res) => {
   }
 });
 
+// Delete a session
+router.delete('/sessions/:id', authMiddleware, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const sessionId = req.params.id;
+
+    const result = await pool.query(
+      `DELETE FROM pomodoro_sessions 
+       WHERE id = $1 AND user_id = $2 
+       RETURNING *`,
+      [sessionId, userId]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Session not found or not authorized' });
+    }
+
+    res.json({ success: true, deleted_id: sessionId });
+  } catch (error) {
+    console.error('Error deleting pomodoro session:', error);
+    res.status(500).json({ error: 'Failed to delete pomodoro session' });
+  }
+});
+
 // Save a completed session
 router.post('/', authMiddleware, async (req, res) => {
   try {

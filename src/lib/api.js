@@ -193,4 +193,5 @@ export const api = {
   getPomodoroHistory: (days = 7) => request(`/pomodoro/history?days=${days}`),
   getPomodoroDailySessions: (date) => request(`/pomodoro/sessions?date=${date}`),
   savePomodoroSession: (data) => request('/pomodoro', { method: 'POST', body: JSON.stringify(data) }),
+  deletePomodoroSession: (id) => request(`/pomodoro/sessions/${id}`, { method: 'DELETE' }),
 };
