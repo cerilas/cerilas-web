@@ -161,9 +161,20 @@ export default function PomodoroTracker() {
     return () => clearInterval(intervalRef.current);
   }, [isRunning, timeLeft, duration]);
 
+  const getLocalYYYYMMDD = () => {
+    const d = new Date();
+    const offset = d.getTimezoneOffset();
+    const local = new Date(d.getTime() - (offset * 60 * 1000));
+    return local.toISOString().split('T')[0];
+  };
+
   const saveSession = async (mins) => {
     try {
-      await api.savePomodoroSession({ duration_minutes: mins, task_label: taskLabel });
+      await api.savePomodoroSession({ 
+        duration_minutes: mins, 
+        task_label: taskLabel,
+        date_string: getLocalYYYYMMDD()
+      });
       toast.success(`${mins} dakikalık odaklanma tamamlandı!`);
       fetchTodayStats();
       setTimeLeft(duration * 60); // Reset for next run

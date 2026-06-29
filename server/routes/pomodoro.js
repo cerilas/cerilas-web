@@ -168,9 +168,10 @@ router.delete('/sessions/:id', authMiddleware, async (req, res) => {
 // Save a completed session
 router.post('/', authMiddleware, async (req, res) => {
   try {
-    const { duration_minutes, task_label } = req.body;
+    const { duration_minutes, task_label, date_string } = req.body;
     const userId = req.user.id;
-    const today = getTodayTRT();
+    // Client strictly knows its local date. Fallback to server calculation just in case.
+    const today = date_string || getTodayTRT();
 
     if (!duration_minutes || typeof duration_minutes !== 'number' || duration_minutes <= 0) {
       return res.status(400).json({ error: 'Invalid duration' });
