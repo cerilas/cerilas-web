@@ -305,10 +305,10 @@ async function seed() {
       { section: 'home', field_key: 'heroTitle', value_tr: 'Geleceği İnşa Eden', value_en: 'Building the' },
       { section: 'home', field_key: 'heroHighlight', value_tr: 'Teknoloji', value_en: 'Future of Technology' },
       { section: 'home', field_key: 'heroDesc', value_tr: 'Yapay zeka, robotik ve ileri veri analitiği alanlarında yenilikçi Ar-Ge çözümleri sunuyoruz.', value_en: 'We deliver innovative R&D solutions in artificial intelligence, robotics, and advanced data analytics.' },
-      { section: 'home', field_key: 'tubitakTitle', value_tr: 'TÜBİTAK Onaylı Ar-Ge Merkezi', value_en: 'TÜBİTAK Certified R&D Center' },
-      { section: 'home', field_key: 'tubitakDesc', value_tr: 'Cerilas, TÜBİTAK tarafından onaylanmış bir Ar-Ge merkezi olarak Türkiye\'nin teknoloji ekosistemine katkı sağlamaktadır.', value_en: 'As a TÜBİTAK-certified R&D center, Cerilas contributes to Turkey\'s technology ecosystem.' },
+      { section: 'home', field_key: 'tubitakTitle', value_tr: 'TÜBİTAK BiGG 1812 ile Kuruldu', value_en: 'Founded with TUBITAK BiGG 1812 Investment' },
+      { section: 'home', field_key: 'tubitakDesc', value_tr: 'CERİLAS, TÜBİTAK BiGG 1812 Girişimcilik Destek Programı kapsamında aldığı yatırımla kurulmuş bir yüksek teknoloji girişimidir.', value_en: 'CERILAS is a high-technology venture founded with investment received under the TUBITAK BiGG 1812 Entrepreneurship Support Program.' },
       { section: 'about', field_key: 'title', value_tr: 'Hakkımızda', value_en: 'About Us' },
-      { section: 'about', field_key: 'subtitle', value_tr: 'Derin teknoloji alanında Ar-Ge odaklı çalışan, TÜBİTAK onaylı yüksek teknoloji şirketi.', value_en: 'A TÜBİTAK-certified deep-tech company focused on R&D.' },
+      { section: 'about', field_key: 'subtitle', value_tr: 'Derin teknoloji alanında Ar-Ge odaklı çalışan, BiGG 1812 yatırımıyla kurulmuş yüksek teknoloji şirketi.', value_en: 'A deep-tech company founded with BiGG 1812 investment and focused on R&D.' },
       { section: 'about', field_key: 'whoTitle', value_tr: 'Biz Kimiz?', value_en: 'Who We Are' },
       { section: 'about', field_key: 'whoText', value_tr: 'CERİLAS Yüksek Teknoloji, yapay zeka, robotik, IoT ve veri analitiği alanlarında uçtan uca Ar-Ge çözümleri sunan bir teknoloji şirketidir.', value_en: 'Cerilas High Technologies is a technology company providing end-to-end R&D solutions in AI, robotics, IoT, and data analytics.' },
     ];

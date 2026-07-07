@@ -87,14 +87,14 @@ export const translations = {
       strategicPartnersTitle: "Strategic Partners",
       strategicPartnersDesc:
         "A strong academic and technological partnership network including Gaziantep University Technopark, Hasan Kalyoncu University Technopark, and Istanbul University Technopark.",
-      tubitakTitle: "TUBITAK Partnership",
+      tubitakTitle: "Founded with TUBITAK BiGG 1812",
       tubitakDesc:
-        "CERILAS is a technology company with direct public R&D alignment. We maintain a strategic partnership with TUBITAK.",
-      tubitakChip: "TUBITAK-Backed Company",
-      tubitakStatLabel: "Official Partnership",
+        "CERILAS is a high-technology venture founded with investment received under the TUBITAK BiGG 1812 Entrepreneurship Support Program.",
+      tubitakChip: "Founded with BiGG 1812 Investment",
+      tubitakStatLabel: "TUBITAK BiGG 1812",
       tubitakStatValue: "",
       tubitakNote:
-        "This structure reinforces our long-term innovation capacity and institutional trust for strategic partnerships.",
+        "This founding support strengthened our productization focus in robotics, artificial intelligence, and order-based R&D.",
       metricsTitle: "Cerilas by the Numbers",
       metric1Label: "R&D Projects",
       metric2Label: "Use Cases",
@@ -630,14 +630,14 @@ export const translations = {
       strategicPartnersTitle: "Stratejik Ortaklarımız",
       strategicPartnersDesc:
         "Gaziantep Üniversitesi Teknopark, Hasan Kalyoncu Üniversitesi Teknopark ve İstanbul Üniversitesi Teknopark başta olmak üzere güçlü bir akademik ve teknolojik iş birliği ağı.",
-      tubitakTitle: "TÜBİTAK Ortaklığı",
+      tubitakTitle: "TÜBİTAK BiGG 1812 ile Kuruldu",
       tubitakDesc:
-        "CERİLAS, kamu destekli Ar-Ge vizyonuna doğrudan bağlı bir teknoloji şirketidir. TÜBİTAK ile stratejik bir ortaklık yapısı sürdürmektedir.",
-      tubitakChip: "TÜBİTAK'ın Yatırım Yaptığı Şirket",
-      tubitakStatLabel: "Resmi Ortaklık",
+        "CERİLAS, TÜBİTAK BiGG 1812 Girişimcilik Destek Programı kapsamında aldığı yatırımla kurulmuş bir yüksek teknoloji girişimidir.",
+      tubitakChip: "BiGG 1812 Yatırımıyla Kuruldu",
+      tubitakStatLabel: "TÜBİTAK BiGG 1812",
       tubitakStatValue: "",
       tubitakNote:
-        "Bu ortaklık yapısı, uzun vadeli inovasyon kapasitemizi ve stratejik iş birlikleri için kurumsal güvenilirliğimizi güçlendirir.",
+        "Bu kuruluş desteği; robotik, yapay zeka ve siparişe dayalı Ar-Ge alanlarında ürünleşme odağımızı güçlendiren erken dönem teknoloji yatırımıdır.",
       metricsTitle: "Rakamlarla Cerilas",
       metric1Label: "Ar-Ge Projesi",
       metric2Label: "Use-Case Sayısı",

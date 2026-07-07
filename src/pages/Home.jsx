@@ -213,7 +213,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* TUBITAK ownership highlight */}
+      {/* TUBITAK BiGG 1812 highlight */}
       <section className="py-20 bg-gray-900/30 border-y border-cyan-500/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <FadeIn>
