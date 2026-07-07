@@ -6,7 +6,7 @@ import { useSeoMeta } from '../hooks/useSeoMeta';
 
 export default function UseCaseDetail() {
   const { slug } = useParams();
-  const { t } = useLang();
+  const { t, localizedPath } = useLang();
   const copy = t.useCases;
   const common = t.common;
   const { loading, useCase } = useUseCase(slug);
@@ -31,7 +31,7 @@ export default function UseCaseDetail() {
         <div className="text-center px-4">
           <h1 className="text-2xl font-bold text-white">{copy.notFoundTitle}</h1>
           <p className="mt-3 text-gray-400">{copy.notFoundDescription}</p>
-          <Link to="/use-cases" className="mt-6 inline-block text-cyan-400 hover:text-cyan-300">
+          <Link to={localizedPath("/use-cases")} className="mt-6 inline-block text-cyan-400 hover:text-cyan-300">
             {copy.backToList}
           </Link>
         </div>
@@ -52,7 +52,7 @@ export default function UseCaseDetail() {
         />
         <div className="relative max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <FadeIn>
-            <Link to="/use-cases" className="text-sm text-gray-400 hover:text-cyan-400 transition-colors inline-block mb-8">
+            <Link to={localizedPath("/use-cases")} className="text-sm text-gray-400 hover:text-cyan-400 transition-colors inline-block mb-8">
               {copy.backToList}
             </Link>
             <div className="flex flex-wrap gap-2 mb-6">
@@ -131,7 +131,7 @@ export default function UseCaseDetail() {
           <FadeIn>
             <p className="text-xl font-semibold text-white mb-6">{common.projectCtaText}</p>
             <Link
-              to="/contact"
+              to={localizedPath("/contact")}
               className="inline-flex items-center gap-2 px-8 py-4 bg-cyan-500 hover:bg-cyan-400 text-gray-950 font-semibold rounded-xl text-sm transition-colors"
             >
               {common.getInTouch}

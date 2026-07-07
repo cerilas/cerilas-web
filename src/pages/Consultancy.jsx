@@ -4,7 +4,7 @@ import { SectionTitle, FadeIn, GlowCard } from "../components/ui";
 import imgConsultancy from "../assets/images/marvin-meyer-SYTO3xs06fU-unsplash.jpg";
 
 export default function Consultancy() {
-  const { t } = useLang();
+  const { t, localizedPath } = useLang();
   const c = t.consultancy;
 
   return (
@@ -65,7 +65,7 @@ export default function Consultancy() {
               <h2 className="text-3xl font-bold text-white">{c.ctaTitle}</h2>
               <p className="mt-4 text-gray-400">{c.ctaText}</p>
               <Link
-                to="/contact"
+                to={localizedPath("/contact")}
                 className="mt-8 inline-flex items-center gap-2 px-8 py-4 bg-cyan-500 hover:bg-cyan-400 text-gray-950 font-semibold rounded-xl text-sm transition-colors"
               >
                 {c.ctaButton}
@@ -104,7 +104,7 @@ export default function Consultancy() {
                   </div>
                   
                   <Link
-                    to="/contact"
+                    to={localizedPath("/contact")}
                     className="inline-flex items-center gap-2 px-6 py-3 bg-cyan-500 hover:bg-cyan-400 text-gray-950 font-semibold rounded-lg text-sm transition-colors w-full justify-center"
                   >
                     {item.button}

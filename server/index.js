@@ -25,6 +25,168 @@ dotenv.config();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
 const PORT = process.env.PORT || 3001;
+const BRAND_NAME = 'CERİLAS Yüksek Teknoloji';
+const DEFAULT_DESCRIPTION = 'Robotik, yapay zeka, sipariş Ar-Ge, TÜBİTAK, teknopark ve Avrupa Birliği projeleri için yüksek teknoloji Ar-Ge çözümleri.';
+const SEO_KEYWORDS = [
+  'CERİLAS Yüksek Teknoloji',
+  'robotik arge',
+  'yapay zeka çözümleri',
+  'sipariş arge',
+  'TÜBİTAK arge projesi',
+  'teknopark teknoloji şirketi',
+  'Avrupa Birliği projeleri',
+  'Horizon Europe proje danışmanlığı',
+  'robotics R&D',
+  'AI R&D company',
+  'EU funded technology projects',
+  'technopark R&D company'
+].join(', ');
+
+const staticSeo = {
+  '/': {
+    title: `${BRAND_NAME} | Robotik, Yapay Zeka ve Sipariş Ar-Ge`,
+    titleEn: `${BRAND_NAME} | Robotics, AI and Custom R&D`,
+    description: DEFAULT_DESCRIPTION,
+    descriptionEn: 'High-tech R&D solutions for robotics, artificial intelligence, custom R&D, technopark, TUBITAK and European Union projects.',
+    priority: '1.0',
+    changefreq: 'weekly'
+  },
+  '/about': {
+    title: `Hakkımızda | ${BRAND_NAME}`,
+    titleEn: `About | ${BRAND_NAME}`,
+    description: 'CERİLAS Yüksek Teknoloji; robotik, yapay zeka, gömülü sistemler, teknopark ve TÜBİTAK destekli Ar-Ge projelerinde uzman teknoloji şirketidir.',
+    descriptionEn: 'CERİLAS Yüksek Teknoloji is a technology company focused on robotics, artificial intelligence, embedded systems, technopark and TUBITAK-backed R&D projects.',
+    priority: '0.8',
+    changefreq: 'monthly'
+  },
+  '/capabilities': {
+    title: `Faaliyet Alanları | Robotik, Yapay Zeka ve Ar-Ge | ${BRAND_NAME}`,
+    titleEn: `Capabilities | Robotics, AI and R&D | ${BRAND_NAME}`,
+    description: 'Robotik, yapay zeka, veri analitiği, IoT, gömülü sistemler ve prototipleme alanlarında uçtan uca yüksek teknoloji Ar-Ge yetkinlikleri.',
+    descriptionEn: 'End-to-end high-tech R&D capabilities in robotics, artificial intelligence, data analytics, IoT, embedded systems and prototyping.',
+    priority: '0.9',
+    changefreq: 'monthly'
+  },
+  '/projects': {
+    title: `Ar-Ge Projeleri | TÜBİTAK, Teknopark ve AB Projeleri | ${BRAND_NAME}`,
+    titleEn: `R&D Projects | TUBITAK, Technopark and EU Projects | ${BRAND_NAME}`,
+    description: 'TÜBİTAK, teknopark, Avrupa Birliği ve sipariş Ar-Ge kapsamındaki robotik, yapay zeka ve yüksek teknoloji proje portföyü.',
+    descriptionEn: 'Robotics, artificial intelligence and high-tech project portfolio covering TUBITAK, technopark, European Union and custom R&D programs.',
+    priority: '0.9',
+    changefreq: 'weekly'
+  },
+  '/use-cases': {
+    title: `Use Case'ler | Yapay Zeka, Robotik ve Teknoloji Çözümleri | ${BRAND_NAME}`,
+    titleEn: `Use Cases | AI, Robotics and Technology Solutions | ${BRAND_NAME}`,
+    description: 'Sektörlere göre yapay zeka, robotik, veri analitiği, IoT ve Ar-Ge kullanım senaryoları.',
+    descriptionEn: 'Sector-specific artificial intelligence, robotics, data analytics, IoT and R&D use cases.',
+    priority: '0.9',
+    changefreq: 'weekly'
+  },
+  '/consultancy': {
+    title: `Ar-Ge ve Teknoloji Danışmanlığı | ${BRAND_NAME}`,
+    titleEn: `R&D and Technology Consultancy | ${BRAND_NAME}`,
+    description: 'TÜBİTAK, Avrupa Birliği projeleri, teknopark süreçleri, sipariş Ar-Ge ve yüksek teknoloji ürün geliştirme danışmanlığı.',
+    descriptionEn: 'Consultancy for TUBITAK, European Union projects, technopark processes, custom R&D and high-tech product development.',
+    priority: '0.8',
+    changefreq: 'monthly'
+  },
+  '/careers': {
+    title: `Kariyer | ${BRAND_NAME}`,
+    titleEn: `Careers | ${BRAND_NAME}`,
+    description: 'Robotik, yapay zeka, yazılım, gömülü sistemler ve Ar-Ge projelerinde CERİLAS Yüksek Teknoloji kariyer fırsatları.',
+    descriptionEn: 'Career opportunities at CERİLAS Yüksek Teknoloji in robotics, AI, software, embedded systems and R&D projects.',
+    priority: '0.6',
+    changefreq: 'weekly'
+  },
+  '/careers/apply': {
+    title: `İş Başvurusu | ${BRAND_NAME}`,
+    titleEn: `Job Application | ${BRAND_NAME}`,
+    description: 'CERİLAS Yüksek Teknoloji açık pozisyonları ve genel iş başvuru formu.',
+    descriptionEn: 'Open positions and general job application form for CERİLAS Yüksek Teknoloji.',
+    priority: '0.5',
+    changefreq: 'monthly'
+  },
+  '/contact': {
+    title: `İletişim | ${BRAND_NAME}`,
+    titleEn: `Contact | ${BRAND_NAME}`,
+    description: 'Robotik, yapay zeka, teknoloji, teknopark, TÜBİTAK ve Avrupa Birliği projeleri için CERİLAS Yüksek Teknoloji ile iletişime geçin.',
+    descriptionEn: 'Contact CERİLAS Yüksek Teknoloji for robotics, AI, technology, technopark, TUBITAK and European Union projects.',
+    priority: '0.8',
+    changefreq: 'monthly'
+  },
+  '/legal/terms': {
+    title: `Kullanım Koşulları | ${BRAND_NAME}`,
+    titleEn: `Terms and Conditions | ${BRAND_NAME}`,
+    description: 'CERİLAS Yüksek Teknoloji web sitesi kullanım koşulları.',
+    descriptionEn: 'Terms and conditions for the CERİLAS Yüksek Teknoloji website.',
+    priority: '0.3',
+    changefreq: 'yearly'
+  },
+  '/legal/privacy': {
+    title: `Gizlilik Politikası | ${BRAND_NAME}`,
+    titleEn: `Privacy Policy | ${BRAND_NAME}`,
+    description: 'CERİLAS Yüksek Teknoloji gizlilik politikası ve KVKK bilgilendirmesi.',
+    descriptionEn: 'Privacy policy and data protection information for CERİLAS Yüksek Teknoloji.',
+    priority: '0.3',
+    changefreq: 'yearly'
+  },
+  '/legal/refund': {
+    title: `İade Politikası | ${BRAND_NAME}`,
+    titleEn: `Refund Policy | ${BRAND_NAME}`,
+    description: 'CERİLAS Yüksek Teknoloji hizmetleri için iade politikası.',
+    descriptionEn: 'Refund policy for CERİLAS Yüksek Teknoloji services.',
+    priority: '0.3',
+    changefreq: 'yearly'
+  },
+  '/legal/accessibility': {
+    title: `Erişilebilirlik | ${BRAND_NAME}`,
+    titleEn: `Accessibility | ${BRAND_NAME}`,
+    description: 'CERİLAS Yüksek Teknoloji dijital erişilebilirlik beyanı.',
+    descriptionEn: 'Digital accessibility statement for CERİLAS Yüksek Teknoloji.',
+    priority: '0.3',
+    changefreq: 'yearly'
+  }
+};
+
+const localePrefixes = ['tr', 'en'];
+
+const escapeXml = (value) => String(value || '')
+  .replace(/&/g, '&amp;')
+  .replace(/</g, '&lt;')
+  .replace(/>/g, '&gt;')
+  .replace(/"/g, '&quot;')
+  .replace(/'/g, '&apos;');
+
+const getBaseUrl = () => (process.env.PUBLIC_URL || 'https://www.cerilas.com').replace(/\/$/, '');
+
+const stripLocalePrefix = (urlPath) => {
+  const match = urlPath.match(/^\/(tr|en)(?=\/|$)/);
+  if (!match) return { locale: 'tr', path: urlPath || '/' };
+  const stripped = urlPath.slice(match[0].length) || '/';
+  return { locale: match[1], path: stripped };
+};
+
+const localizedPath = (pathValue, locale) => {
+  const normalized = pathValue === '/' ? '' : pathValue;
+  return `/${locale}${normalized}`;
+};
+
+const addMetaTag = (html, selector, tagHtml) => (
+  html.includes(selector) ? html : html.replace('</head>', `  ${tagHtml}\n  </head>`)
+);
+
+const getStaticMeta = (routePath, locale) => {
+  const meta = staticSeo[routePath] || staticSeo['/'];
+  if (locale === 'en') {
+    return {
+      ...meta,
+      title: meta.titleEn || meta.title,
+      description: meta.descriptionEn || meta.description
+    };
+  }
+  return meta;
+};
 
 app.use(cors());
 app.use(express.json({ limit: '10mb' }));
@@ -60,29 +222,39 @@ app.use(express.static(distPath, { index: false }));
 
 app.get('/sitemap.xml', async (req, res) => {
   try {
-    const baseUrl = process.env.PUBLIC_URL || 'https://www.cerilas.com';
+    const baseUrl = getBaseUrl();
     const projects = await pool.query("SELECT slug, updated_at FROM projects WHERE status = 'active'");
     const useCases = await pool.query("SELECT slug, updated_at FROM use_cases WHERE status = 'published'");
-    const jobs = await pool.query("SELECT id, updated_at FROM job_listings WHERE is_active = true");
 
     let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
-    xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
+    xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">\n';
 
-    const staticRoutes = ['/', '/tr/about', '/tr/contact', '/tr/projects', '/tr/use-cases', '/tr/careers'];
-    staticRoutes.forEach(route => {
-      xml += `  <url>\n    <loc>${baseUrl}${route}</loc>\n    <changefreq>weekly</changefreq>\n    <priority>0.8</priority>\n  </url>\n`;
+    const addUrl = ({ path: routePath, lastmod, changefreq = 'monthly', priority = '0.7' }) => {
+      localePrefixes.forEach(locale => {
+        const loc = `${baseUrl}${localizedPath(routePath, locale)}`;
+        xml += '  <url>\n';
+        xml += `    <loc>${escapeXml(loc)}</loc>\n`;
+        localePrefixes.forEach(altLocale => {
+          xml += `    <xhtml:link rel="alternate" hreflang="${altLocale}" href="${escapeXml(`${baseUrl}${localizedPath(routePath, altLocale)}`)}" />\n`;
+        });
+        xml += `    <xhtml:link rel="alternate" hreflang="x-default" href="${escapeXml(`${baseUrl}${routePath}`)}" />\n`;
+        if (lastmod) xml += `    <lastmod>${new Date(lastmod).toISOString()}</lastmod>\n`;
+        xml += `    <changefreq>${changefreq}</changefreq>\n`;
+        xml += `    <priority>${priority}</priority>\n`;
+        xml += '  </url>\n';
+      });
+    };
+
+    Object.entries(staticSeo).forEach(([routePath, meta]) => {
+      addUrl({ path: routePath, changefreq: meta.changefreq, priority: meta.priority });
     });
 
     projects.rows.forEach(p => {
-      xml += `  <url>\n    <loc>${baseUrl}/tr/projects/${p.slug}</loc>\n    <lastmod>${new Date(p.updated_at || Date.now()).toISOString()}</lastmod>\n    <changefreq>monthly</changefreq>\n    <priority>0.7</priority>\n  </url>\n`;
+      addUrl({ path: `/projects/${p.slug}`, lastmod: p.updated_at || Date.now(), changefreq: 'monthly', priority: '0.7' });
     });
 
     useCases.rows.forEach(u => {
-      xml += `  <url>\n    <loc>${baseUrl}/tr/use-cases/${u.slug}</loc>\n    <lastmod>${new Date(u.updated_at || Date.now()).toISOString()}</lastmod>\n    <changefreq>monthly</changefreq>\n    <priority>0.7</priority>\n  </url>\n`;
-    });
-
-    jobs.rows.forEach(j => {
-      xml += `  <url>\n    <loc>${baseUrl}/tr/careers/${j.id}</loc>\n    <lastmod>${new Date(j.updated_at || Date.now()).toISOString()}</lastmod>\n    <changefreq>monthly</changefreq>\n    <priority>0.6</priority>\n  </url>\n`;
+      addUrl({ path: `/use-cases/${u.slug}`, lastmod: u.updated_at || Date.now(), changefreq: 'monthly', priority: '0.7' });
     });
 
     xml += '</urlset>';
@@ -95,9 +267,19 @@ app.get('/sitemap.xml', async (req, res) => {
 });
 
 app.get('/robots.txt', (req, res) => {
-  const baseUrl = process.env.PUBLIC_URL || 'https://www.cerilas.com';
+  const baseUrl = getBaseUrl();
   res.type('text/plain');
-  res.send(`User-agent: *\nAllow: /\nSitemap: ${baseUrl}/sitemap.xml\n`);
+  res.send([
+    'User-agent: *',
+    'Allow: /',
+    'Disallow: /admin',
+    'Disallow: /api/',
+    'Disallow: /server/',
+    '',
+    `Sitemap: ${baseUrl}/sitemap.xml`,
+    `Host: ${baseUrl.replace(/^https?:\/\//, '')}`,
+    ''
+  ].join('\n'));
 });
 
 app.get('{*path}', async (req, res) => {
@@ -105,47 +287,84 @@ app.get('{*path}', async (req, res) => {
   try {
     let html = await fs.promises.readFile(indexPath, 'utf-8');
     const url = req.path;
-    let ogTitle = 'Cerilas Yüksek Teknolojiler';
-    let ogDesc = 'Yapay Zeka, Robotik, Veri Analitiği ve IoT alanlarında Ar-Ge ve danışmanlık hizmetleri sunan TÜBİTAK onaylı teknoloji şirketi.';
+    const baseUrl = getBaseUrl();
+    const { locale, path: canonicalPath } = stripLocalePrefix(url);
+    const canonicalUrl = `${baseUrl}${localizedPath(canonicalPath, locale)}`;
+    const staticMeta = getStaticMeta(canonicalPath, locale);
+    let ogTitle = staticMeta.title || BRAND_NAME;
+    let ogDesc = staticMeta.description || DEFAULT_DESCRIPTION;
     let ogImage = '/favicon.png';
 
-    if (url.includes('/projects/') || url.includes('/projeler/')) {
-      const slug = url.split('/').pop();
+    if (canonicalPath.includes('/projects/') || canonicalPath.includes('/projeler/')) {
+      const slug = canonicalPath.split('/').pop();
       const proj = await pool.query("SELECT * FROM projects WHERE slug = $1", [slug]);
       if (proj.rows.length > 0) {
         const p = proj.rows[0];
-        ogTitle = p.seo_title_tr || p.title_tr || ogTitle;
-        ogDesc = p.seo_description_tr || p.short_desc_tr || ogDesc;
+        ogTitle = locale === 'en' ? (p.seo_title_en || p.title_en || ogTitle) : (p.seo_title_tr || p.title_tr || ogTitle);
+        ogDesc = locale === 'en' ? (p.seo_description_en || p.short_desc_en || ogDesc) : (p.seo_description_tr || p.short_desc_tr || ogDesc);
         if (p.image_url) ogImage = p.image_url;
       }
-    } else if (url.includes('/use-cases/')) {
-      const slug = url.split('/').pop();
+    } else if (canonicalPath.includes('/use-cases/')) {
+      const slug = canonicalPath.split('/').pop();
       const uc = await pool.query("SELECT * FROM use_cases WHERE slug = $1", [slug]);
       if (uc.rows.length > 0) {
         const u = uc.rows[0];
-        ogTitle = u.seo_title_tr || u.title_tr || ogTitle;
-        ogDesc = u.seo_description_tr || u.problem_tr || ogDesc;
+        ogTitle = locale === 'en' ? (u.seo_title_en || u.title_en || ogTitle) : (u.seo_title_tr || u.title_tr || ogTitle);
+        ogDesc = locale === 'en' ? (u.seo_description_en || u.problem_en || ogDesc) : (u.seo_description_tr || u.problem_tr || ogDesc);
         if (u.cover_image_url) ogImage = u.cover_image_url;
       }
-    } else if (url.includes('/careers/')) {
-      const id = url.split('/').pop();
+    } else if (canonicalPath.includes('/careers/')) {
+      const id = canonicalPath.split('/').pop();
       if (!isNaN(id)) {
         const job = await pool.query("SELECT * FROM job_listings WHERE id = $1", [id]);
         if (job.rows.length > 0) {
           const j = job.rows[0];
-          ogTitle = j.title_tr || ogTitle;
-          ogDesc = j.description_tr ? j.description_tr.substring(0, 150) + '...' : ogDesc;
+          ogTitle = locale === 'en' ? (j.title_en || j.title || ogTitle) : (j.title_tr || j.title || ogTitle);
+          const jobDesc = locale === 'en' ? (j.description_en || j.description) : (j.description_tr || j.description);
+          ogDesc = jobDesc ? jobDesc.substring(0, 150) + '...' : ogDesc;
         }
       }
     }
 
-    html = html.replace(/<title>.*<\/title>/, `<title>${ogTitle} | Cerilas</title>`);
+    const title = ogTitle.includes(BRAND_NAME) ? ogTitle : `${ogTitle} | ${BRAND_NAME}`;
+    const imageUrl = ogImage.startsWith('http') ? ogImage : `${baseUrl}${ogImage}`;
+    const structuredData = {
+      '@context': 'https://schema.org',
+      '@type': 'Organization',
+      name: BRAND_NAME,
+      alternateName: ['CERİLAS', 'Cerilas High Tech'],
+      url: baseUrl,
+      logo: `${baseUrl}/favicon.png`,
+      description: DEFAULT_DESCRIPTION,
+      areaServed: ['TR', 'EU'],
+      knowsAbout: [
+        'Robotik',
+        'Yapay zeka',
+        'Sipariş Ar-Ge',
+        'TÜBİTAK projeleri',
+        'Teknopark',
+        'Avrupa Birliği projeleri',
+        'Horizon Europe',
+        'Robotics R&D',
+        'Artificial intelligence R&D'
+      ],
+      contactPoint: {
+        '@type': 'ContactPoint',
+        contactType: 'business inquiries',
+        email: 'info@cerilas.com',
+        availableLanguage: ['tr', 'en']
+      }
+    };
+
+    html = html.replace(/<html lang="[^"]*"/, `<html lang="${locale}"`);
+    html = html.replace(/<title>.*<\/title>/, `<title>${title.replace(/</g, '&lt;')}</title>`);
     html = html.replace(/<meta name="description" content="[^"]*"/, `<meta name="description" content="${ogDesc.replace(/"/g, '&quot;')}"`);
+    html = html.replace(/<meta name="keywords" content="[^"]*"/, `<meta name="keywords" content="${SEO_KEYWORDS.replace(/"/g, '&quot;')}"`);
     
     if (html.includes('<meta property="og:title"')) {
-      html = html.replace(/<meta property="og:title" content="[^"]*"/, `<meta property="og:title" content="${ogTitle.replace(/"/g, '&quot;')}"`);
+      html = html.replace(/<meta property="og:title" content="[^"]*"/, `<meta property="og:title" content="${title.replace(/"/g, '&quot;')}"`);
     } else {
-      html = html.replace('</head>', `  <meta property="og:title" content="${ogTitle.replace(/"/g, '&quot;')}" />\n  </head>`);
+      html = html.replace('</head>', `  <meta property="og:title" content="${title.replace(/"/g, '&quot;')}" />\n  </head>`);
     }
 
     if (html.includes('<meta property="og:description"')) {
@@ -155,10 +374,35 @@ app.get('{*path}', async (req, res) => {
     }
 
     if (html.includes('<meta property="og:image"')) {
-      html = html.replace(/<meta property="og:image" content="[^"]*"/, `<meta property="og:image" content="${ogImage}"`);
+      html = html.replace(/<meta property="og:image" content="[^"]*"/, `<meta property="og:image" content="${imageUrl}"`);
     } else {
-      html = html.replace('</head>', `  <meta property="og:image" content="${ogImage}" />\n  </head>`);
+      html = html.replace('</head>', `  <meta property="og:image" content="${imageUrl}" />\n  </head>`);
     }
+
+    html = html
+      .replace(/\s*<link rel="canonical"[^>]*>\n?/g, '')
+      .replace(/\s*<link rel="alternate"[^>]*>\n?/g, '')
+      .replace(/\s*<meta property="og:url"[^>]*>\n?/g, '')
+      .replace(/\s*<meta property="og:site_name"[^>]*>\n?/g, '')
+      .replace(/\s*<meta name="twitter:card"[^>]*>\n?/g, '')
+      .replace(/\s*<meta name="twitter:title"[^>]*>\n?/g, '')
+      .replace(/\s*<meta name="twitter:description"[^>]*>\n?/g, '')
+      .replace(/\s*<script type="application\/ld\+json">[\s\S]*?<\/script>\n?/g, '');
+
+    html = html.replace(/<meta property="og:locale" content="[^"]*"/, `<meta property="og:locale" content="${locale === 'en' ? 'en_US' : 'tr_TR'}"`);
+    const localeAlternates = localePrefixes.map(altLocale => 
+      `<link rel="alternate" hreflang="${altLocale}" href="${baseUrl}${localizedPath(canonicalPath, altLocale)}" />`
+    ).join('\n  ');
+
+    html = addMetaTag(html, 'rel="canonical"', `<link rel="canonical" href="${canonicalUrl}" />`);
+    html = addMetaTag(html, 'hreflang="x-default"', `${localeAlternates}\n  <link rel="alternate" hreflang="x-default" href="${baseUrl}${canonicalPath}" />`);
+    html = addMetaTag(html, 'name="robots"', '<meta name="robots" content="index, follow, max-image-preview:large" />');
+    html = addMetaTag(html, 'property="og:url"', `<meta property="og:url" content="${canonicalUrl}" />`);
+    html = addMetaTag(html, 'property="og:site_name"', `<meta property="og:site_name" content="${BRAND_NAME}" />`);
+    html = addMetaTag(html, 'name="twitter:card"', '<meta name="twitter:card" content="summary_large_image" />');
+    html = addMetaTag(html, 'name="twitter:title"', `<meta name="twitter:title" content="${title.replace(/"/g, '&quot;')}" />`);
+    html = addMetaTag(html, 'name="twitter:description"', `<meta name="twitter:description" content="${ogDesc.replace(/"/g, '&quot;')}" />`);
+    html = addMetaTag(html, 'application/ld+json', `<script type="application/ld+json">${JSON.stringify(structuredData).replace(/</g, '\\u003c')}</script>`);
 
     res.send(html);
   } catch (err) {

@@ -47,7 +47,7 @@ export const translations = {
     useCases: {
       title: "Use Cases",
       subtitle: "Search-driven, SEO-focused use cases that map concrete sector problems to Cerilas solutions.",
-      seoPageTitle: "Use Cases | Cerilas",
+      seoPageTitle: "Use Cases | CERİLAS Yüksek Teknoloji",
       seoPageDescription: "Explore Cerilas use cases built for SEO, sector-specific discovery, and high-intent problem-solution matching.",
       searchPlaceholder: "Search by sector, problem, workflow, or keyword",
       resultCount: "{count} use cases",
@@ -64,7 +64,7 @@ export const translations = {
       backToList: "← Back to Use Cases",
       notFoundTitle: "Use case not found",
       notFoundDescription: "This use case may be unpublished or the link may be incorrect.",
-      seoFallbackTitle: "Use Case | Cerilas",
+      seoFallbackTitle: "Use Case | CERİLAS Yüksek Teknoloji",
     },
     home: {
       heroTitle: "Dream, Design, Disrupt:",
@@ -590,8 +590,8 @@ export const translations = {
     useCases: {
       title: "Use Case'ler",
       subtitle: "Belirli sektör problemlerini Cerilas çözümleriyle eşleyen, SEO odaklı kullanım senaryoları.",
-      seoPageTitle: "Use Case'ler | Cerilas",
-      seoPageDescription: "Cerilas use-case içeriklerini keşfedin; arama odaklı, sektör bazlı ve yüksek niyetli problem-çözüm eşleşmeleri için hazırlanmıştır.",
+      seoPageTitle: "Use Case'ler | CERİLAS Yüksek Teknoloji",
+      seoPageDescription: "CERİLAS Yüksek Teknoloji use-case içeriklerini keşfedin; arama odaklı, sektör bazlı ve yüksek niyetli problem-çözüm eşleşmeleri için hazırlanmıştır.",
       searchPlaceholder: "Sektör, problem, süreç veya anahtar kelime ile ara",
       resultCount: "{count} use case",
       activeTag: "Aktif etiket: {tag}",
@@ -607,13 +607,13 @@ export const translations = {
       backToList: "← Use Case'lere Dön",
       notFoundTitle: "Use case bulunamadı",
       notFoundDescription: "Bu içerik yayında olmayabilir veya bağlantı hatalı olabilir.",
-      seoFallbackTitle: "Use Case | Cerilas",
+      seoFallbackTitle: "Use Case | CERİLAS Yüksek Teknoloji",
     },
     home: {
       heroTitle: "Hayal Et, Tasarla, Dönüştür:",
       heroSubtitle: "İleri Teknoloji Ar-Ge Çözümleri",
       heroDesc:
-        "Cerilas Yüksek Teknoloji, TÜBİTAK destekli Ar-Ge projeleriyle sağlık teknolojileri, mekatronik, robotik ve gömülü sistemler alanında ihtiyaca özel çözümler geliştiren bir teknoloji şirketidir.",
+        "CERİLAS Yüksek Teknoloji, TÜBİTAK destekli Ar-Ge projeleriyle sağlık teknolojileri, mekatronik, robotik ve gömülü sistemler alanında ihtiyaca özel çözümler geliştiren bir teknoloji şirketidir.",
       ctaPrimary: "Projelerimizi Keşfet",
       ctaSecondary: "İletişime Geç",
       valueTitle: "Neden Cerilas?",
@@ -653,7 +653,7 @@ export const translations = {
     about: {
       title: "Hakkımızda",
       subtitle:
-        "Cerilas Yüksek Teknoloji Sanayi ve Ticaret A.Ş., ileri teknoloji odaklı Ar-Ge faaliyetleri yürüten, çok disiplinli mühendislik yaklaşımıyla yenilikçi çözümler geliştiren bir teknoloji şirketidir.",
+        "CERİLAS Yüksek Teknoloji Sanayi ve Ticaret A.Ş., ileri teknoloji odaklı Ar-Ge faaliyetleri yürüten, çok disiplinli mühendislik yaklaşımıyla yenilikçi çözümler geliştiren bir teknoloji şirketidir.",
       whoTitle: "Biz Kimiz",
       whoText:
         "Cerilas, özellikle TÜBİTAK 1707 Siparişe Dayalı Ar-Ge Programı kapsamında sektör odaklı projeler geliştirerek, ihtiyaçlara özel çözümler üretmektedir. Farklı sektörlerde faaliyet gösteren kurum ve kuruluşlarla iş birliği içerisinde çalışarak, gerçek problem odaklı Ar-Ge projeleri tasarlamakta ve uygulamaktadır. Sağlık teknolojileri alanında fizyoterapi, kadın doğum ve benzeri klinik alanlara yönelik dijital ve donanımsal çözümler geliştirmektedir.",

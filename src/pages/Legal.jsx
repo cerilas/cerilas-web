@@ -11,7 +11,7 @@ const slugMap = {
 
 export default function Legal() {
   const { slug } = useParams();
-  const { t } = useLang();
+  const { t, localizedPath } = useLang();
   const l = t.legal;
   const common = t.common;
   const page = slugMap[slug];
@@ -22,7 +22,7 @@ export default function Legal() {
       <section className="py-24">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
           <FadeIn>
-            <Link to="/" className="text-sm text-gray-400 hover:text-cyan-400 transition-colors mb-8 inline-block">
+            <Link to={localizedPath("/")} className="text-sm text-gray-400 hover:text-cyan-400 transition-colors mb-8 inline-block">
               ← {common.home}
             </Link>
             <h1 className="text-4xl font-bold text-white mb-4">

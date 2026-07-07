@@ -14,7 +14,7 @@ const navRoutes = [
 ];
 
 export default function Footer() {
-  const { t } = useLang();
+  const { t, localizedPath } = useLang();
   const f = t.footer;
   const year = new Date().getFullYear();
   const [nlEmail, setNlEmail] = useState("");
@@ -26,7 +26,7 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
           {/* Brand */}
           <div className="lg:col-span-1">
-            <Link to="/">
+            <Link to={localizedPath("/")}>
               <img src={logoImg} alt="Cerilas" className="h-11 w-auto mb-2" />
             </Link>
             <p className="mt-2 text-sm text-cyan-400 font-medium tracking-wide">{f.tagline}</p>
@@ -59,7 +59,7 @@ export default function Footer() {
               {navRoutes.map(({ key, path }) => (
                 <li key={key}>
                   <Link
-                    to={path}
+                    to={localizedPath(path)}
                     className="text-sm text-gray-400 hover:text-cyan-400 transition-colors"
                   >
                     {t.nav[key]}
@@ -80,7 +80,7 @@ export default function Footer() {
                 { label: f.accessLabel, slug: "accessibility" },
               ].map(({ label, slug }) => (
                 <li key={slug}>
-                  <Link to={`/legal/${slug}`} className="text-sm text-gray-400 hover:text-cyan-400 transition-colors">
+                  <Link to={localizedPath(`/legal/${slug}`)} className="text-sm text-gray-400 hover:text-cyan-400 transition-colors">
                     {label}
                   </Link>
                 </li>

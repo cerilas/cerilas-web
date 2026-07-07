@@ -7,7 +7,7 @@ import imgProject from "../assets/images/nicolas-thomas-CBydtQDjaJc-unsplash.jpg
 
 export default function ProjectDetail() {
   const { id } = useParams();
-  const { t } = useLang();
+  const { t, localizedPath } = useLang();
   const p = t.projects;
   const common = t.common;
   const { loading, project } = useProject(id);
@@ -25,7 +25,7 @@ export default function ProjectDetail() {
       <div className="pt-16 min-h-screen flex items-center justify-center bg-gray-950">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-white">{common.projectNotFound}</h1>
-          <Link to="/projects" className="mt-4 text-cyan-400 hover:text-cyan-300">
+          <Link to={localizedPath("/projects")} className="mt-4 text-cyan-400 hover:text-cyan-300">
             {p.backToProjects}
           </Link>
         </div>
@@ -46,7 +46,7 @@ export default function ProjectDetail() {
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-cyan-500/5 rounded-full blur-3xl" />
         <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <FadeIn>
-            <Link to="/projects" className="text-sm text-gray-400 hover:text-cyan-400 transition-colors mb-8 inline-block">
+            <Link to={localizedPath("/projects")} className="text-sm text-gray-400 hover:text-cyan-400 transition-colors mb-8 inline-block">
               {p.backToProjects}
             </Link>
             <div className="flex flex-wrap gap-2 mb-6">
@@ -140,7 +140,7 @@ export default function ProjectDetail() {
               {common.projectCtaText}
             </p>
             <Link
-              to="/contact"
+              to={localizedPath("/contact")}
               className="inline-flex items-center gap-2 px-8 py-4 bg-cyan-500 hover:bg-cyan-400 text-gray-950 font-semibold rounded-xl text-sm transition-colors"
             >
               {common.getInTouch}

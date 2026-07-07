@@ -74,7 +74,7 @@ const capIcons = [
 ];
 
 export default function Home() {
-  const { t } = useLang();
+  const { t, localizedPath } = useLang();
   const h = t.home;
   const common = t.common;
   const caps = t.capabilities.areas;
@@ -152,13 +152,13 @@ export default function Home() {
             </p>
             <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center">
               <Link
-                to="/projects"
+                to={localizedPath("/projects")}
                 className="px-8 py-3.5 bg-cyan-500 hover:bg-cyan-400 text-gray-950 font-semibold rounded-xl transition-colors text-sm"
               >
                 {h.ctaPrimary}
               </Link>
               <Link
-                to="/contact"
+                to={localizedPath("/contact")}
                 className="px-8 py-3.5 border border-gray-700 hover:border-cyan-500 text-gray-300 hover:text-white font-semibold rounded-xl transition-colors text-sm"
               >
                 {h.ctaSecondary}
@@ -274,7 +274,7 @@ export default function Home() {
                   <h3 className="text-lg font-semibold text-white mb-2">{cap.title}</h3>
                   <p className="text-sm text-gray-400 leading-relaxed line-clamp-3">{cap.desc}</p>
                   <Link
-                    to="/capabilities"
+                    to={localizedPath("/capabilities")}
                     className="mt-4 inline-flex items-center text-xs text-cyan-400 hover:text-cyan-300 font-medium transition-colors"
                   >
                     {common.learnMore} →
@@ -293,7 +293,7 @@ export default function Home() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {projects.map((proj, i) => (
               <FadeIn key={proj.id} delay={i * 0.1}>
-                <Link to={`/projects/${proj.id}`}>
+                <Link to={localizedPath(`/projects/${proj.id}`)}>
                   <GlowCard className="h-full cursor-pointer p-0 overflow-hidden">
                     {proj.imageUrl && (
                       <img 
@@ -320,7 +320,7 @@ export default function Home() {
           </div>
           <div className="mt-10 text-center">
             <Link
-              to="/projects"
+              to={localizedPath("/projects")}
               className="inline-flex items-center gap-2 px-6 py-3 border border-gray-700 hover:border-cyan-500 text-gray-300 hover:text-white rounded-xl text-sm font-medium transition-colors"
             >
               {t.projects.viewDetail} →
@@ -382,7 +382,7 @@ export default function Home() {
               <h2 className="text-3xl sm:text-4xl font-bold text-white">{h.consultTitle}</h2>
               <p className="mt-6 text-gray-400 leading-relaxed">{h.consultDesc}</p>
               <Link
-                to="/consultancy"
+                to={localizedPath("/consultancy")}
                 className="mt-8 inline-flex items-center gap-2 px-6 py-3 bg-cyan-500 hover:bg-cyan-400 text-gray-950 font-semibold rounded-xl text-sm transition-colors"
               >
                 {h.consultCta}
@@ -409,7 +409,7 @@ export default function Home() {
           <FadeIn>
             <p className="text-2xl sm:text-3xl font-bold text-white">{h.contactBand}</p>
             <Link
-              to="/contact"
+              to={localizedPath("/contact")}
               className="mt-8 inline-flex items-center gap-2 px-8 py-4 bg-cyan-500 hover:bg-cyan-400 text-gray-950 font-semibold rounded-xl text-sm transition-colors"
             >
               {h.contactCta}

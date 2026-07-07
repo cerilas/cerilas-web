@@ -4,20 +4,29 @@ import authMiddleware from '../middleware/auth.js';
 
 const router = Router();
 
+const extractTcmbRate = (xml, currencyCode) => {
+  const regex = new RegExp(`<Currency[^>]*CurrencyCode="${currencyCode}"[^>]*>[\\s\\S]*?<BanknoteSelling>([\\d.]+)</BanknoteSelling>`);
+  const match = xml.match(regex);
+  return match ? parseFloat(match[1]) : null;
+};
+
+const parsePaymentDate = (dateString) => {
+  if (typeof dateString !== 'string') return null;
+  const match = dateString.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (!match) return null;
+  const [, year, month, day] = match;
+  const date = new Date(Number(year), Number(month) - 1, Number(day));
+  return Number.isNaN(date.getTime()) ? null : date;
+};
+
 // Get exchange rates (TCMB)
 router.get('/rates', authMiddleware, async (req, res) => {
   try {
     const response = await fetch('https://www.tcmb.gov.tr/kurlar/today.xml');
     const xml = await response.text();
-    
-    const extractRate = (currencyCode) => {
-      const regex = new RegExp(`<Currency[^>]*CurrencyCode="${currencyCode}"[^>]*>[\\s\\S]*?<BanknoteSelling>([\\d.]+)</BanknoteSelling>`);
-      const match = xml.match(regex);
-      return match ? parseFloat(match[1]) : null;
-    };
 
-    const usd = extractRate('USD');
-    const eur = extractRate('EUR');
+    const usd = extractTcmbRate(xml, 'USD');
+    const eur = extractTcmbRate(xml, 'EUR');
 
     res.json({
       TRY: 1,
@@ -31,41 +40,49 @@ router.get('/rates', authMiddleware, async (req, res) => {
 });
 
 const fetchHistoricalRates = async (dateString) => {
-  try {
-    let dateObj = new Date(dateString);
-    if (isNaN(dateObj.getTime())) dateObj = new Date();
+  const dateObj = parsePaymentDate(dateString);
+  if (!dateObj) {
+    const err = new Error('Geçerli bir ödeme tarihi seçin');
+    err.statusCode = 400;
+    throw err;
+  }
 
-    for (let i = 0; i < 5; i++) {
-      const year = dateObj.getFullYear();
-      const month = String(dateObj.getMonth() + 1).padStart(2, '0');
-      const day = String(dateObj.getDate()).padStart(2, '0');
-      
-      const isToday = (new Date()).toISOString().slice(0, 10) === dateObj.toISOString().slice(0, 10);
-      let url = `https://www.tcmb.gov.tr/kurlar/${year}${month}/${day}${month}${year}.xml`;
-      if (isToday) {
-        url = 'https://www.tcmb.gov.tr/kurlar/today.xml';
-      }
+  for (let i = 0; i < 15; i++) {
+    const year = dateObj.getFullYear();
+    const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+    const day = String(dateObj.getDate()).padStart(2, '0');
+    const sourceDate = `${year}-${month}-${day}`;
 
+    const today = new Date();
+    const todayKey = [
+      today.getFullYear(),
+      String(today.getMonth() + 1).padStart(2, '0'),
+      String(today.getDate()).padStart(2, '0')
+    ].join('-');
+    const isToday = todayKey === sourceDate;
+    const url = isToday
+      ? 'https://www.tcmb.gov.tr/kurlar/today.xml'
+      : `https://www.tcmb.gov.tr/kurlar/${year}${month}/${day}${month}${year}.xml`;
+
+    try {
       const res = await fetch(url);
       if (res.ok) {
         const xml = await res.text();
-        const extractRate = (currencyCode) => {
-          const regex = new RegExp(`<Currency[^>]*CurrencyCode="${currencyCode}"[^>]*>[\\s\\S]*?<BanknoteSelling>([\\d.]+)</BanknoteSelling>`);
-          const match = xml.match(regex);
-          return match ? parseFloat(match[1]) : null;
-        };
-        const usd = extractRate('USD');
-        const eur = extractRate('EUR');
+        const usd = extractTcmbRate(xml, 'USD');
+        const eur = extractTcmbRate(xml, 'EUR');
         if (usd || eur) {
-          return { TRY: 1, USD: usd || 35, EUR: eur || 38 };
+          return { TRY: 1, USD: usd, EUR: eur, source: 'TCMB', source_date: sourceDate };
         }
       }
-      dateObj.setDate(dateObj.getDate() - 1);
+    } catch (err) {
+      console.error(`Historical rates fetch error for ${sourceDate}:`, err);
     }
-  } catch (err) {
-    console.error('Historical rates error:', err);
+    dateObj.setDate(dateObj.getDate() - 1);
   }
-  return { TRY: 1, USD: 35, EUR: 38 };
+
+  const err = new Error('Seçilen tarih için TCMB kuru bulunamadı. Lütfen daha sonra tekrar deneyin.');
+  err.statusCode = 502;
+  throw err;
 };
 
 // Get all opportunities
@@ -201,7 +218,7 @@ router.post('/:id/payments', authMiddleware, async (req, res) => {
     res.status(201).json(result.rows[0]);
   } catch (err) {
     console.error('Add payment error:', err);
-    res.status(500).json({ error: err.message });
+    res.status(err.statusCode || 500).json({ error: err.message });
   }
 });
 

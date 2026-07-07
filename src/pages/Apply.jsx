@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { api } from "../lib/api";
 
 export default function Apply() {
-  const { t, lang } = useLang();
+  const { t, lang, localizedPath } = useLang();
   const a = t.application;
   const [searchParams] = useSearchParams();
   const preselected = searchParams.get("position") || "";
@@ -124,7 +124,7 @@ export default function Apply() {
               <h1 className="text-3xl font-bold text-white">{a.successTitle}</h1>
               <p className="mt-4 text-gray-400 text-lg">{a.successDesc}</p>
               <Link
-                to="/careers"
+                to={localizedPath("/careers")}
                 className="mt-8 inline-flex items-center gap-2 px-6 py-3 text-sm font-semibold text-cyan-400 border border-cyan-500/30 rounded-xl hover:bg-cyan-500/10 transition-colors"
               >
                 {a.backToCareers}

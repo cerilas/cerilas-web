@@ -50,6 +50,26 @@ function Layout({ children }) {
   );
 }
 
+function buildPublicRoutes(prefix = "") {
+  const rootPath = prefix || "/";
+  const routePath = (path) => `${prefix}${path}`;
+
+  return [
+    <Route key={`${rootPath}-home`} path={rootPath} element={<Layout><Home /></Layout>} />,
+    <Route key={`${prefix}-about`} path={routePath("/about")} element={<Layout><About /></Layout>} />,
+    <Route key={`${prefix}-capabilities`} path={routePath("/capabilities")} element={<Layout><Capabilities /></Layout>} />,
+    <Route key={`${prefix}-projects`} path={routePath("/projects")} element={<Layout><Projects /></Layout>} />,
+    <Route key={`${prefix}-project-detail`} path={routePath("/projects/:id")} element={<Layout><ProjectDetail /></Layout>} />,
+    <Route key={`${prefix}-use-cases`} path={routePath("/use-cases")} element={<Layout><UseCases /></Layout>} />,
+    <Route key={`${prefix}-use-case-detail`} path={routePath("/use-cases/:slug")} element={<Layout><UseCaseDetail /></Layout>} />,
+    <Route key={`${prefix}-consultancy`} path={routePath("/consultancy")} element={<Layout><Consultancy /></Layout>} />,
+    <Route key={`${prefix}-careers`} path={routePath("/careers")} element={<Layout><Careers /></Layout>} />,
+    <Route key={`${prefix}-apply`} path={routePath("/careers/apply")} element={<Layout><Apply /></Layout>} />,
+    <Route key={`${prefix}-contact`} path={routePath("/contact")} element={<Layout><Contact /></Layout>} />,
+    <Route key={`${prefix}-legal`} path={routePath("/legal/:slug")} element={<Layout><Legal /></Layout>} />,
+  ];
+}
+
 export default function App() {
   return (
     <LanguageProvider>
@@ -98,18 +118,9 @@ export default function App() {
           </Route>
 
           {/* Public routes */}
-          <Route path="/" element={<Layout><Home /></Layout>} />
-          <Route path="/about" element={<Layout><About /></Layout>} />
-          <Route path="/capabilities" element={<Layout><Capabilities /></Layout>} />
-          <Route path="/projects" element={<Layout><Projects /></Layout>} />
-          <Route path="/projects/:id" element={<Layout><ProjectDetail /></Layout>} />
-          <Route path="/use-cases" element={<Layout><UseCases /></Layout>} />
-          <Route path="/use-cases/:slug" element={<Layout><UseCaseDetail /></Layout>} />
-          <Route path="/consultancy" element={<Layout><Consultancy /></Layout>} />
-          <Route path="/careers" element={<Layout><Careers /></Layout>} />
-          <Route path="/careers/apply" element={<Layout><Apply /></Layout>} />
-          <Route path="/contact" element={<Layout><Contact /></Layout>} />
-          <Route path="/legal/:slug" element={<Layout><Legal /></Layout>} />
+          {buildPublicRoutes()}
+          {buildPublicRoutes("/tr")}
+          {buildPublicRoutes("/en")}
         </Routes>
       </BrowserRouter>
     </LanguageProvider>

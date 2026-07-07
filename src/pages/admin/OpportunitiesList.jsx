@@ -285,6 +285,7 @@ export default function OpportunitiesList() {
 
     let totalActiveTodos = 0;
     let totalFocus = 0;
+    let totalMediumProbBudget = 0; // 5-6
     let totalHighProbBudget = 0; // 7-9
     let totalCertainBudget = 0; // 10
     let totalCertainRemaining = 0; // 10
@@ -331,6 +332,7 @@ export default function OpportunitiesList() {
       const oppTotalIncomeInTry = convertAmount(opp.total_income, opp.currency, baseCurr);
       const oppRemainingInTry = convertAmount(calculateRemaining(opp), opp.currency, baseCurr);
 
+      if (p >= 5 && p <= 6) totalMediumProbBudget += oppTotalIncomeInTry;
       if (p >= 7 && p <= 9) totalHighProbBudget += oppTotalIncomeInTry;
       if (p === 10) {
         totalCertainBudget += oppTotalIncomeInTry;
@@ -460,7 +462,7 @@ export default function OpportunitiesList() {
     const avg12 = getPastMonthKeys(12).reduce((sum, key) => sum + (paymentsByMonth[key]?.total || 0), 0) / 12;
 
     return { 
-      probData, timelineData, totalReceivedInTry, totalHighProbBudget, totalCertainBudget, 
+      probData, timelineData, totalReceivedInTry, totalMediumProbBudget, totalHighProbBudget, totalCertainBudget, 
       totalCertainRemaining, totalActiveTodos, avgFocus, baseCurr, currentActiveFocusSum,
       projectTimeline, timelineMonths: months, todayPercent, timelineMinWidth, totalAllTimeGrossBudget,
       averages: { avg3, avg6, avg12 },
@@ -495,8 +497,8 @@ export default function OpportunitiesList() {
       {opportunities.length > 0 && (
         <div className="mb-10 flex flex-col gap-6">
           {/* Top Stats Row */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5 flex flex-col shadow-lg relative overflow-visible">
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-5 gap-4">
+            <div className="min-w-0 bg-gray-900 border border-gray-800 rounded-2xl p-5 flex flex-col shadow-lg relative overflow-visible">
               <div className="absolute top-0 right-0 p-4 opacity-10 pointer-events-none">
                 <svg className="w-16 h-16 text-cyan-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
               </div>
@@ -505,15 +507,15 @@ export default function OpportunitiesList() {
                 <div className="relative group flex items-center">
                   <svg className="w-4 h-4 text-gray-600 hover:text-cyan-400 cursor-pointer transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                   <div className="absolute z-50 bottom-full left-1/2 -translate-x-1/2 mb-2 w-56 p-2.5 bg-gray-800 border border-gray-700 text-xs text-gray-300 rounded shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 pointer-events-none text-center">
-                    Arşivlenmiş veya pasif olanlar dahil, bugüne kadar sisteme girilmiş tüm projelerden alınan ödemelerin güncel kur ile {getDashboardStats.baseCurr} karşılığının toplamıdır.
+                    Arşivlenmiş veya pasif olanlar dahil, bugüne kadar sisteme girilmiş tüm projelerden alınan ödemelerin ödeme tarihindeki kayıtlı TCMB kuru ile {getDashboardStats.baseCurr} karşılığının toplamıdır.
                     <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-800"></div>
                   </div>
                 </div>
               </div>
-              <span className="text-2xl font-black text-white mt-1 z-10">{formatMoney(getDashboardStats.totalReceivedInTry, getDashboardStats.baseCurr)}</span>
+              <span className="text-xl sm:text-2xl font-black leading-tight break-words text-white mt-1 z-10">{formatMoney(getDashboardStats.totalReceivedInTry, getDashboardStats.baseCurr)}</span>
             </div>
             
-            <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5 flex flex-col shadow-lg relative overflow-visible">
+            <div className="min-w-0 bg-gray-900 border border-gray-800 rounded-2xl p-5 flex flex-col shadow-lg relative overflow-visible">
               <div className="absolute top-0 right-0 p-4 opacity-10 pointer-events-none">
                 <svg className="w-16 h-16 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" /></svg>
               </div>
@@ -527,11 +529,11 @@ export default function OpportunitiesList() {
                   </div>
                 </div>
               </div>
-              <span className="text-2xl font-black text-green-400 mt-1 z-10">{formatMoney(getDashboardStats.totalCertainRemaining, getDashboardStats.baseCurr)}</span>
-              <span className="text-xs text-gray-500 mt-1 z-10">Toplam Bütçe: {formatMoney(getDashboardStats.totalCertainBudget, getDashboardStats.baseCurr)}</span>
+              <span className="text-xl sm:text-2xl font-black leading-tight break-words text-green-400 mt-1 z-10">{formatMoney(getDashboardStats.totalCertainRemaining, getDashboardStats.baseCurr)}</span>
+              <span className="text-xs text-gray-500 mt-1 z-10 break-words">Toplam Bütçe: {formatMoney(getDashboardStats.totalCertainBudget, getDashboardStats.baseCurr)}</span>
             </div>
 
-            <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5 flex flex-col shadow-lg relative overflow-visible">
+            <div className="min-w-0 bg-gray-900 border border-gray-800 rounded-2xl p-5 flex flex-col shadow-lg relative overflow-visible">
               <div className="flex items-center gap-1.5 z-10">
                 <span className="text-xs text-gray-500 font-bold uppercase tracking-wider">Yüksek İhtimal (7-9)</span>
                 <div className="relative group flex items-center">
@@ -542,13 +544,27 @@ export default function OpportunitiesList() {
                   </div>
                 </div>
               </div>
-              <span className="text-2xl font-black text-cyan-400 mt-1 z-10">{formatMoney(getDashboardStats.totalHighProbBudget, getDashboardStats.baseCurr)}</span>
+              <span className="text-xl sm:text-2xl font-black leading-tight break-words text-cyan-400 mt-1 z-10">{formatMoney(getDashboardStats.totalHighProbBudget, getDashboardStats.baseCurr)}</span>
             </div>
 
-            <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5 flex flex-col shadow-lg overflow-visible">
-              <div className="flex justify-between items-center h-full">
+            <div className="min-w-0 bg-gray-900 border border-gray-800 rounded-2xl p-5 flex flex-col shadow-lg relative overflow-visible">
+              <div className="flex items-center gap-1.5 z-10">
+                <span className="text-xs text-gray-500 font-bold uppercase tracking-wider">Orta İhtimal (5-6)</span>
+                <div className="relative group flex items-center">
+                  <svg className="w-4 h-4 text-gray-600 hover:text-yellow-400 cursor-pointer transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                  <div className="absolute z-50 bottom-full left-1/2 -translate-x-1/2 mb-2 w-56 p-2.5 bg-gray-800 border border-gray-700 text-xs text-gray-300 rounded shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 pointer-events-none text-center">
+                    İhtimal derecesi 5 veya 6 olarak seçilen, orta potansiyelli projelerin henüz kesinleşmese de güncel kur ile hesaplanan brüt bütçe beklentisidir.
+                    <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-800"></div>
+                  </div>
+                </div>
+              </div>
+              <span className="text-xl sm:text-2xl font-black leading-tight break-words text-yellow-400 mt-1 z-10">{formatMoney(getDashboardStats.totalMediumProbBudget, getDashboardStats.baseCurr)}</span>
+            </div>
+
+            <div className="min-w-0 bg-gray-900 border border-gray-800 rounded-2xl p-5 flex flex-col shadow-lg overflow-visible">
+              <div className="flex flex-col gap-4 h-full">
                 <div 
-                  className="flex-1 cursor-pointer group/task hover:bg-gray-800/40 p-2 rounded-xl transition-colors -m-2"
+                  className="min-w-0 cursor-pointer group/task hover:bg-gray-800/40 p-2 rounded-xl transition-colors -m-2"
                   onClick={() => setShowActiveTasksModal(true)}
                 >
                   <div className="flex items-center gap-1.5 z-10">
@@ -560,20 +576,20 @@ export default function OpportunitiesList() {
                       </div>
                     </div>
                   </div>
-                  <span className="text-2xl font-black text-white">{getDashboardStats.totalActiveTodos}</span>
+                  <span className="text-xl sm:text-2xl font-black leading-tight text-white">{getDashboardStats.totalActiveTodos}</span>
                 </div>
-                <div className="text-right flex-1 border-l border-gray-800 pl-4 ml-4">
-                  <div className="flex items-center justify-end gap-1.5 z-10">
+                <div className="min-w-0 border-t border-gray-800 pt-4">
+                  <div className="flex items-center gap-1.5 z-10">
                     <div className="relative group flex items-center">
                       <svg className="w-3.5 h-3.5 text-gray-600 hover:text-white cursor-pointer transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                      <div className="absolute z-50 bottom-full right-0 mb-2 w-48 p-2 bg-gray-800 border border-gray-700 text-[11px] text-gray-300 rounded shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 pointer-events-none text-right">
+                      <div className="absolute z-50 bottom-full left-0 mb-2 w-48 p-2 bg-gray-800 border border-gray-700 text-[11px] text-gray-300 rounded shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 pointer-events-none text-left">
                         Durumu "Aktif" olan ve tarih aralığı "bugün"ü kapsayan projelerin toplam odak (efor) puanıdır. Ekibin anlık olarak ne kadar dolu olduğunu gösterir. Toplam kapasite 10 olarak kabul edilir.
                       </div>
                     </div>
                     <span className="text-xs text-gray-500 font-bold uppercase tracking-wider block">Anlık Kapasite</span>
                   </div>
-                  <div className="flex flex-col items-end mt-1">
-                    <span className={`text-2xl font-black ${getDashboardStats.currentActiveFocusSum > 10 ? 'text-red-400' : 'text-white'}`}>
+                  <div className="flex flex-col mt-1">
+                    <span className={`text-xl sm:text-2xl font-black leading-tight ${getDashboardStats.currentActiveFocusSum > 10 ? 'text-red-400' : 'text-white'}`}>
                       {getDashboardStats.currentActiveFocusSum} <span className="text-sm text-gray-500">/ 10</span>
                     </span>
                     <span className="text-[10px] text-gray-500 mt-0.5">
@@ -960,9 +976,14 @@ export default function OpportunitiesList() {
                         );
                       }
                       return null;
-                    })()}
-                    {getStatusBadge(opp.status)}
-                  </div>
+	                    })()}
+	                    {getStatusBadge(opp.status)}
+	                    {parseInt(opp.probability_rating) === 10 && (
+	                      <span className="bg-green-500/15 text-green-300 border border-green-500/30 px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider whitespace-nowrap">
+	                        Kesin oldu!
+	                      </span>
+	                    )}
+	                  </div>
                   <h3 className="text-xl font-bold text-white group-hover:text-cyan-400 transition-colors line-clamp-2">
                     {opp.name}
                   </h3>

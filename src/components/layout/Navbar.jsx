@@ -21,7 +21,7 @@ const secondaryRoutes = [
 const navRoutes = [...mainRoutes, ...secondaryRoutes];
 
 export default function Navbar() {
-  const { t, lang, toggleLang } = useLang();
+  const { t, lang, toggleLang, localizedPath } = useLang();
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
@@ -46,7 +46,7 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-2 group">
+          <Link to={localizedPath("/")} className="flex items-center gap-2 group">
             <img src={logoImg} alt="Cerilas" className="h-11 sm:h-14 w-auto transition-transform duration-300 group-hover:scale-105" />
           </Link>
 
@@ -57,7 +57,7 @@ export default function Navbar() {
               {navRoutes.map(({ key, path }) => (
                 <NavLink
                   key={key}
-                  to={path}
+                  to={localizedPath(path)}
                   end={path === "/"}
                   className={({ isActive }) =>
                     `px-2 xl:px-3 py-2 text-[13px] xl:text-sm font-medium rounded-md transition-colors ${
@@ -77,7 +77,7 @@ export default function Navbar() {
               {mainRoutes.map(({ key, path }) => (
                 <NavLink
                   key={key}
-                  to={path}
+                  to={localizedPath(path)}
                   end={path === "/"}
                   className={({ isActive }) =>
                     `px-2 py-2 text-[13px] font-medium rounded-md transition-colors ${
@@ -115,7 +115,7 @@ export default function Navbar() {
                       {secondaryRoutes.map(({ key, path }) => (
                         <NavLink
                           key={key}
-                          to={path}
+                          to={localizedPath(path)}
                           className={({ isActive }) =>
                             `block px-4 py-2 text-sm transition-colors ${
                               isActive ? "text-cyan-400 bg-cyan-400/5" : "text-gray-400 hover:text-white hover:bg-white/5"
@@ -171,7 +171,7 @@ export default function Navbar() {
               {navRoutes.map(({ key, path }) => (
                 <NavLink
                   key={key}
-                  to={path}
+                  to={localizedPath(path)}
                   end={path === "/"}
                   className={({ isActive }) =>
                     `px-4 py-3 text-sm font-medium rounded-md transition-colors ${

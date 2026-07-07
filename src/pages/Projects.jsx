@@ -5,7 +5,7 @@ import { SectionTitle, FadeIn, GlowCard, Badge } from "../components/ui";
 import { useProjects } from "../hooks/useProjects";
 
 export default function Projects() {
-  const { t } = useLang();
+  const { t, localizedPath } = useLang();
   const p = t.projects;
   const projects = useProjects();
 
@@ -33,7 +33,7 @@ export default function Projects() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {projects.map((proj, i) => (
               <FadeIn key={proj.id} delay={i * 0.1}>
-                <Link to={`/projects/${proj.id}`} className="block h-full">
+                <Link to={localizedPath(`/projects/${proj.id}`)} className="block h-full">
                   <GlowCard className="h-full cursor-pointer flex flex-col p-0 overflow-hidden">
                     {proj.imageUrl && (
                       <img 

@@ -16,7 +16,7 @@ function buildNextParams(searchParams, updates) {
 }
 
 export default function UseCases() {
-  const { t, lang } = useLang();
+  const { t, lang, localizedPath } = useLang();
   const copy = t.useCases;
   const common = t.common;
   const [searchParams, setSearchParams] = useSearchParams();
@@ -161,7 +161,7 @@ export default function UseCases() {
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                 {items.map((item, index) => (
                   <FadeIn key={item.id} delay={index * 0.05}>
-                    <Link to={`/use-cases/${item.slug}`} className="block h-full">
+                    <Link to={localizedPath(`/use-cases/${item.slug}`)} className="block h-full">
                       <GlowCard className="h-full overflow-hidden flex flex-col p-0">
                         <div className="aspect-[16/10] bg-gray-900 border-b border-gray-800 overflow-hidden">
                           {item.coverImageUrl ? (
