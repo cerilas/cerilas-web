@@ -37,6 +37,7 @@ import SmsSettings from "./pages/admin/SmsSettings";
 import SmsApiDocs from "./pages/admin/SmsApiDocs";
 import OpportunitiesList from "./pages/admin/OpportunitiesList";
 import OpportunityDetail from "./pages/admin/OpportunityDetail";
+import OpportunityTracking from "./pages/admin/OpportunityTracking";
 import Pomodoro from "./pages/admin/Pomodoro";
 import { Toaster } from 'react-hot-toast';
 
@@ -109,6 +110,7 @@ export default function App() {
               <Route path="users" element={<UsersAdmin />} />
               <Route path="opportunities" element={<OpportunitiesList />} />
               <Route path="opportunities/:id" element={<OpportunityDetail />} />
+              <Route path="opportunity-tracking" element={<OpportunityTracking />} />
             <Route path="mail-senders" element={<SendersAdmin />} />
             <Route path="mail-docs" element={<MailApiDocs />} />
             <Route path="mail-settings" element={<MailSettings />} />

@@ -26,6 +26,27 @@ const partnerLogos = Object.entries(partnerLogoModules)
     alt: `Strategic Partner ${index + 1}`,
   }));
 
+const sponsorLogoModules = import.meta.glob("../Sponsor-Logo/*.{png,jpg,jpeg,svg,webp}", {
+  eager: true,
+  import: "default",
+});
+
+const sponsorLogos = Object.entries(sponsorLogoModules)
+  .map(([path, src]) => {
+    const fileName = path.split("/").pop() || "";
+    const cleanName = fileName
+      .replace(/\.(png|jpe?g|svg|webp)$/i, "")
+      .replace(/[_-]/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+
+    return {
+      src,
+      alt: cleanName,
+    };
+  })
+  .sort((a, b) => a.alt.localeCompare(b.alt, "tr"));
+
 
 const capIcons = [
   (
@@ -131,15 +152,12 @@ export default function Home() {
           />
         </div>
 
-        <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center py-24">
+        <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center pt-24 pb-40 sm:pb-44">
           <motion.div
             initial={{ opacity: 0, y: 32 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
           >
-            <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-cyan-500/30 bg-cyan-500/10 text-cyan-400 text-xs font-semibold tracking-widest uppercase mb-8">
-              {t.brand.fullName}
-            </span>
             <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight text-white leading-none">
               {h.heroTitle}
               <br />
@@ -171,12 +189,33 @@ export default function Home() {
         <motion.div
           animate={{ y: [0, 8, 0] }}
           transition={{ repeat: Infinity, duration: 2 }}
-          className="absolute bottom-8 left-1/2 -translate-x-1/2 text-gray-600"
+          className="absolute bottom-24 left-1/2 -translate-x-1/2 text-gray-600"
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
           </svg>
         </motion.div>
+
+        <div className="absolute inset-x-0 bottom-0 z-20 border-t border-gray-200 bg-white/95 backdrop-blur">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-5">
+              <div className="text-[9px] sm:text-[10px] font-normal uppercase tracking-[0.12em] text-gray-400 whitespace-nowrap">
+                CERİLAS supported / funded by
+              </div>
+              <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2">
+                {sponsorLogos.map((logo) => (
+                  <img
+                    key={logo.alt}
+                    src={logo.src}
+                    alt={logo.alt}
+                    className="h-7 sm:h-8 max-w-[120px] object-contain"
+                    loading="lazy"
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
       </section>
 
       {/* Value proposition */}

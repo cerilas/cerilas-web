@@ -17,6 +17,7 @@ import statsRoutes from './routes/stats.js';
 import mailRoutes from './routes/mail.js';
 import smsRoutes from './routes/sms.js';
 import opportunitiesRoutes from './routes/opportunities.js';
+import opportunityTrackingRoutes from './routes/opportunityTracking.js';
 import pomodoroRoutes from './routes/pomodoro.js';
 import pool from './db.js';
 
@@ -211,6 +212,7 @@ app.use('/api/stats', statsRoutes);
 app.use('/api/mail', mailRoutes);
 app.use('/api/sms', smsRoutes);
 app.use('/api/opportunities', opportunitiesRoutes);
+app.use('/api/opportunity-tracking', opportunityTrackingRoutes);
 app.use('/api/pomodoro', pomodoroRoutes);
 
 // Health check
@@ -487,6 +489,20 @@ app.listen(PORT, async () => {
       ALTER TABLE opportunities ADD COLUMN IF NOT EXISTS institution VARCHAR(100);
       ALTER TABLE opportunities ADD COLUMN IF NOT EXISTS application_point VARCHAR(100);
       ALTER TABLE opportunities ADD COLUMN IF NOT EXISTS application_point_other VARCHAR(100);
+
+      CREATE TABLE IF NOT EXISTS tracked_opportunities (
+        id SERIAL PRIMARY KEY,
+        title VARCHAR(300) NOT NULL,
+        description TEXT DEFAULT '',
+        note TEXT DEFAULT '',
+        link_url TEXT,
+        scrap_url TEXT,
+        domain VARCHAR(255),
+        favicon_url TEXT,
+        created_at TIMESTAMP DEFAULT NOW(),
+        updated_at TIMESTAMP DEFAULT NOW()
+      );
+      CREATE INDEX IF NOT EXISTS idx_tracked_opportunities_created ON tracked_opportunities(created_at DESC);
     `);
     await pool.query(`
       CREATE TABLE IF NOT EXISTS job_listings (

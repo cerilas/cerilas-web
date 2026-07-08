@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-export default function Dropdown({ value, options, onChange, placeholder = 'Seçiniz...', className = '' }) {
+export default function Dropdown({ value, options, onChange, placeholder = 'Seçiniz...', className = '', buttonClassName = '' }) {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef(null);
 
@@ -22,7 +22,7 @@ export default function Dropdown({ value, options, onChange, placeholder = 'Seç
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full h-10 flex items-center justify-between px-4 bg-gray-800 border border-gray-700 rounded-xl text-sm text-white hover:border-gray-600 transition-colors focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
+        className={buttonClassName || "w-full h-10 flex items-center justify-between px-4 bg-gray-800 border border-gray-700 rounded-xl text-sm text-white hover:border-gray-600 transition-colors focus:outline-none focus:ring-2 focus:ring-cyan-500/20"}
       >
         <span className={selectedOption ? 'text-white' : 'text-gray-500'}>
           {selectedOption ? selectedOption.label : placeholder}

@@ -187,6 +187,12 @@ export const api = {
   reorderOpportunityTodos: (id, items) => request(`/opportunities/${id}/todos/reorder/bulk`, { method: 'PATCH', body: JSON.stringify({ items }) }),
   getExchangeRates: () => request('/opportunities/rates'),
 
+  // Opportunity Tracking
+  getTrackedOpportunities: () => request('/opportunity-tracking'),
+  createTrackedOpportunity: (data) => request('/opportunity-tracking', { method: 'POST', body: JSON.stringify(data) }),
+  updateTrackedOpportunity: (id, data) => request(`/opportunity-tracking/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+  deleteTrackedOpportunity: (id) => request(`/opportunity-tracking/${id}`, { method: 'DELETE' }),
+
   // Pomodoro
   getPomodoroToday: () => request('/pomodoro/today'),
   getPomodoroStats: () => request('/pomodoro/stats'),

@@ -87,6 +87,7 @@ const navItems = [
   { path: '/admin/dashboard', label: 'Dashboard', icon: <Icons.Dashboard /> },
   { path: '/admin/pomodoro', label: 'Pomodoro', icon: <Icons.Pomodoro /> },
   { path: '/admin/opportunities', label: 'İhtimal Listesi', icon: <Icons.Opportunities /> },
+  { path: '/admin/opportunity-tracking', label: 'Fırsat Takibi', icon: <Icons.Opportunities /> },
   { path: '/admin/projects', label: 'Projeler', icon: <Icons.Projects /> },
   { path: '/admin/use-cases', label: 'Use Case\'ler', icon: <Icons.UseCases /> },
   { path: '/admin/media', label: 'Görsel Paylaşım', icon: <Icons.Media /> },
