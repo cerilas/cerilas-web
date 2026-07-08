@@ -157,6 +157,7 @@ export const api = {
 
   // Stats
   getStats: () => request('/stats'),
+  getAnalyticsSummary: (days = 30) => request(`/analytics/summary?days=${days}`),
 
   // Mail
   getSenders: () => request('/mail/senders'),

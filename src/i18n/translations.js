@@ -498,7 +498,7 @@ export const translations = {
           ]
         },
         { heading: "9. Data Security", body: "CERİLAS implements appropriate technical and organizational security measures to protect your personal data against unauthorized access, loss, alteration, or disclosure. These include encrypted connections (SSL/TLS), secure server infrastructure, access controls, and regular security reviews." },
-        { heading: "10. Cookies", body: "This Website may use essential cookies required for basic functionality. No third-party tracking cookies or advertising cookies are used. By continuing to use the Website, you consent to the use of essential cookies." },
+        { heading: "10. Cookies", body: "This Website may use essential cookies required for basic functionality. We may also process basic, non-advertising usage statistics such as page visits, sessions, approximate country information, and click interactions to improve the Website. Advertising cookies are not used." },
         { heading: "11. Contact", body: "To exercise your rights or for any privacy-related inquiries, please contact us at:\n\nEmail: info@cerilas.com\nSubject: \"Personal Data Request\"" },
       ],
       refundContent: [
@@ -1040,7 +1040,7 @@ export const translations = {
           ]
         },
         { heading: "9. Veri Güvenliği", body: "CERİLAS, kişisel verilerinizi yetkisiz erişime, kayba, değiştirilmeye veya ifşaya karşı korumak için uygun teknik ve idari güvenlik önlemleri uygular. Bunlar arasında şifreli bağlantılar (SSL/TLS), güvenli sunucu altyapısı, erişim kontrolleri ve düzenli güvenlik incelemeleri yer alır." },
-        { heading: "10. Çerezler", body: "Bu Web Sitesi, temel işlevsellik için gerekli olan zorunlu çerezleri kullanabilir. Üçüncü taraf izleme çerezleri veya reklam çerezleri kullanılmamaktadır. Web Sitesi'ni kullanmaya devam ederek zorunlu çerezlerin kullanımına onay vermiş olursunuz." },
+        { heading: "10. Çerezler", body: "Bu Web Sitesi, temel işlevsellik için gerekli olan zorunlu çerezleri kullanabilir. Web Sitesi'ni iyileştirmek amacıyla sayfa ziyaretleri, oturumlar, yaklaşık ülke bilgisi ve tıklama etkileşimleri gibi reklam amacı taşımayan temel kullanım istatistikleri işlenebilir. Reklam çerezleri kullanılmamaktadır." },
         { heading: "11. İletişim", body: "Haklarınızı kullanmak veya gizlilikle ilgili talepleriniz için lütfen aşağıdaki adresten bize ulaşın:\n\nE-posta: info@cerilas.com\nKonu: \"Kişisel Veri Talebi\"" },
       ],
       refundContent: [

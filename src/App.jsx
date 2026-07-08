@@ -15,6 +15,8 @@ import Apply from "./pages/Apply";
 import Contact from "./pages/Contact";
 import Legal from "./pages/Legal";
 import ScrollToTop from "./components/ScrollToTop";
+import CookieConsent from "./components/CookieConsent";
+import SiteAnalytics from "./components/SiteAnalytics";
 
 // Admin
 import Login from "./pages/admin/Login";
@@ -38,6 +40,7 @@ import SmsApiDocs from "./pages/admin/SmsApiDocs";
 import OpportunitiesList from "./pages/admin/OpportunitiesList";
 import OpportunityDetail from "./pages/admin/OpportunityDetail";
 import OpportunityTracking from "./pages/admin/OpportunityTracking";
+import AnalyticsAdmin from "./pages/admin/AnalyticsAdmin";
 import Pomodoro from "./pages/admin/Pomodoro";
 import { Toaster } from 'react-hot-toast';
 
@@ -76,6 +79,7 @@ export default function App() {
     <LanguageProvider>
       <BrowserRouter>
         <ScrollToTop />
+        <SiteAnalytics />
         <Toaster position="top-right" toastOptions={{
           style: {
             background: '#1f2937',
@@ -89,6 +93,7 @@ export default function App() {
             },
           },
         }} />
+        <CookieConsent />
         <Routes>
           {/* Admin routes - no Navbar/Footer */}
           <Route path="/admin">
@@ -108,6 +113,7 @@ export default function App() {
               <Route path="job-listings" element={<JobListingsAdmin />} />
               <Route path="applications" element={<ApplicationsAdmin />} />
               <Route path="users" element={<UsersAdmin />} />
+              <Route path="analytics" element={<AnalyticsAdmin />} />
               <Route path="opportunities" element={<OpportunitiesList />} />
               <Route path="opportunities/:id" element={<OpportunityDetail />} />
               <Route path="opportunity-tracking" element={<OpportunityTracking />} />

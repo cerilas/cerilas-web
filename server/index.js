@@ -19,6 +19,7 @@ import smsRoutes from './routes/sms.js';
 import opportunitiesRoutes from './routes/opportunities.js';
 import opportunityTrackingRoutes from './routes/opportunityTracking.js';
 import pomodoroRoutes from './routes/pomodoro.js';
+import analyticsRoutes from './routes/analytics.js';
 import pool from './db.js';
 
 dotenv.config();
@@ -214,6 +215,7 @@ app.use('/api/sms', smsRoutes);
 app.use('/api/opportunities', opportunitiesRoutes);
 app.use('/api/opportunity-tracking', opportunityTrackingRoutes);
 app.use('/api/pomodoro', pomodoroRoutes);
+app.use('/api/analytics', analyticsRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => res.json({ ok: true }));
@@ -503,6 +505,29 @@ app.listen(PORT, async () => {
         updated_at TIMESTAMP DEFAULT NOW()
       );
       CREATE INDEX IF NOT EXISTS idx_tracked_opportunities_created ON tracked_opportunities(created_at DESC);
+
+      CREATE TABLE IF NOT EXISTS site_analytics_events (
+        id SERIAL PRIMARY KEY,
+        visitor_id VARCHAR(100),
+        session_id VARCHAR(100),
+        event_type VARCHAR(40) NOT NULL,
+        path TEXT,
+        page_title TEXT,
+        referrer TEXT,
+        element_tag VARCHAR(80),
+        element_text TEXT,
+        element_href TEXT,
+        duration_seconds INTEGER,
+        country VARCHAR(8),
+        user_agent TEXT,
+        ip_hash VARCHAR(128),
+        metadata JSONB DEFAULT '{}'::jsonb,
+        created_at TIMESTAMP DEFAULT NOW()
+      );
+      CREATE INDEX IF NOT EXISTS idx_site_analytics_created ON site_analytics_events(created_at DESC);
+      CREATE INDEX IF NOT EXISTS idx_site_analytics_event_type ON site_analytics_events(event_type);
+      CREATE INDEX IF NOT EXISTS idx_site_analytics_session ON site_analytics_events(session_id);
+      CREATE INDEX IF NOT EXISTS idx_site_analytics_path ON site_analytics_events(path);
     `);
     await pool.query(`
       CREATE TABLE IF NOT EXISTS job_listings (

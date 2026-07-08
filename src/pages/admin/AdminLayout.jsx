@@ -80,11 +80,17 @@ const Icons = {
     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
     </svg>
+  ),
+  Analytics: () => (
+    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 19V5m0 14h16M8 16V9m4 7V7m4 9v-4" />
+    </svg>
   )
 };
 
 const navItems = [
   { path: '/admin/dashboard', label: 'Dashboard', icon: <Icons.Dashboard /> },
+  { path: '/admin/analytics', label: 'Site İstatistikleri', icon: <Icons.Analytics /> },
   { path: '/admin/pomodoro', label: 'Pomodoro', icon: <Icons.Pomodoro /> },
   { path: '/admin/opportunities', label: 'İhtimal Listesi', icon: <Icons.Opportunities /> },
   { path: '/admin/opportunity-tracking', label: 'Fırsat Takibi', icon: <Icons.Opportunities /> },
