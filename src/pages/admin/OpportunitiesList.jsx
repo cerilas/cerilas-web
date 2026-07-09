@@ -285,6 +285,7 @@ export default function OpportunitiesList() {
 
     let totalActiveTodos = 0;
     let totalFocus = 0;
+    let totalLowProbBudget = 0; // 1-4
     let totalMediumProbBudget = 0; // 5-6
     let totalHighProbBudget = 0; // 7-9
     let totalCertainBudget = 0; // 10
@@ -332,6 +333,7 @@ export default function OpportunitiesList() {
       const oppTotalIncomeInTry = convertAmount(opp.total_income, opp.currency, baseCurr);
       const oppRemainingInTry = convertAmount(calculateRemaining(opp), opp.currency, baseCurr);
 
+      if (p >= 1 && p <= 4) totalLowProbBudget += oppTotalIncomeInTry;
       if (p >= 5 && p <= 6) totalMediumProbBudget += oppTotalIncomeInTry;
       if (p >= 7 && p <= 9) totalHighProbBudget += oppTotalIncomeInTry;
       if (p === 10) {
@@ -462,7 +464,7 @@ export default function OpportunitiesList() {
     const avg12 = getPastMonthKeys(12).reduce((sum, key) => sum + (paymentsByMonth[key]?.total || 0), 0) / 12;
 
     return { 
-      probData, timelineData, totalReceivedInTry, totalMediumProbBudget, totalHighProbBudget, totalCertainBudget, 
+      probData, timelineData, totalReceivedInTry, totalLowProbBudget, totalMediumProbBudget, totalHighProbBudget, totalCertainBudget, 
       totalCertainRemaining, totalActiveTodos, avgFocus, baseCurr, currentActiveFocusSum,
       projectTimeline, timelineMonths: months, todayPercent, timelineMinWidth, totalAllTimeGrossBudget,
       averages: { avg3, avg6, avg12 },
@@ -497,7 +499,7 @@ export default function OpportunitiesList() {
       {opportunities.length > 0 && (
         <div className="mb-10 flex flex-col gap-6">
           {/* Top Stats Row */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-5 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-6 gap-4">
             <div className="min-w-0 bg-gray-900 border border-gray-800 rounded-2xl p-5 flex flex-col shadow-lg relative overflow-visible">
               <div className="absolute top-0 right-0 p-4 opacity-10 pointer-events-none">
                 <svg className="w-16 h-16 text-cyan-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
@@ -559,6 +561,20 @@ export default function OpportunitiesList() {
                 </div>
               </div>
               <span className="text-xl sm:text-2xl font-black leading-tight break-words text-yellow-400 mt-1 z-10">{formatMoney(getDashboardStats.totalMediumProbBudget, getDashboardStats.baseCurr)}</span>
+            </div>
+
+            <div className="min-w-0 bg-gray-900 border border-gray-800 rounded-2xl p-5 flex flex-col shadow-lg relative overflow-visible">
+              <div className="flex items-center gap-1.5 z-10">
+                <span className="text-xs text-gray-500 font-bold uppercase tracking-wider">Düşük İhtimal (1-4)</span>
+                <div className="relative group flex items-center">
+                  <svg className="w-4 h-4 text-gray-600 hover:text-orange-400 cursor-pointer transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                  <div className="absolute z-50 bottom-full left-1/2 -translate-x-1/2 mb-2 w-56 p-2.5 bg-gray-800 border border-gray-700 text-xs text-gray-300 rounded shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 pointer-events-none text-center">
+                    İhtimal derecesi 1, 2, 3 veya 4 olarak seçilen, düşük olasılıklı projelerin güncel kur ile hesaplanan brüt bütçe beklentisidir.
+                    <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-800"></div>
+                  </div>
+                </div>
+              </div>
+              <span className="text-xl sm:text-2xl font-black leading-tight break-words text-orange-400 mt-1 z-10">{formatMoney(getDashboardStats.totalLowProbBudget, getDashboardStats.baseCurr)}</span>
             </div>
 
             <div className="min-w-0 bg-gray-900 border border-gray-800 rounded-2xl p-5 flex flex-col shadow-lg overflow-visible">
