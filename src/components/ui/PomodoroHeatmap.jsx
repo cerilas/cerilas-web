@@ -35,7 +35,7 @@ export default function PomodoroHeatmap() {
 
   if (loading) {
     return (
-      <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 shadow-lg animate-pulse h-[200px]" />
+      <div className="pomodoro-panel bg-gray-900 border border-gray-800 rounded-xl p-6 shadow-lg animate-pulse h-[200px]" />
     );
   }
 
@@ -58,14 +58,14 @@ export default function PomodoroHeatmap() {
   }
 
   return (
-    <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 shadow-lg overflow-x-auto relative">
+    <div className="pomodoro-panel bg-gray-900 border border-gray-800 rounded-xl p-6 shadow-lg overflow-x-auto relative">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
         <div>
-          <h3 className="text-lg font-bold text-white">Odaklanma Haritası</h3>
+          <h3 className="text-base font-semibold text-white">Odaklanma Haritası</h3>
           <p className="text-sm text-gray-400 mt-1">Sürekli üretken kalmaya çalışın</p>
         </div>
         
-        <div className="flex bg-gray-800/60 p-1 rounded-xl border border-gray-700/50 backdrop-blur-sm">
+        <div className="pomodoro-range-switcher flex bg-gray-800/60 p-1 rounded-xl border border-gray-700/50 backdrop-blur-sm">
           {[
             { value: 30, label: '1 Ay' },
             { value: 90, label: '3 Ay' },
@@ -75,14 +75,14 @@ export default function PomodoroHeatmap() {
             <button
               key={item.value}
               onClick={() => setRange(item.value)}
-              className={`relative px-4 py-1.5 text-xs sm:text-sm font-medium rounded-lg transition-all duration-300 ease-out ${
+              className={`pomodoro-range-option relative px-4 py-1.5 text-xs sm:text-sm font-medium rounded-lg transition-all duration-300 ease-out ${
                 range === item.value 
-                  ? 'text-white shadow-lg' 
+                  ? 'pomodoro-range-option-active text-white shadow-lg' 
                   : 'text-gray-400 hover:text-white hover:bg-gray-700/50'
               }`}
             >
               {range === item.value && (
-                <div className="absolute inset-0 bg-gradient-to-r from-cyan-600 to-cyan-500 rounded-lg shadow-[0_0_15px_rgba(8,145,178,0.4)] animate-in zoom-in-95 duration-200 pointer-events-none" />
+                <div className="pomodoro-range-active-bg absolute inset-0 bg-gradient-to-r from-cyan-600 to-cyan-500 rounded-lg shadow-[0_0_15px_rgba(8,145,178,0.4)] animate-in zoom-in-95 duration-200 pointer-events-none" />
               )}
               <span className="relative z-10">{item.label}</span>
             </button>
@@ -104,11 +104,11 @@ export default function PomodoroHeatmap() {
             >
               {/* Tooltip */}
               <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:flex flex-col items-center z-10 w-max pointer-events-none">
-                <div className="bg-gray-800 text-white text-[10px] py-1 px-2 rounded border border-gray-700 shadow-xl whitespace-nowrap">
-                  <span className="font-bold text-cyan-400">{day.minutes} dk</span> odaklanma
+                <div className="pomodoro-hover-tooltip bg-gray-800 text-white text-[10px] py-1 px-2 rounded border border-gray-700 shadow-xl whitespace-nowrap">
+                  <span className="font-semibold text-cyan-400">{day.minutes} dk</span> odaklanma
                   <div className="text-gray-400 mt-0.5">{day.displayDate}</div>
                 </div>
-                <div className="w-2 h-2 bg-gray-800 border-b border-r border-gray-700 rotate-45 -mt-1.5"></div>
+                <div className="pomodoro-hover-tooltip-arrow w-2 h-2 bg-gray-800 border-b border-r border-gray-700 rotate-45 -mt-1.5"></div>
               </div>
             </div>
           ))}

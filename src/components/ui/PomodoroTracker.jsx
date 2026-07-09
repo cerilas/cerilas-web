@@ -248,7 +248,7 @@ export default function PomodoroTracker() {
   const progress = 100 - (timeLeft / maxTime) * 100;
 
   return (
-    <div className="bg-gray-900 border border-gray-800 rounded-xl p-4 shadow-lg flex flex-col gap-3 relative overflow-hidden">
+    <div className="pomodoro-panel bg-gray-900 border border-gray-800 rounded-xl p-4 shadow-lg flex flex-col gap-3 relative overflow-hidden">
       {/* Progress Bar background */}
       <div 
         className="absolute bottom-0 left-0 h-1 bg-cyan-500 transition-all duration-1000 ease-linear"
@@ -256,7 +256,7 @@ export default function PomodoroTracker() {
       />
       
       <div className="flex justify-between items-center">
-        <h3 className="text-sm font-bold text-gray-300 flex items-center gap-2">
+        <h3 className="text-sm font-semibold text-gray-300 flex items-center gap-2">
           <svg className="w-4 h-4 text-cyan-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
@@ -312,7 +312,7 @@ export default function PomodoroTracker() {
       )}
 
       <div className="flex justify-between items-end">
-        <div className="text-3xl font-black text-white tracking-wider tabular-nums">
+        <div className="text-3xl font-semibold text-white tracking-wider tabular-nums">
           {formatTime(timeLeft)}
         </div>
         

@@ -64,10 +64,10 @@ export default function PomodoroDailyLog() {
   const totalMinutes = sessions.reduce((acc, s) => acc + s.duration_minutes, 0);
 
   return (
-    <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 shadow-lg">
+    <div className="pomodoro-panel bg-gray-900 border border-gray-800 rounded-xl p-6 shadow-lg">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
         <div>
-          <h3 className="text-lg font-bold text-white">Günlük Kayıt Defteri</h3>
+          <h3 className="text-base font-semibold text-white">Günlük Kayıt Defteri</h3>
           <p className="text-sm text-gray-400 mt-1">Oturum notlarınızı ve detaylarınızı inceleyin</p>
         </div>
 

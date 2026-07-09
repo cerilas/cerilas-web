@@ -341,7 +341,7 @@ export default function OpportunityTracking() {
                       <p className="text-gray-400 truncate">
                         {item.description || <span className="text-gray-600">Açıklama yok</span>}
                       </p>
-                      <p className="text-amber-200/80 truncate">
+                      <p className="opportunity-note text-amber-200/80 truncate">
                         {item.note || <span className="text-gray-600">Not yok</span>}
                       </p>
                     </div>

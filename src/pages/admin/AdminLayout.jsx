@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { api } from '../../lib/api';
 import logoImg from '../../assets/logo.png';
+import { adminThemeOptions, useAdminTheme } from './adminTheme';
 
 const Icons = {
   Dashboard: () => (
@@ -85,6 +86,11 @@ const Icons = {
     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 19V5m0 14h16M8 16V9m4 7V7m4 9v-4" />
     </svg>
+  ),
+  Theme: () => (
+    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 3v1.5m0 15V21m9-9h-1.5M4.5 12H3m15.364-6.364-1.061 1.061M6.697 17.303l-1.061 1.061m12.728 0-1.061-1.061M6.697 6.697 5.636 5.636M16.5 12a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z" />
+    </svg>
   )
 };
 
@@ -111,11 +117,50 @@ const navItems = [
   { path: '/admin/sms-docs', label: 'SMS API Dokümanı', icon: <Icons.Docs /> },
 ];
 
+function ThemeSwitcher({ theme, setTheme, compact = false }) {
+  if (compact) {
+    return (
+      <button
+        type="button"
+        onClick={() => {
+          const currentIndex = adminThemeOptions.findIndex((option) => option.value === theme);
+          const nextOption = adminThemeOptions[(currentIndex + 1) % adminThemeOptions.length];
+          setTheme(nextOption.value);
+        }}
+        className="theme-switcher theme-switcher-compact flex h-9 w-9 items-center justify-center rounded-xl border border-gray-800 bg-gray-950/80 text-gray-400 transition-colors hover:bg-white/5 hover:text-white"
+        title={`Tema: ${adminThemeOptions.find((option) => option.value === theme)?.label}`}
+      >
+        <Icons.Theme />
+      </button>
+    );
+  }
+
+  return (
+    <div className="theme-switcher mt-3 grid grid-cols-3 gap-0.5 rounded-lg bg-gray-950/70 p-0.5">
+      {adminThemeOptions.map((option) => (
+        <button
+          key={option.value}
+          type="button"
+          onClick={() => setTheme(option.value)}
+          className={`theme-option rounded-md px-2 py-1 text-[11px] font-medium transition-colors ${
+            theme === option.value
+              ? 'theme-option-active bg-cyan-500 text-white'
+              : 'text-gray-500 hover:bg-white/5 hover:text-white'
+          }`}
+        >
+          {option.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
 export default function AdminLayout() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+  const { theme, setTheme, resolvedTheme } = useAdminTheme();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -134,10 +179,6 @@ export default function AdminLayout() {
       .finally(() => setLoading(false));
   }, [navigate]);
 
-  useEffect(() => {
-    setMobileSidebarOpen(false);
-  }, [location]);
-
   const handleLogout = () => {
     localStorage.removeItem('admin_token');
     navigate('/admin');
@@ -145,17 +186,17 @@ export default function AdminLayout() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-950 flex items-center justify-center">
+      <div className={`admin-theme-${resolvedTheme} min-h-screen bg-gray-950 flex items-center justify-center`}>
         <div className="w-8 h-8 border-2 border-cyan-500 border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-950 flex flex-col md:flex-row overflow-hidden">
+    <div className={`admin-theme-${resolvedTheme} min-h-screen bg-gray-950 flex flex-col md:flex-row overflow-hidden`}>
       {/* Mobile Top Header */}
-      <div className="md:hidden flex items-center justify-between p-4 bg-gray-900 border-b border-gray-800">
-        <img src={logoImg} alt="Cerilas" className="h-6 w-auto" />
+      <div className="admin-brand-panel md:hidden flex items-center justify-between p-4 bg-gray-900 border-b border-gray-800">
+        <img src={logoImg} alt="Cerilas" className="h-9 w-auto" />
         <button 
           onClick={() => setMobileSidebarOpen(!mobileSidebarOpen)}
           className="p-2 text-gray-400 hover:text-white"
@@ -180,31 +221,54 @@ export default function AdminLayout() {
         md:relative md:translate-x-0 transition-all duration-200
         ${sidebarOpen ? 'md:w-64' : 'md:w-20'} bg-gray-900 border-r border-gray-800 flex flex-col w-64 md:flex
       `}>
-        <div className="hidden md:flex p-4 h-16 border-b border-gray-800 items-center justify-between">
-          <div className="overflow-hidden flex items-center">
-            <img src={logoImg} alt="Cerilas" className={`h-6 w-auto transition-opacity duration-200 ${sidebarOpen ? 'opacity-100' : 'opacity-0 md:hidden'}`} />
-            {!sidebarOpen && <div className="w-10 h-10 flex items-center justify-center shrink-0 ml-1">
+        <div className={`admin-brand-panel hidden md:flex border-b border-gray-800 bg-gray-900 ${
+          sidebarOpen ? 'p-4 flex-col items-stretch' : 'px-3 py-4 flex-col items-center gap-3'
+        }`}>
+          <div className={`flex items-center ${sidebarOpen ? 'justify-between' : 'justify-center'}`}>
+            <img src={logoImg} alt="Cerilas" className={`h-9 w-auto transition-opacity duration-200 ${sidebarOpen ? 'opacity-100' : 'opacity-0 md:hidden'}`} />
+            {!sidebarOpen && <div className="w-9 h-9 flex items-center justify-center shrink-0">
               <div className="w-2 h-6 bg-cyan-500 rounded-full" />
             </div>}
+            {sidebarOpen && (
+              <button
+                onClick={() => setSidebarOpen(!sidebarOpen)}
+                className="text-gray-400 hover:text-white p-1 ml-2 transition-transform duration-200"
+              >
+                <svg className={`w-5 h-5 ${!sidebarOpen ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
+                </svg>
+              </button>
+            )}
           </div>
-          <button
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="text-gray-400 hover:text-white p-1 ml-2 transition-transform duration-200"
-          >
-             <svg className={`w-5 h-5 ${!sidebarOpen ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
-             </svg>
-          </button>
+          {sidebarOpen ? (
+            <ThemeSwitcher theme={theme} setTheme={setTheme} />
+          ) : (
+            <div className="flex flex-col items-center gap-2">
+              <ThemeSwitcher theme={theme} setTheme={setTheme} compact />
+              <button
+                onClick={() => setSidebarOpen(!sidebarOpen)}
+                className="flex h-9 w-9 items-center justify-center rounded-xl text-gray-400 transition-colors hover:bg-white/5 hover:text-white"
+                title="Menüyü genişlet"
+              >
+                <svg className="w-5 h-5 rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
+                </svg>
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Mobile Sidebar Brand */}
-        <div className="md:hidden p-4 border-b border-gray-800 flex items-center justify-between">
-          <img src={logoImg} alt="Cerilas" className="h-6 w-auto" />
-          <button onClick={() => setMobileSidebarOpen(false)} className="text-gray-400">
-            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
+        <div className="admin-brand-panel md:hidden p-4 border-b border-gray-800 bg-gray-900">
+          <div className="flex items-center justify-between">
+            <img src={logoImg} alt="Cerilas" className="h-9 w-auto" />
+            <button onClick={() => setMobileSidebarOpen(false)} className="text-gray-400">
+              <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+          <ThemeSwitcher theme={theme} setTheme={setTheme} />
         </div>
 
         <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
@@ -220,7 +284,8 @@ export default function AdminLayout() {
               <Link
                 key={item.path}
                 to={item.path}
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all group ${
+                onClick={() => setMobileSidebarOpen(false)}
+                className={`relative flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all group ${
                   location.pathname === item.path || location.pathname.startsWith(`${item.path}/`)
                     ? 'bg-cyan-500/10 text-cyan-400'
                     : 'text-gray-400 hover:text-white hover:bg-white/5'

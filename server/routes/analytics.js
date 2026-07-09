@@ -58,6 +58,48 @@ const hashIp = (ip) => {
 const clampText = (value, max = 500) => String(value || '').trim().slice(0, max);
 const isAdminPath = (value) => String(value || '').startsWith('/admin');
 const publicOnlySql = `AND COALESCE(path, '') NOT LIKE '/admin%'`;
+const ownHostnames = new Set(['cerilas.com', 'www.cerilas.com', 'localhost', '127.0.0.1']);
+
+const cleanHostname = (value) => String(value || '').replace(/^www\./, '').toLowerCase();
+
+const getSearchParam = (path, key) => {
+  try {
+    const url = new URL(String(path || '/'), 'https://cerilas.com');
+    return url.searchParams.get(key) || '';
+  } catch {
+    return '';
+  }
+};
+
+const normalizeSourceName = (value) => {
+  const source = cleanHostname(decodeURIComponent(String(value || '').replace(/\+/g, ' ')));
+  if (!source) return 'Doğrudan';
+  if (source.includes('google')) return 'Google';
+  if (source.includes('instagram')) return 'Instagram';
+  if (source.includes('linkedin')) return 'LinkedIn';
+  if (source.includes('facebook') || source === 'fb') return 'Facebook';
+  if (source.includes('twitter') || source.includes('x.com')) return 'X / Twitter';
+  if (source.includes('youtube')) return 'YouTube';
+  if (source.includes('bing')) return 'Bing';
+  if (source.includes('yandex')) return 'Yandex';
+  if (source.includes('duckduckgo')) return 'DuckDuckGo';
+  return source;
+};
+
+const classifyTrafficSource = ({ path, referrer }) => {
+  const utmSource = getSearchParam(path, 'utm_source');
+  if (utmSource) return normalizeSourceName(utmSource);
+
+  if (!referrer) return 'Doğrudan';
+
+  try {
+    const hostname = cleanHostname(new URL(referrer).hostname);
+    if (!hostname || ownHostnames.has(hostname)) return 'Doğrudan';
+    return normalizeSourceName(hostname);
+  } catch {
+    return 'Diğer';
+  }
+};
 
 router.post('/event', async (req, res) => {
   try {
@@ -191,6 +233,40 @@ router.get('/summary', authMiddleware, async (req, res) => {
       ORDER BY created_at::date ASC
     `, params);
 
+    const sourceRows = await pool.query(`
+      WITH first_session_views AS (
+        SELECT DISTINCT ON (COALESCE(NULLIF(session_id, ''), NULLIF(visitor_id, ''), id::text))
+          COALESCE(NULLIF(session_id, ''), NULLIF(visitor_id, ''), id::text) AS session_key,
+          visitor_id,
+          path,
+          referrer,
+          created_at
+        FROM site_analytics_events
+        WHERE created_at >= ${sinceSql} ${publicOnlySql} AND event_type = 'page_view'
+        ORDER BY COALESCE(NULLIF(session_id, ''), NULLIF(visitor_id, ''), id::text), created_at ASC
+      )
+      SELECT session_key, visitor_id, path, referrer
+      FROM first_session_views
+    `, params);
+
+    const sourceMap = new Map();
+    for (const row of sourceRows.rows) {
+      const source = classifyTrafficSource(row);
+      const current = sourceMap.get(source) || { source, sessions: 0, visitors: new Set() };
+      current.sessions += 1;
+      if (row.visitor_id) current.visitors.add(row.visitor_id);
+      sourceMap.set(source, current);
+    }
+
+    const trafficSources = Array.from(sourceMap.values())
+      .map((item) => ({
+        source: item.source,
+        sessions: item.sessions,
+        visitors: item.visitors.size,
+      }))
+      .sort((a, b) => b.sessions - a.sessions)
+      .slice(0, 12);
+
     res.json({
       range_days: days,
       overview: {
@@ -201,6 +277,7 @@ router.get('/summary', authMiddleware, async (req, res) => {
       byCountry: byCountry.rows,
       clicks: clicks.rows,
       daily: daily.rows,
+      trafficSources,
     });
   } catch (err) {
     console.error('Analytics summary error:', err);

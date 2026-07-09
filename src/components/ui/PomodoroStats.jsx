@@ -38,7 +38,7 @@ export default function PomodoroStats() {
 
   if (loading) {
     return (
-      <div className="bg-gray-900 border border-gray-800 rounded-xl p-4 shadow-lg flex animate-pulse h-24">
+      <div className="pomodoro-panel bg-gray-900 border border-gray-800 rounded-xl p-4 shadow-lg flex animate-pulse h-24">
       </div>
     );
   }
@@ -48,14 +48,14 @@ export default function PomodoroStats() {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="bg-gray-900 border border-gray-800 rounded-xl p-4 shadow-lg flex flex-col justify-center relative overflow-hidden">
+      <div className="pomodoro-panel bg-gray-900 border border-gray-800 rounded-xl p-4 shadow-lg flex flex-col justify-center relative overflow-hidden">
         <div className="absolute top-0 right-0 p-4 opacity-10">
           <svg className="w-12 h-12 text-orange-500" fill="currentColor" viewBox="0 0 24 24">
             <path d="M17.5 10c0-1.5-1-3-2.5-4C13.5 4.5 14.5 2 12 2S9.5 6.5 10 8c-1.5 1-2.5 2.5-2.5 4 0 2.5 2 4.5 4.5 4.5s4.5-2 4.5-4.5zM12 15c-1.5 0-2.5-1-2.5-2.5 0-1 .5-2 1.5-2.5-1 1-.5 2 .5 2.5 1.5.5 2.5-.5 2.5-1.5-.5 0-1-1-1-2 1 .5 1.5 1.5 1.5 2.5 0 1.5-1 2.5-2.5 2.5z" />
           </svg>
         </div>
         <div className="text-sm text-gray-400 font-medium mb-1">Mevcut Seri</div>
-        <div className="text-3xl font-black text-white flex items-center gap-2">
+        <div className="text-3xl font-semibold text-white flex items-center gap-2">
           {stats.currentStreak} <span className="text-lg text-gray-500 font-normal">Gün</span>
           {stats.currentStreak > 0 && (
             <svg className="w-6 h-6 text-orange-500 animate-pulse" fill="currentColor" viewBox="0 0 24 24">
@@ -65,7 +65,7 @@ export default function PomodoroStats() {
         </div>
       </div>
 
-      <div className="bg-gray-900 border border-gray-800 rounded-xl p-4 shadow-lg flex flex-col justify-center">
+      <div className="pomodoro-panel bg-gray-900 border border-gray-800 rounded-xl p-4 shadow-lg flex flex-col justify-center">
         <div className="text-sm text-gray-400 font-medium mb-1 flex justify-between items-center relative group">
           Toplam Odak
           <div className="flex items-center gap-1.5 cursor-help">
@@ -77,8 +77,8 @@ export default function PomodoroStats() {
             </svg>
             
             {/* Ranks Tooltip */}
-            <div className="absolute top-full right-0 mt-2 hidden group-hover:block z-50 w-64 bg-gray-800 border border-gray-700 rounded-lg shadow-xl p-3">
-              <div className="text-xs font-bold text-white mb-2 border-b border-gray-700 pb-2">Rütbeler & Hedefler</div>
+            <div className="pomodoro-hover-tooltip absolute top-full right-0 mt-2 hidden group-hover:block z-50 w-64 bg-gray-800 border border-gray-700 rounded-lg shadow-xl p-3">
+              <div className="text-xs font-semibold text-white mb-2 border-b border-gray-700 pb-2">Rütbeler & Hedefler</div>
               <div className="space-y-1.5">
                 {RANKS.map((r, i) => {
                   const isCurrent = r.title === rank.title;
@@ -93,7 +93,7 @@ export default function PomodoroStats() {
             </div>
           </div>
         </div>
-        <div className="text-3xl font-black text-white">
+        <div className="text-3xl font-semibold text-white">
           {hours} <span className="text-lg text-gray-500 font-normal">Saat</span>
         </div>
       </div>
