@@ -14,6 +14,12 @@ const countryLabel = (country) => {
   return country;
 };
 
+const countryFlag = (country) => {
+  const code = String(country || '').trim().toUpperCase();
+  if (!/^[A-Z]{2}$/.test(code) || code === 'XX') return '•';
+  return String.fromCodePoint(...[...code].map((char) => 127397 + char.charCodeAt(0)));
+};
+
 const toLocalDateKey = (date) => {
   const offset = date.getTimezoneOffset();
   const local = new Date(date.getTime() - offset * 60 * 1000);
@@ -197,7 +203,10 @@ export default function AnalyticsAdmin() {
                 empty="Ülke verisi yok."
                 render={(item) => (
                   <>
-                    <span className="truncate text-gray-300">{countryLabel(item.country)}</span>
+                    <span className="flex min-w-0 items-center gap-2 truncate text-gray-300">
+                      <span className="text-base leading-none">{countryFlag(item.country)}</span>
+                      <span className="truncate">{countryLabel(item.country)}</span>
+                    </span>
                     <span className="text-gray-500">{item.views} görüntüleme</span>
                   </>
                 )}

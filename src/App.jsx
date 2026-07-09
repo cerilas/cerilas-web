@@ -82,14 +82,15 @@ export default function App() {
         <SiteAnalytics />
         <Toaster position="top-right" toastOptions={{
           style: {
-            background: '#1f2937',
-            color: '#fff',
-            border: '1px solid #374151',
+            background: 'var(--admin-toast-bg, #1f2937)',
+            color: 'var(--admin-toast-text, #ffffff)',
+            border: '1px solid var(--admin-toast-border, #374151)',
+            boxShadow: 'var(--admin-toast-shadow, 0 18px 45px rgb(0 0 0 / 0.28))',
           },
           success: {
             iconTheme: {
-              primary: '#22c55e',
-              secondary: '#fff',
+              primary: 'var(--admin-toast-success, #22c55e)',
+              secondary: 'var(--admin-toast-icon-secondary, #ffffff)',
             },
           },
         }} />

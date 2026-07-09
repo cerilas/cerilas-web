@@ -59,6 +59,7 @@ const clampText = (value, max = 500) => String(value || '').trim().slice(0, max)
 const isAdminPath = (value) => String(value || '').startsWith('/admin');
 const publicOnlySql = `AND COALESCE(path, '') NOT LIKE '/admin%'`;
 const ownHostnames = new Set(['cerilas.com', 'www.cerilas.com', 'localhost', '127.0.0.1']);
+const MAX_AVG_SESSION_SECONDS = 30 * 60;
 
 const cleanHostname = (value) => String(value || '').replace(/^www\./, '').toLowerCase();
 
@@ -187,7 +188,7 @@ router.get('/summary', authMiddleware, async (req, res) => {
         WHERE created_at >= ${sinceSql} ${publicOnlySql} AND session_id IS NOT NULL AND session_id <> ''
         GROUP BY session_id
       )
-      SELECT COALESCE(ROUND(AVG(GREATEST(COALESCE(reported_duration, 0), COALESCE(computed_duration, 0))))::int, 0) AS avg_session_seconds
+      SELECT COALESCE(ROUND(AVG(LEAST(COALESCE(reported_duration, computed_duration, 0), ${MAX_AVG_SESSION_SECONDS})))::int, 0) AS avg_session_seconds
       FROM sessions
     `, params);
 

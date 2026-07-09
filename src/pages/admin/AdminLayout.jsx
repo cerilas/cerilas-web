@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
 import { Link, Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { api } from '../../lib/api';
-import logoImg from '../../assets/logo.png';
+import logoDarkMode from '../../assets/cerilas-logo-darkmode.png';
+import logoLightMode from '../../assets/cerilas-logo-lightmode.png';
+import logoCollapsed from '../../assets/Cerilas Logo-COLLAPSED2.png';
 import { adminThemeOptions, useAdminTheme } from './adminTheme';
 
 const Icons = {
@@ -155,6 +157,17 @@ function ThemeSwitcher({ theme, setTheme, compact = false }) {
   );
 }
 
+function AdminLogo({ resolvedTheme, collapsed = false }) {
+  const logoSrc = collapsed ? logoCollapsed : resolvedTheme === 'light' ? logoLightMode : logoDarkMode;
+  return (
+    <img
+      src={logoSrc}
+      alt="Cerilas"
+      className={`admin-logo object-contain transition-all duration-200 ${collapsed ? 'h-[38px] w-[38px]' : 'h-10 w-auto max-w-[170px]'}`}
+    />
+  );
+}
+
 export default function AdminLayout() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -196,7 +209,7 @@ export default function AdminLayout() {
     <div className={`admin-theme-${resolvedTheme} min-h-screen bg-gray-950 flex flex-col md:flex-row overflow-hidden`}>
       {/* Mobile Top Header */}
       <div className="admin-brand-panel md:hidden flex items-center justify-between p-4 bg-gray-900 border-b border-gray-800">
-        <img src={logoImg} alt="Cerilas" className="h-9 w-auto" />
+        <AdminLogo resolvedTheme={resolvedTheme} />
         <button 
           onClick={() => setMobileSidebarOpen(!mobileSidebarOpen)}
           className="p-2 text-gray-400 hover:text-white"
@@ -225,10 +238,13 @@ export default function AdminLayout() {
           sidebarOpen ? 'p-4 flex-col items-stretch' : 'px-3 py-4 flex-col items-center gap-3'
         }`}>
           <div className={`flex items-center ${sidebarOpen ? 'justify-between' : 'justify-center'}`}>
-            <img src={logoImg} alt="Cerilas" className={`h-9 w-auto transition-opacity duration-200 ${sidebarOpen ? 'opacity-100' : 'opacity-0 md:hidden'}`} />
-            {!sidebarOpen && <div className="w-9 h-9 flex items-center justify-center shrink-0">
-              <div className="w-2 h-6 bg-cyan-500 rounded-full" />
-            </div>}
+            {sidebarOpen ? (
+              <AdminLogo resolvedTheme={resolvedTheme} />
+            ) : (
+              <div className="h-[38px] w-[38px] flex items-center justify-center shrink-0 overflow-visible">
+                <AdminLogo resolvedTheme={resolvedTheme} collapsed />
+              </div>
+            )}
             {sidebarOpen && (
               <button
                 onClick={() => setSidebarOpen(!sidebarOpen)}
@@ -261,7 +277,7 @@ export default function AdminLayout() {
         {/* Mobile Sidebar Brand */}
         <div className="admin-brand-panel md:hidden p-4 border-b border-gray-800 bg-gray-900">
           <div className="flex items-center justify-between">
-            <img src={logoImg} alt="Cerilas" className="h-9 w-auto" />
+            <AdminLogo resolvedTheme={resolvedTheme} />
             <button onClick={() => setMobileSidebarOpen(false)} className="text-gray-400">
               <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />

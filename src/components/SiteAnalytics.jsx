@@ -4,6 +4,8 @@ import { useLocation } from 'react-router-dom';
 const VISITOR_KEY = 'cerilas_visitor_id';
 const SESSION_KEY = 'cerilas_session_id';
 const SESSION_START_KEY = 'cerilas_session_start';
+const SESSION_ENGAGED_KEY = 'cerilas_session_engaged_seconds';
+const ACTIVE_WINDOW_MS = 60 * 1000;
 
 const randomId = (prefix) => {
   if (globalThis.crypto?.randomUUID) return `${prefix}_${globalThis.crypto.randomUUID()}`;
@@ -25,9 +27,13 @@ const getSessionId = () => {
     id = randomId('s');
     sessionStorage.setItem(SESSION_KEY, id);
     sessionStorage.setItem(SESSION_START_KEY, String(Date.now()));
+    sessionStorage.setItem(SESSION_ENGAGED_KEY, '0');
   }
   if (!sessionStorage.getItem(SESSION_START_KEY)) {
     sessionStorage.setItem(SESSION_START_KEY, String(Date.now()));
+  }
+  if (!sessionStorage.getItem(SESSION_ENGAGED_KEY)) {
+    sessionStorage.setItem(SESSION_ENGAGED_KEY, '0');
   }
   return id;
 };
@@ -111,10 +117,20 @@ export default function SiteAnalytics() {
   useEffect(() => {
     if (location.pathname.startsWith('/admin')) return;
     const identity = getIdentity();
+    let lastActivityAt = Date.now();
+    let lastTickAt = Date.now();
 
     const sendDuration = (useBeacon = false) => {
-      const startedAt = Number(sessionStorage.getItem(SESSION_START_KEY) || Date.now());
-      const duration = Math.max(0, Math.round((Date.now() - startedAt) / 1000));
+      const now = Date.now();
+      const previousEngagedSeconds = Number(sessionStorage.getItem(SESSION_ENGAGED_KEY) || 0);
+      const elapsedSeconds = Math.max(0, Math.min(30, Math.round((now - lastTickAt) / 1000)));
+      const isRecentlyActive = document.visibilityState === 'visible' && now - lastActivityAt <= ACTIVE_WINDOW_MS;
+      const duration = previousEngagedSeconds + (isRecentlyActive ? elapsedSeconds : 0);
+      lastTickAt = now;
+      sessionStorage.setItem(SESSION_ENGAGED_KEY, String(duration));
+
+      if (!useBeacon && duration === previousEngagedSeconds && document.visibilityState !== 'visible') return;
+
       postEvent({
         ...identity,
         event_type: 'session_duration',
@@ -124,17 +140,32 @@ export default function SiteAnalytics() {
       }, useBeacon);
     };
 
+    const markActivity = () => {
+      lastActivityAt = Date.now();
+    };
+
     const interval = window.setInterval(() => sendDuration(false), 30000);
     const handlePageHide = () => sendDuration(true);
     const handleVisibility = () => {
-      if (document.visibilityState === 'hidden') sendDuration(true);
+      if (document.visibilityState === 'visible') {
+        markActivity();
+        lastTickAt = Date.now();
+      } else {
+        sendDuration(true);
+      }
     };
 
+    ['click', 'keydown', 'scroll', 'touchstart', 'mousemove'].forEach((eventName) => {
+      window.addEventListener(eventName, markActivity, { passive: true });
+    });
     window.addEventListener('pagehide', handlePageHide);
     document.addEventListener('visibilitychange', handleVisibility);
 
     return () => {
       window.clearInterval(interval);
+      ['click', 'keydown', 'scroll', 'touchstart', 'mousemove'].forEach((eventName) => {
+        window.removeEventListener(eventName, markActivity);
+      });
       window.removeEventListener('pagehide', handlePageHide);
       document.removeEventListener('visibilitychange', handleVisibility);
     };

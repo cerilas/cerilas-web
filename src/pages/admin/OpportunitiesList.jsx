@@ -272,6 +272,21 @@ export default function OpportunitiesList() {
     return new Intl.NumberFormat('tr-TR', { style: 'currency', currency: currency || 'TRY' }).format(amount);
   };
 
+  const formatMoneyCompact = (amount, currency) => {
+    const value = Number(amount) || 0;
+    const abs = Math.abs(value);
+    const compactCurrency = new Intl.NumberFormat('tr-TR', {
+      style: 'currency',
+      currency: currency || 'TRY',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: abs >= 10_000_000 ? 1 : 2,
+    });
+
+    if (abs >= 1_000_000_000) return `${compactCurrency.format(value / 1_000_000_000)} Mr`;
+    if (abs >= 1_000_000) return `${compactCurrency.format(value / 1_000_000)} Mn`;
+    return formatMoney(value, currency);
+  };
+
   const getDashboardStats = useMemo(() => {
     const baseCurr = 'TRY';
     const probData = [
@@ -514,7 +529,9 @@ export default function OpportunitiesList() {
                   </div>
                 </div>
               </div>
-              <span className="text-xl sm:text-2xl font-black leading-tight break-words text-white mt-1 z-10">{formatMoney(getDashboardStats.totalReceivedInTry, getDashboardStats.baseCurr)}</span>
+              <span className="text-xl sm:text-2xl 2xl:text-3xl font-black leading-tight whitespace-nowrap text-white mt-1 z-10" title={formatMoney(getDashboardStats.totalReceivedInTry, getDashboardStats.baseCurr)}>
+                {formatMoneyCompact(getDashboardStats.totalReceivedInTry, getDashboardStats.baseCurr)}
+              </span>
             </div>
             
             <div className="min-w-0 bg-gray-900 border border-gray-800 rounded-2xl p-5 flex flex-col shadow-lg relative overflow-visible">
@@ -531,11 +548,18 @@ export default function OpportunitiesList() {
                   </div>
                 </div>
               </div>
-              <span className="text-xl sm:text-2xl font-black leading-tight break-words text-green-400 mt-1 z-10">{formatMoney(getDashboardStats.totalCertainRemaining, getDashboardStats.baseCurr)}</span>
-              <span className="text-xs text-gray-500 mt-1 z-10 break-words">Toplam Bütçe: {formatMoney(getDashboardStats.totalCertainBudget, getDashboardStats.baseCurr)}</span>
+              <span className="text-xl sm:text-2xl 2xl:text-3xl font-black leading-tight whitespace-nowrap text-green-400 mt-1 z-10" title={formatMoney(getDashboardStats.totalCertainRemaining, getDashboardStats.baseCurr)}>
+                {formatMoneyCompact(getDashboardStats.totalCertainRemaining, getDashboardStats.baseCurr)}
+              </span>
+              <span className="text-xs text-gray-500 mt-1 z-10 truncate" title={`Toplam Bütçe: ${formatMoney(getDashboardStats.totalCertainBudget, getDashboardStats.baseCurr)}`}>
+                Toplam Bütçe: {formatMoneyCompact(getDashboardStats.totalCertainBudget, getDashboardStats.baseCurr)}
+              </span>
             </div>
 
             <div className="min-w-0 bg-gray-900 border border-gray-800 rounded-2xl p-5 flex flex-col shadow-lg relative overflow-visible">
+              <div className="absolute top-0 right-0 p-4 opacity-10 pointer-events-none">
+                <svg className="w-16 h-16 text-cyan-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" /></svg>
+              </div>
               <div className="flex items-center gap-1.5 z-10">
                 <span className="text-xs text-gray-500 font-bold uppercase tracking-wider">Yüksek İhtimal (7-9)</span>
                 <div className="relative group flex items-center">
@@ -546,10 +570,15 @@ export default function OpportunitiesList() {
                   </div>
                 </div>
               </div>
-              <span className="text-xl sm:text-2xl font-black leading-tight break-words text-cyan-400 mt-1 z-10">{formatMoney(getDashboardStats.totalHighProbBudget, getDashboardStats.baseCurr)}</span>
+              <span className="text-xl sm:text-2xl 2xl:text-3xl font-black leading-tight whitespace-nowrap text-cyan-400 mt-1 z-10" title={formatMoney(getDashboardStats.totalHighProbBudget, getDashboardStats.baseCurr)}>
+                {formatMoneyCompact(getDashboardStats.totalHighProbBudget, getDashboardStats.baseCurr)}
+              </span>
             </div>
 
             <div className="min-w-0 bg-gray-900 border border-gray-800 rounded-2xl p-5 flex flex-col shadow-lg relative overflow-visible">
+              <div className="absolute top-0 right-0 p-4 opacity-10 pointer-events-none">
+                <svg className="w-16 h-16 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 19V5m0 14h16M8 16l4-4 3 3 5-7" /></svg>
+              </div>
               <div className="flex items-center gap-1.5 z-10">
                 <span className="text-xs text-gray-500 font-bold uppercase tracking-wider">Orta İhtimal (5-6)</span>
                 <div className="relative group flex items-center">
@@ -560,10 +589,15 @@ export default function OpportunitiesList() {
                   </div>
                 </div>
               </div>
-              <span className="text-xl sm:text-2xl font-black leading-tight break-words text-yellow-400 mt-1 z-10">{formatMoney(getDashboardStats.totalMediumProbBudget, getDashboardStats.baseCurr)}</span>
+              <span className="text-xl sm:text-2xl 2xl:text-3xl font-black leading-tight whitespace-nowrap text-yellow-400 mt-1 z-10" title={formatMoney(getDashboardStats.totalMediumProbBudget, getDashboardStats.baseCurr)}>
+                {formatMoneyCompact(getDashboardStats.totalMediumProbBudget, getDashboardStats.baseCurr)}
+              </span>
             </div>
 
             <div className="min-w-0 bg-gray-900 border border-gray-800 rounded-2xl p-5 flex flex-col shadow-lg relative overflow-visible">
+              <div className="absolute top-0 right-0 p-4 opacity-10 pointer-events-none">
+                <svg className="w-16 h-16 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 17h8m0 0V9m0 8-8-8-4 4-6-6" /></svg>
+              </div>
               <div className="flex items-center gap-1.5 z-10">
                 <span className="text-xs text-gray-500 font-bold uppercase tracking-wider">Düşük İhtimal (1-4)</span>
                 <div className="relative group flex items-center">
@@ -574,10 +608,15 @@ export default function OpportunitiesList() {
                   </div>
                 </div>
               </div>
-              <span className="text-xl sm:text-2xl font-black leading-tight break-words text-orange-400 mt-1 z-10">{formatMoney(getDashboardStats.totalLowProbBudget, getDashboardStats.baseCurr)}</span>
+              <span className="text-xl sm:text-2xl 2xl:text-3xl font-black leading-tight whitespace-nowrap text-orange-400 mt-1 z-10" title={formatMoney(getDashboardStats.totalLowProbBudget, getDashboardStats.baseCurr)}>
+                {formatMoneyCompact(getDashboardStats.totalLowProbBudget, getDashboardStats.baseCurr)}
+              </span>
             </div>
 
-            <div className="min-w-0 bg-gray-900 border border-gray-800 rounded-2xl p-5 flex flex-col shadow-lg overflow-visible">
+            <div className="min-w-0 bg-gray-900 border border-gray-800 rounded-2xl p-5 flex flex-col shadow-lg overflow-visible relative">
+              <div className="absolute top-0 right-0 p-4 opacity-10 pointer-events-none">
+                <svg className="w-16 h-16 text-purple-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5h6m-7 4h8m-9 4h6m-7 4h8M7 3h10a2 2 0 012 2v14a2 2 0 01-2 2H7a2 2 0 01-2-2V5a2 2 0 012-2z" /></svg>
+              </div>
               <div className="flex flex-col gap-4 h-full">
                 <div 
                   className="min-w-0 cursor-pointer group/task hover:bg-gray-800/40 p-2 rounded-xl transition-colors -m-2"
