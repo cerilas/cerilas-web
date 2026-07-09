@@ -285,7 +285,7 @@ function Panel({ title, children, className = '' }) {
 function List({ items, empty, render }) {
   if (!items.length) return <Empty text={empty} />;
   return (
-    <div className="divide-y divide-gray-800">
+    <div className="analytics-list divide-y divide-gray-800">
       {items.map((item, index) => (
         <div key={`${item.path || item.country || item.label || item.source}-${index}`} className="flex items-center justify-between gap-4 py-2 text-sm">
           {render(item)}

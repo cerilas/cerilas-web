@@ -67,6 +67,7 @@ const lightThemeRuntimeCss = `
   [data-admin-theme="light"] .pomodoro-range-option:hover { background-color: #ffffff !important; color: #1e293b !important; }
   [data-admin-theme="light"] .pomodoro-range-option-active { color: #ffffff !important; box-shadow: none !important; }
   [data-admin-theme="light"] .pomodoro-range-active-bg { background: #2563eb !important; box-shadow: 0 1px 2px rgb(37 99 235 / 0.20) !important; }
+  [data-admin-theme="light"] .analytics-list > :not(:last-child) { border-color: rgb(226 232 240 / 0.30) !important; }
   [data-admin-theme="light"] input.bg-gray-800, [data-admin-theme="light"] textarea.bg-gray-800, [data-admin-theme="light"] select.bg-gray-800, [data-admin-theme="light"] input.bg-gray-950\\/80, [data-admin-theme="light"] textarea.bg-gray-950\\/80, [data-admin-theme="light"] select.bg-gray-950\\/80 { background-color: #ffffff !important; color: #0f172a !important; }
 `;
 

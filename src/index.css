@@ -567,6 +567,10 @@ body[data-admin-theme="light"] {
   box-shadow: 0 1px 2px rgb(37 99 235 / 0.20) !important;
 }
 
+[data-admin-theme="light"] .analytics-list > :not(:last-child) {
+  border-color: rgb(226 232 240 / 0.30) !important;
+}
+
 [data-admin-theme="light"] .hover\:bg-white\/5:hover {
   background-color: rgb(15 23 42 / 0.06) !important;
 }
