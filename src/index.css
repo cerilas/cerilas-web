@@ -1,5 +1,21 @@
 @import "tailwindcss";
 
+.expense-list-item + .expense-list-item {
+  border-top: 1px solid rgb(31 41 55 / 0.58);
+}
+
+.admin-theme-light .expense-list-item + .expense-list-item {
+  border-top-color: rgb(203 213 225 / 0.42);
+}
+
+.expense-calendar-agenda-day + .expense-calendar-agenda-day {
+  border-top: 1px solid rgb(31 41 55 / 0.58);
+}
+
+.admin-theme-light .expense-calendar-agenda-day + .expense-calendar-agenda-day {
+  border-top-color: rgb(203 213 225 / 0.42);
+}
+
 @layer base {
   html {
     scroll-behavior: smooth;
