@@ -159,6 +159,12 @@ export const api = {
   getStats: () => request('/stats'),
   getAnalyticsSummary: (days = 30) => request(`/analytics/summary?days=${days}`),
 
+  // Expenses
+  getExpenses: () => request('/expenses'),
+  createExpense: (data) => request('/expenses', { method: 'POST', body: JSON.stringify(data) }),
+  updateExpense: (id, data) => request(`/expenses/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+  deleteExpense: (id) => request(`/expenses/${id}`, { method: 'DELETE' }),
+
   // Mail
   getSenders: () => request('/mail/senders'),
   createSender: (data) => request('/mail/senders', { method: 'POST', body: JSON.stringify(data) }),

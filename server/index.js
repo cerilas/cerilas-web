@@ -20,6 +20,7 @@ import opportunitiesRoutes from './routes/opportunities.js';
 import opportunityTrackingRoutes from './routes/opportunityTracking.js';
 import pomodoroRoutes from './routes/pomodoro.js';
 import analyticsRoutes from './routes/analytics.js';
+import expensesRoutes from './routes/expenses.js';
 import pool from './db.js';
 
 dotenv.config();
@@ -216,6 +217,7 @@ app.use('/api/opportunities', opportunitiesRoutes);
 app.use('/api/opportunity-tracking', opportunityTrackingRoutes);
 app.use('/api/pomodoro', pomodoroRoutes);
 app.use('/api/analytics', analyticsRoutes);
+app.use('/api/expenses', expensesRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => res.json({ ok: true }));
@@ -505,6 +507,21 @@ app.listen(PORT, async () => {
         updated_at TIMESTAMP DEFAULT NOW()
       );
       CREATE INDEX IF NOT EXISTS idx_tracked_opportunities_created ON tracked_opportunities(created_at DESC);
+
+      CREATE TABLE IF NOT EXISTS expenses (
+        id SERIAL PRIMARY KEY,
+        title VARCHAR(240) NOT NULL,
+        note TEXT DEFAULT '',
+        category VARCHAR(100) NOT NULL DEFAULT 'Diğer',
+        related_party VARCHAR(240),
+        icon VARCHAR(40) NOT NULL DEFAULT 'receipt',
+        amount NUMERIC(15, 2) NOT NULL CHECK (amount > 0),
+        period VARCHAR(10) NOT NULL CHECK (period IN ('monthly', 'yearly')),
+        due_day INTEGER CHECK (due_day IS NULL OR (due_day BETWEEN 1 AND 31)),
+        created_at TIMESTAMP DEFAULT NOW(),
+        updated_at TIMESTAMP DEFAULT NOW()
+      );
+      CREATE INDEX IF NOT EXISTS idx_expenses_created ON expenses(created_at DESC);
 
       CREATE TABLE IF NOT EXISTS site_analytics_events (
         id SERIAL PRIMARY KEY,

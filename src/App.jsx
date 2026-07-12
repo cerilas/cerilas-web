@@ -42,6 +42,7 @@ import OpportunityDetail from "./pages/admin/OpportunityDetail";
 import OpportunityTracking from "./pages/admin/OpportunityTracking";
 import AnalyticsAdmin from "./pages/admin/AnalyticsAdmin";
 import Pomodoro from "./pages/admin/Pomodoro";
+import ExpensesAdmin from "./pages/admin/ExpensesAdmin";
 import { Toaster } from 'react-hot-toast';
 
 function Layout({ children }) {
@@ -118,6 +119,7 @@ export default function App() {
               <Route path="opportunities" element={<OpportunitiesList />} />
               <Route path="opportunities/:id" element={<OpportunityDetail />} />
               <Route path="opportunity-tracking" element={<OpportunityTracking />} />
+              <Route path="expenses" element={<ExpensesAdmin />} />
             <Route path="mail-senders" element={<SendersAdmin />} />
             <Route path="mail-docs" element={<MailApiDocs />} />
             <Route path="mail-settings" element={<MailSettings />} />
