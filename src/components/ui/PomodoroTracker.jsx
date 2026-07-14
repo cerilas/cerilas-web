@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { api } from '../../lib/api';
 import toast from 'react-hot-toast';
+import PomodoroLiquid from './PomodoroLiquid';
 
 let globalAudioCtx = null;
 
@@ -245,16 +246,13 @@ export default function PomodoroTracker() {
 
   // Prevent divide by zero if duration is somehow empty
   const maxTime = (duration || 1) * 60;
-  const progress = 100 - (timeLeft / maxTime) * 100;
+  const progress = Math.min(100, Math.max(0, 100 - (timeLeft / maxTime) * 100));
 
   return (
-    <div className="pomodoro-panel bg-gray-900 border border-gray-800 rounded-xl p-4 shadow-lg flex flex-col gap-3 relative overflow-hidden">
-      {/* Progress Bar background */}
-      <div 
-        className="absolute bottom-0 left-0 h-1 bg-cyan-500 transition-all duration-1000 ease-linear"
-        style={{ width: `${progress}%` }}
-      />
-      
+    <div className="pomodoro-panel pomodoro-liquid-card bg-gray-900 border border-gray-800 rounded-xl p-4 shadow-lg relative overflow-hidden">
+      <PomodoroLiquid progress={progress} isRunning={isRunning} />
+
+      <div className="relative z-10 flex flex-col gap-3">
       <div className="flex justify-between items-center">
         <h3 className="text-sm font-semibold text-gray-300 flex items-center gap-2">
           <svg className="w-4 h-4 text-cyan-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -375,6 +373,7 @@ export default function PomodoroTracker() {
       <div className="pt-2 mt-1 border-t border-gray-800 flex justify-between items-center text-xs">
         <span className="text-gray-500">Bugünkü Odak Puanı:</span>
         <span className="text-cyan-400 font-bold">{dailyTotal} dk</span>
+      </div>
       </div>
     </div>
   );
