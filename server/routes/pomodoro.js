@@ -80,41 +80,64 @@ router.get('/stats', authMiddleware, async (req, res) => {
       [userId]
     );
     
-    // Build a Set of all dates with sessions for O(1) lookup
-    const workedDatesSet = new Set(datesRes.rows.map(r => r.date_string));
-    
-    // Filter to only weekday dates (weekends don't count toward/against streak)
-    const weekdayDates = datesRes.rows
-      .map(r => r.date_string)
-      .filter(d => !isWeekend(d));
-    
     let currentStreak = 0;
-    
+    let streakBreakDate = null;
+
     const todayStr = getTodayTRT();
 
-    // Find the most recent weekday on or before today
+    // Build a set for fast lookup
+    const workedDatesSet = new Set(datesRes.rows.map(r => r.date_string));
+
+    // Find the most recent weekday (today if weekday, or last Friday if weekend)
     let latestRequiredWeekday = isWeekend(todayStr)
       ? decrementSkippingWeekends(decrementDateString(todayStr))
       : todayStr;
     const prevWeekday = decrementSkippingWeekends(latestRequiredWeekday);
 
-    // Streak is alive if user worked today (weekday) OR worked the most recent previous weekday
+    // Streak is alive if worked today (weekday) OR the most recent previous weekday
     const streakAlive = workedDatesSet.has(latestRequiredWeekday) || workedDatesSet.has(prevWeekday);
 
-    if (weekdayDates.length > 0 && streakAlive) {
-      // Walk backwards from the most recent worked weekday
-      let expectedDateStr = weekdayDates[0];
-      for (const dateStr of weekdayDates) {
-        if (dateStr === expectedDateStr) {
-          currentStreak++;
-          expectedDateStr = decrementSkippingWeekends(expectedDateStr);
+    if (workedDatesSet.size > 0 && streakAlive) {
+      // Walk backwards day by day starting from the most recent worked date
+      // - If it's a weekday and worked: streak++
+      // - If it's a weekday and NOT worked: BREAK (streak ends)
+      // - If it's a weekend and worked: streak++ (bonus)
+      // - If it's a weekend and NOT worked: skip (no penalty)
+      const allWorked = datesRes.rows.map(r => r.date_string);
+      const mostRecentWorked = allWorked[0]; // already DESC sorted
+
+      let cursor = mostRecentWorked;
+
+      while (true) {
+        const weekend = isWeekend(cursor);
+        const worked = workedDatesSet.has(cursor);
+
+        if (weekend) {
+          if (worked) {
+            currentStreak++; // bonus
+          }
+          // weekend not worked = skip, no penalty
         } else {
-          break;
+          // weekday
+          if (worked) {
+            currentStreak++;
+          } else {
+            // Missing weekday = streak breaks
+            streakBreakDate = cursor;
+            break;
+          }
         }
+
+        cursor = decrementDateString(cursor);
+
+        // Safety: stop going too far back (e.g. more than 2 years)
+        const cursorYear = parseInt(cursor.split('-')[0]);
+        if (cursorYear < 2024) break;
       }
     }
 
-    res.json({ totalMinutes, currentStreak });
+    res.json({ totalMinutes, currentStreak, streakBreakDate });
+
   } catch (error) {
     console.error('Error fetching pomodoro overall stats:', error);
     res.status(500).json({ error: 'Failed to fetch stats' });

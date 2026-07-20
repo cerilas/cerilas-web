@@ -19,7 +19,7 @@ const getRank = (hours) => {
 };
 
 export default function PomodoroStats() {
-  const [stats, setStats] = useState({ totalMinutes: 0, currentStreak: 0 });
+  const [stats, setStats] = useState({ totalMinutes: 0, currentStreak: 0, streakBreakDate: null });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -58,11 +58,24 @@ export default function PomodoroStats() {
         <div className="text-3xl font-semibold text-white flex items-center gap-2">
           {stats.currentStreak} <span className="text-lg text-gray-500 font-normal">Gün</span>
           {stats.currentStreak > 0 && (
-            <svg className="w-6 h-6 text-orange-500 animate-pulse" fill="currentColor" viewBox="0 0 24 24">
+            <svg className="w-5 h-5 text-orange-500 animate-pulse" fill="currentColor" viewBox="0 0 24 24">
               <path d="M17.5 10c0-1.5-1-3-2.5-4C13.5 4.5 14.5 2 12 2S9.5 6.5 10 8c-1.5 1-2.5 2.5-2.5 4 0 2.5 2 4.5 4.5 4.5s4.5-2 4.5-4.5z" />
             </svg>
           )}
         </div>
+        {stats.streakBreakDate && (
+          <div className="mt-2 flex items-center gap-1.5 text-xs text-gray-500">
+            <svg className="w-3.5 h-3.5 text-gray-600 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span>
+              Son kırılma:{' '}
+              <span className="text-gray-400">
+                {new Date(stats.streakBreakDate).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', timeZone: 'UTC' })}
+              </span>
+            </span>
+          </div>
+        )}
       </div>
 
       <div className="pomodoro-panel bg-gray-900 border border-gray-800 rounded-xl p-4 shadow-lg flex flex-col justify-center">

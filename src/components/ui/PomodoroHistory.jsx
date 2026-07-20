@@ -176,15 +176,15 @@ export default function PomodoroHistory() {
                 itemStyle={{ color: '#22d3ee', fontWeight: 500 }}
                 labelStyle={{ color: '#9ca3af', marginBottom: '4px', fontSize: '11px' }}
                 formatter={(value, name, props) => {
-                  const suffix = props.payload?.isWeekend ? ' 🌅' : '';
-                  return [`${value} dk${suffix}`, 'Odak Süresi'];
+                  const isW = props.payload?.isWeekend;
+                  return [`${value} dk${isW ? ' (H.Sonu)' : ''}`, 'Odak Süresi'];
                 }}
                 labelFormatter={(label) => {
                   const parts = label.split('|');
                   const displayLabel = parts[0];
                   const dateKey = parts[1] || '';
                   const isW = dateKey && isWeekend(dateKey);
-                  return `${displayLabel}${isW ? ' (Hafta sonu)' : ''}`;
+                  return `${displayLabel}${isW ? ' — Hafta sonu' : ''}`;
                 }}
               />
               <Area 
