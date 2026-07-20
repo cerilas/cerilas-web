@@ -1,12 +1,18 @@
 import React, { useEffect, useState } from 'react';
 import { api } from '../../lib/api';
 
-const getLevel = (minutes) => {
+const getLevel = (minutes, isWeekend) => {
+  if (isWeekend && minutes === 0) return 'bg-gray-800/40'; // lighter empty for weekends
   if (minutes === 0) return 'bg-gray-800';
   if (minutes < 30) return 'bg-cyan-900/50';
   if (minutes < 60) return 'bg-cyan-700/60';
   if (minutes < 120) return 'bg-cyan-500/80';
   return 'bg-cyan-400';
+};
+
+const isDayWeekend = (dateStr) => {
+  const dow = new Date(dateStr).getUTCDay();
+  return dow === 0 || dow === 6;
 };
 
 export default function PomodoroHeatmap() {
@@ -53,7 +59,8 @@ export default function PomodoroHeatmap() {
     days.push({
       dateStr,
       displayDate: d.toLocaleDateString('tr-TR', { day: 'numeric', month: 'short', year: 'numeric' }),
-      minutes: dataMap[dateStr] || 0
+      minutes: dataMap[dateStr] || 0,
+      isWeekend: isDayWeekend(dateStr)
     });
   }
 
@@ -100,13 +107,18 @@ export default function PomodoroHeatmap() {
           {days.map((day, i) => (
             <div 
               key={i}
-              className={`w-3.5 h-3.5 rounded-sm ${getLevel(day.minutes)} transition-colors duration-200 hover:ring-2 hover:ring-white relative group`}
+              className={`w-3.5 h-3.5 rounded-sm ${getLevel(day.minutes, day.isWeekend)} transition-colors duration-200 hover:ring-2 hover:ring-white relative group ${
+                day.isWeekend && day.minutes === 0 ? 'opacity-50' : ''
+              }`}
             >
               {/* Tooltip */}
               <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:flex flex-col items-center z-10 w-max pointer-events-none">
                 <div className="pomodoro-hover-tooltip bg-gray-800 text-white text-[10px] py-1 px-2 rounded border border-gray-700 shadow-xl whitespace-nowrap">
-                  <span className="font-semibold text-cyan-400">{day.minutes} dk</span> odaklanma
-                  <div className="text-gray-400 mt-0.5">{day.displayDate}</div>
+                  <span className={`font-semibold ${day.isWeekend ? 'text-amber-400' : 'text-cyan-400'}`}>{day.minutes} dk</span> odaklanma
+                  <div className="text-gray-400 mt-0.5">
+                    {day.displayDate}
+                    {day.isWeekend && <span className="text-amber-500/80 ml-1">(Hafta sonu)</span>}
+                  </div>
                 </div>
                 <div className="pomodoro-hover-tooltip-arrow w-2 h-2 bg-gray-800 border-b border-r border-gray-700 rotate-45 -mt-1.5"></div>
               </div>
@@ -115,7 +127,7 @@ export default function PomodoroHeatmap() {
         </div>
         
         {/* Legend */}
-        <div className="flex items-center gap-2 mt-4 text-xs text-gray-500 justify-end">
+        <div className="flex items-center gap-2 mt-4 text-xs text-gray-500 flex-wrap">
           <span>Daha az</span>
           <div className="w-3.5 h-3.5 rounded-sm bg-gray-800"></div>
           <div className="w-3.5 h-3.5 rounded-sm bg-cyan-900/50"></div>
@@ -123,6 +135,9 @@ export default function PomodoroHeatmap() {
           <div className="w-3.5 h-3.5 rounded-sm bg-cyan-500/80"></div>
           <div className="w-3.5 h-3.5 rounded-sm bg-cyan-400"></div>
           <span>Daha fazla</span>
+          <span className="mx-2 text-gray-700">|</span>
+          <div className="w-3.5 h-3.5 rounded-sm bg-gray-800/40 opacity-50"></div>
+          <span>Hafta sonu (isteğe bağlı)</span>
         </div>
       </div>
     </div>

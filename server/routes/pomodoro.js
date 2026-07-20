@@ -14,10 +14,26 @@ const getTodayTRT = () => {
   }).format(new Date());
 };
 
+// Check if a YYYY-MM-DD string falls on a weekend (Sat=6, Sun=0)
+const isWeekend = (dateStr) => {
+  // new Date('YYYY-MM-DD') parses as UTC midnight; getUTCDay is safe here
+  const dow = new Date(dateStr).getUTCDay();
+  return dow === 0 || dow === 6;
+};
+
 const decrementDateString = (dateStr) => {
   const d = new Date(dateStr);
-  d.setDate(d.getDate() - 1);
+  d.setUTCDate(d.getUTCDate() - 1);
   return d.toISOString().split('T')[0];
+};
+
+// Decrement, skipping over weekends (going backwards)
+const decrementSkippingWeekends = (dateStr) => {
+  let d = decrementDateString(dateStr);
+  while (isWeekend(d)) {
+    d = decrementDateString(d);
+  }
+  return d;
 };
 
 // Get today's total focus minutes
@@ -41,6 +57,8 @@ router.get('/today', authMiddleware, async (req, res) => {
 });
 
 // Get overall stats (total minutes, streak)
+// Weekend logic: weekends are optional. Missing a weekend doesn't break streak.
+// Only missing a WEEKDAY breaks the streak.
 router.get('/stats', authMiddleware, async (req, res) => {
   try {
     const userId = req.user.id;
@@ -53,6 +71,7 @@ router.get('/stats', authMiddleware, async (req, res) => {
     );
     const totalMinutes = parseInt(totalRes.rows[0].total_minutes, 10);
 
+    // Get all worked weekdays (exclude weekend sessions from streak counting, but keep them in total)
     const datesRes = await pool.query(
       `SELECT DISTINCT date_string 
        FROM pomodoro_sessions 
@@ -61,23 +80,36 @@ router.get('/stats', authMiddleware, async (req, res) => {
       [userId]
     );
     
-    const dates = datesRes.rows.map(r => r.date_string);
+    // Build a Set of all dates with sessions for O(1) lookup
+    const workedDatesSet = new Set(datesRes.rows.map(r => r.date_string));
+    
+    // Filter to only weekday dates (weekends don't count toward/against streak)
+    const weekdayDates = datesRes.rows
+      .map(r => r.date_string)
+      .filter(d => !isWeekend(d));
     
     let currentStreak = 0;
     
     const todayStr = getTodayTRT();
-    const yesterdayStr = decrementDateString(todayStr);
 
-    if (dates.length > 0) {
-      if (dates[0] === todayStr || dates[0] === yesterdayStr) {
-        let expectedDateStr = dates[0];
-        for (const dateStr of dates) {
-          if (dateStr === expectedDateStr) {
-            currentStreak++;
-            expectedDateStr = decrementDateString(expectedDateStr);
-          } else {
-            break;
-          }
+    // Find the most recent weekday on or before today
+    let latestRequiredWeekday = isWeekend(todayStr)
+      ? decrementSkippingWeekends(decrementDateString(todayStr))
+      : todayStr;
+    const prevWeekday = decrementSkippingWeekends(latestRequiredWeekday);
+
+    // Streak is alive if user worked today (weekday) OR worked the most recent previous weekday
+    const streakAlive = workedDatesSet.has(latestRequiredWeekday) || workedDatesSet.has(prevWeekday);
+
+    if (weekdayDates.length > 0 && streakAlive) {
+      // Walk backwards from the most recent worked weekday
+      let expectedDateStr = weekdayDates[0];
+      for (const dateStr of weekdayDates) {
+        if (dateStr === expectedDateStr) {
+          currentStreak++;
+          expectedDateStr = decrementSkippingWeekends(expectedDateStr);
+        } else {
+          break;
         }
       }
     }
