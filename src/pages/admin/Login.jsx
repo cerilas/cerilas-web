@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { api } from '../../lib/api';
-import logoImg from '../../assets/logo.png';
+import logoDark from '../../assets/cerilas-logo-darkmode.png';
+import logoLight from '../../assets/cerilas-logo-lightmode.png';
 import { adminThemeOptions, useAdminTheme } from './adminTheme';
 
 export default function Login() {
@@ -34,7 +35,11 @@ export default function Login() {
     <div className={`admin-theme-${resolvedTheme} min-h-screen bg-gray-950 flex items-center justify-center px-4`}>
       <div className="max-w-md w-full">
         <div className="text-center mb-8">
-          <img src={logoImg} alt="Cerilas" className="h-12 w-auto mx-auto mb-4" />
+          <img
+            src={resolvedTheme === 'light' ? logoLight : logoDark}
+            alt="Cerilas"
+            className="h-12 w-auto mx-auto mb-4"
+          />
           <p className="text-gray-400">Yönetim paneline giriş yapın</p>
         </div>
         <div className="mb-4 flex justify-center">
