@@ -53,12 +53,29 @@ export default function PomodoroHistory() {
     setLoading(true);
     try {
       const res = await api.getPomodoroHistory(days);
-      const formatted = res.map(item => ({
-        label: formatDateLabel(item.date),
-        rawDate: item.date,
-        totalMinutes: parseInt(item.totalMinutes, 10),
-        isWeekend: isWeekend(item.date),
-      }));
+
+      // Build a lookup map: date -> minutes
+      const apiMap = {};
+      res.forEach(item => { apiMap[item.date] = parseInt(item.totalMinutes, 10); });
+
+      // Generate the full date range (today - days + 1 ... today) in local TRT time
+      const today = new Date();
+      const offset = today.getTimezoneOffset();
+      const localToday = new Date(today.getTime() - offset * 60 * 1000);
+
+      const formatted = [];
+      for (let i = days - 1; i >= 0; i--) {
+        const d = new Date(localToday);
+        d.setUTCDate(d.getUTCDate() - i);
+        const dateStr = d.toISOString().split('T')[0];
+        formatted.push({
+          label: formatDateLabel(dateStr),
+          rawDate: dateStr,
+          totalMinutes: apiMap[dateStr] ?? 0,
+          isWeekend: isWeekend(dateStr),
+        });
+      }
+
       setData(formatted);
     } catch (err) {
       console.error('Geçmiş yüklenirken hata:', err);
