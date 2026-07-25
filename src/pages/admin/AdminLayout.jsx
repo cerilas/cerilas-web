@@ -94,6 +94,16 @@ const Icons = {
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 3h12v18l-3-2-3 2-3-2-3 2V3zm3 5h6m-6 4h6" />
     </svg>
   ),
+  Accounts: () => (
+    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 7a4 4 0 11-7.75 1.38L3 12.63V16h3v3h3v2h4l2.62-2.62A4 4 0 0015 7z" />
+    </svg>
+  ),
+  Documents: () => (
+    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V7z" />
+    </svg>
+  ),
   Theme: () => (
     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 3v1.5m0 15V21m9-9h-1.5M4.5 12H3m15.364-6.364-1.061 1.061M6.697 17.303l-1.061 1.061m12.728 0-1.061-1.061M6.697 6.697 5.636 5.636M16.5 12a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z" />
@@ -108,6 +118,8 @@ const navItems = [
   { path: '/admin/opportunities', label: 'İhtimal Listesi', icon: <Icons.Opportunities /> },
   { path: '/admin/opportunity-tracking', label: 'Fırsat Takibi', icon: <Icons.Opportunities /> },
   { path: '/admin/expenses', label: 'Gider Takibi', icon: <Icons.Expenses /> },
+  { path: '/admin/accounts', label: 'Şifre ve Hesaplar', icon: <Icons.Accounts /> },
+  { path: '/admin/documents', label: 'Belge Yönetimi', icon: <Icons.Documents /> },
   { path: '/admin/projects', label: 'Projeler', icon: <Icons.Projects /> },
   { path: '/admin/use-cases', label: 'Use Case\'ler', icon: <Icons.UseCases /> },
   { path: '/admin/media', label: 'Görsel Paylaşım', icon: <Icons.Media /> },

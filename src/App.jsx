@@ -17,6 +17,7 @@ import Legal from "./pages/Legal";
 import ScrollToTop from "./components/ScrollToTop";
 import CookieConsent from "./components/CookieConsent";
 import SiteAnalytics from "./components/SiteAnalytics";
+import SharedDocument from "./pages/SharedDocument";
 
 // Admin
 import Login from "./pages/admin/Login";
@@ -43,6 +44,8 @@ import OpportunityTracking from "./pages/admin/OpportunityTracking";
 import AnalyticsAdmin from "./pages/admin/AnalyticsAdmin";
 import Pomodoro from "./pages/admin/Pomodoro";
 import ExpensesAdmin from "./pages/admin/ExpensesAdmin";
+import SavedAccounts from "./pages/admin/SavedAccounts";
+import DocumentsAdmin from "./pages/admin/DocumentsAdmin";
 import { Toaster } from 'react-hot-toast';
 
 function Layout({ children }) {
@@ -120,6 +123,8 @@ export default function App() {
               <Route path="opportunities/:id" element={<OpportunityDetail />} />
               <Route path="opportunity-tracking" element={<OpportunityTracking />} />
               <Route path="expenses" element={<ExpensesAdmin />} />
+              <Route path="accounts" element={<SavedAccounts />} />
+              <Route path="documents" element={<DocumentsAdmin />} />
             <Route path="mail-senders" element={<SendersAdmin />} />
             <Route path="mail-docs" element={<MailApiDocs />} />
             <Route path="mail-settings" element={<MailSettings />} />
@@ -127,6 +132,8 @@ export default function App() {
             <Route path="sms-docs" element={<SmsApiDocs />} />
             </Route>
           </Route>
+
+          <Route path="/shared/document/:token" element={<SharedDocument />} />
 
           {/* Public routes */}
           {buildPublicRoutes()}

@@ -29,6 +29,15 @@ export default function ConfirmModal({ open, title, message, confirmText = 'Sil'
       bg: 'bg-yellow-500/10',
       btn: 'bg-yellow-600 hover:bg-yellow-500 focus:ring-yellow-500/40',
     },
+    info: {
+      icon: (
+        <svg className="w-6 h-6 text-blue-400" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75m6-3.375A12 12 0 0 1 12 3a12 12 0 0 1-9 3.375c0 5.591 3.824 10.29 9 11.625 5.176-1.335 9-6.034 9-11.625Z" />
+        </svg>
+      ),
+      bg: 'bg-blue-500/10',
+      btn: 'bg-blue-600 hover:bg-blue-500 focus:ring-blue-500/40',
+    },
   };
 
   const v = variants[variant] || variants.danger;

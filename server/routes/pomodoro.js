@@ -148,17 +148,20 @@ router.get('/stats', authMiddleware, async (req, res) => {
 router.get('/history', authMiddleware, async (req, res) => {
   try {
     const userId = req.user.id;
-    const days = parseInt(req.query.days) || 7;
+    const requestedDays = parseInt(req.query.days, 10) || 7;
+    const days = Math.min(Math.max(requestedDays, 1), 365);
+    const today = getTodayTRT();
     
-    // Fetch sessions created within the last 'days' and group by date_string
+    // Use the user-facing TRT date recorded with each session. This keeps the
+    // selected range exact and includes today as one of the requested days.
     const result = await pool.query(
       `SELECT date_string as date, SUM(duration_minutes) as total_minutes
        FROM pomodoro_sessions
        WHERE user_id = $1 
-         AND created_at >= NOW() - INTERVAL '1 day' * $2
+         AND date_string::date BETWEEN ($2::date - ($3::int - 1)) AND $2::date
        GROUP BY date_string
        ORDER BY date_string ASC`,
-      [userId, days]
+      [userId, today, days]
     );
 
     res.json(result.rows.map(r => ({

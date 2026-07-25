@@ -1,14 +1,15 @@
 import { useEffect, useState, useRef } from "react";
 import { Link } from "react-router-dom";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion as Motion, useScroll, useTransform } from "framer-motion";
 import { useLang } from "../context/LanguageContext";
 import { SectionTitle, FadeIn, GlowCard, Badge } from "../components/ui";
 import { useProjects } from "../hooks/useProjects";
 import { api } from "../lib/api";
-import LiquidEther from "../components/effects/LiquidEther";
 import imgConsult from "../assets/images/ux-indonesia-ywwuOBJy60c-unsplash.jpg";
-import heroBg from "../assets/images/boitumelo-zqhZH1Khf_I-unsplash.jpg";
 import capBg from "../assets/images/albert-stoynov-b_GcLCaKt94-unsplash.jpg";
+import imgRdLab from "../assets/images/generated/cerilas-rd-lab.webp";
+import imgEmbeddedLab from "../assets/images/generated/cerilas-embedded-lab.webp";
+import imgCollaborationLab from "../assets/images/generated/cerilas-collaboration-lab.webp";
 
 const partnerLogoModules = import.meta.glob("../cerilas-partners-logos/*.{png,jpg,jpeg,svg,webp}", {
   eager: true,
@@ -101,6 +102,7 @@ export default function Home() {
   const caps = t.capabilities.areas;
   const projects = useProjects();
   const [stats, setStats] = useState({ projects: 0, useCases: 0, uniqueTags: 0 });
+  const [activeCapability, setActiveCapability] = useState(0);
 
   const capsRef = useRef(null);
   const { scrollYProgress } = useScroll({
@@ -123,70 +125,55 @@ export default function Home() {
     <div>
       {/* Hero */}
       <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gray-950">
-        {/* Background Image with low transparency */}
-        <div 
-          className="absolute inset-0 z-0 opacity-[0.08] pointer-events-none"
-          style={{
-            backgroundImage: `url(${heroBg})`,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-          }}
+        <img
+          src={imgRdLab}
+          alt=""
+          className="absolute inset-0 h-full w-full object-cover object-[62%_center]"
+          aria-hidden="true"
         />
-        <div style={{ width: '100%', height: '100%', position: 'absolute', top: 0, left: 0, zIndex: 0 }}>
-          <LiquidEther
-            colors={['#06b6d4', '#3b82f6', '#0e7490']}
-            mouseForce={20}
-            cursorSize={80}
-            isViscous={false}
-            viscous={30}
-            iterationsViscous={16}
-            iterationsPoisson={16}
-            resolution={0.3}
-            isBounce={false}
-            autoDemo
-            autoSpeed={0.5}
-            autoIntensity={2.2}
-            takeoverDuration={0.25}
-            autoResumeDelay={3000}
-            autoRampDuration={0.6}
-          />
-        </div>
+        <div className="absolute inset-0 bg-gradient-to-r from-gray-950 via-gray-950/90 to-gray-950/25" />
+        <div className="absolute inset-0 bg-gradient-to-t from-gray-950 via-transparent to-gray-950/25" />
+        <div className="absolute inset-y-0 left-0 w-2/3 bg-[radial-gradient(circle_at_25%_50%,rgba(6,182,212,.09),transparent_52%)]" />
 
-        <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center pt-24 pb-40 sm:pb-44">
-          <motion.div
+        <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-40 sm:pb-44">
+          <Motion.div
             initial={{ opacity: 0, y: 32 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
+            className="grid lg:grid-cols-[.92fr_1.08fr] items-center gap-12 lg:gap-16"
           >
-            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight text-white leading-none">
-              {h.heroTitle}
-              <br />
-              <span className="bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
-                {h.heroSubtitle}
-              </span>
-            </h1>
-            <p className="mt-8 text-lg sm:text-xl text-gray-400 max-w-2xl mx-auto leading-relaxed">
-              {h.heroDesc}
-            </p>
-            <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center">
-              <Link
-                to={localizedPath("/projects")}
-                className="px-8 py-3.5 bg-cyan-500 hover:bg-cyan-400 text-gray-950 font-semibold rounded-xl transition-colors text-sm"
-              >
-                {h.ctaPrimary}
-              </Link>
-              <Link
-                to={localizedPath("/contact")}
-                className="px-8 py-3.5 border border-gray-700 hover:border-cyan-500 text-gray-300 hover:text-white font-semibold rounded-xl transition-colors text-sm"
-              >
-                {h.ctaSecondary}
-              </Link>
+            <div className="text-center lg:text-left">
+              <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight text-white leading-[0.98]">
+                {h.heroTitle}
+                <br />
+                <span className="bg-gradient-to-r from-cyan-300 via-cyan-400 to-blue-500 bg-clip-text text-transparent">
+                  {h.heroSubtitle}
+                </span>
+              </h1>
+              <p className="mt-7 text-base sm:text-lg text-gray-400 max-w-xl mx-auto lg:mx-0 leading-relaxed">
+                {h.heroDesc}
+              </p>
+              <div className="mt-9 flex flex-col sm:flex-row gap-3 justify-center lg:justify-start">
+                <Link
+                  to={localizedPath("/projects")}
+                  className="px-7 py-3.5 bg-cyan-400 hover:bg-cyan-300 text-gray-950 font-semibold rounded-xl transition-colors text-sm"
+                >
+                  {h.ctaPrimary}
+                </Link>
+                <Link
+                  to={localizedPath("/contact")}
+                  className="px-7 py-3.5 border border-gray-700/80 bg-gray-950/25 hover:border-cyan-500 text-gray-300 hover:text-white font-semibold rounded-xl transition-colors text-sm backdrop-blur"
+                >
+                  {h.ctaSecondary}
+                </Link>
+              </div>
             </div>
-          </motion.div>
+            <div className="hidden lg:block" aria-hidden="true" />
+          </Motion.div>
         </div>
 
         {/* Scroll indicator */}
-        <motion.div
+        <Motion.div
           animate={{ y: [0, 8, 0] }}
           transition={{ repeat: Infinity, duration: 2 }}
           className="absolute bottom-24 left-1/2 -translate-x-1/2 text-gray-600"
@@ -194,7 +181,7 @@ export default function Home() {
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
           </svg>
-        </motion.div>
+        </Motion.div>
 
         <div className="absolute inset-x-0 bottom-0 z-20 border-t border-gray-200 bg-white/95 backdrop-blur">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
@@ -218,70 +205,78 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Value proposition */}
-      <section className="py-24 bg-gray-950">
+      {/* R&D system overview */}
+      <section className="py-24 bg-gray-950 overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-            <FadeIn>
-              <h2 className="text-3xl sm:text-4xl font-bold text-white leading-tight">
-                {h.valueTitle}
-              </h2>
-              <p className="mt-6 text-lg text-gray-400 leading-relaxed">{h.valueDesc}</p>
-              <div className="mt-8 flex flex-wrap gap-2">
-                {["Health Tech", "Mechatronics", "Embedded", "AI", "Prototyping"].map((tag) => (
-                  <Badge key={tag}>{tag}</Badge>
-                ))}
+          <FadeIn>
+            <div className="grid lg:grid-cols-[1.35fr_.65fr] gap-5">
+              <div className="relative min-h-[410px] overflow-hidden rounded-3xl border border-gray-800/70 bg-gradient-to-br from-gray-900 via-gray-950 to-cyan-950/30 p-7 sm:p-10">
+                <div className="absolute -right-20 -top-20 h-72 w-72 rounded-full bg-cyan-500/10 blur-3xl" />
+                <div className="relative">
+                  <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-5">
+                    <div className="max-w-xl">
+                      <span className="text-[10px] font-semibold uppercase tracking-[0.22em] text-cyan-400">{h.valueTitle}</span>
+                      <h2 className="mt-3 max-w-[36rem] text-balance text-3xl sm:text-4xl font-bold text-white leading-[1.15]">
+                        {h.capDesc}
+                      </h2>
+                    </div>
+                    <div className="flex flex-wrap gap-2 sm:max-w-[220px] sm:justify-end">
+                      {["Health Tech", "Robotics", "Embedded", "AI"].map((tag) => (
+                        <Badge key={tag}>{tag}</Badge>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="relative mt-14">
+                    <div className="absolute left-6 right-6 top-6 hidden h-px bg-gradient-to-r from-cyan-400/15 via-cyan-400/70 to-cyan-400/15 sm:block" />
+                    <div className="relative grid grid-cols-2 gap-x-3 gap-y-8 sm:grid-cols-4">
+                      {caps.slice(0, 4).map((cap, i) => (
+                        <div key={cap.id}>
+                          <div className="relative z-10 flex h-12 w-12 items-center justify-center rounded-2xl border border-cyan-400/30 bg-gray-950 text-cyan-300 shadow-[0_0_24px_rgba(6,182,212,.12)]">
+                            {capIcons[i]}
+                          </div>
+                          <div className="mt-4 text-[10px] font-bold tracking-[0.2em] text-gray-600">0{i + 1}</div>
+                          <h3 className="mt-1 max-w-[9rem] text-sm font-semibold leading-snug text-gray-100">{cap.title}</h3>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
               </div>
-            </FadeIn>
-            <FadeIn delay={0.2}>
-              <div className="grid grid-cols-3 gap-4">
+
+              <div className="grid gap-5">
+                <div className="grid grid-cols-3 gap-3">
                 {metrics.map(({ key, value, valueKey }) => (
                   <div
                     key={key}
-                    className="bg-gray-900/60 border border-gray-800/60 rounded-2xl p-6 text-center"
+                      className="rounded-2xl border border-gray-800/70 bg-gray-900/70 px-3 py-5 text-center"
                   >
-                    <div className="text-3xl font-bold text-cyan-400">
+                      <div className="text-2xl sm:text-3xl font-bold text-cyan-300">
                       {valueKey ? h[valueKey] : value}
                     </div>
-                    <div className="mt-2 text-xs text-gray-400 leading-tight">{h[key]}</div>
+                      <div className="mt-2 text-[10px] text-gray-500 leading-tight">{h[key]}</div>
                   </div>
                 ))}
               </div>
-            </FadeIn>
-          </div>
-        </div>
-      </section>
 
-      {/* TUBITAK BiGG 1812 highlight */}
-      <section className="py-20 bg-gray-900/30 border-y border-cyan-500/10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <FadeIn>
-            <div className="rounded-3xl border border-cyan-500/25 bg-gradient-to-br from-cyan-900/20 via-gray-900/80 to-blue-900/20 p-8 sm:p-10">
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-center">
-                <div className="lg:col-span-2">
-                  <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold tracking-wide border border-cyan-400/30 bg-cyan-500/10 text-cyan-300">
-                    {h.tubitakChip}
-                  </span>
-                  <h2 className="mt-4 text-2xl sm:text-3xl font-bold text-white tracking-tight">
-                    {h.tubitakTitle}
-                  </h2>
-                  <p className="mt-4 text-gray-300 leading-relaxed">
-                    {h.tubitakDesc}
-                  </p>
-                  <p className="mt-4 text-sm text-gray-400 leading-relaxed">
-                    {h.tubitakNote}
-                  </p>
-                </div>
-
-                <div className="rounded-2xl border border-white/20 bg-white p-6 flex flex-col items-center justify-center">
-                  <div className="text-[10px] uppercase tracking-widest text-gray-500 font-bold mb-3">
-                    {h.tubitakStatLabel}
+                <div className="group relative flex min-h-[225px] flex-col justify-between overflow-hidden rounded-3xl border border-cyan-500/20 bg-cyan-950/20 p-6">
+                  <div className="absolute -bottom-16 -right-12 h-44 w-44 rounded-full bg-cyan-400/10 blur-2xl" />
+                  <div className="relative flex items-start justify-between gap-4">
+                    <span className="rounded-full border border-cyan-400/25 bg-cyan-400/10 px-3 py-1 text-[9px] font-bold uppercase tracking-[0.18em] text-cyan-300">
+                      {h.tubitakChip}
+                    </span>
+                    <div className="rounded-xl bg-white p-2.5">
+                      <img
+                        src={partnerLogos[1]?.src}
+                        alt="TUBITAK"
+                        className="h-8 w-auto object-contain"
+                      />
+                    </div>
                   </div>
-                  <img
-                    src={partnerLogos[1].src}
-                    alt="TUBITAK"
-                    className="h-16 sm:h-20 w-auto object-contain transition-all duration-300"
-                  />
+                  <div className="relative">
+                    <h3 className="text-xl font-bold text-white">{h.tubitakTitle}</h3>
+                    <p className="mt-2 line-clamp-2 text-xs leading-relaxed text-gray-400">{h.tubitakDesc}</p>
+                  </div>
                 </div>
               </div>
             </div>
@@ -292,7 +287,7 @@ export default function Home() {
       {/* Capabilities */}
       <section ref={capsRef} className="relative py-24 bg-gray-900/30 overflow-hidden">
         {/* Parallax Background */}
-        <motion.div 
+        <Motion.div
           className="absolute inset-0 z-0 opacity-[0.05] pointer-events-none"
           style={{
             backgroundImage: `url(${capBg})`,
@@ -302,26 +297,74 @@ export default function Home() {
           }}
         />
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <SectionTitle title={h.capTitle} subtitle={h.capDesc} />
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {caps.map((cap, i) => (
-              <FadeIn key={cap.id} delay={i * 0.08}>
-                <GlowCard className="h-full">
-                  <div className="mb-4 inline-flex items-center justify-center w-11 h-11 rounded-xl border border-cyan-500/30 bg-cyan-500/10 text-cyan-300">
-                    {capIcons[i]}
+          <SectionTitle title={h.capTitle} />
+          <FadeIn>
+            <div className="overflow-hidden rounded-3xl border border-gray-800/70 bg-gray-950/65 backdrop-blur">
+              <div className="grid lg:grid-cols-[.72fr_1.28fr]">
+                <div className="border-b border-gray-800/70 p-3 lg:border-b-0 lg:border-r">
+                  <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-1">
+                    {caps.map((cap, i) => (
+                      <button
+                        key={cap.id}
+                        type="button"
+                        onClick={() => setActiveCapability(i)}
+                        className={`group flex min-h-14 items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-all ${
+                          activeCapability === i
+                            ? "bg-cyan-400 text-gray-950 shadow-[0_12px_40px_rgba(6,182,212,.16)]"
+                            : "text-gray-400 hover:bg-white/5 hover:text-white"
+                        }`}
+                      >
+                        <span className={`shrink-0 ${activeCapability === i ? "text-gray-950" : "text-cyan-400"}`}>
+                          {capIcons[i]}
+                        </span>
+                        <span className="text-xs font-semibold leading-tight sm:text-sm">{cap.title}</span>
+                      </button>
+                    ))}
                   </div>
-                  <h3 className="text-lg font-semibold text-white mb-2">{cap.title}</h3>
-                  <p className="text-sm text-gray-400 leading-relaxed line-clamp-3">{cap.desc}</p>
-                  <Link
-                    to={localizedPath("/capabilities")}
-                    className="mt-4 inline-flex items-center text-xs text-cyan-400 hover:text-cyan-300 font-medium transition-colors"
+                </div>
+
+                <div className="relative min-h-[390px] p-7 sm:p-10 lg:p-12">
+                  <img
+                    src={imgEmbeddedLab}
+                    alt=""
+                    aria-hidden="true"
+                    className="absolute inset-0 h-full w-full object-cover object-center opacity-55"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-r from-gray-950 via-gray-950/92 to-gray-950/30" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-gray-950/80 via-transparent to-gray-950/30" />
+                  <Motion.div
+                    key={caps[activeCapability].id}
+                    initial={{ opacity: 0, y: 14 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3 }}
+                    className="relative flex h-full flex-col justify-between"
                   >
-                    {common.learnMore} →
-                  </Link>
-                </GlowCard>
-              </FadeIn>
-            ))}
-          </div>
+                    <div>
+                      <div className="flex items-center justify-between">
+                        <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-cyan-400/30 bg-cyan-400/10 text-cyan-300">
+                          {capIcons[activeCapability]}
+                        </div>
+                        <span className="text-6xl font-black text-white/[0.035] sm:text-8xl">
+                          0{activeCapability + 1}
+                        </span>
+                      </div>
+                      <h3 className="mt-8 text-3xl font-bold text-white">{caps[activeCapability].title}</h3>
+                      <p className="mt-4 max-w-lg text-base leading-relaxed text-gray-300">
+                        {caps[activeCapability].desc}
+                      </p>
+                    </div>
+                    <Link
+                      to={localizedPath("/capabilities")}
+                      className="mt-9 inline-flex w-fit items-center gap-2 text-sm font-semibold text-cyan-300 transition-colors hover:text-cyan-200"
+                    >
+                      {common.learnMore}
+                      <span aria-hidden="true">↗</span>
+                    </Link>
+                  </Motion.div>
+                </div>
+              </div>
+            </div>
+          </FadeIn>
         </div>
       </section>
 
@@ -330,27 +373,30 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <SectionTitle title={h.projTitle} subtitle={h.projDesc} />
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {projects.map((proj, i) => (
+            {projects.slice(0, 3).map((proj, i) => (
               <FadeIn key={proj.id} delay={i * 0.1}>
                 <Link to={localizedPath(`/projects/${proj.id}`)}>
-                  <GlowCard className="h-full cursor-pointer p-0 overflow-hidden">
+                  <GlowCard className="h-full min-h-[360px] cursor-pointer p-0 overflow-hidden">
                     {proj.imageUrl && (
                       <img 
                         src={proj.imageUrl} 
                         alt={proj.title} 
-                        className="w-full h-40 object-cover" 
+                        className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
                         loading="lazy" 
                       />
                     )}
-                    <div className="p-6">
+                    <div className="absolute inset-0 bg-gradient-to-t from-gray-950 via-gray-950/65 to-transparent" />
+                    <div className="absolute inset-x-0 bottom-0 p-6">
                       <div className="flex flex-wrap gap-1.5 mb-4">
                         {proj.tags.slice(0, 3).map((tag) => (
                           <Badge key={tag}>{tag}</Badge>
                         ))}
                       </div>
                       <h3 className="text-xl font-bold text-white mb-2">{proj.title}</h3>
-                      <p className="text-sm text-gray-400 leading-relaxed">{proj.shortDesc}</p>
-                      <div className="mt-4 text-xs text-gray-500">{proj.date}</div>
+                      <div className="mt-4 flex items-center justify-between text-xs text-gray-400">
+                        <span>{proj.date}</span>
+                        <span className="text-cyan-300">↗</span>
+                      </div>
                     </div>
                   </GlowCard>
                 </Link>
@@ -370,19 +416,33 @@ export default function Home() {
 
       {/* Ecosystem / Collaboration */}
       <section className="py-24 bg-gray-900/30">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <FadeIn>
-            <h2 className="text-3xl sm:text-4xl font-bold text-white">{h.ecoTitle}</h2>
-            <p className="mt-6 text-lg text-gray-400 leading-relaxed">{h.ecoDesc}</p>
-            <div className="mt-10 flex flex-wrap justify-center gap-4">
-              {h.ecosystemPartners.map((p) => (
-                <span
-                  key={p}
-                  className="px-4 py-2 rounded-full bg-gray-900/80 border border-gray-700/60 text-sm text-gray-300"
-                >
-                  {p}
-                </span>
-              ))}
+            <div className="group relative min-h-[540px] overflow-hidden rounded-3xl border border-gray-800/70">
+              <img
+                src={imgCollaborationLab}
+                alt=""
+                aria-hidden="true"
+                loading="lazy"
+                className="absolute inset-0 h-full w-full object-cover object-[58%_center] transition-transform duration-700 group-hover:scale-[1.015]"
+              />
+              <div className="absolute inset-0 bg-gradient-to-r from-gray-950 via-gray-950/90 to-gray-950/10" />
+              <div className="absolute inset-0 bg-gradient-to-t from-gray-950/80 via-transparent to-gray-950/20" />
+
+              <div className="relative flex min-h-[540px] max-w-xl flex-col justify-center p-7 sm:p-12">
+                <h2 className="text-4xl font-bold leading-tight text-white sm:text-5xl">{h.ecoTitle}</h2>
+                <p className="mt-6 max-w-lg text-sm leading-relaxed text-gray-300 sm:text-base">{h.ecoDesc}</p>
+                <div className="mt-8 flex flex-wrap gap-2">
+                  {h.ecosystemPartners.map((p) => (
+                    <span
+                      key={p}
+                      className="rounded-full border border-white/15 bg-gray-950/65 px-3.5 py-2 text-xs font-medium text-gray-200 backdrop-blur-md"
+                    >
+                      {p}
+                    </span>
+                  ))}
+                </div>
+              </div>
             </div>
           </FadeIn>
         </div>
@@ -393,7 +453,6 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <SectionTitle
             title={h.strategicPartnersTitle}
-            subtitle={h.strategicPartnersDesc}
           />
 
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 sm:gap-5">
@@ -416,29 +475,29 @@ export default function Home() {
       {/* Consultancy teaser */}
       <section className="py-24 bg-gray-950">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-            <FadeIn>
-              <h2 className="text-3xl sm:text-4xl font-bold text-white">{h.consultTitle}</h2>
-              <p className="mt-6 text-gray-400 leading-relaxed">{h.consultDesc}</p>
-              <Link
-                to={localizedPath("/consultancy")}
-                className="mt-8 inline-flex items-center gap-2 px-6 py-3 bg-cyan-500 hover:bg-cyan-400 text-gray-950 font-semibold rounded-xl text-sm transition-colors"
-              >
-                {h.consultCta}
-              </Link>
-            </FadeIn>
-            <FadeIn delay={0.2}>
-              <img src={imgConsult} alt="Consultancy" className="rounded-2xl border border-gray-800/60 object-cover w-full aspect-video mb-6" loading="lazy" />
-              <div className="grid grid-cols-2 gap-4">
-                {t.consultancy.services.slice(0, 4).map((s, i) => (
-                  <div key={i} className="bg-gray-900/60 border border-gray-800/60 rounded-xl p-4">
-                    <h4 className="text-sm font-semibold text-white">{s.title}</h4>
-                    <p className="mt-1 text-xs text-gray-500 line-clamp-2">{s.desc}</p>
-                  </div>
-                ))}
+          <FadeIn>
+            <div className="group relative min-h-[490px] overflow-hidden rounded-3xl border border-gray-800/70">
+              <img src={imgConsult} alt="Consultancy" className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.02]" loading="lazy" />
+              <div className="absolute inset-0 bg-gradient-to-r from-gray-950 via-gray-950/85 to-gray-950/20" />
+              <div className="relative flex min-h-[490px] max-w-2xl flex-col justify-center p-7 sm:p-12">
+                <span className="text-[10px] font-semibold uppercase tracking-[0.22em] text-cyan-400">KNOW-HOW → IMPACT</span>
+                <h2 className="mt-4 text-4xl sm:text-5xl font-bold text-white">{h.consultTitle}</h2>
+                <div className="mt-7 flex flex-wrap gap-2">
+                  {t.consultancy.services.slice(0, 4).map((s, i) => (
+                    <span key={i} className="rounded-full border border-white/15 bg-gray-950/60 px-3.5 py-2 text-xs font-medium text-gray-200 backdrop-blur">
+                      {s.title}
+                    </span>
+                  ))}
+                </div>
+                <Link
+                  to={localizedPath("/consultancy")}
+                  className="mt-9 inline-flex w-fit items-center gap-2 rounded-xl bg-cyan-400 px-6 py-3 text-sm font-semibold text-gray-950 transition-colors hover:bg-cyan-300"
+                >
+                  {h.consultCta} <span aria-hidden="true">↗</span>
+                </Link>
               </div>
-            </FadeIn>
-          </div>
+            </div>
+          </FadeIn>
         </div>
       </section>
 

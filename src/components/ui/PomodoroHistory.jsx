@@ -14,6 +14,23 @@ const formatDateLabel = (dateStr) => {
   return `${day} ${MONTH_NAMES[month - 1]}`;
 };
 
+const RANGE_OPTIONS = [
+  { label: '3 Gün', value: 3 },
+  { label: '1 Hafta', value: 7 },
+  { label: '1 Ay', value: 30 },
+  { label: '3 Ay', value: 90 },
+];
+
+const formatMinutes = (minutes) => {
+  const roundedMinutes = Math.round(minutes);
+  const hours = Math.floor(roundedMinutes / 60);
+  const remainingMinutes = roundedMinutes % 60;
+
+  if (hours === 0) return `${remainingMinutes} dk`;
+  if (remainingMinutes === 0) return `${hours} sa`;
+  return `${hours} sa ${remainingMinutes} dk`;
+};
+
 // Modern minimal dot
 const CustomDot = (props) => {
   const { cx, cy, payload } = props;
@@ -46,48 +63,59 @@ export default function PomodoroHistory() {
   const [data, setData] = useState([]);
   const [days, setDays] = useState(7);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
-  useEffect(() => { fetchHistory(); }, [days]);
+  useEffect(() => {
+    let isCurrent = true;
 
-  const fetchHistory = async () => {
-    setLoading(true);
-    try {
-      const res = await api.getPomodoroHistory(days);
+    const fetchHistory = async () => {
+      setLoading(true);
+      setError(false);
+      try {
+        const res = await api.getPomodoroHistory(days);
 
-      // Build a lookup map: date -> minutes
-      const apiMap = {};
-      res.forEach(item => { apiMap[item.date] = parseInt(item.totalMinutes, 10); });
+        // Build a lookup map: date -> minutes
+        const apiMap = {};
+        res.forEach(item => { apiMap[item.date] = parseInt(item.totalMinutes, 10); });
 
-      // Generate the full date range (today - days + 1 ... today) in local TRT time
-      const today = new Date();
-      const offset = today.getTimezoneOffset();
-      const localToday = new Date(today.getTime() - offset * 60 * 1000);
+        // Generate the full date range (today - days + 1 ... today) in local TRT time
+        const today = new Date();
+        const offset = today.getTimezoneOffset();
+        const localToday = new Date(today.getTime() - offset * 60 * 1000);
 
-      const formatted = [];
-      for (let i = days - 1; i >= 0; i--) {
-        const d = new Date(localToday);
-        d.setUTCDate(d.getUTCDate() - i);
-        const dateStr = d.toISOString().split('T')[0];
-        formatted.push({
-          label: formatDateLabel(dateStr),
-          rawDate: dateStr,
-          totalMinutes: apiMap[dateStr] ?? 0,
-          isWeekend: isWeekend(dateStr),
-        });
+        const formatted = [];
+        for (let i = days - 1; i >= 0; i--) {
+          const d = new Date(localToday);
+          d.setUTCDate(d.getUTCDate() - i);
+          const dateStr = d.toISOString().split('T')[0];
+          formatted.push({
+            label: formatDateLabel(dateStr),
+            rawDate: dateStr,
+            totalMinutes: apiMap[dateStr] ?? 0,
+            isWeekend: isWeekend(dateStr),
+          });
+        }
+
+        if (isCurrent) setData(formatted);
+      } catch (err) {
+        console.error('Geçmiş yüklenirken hata:', err);
+        if (isCurrent) setError(true);
+      } finally {
+        if (isCurrent) setLoading(false);
       }
+    };
 
-      setData(formatted);
-    } catch (err) {
-      console.error('Geçmiş yüklenirken hata:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
+    fetchHistory();
+    return () => { isCurrent = false; };
+  }, [days]);
 
   // Map: label -> isWeekend (for tick coloring)
   const weekendLabelMap = Object.fromEntries(
     data.filter(d => d.isWeekend).map(d => [d.label, true])
   );
+  const dailyAverageMinutes = data.length
+    ? data.reduce((total, day) => total + day.totalMinutes, 0) / data.length
+    : 0;
 
   return (
     <div className="pomodoro-panel bg-gray-900 border border-gray-800 rounded-xl p-6 shadow-lg">
@@ -107,11 +135,11 @@ export default function PomodoroHistory() {
               Hafta sonu
             </span>
           </div>
-          <div className="flex gap-1.5">
-            {[{ label: '7 Gün', val: 7 }, { label: '30 Gün', val: 30 }].map(({ label, val }) => (
-              <button key={val} onClick={() => setDays(val)}
+          <div className="grid grid-cols-2 sm:flex gap-1.5">
+            {RANGE_OPTIONS.map(({ label, value }) => (
+              <button key={value} onClick={() => setDays(value)}
                 className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all ${
-                  days === val
+                  days === value
                     ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30'
                     : 'border border-transparent bg-gray-800 text-gray-400 hover:text-white hover:bg-gray-700'
                 }`}>
@@ -126,6 +154,10 @@ export default function PomodoroHistory() {
         {loading ? (
           <div className="w-full h-full flex items-center justify-center">
             <div className="animate-spin w-7 h-7 border-2 border-cyan-500/20 border-t-cyan-500 rounded-full" />
+          </div>
+        ) : error ? (
+          <div className="w-full h-full flex items-center justify-center text-red-400 text-sm border border-dashed border-red-500/20 rounded-xl">
+            Odaklanma verileri yüklenemedi. Lütfen tekrar deneyin.
           </div>
         ) : data.length === 0 ? (
           <div className="w-full h-full flex items-center justify-center text-gray-500 text-sm border border-dashed border-gray-800 rounded-xl">
@@ -151,6 +183,7 @@ export default function PomodoroHistory() {
                 strokeWidth={0.5} strokeOpacity={0.55} vertical={false} />
 
               <XAxis dataKey="label" axisLine={false} tickLine={false} dy={6}
+                interval={days === 90 ? 8 : days === 30 ? 3 : 0}
                 tick={(props) => <CustomXAxisTick {...props} dataMap={weekendLabelMap} />}
               />
               <YAxis stroke="#6b7280" fontSize={10.5} tickLine={false}
@@ -185,6 +218,22 @@ export default function PomodoroHistory() {
             </AreaChart>
           </ResponsiveContainer>
         )}
+      </div>
+
+      <div className="mt-4 pt-4 border-t border-gray-800/70 flex justify-center">
+        <div className="inline-flex items-center gap-2.5 rounded-full border border-cyan-500/15 bg-cyan-500/[0.06] px-3.5 py-2">
+          <span className="flex h-6 w-6 items-center justify-center rounded-full bg-cyan-500/10 text-cyan-400">
+            <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M12 6v6l4 2m5-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </span>
+          <span className="text-xs text-gray-400">
+            {RANGE_OPTIONS.find(option => option.value === days)?.label} için günlük ortalama
+          </span>
+          <span className="text-sm font-semibold text-cyan-300">
+            {loading ? '—' : formatMinutes(dailyAverageMinutes)}
+          </span>
+        </div>
       </div>
     </div>
   );

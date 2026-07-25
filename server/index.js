@@ -21,6 +21,8 @@ import opportunityTrackingRoutes from './routes/opportunityTracking.js';
 import pomodoroRoutes from './routes/pomodoro.js';
 import analyticsRoutes from './routes/analytics.js';
 import expensesRoutes from './routes/expenses.js';
+import accountsRoutes from './routes/accounts.js';
+import documentsRoutes from './routes/documents.js';
 import pool from './db.js';
 
 dotenv.config();
@@ -218,6 +220,8 @@ app.use('/api/opportunity-tracking', opportunityTrackingRoutes);
 app.use('/api/pomodoro', pomodoroRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/expenses', expensesRoutes);
+app.use('/api/accounts', accountsRoutes);
+app.use('/api/documents', documentsRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => res.json({ ok: true }));
@@ -522,6 +526,24 @@ app.listen(PORT, async () => {
         updated_at TIMESTAMP DEFAULT NOW()
       );
       CREATE INDEX IF NOT EXISTS idx_expenses_created ON expenses(created_at DESC);
+
+      CREATE TABLE IF NOT EXISTS saved_accounts (
+        id SERIAL PRIMARY KEY,
+        user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        account_name VARCHAR(240) NOT NULL,
+        login_url TEXT,
+        domain VARCHAR(255),
+        favicon_url TEXT,
+        password_encrypted TEXT,
+        email VARCHAR(320),
+        phone VARCHAR(50),
+        note TEXT DEFAULT '',
+        login_type VARCHAR(80) NOT NULL DEFAULT 'Şifre',
+        created_at TIMESTAMP DEFAULT NOW(),
+        updated_at TIMESTAMP DEFAULT NOW()
+      );
+      CREATE INDEX IF NOT EXISTS idx_saved_accounts_user
+        ON saved_accounts(user_id, updated_at DESC);
 
       CREATE TABLE IF NOT EXISTS site_analytics_events (
         id SERIAL PRIMARY KEY,
