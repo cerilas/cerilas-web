@@ -7,6 +7,7 @@ import pool from '../db.js';
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const imageDir = path.join(scriptDir, '..', '..', 'public', 'project-images');
+const assetVersion = '20260725';
 
 const projectImages = [
   'agi-robot-kiti',
@@ -19,7 +20,7 @@ const projectImages = [
 ].map((slug) => ({
   slug,
   filename: `${slug}.webp`,
-  imageUrl: `/project-images/${slug}.webp`,
+  imageUrl: `/project-images/${slug}.webp?v=${assetVersion}`,
 }));
 
 async function validateImages() {
