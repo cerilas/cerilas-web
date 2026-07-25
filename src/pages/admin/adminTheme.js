@@ -69,6 +69,22 @@ const lightThemeRuntimeCss = `
   [data-admin-theme="light"] .pomodoro-range-active-bg { background: #2563eb !important; box-shadow: 0 1px 2px rgb(37 99 235 / 0.20) !important; }
   [data-admin-theme="light"] .analytics-list > :not(:last-child) { border-color: rgb(226 232 240 / 0.30) !important; }
   [data-admin-theme="light"] input.bg-gray-800, [data-admin-theme="light"] textarea.bg-gray-800, [data-admin-theme="light"] select.bg-gray-800, [data-admin-theme="light"] input.bg-gray-950\\/80, [data-admin-theme="light"] textarea.bg-gray-950\\/80, [data-admin-theme="light"] select.bg-gray-950\\/80 { background-color: #ffffff !important; color: #0f172a !important; }
+  [data-admin-theme="light"] .saved-accounts-page .saved-account-toolbar, [data-admin-theme="light"] .saved-accounts-page .saved-account-card, [data-admin-theme="light"] .saved-accounts-page .saved-account-modal { background-color: #ffffff !important; border-color: rgb(226 232 240 / 0.82) !important; box-shadow: 0 1px 2px rgb(15 23 42 / 0.04), 0 14px 34px rgb(15 23 42 / 0.04) !important; }
+  [data-admin-theme="light"] .saved-accounts-page .saved-account-row { border-color: rgb(226 232 240 / 0.72) !important; }
+  [data-admin-theme="light"] .saved-accounts-page .saved-account-row:hover { background-color: #f8fafc !important; }
+  [data-admin-theme="light"] .saved-accounts-page .saved-account-secret, [data-admin-theme="light"] .saved-accounts-page .saved-account-sms-preview { background-color: #f8fafc !important; border-color: rgb(226 232 240 / 0.78) !important; }
+  [data-admin-theme="light"] .saved-accounts-page .saved-account-copy-button { color: #64748b !important; }
+  [data-admin-theme="light"] .saved-accounts-page .saved-account-copy-button:hover { background-color: rgb(37 99 235 / 0.09) !important; color: #2563eb !important; }
+  [data-admin-theme="light"] .saved-accounts-page .saved-account-export-button { background-color: rgb(22 163 74 / 0.08) !important; border-color: rgb(22 163 74 / 0.22) !important; color: #15803d !important; }
+  [data-admin-theme="light"] .saved-accounts-page .saved-account-export-button:hover { background-color: rgb(22 163 74 / 0.14) !important; }
+  [data-admin-theme="light"] .documents-admin-page .documents-toolbar, [data-admin-theme="light"] .documents-admin-page .documents-list, [data-admin-theme="light"] .documents-admin-page .document-modal { background-color: #ffffff !important; border-color: rgb(226 232 240 / 0.82) !important; box-shadow: 0 1px 2px rgb(15 23 42 / 0.04), 0 14px 34px rgb(15 23 42 / 0.04) !important; }
+  [data-admin-theme="light"] .documents-admin-page .document-row { border-color: rgb(226 232 240 / 0.72) !important; }
+  [data-admin-theme="light"] .documents-admin-page .document-row:hover { background-color: #f8fafc !important; }
+  [data-admin-theme="light"] .documents-admin-page .bg-gray-950\\/50 { background-color: #f8fafc !important; }
+  [data-admin-theme="light"] .documents-admin-page .text-green-300, [data-admin-theme="light"] .documents-admin-page .text-green-400 { color: #15803d !important; }
+  [data-admin-theme="light"] .documents-admin-page .text-blue-300, [data-admin-theme="light"] .documents-admin-page .text-blue-400 { color: #2563eb !important; }
+  [data-admin-theme="light"] .documents-admin-page .text-purple-300, [data-admin-theme="light"] .documents-admin-page .text-purple-400 { color: #7e22ce !important; }
+  [data-admin-theme="light"] .documents-admin-page .text-orange-400 { color: #c2410c !important; }
 `;
 
 function syncRuntimeThemeStyle(resolvedTheme) {

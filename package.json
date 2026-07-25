@@ -10,6 +10,7 @@
     "preview": "vite preview",
     "server": "node server/index.js",
     "seed": "node server/seed.js",
+    "seed:project-images": "node server/scripts/seedProjectImages.js",
     "start": "node server/index.js"
   },
   "dependencies": {

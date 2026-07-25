@@ -165,6 +165,80 @@ export const api = {
   updateExpense: (id, data) => request(`/expenses/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
   deleteExpense: (id) => request(`/expenses/${id}`, { method: 'DELETE' }),
 
+  // Saved accounts
+  getSavedAccounts: () => request('/accounts'),
+  getSavedAccountPassword: (id) => request(`/accounts/${id}/password`),
+  createSavedAccount: (data) => request('/accounts', { method: 'POST', body: JSON.stringify(data) }),
+  updateSavedAccount: (id, data) => request(`/accounts/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+  deleteSavedAccount: (id) => request(`/accounts/${id}`, { method: 'DELETE' }),
+
+  // Documents
+  getDocuments: (params = {}) => request(`/documents?${new URLSearchParams(params)}`),
+  uploadDocument: async (formData) => {
+    const res = await fetch(`${API}/documents`, {
+      method: 'POST',
+      headers: authHeaders(),
+      body: formData,
+    });
+    if (res.status === 401) {
+      localStorage.removeItem('admin_token');
+      window.location.href = '/admin';
+      throw new Error('Unauthorized');
+    }
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Belge yüklenemedi');
+    return data;
+  },
+  updateDocument: (id, data) => request(`/documents/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+  trashDocument: (id) => request(`/documents/${id}`, { method: 'DELETE' }),
+  restoreDocument: (id) => request(`/documents/${id}/restore`, { method: 'POST' }),
+  permanentlyDeleteDocument: (id) => request(`/documents/${id}/permanent`, { method: 'DELETE' }),
+  getDocumentFolders: () => request('/documents/folders'),
+  createDocumentFolder: (data) => request('/documents/folders', { method: 'POST', body: JSON.stringify(data) }),
+  updateDocumentFolder: (id, data) => request(`/documents/folders/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+  deleteDocumentFolder: (id) => request(`/documents/folders/${id}`, { method: 'DELETE' }),
+  getDocumentShare: (id) => request(`/documents/${id}/share`),
+  createDocumentShare: (id) => request(`/documents/${id}/share`, { method: 'POST' }),
+  revokeDocumentShare: (id) => request(`/documents/${id}/share`, { method: 'DELETE' }),
+  fetchDocumentFile: async (id, download = false) => {
+    const res = await fetch(`${API}/documents/${id}/file?download=${download}`, {
+      headers: authHeaders(),
+    });
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      throw new Error(data.error || 'Belge açılamadı');
+    }
+    const disposition = res.headers.get('content-disposition') || '';
+    const encodedName = disposition.match(/filename\\*=UTF-8''([^;]+)/i)?.[1];
+    return {
+      blob: await res.blob(),
+      filename: encodedName ? decodeURIComponent(encodedName) : `belge-${id}`,
+    };
+  },
+  getPublicDocument: async (token) => {
+    const res = await fetch(`${API}/documents/public/${encodeURIComponent(token)}`);
+    const data = await res.json();
+    if (!res.ok) {
+      const error = new Error(data.error || 'Paylaşılan belge açılamadı');
+      error.code = data.code;
+      throw error;
+    }
+    return data;
+  },
+  fetchPublicDocumentFile: async (token, download = false) => {
+    const res = await fetch(`${API}/documents/public/${encodeURIComponent(token)}/file?download=${download}`);
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      throw new Error(data.error || 'Paylaşılan belge açılamadı');
+    }
+    const disposition = res.headers.get('content-disposition') || '';
+    const encodedName = disposition.match(/filename\\*=UTF-8''([^;]+)/i)?.[1];
+    return {
+      blob: await res.blob(),
+      filename: encodedName ? decodeURIComponent(encodedName) : 'cerilas-belge',
+    };
+  },
+
   // Mail
   getSenders: () => request('/mail/senders'),
   createSender: (data) => request('/mail/senders', { method: 'POST', body: JSON.stringify(data) }),
