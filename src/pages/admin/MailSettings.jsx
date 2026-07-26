@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
 import { api } from '../../lib/api';
 import Dropdown from '../../components/ui/Dropdown';
 
@@ -229,7 +228,17 @@ export default function MailSettings() {
                   value={settings.opp_digest_recipients || ''}
                   onChange={(e) => setSettings({ ...settings, opp_digest_recipients: e.target.value })}
                 />
-                <p className="mt-2 text-xs text-gray-500">Bu bildirim Cron URL üzerinden tetiklenir: <code>{window.location.origin}/api/mail/cron/opportunities-digest?token=cerilas-cron-secret-123</code></p>
+                <div className="mt-3 rounded-xl border border-gray-700/80 bg-gray-900/60 px-3 py-2.5">
+                  <p className="text-xs leading-5 text-gray-400">
+                    Bu bildirim aşağıdaki Cron URL üzerinden tetiklenir:
+                  </p>
+                  <code className="mt-1 block break-all text-[11px] text-cyan-300">
+                    {'https://cerilas.com/api/mail/cron/opportunities-digest?token=<CRON_SECRET>'}
+                  </code>
+                  <p className="mt-1.5 text-[11px] leading-4 text-gray-500">
+                    URL&apos;deki değer Railway ortamındaki <code className="text-gray-300">CRON_SECRET</code> ile aynı olmalıdır.
+                  </p>
+                </div>
               </div>
             )}
           </div>
