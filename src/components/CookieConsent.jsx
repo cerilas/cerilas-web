@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useLang } from '../context/LanguageContext';
+import { usePublicTheme } from '../context/publicTheme';
 
 const STORAGE_KEY = 'cerilas_cookie_consent';
 
@@ -47,6 +48,7 @@ function updateGoogleConsent(analytics) {
 export default function CookieConsent() {
   const location = useLocation();
   const { lang, localizedPath } = useLang();
+  const { resolvedTheme } = usePublicTheme();
   const t = copy[lang] || copy.tr;
   const [visible, setVisible] = useState(false);
   const [expanded, setExpanded] = useState(false);
@@ -84,7 +86,7 @@ export default function CookieConsent() {
   };
 
   return (
-    <div className="fixed inset-x-0 bottom-0 z-[80] p-3 sm:p-5 pointer-events-none">
+    <div className={`public-theme-${resolvedTheme} fixed inset-x-0 bottom-0 z-[80] p-3 sm:p-5 pointer-events-none`}>
       <div className="pointer-events-auto mx-auto max-w-5xl overflow-hidden rounded-2xl border border-white/10 bg-gray-950/95 shadow-2xl shadow-black/50 backdrop-blur-xl">
         <div className="flex flex-col gap-4 p-4 sm:flex-row sm:items-start sm:justify-between sm:p-5">
           <div className="min-w-0 flex-1">
