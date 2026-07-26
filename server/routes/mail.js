@@ -1,9 +1,38 @@
 import { Router } from 'express';
+import crypto from 'node:crypto';
+import process from 'node:process';
 import nodemailer from 'nodemailer';
 import pool from '../db.js';
 import authMiddleware from '../middleware/auth.js';
 
 const router = Router();
+
+const getCronSecret = () => String(process.env.CRON_SECRET || '');
+
+const isValidCronSecret = (candidate) => {
+  const configuredSecret = getCronSecret();
+  if (!configuredSecret || !candidate) return false;
+
+  const candidateDigest = crypto
+    .createHash('sha256')
+    .update(String(candidate))
+    .digest();
+  const configuredDigest = crypto
+    .createHash('sha256')
+    .update(configuredSecret)
+    .digest();
+
+  return crypto.timingSafeEqual(candidateDigest, configuredDigest);
+};
+
+const getRequestCronSecret = (req) => {
+  const authorization = req.get('authorization') || '';
+  const bearerToken = authorization.startsWith('Bearer ')
+    ? authorization.slice(7).trim()
+    : '';
+
+  return String(req.get('x-cron-secret') || bearerToken || req.query.token || '');
+};
 
 // --- SENDER MANAGEMENT (Admin only) ---
 
@@ -281,9 +310,20 @@ export async function sendNotificationMail(type, data) {
 
 router.get('/cron/opportunities-digest', async (req, res) => {
   try {
-    const token = req.query.token;
-    if (token !== 'cerilas-cron-secret-123') {
-      return res.status(401).json({ error: 'Unauthorized. Invalid token.' });
+    res.set('Cache-Control', 'no-store');
+
+    if (!getCronSecret()) {
+      return res.status(503).json({
+        code: 'CRON_SECRET_NOT_CONFIGURED',
+        error: 'Cron güvenlik anahtarı sunucuda tanımlanmamış.'
+      });
+    }
+
+    if (!isValidCronSecret(getRequestCronSecret(req))) {
+      return res.status(401).json({
+        code: 'CRON_SECRET_INVALID',
+        error: 'Unauthorized. Invalid token.'
+      });
     }
 
     const settingsResult = await pool.query('SELECT * FROM mail_settings LIMIT 1');
@@ -353,8 +393,6 @@ router.get('/cron/opportunities-digest', async (req, res) => {
       return keys.map(k => `${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 }).format(obj[k])} ${k}`).join(' | ');
     };
 
-    const title = 'Genel İhtimal ve Proje Özeti';
-    
     let todosHtml = '';
     if (topTodos.length > 0) {
       todosHtml = topTodos.map(t => `
