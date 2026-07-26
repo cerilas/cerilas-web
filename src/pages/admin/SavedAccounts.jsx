@@ -110,7 +110,11 @@ function DetailLine({ type, label, value, onCopy, valueClassName = 'text-gray-30
 
 export default function SavedAccounts() {
   const [accounts, setAccounts] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [vaultUnlocked, setVaultUnlocked] = useState(() => api.hasSavedAccountsVaultSession());
+  const [vaultPassword, setVaultPassword] = useState('');
+  const [vaultError, setVaultError] = useState('');
+  const [unlocking, setUnlocking] = useState(false);
+  const [loading, setLoading] = useState(() => api.hasSavedAccountsVaultSession());
   const [error, setError] = useState('');
   const [search, setSearch] = useState('');
   const [typeFilter, setTypeFilter] = useState('all');
@@ -129,29 +133,91 @@ export default function SavedAccounts() {
   const [exportConfirmOpen, setExportConfirmOpen] = useState(false);
   const [exporting, setExporting] = useState(false);
 
+  const resetVaultState = (message = '') => {
+    api.lockSavedAccounts();
+    setVaultUnlocked(false);
+    setVaultPassword('');
+    setVaultError(message);
+    setAccounts([]);
+    setRevealedPasswords({});
+    setEditing(null);
+    setSmsTarget(null);
+    setLoading(false);
+  };
+
   const loadAccounts = () => {
     setLoading(true);
     setError('');
     api.getSavedAccounts()
       .then(setAccounts)
-      .catch((err) => setError(err.message || 'Hesaplar yüklenemedi'))
+      .catch((err) => {
+        if (err.code === 'VAULT_LOCKED') {
+          resetVaultState('Kasa oturumu sona erdi. Şifreyi yeniden girin.');
+          return;
+        }
+        setError(err.message || 'Hesaplar yüklenemedi');
+      })
       .finally(() => setLoading(false));
   };
 
   useEffect(() => {
+    const handleVaultLocked = () => {
+      setVaultUnlocked(false);
+      setVaultPassword('');
+      setVaultError('Kasa oturumu sona erdi. Şifreyi yeniden girin.');
+      setAccounts([]);
+      setRevealedPasswords({});
+      setEditing(null);
+      setSmsTarget(null);
+      setLoading(false);
+    };
+    window.addEventListener('accounts-vault-locked', handleVaultLocked);
+    return () => window.removeEventListener('accounts-vault-locked', handleVaultLocked);
+  }, []);
+
+  useEffect(() => {
+    if (!vaultUnlocked) return undefined;
     let isCurrent = true;
     api.getSavedAccounts()
       .then((data) => {
         if (isCurrent) setAccounts(data);
       })
       .catch((err) => {
-        if (isCurrent) setError(err.message || 'Hesaplar yüklenemedi');
+        if (!isCurrent || err.code === 'VAULT_LOCKED') return;
+        setError(err.message || 'Hesaplar yüklenemedi');
       })
       .finally(() => {
         if (isCurrent) setLoading(false);
       });
     return () => { isCurrent = false; };
-  }, []);
+  }, [vaultUnlocked]);
+
+  const unlockVault = async (event) => {
+    event.preventDefault();
+    if (!vaultPassword) {
+      setVaultError('Kasa şifresini girin.');
+      return;
+    }
+
+    setUnlocking(true);
+    setVaultError('');
+    try {
+      await api.unlockSavedAccounts(vaultPassword);
+      setVaultPassword('');
+      setLoading(true);
+      setVaultUnlocked(true);
+      toast.success('Şifre kasası açıldı');
+    } catch (err) {
+      setVaultError(err.message || 'Kasa açılamadı');
+    } finally {
+      setUnlocking(false);
+    }
+  };
+
+  const lockVault = () => {
+    resetVaultState('');
+    toast.success('Şifre kasası kilitlendi');
+  };
 
   const filteredAccounts = useMemo(() => {
     const term = search.trim().toLocaleLowerCase('tr-TR');
@@ -377,6 +443,73 @@ export default function SavedAccounts() {
   const faviconPreview = getPreviewFavicon(editing?.login_url);
   const smsContent = smsTarget ? buildLoginInfo(smsTarget, smsPassword) : '';
 
+  if (!vaultUnlocked) {
+    return (
+      <div className="saved-accounts-page mx-auto max-w-7xl pb-20">
+        <div className="mb-5">
+          <div className="mb-1.5 flex items-center gap-2">
+            <span className="flex h-8 w-8 items-center justify-center rounded-lg border border-cyan-500/20 bg-cyan-500/10 text-cyan-400">
+              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.6} d="M15 7a4 4 0 11-7.75 1.38L3 12.63V16h3v3h3v2h4l2.62-2.62A4 4 0 0015 7z" />
+              </svg>
+            </span>
+            <h1 className="text-xl font-bold text-white">Şifre ve Hesaplar</h1>
+          </div>
+          <p className="text-sm text-gray-400">
+            Bu bölüm ek bir kasa şifresiyle korunur.
+          </p>
+        </div>
+
+        <div className="saved-account-vault-gate mx-auto mt-12 max-w-md rounded-2xl border border-gray-800 bg-gray-900 p-6 shadow-2xl shadow-black/10 sm:p-8">
+          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl border border-cyan-500/20 bg-cyan-500/10 text-cyan-400">
+            <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.6} d="M7 10V8a5 5 0 0110 0v2m-11 0h12a2 2 0 012 2v7a2 2 0 01-2 2H6a2 2 0 01-2-2v-7a2 2 0 012-2zm5 4v3" />
+            </svg>
+          </div>
+          <div className="mt-4 text-center">
+            <h2 className="text-lg font-bold text-white">Şifre Kasası Kilitli</h2>
+            <p className="mt-1.5 text-sm leading-6 text-gray-400">
+              Hesap bilgilerini görüntülemek için kasa şifresini girin.
+            </p>
+          </div>
+
+          <form onSubmit={unlockVault} className="mt-6">
+            <label className="block">
+              <span className="mb-1.5 block text-xs font-medium text-gray-400">Kasa Şifresi</span>
+              <input
+                type="password"
+                value={vaultPassword}
+                onChange={(event) => setVaultPassword(event.target.value)}
+                className={`${inputClass} h-11`}
+                placeholder="••••••••••••"
+                autoComplete="current-password"
+                autoFocus
+              />
+            </label>
+
+            {vaultError && (
+              <div className="mt-3 rounded-xl border border-red-500/20 bg-red-500/10 px-3 py-2.5 text-xs leading-5 text-red-300">
+                {vaultError}
+              </div>
+            )}
+
+            <button
+              type="submit"
+              disabled={unlocking || !vaultPassword}
+              className="mt-4 w-full rounded-lg bg-cyan-500 px-4 py-2.5 text-sm font-semibold text-gray-950 transition-colors hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {unlocking ? 'Kasa Açılıyor...' : 'Kasayı Aç'}
+            </button>
+          </form>
+
+          <p className="mt-4 text-center text-[11px] leading-5 text-gray-500">
+            Şifre tarayıcıda saklanmaz ve yalnızca güvenli doğrulama için sunucuya gönderilir.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="saved-accounts-page mx-auto max-w-7xl pb-20">
       <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
@@ -394,6 +527,13 @@ export default function SavedAccounts() {
           </p>
         </div>
         <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={lockVault}
+            className="rounded-lg border border-gray-700 px-3 py-2 text-xs font-medium text-gray-400 transition-colors hover:bg-white/5 hover:text-white"
+          >
+            Kasayı Kilitle
+          </button>
           <button
             type="button"
             onClick={() => setExportConfirmOpen(true)}
