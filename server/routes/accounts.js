@@ -2,10 +2,17 @@ import { Router } from 'express';
 import crypto from 'crypto';
 import { Buffer } from 'node:buffer';
 import process from 'node:process';
+import jwt from 'jsonwebtoken';
 import pool from '../db.js';
 import authMiddleware from '../middleware/auth.js';
 
 const router = Router();
+const VAULT_SCOPE = 'saved-accounts:vault';
+const VAULT_AUDIENCE = 'cerilas-admin';
+const VAULT_ISSUER = 'cerilas-api';
+const MAX_UNLOCK_ATTEMPTS = 5;
+const UNLOCK_BLOCK_MS = 5 * 60 * 1000;
+const unlockAttempts = new Map();
 
 const ensureTable = async () => {
   await pool.query(`
@@ -33,6 +40,51 @@ const getEncryptionKey = () => {
   const secret = process.env.VAULT_ENCRYPTION_KEY || process.env.JWT_SECRET;
   if (!secret) throw new Error('Vault encryption key is not configured');
   return crypto.createHash('sha256').update(secret).digest();
+};
+
+const getVaultAccessSecret = () => {
+  const secret = process.env.VAULT_ACCESS_TOKEN_SECRET || process.env.JWT_SECRET;
+  if (!secret) throw new Error('Vault access token secret is not configured');
+  return crypto
+    .createHmac('sha256', secret)
+    .update('cerilas:saved-accounts:vault-access')
+    .digest('hex');
+};
+
+const compareVaultPassword = (candidate) => {
+  const configuredPassword = String(process.env.ACCOUNTS_VAULT_PASSWORD || '');
+  if (!configuredPassword) return false;
+  const candidateDigest = crypto.createHash('sha256').update(String(candidate || '')).digest();
+  const configuredDigest = crypto.createHash('sha256').update(configuredPassword).digest();
+  return crypto.timingSafeEqual(candidateDigest, configuredDigest);
+};
+
+const getAttemptKey = (req) => `${req.user.id}:${req.ip || 'unknown'}`;
+
+const vaultAccessMiddleware = (req, res, next) => {
+  const token = req.headers['x-vault-token'];
+  if (!token || typeof token !== 'string') {
+    return res.status(423).json({
+      code: 'VAULT_LOCKED',
+      error: 'Şifre kasası kilitli',
+    });
+  }
+
+  try {
+    const decoded = jwt.verify(token, getVaultAccessSecret(), {
+      audience: VAULT_AUDIENCE,
+      issuer: VAULT_ISSUER,
+    });
+    if (decoded.scope !== VAULT_SCOPE || String(decoded.sub) !== String(req.user.id)) {
+      throw new Error('Invalid vault token scope');
+    }
+    next();
+  } catch {
+    return res.status(423).json({
+      code: 'VAULT_LOCKED',
+      error: 'Kasa oturumu sona erdi. Lütfen şifreyi yeniden girin.',
+    });
+  }
 };
 
 const encryptPassword = (password, userId) => {
@@ -99,7 +151,62 @@ const serializeAccount = (row) => ({
   updated_at: row.updated_at,
 });
 
-router.get('/', authMiddleware, async (req, res) => {
+router.use(authMiddleware);
+
+router.post('/unlock', (req, res) => {
+  const configuredPassword = String(process.env.ACCOUNTS_VAULT_PASSWORD || '');
+  if (!configuredPassword) {
+    return res.status(503).json({
+      code: 'VAULT_NOT_CONFIGURED',
+      error: 'Kasa erişim şifresi sunucuda tanımlanmamış',
+    });
+  }
+
+  const password = String(req.body?.password || '');
+  if (!password || password.length > 1024) {
+    return res.status(400).json({ error: 'Kasa şifresini girin' });
+  }
+
+  const attemptKey = getAttemptKey(req);
+  const attempt = unlockAttempts.get(attemptKey);
+  if (attempt?.blockedUntil > Date.now()) {
+    const retryAfter = Math.ceil((attempt.blockedUntil - Date.now()) / 1000);
+    res.set('Retry-After', String(retryAfter));
+    return res.status(429).json({
+      code: 'VAULT_RATE_LIMITED',
+      error: `Çok fazla hatalı deneme. ${Math.ceil(retryAfter / 60)} dakika sonra tekrar deneyin.`,
+    });
+  }
+
+  if (!compareVaultPassword(password)) {
+    const failures = (attempt?.failures || 0) + 1;
+    const blockedUntil = failures >= MAX_UNLOCK_ATTEMPTS ? Date.now() + UNLOCK_BLOCK_MS : 0;
+    unlockAttempts.set(attemptKey, { failures, blockedUntil });
+    return res.status(403).json({
+      code: 'VAULT_PASSWORD_INVALID',
+      error: blockedUntil
+        ? 'Çok fazla hatalı deneme. Kasa 5 dakika kilitlendi.'
+        : 'Kasa şifresi hatalı',
+    });
+  }
+
+  unlockAttempts.delete(attemptKey);
+  const token = jwt.sign(
+    { scope: VAULT_SCOPE },
+    getVaultAccessSecret(),
+    {
+      subject: String(req.user.id),
+      audience: VAULT_AUDIENCE,
+      issuer: VAULT_ISSUER,
+      expiresIn: '20m',
+    }
+  );
+  return res.json({ token, expires_in: 20 * 60 });
+});
+
+router.use(vaultAccessMiddleware);
+
+router.get('/', async (req, res) => {
   try {
     await ensureTable();
     const result = await pool.query(
@@ -116,7 +223,7 @@ router.get('/', authMiddleware, async (req, res) => {
   }
 });
 
-router.get('/:id/password', authMiddleware, async (req, res) => {
+router.get('/:id/password', async (req, res) => {
   try {
     await ensureTable();
     const result = await pool.query(
@@ -131,7 +238,7 @@ router.get('/:id/password', authMiddleware, async (req, res) => {
   }
 });
 
-router.post('/', authMiddleware, async (req, res) => {
+router.post('/', async (req, res) => {
   try {
     await ensureTable();
     const {
@@ -174,7 +281,7 @@ router.post('/', authMiddleware, async (req, res) => {
   }
 });
 
-router.put('/:id', authMiddleware, async (req, res) => {
+router.put('/:id', async (req, res) => {
   try {
     await ensureTable();
     const {
@@ -230,7 +337,7 @@ router.put('/:id', authMiddleware, async (req, res) => {
   }
 });
 
-router.delete('/:id', authMiddleware, async (req, res) => {
+router.delete('/:id', async (req, res) => {
   try {
     await ensureTable();
     const result = await pool.query(

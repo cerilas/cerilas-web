@@ -1,4 +1,5 @@
 const API = '/api';
+const ACCOUNTS_VAULT_TOKEN_KEY = 'accounts_vault_token';
 
 function getToken() {
   return localStorage.getItem('admin_token');
@@ -7,6 +8,15 @@ function getToken() {
 function authHeaders() {
   const token = getToken();
   return token ? { Authorization: `Bearer ${token}` } : {};
+}
+
+function getAccountsVaultToken() {
+  return sessionStorage.getItem(ACCOUNTS_VAULT_TOKEN_KEY);
+}
+
+function accountsVaultHeaders() {
+  const token = getAccountsVaultToken();
+  return token ? { 'X-Vault-Token': token } : {};
 }
 
 async function request(path, options = {}) {
@@ -24,7 +34,16 @@ async function request(path, options = {}) {
     throw new Error('Unauthorized');
   }
   const data = await res.json();
-  if (!res.ok) throw new Error(data.error || 'Request failed');
+  if (res.status === 423 && data.code === 'VAULT_LOCKED') {
+    sessionStorage.removeItem(ACCOUNTS_VAULT_TOKEN_KEY);
+    window.dispatchEvent(new CustomEvent('accounts-vault-locked'));
+  }
+  if (!res.ok) {
+    const error = new Error(data.error || 'Request failed');
+    error.status = res.status;
+    error.code = data.code;
+    throw error;
+  }
   return data;
 }
 
@@ -166,11 +185,34 @@ export const api = {
   deleteExpense: (id) => request(`/expenses/${id}`, { method: 'DELETE' }),
 
   // Saved accounts
-  getSavedAccounts: () => request('/accounts'),
-  getSavedAccountPassword: (id) => request(`/accounts/${id}/password`),
-  createSavedAccount: (data) => request('/accounts', { method: 'POST', body: JSON.stringify(data) }),
-  updateSavedAccount: (id, data) => request(`/accounts/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
-  deleteSavedAccount: (id) => request(`/accounts/${id}`, { method: 'DELETE' }),
+  hasSavedAccountsVaultSession: () => Boolean(getAccountsVaultToken()),
+  unlockSavedAccounts: async (password) => {
+    const data = await request('/accounts/unlock', {
+      method: 'POST',
+      body: JSON.stringify({ password }),
+    });
+    sessionStorage.setItem(ACCOUNTS_VAULT_TOKEN_KEY, data.token);
+    return data;
+  },
+  lockSavedAccounts: () => {
+    sessionStorage.removeItem(ACCOUNTS_VAULT_TOKEN_KEY);
+  },
+  getSavedAccounts: () => request('/accounts', { headers: accountsVaultHeaders() }),
+  getSavedAccountPassword: (id) => request(`/accounts/${id}/password`, { headers: accountsVaultHeaders() }),
+  createSavedAccount: (data) => request('/accounts', {
+    method: 'POST',
+    headers: accountsVaultHeaders(),
+    body: JSON.stringify(data),
+  }),
+  updateSavedAccount: (id, data) => request(`/accounts/${id}`, {
+    method: 'PUT',
+    headers: accountsVaultHeaders(),
+    body: JSON.stringify(data),
+  }),
+  deleteSavedAccount: (id) => request(`/accounts/${id}`, {
+    method: 'DELETE',
+    headers: accountsVaultHeaders(),
+  }),
 
   // Documents
   getDocuments: (params = {}) => request(`/documents?${new URLSearchParams(params)}`),
