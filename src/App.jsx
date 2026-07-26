@@ -1,5 +1,7 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { LanguageProvider } from "./context/LanguageContext";
+import { PublicThemeProvider } from "./context/PublicThemeProvider";
+import { usePublicTheme } from "./context/publicTheme";
 import Navbar from "./components/layout/Navbar";
 import Footer from "./components/layout/Footer";
 import Home from "./pages/Home";
@@ -49,10 +51,15 @@ import DocumentsAdmin from "./pages/admin/DocumentsAdmin";
 import { Toaster } from 'react-hot-toast';
 
 function Layout({ children }) {
+  const { resolvedTheme } = usePublicTheme();
+
   return (
-    <div className="min-h-screen flex flex-col bg-gray-950">
+    <div
+      className={`public-site public-theme-${resolvedTheme} min-h-screen flex flex-col bg-gray-950`}
+      data-public-theme={resolvedTheme}
+    >
       <Navbar />
-      <main className="flex-1">{children}</main>
+      <main className="public-main flex-1">{children}</main>
       <Footer />
     </div>
   );
@@ -81,25 +88,26 @@ function buildPublicRoutes(prefix = "") {
 export default function App() {
   return (
     <LanguageProvider>
-      <BrowserRouter>
-        <ScrollToTop />
-        <SiteAnalytics />
-        <Toaster position="top-right" toastOptions={{
-          style: {
-            background: 'var(--admin-toast-bg, #1f2937)',
-            color: 'var(--admin-toast-text, #ffffff)',
-            border: '1px solid var(--admin-toast-border, #374151)',
-            boxShadow: 'var(--admin-toast-shadow, 0 18px 45px rgb(0 0 0 / 0.28))',
-          },
-          success: {
-            iconTheme: {
-              primary: 'var(--admin-toast-success, #22c55e)',
-              secondary: 'var(--admin-toast-icon-secondary, #ffffff)',
+      <PublicThemeProvider>
+        <BrowserRouter>
+          <ScrollToTop />
+          <SiteAnalytics />
+          <Toaster position="top-right" toastOptions={{
+            style: {
+              background: 'var(--admin-toast-bg, #1f2937)',
+              color: 'var(--admin-toast-text, #ffffff)',
+              border: '1px solid var(--admin-toast-border, #374151)',
+              boxShadow: 'var(--admin-toast-shadow, 0 18px 45px rgb(0 0 0 / 0.28))',
             },
-          },
-        }} />
-        <CookieConsent />
-        <Routes>
+            success: {
+              iconTheme: {
+                primary: 'var(--admin-toast-success, #22c55e)',
+                secondary: 'var(--admin-toast-icon-secondary, #ffffff)',
+              },
+            },
+          }} />
+          <CookieConsent />
+          <Routes>
           {/* Admin routes - no Navbar/Footer */}
           <Route path="/admin">
             <Route index element={<Login />} />
@@ -139,8 +147,9 @@ export default function App() {
           {buildPublicRoutes()}
           {buildPublicRoutes("/tr")}
           {buildPublicRoutes("/en")}
-        </Routes>
-      </BrowserRouter>
+          </Routes>
+        </BrowserRouter>
+      </PublicThemeProvider>
     </LanguageProvider>
   );
 }

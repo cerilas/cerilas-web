@@ -7,6 +7,7 @@ import { useProjects } from "../hooks/useProjects";
 import { api } from "../lib/api";
 import imgConsult from "../assets/images/ux-indonesia-ywwuOBJy60c-unsplash.jpg";
 import capBg from "../assets/images/albert-stoynov-b_GcLCaKt94-unsplash.jpg";
+import imgContactCta from "../assets/images/nicolas-thomas-CBydtQDjaJc-unsplash.jpg";
 import imgRdLab from "../assets/images/generated/cerilas-rd-lab.webp";
 import imgEmbeddedLab from "../assets/images/generated/cerilas-embedded-lab.webp";
 import imgCollaborationLab from "../assets/images/generated/cerilas-collaboration-lab.webp";
@@ -124,15 +125,15 @@ export default function Home() {
   return (
     <div>
       {/* Hero */}
-      <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gray-950">
+      <section className="public-home-hero relative min-h-screen flex items-center justify-center overflow-hidden bg-gray-950">
         <img
           src={imgRdLab}
           alt=""
           className="absolute inset-0 h-full w-full object-cover object-[62%_center]"
           aria-hidden="true"
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-gray-950 via-gray-950/90 to-gray-950/25" />
-        <div className="absolute inset-0 bg-gradient-to-t from-gray-950 via-transparent to-gray-950/25" />
+        <div className="light-photo-wash-x absolute inset-0 bg-gradient-to-r from-gray-950 via-gray-950/90 to-gray-950/25" />
+        <div className="light-photo-wash-y absolute inset-0 bg-gradient-to-t from-gray-950 via-transparent to-gray-950/25" />
         <div className="absolute inset-y-0 left-0 w-2/3 bg-[radial-gradient(circle_at_25%_50%,rgba(6,182,212,.09),transparent_52%)]" />
 
         <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-40 sm:pb-44">
@@ -143,7 +144,7 @@ export default function Home() {
             className="grid lg:grid-cols-[.92fr_1.08fr] items-center gap-12 lg:gap-16"
           >
             <div className="text-center lg:text-left">
-              <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight text-white leading-[0.98]">
+              <h1 className="public-hero-title text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight text-white leading-[0.98]">
                 {h.heroTitle}
                 <br />
                 <span className="bg-gradient-to-r from-cyan-300 via-cyan-400 to-blue-500 bg-clip-text text-transparent">
@@ -156,13 +157,13 @@ export default function Home() {
               <div className="mt-9 flex flex-col sm:flex-row gap-3 justify-center lg:justify-start">
                 <Link
                   to={localizedPath("/projects")}
-                  className="px-7 py-3.5 bg-cyan-400 hover:bg-cyan-300 text-gray-950 font-semibold rounded-xl transition-colors text-sm"
+                  className="public-primary-button px-7 py-3.5 bg-cyan-400 hover:bg-cyan-300 text-gray-950 font-semibold rounded-xl transition-colors text-sm"
                 >
                   {h.ctaPrimary}
                 </Link>
                 <Link
                   to={localizedPath("/contact")}
-                  className="px-7 py-3.5 border border-gray-700/80 bg-gray-950/25 hover:border-cyan-500 text-gray-300 hover:text-white font-semibold rounded-xl transition-colors text-sm backdrop-blur"
+                  className="public-secondary-button px-7 py-3.5 border border-gray-700/80 bg-gray-950/25 hover:border-cyan-500 text-gray-300 hover:text-white font-semibold rounded-xl transition-colors text-sm backdrop-blur"
                 >
                   {h.ctaSecondary}
                 </Link>
@@ -206,11 +207,11 @@ export default function Home() {
       </section>
 
       {/* R&D system overview */}
-      <section className="py-24 bg-gray-950 overflow-hidden">
+      <section className="public-home-overview py-24 bg-gray-950 overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <FadeIn>
             <div className="grid lg:grid-cols-[1.35fr_.65fr] gap-5">
-              <div className="relative min-h-[410px] overflow-hidden rounded-3xl border border-gray-800/70 bg-gradient-to-br from-gray-900 via-gray-950 to-cyan-950/30 p-7 sm:p-10">
+              <div className="public-feature-card relative min-h-[410px] overflow-hidden rounded-3xl border border-gray-800/70 bg-gradient-to-br from-gray-900 via-gray-950 to-cyan-950/30 p-7 sm:p-10">
                 <div className="absolute -right-20 -top-20 h-72 w-72 rounded-full bg-cyan-500/10 blur-3xl" />
                 <div className="relative">
                   <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-5">
@@ -249,7 +250,7 @@ export default function Home() {
                 {metrics.map(({ key, value, valueKey }) => (
                   <div
                     key={key}
-                      className="rounded-2xl border border-gray-800/70 bg-gray-900/70 px-3 py-5 text-center"
+                      className="public-metric-card rounded-2xl border border-gray-800/70 bg-gray-900/70 px-3 py-5 text-center"
                   >
                       <div className="text-2xl sm:text-3xl font-bold text-cyan-300">
                       {valueKey ? h[valueKey] : value}
@@ -259,7 +260,7 @@ export default function Home() {
                 ))}
               </div>
 
-                <div className="group relative flex min-h-[225px] flex-col justify-between overflow-hidden rounded-3xl border border-cyan-500/20 bg-cyan-950/20 p-6">
+                <div className="public-grant-card group relative flex min-h-[225px] flex-col justify-between overflow-hidden rounded-3xl border border-cyan-500/20 bg-cyan-950/20 p-6">
                   <div className="absolute -bottom-16 -right-12 h-44 w-44 rounded-full bg-cyan-400/10 blur-2xl" />
                   <div className="relative flex items-start justify-between gap-4">
                     <span className="rounded-full border border-cyan-400/25 bg-cyan-400/10 px-3 py-1 text-[9px] font-bold uppercase tracking-[0.18em] text-cyan-300">
@@ -285,7 +286,7 @@ export default function Home() {
       </section>
 
       {/* Capabilities */}
-      <section ref={capsRef} className="relative py-24 bg-gray-900/30 overflow-hidden">
+      <section ref={capsRef} className="public-home-capabilities relative py-24 bg-gray-900/30 overflow-hidden">
         {/* Parallax Background */}
         <Motion.div
           className="absolute inset-0 z-0 opacity-[0.05] pointer-events-none"
@@ -299,7 +300,7 @@ export default function Home() {
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <SectionTitle title={h.capTitle} />
           <FadeIn>
-            <div className="overflow-hidden rounded-3xl border border-gray-800/70 bg-gray-950/65 backdrop-blur">
+            <div className="public-capabilities-frame overflow-hidden rounded-3xl border border-gray-800/70 bg-gray-950/65 backdrop-blur">
               <div className="grid lg:grid-cols-[.72fr_1.28fr]">
                 <div className="border-b border-gray-800/70 p-3 lg:border-b-0 lg:border-r">
                   <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-1">
@@ -310,7 +311,7 @@ export default function Home() {
                         onClick={() => setActiveCapability(i)}
                         className={`group flex min-h-14 items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-all ${
                           activeCapability === i
-                            ? "bg-cyan-400 text-gray-950 shadow-[0_12px_40px_rgba(6,182,212,.16)]"
+                            ? "public-capability-active bg-cyan-400 text-gray-950 shadow-[0_12px_40px_rgba(6,182,212,.16)]"
                             : "text-gray-400 hover:bg-white/5 hover:text-white"
                         }`}
                       >
@@ -328,10 +329,10 @@ export default function Home() {
                     src={imgEmbeddedLab}
                     alt=""
                     aria-hidden="true"
-                    className="absolute inset-0 h-full w-full object-cover object-center opacity-55"
+                    className="public-photo-image absolute inset-0 h-full w-full object-cover object-center opacity-55"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-r from-gray-950 via-gray-950/92 to-gray-950/30" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-gray-950/80 via-transparent to-gray-950/30" />
+                  <div className="light-photo-wash-x absolute inset-0 bg-gradient-to-r from-gray-950 via-gray-950/92 to-gray-950/30" />
+                  <div className="light-photo-wash-y absolute inset-0 bg-gradient-to-t from-gray-950/80 via-transparent to-gray-950/30" />
                   <Motion.div
                     key={caps[activeCapability].id}
                     initial={{ opacity: 0, y: 14 }}
@@ -369,14 +370,14 @@ export default function Home() {
       </section>
 
       {/* Projects */}
-      <section className="py-24 bg-gray-950">
+      <section className="public-home-projects py-24 bg-gray-950">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <SectionTitle title={h.projTitle} subtitle={h.projDesc} />
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {projects.slice(0, 3).map((proj, i) => (
               <FadeIn key={proj.id} delay={i * 0.1}>
                 <Link to={localizedPath(`/projects/${proj.id}`)}>
-                  <GlowCard className="h-full min-h-[360px] cursor-pointer p-0 overflow-hidden">
+                  <GlowCard className="public-photo-card h-full min-h-[360px] cursor-pointer p-0 overflow-hidden">
                     {proj.imageUrl && (
                       <img 
                         src={proj.imageUrl} 
@@ -385,7 +386,7 @@ export default function Home() {
                         loading="lazy" 
                       />
                     )}
-                    <div className="absolute inset-0 bg-gradient-to-t from-gray-950 via-gray-950/65 to-transparent" />
+                    <div className="light-photo-card-overlay absolute inset-0 bg-gradient-to-t from-gray-950 via-gray-950/65 to-transparent" />
                     <div className="absolute inset-x-0 bottom-0 p-6">
                       <div className="flex flex-wrap gap-1.5 mb-4">
                         {proj.tags.slice(0, 3).map((tag) => (
@@ -415,10 +416,10 @@ export default function Home() {
       </section>
 
       {/* Ecosystem / Collaboration */}
-      <section className="py-24 bg-gray-900/30">
+      <section className="public-home-ecosystem py-24 bg-gray-900/30">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <FadeIn>
-            <div className="group relative min-h-[540px] overflow-hidden rounded-3xl border border-gray-800/70">
+            <div className="public-photo-card group relative min-h-[540px] overflow-hidden rounded-3xl border border-gray-800/70">
               <img
                 src={imgCollaborationLab}
                 alt=""
@@ -426,8 +427,8 @@ export default function Home() {
                 loading="lazy"
                 className="absolute inset-0 h-full w-full object-cover object-[58%_center] transition-transform duration-700 group-hover:scale-[1.015]"
               />
-              <div className="absolute inset-0 bg-gradient-to-r from-gray-950 via-gray-950/90 to-gray-950/10" />
-              <div className="absolute inset-0 bg-gradient-to-t from-gray-950/80 via-transparent to-gray-950/20" />
+              <div className="light-photo-wash-x absolute inset-0 bg-gradient-to-r from-gray-950 via-gray-950/90 to-gray-950/10" />
+              <div className="light-photo-wash-y absolute inset-0 bg-gradient-to-t from-gray-950/80 via-transparent to-gray-950/20" />
 
               <div className="relative flex min-h-[540px] max-w-xl flex-col justify-center p-7 sm:p-12">
                 <h2 className="text-4xl font-bold leading-tight text-white sm:text-5xl">{h.ecoTitle}</h2>
@@ -449,7 +450,7 @@ export default function Home() {
       </section>
 
       {/* Strategic partners logos */}
-      <section className="py-24 bg-gray-950 border-y border-gray-800/50">
+      <section className="public-home-partners py-24 bg-gray-950 border-y border-gray-800/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <SectionTitle
             title={h.strategicPartnersTitle}
@@ -458,7 +459,7 @@ export default function Home() {
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 sm:gap-5">
             {partnerLogos.map((logo, idx) => (
               <FadeIn key={`${logo.src}-${idx}`} delay={idx * 0.04}>
-                <div className="group relative h-28 sm:h-32 rounded-2xl border border-gray-800/70 bg-gray-900/45 backdrop-blur flex items-center justify-center px-5 hover:border-white/80 hover:bg-white/95 hover:shadow-lg hover:shadow-white/20 transition-all duration-300">
+                <div className="public-logo-card group relative h-28 sm:h-32 rounded-2xl border border-gray-800/70 bg-gray-900/45 backdrop-blur flex items-center justify-center px-5 hover:border-white/80 hover:bg-white/95 hover:shadow-lg hover:shadow-white/20 transition-all duration-300">
                   <img
                     src={logo.src}
                     alt={logo.alt}
@@ -473,12 +474,12 @@ export default function Home() {
       </section>
 
       {/* Consultancy teaser */}
-      <section className="py-24 bg-gray-950">
+      <section className="public-home-consultancy py-24 bg-gray-950">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <FadeIn>
-            <div className="group relative min-h-[490px] overflow-hidden rounded-3xl border border-gray-800/70">
+            <div className="public-photo-card group relative min-h-[490px] overflow-hidden rounded-3xl border border-gray-800/70">
               <img src={imgConsult} alt="Consultancy" className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.02]" loading="lazy" />
-              <div className="absolute inset-0 bg-gradient-to-r from-gray-950 via-gray-950/85 to-gray-950/20" />
+              <div className="light-photo-wash-x absolute inset-0 bg-gradient-to-r from-gray-950 via-gray-950/85 to-gray-950/20" />
               <div className="relative flex min-h-[490px] max-w-2xl flex-col justify-center p-7 sm:p-12">
                 <span className="text-[10px] font-semibold uppercase tracking-[0.22em] text-cyan-400">KNOW-HOW → IMPACT</span>
                 <h2 className="mt-4 text-4xl sm:text-5xl font-bold text-white">{h.consultTitle}</h2>
@@ -491,7 +492,7 @@ export default function Home() {
                 </div>
                 <Link
                   to={localizedPath("/consultancy")}
-                  className="mt-9 inline-flex w-fit items-center gap-2 rounded-xl bg-cyan-400 px-6 py-3 text-sm font-semibold text-gray-950 transition-colors hover:bg-cyan-300"
+                  className="public-primary-button mt-9 inline-flex w-fit items-center gap-2 rounded-xl bg-cyan-400 px-6 py-3 text-sm font-semibold text-gray-950 transition-colors hover:bg-cyan-300"
                 >
                   {h.consultCta} <span aria-hidden="true">↗</span>
                 </Link>
@@ -502,13 +503,21 @@ export default function Home() {
       </section>
 
       {/* Contact CTA band */}
-      <section className="py-20 bg-gradient-to-r from-cyan-900/20 via-blue-900/20 to-cyan-900/20 border-y border-cyan-500/10">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <section className="public-contact-band relative overflow-hidden py-24 border-y border-cyan-500/10">
+        <img
+          src={imgContactCta}
+          alt=""
+          aria-hidden="true"
+          loading="lazy"
+          className="absolute inset-0 h-full w-full object-cover object-center"
+        />
+        <div className="contact-photo-overlay absolute inset-0" />
+        <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <FadeIn>
             <p className="text-2xl sm:text-3xl font-bold text-white">{h.contactBand}</p>
             <Link
               to={localizedPath("/contact")}
-              className="mt-8 inline-flex items-center gap-2 px-8 py-4 bg-cyan-500 hover:bg-cyan-400 text-gray-950 font-semibold rounded-xl text-sm transition-colors"
+              className="public-primary-button mt-8 inline-flex items-center gap-2 px-8 py-4 bg-cyan-500 hover:bg-cyan-400 text-gray-950 font-semibold rounded-xl text-sm transition-colors"
             >
               {h.contactCta}
             </Link>

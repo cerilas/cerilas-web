@@ -1,25 +1,25 @@
-import { motion } from "framer-motion";
+import { motion as Motion } from "framer-motion";
 
 export function SectionTitle({ title, subtitle, center = true }) {
   return (
-    <motion.div
+    <Motion.div
       initial={{ opacity: 0, y: 24 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ duration: 0.6 }}
-      className={`mb-14 ${center ? "text-center" : ""}`}
+      className={`public-section-heading mb-14 ${center ? "text-center" : ""}`}
     >
       <h2 className="text-3xl sm:text-4xl font-bold text-white tracking-tight">{title}</h2>
       {subtitle && (
         <p className="mt-4 text-lg text-gray-400 max-w-2xl leading-relaxed mx-auto">{subtitle}</p>
       )}
-    </motion.div>
+    </Motion.div>
   );
 }
 
 export function FadeIn({ children, delay = 0, className = "" }) {
   return (
-    <motion.div
+    <Motion.div
       initial={{ opacity: 0, y: 24 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
@@ -27,14 +27,14 @@ export function FadeIn({ children, delay = 0, className = "" }) {
       className={className}
     >
       {children}
-    </motion.div>
+    </Motion.div>
   );
 }
 
 export function GlowCard({ children, className = "" }) {
   return (
     <div
-      className={`relative bg-gray-900/60 border border-gray-800/60 rounded-2xl p-6 hover:border-cyan-500/40 hover:bg-gray-900/80 transition-all duration-300 group ${className}`}
+      className={`public-card relative bg-gray-900/60 border border-gray-800/60 rounded-2xl p-6 hover:border-cyan-500/40 hover:bg-gray-900/80 transition-all duration-300 group ${className}`}
     >
       {children}
     </div>
@@ -43,7 +43,7 @@ export function GlowCard({ children, className = "" }) {
 
 export function Badge({ children }) {
   return (
-    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-cyan-400/10 text-cyan-400 border border-cyan-400/20">
+    <span className="public-badge inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-cyan-400/10 text-cyan-400 border border-cyan-400/20">
       {children}
     </span>
   );

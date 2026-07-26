@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useLang } from "../../context/LanguageContext";
-import logoImg from "../../assets/logo.png";
+import { usePublicTheme } from "../../context/publicTheme";
+import logoDarkMode from "../../assets/cerilas-logo-darkmode.png";
+import logoLightMode from "../../assets/cerilas-logo-lightmode.png";
 
 const navRoutes = [
   { key: "home", path: "/" },
@@ -15,19 +17,24 @@ const navRoutes = [
 
 export default function Footer() {
   const { t, localizedPath } = useLang();
+  const { resolvedTheme } = usePublicTheme();
   const f = t.footer;
   const year = new Date().getFullYear();
   const [nlEmail, setNlEmail] = useState("");
   const [nlDone, setNlDone] = useState(false);
 
   return (
-    <footer className="bg-gray-950 border-t border-gray-800/60">
+    <footer className="public-footer bg-gray-950 border-t border-gray-800/60">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
           {/* Brand */}
           <div className="lg:col-span-1">
             <Link to={localizedPath("/")}>
-              <img src={logoImg} alt="Cerilas" className="h-11 w-auto mb-2" />
+              <img
+                src={resolvedTheme === "light" ? logoLightMode : logoDarkMode}
+                alt="Cerilas"
+                className="h-11 w-auto mb-2"
+              />
             </Link>
             <p className="mt-2 text-sm text-cyan-400 font-medium tracking-wide">{f.tagline}</p>
             <p className="mt-4 text-sm text-gray-400 leading-relaxed">
@@ -102,7 +109,9 @@ export default function Footer() {
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ email: nlEmail }),
                   });
-                } catch {}
+                } catch (error) {
+                  console.error("Newsletter subscription failed", error);
+                }
                 setNlDone(true);
               }}
               className="flex flex-col sm:flex-row gap-2"

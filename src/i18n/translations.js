@@ -67,8 +67,8 @@ export const translations = {
       seoFallbackTitle: "Use Case | CERİLAS Yüksek Teknoloji",
     },
     home: {
-      heroTitle: "Dream, Design, Disrupt:",
-      heroSubtitle: "Advanced Technology R&D Solutions",
+      heroTitle: "Fast, Agile",
+      heroSubtitle: "Next-Generation R&D.",
       heroDesc:
         "Cerilas High Technologies develops custom R&D solutions in health technologies, mechatronics, robotics, and embedded systems — backed by TUBITAK grants and international consortiums.",
       ctaPrimary: "Explore Our Projects",
@@ -610,8 +610,8 @@ export const translations = {
       seoFallbackTitle: "Use Case | CERİLAS Yüksek Teknoloji",
     },
     home: {
-      heroTitle: "Hayal Et, Tasarla, Dönüştür:",
-      heroSubtitle: "İleri Teknoloji Ar-Ge Çözümleri",
+      heroTitle: "Hızlı, Çevik",
+      heroSubtitle: "Yeni Nesil Ar-Ge Yapıyoruz.",
       heroDesc:
         "CERİLAS Yüksek Teknoloji, TÜBİTAK destekli Ar-Ge projeleriyle sağlık teknolojileri, mekatronik, robotik ve gömülü sistemler alanında ihtiyaca özel çözümler geliştiren bir teknoloji şirketidir.",
       ctaPrimary: "Projelerimizi Keşfet",
