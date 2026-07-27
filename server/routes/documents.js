@@ -8,6 +8,7 @@ import process from 'node:process';
 import { fileURLToPath } from 'url';
 import pool from '../db.js';
 import authMiddleware from '../middleware/auth.js';
+import { getDocumentShareUrl } from '../publicUrl.js';
 
 const router = Router();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -494,6 +495,7 @@ router.post('/:id/share', authMiddleware, async (req, res) => {
       active: true,
       token,
       sharePath: `/shared/document/${token}`,
+      shareUrl: getDocumentShareUrl(token),
       share: result.rows[0],
     });
   } catch (error) {

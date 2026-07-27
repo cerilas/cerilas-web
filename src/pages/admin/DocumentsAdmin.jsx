@@ -421,7 +421,7 @@ export default function DocumentsAdmin() {
     setShareWorking(true);
     try {
       const result = await api.createDocumentShare(shareTarget.id);
-      const fullLink = `${window.location.origin}${result.sharePath}`;
+      const fullLink = result.shareUrl || `${window.location.origin}${result.sharePath}`;
       setShareLink(fullLink);
       setShareStatus({ active: true, share: result.share });
       await navigator.clipboard.writeText(fullLink);

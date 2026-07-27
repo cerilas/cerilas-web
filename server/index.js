@@ -24,6 +24,7 @@ import expensesRoutes from './routes/expenses.js';
 import accountsRoutes from './routes/accounts.js';
 import documentsRoutes from './routes/documents.js';
 import pool from './db.js';
+import { getPublicUrl } from './publicUrl.js';
 
 dotenv.config();
 
@@ -163,7 +164,7 @@ const escapeXml = (value) => String(value || '')
   .replace(/"/g, '&quot;')
   .replace(/'/g, '&apos;');
 
-const getBaseUrl = () => (process.env.PUBLIC_URL || 'https://www.cerilas.com').replace(/\/$/, '');
+const getBaseUrl = getPublicUrl;
 
 const stripLocalePrefix = (urlPath) => {
   const match = urlPath.match(/^\/(tr|en)(?=\/|$)/);
