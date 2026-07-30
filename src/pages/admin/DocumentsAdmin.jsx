@@ -172,6 +172,7 @@ export default function DocumentsAdmin() {
   const [uploading, setUploading] = useState(false);
   const [dragOver, setDragOver] = useState(false);
   const [editing, setEditing] = useState(null);
+  const [replacementFile, setReplacementFile] = useState(null);
   const [saving, setSaving] = useState(false);
   const [folderManagerOpen, setFolderManagerOpen] = useState(false);
   const [newFolder, setNewFolder] = useState({ name: '', scope_type: 'company', project_id: '' });
@@ -304,6 +305,7 @@ export default function DocumentsAdmin() {
   };
 
   const openFile = async (document, download) => {
+    const previewWindow = download ? null : window.open('about:blank', '_blank');
     try {
       const file = await api.fetchDocumentFile(document.id, download);
       const url = URL.createObjectURL(file.blob);
@@ -312,17 +314,21 @@ export default function DocumentsAdmin() {
         anchor.href = url;
         anchor.download = file.filename;
         anchor.click();
-        URL.revokeObjectURL(url);
+        window.setTimeout(() => URL.revokeObjectURL(url), 10_000);
       } else {
-        window.open(url, '_blank', 'noopener,noreferrer');
+        if (!previewWindow) throw new Error('Tarayıcı yeni pencereyi engelledi. Açılır pencerelere izin verip tekrar deneyin.');
+        previewWindow.opener = null;
+        previewWindow.location.href = url;
         window.setTimeout(() => URL.revokeObjectURL(url), 60_000);
       }
     } catch (error) {
+      previewWindow?.close();
       toast.error(error.message || 'Belge açılamadı');
     }
   };
 
   const openEdit = (document) => {
+    setReplacementFile(null);
     setEditing({
       ...document,
       project_id: document.project_id || '',
@@ -336,8 +342,12 @@ export default function DocumentsAdmin() {
     setSaving(true);
     try {
       await api.updateDocument(editing.id, editing);
-      toast.success('Belge bilgileri güncellendi');
+      if (replacementFile) {
+        await api.replaceDocumentFile(editing.id, replacementFile);
+      }
+      toast.success(replacementFile ? 'Belge bilgileri ve dosyası güncellendi' : 'Belge bilgileri güncellendi');
       setEditing(null);
+      setReplacementFile(null);
       await refreshDocuments();
       await refreshFolders();
     } catch (error) {
@@ -702,6 +712,18 @@ export default function DocumentsAdmin() {
               <button onClick={() => setEditing(null)} className="text-2xl leading-none text-gray-500 hover:text-white">&times;</button>
             </div>
             <MetadataFields value={editing} onChange={setEditing} projects={projects} folders={folders} />
+            <div className="mt-4 rounded-xl border border-amber-500/20 bg-amber-500/[0.05] p-3">
+              <label className="block text-xs font-medium text-amber-200">Belge dosyasını yenile</label>
+              <p className="mt-1 text-[11px] leading-4 text-gray-500">
+                Deploy sırasında kaybolan veya değiştirilmesi gereken dosyayı burada yeniden seçebilirsiniz. Mevcut paylaşım bağlantısı korunur.
+              </p>
+              <input
+                type="file"
+                accept={ACCEPTED_FILES}
+                onChange={(event) => setReplacementFile(event.target.files?.[0] || null)}
+                className="mt-3 block w-full text-xs text-gray-400 file:mr-3 file:rounded-lg file:border-0 file:bg-amber-500/15 file:px-3 file:py-2 file:text-xs file:font-medium file:text-amber-200 hover:file:bg-amber-500/25"
+              />
+            </div>
             <div className="mt-5 flex justify-end gap-2 border-t border-gray-800 pt-4">
               <button onClick={() => setEditing(null)} disabled={saving} className="rounded-lg border border-gray-700 px-4 py-2 text-xs text-gray-300">Vazgeç</button>
               <button onClick={saveEdit} disabled={saving} className="rounded-lg bg-cyan-500 px-5 py-2 text-xs font-semibold text-gray-950 disabled:opacity-50">{saving ? 'Kaydediliyor...' : 'Kaydet'}</button>

@@ -84,6 +84,7 @@ const ensureTables = async () => {
       category VARCHAR(100) DEFAULT 'Diğer',
       tags TEXT[] DEFAULT '{}',
       note TEXT DEFAULT '',
+      file_data BYTEA,
       uploaded_by INTEGER REFERENCES users(id) ON DELETE SET NULL,
       created_at TIMESTAMP DEFAULT NOW(),
       updated_at TIMESTAMP DEFAULT NOW(),
@@ -93,6 +94,7 @@ const ensureTables = async () => {
     CREATE INDEX IF NOT EXISTS idx_documents_folder ON documents(folder_id);
     CREATE INDEX IF NOT EXISTS idx_documents_deleted ON documents(deleted_at);
     CREATE INDEX IF NOT EXISTS idx_documents_created ON documents(created_at DESC);
+    ALTER TABLE documents ADD COLUMN IF NOT EXISTS file_data BYTEA;
 
     CREATE TABLE IF NOT EXISTS document_activity (
       id SERIAL PRIMARY KEY,
@@ -179,11 +181,12 @@ const documentSelect = `
 
 const hashShareToken = (token) => crypto.createHash('sha256').update(token).digest('hex');
 
-const getSharedDocument = async (token) => {
+const getSharedDocument = async (token, { includeFile = false } = {}) => {
   if (!token || token.length < 32 || token.length > 200) return null;
+  const fileColumn = includeFile ? ', d.file_data' : '';
   const result = await pool.query(
     `SELECT d.id, d.title, d.original_name, d.stored_filename, d.mime_type,
-      d.file_size, d.category, d.created_at, s.id AS share_id
+      d.file_size, d.category, d.created_at, s.id AS share_id${fileColumn}
      FROM document_shares s
      JOIN documents d ON d.id = s.document_id
      WHERE s.token_hash = $1
@@ -222,10 +225,16 @@ router.get('/public/:token', async (req, res) => {
 router.get('/public/:token/file', async (req, res) => {
   try {
     await ensureTables();
-    const document = await getSharedDocument(req.params.token);
+    const document = await getSharedDocument(req.params.token, { includeFile: true });
     if (!document) return sendInvalidShare(res);
     const filePath = path.join(documentsDir, path.basename(document.stored_filename));
-    if (!fs.existsSync(filePath)) return res.status(404).json({ error: 'Belge dosyası bulunamadı' });
+    const hasDatabaseFile = Buffer.isBuffer(document.file_data) && document.file_data.length > 0;
+    if (!hasDatabaseFile && !fs.existsSync(filePath)) {
+      return res.status(404).json({
+        code: 'DOCUMENT_FILE_MISSING',
+        error: 'Belgenin dosyası sunucuda bulunamadı. Belgenin yeniden yüklenmesi gerekiyor.',
+      });
+    }
     await pool.query(
       `UPDATE document_shares
        SET access_count = access_count + 1, last_accessed_at = NOW()
@@ -240,6 +249,7 @@ router.get('/public/:token/file', async (req, res) => {
     );
     res.setHeader('Cache-Control', 'private, no-store, max-age=0');
     res.setHeader('Referrer-Policy', 'no-referrer');
+    if (hasDatabaseFile) return res.send(document.file_data);
     res.sendFile(filePath);
   } catch (error) {
     res.status(500).json({ error: error.message || 'Paylaşılan belge açılamadı' });
@@ -371,7 +381,6 @@ router.get('/', authMiddleware, async (req, res) => {
 });
 
 router.post('/', authMiddleware, uploadSingle, async (req, res) => {
-  let writtenPath = null;
   try {
     await ensureTables();
     if (!req.file) return res.status(400).json({ error: 'Dosya seçilmedi' });
@@ -383,16 +392,14 @@ router.post('/', authMiddleware, uploadSingle, async (req, res) => {
     const decodedOriginalName = normalizeOriginalFilename(req.file.originalname);
     const extension = path.extname(decodedOriginalName).toLowerCase();
     const storedFilename = `${crypto.randomUUID()}${extension}`;
-    writtenPath = path.join(documentsDir, storedFilename);
-    await fs.promises.writeFile(writtenPath, req.file.buffer, { flag: 'wx' });
 
     const originalName = path.basename(decodedOriginalName);
     const defaultTitle = path.basename(originalName, extension);
     const result = await pool.query(
       `INSERT INTO documents (
         title, original_name, stored_filename, mime_type, file_size,
-        scope_type, project_id, folder_id, category, tags, note, uploaded_by
-      ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
+        scope_type, project_id, folder_id, category, tags, note, uploaded_by, file_data
+      ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)
       RETURNING id`,
       [
         String(req.body.title || '').trim() || defaultTitle,
@@ -407,15 +414,51 @@ router.post('/', authMiddleware, uploadSingle, async (req, res) => {
         parseTags(req.body.tags),
         String(req.body.note || '').trim(),
         req.user.id,
+        req.file.buffer,
       ]
     );
     await logActivity(result.rows[0].id, req.user.id, 'uploaded', { originalName });
     const documentResult = await pool.query(`${documentSelect} WHERE d.id = $1`, [result.rows[0].id]);
     res.status(201).json(documentResult.rows[0]);
   } catch (error) {
-    if (writtenPath) await fs.promises.unlink(writtenPath).catch(() => {});
     console.error('Upload document error:', error);
     res.status(400).json({ error: error.message || 'Belge yüklenemedi' });
+  }
+});
+
+router.put('/:id/file', authMiddleware, uploadSingle, async (req, res) => {
+  try {
+    await ensureTables();
+    if (!req.file) return res.status(400).json({ error: 'Yeni dosya seçilmedi' });
+
+    const decodedOriginalName = normalizeOriginalFilename(req.file.originalname);
+    const extension = path.extname(decodedOriginalName).toLowerCase();
+    const storedFilename = `${crypto.randomUUID()}${extension}`;
+    const originalName = path.basename(decodedOriginalName);
+
+    const result = await pool.query(
+      `UPDATE documents SET
+        original_name=$1, stored_filename=$2, mime_type=$3, file_size=$4,
+        file_data=$5, updated_at=NOW()
+       WHERE id=$6 AND deleted_at IS NULL
+       RETURNING id`,
+      [
+        originalName,
+        storedFilename,
+        req.file.mimetype || 'application/octet-stream',
+        req.file.size,
+        req.file.buffer,
+        req.params.id,
+      ]
+    );
+
+    if (result.rows.length === 0) return res.status(404).json({ error: 'Belge bulunamadı' });
+    await logActivity(req.params.id, req.user.id, 'file_replaced', { originalName });
+    const documentResult = await pool.query(`${documentSelect} WHERE d.id = $1`, [req.params.id]);
+    res.json(documentResult.rows[0]);
+  } catch (error) {
+    console.error('Replace document file error:', error);
+    res.status(400).json({ error: error.message || 'Belge dosyası yenilenemedi' });
   }
 });
 
@@ -423,19 +466,26 @@ router.get('/:id/file', authMiddleware, async (req, res) => {
   try {
     await ensureTables();
     const result = await pool.query(
-      'SELECT original_name, stored_filename, mime_type FROM documents WHERE id = $1',
+      'SELECT original_name, stored_filename, mime_type, file_data FROM documents WHERE id = $1',
       [req.params.id]
     );
     const document = result.rows[0];
     if (!document) return res.status(404).json({ error: 'Belge bulunamadı' });
     const filePath = path.join(documentsDir, path.basename(document.stored_filename));
-    if (!fs.existsSync(filePath)) return res.status(404).json({ error: 'Belge dosyası bulunamadı' });
+    const hasDatabaseFile = Buffer.isBuffer(document.file_data) && document.file_data.length > 0;
+    if (!hasDatabaseFile && !fs.existsSync(filePath)) {
+      return res.status(404).json({
+        code: 'DOCUMENT_FILE_MISSING',
+        error: 'Belgenin dosyası sunucuda bulunamadı. Belgenin yeniden yüklenmesi gerekiyor.',
+      });
+    }
     const disposition = req.query.download === 'true' ? 'attachment' : 'inline';
     res.setHeader('Content-Type', document.mime_type || 'application/octet-stream');
     res.setHeader(
       'Content-Disposition',
       `${disposition}; filename*=UTF-8''${encodeURIComponent(document.original_name)}`
     );
+    if (hasDatabaseFile) return res.send(document.file_data);
     res.sendFile(filePath);
   } catch (error) {
     res.status(500).json({ error: error.message || 'Belge açılamadı' });

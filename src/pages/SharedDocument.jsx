@@ -40,6 +40,7 @@ export default function SharedDocument() {
   }, [token]);
 
   const openFile = async (download) => {
+    const previewWindow = download ? null : window.open('about:blank', '_blank');
     setFileLoading(true);
     try {
       const file = await api.fetchPublicDocumentFile(token, download);
@@ -49,12 +50,15 @@ export default function SharedDocument() {
         anchor.href = url;
         anchor.download = file.filename;
         anchor.click();
-        URL.revokeObjectURL(url);
+        window.setTimeout(() => URL.revokeObjectURL(url), 10_000);
       } else {
-        window.open(url, '_blank', 'noopener,noreferrer');
+        if (!previewWindow) throw new Error('Tarayıcı yeni pencereyi engelledi. Açılır pencerelere izin verip tekrar deneyin.');
+        previewWindow.opener = null;
+        previewWindow.location.href = url;
         window.setTimeout(() => URL.revokeObjectURL(url), 60_000);
       }
     } catch (requestError) {
+      previewWindow?.close();
       setError(requestError.message || 'Belge artık açılamıyor.');
       setDocument(null);
     } finally {
