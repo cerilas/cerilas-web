@@ -4,6 +4,11 @@ import process from 'node:process';
 import nodemailer from 'nodemailer';
 import pool from '../db.js';
 import authMiddleware from '../middleware/auth.js';
+import {
+  calculateDigestStats,
+  escapeHtml,
+  formatCurrencyGroups,
+} from './mailDigest.js';
 
 const router = Router();
 
@@ -242,7 +247,7 @@ export async function sendNotificationMail(type, data) {
     let title = '';
     let content = '';
     let btnText = 'Paneli Görüntüle';
-    let btnUrl = `${process.env.FRONTEND_URL || 'https://www.cerilas.com'}/admin`;
+    let btnUrl = `${process.env.FRONTEND_URL || 'https://cerilas.com'}/admin`;
 
     if (type === 'newsletter') {
       active = s.newsletter_active;
@@ -334,8 +339,13 @@ router.get('/cron/opportunities-digest', async (req, res) => {
       return res.json({ message: 'Digest not active or missing configuration' });
     }
 
-    const senderResult = await pool.query('SELECT * FROM email_senders WHERE id = $1', [s.sender_id]);
-    if (senderResult.rows.length === 0) return res.status(404).json({ error: 'Sender not found' });
+    const senderResult = await pool.query(
+      'SELECT * FROM email_senders WHERE id = $1 AND is_active = true',
+      [s.sender_id]
+    );
+    if (senderResult.rows.length === 0) {
+      return res.status(404).json({ error: 'Sender not found or inactive' });
+    }
     const sender = senderResult.rows[0];
 
     // Fetch data
@@ -348,50 +358,32 @@ router.get('/cron/opportunities-digest', async (req, res) => {
       FROM opportunity_todos t
       JOIN opportunities o ON t.opportunity_id = o.id
       WHERE t.is_completed = false
-      ORDER BY t.deadline ASC NULLS LAST
+        AND COALESCE(o.status, 'Aktif') NOT IN ('Pasif', 'Arşiv')
+      ORDER BY t.deadline ASC NULLS LAST, t.sort_order ASC, t.created_at ASC
       LIMIT 5
     `);
-    const allTodosCountResult = await pool.query("SELECT count(*) as total FROM opportunity_todos WHERE is_completed = false");
+    const allTodosCountResult = await pool.query(`
+      SELECT COUNT(*)::int AS total
+      FROM opportunity_todos t
+      JOIN opportunities o ON t.opportunity_id = o.id
+      WHERE t.is_completed = false
+        AND COALESCE(o.status, 'Aktif') NOT IN ('Pasif', 'Arşiv')
+    `);
 
     const opps = oppResult.rows;
     const payments = payResult.rows;
     const topTodos = todosResult.rows;
-    const totalTodosCount = parseInt(allTodosCountResult.rows[0].total);
-
-    // Stats
-    const activeCount = opps.filter(o => o.status === 'Aktif').length;
-    const completedCount = opps.filter(o => o.status === 'Tamamlandı').length;
-    const certainCount = opps.filter(o => o.probability === 'Kesinleşti' && o.status === 'Aktif').length;
-    const highCount = opps.filter(o => o.probability === 'Yüksek' && o.status === 'Aktif').length;
-    const passiveCount = opps.filter(o => o.status === 'Pasif').length;
-
-    const groupedReceived = {};
-    payments.forEach(p => {
-      groupedReceived[p.currency] = (groupedReceived[p.currency] || 0) + parseFloat(p.amount);
-    });
-
-    const groupedExpected = {};
-    const groupedAllTimeExpected = {};
-    opps.forEach(o => {
-      const val = parseFloat(o.total_income || 0);
-      groupedAllTimeExpected[o.currency] = (groupedAllTimeExpected[o.currency] || 0) + val;
-      
-      if (o.status !== 'Pasif' && o.status !== 'Arşiv') {
-         groupedExpected[o.currency] = (groupedExpected[o.currency] || 0) + val;
-      }
-    });
-
-    const formatCurr = (obj) => {
-      const keys = Object.keys(obj);
-      if (keys.length === 0) return '0 TRY';
-      return keys.map(k => `<div style="margin-bottom: 4px;">${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 }).format(obj[k])} <span style="font-size: 13px; color: #9ca3af;">${k}</span></div>`).join('');
-    };
-
-    const formatCurrInline = (obj) => {
-      const keys = Object.keys(obj);
-      if (keys.length === 0) return '0 TRY';
-      return keys.map(k => `${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 }).format(obj[k])} ${k}`).join(' | ');
-    };
+    const totalTodosCount = Number(allTodosCountResult.rows[0]?.total) || 0;
+    const {
+      activeCount,
+      completedCount,
+      certainCount,
+      highCount,
+      passiveCount,
+      groupedReceived,
+      groupedExpected,
+      groupedAllTimeExpected,
+    } = calculateDigestStats(opps, payments);
 
     let todosHtml = '';
     if (topTodos.length > 0) {
@@ -399,11 +391,11 @@ router.get('/cron/opportunities-digest', async (req, res) => {
         <div style="background: #1f2937; border-left: 4px solid #f59e0b; padding: 12px 16px; margin-bottom: 12px; border-radius: 4px;">
           <div style="font-size: 13px; color: #9ca3af; margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle;"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
-            <span style="vertical-align: middle;">${t.opp_name}</span>
+            <span style="vertical-align: middle;">${escapeHtml(t.opp_name)}</span>
             ${t.deadline ? `<span style="margin-left: auto; color: #ef4444; font-size: 11px;">Son: ${new Date(t.deadline).toLocaleDateString('tr-TR')}</span>` : ''}
           </div>
           <div style="color: #e5e7eb; font-size: 14px; font-weight: 500;">
-            ${t.text}
+            ${escapeHtml(t.text)}
           </div>
         </div>
       `).join('');
@@ -503,16 +495,16 @@ router.get('/cron/opportunities-digest', async (req, res) => {
             <tr>
               <td class="stack-column fin-border" style="padding: 15px; background: #111827; border-radius: 8px 0 0 8px; width: 50%; border-right: 1px solid #374151; vertical-align: top;">
                 <div style="color: #9ca3af; font-size: 12px; margin-bottom: 8px;">Gerçekleşen Tahsilat (Ödenen)</div>
-                <div style="color: #10b981; font-size: 16px; font-weight: 700;">${formatCurr(groupedReceived)}</div>
+                <div style="color: #10b981; font-size: 16px; font-weight: 700;">${formatCurrencyGroups(groupedReceived)}</div>
               </td>
               <td class="stack-column fin-radius" style="padding: 15px; background: #111827; border-radius: 0 8px 8px 0; width: 50%; vertical-align: top;">
                 <div style="color: #9ca3af; font-size: 12px; margin-bottom: 8px;">Bekleyen Tahsilat Hacmi (Aktif)</div>
-                <div style="color: #22d3ee; font-size: 16px; font-weight: 700;">${formatCurr(groupedExpected)}</div>
+                <div style="color: #22d3ee; font-size: 16px; font-weight: 700;">${formatCurrencyGroups(groupedExpected)}</div>
               </td>
             </tr>
           </table>
           <div style="margin-top: 15px; font-size: 11px; color: #4b5563; text-align: right;">
-            Sisteme girilmiş tüm projelerin (arşiv ve pasifler dahil) brüt bütçe hacmi: ${formatCurrInline(groupedAllTimeExpected)}
+            Sisteme girilmiş tüm projelerin (arşiv ve pasifler dahil) brüt bütçe hacmi: ${formatCurrencyGroups(groupedAllTimeExpected, { inline: true })}
           </div>
         </div>
 
@@ -535,7 +527,7 @@ router.get('/cron/opportunities-digest', async (req, res) => {
       </div>
 
       <div style="text-align: center; margin-top: 30px; font-family: 'Inter', sans-serif;">
-        <a href="${process.env.FRONTEND_URL || 'https://www.cerilas.com'}/admin" style="display: inline-block; background-color: #0891b2; color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 14px;">
+        <a href="${process.env.FRONTEND_URL || 'https://cerilas.com'}/admin/opportunities" style="display: inline-block; background-color: #0891b2; color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 14px;">
           Sisteme Giriş Yap
         </a>
         <p style="margin-top: 20px; font-size: 12px; color: #4b5563;">Bu otomatik bir sistem bilgilendirmesidir.</p>

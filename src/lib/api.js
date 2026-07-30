@@ -231,6 +231,18 @@ export const api = {
     if (!res.ok) throw new Error(data.error || 'Belge yüklenemedi');
     return data;
   },
+  replaceDocumentFile: async (id, file) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    const res = await fetch(`${API}/documents/${id}/file`, {
+      method: 'PUT',
+      headers: authHeaders(),
+      body: formData,
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Belge dosyası yenilenemedi');
+    return data;
+  },
   updateDocument: (id, data) => request(`/documents/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
   trashDocument: (id) => request(`/documents/${id}`, { method: 'DELETE' }),
   restoreDocument: (id) => request(`/documents/${id}/restore`, { method: 'POST' }),
