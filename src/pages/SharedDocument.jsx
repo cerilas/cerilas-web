@@ -124,6 +124,11 @@ export default function SharedDocument() {
               <p className="mt-5 text-center text-[10px] leading-4 text-slate-600">
                 Bu belge size Cerilas yetkilisi tarafından özel bir bağlantıyla paylaşılmıştır.
               </p>
+              <p className="mt-2 text-center text-[10px] leading-4 text-red-300/80">
+                <span className="font-semibold text-red-300">Gizlilik uyarısı:</span>{' '}
+                Bu bağlantıya yapılan erişimler güvenlik amacıyla anonimleştirilmiş IP verileriyle kaydedilmektedir.
+                Belge yalnızca ilgili muhataba iletilmiştir. Bağlantıyı veya belge içeriğini yetkisiz üçüncü kişilerle paylaşmayınız.
+              </p>
             </div>
           </section>
         )}
