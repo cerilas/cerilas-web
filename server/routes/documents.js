@@ -169,7 +169,8 @@ const logActivity = (documentId, userId, action, details = {}) => (
 const documentSelect = `
   SELECT d.id, d.title, d.original_name, d.mime_type, d.file_size,
     d.scope_type, d.project_id, d.folder_id, d.category, d.tags, d.note,
-    d.created_at, d.updated_at, d.deleted_at,
+    d.created_at, d.updated_at, d.deleted_at, d.stored_filename,
+    COALESCE(octet_length(d.file_data), 0) > 0 AS has_database_file,
     p.title_tr AS project_name,
     f.name AS folder_name,
     u.email AS uploaded_by_email
@@ -178,6 +179,18 @@ const documentSelect = `
   LEFT JOIN document_folders f ON f.id = d.folder_id
   LEFT JOIN users u ON u.id = d.uploaded_by
 `;
+
+const withFileAvailability = (document) => {
+  const { stored_filename: storedFilename, has_database_file: hasDatabaseFile, ...publicDocument } = document;
+  const diskFileExists = storedFilename
+    ? fs.existsSync(path.join(documentsDir, path.basename(storedFilename)))
+    : false;
+
+  return {
+    ...publicDocument,
+    file_available: Boolean(hasDatabaseFile) || diskFileExists,
+  };
+};
 
 const hashShareToken = (token) => crypto.createHash('sha256').update(token).digest('hex');
 
@@ -368,7 +381,7 @@ router.get('/', authMiddleware, async (req, res) => {
     );
     const total = Number.parseInt(countResult.rows[0].count, 10);
     res.json({
-      documents: result.rows,
+      documents: result.rows.map(withFileAvailability),
       total,
       page,
       limit,
@@ -419,7 +432,7 @@ router.post('/', authMiddleware, uploadSingle, async (req, res) => {
     );
     await logActivity(result.rows[0].id, req.user.id, 'uploaded', { originalName });
     const documentResult = await pool.query(`${documentSelect} WHERE d.id = $1`, [result.rows[0].id]);
-    res.status(201).json(documentResult.rows[0]);
+    res.status(201).json(withFileAvailability(documentResult.rows[0]));
   } catch (error) {
     console.error('Upload document error:', error);
     res.status(400).json({ error: error.message || 'Belge yüklenemedi' });
@@ -455,7 +468,7 @@ router.put('/:id/file', authMiddleware, uploadSingle, async (req, res) => {
     if (result.rows.length === 0) return res.status(404).json({ error: 'Belge bulunamadı' });
     await logActivity(req.params.id, req.user.id, 'file_replaced', { originalName });
     const documentResult = await pool.query(`${documentSelect} WHERE d.id = $1`, [req.params.id]);
-    res.json(documentResult.rows[0]);
+    res.json(withFileAvailability(documentResult.rows[0]));
   } catch (error) {
     console.error('Replace document file error:', error);
     res.status(400).json({ error: error.message || 'Belge dosyası yenilenemedi' });
@@ -604,7 +617,7 @@ router.put('/:id', authMiddleware, async (req, res) => {
     if (result.rows.length === 0) return res.status(404).json({ error: 'Belge bulunamadı' });
     await logActivity(req.params.id, req.user.id, 'updated');
     const documentResult = await pool.query(`${documentSelect} WHERE d.id = $1`, [req.params.id]);
-    res.json(documentResult.rows[0]);
+    res.json(withFileAvailability(documentResult.rows[0]));
   } catch (error) {
     res.status(400).json({ error: error.message || 'Belge güncellenemedi' });
   }

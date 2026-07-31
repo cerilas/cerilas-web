@@ -80,11 +80,24 @@ const lightThemeRuntimeCss = `
   [data-admin-theme="light"] .documents-admin-page .documents-toolbar, [data-admin-theme="light"] .documents-admin-page .documents-list, [data-admin-theme="light"] .documents-admin-page .document-modal { background-color: #ffffff !important; border-color: rgb(226 232 240 / 0.82) !important; box-shadow: 0 1px 2px rgb(15 23 42 / 0.04), 0 14px 34px rgb(15 23 42 / 0.04) !important; }
   [data-admin-theme="light"] .documents-admin-page .document-row { border-color: rgb(226 232 240 / 0.72) !important; }
   [data-admin-theme="light"] .documents-admin-page .document-row:hover { background-color: #f8fafc !important; }
+  [data-admin-theme="light"] .documents-admin-page .document-row-file-missing { background-color: #fff7f7 !important; border-color: rgb(248 113 113 / 0.46) !important; }
+  [data-admin-theme="light"] .documents-admin-page .document-row-file-missing:hover { background-color: #fef2f2 !important; }
+  [data-admin-theme="light"] .documents-admin-page .document-file-missing-badge { background-color: #fee2e2 !important; border-color: #fca5a5 !important; color: #991b1b !important; }
+  [data-admin-theme="light"] .documents-admin-page .document-file-replace-button { background-color: #fee2e2 !important; border-color: #f87171 !important; color: #991b1b !important; }
+  [data-admin-theme="light"] .documents-admin-page .document-file-replace-button:hover { background-color: #fecaca !important; color: #7f1d1d !important; }
   [data-admin-theme="light"] .documents-admin-page .bg-gray-950\\/50 { background-color: #f8fafc !important; }
   [data-admin-theme="light"] .documents-admin-page .text-green-300, [data-admin-theme="light"] .documents-admin-page .text-green-400 { color: #15803d !important; }
   [data-admin-theme="light"] .documents-admin-page .text-blue-300, [data-admin-theme="light"] .documents-admin-page .text-blue-400 { color: #2563eb !important; }
   [data-admin-theme="light"] .documents-admin-page .text-purple-300, [data-admin-theme="light"] .documents-admin-page .text-purple-400 { color: #7e22ce !important; }
   [data-admin-theme="light"] .documents-admin-page .text-orange-400 { color: #c2410c !important; }
+  [data-admin-theme="light"] .documents-admin-page .document-file-replace { background-color: #fffbeb !important; border-color: #fcd34d !important; box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.85) !important; }
+  [data-admin-theme="light"] .documents-admin-page .document-file-replace-title { color: #78350f !important; }
+  [data-admin-theme="light"] .documents-admin-page .document-file-replace-copy { color: #475569 !important; }
+  [data-admin-theme="light"] .documents-admin-page .document-file-replace-input { color: #334155 !important; }
+  [data-admin-theme="light"] .documents-admin-page .document-file-replace-input::file-selector-button,
+  [data-admin-theme="light"] .documents-admin-page .document-file-replace-input::-webkit-file-upload-button { background-color: #fef3c7 !important; border: 1px solid #fcd34d !important; color: #78350f !important; }
+  [data-admin-theme="light"] .documents-admin-page .document-file-replace-input:hover::file-selector-button,
+  [data-admin-theme="light"] .documents-admin-page .document-file-replace-input:hover::-webkit-file-upload-button { background-color: #fde68a !important; border-color: #f59e0b !important; color: #451a03 !important; }
 `;
 
 function syncRuntimeThemeStyle(resolvedTheme) {

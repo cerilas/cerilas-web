@@ -577,13 +577,32 @@ export default function DocumentsAdmin() {
       ) : (
         <>
           <div className="documents-list overflow-hidden rounded-xl border border-gray-800 bg-gray-900">
-            {documents.map((document) => (
-              <div key={document.id} className="document-row border-b border-gray-800 px-3 py-2.5 last:border-b-0 hover:bg-white/[0.025]">
+            {documents.map((document) => {
+              const fileMissing = document.file_available === false;
+              return (
+              <div
+                key={document.id}
+                className={`document-row border-b px-3 py-2.5 last:border-b-0 ${
+                  fileMissing
+                    ? 'document-row-file-missing border-red-500/30 bg-red-500/[0.07] hover:bg-red-500/[0.11]'
+                    : 'border-gray-800 hover:bg-white/[0.025]'
+                }`}
+              >
                 <div className="grid gap-3 xl:grid-cols-[minmax(260px,1.2fr)_minmax(190px,.8fr)_minmax(220px,1fr)_auto] xl:items-center">
                   <div className="flex min-w-0 items-center gap-2.5">
                     <FileTypeIcon document={document} />
                     <div className="min-w-0">
-                      <h2 className="truncate text-xs font-semibold text-white">{document.title}</h2>
+                      <div className="flex min-w-0 flex-wrap items-center gap-1.5">
+                        <h2 className="truncate text-xs font-semibold text-white">{document.title}</h2>
+                        {fileMissing && (
+                          <span className="document-file-missing-badge inline-flex shrink-0 items-center gap-1 rounded-full border border-red-500/30 bg-red-500/15 px-1.5 py-0.5 text-[9px] font-semibold text-red-300">
+                            <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v4m0 4h.01M10.3 3.9 2.5 17.4A2 2 0 0 0 4.2 20h15.6a2 2 0 0 0 1.7-2.6L13.7 3.9a2 2 0 0 0-3.4 0Z" />
+                            </svg>
+                            Dosya bulunamadı
+                          </span>
+                        )}
+                      </div>
                       <div className="mt-0.5 flex flex-wrap items-center gap-1.5 text-[10px] text-gray-500">
                         <span className="truncate">{document.original_name}</span>
                         <span>•</span>
@@ -615,10 +634,18 @@ export default function DocumentsAdmin() {
                   <div className="flex flex-wrap gap-1 xl:justify-end">
                     {!trashMode ? (
                       <>
-                        <button onClick={() => openFile(document, false)} className="rounded-md bg-cyan-400 px-2.5 py-1.5 text-[10px] font-bold text-gray-950 hover:bg-cyan-300">Aç</button>
-                        <button onClick={() => openFile(document, true)} className="rounded-md border border-gray-700 px-2 py-1.5 text-[10px] text-gray-300 hover:bg-white/5">İndir</button>
-                        <button onClick={() => openShare(document)} className="rounded-md border border-blue-500/25 bg-blue-500/10 px-2 py-1.5 text-[10px] text-blue-300 hover:bg-blue-500/20">Paylaş</button>
-                        <button onClick={() => openEdit(document)} className="rounded-md border border-gray-700 px-2 py-1.5 text-[10px] text-gray-400 hover:text-white">Düzenle</button>
+                        {fileMissing ? (
+                          <button onClick={() => openEdit(document)} className="document-file-replace-button rounded-md border border-red-500/35 bg-red-500/15 px-2.5 py-1.5 text-[10px] font-semibold text-red-200 hover:bg-red-500/25">
+                            Dosyayı yenile
+                          </button>
+                        ) : (
+                          <>
+                            <button onClick={() => openFile(document, false)} className="rounded-md bg-cyan-400 px-2.5 py-1.5 text-[10px] font-bold text-gray-950 hover:bg-cyan-300">Aç</button>
+                            <button onClick={() => openFile(document, true)} className="rounded-md border border-gray-700 px-2 py-1.5 text-[10px] text-gray-300 hover:bg-white/5">İndir</button>
+                            <button onClick={() => openShare(document)} className="rounded-md border border-blue-500/25 bg-blue-500/10 px-2 py-1.5 text-[10px] text-blue-300 hover:bg-blue-500/20">Paylaş</button>
+                            <button onClick={() => openEdit(document)} className="rounded-md border border-gray-700 px-2 py-1.5 text-[10px] text-gray-400 hover:text-white">Düzenle</button>
+                          </>
+                        )}
                         <button onClick={() => setDeleteTarget({ document, action: 'trash' })} className="rounded-md border border-red-500/20 px-2 py-1.5 text-[10px] text-red-300 hover:bg-red-500/10">Çöpe At</button>
                       </>
                     ) : (
@@ -630,7 +657,8 @@ export default function DocumentsAdmin() {
                   </div>
                 </div>
               </div>
-            ))}
+              );
+            })}
           </div>
 
           <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
@@ -712,16 +740,16 @@ export default function DocumentsAdmin() {
               <button onClick={() => setEditing(null)} className="text-2xl leading-none text-gray-500 hover:text-white">&times;</button>
             </div>
             <MetadataFields value={editing} onChange={setEditing} projects={projects} folders={folders} />
-            <div className="mt-4 rounded-xl border border-amber-500/20 bg-amber-500/[0.05] p-3">
-              <label className="block text-xs font-medium text-amber-200">Belge dosyasını yenile</label>
-              <p className="mt-1 text-[11px] leading-4 text-gray-500">
+            <div className="document-file-replace mt-4 rounded-xl border border-amber-500/20 bg-amber-500/[0.05] p-3">
+              <label className="document-file-replace-title block text-xs font-medium text-amber-200">Belge dosyasını yenile</label>
+              <p className="document-file-replace-copy mt-1 text-[11px] leading-4 text-gray-500">
                 Deploy sırasında kaybolan veya değiştirilmesi gereken dosyayı burada yeniden seçebilirsiniz. Mevcut paylaşım bağlantısı korunur.
               </p>
               <input
                 type="file"
                 accept={ACCEPTED_FILES}
                 onChange={(event) => setReplacementFile(event.target.files?.[0] || null)}
-                className="mt-3 block w-full text-xs text-gray-400 file:mr-3 file:rounded-lg file:border-0 file:bg-amber-500/15 file:px-3 file:py-2 file:text-xs file:font-medium file:text-amber-200 hover:file:bg-amber-500/25"
+                className="document-file-replace-input mt-3 block w-full text-xs text-gray-400 file:mr-3 file:rounded-lg file:border-0 file:bg-amber-500/15 file:px-3 file:py-2 file:text-xs file:font-medium file:text-amber-200 hover:file:bg-amber-500/25"
               />
             </div>
             <div className="mt-5 flex justify-end gap-2 border-t border-gray-800 pt-4">
