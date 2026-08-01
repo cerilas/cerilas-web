@@ -19,7 +19,7 @@ export const DEFAULT_OPPORTUNITY_AI_SETTINGS = {
   eligibility_preferences: `Türkiye merkezli Ar-Ge/teknoloji şirketlerinin katılabildiği; startup veya KOBİ uygunluğu aranan fırsatlara öncelik ver ancak CERİLAS'ın resmî KOBİ/statü koşullarını sağladığını ayrıca doğrulama gerektiren bir alan olarak işaretle. Tek başvuru sahibi olunabilen çağrılar ile CERİLAS'ın teknoloji sağlayıcısı, pilot uygulayıcı veya konsorsiyum ortağı olabileceği çağrıları dahil et. Bireysel fırsatlarda Deniz Can Ilgın'ın Türkiye'den başvuran teknoloji girişimcisi/yöneticisi profiliyle katılabileceği programları değerlendir; vatandaşlık, yaş, diploma veya deneyim koşullarını doğrulanmadan sağlanmış kabul etme.`,
   custom_instructions: `Önce fırsatın hâlâ açık ve başvuruya uygun olup olmadığını kontrol et. Resmî program adı, son tarih, destek tutarı/oranı, uygun başvuru sahibi, coğrafi kapsam, konsorsiyum zorunluluğu ve doğrudan başvuru URL'sini mümkün olduğunca çıkar. Bilgi sayfada yoksa uydurma; "belirtilmedi" olarak işaretle ve confidence değerini düşür. Şirket ve kişisel uygunluğu ayrı düşün. CERİLAS'ın ana teknoloji alanlarıyla somut bağ, başvuru uygunluğu, finansal/stratejik değer ve uygulanabilir efor yoksa yüksek puan verme. Konsorsiyum gerektiren ama CERİLAS'ın gerçekçi ortak rolü üstlenebileceği çağrıları otomatik eleme. Son tarihi geçmiş, kapalı, yinelenen veya yalnızca haber niteliğindeki içerikleri shortlist'e alma. 70 ve üzeri puanı yalnızca güçlü kanıt bulunan fırsatlara ver. Gerekçeyi kısa, karar odaklı ve Türkçe yaz; risklerde eksik uygunluk koşullarını açıkça belirt.`,
   shortlist_threshold: 70,
-  max_candidates_per_source: 15,
+  max_candidates_per_source: 50,
   temperature: 0.2,
   score_weights: {
     technical_fit: 25,
@@ -88,7 +88,7 @@ export async function ensureOpportunityAutomationTables() {
       eligibility_preferences TEXT DEFAULT '',
       custom_instructions TEXT DEFAULT '',
       shortlist_threshold INTEGER NOT NULL DEFAULT 70,
-      max_candidates_per_source INTEGER NOT NULL DEFAULT 12,
+      max_candidates_per_source INTEGER NOT NULL DEFAULT 50,
       temperature NUMERIC(3,2) NOT NULL DEFAULT 0.20,
       score_weights JSONB NOT NULL DEFAULT '{}'::jsonb,
       updated_by INTEGER REFERENCES users(id) ON DELETE SET NULL,
