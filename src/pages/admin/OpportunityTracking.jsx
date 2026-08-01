@@ -155,30 +155,40 @@ function SourceResultsModal({ source, onClose }) {
           )}
 
           <section>
-            <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+            <div className="mb-4 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between rounded-xl border border-gray-800/60 bg-gray-900/50 p-4">
               <div>
                 <h3 className="text-sm font-semibold text-white">Bulunan fırsatlar</h3>
                 <p className="mt-1 text-xs text-gray-500">{visibleCandidates.length} sonuç gösteriliyor; toplam {candidates.length} kayıt.</p>
               </div>
-            </div>
-            <div className="grid gap-2 sm:grid-cols-2">
-              <label>
-                <span className="mb-1 block text-[10px] uppercase tracking-wider text-gray-500">Gösterim</span>
-                <select value={listFilter} onChange={(event) => setListFilter(event.target.value)} className="h-9 rounded-lg border border-gray-700 bg-gray-800 px-3 text-xs text-white outline-none focus:border-cyan-500/60">
-                  <option value="all">Tüm sonuçlar</option>
-                  <option value="shortlisted">Yalnızca kısa liste</option>
-                  <option value="not_shortlisted">Kısa liste dışındakiler</option>
-                </select>
-              </label>
-              <label>
-                <span className="mb-1 block text-[10px] uppercase tracking-wider text-gray-500">Sıralama</span>
-                <select value={resultSort} onChange={(event) => setResultSort(event.target.value)} className="h-9 rounded-lg border border-gray-700 bg-gray-800 px-3 text-xs text-white outline-none focus:border-cyan-500/60">
-                  <option value="score_desc">Puanı yüksekten düşüğe</option>
-                  <option value="score_asc">Puanı düşükten yükseğe</option>
-                  <option value="newest">En son görülene göre</option>
-                  <option value="oldest">İlk görülene göre</option>
-                </select>
-              </label>
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+                <div className="flex items-center gap-2">
+                  <label htmlFor="listFilter" className="shrink-0 text-[11px] font-medium uppercase tracking-wider text-gray-500">Gösterim</label>
+                  <div className="relative">
+                    <select id="listFilter" value={listFilter} onChange={(event) => setListFilter(event.target.value)} className="h-9 w-full min-w-[160px] cursor-pointer appearance-none rounded-lg border border-gray-700 bg-gray-800 px-3 pr-8 text-xs text-white outline-none transition-colors hover:border-gray-600 focus:border-cyan-500/60 focus:ring-1 focus:ring-cyan-500/60 sm:w-auto">
+                      <option value="all">Tüm sonuçlar</option>
+                      <option value="shortlisted">Yalnızca kısa liste</option>
+                      <option value="not_shortlisted">Kısa liste dışındakiler</option>
+                    </select>
+                    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-400">
+                      <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <label htmlFor="resultSort" className="shrink-0 text-[11px] font-medium uppercase tracking-wider text-gray-500">Sıralama</label>
+                  <div className="relative">
+                    <select id="resultSort" value={resultSort} onChange={(event) => setResultSort(event.target.value)} className="h-9 w-full min-w-[190px] cursor-pointer appearance-none rounded-lg border border-gray-700 bg-gray-800 px-3 pr-8 text-xs text-white outline-none transition-colors hover:border-gray-600 focus:border-cyan-500/60 focus:ring-1 focus:ring-cyan-500/60 sm:w-auto">
+                      <option value="score_desc">Puanı yüksekten düşüğe</option>
+                      <option value="score_asc">Puanı düşükten yükseğe</option>
+                      <option value="newest">En son görülene göre</option>
+                      <option value="oldest">İlk görülene göre</option>
+                    </select>
+                    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-400">
+                      <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
 
             {loading ? (

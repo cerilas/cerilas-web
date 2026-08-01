@@ -363,6 +363,37 @@ const extractReadablePage = ({ html, finalUrl }) => {
     );
   }
   const $ = load(html);
+
+  // Extract Vue-style JSON data embedded in inline scripts (e.g., cascadefunding.eu)
+  $('script').each((_index, element) => {
+    const scriptContent = $(element).html();
+    if (scriptContent && scriptContent.includes('const data')) {
+      const matches = scriptContent.match(/const\s+data[a-zA-Z0-9_]*\s*=\s*(\[\{.*?\}\]);/g);
+      if (matches) {
+        matches.forEach(m => {
+          const jsonMatch = m.match(/=\s*(\[\{.*?\}\]);/);
+          if (jsonMatch) {
+            try {
+              const parsed = JSON.parse(jsonMatch[1]);
+              if (Array.isArray(parsed)) {
+                parsed.forEach(item => {
+                  if (item.title && (item.permalink || item.url || item.link)) {
+                    const href = item.permalink || item.url || item.link;
+                    $('body').prepend(`<div>
+                      <h2>${item.title}</h2>
+                      <p>${item.description || ''}</p>
+                      <a href="${href}">${item.title}</a>
+                    </div>`);
+                  }
+                });
+              }
+            } catch (e) {}
+          }
+        });
+      }
+    }
+  });
+
   $('script,style,noscript,svg,canvas,template').remove();
   const title = $('title').first().text().replace(/\s+/g, ' ').trim();
   const links = [];
