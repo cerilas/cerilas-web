@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import process from 'node:process';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import fs from 'fs';
@@ -23,6 +24,7 @@ import analyticsRoutes from './routes/analytics.js';
 import expensesRoutes from './routes/expenses.js';
 import accountsRoutes from './routes/accounts.js';
 import documentsRoutes from './routes/documents.js';
+import { startOpportunityScannerScheduler } from './services/opportunityScanner.js';
 import pool from './db.js';
 import { getPublicUrl } from './publicUrl.js';
 
@@ -680,5 +682,6 @@ app.listen(PORT, async () => {
   } catch (err) {
     console.error('Table init error:', err.message);
   }
+  startOpportunityScannerScheduler();
   console.log(`API server running on http://localhost:${PORT}`);
 });

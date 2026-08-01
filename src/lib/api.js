@@ -47,6 +47,29 @@ async function request(path, options = {}) {
   return data;
 }
 
+async function requestBlob(path, options = {}) {
+  const res = await fetch(`${API}${path}`, {
+    ...options,
+    headers: { ...authHeaders(), ...options.headers },
+  });
+  if (res.status === 401) {
+    localStorage.removeItem('admin_token');
+    window.location.href = '/admin';
+    throw new Error('Unauthorized');
+  }
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data.error || 'Dosya oluşturulamadı');
+  }
+  const disposition = res.headers.get('content-disposition') || '';
+  const encodedName = disposition.match(/filename\*=UTF-8''([^;]+)/i)?.[1];
+  const plainName = disposition.match(/filename="([^"]+)"/i)?.[1];
+  return {
+    blob: await res.blob(),
+    filename: encodedName ? decodeURIComponent(encodedName) : (plainName || 'cerilas-rapor'),
+  };
+}
+
 export const api = {
   // Auth
   login: (email, password) => request('/auth/login', { method: 'POST', body: JSON.stringify({ email, password }) }),
@@ -327,6 +350,18 @@ export const api = {
   createTrackedOpportunity: (data) => request('/opportunity-tracking', { method: 'POST', body: JSON.stringify(data) }),
   updateTrackedOpportunity: (id, data) => request(`/opportunity-tracking/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
   deleteTrackedOpportunity: (id) => request(`/opportunity-tracking/${id}`, { method: 'DELETE' }),
+  getOpportunityAiSettings: () => request('/opportunity-tracking/ai-settings'),
+  updateOpportunityAiSettings: (data) => request('/opportunity-tracking/ai-settings', { method: 'PUT', body: JSON.stringify(data) }),
+  getOpportunityAiModels: () => request('/opportunity-tracking/ai-models'),
+  getOpportunityCandidates: (params = {}) => request(`/opportunity-tracking/candidates?${new URLSearchParams(params)}`),
+  updateOpportunityCandidate: (id, data) => request(`/opportunity-tracking/candidates/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
+  downloadOpportunityReport: (format, scope = 'all') => requestBlob(`/opportunity-tracking/reports/${format}?${new URLSearchParams({ scope })}`),
+  emailOpportunityReport: (data) => request('/opportunity-tracking/reports/email', { method: 'POST', body: JSON.stringify(data) }),
+  getOpportunityScanRuns: (limit = 50, sourceId = '', batchId = '', active = false) => request(`/opportunity-tracking/scan-runs?${new URLSearchParams({ limit, ...(sourceId ? { source_id: sourceId } : {}), ...(batchId ? { batch_id: batchId } : {}), ...(active ? { active: 'true' } : {}) })}`),
+  getOpportunityScanBatches: (limit = 10, active = false) => request(`/opportunity-tracking/scan-batches?${new URLSearchParams({ limit, ...(active ? { active: 'true' } : {}) })}`),
+  getOpportunityScanSummary: () => request('/opportunity-tracking/scan-summary'),
+  scanTrackedOpportunity: (id) => request(`/opportunity-tracking/scan/${id}`, { method: 'POST' }),
+  scanDueOpportunities: (forceAll = false) => request('/opportunity-tracking/scan-due', { method: 'POST', body: JSON.stringify({ force_all: forceAll }) }),
 
   // Pomodoro
   getPomodoroToday: () => request('/pomodoro/today'),

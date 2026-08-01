@@ -29,7 +29,7 @@ const updates = [
   {
     id: 7,
     description: 'FundingBox/OnePass ekosisteminde AB destekli fırsat, eğitim, teknoloji ve cascade funding çağrıları.',
-    note: 'Konsept: AB odaklı fırsat ve topluluk platformu. Alanlar: deep tech, AI, robotics, SME innovation, digital, green, health, manufacturing. Fırsat: Cascade funding, açık çağrı, eğitim, mentorluk, pilot ve proje partnerliği. Takip: Platform JS ağırlıklı olduğu için scrap link saklı; manuel arama/filtreleme ile haftalık kontrol iyi olur.',
+    note: 'Konsept: AB odaklı fırsat ve topluluk platformu. Alanlar: deep tech, AI, robotics, SME innovation, digital, green, health, manufacturing. Fırsat: Cascade funding, açık çağrı, eğitim, mentorluk, pilot ve proje partnerliği. Takip: Public OnePass fırsat listesi genişletilmiş sayfa boyutu ve açık detay sayfalarıyla günlük otomatik taranır; API ve hesap alanlarına girilmez.',
   },
   {
     id: 8,
