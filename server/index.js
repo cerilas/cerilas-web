@@ -678,6 +678,7 @@ app.listen(PORT, async () => {
       
       ALTER TABLE users ADD COLUMN IF NOT EXISTS pomodoro_sound VARCHAR(50) DEFAULT 'beep1';
       ALTER TABLE pomodoro_sessions ADD COLUMN IF NOT EXISTS task_label VARCHAR(255);
+      ALTER TABLE pomodoro_sessions ADD COLUMN IF NOT EXISTS is_recovered BOOLEAN DEFAULT FALSE;
     `);
   } catch (err) {
     console.error('Table init error:', err.message);

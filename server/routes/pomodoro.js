@@ -56,88 +56,101 @@ router.get('/today', authMiddleware, async (req, res) => {
   }
 });
 
-// Get overall stats (total minutes, streak)
-// Weekend logic: weekends are optional. Missing a weekend doesn't break streak.
-// Only missing a WEEKDAY breaks the streak.
-router.get('/stats', authMiddleware, async (req, res) => {
-  try {
-    const userId = req.user.id;
-    
-    const totalRes = await pool.query(
-      `SELECT COALESCE(SUM(duration_minutes), 0) as total_minutes
-       FROM pomodoro_sessions
-       WHERE user_id = $1`,
-      [userId]
-    );
-    const totalMinutes = parseInt(totalRes.rows[0].total_minutes, 10);
+async function getStatsData(userId) {
+  const totalRes = await pool.query(
+    `SELECT COALESCE(SUM(duration_minutes), 0) as total_minutes
+     FROM pomodoro_sessions
+     WHERE user_id = $1`,
+    [userId]
+  );
+  const totalMinutes = parseInt(totalRes.rows[0].total_minutes, 10);
 
-    // Get all worked weekdays (exclude weekend sessions from streak counting, but keep them in total)
-    const datesRes = await pool.query(
-      `SELECT DISTINCT date_string 
-       FROM pomodoro_sessions 
-       WHERE user_id = $1 
-       ORDER BY date_string DESC`,
-      [userId]
-    );
-    
-    let currentStreak = 0;
-    let streakBreakDate = null;
+  const datesRes = await pool.query(
+    `SELECT DISTINCT date_string 
+     FROM pomodoro_sessions 
+     WHERE user_id = $1 
+     ORDER BY date_string DESC`,
+    [userId]
+  );
+  
+  let currentStreak = 0;
+  let streakBreakDate = null;
+  let totalEarned = 0;
 
-    const todayStr = getTodayTRT();
+  const todayStr = getTodayTRT();
+  const workedDatesSet = new Set(datesRes.rows.map(r => r.date_string));
 
-    // Build a set for fast lookup
-    const workedDatesSet = new Set(datesRes.rows.map(r => r.date_string));
+  let latestRequiredWeekday = isWeekend(todayStr)
+    ? decrementSkippingWeekends(decrementDateString(todayStr))
+    : todayStr;
+  const prevWeekday = decrementSkippingWeekends(latestRequiredWeekday);
 
-    // Find the most recent weekday (today if weekday, or last Friday if weekend)
-    let latestRequiredWeekday = isWeekend(todayStr)
-      ? decrementSkippingWeekends(decrementDateString(todayStr))
-      : todayStr;
-    const prevWeekday = decrementSkippingWeekends(latestRequiredWeekday);
+  const streakAlive = workedDatesSet.has(latestRequiredWeekday) || workedDatesSet.has(prevWeekday);
 
-    // Streak is alive if worked today (weekday) OR the most recent previous weekday
-    const streakAlive = workedDatesSet.has(latestRequiredWeekday) || workedDatesSet.has(prevWeekday);
+  if (datesRes.rows.length > 0) {
+    const allWorked = datesRes.rows.map(r => r.date_string);
+    const mostRecentWorked = allWorked[0];
+    const earliestWorked = allWorked[allWorked.length - 1];
 
-    if (workedDatesSet.size > 0 && streakAlive) {
-      // Walk backwards day by day starting from the most recent worked date
-      // - If it's a weekday and worked: streak++
-      // - If it's a weekday and NOT worked: BREAK (streak ends)
-      // - If it's a weekend and worked: streak++ (bonus)
-      // - If it's a weekend and NOT worked: skip (no penalty)
-      const allWorked = datesRes.rows.map(r => r.date_string);
-      const mostRecentWorked = allWorked[0]; // already DESC sorted
+    let cursor = mostRecentWorked;
+    let tempStreak = 0;
+    let isCurrentStreak = streakAlive;
 
-      let cursor = mostRecentWorked;
+    while (cursor >= earliestWorked) {
+      const weekend = isWeekend(cursor);
+      const worked = workedDatesSet.has(cursor);
 
-      while (true) {
-        const weekend = isWeekend(cursor);
-        const worked = workedDatesSet.has(cursor);
-
-        if (weekend) {
-          if (worked) {
-            currentStreak++; // bonus
-          }
-          // weekend not worked = skip, no penalty
+      if (weekend) {
+        if (worked) tempStreak++;
+      } else {
+        if (worked) {
+          tempStreak++;
         } else {
-          // weekday
-          if (worked) {
-            currentStreak++;
-          } else {
-            // Missing weekday = streak breaks
+          // Streak broken!
+          if (isCurrentStreak) {
+            currentStreak = tempStreak;
             streakBreakDate = cursor;
+            isCurrentStreak = false;
+          }
+          totalEarned += Math.floor(tempStreak / 14);
+          tempStreak = 0;
+
+          const nextWorkedIndex = allWorked.findIndex(d => d < cursor);
+          if (nextWorkedIndex !== -1) {
+            cursor = allWorked[nextWorkedIndex];
+            continue;
+          } else {
             break;
           }
         }
-
-        cursor = decrementDateString(cursor);
-
-        // Safety: stop going too far back (e.g. more than 2 years)
-        const cursorYear = parseInt(cursor.split('-')[0]);
-        if (cursorYear < 2024) break;
       }
+      cursor = decrementDateString(cursor);
     }
+    
+    // Process final chunk
+    if (isCurrentStreak) {
+      currentStreak = tempStreak;
+    }
+    totalEarned += Math.floor(tempStreak / 14);
+  }
 
-    res.json({ totalMinutes, currentStreak, streakBreakDate });
+  const usedRes = await pool.query(
+    `SELECT COUNT(*) as used_count
+     FROM pomodoro_sessions
+     WHERE user_id = $1 AND is_recovered = true`,
+    [userId]
+  );
+  const totalUsed = parseInt(usedRes.rows[0].used_count, 10);
+  const availableRecoveries = totalEarned - totalUsed;
 
+  return { totalMinutes, currentStreak, streakBreakDate, availableRecoveries, totalEarned, totalUsed };
+}
+
+// Get overall stats (total minutes, streak)
+router.get('/stats', authMiddleware, async (req, res) => {
+  try {
+    const stats = await getStatsData(req.user.id);
+    res.json(stats);
   } catch (error) {
     console.error('Error fetching pomodoro overall stats:', error);
     res.status(500).json({ error: 'Failed to fetch stats' });
@@ -155,7 +168,9 @@ router.get('/history', authMiddleware, async (req, res) => {
     // Use the user-facing TRT date recorded with each session. This keeps the
     // selected range exact and includes today as one of the requested days.
     const result = await pool.query(
-      `SELECT date_string as date, SUM(duration_minutes) as total_minutes
+      `SELECT date_string as date, 
+              SUM(duration_minutes) as total_minutes, 
+              BOOL_OR(is_recovered) as is_recovered
        FROM pomodoro_sessions
        WHERE user_id = $1 
          AND date_string::date BETWEEN ($2::date - ($3::int - 1)) AND $2::date
@@ -166,7 +181,8 @@ router.get('/history', authMiddleware, async (req, res) => {
 
     res.json(result.rows.map(r => ({
       date: r.date,
-      totalMinutes: parseInt(r.total_minutes, 10)
+      totalMinutes: parseInt(r.total_minutes, 10),
+      isRecovered: r.is_recovered || false
     })));
   } catch (error) {
     console.error('Error fetching pomodoro history:', error);
@@ -246,6 +262,49 @@ router.post('/', authMiddleware, async (req, res) => {
   } catch (error) {
     console.error('Error saving pomodoro session:', error);
     res.status(500).json({ error: 'Failed to save pomodoro session' });
+  }
+});
+
+// Recover a missed day
+router.post('/recover', authMiddleware, async (req, res) => {
+  try {
+    const { date_string } = req.body;
+    const userId = req.user.id;
+
+    if (!date_string) {
+      return res.status(400).json({ error: 'Date is required' });
+    }
+
+    const todayStr = getTodayTRT();
+    if (date_string >= todayStr) {
+      return res.status(400).json({ error: 'Sadece geçmiş günler kurtarılabilir' });
+    }
+
+    // Check if already worked/recovered
+    const checkRes = await pool.query(
+      `SELECT id FROM pomodoro_sessions WHERE user_id = $1 AND date_string = $2`,
+      [userId, date_string]
+    );
+    if (checkRes.rows.length > 0) {
+      return res.status(400).json({ error: 'Bu gün zaten çalışılmış veya kurtarılmış' });
+    }
+
+    const stats = await getStatsData(userId);
+    if (stats.availableRecoveries <= 0) {
+      return res.status(403).json({ error: 'Kullanılabilir kurtarma hakkınız bulunmuyor' });
+    }
+
+    const result = await pool.query(
+      `INSERT INTO pomodoro_sessions (user_id, duration_minutes, date_string, is_recovered)
+       VALUES ($1, 0, $2, true)
+       RETURNING *`,
+      [userId, date_string]
+    );
+
+    res.status(201).json(result.rows[0]);
+  } catch (error) {
+    console.error('Error recovering pomodoro session:', error);
+    res.status(500).json({ error: 'Failed to recover session' });
   }
 });
 
