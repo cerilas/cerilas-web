@@ -1,0 +1,402 @@
+/* ==========================================================================
+   Apple-Minimalist PDF → RAG Cleaner Styles
+   Cerilas Design System
+   ========================================================================== */
+
+.pdf-rag-root {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  width: 100%;
+}
+
+/* Dropzone */
+.rag-dropzone {
+  border: 2px dashed var(--card-border);
+  border-radius: 20px;
+  background: var(--card-bg);
+  padding: 2rem 1.5rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  min-height: 180px;
+}
+
+.rag-dropzone:hover,
+.rag-dropzone.drag-active {
+  border-color: rgba(150, 150, 150, 0.45);
+  background: rgba(150, 150, 150, 0.04);
+}
+
+.rag-dropzone.rag-dropzone-disabled {
+  cursor: not-allowed;
+  border-style: solid;
+  border-color: rgba(245, 158, 11, 0.3);
+  background: rgba(245, 158, 11, 0.03);
+}
+
+.rag-dropzone-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  background: rgba(150, 150, 150, 0.08);
+  border: 1px solid var(--card-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-main);
+  margin-bottom: 0.25rem;
+}
+
+.rag-dropzone-title {
+  font-size: 1.15rem;
+  font-weight: 500;
+  color: var(--text-main);
+  margin: 0;
+}
+
+.rag-dropzone-desc {
+  font-size: 0.88rem;
+  color: var(--text-muted);
+  margin: 0;
+  max-width: 440px;
+  line-height: 1.5;
+}
+
+.rag-samples-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-top: 0.5rem;
+}
+
+.rag-sample-label {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.rag-sample-btn {
+  padding: 0.38rem 0.85rem;
+  border-radius: 8px;
+  background: rgba(150, 150, 150, 0.06);
+  border: 1px solid var(--card-border);
+  color: var(--text-main);
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.rag-sample-btn:hover {
+  background: rgba(150, 150, 150, 0.12);
+  border-color: rgba(150, 150, 150, 0.35);
+}
+
+/* Processing Spinner & Card */
+.rag-processing-card {
+  border: 1px solid var(--card-border);
+  border-radius: 20px;
+  background: var(--card-bg);
+  padding: 3.5rem 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.25rem;
+  text-align: center;
+  backdrop-filter: blur(12px);
+}
+
+.rag-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(150, 150, 150, 0.2);
+  border-top-color: var(--text-main);
+  border-radius: 50%;
+  animation: ragSpin 0.7s linear infinite;
+}
+
+@keyframes ragSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Workspace Layout */
+.rag-workspace {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* Top Stats Matrix */
+.rag-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 1rem;
+}
+
+.rag-stat-card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 16px;
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.rag-stat-label {
+  font-size: 0.76rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.rag-stat-value {
+  font-size: 1.45rem;
+  font-weight: 600;
+  color: var(--text-main);
+  letter-spacing: -0.02em;
+}
+
+.rag-stat-sub {
+  font-size: 0.76rem;
+  color: var(--text-muted);
+}
+
+/* Toolbar & Chunking Configuration */
+.rag-toolbar {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 18px;
+  padding: 1rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.rag-toolbar-group {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.rag-toolbar-label {
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+.rag-strategy-btn {
+  padding: 0.4rem 0.85rem;
+  border-radius: 10px;
+  font-size: 0.82rem;
+  font-weight: 500;
+  background: transparent;
+  border: 1px solid var(--card-border);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.rag-strategy-btn.active {
+  background: var(--text-main);
+  color: var(--bg-color);
+  border-color: var(--text-main);
+}
+
+.rag-actions-group {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+/* Output Viewers & Tabs */
+.rag-output-card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 20px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.rag-tabs-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--card-border);
+  padding: 0.75rem 1.25rem;
+  background: rgba(150, 150, 150, 0.02);
+}
+
+.rag-tabs-list {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.rag-tab-btn {
+  padding: 0.45rem 0.9rem;
+  border-radius: 8px;
+  background: transparent;
+  border: none;
+  font-size: 0.84rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.rag-tab-btn.active {
+  background: rgba(150, 150, 150, 0.1);
+  color: var(--text-main);
+}
+
+.rag-tab-content {
+  padding: 1.5rem;
+  max-height: 520px;
+  overflow-y: auto;
+}
+
+/* Code & Raw Textarea */
+.rag-code-editor {
+  width: 100%;
+  height: 440px;
+  background: transparent;
+  border: none;
+  outline: none;
+  font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+  font-size: 0.86rem;
+  line-height: 1.6;
+  color: var(--text-main);
+  resize: vertical;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* Chunk Cards in JSON View */
+.rag-chunks-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.rag-chunk-card {
+  background: rgba(150, 150, 150, 0.03);
+  border: 1px solid var(--card-border);
+  border-radius: 14px;
+  padding: 1.1rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  transition: border-color 0.15s ease;
+}
+
+.rag-chunk-card:hover {
+  border-color: rgba(150, 150, 150, 0.3);
+}
+
+.rag-chunk-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.rag-chunk-badges {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.rag-chunk-title {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.rag-chunk-snippet {
+  font-size: 0.84rem;
+  line-height: 1.5;
+  color: var(--text-muted);
+  white-space: pre-wrap;
+  max-height: 120px;
+  overflow-y: auto;
+  background: rgba(0, 0, 0, 0.02);
+  padding: 0.6rem 0.8rem;
+  border-radius: 8px;
+  font-family: monospace;
+}
+
+/* AI Deep Polish Banner */
+.rag-ai-banner {
+  background: radial-gradient(circle at 10% 50%, rgba(99, 102, 241, 0.08) 0%, rgba(168, 85, 247, 0.04) 100%);
+  border: 1px solid rgba(139, 92, 246, 0.25);
+  border-radius: 16px;
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.rag-ai-info {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.rag-ai-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  background: rgba(139, 92, 246, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #8b5cf6;
+}
+
+.rag-ai-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-main);
+  margin: 0;
+}
+
+.rag-ai-desc {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+@media (max-width: 768px) {
+  .rag-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .rag-stats-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}

@@ -55,7 +55,7 @@ export default function About() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
             <FadeIn delay={0.2} className="order-2 lg:order-1">
-              <img src={imgInnovation} alt="Open Innovation" className="aspect-video rounded-2xl border border-cyan-500/20 object-cover w-full" loading="lazy" />
+              <img src={imgInnovation} alt={t.seoAlts?.innovationImage || "Open Innovation"} className="aspect-video rounded-2xl border border-cyan-500/20 object-cover w-full" loading="lazy" />
             </FadeIn>
             <FadeIn className="order-1 lg:order-2">
               <h2 className="text-3xl font-bold text-white">{a.innovationTitle}</h2>
@@ -74,7 +74,7 @@ export default function About() {
               <p className="mt-6 text-gray-400 leading-relaxed">{a.sustainText}</p>
             </FadeIn>
             <FadeIn delay={0.2}>
-              <img src={imgSustain} alt="Sustainability" className="aspect-video rounded-2xl border border-green-500/20 object-cover w-full" loading="lazy" />
+              <img src={imgSustain} alt={t.seoAlts?.sustainabilityImage || "Sustainability"} className="aspect-video rounded-2xl border border-green-500/20 object-cover w-full" loading="lazy" />
             </FadeIn>
           </div>
         </div>

@@ -1,0 +1,119 @@
+.c-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  text-decoration: none;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.c-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+/* Sizes */
+.c-btn-sm {
+  min-height: 36px;
+  padding: 0.45rem 0.85rem;
+  font-size: 0.82rem;
+  border-radius: 10px;
+}
+
+.c-btn-md {
+  min-height: 44px;
+  padding: 0.75rem 1.25rem;
+  font-size: 0.9rem;
+  border-radius: 14px;
+}
+
+.c-btn-lg {
+  min-height: 50px;
+  padding: 0.9rem 1.6rem;
+  font-size: 1rem;
+  border-radius: 16px;
+}
+
+/* Variants */
+.c-btn-primary {
+  background: var(--text-main);
+  color: var(--bg-color);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+}
+
+.c-btn-primary:hover:not(:disabled) {
+  opacity: 0.92;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.16);
+}
+
+.c-btn-primary:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.c-btn-secondary {
+  background: rgba(150, 150, 150, 0.08);
+  border: 1px solid var(--card-border);
+  color: var(--text-main);
+}
+
+.c-btn-secondary:hover:not(:disabled) {
+  background: rgba(150, 150, 150, 0.16);
+  transform: translateY(-1px);
+}
+
+.c-btn-secondary:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.c-btn-ghost {
+  background: transparent;
+  color: var(--text-muted);
+}
+
+.c-btn-ghost:hover:not(:disabled) {
+  color: var(--text-main);
+  background: rgba(150, 150, 150, 0.08);
+}
+
+.c-btn-outline {
+  background: transparent;
+  border: 1px solid var(--card-border);
+  color: var(--text-main);
+}
+
+.c-btn-outline:hover:not(:disabled) {
+  background: var(--hover-bg);
+  border-color: rgba(150, 150, 150, 0.25);
+}
+
+.c-btn-danger {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  color: #ef4444;
+}
+
+.c-btn-danger:hover:not(:disabled) {
+  background: rgba(239, 68, 68, 0.18);
+}
+
+/* Spinner animation */
+.c-btn-spinner {
+  animation: cBtnSpin 0.9s linear infinite;
+  flex-shrink: 0;
+}
+
+@keyframes cBtnSpin {
+  100% {
+    transform: rotate(360deg);
+  }
+}

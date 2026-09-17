@@ -478,7 +478,7 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <FadeIn>
             <div className="public-photo-card group relative min-h-[490px] overflow-hidden rounded-3xl border border-gray-800/70">
-              <img src={imgConsult} alt="Consultancy" className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.02]" loading="lazy" />
+              <img src={imgConsult} alt={t.seoAlts?.consultancyImage || "Consultancy"} className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.02]" loading="lazy" />
               <div className="light-photo-wash-x absolute inset-0 bg-gradient-to-r from-gray-950 via-gray-950/85 to-gray-950/20" />
               <div className="relative flex min-h-[490px] max-w-2xl flex-col justify-center p-7 sm:p-12">
                 <span className="text-[10px] font-semibold uppercase tracking-[0.22em] text-cyan-400">KNOW-HOW → IMPACT</span>

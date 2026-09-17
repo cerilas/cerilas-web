@@ -1,0 +1,158 @@
+/* ==========================================================================
+   Apple-Minimalist Modal Component
+   Cerilas Design System
+   ========================================================================== */
+
+.c-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483647;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  animation: cModalFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.c-modal-box {
+  background: var(--bg-color);
+  border: 1px solid var(--card-border);
+  border-radius: 24px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(150, 150, 150, 0.08);
+  width: 100%;
+  max-width: 460px;
+  overflow: hidden;
+  position: relative;
+  animation: cModalScaleIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes cModalFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes cModalScaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.c-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.5rem 1.75rem 0.5rem;
+}
+
+.c-modal-title {
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--text-main);
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+
+.c-modal-close-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--text-muted);
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.c-modal-close-btn:hover {
+  background: rgba(150, 150, 150, 0.12);
+  color: var(--text-main);
+}
+
+.c-modal-body {
+  padding: 1.5rem 1.75rem 1.75rem;
+}
+
+.c-modal-footer {
+  padding: 0 1.75rem 1.75rem;
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+
+/* Quota Specific Elements */
+.c-quota-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 1.15rem;
+  padding: 0.5rem 0.25rem 0;
+}
+
+.c-quota-icon-wrap {
+  width: 60px;
+  height: 60px;
+  border-radius: 18px;
+  background: rgba(245, 158, 11, 0.12);
+  border: 1px solid rgba(245, 158, 11, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #f59e0b;
+}
+
+.c-quota-title {
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: var(--text-main);
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+
+.c-quota-desc {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  line-height: 1.55;
+  margin: 0;
+}
+
+.c-quota-timer-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: rgba(150, 150, 150, 0.06);
+  border: 1px solid var(--card-border);
+  padding: 0.75rem 1.25rem;
+  border-radius: 14px;
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: var(--text-main);
+  width: 100%;
+}
+
+.c-quota-timer-box strong {
+  color: #f59e0b;
+}
+
+.c-quota-info-note {
+  font-size: 0.76rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+  margin: 0;
+}

@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd
+                            http://www.google.com/schemas/sitemap-image/1.1 http://www.google.com/schemas/sitemap-image/1.1/sitemap-image.xsd">
+  <!-- Homepage / Tools Catalog -->
+  <url>
+    <loc>https://tools.cerilas.com/</loc>
+    <lastmod>2026-09-17</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+    <image:image>
+      <image:loc>https://tools.cerilas.com/og-image.svg</image:loc>
+      <image:title>Cerilas Tools Platform</image:title>
+      <image:caption>Free in-browser privacy-focused high-tech utilities by Cerilas.</image:caption>
+    </image:image>
+  </url>
+
+  <!-- Image Compressor & WebP Converter Tool -->
+  <url>
+    <loc>https://tools.cerilas.com/#/tool/image-compressor</loc>
+    <lastmod>2026-09-17</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.95</priority>
+    <image:image>
+      <image:loc>https://tools.cerilas.com/og-image-compressor.svg</image:loc>
+      <image:title>Free Image Compressor and WebP Converter</image:title>
+      <image:caption>Lossless and high-efficiency client-side image compressor for JPG, PNG, WebP, AVIF, and SVG.</image:caption>
+    </image:image>
+  </url>
+
+  <!-- Image Compressor Direct Clean URL for Web Crawlers -->
+  <url>
+    <loc>https://tools.cerilas.com/tool/image-compressor</loc>
+    <lastmod>2026-09-17</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.95</priority>
+    <image:image>
+      <image:loc>https://tools.cerilas.com/og-image-compressor.svg</image:loc>
+      <image:title>Free Image Compressor and WebP Converter</image:title>
+      <image:caption>Lossless and high-efficiency client-side image compressor for JPG, PNG, WebP, AVIF, and SVG.</image:caption>
+    </image:image>
+  </url>
+
+  <!-- Free QR Code Generator Tool -->
+  <url>
+    <loc>https://tools.cerilas.com/#/tool/qr-code-generator</loc>
+    <lastmod>2026-09-17</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.90</priority>
+    <image:image>
+      <image:loc>https://tools.cerilas.com/og-image.svg</image:loc>
+      <image:title>Free QR Code Generator That Never Expires</image:title>
+      <image:caption>100% free permanent QR code generator with unlimited lifetime scans and SVG export.</image:caption>
+    </image:image>
+  </url>
+
+  <url>
+    <loc>https://tools.cerilas.com/tool/qr-code-generator</loc>
+    <lastmod>2026-09-17</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.90</priority>
+    <image:image>
+      <image:loc>https://tools.cerilas.com/og-image.svg</image:loc>
+      <image:title>Free QR Code Generator That Never Expires</image:title>
+      <image:caption>100% free permanent QR code generator with unlimited lifetime scans and SVG export.</image:caption>
+    </image:image>
+  </url>
+
+  <!-- Pomodoro Focus Timer Tool -->
+  <url>
+    <loc>https://tools.cerilas.com/#/tool/pomodoro-timer</loc>
+    <lastmod>2026-09-17</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.95</priority>
+    <image:image>
+      <image:loc>https://tools.cerilas.com/og-image.svg</image:loc>
+      <image:title>Free Online Pomodoro Timer with Fluid Wave and Sound Alerts</image:title>
+      <image:caption>Minimalist Pomodoro timer with fluid wave animation, acoustic alert sounds, and customizable focus &amp; break intervals.</image:caption>
+    </image:image>
+  </url>
+
+  <url>
+    <loc>https://tools.cerilas.com/tool/pomodoro-timer</loc>
+    <lastmod>2026-09-17</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.95</priority>
+    <image:image>
+      <image:loc>https://tools.cerilas.com/og-image.svg</image:loc>
+      <image:title>Free Online Pomodoro Timer with Fluid Wave and Sound Alerts</image:title>
+      <image:caption>Minimalist Pomodoro timer with fluid wave animation, acoustic alert sounds, and customizable focus &amp; break intervals.</image:caption>
+    </image:image>
+  </url>
+</urlset>

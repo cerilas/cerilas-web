@@ -18,6 +18,7 @@ const secondaryRoutes = [
   { key: "consultancy", path: "/consultancy" },
   { key: "careers", path: "/careers" },
   { key: "contact", path: "/contact" },
+  { key: "atsChecker", path: "/ats-checker" },
 ];
 
 const navRoutes = [...mainRoutes, ...secondaryRoutes];

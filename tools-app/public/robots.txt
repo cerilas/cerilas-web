@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+
+# Host
+Host: https://tools.cerilas.com
+
+# Sitemaps
+Sitemap: https://tools.cerilas.com/sitemap.xml

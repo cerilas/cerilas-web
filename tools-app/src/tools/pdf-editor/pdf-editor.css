@@ -1,0 +1,1280 @@
+/* ==========================================================================
+   Cerilas PDF Editor Tool - Universal Apple-Minimalist Design System
+   Harmonized with Cerilas Color Tokens & Theme System
+   ========================================================================== */
+
+.pdf-editor-container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  color: var(--text-main);
+}
+
+/* ==========================================================================
+   Upload Dropzone (when no PDF is loaded)
+   ========================================================================== */
+
+.pdf-dropzone-wrapper {
+  background: var(--card-bg);
+  border: 1px dashed var(--card-border);
+  border-radius: 24px;
+  padding: 4rem 2rem;
+  text-align: center;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: var(--card-shadow);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  margin-bottom: 2rem;
+}
+
+.pdf-dropzone-wrapper:hover {
+  border-color: rgba(150, 150, 150, 0.3);
+  transform: translateY(-2px);
+}
+
+.pdf-dropzone-icon-box {
+  width: 64px;
+  height: 64px;
+  border-radius: 18px;
+  background: rgba(150, 150, 150, 0.08);
+  border: 1px solid var(--card-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-main);
+  margin-bottom: 1.25rem;
+}
+
+.pdf-dropzone-title {
+  font-size: 1.35rem;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  margin-bottom: 0.5rem;
+  color: var(--text-main);
+}
+
+.pdf-dropzone-sub {
+  font-size: 0.92rem;
+  color: var(--text-muted);
+  max-width: 480px;
+  line-height: 1.55;
+  margin-bottom: 1.75rem;
+  font-weight: 400;
+}
+
+.pdf-sample-trigger {
+  margin-top: 1.25rem;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: color 0.15s ease;
+}
+
+.pdf-sample-trigger:hover {
+  color: var(--text-main);
+}
+
+/* ==========================================================================
+   Active PDF Workspace (Dual Pane: Sidebar + Canvas Stage)
+   ========================================================================== */
+
+.pdf-workspace-card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 24px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: var(--card-shadow);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  margin-bottom: 2rem;
+}
+
+/* Top Action Toolbar */
+.pdf-toolbar {
+  padding: 0.75rem 1rem;
+  background: rgba(150, 150, 150, 0.04);
+  border-bottom: 1px solid var(--card-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  user-select: none;
+}
+
+.pdf-toolbar-group {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: rgba(150, 150, 150, 0.06);
+  padding: 0.25rem;
+  border-radius: 12px;
+  border: 1px solid var(--card-border);
+}
+
+.pdf-tool-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 0.75rem;
+  font-size: 0.82rem;
+  font-weight: 500;
+  border-radius: 9px;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.pdf-tool-btn:hover {
+  color: var(--text-main);
+  background: rgba(150, 150, 150, 0.08);
+}
+
+.pdf-tool-btn.active {
+  color: var(--bg-color);
+  background: var(--text-main);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+}
+
+.pdf-tool-btn.danger:hover {
+  color: #ef4444;
+  background: rgba(239, 68, 68, 0.1);
+}
+
+/* Secondary Contextual Options Bar */
+.pdf-options-bar {
+  padding: 0.55rem 1.25rem;
+  background: rgba(150, 150, 150, 0.03);
+  border-bottom: 1px solid var(--card-border);
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 1.25rem;
+  font-size: 0.82rem;
+  flex-wrap: wrap;
+}
+
+.pdf-option-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.pdf-option-label {
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 500;
+}
+
+.pdf-select-sm {
+  padding: 0.35rem 0.65rem;
+  border-radius: 8px;
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  color: var(--text-main);
+  font-size: 0.82rem;
+  outline: none;
+  cursor: pointer;
+}
+
+.pdf-color-row {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.pdf-color-pill {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: transform 0.15s ease, border-color 0.15s ease;
+}
+
+.pdf-color-pill:hover {
+  transform: scale(1.15);
+}
+
+.pdf-color-pill.active {
+  border-color: var(--text-main);
+  box-shadow: 0 0 8px rgba(150, 150, 150, 0.4);
+}
+
+/* Dual Pane Layout */
+.pdf-dual-pane {
+  display: flex;
+  min-height: 580px;
+  max-height: 740px;
+  position: relative;
+  background: rgba(150, 150, 150, 0.02);
+}
+
+/* Sidebar: Thumbnails & Page Management */
+.pdf-sidebar {
+  width: 200px;
+  min-width: 180px;
+  background: rgba(150, 150, 150, 0.03);
+  border-right: 1px solid var(--card-border);
+  display: flex;
+  flex-direction: column;
+}
+
+.pdf-sidebar-header {
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid var(--card-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.pdf-sidebar-title {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+}
+
+.pdf-sidebar-action-btn {
+  background: rgba(150, 150, 150, 0.08);
+  border: 1px solid var(--card-border);
+  color: var(--text-main);
+  border-radius: 7px;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.72rem;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  transition: all 0.15s ease;
+}
+
+.pdf-sidebar-action-btn:hover {
+  background: rgba(150, 150, 150, 0.15);
+}
+
+.pdf-thumbnails-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0.85rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.pdf-thumb-card {
+  background: var(--card-bg);
+  border: 1.5px solid var(--card-border);
+  border-radius: 12px;
+  padding: 0.4rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.pdf-thumb-card:hover {
+  border-color: rgba(150, 150, 150, 0.3);
+  transform: translateY(-1px);
+}
+
+.pdf-thumb-card.active {
+  border-color: var(--text-main);
+  box-shadow: 0 0 14px rgba(150, 150, 150, 0.2);
+}
+
+.pdf-thumb-canvas-box {
+  width: 100%;
+  height: 135px;
+  background: #ffffff;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.pdf-thumb-canvas {
+  max-width: 100%;
+  max-height: 100%;
+  display: block;
+}
+
+.pdf-thumb-footer {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 0.45rem;
+  padding: 0 0.2rem;
+}
+
+.pdf-thumb-number {
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+.pdf-thumb-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.15rem;
+}
+
+.pdf-thumb-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  padding: 0.25rem;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.pdf-thumb-btn:hover {
+  color: var(--text-main);
+  background: rgba(150, 150, 150, 0.12);
+}
+
+.pdf-thumb-btn.delete:hover {
+  color: #ef4444;
+  background: rgba(239, 68, 68, 0.12);
+}
+
+/* Stage: PDF Interactive Canvas Viewer */
+.pdf-stage {
+  flex: 1;
+  overflow: auto;
+  padding: 2.25rem;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  background: rgba(150, 150, 150, 0.02);
+  position: relative;
+}
+
+.pdf-canvas-wrapper {
+  position: relative;
+  background: #ffffff;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.15);
+  border-radius: 6px;
+  margin: auto;
+  user-select: none;
+  transition: transform 0.15s ease;
+}
+
+.pdf-main-canvas {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  border-radius: 6px;
+}
+
+/* Overlay Layer for Dragging / Adding Annotations */
+.pdf-annotation-overlay {
+  position: absolute;
+  inset: 0;
+  cursor: default;
+}
+
+.pdf-annotation-overlay.tool-text {
+  cursor: text;
+}
+
+.pdf-annotation-overlay.tool-redact,
+.pdf-annotation-overlay.tool-highlight,
+.pdf-annotation-overlay.tool-stamp {
+  cursor: crosshair;
+}
+
+/* Rendered Annotations on Canvas Overlay */
+.pdf-annotation-item {
+  position: absolute;
+  box-sizing: border-box;
+  cursor: move;
+  border: 1px dashed transparent;
+  transition: border-color 0.12s ease;
+  user-select: none;
+}
+
+.pdf-annotation-item:hover,
+.pdf-annotation-item.selected {
+  border-color: rgba(59, 130, 246, 0.6);
+  background: rgba(59, 130, 246, 0.06);
+}
+
+/* Inline Text Editor on Canvas */
+.pdf-inline-text-editor {
+  background: rgba(255, 255, 255, 0.95);
+  border: 1.5px solid #3b82f6;
+  border-radius: 4px;
+  padding: 4px 6px;
+  outline: none;
+  font-family: inherit;
+  line-height: 1.25;
+  color: #1d1d1f;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+  min-width: 140px;
+  resize: none;
+}
+
+.pdf-annotation-delete-btn {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #ef4444;
+  color: #ffffff;
+  border: none;
+  cursor: pointer;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+  z-index: 25;
+}
+
+.pdf-annotation-item:hover .pdf-annotation-delete-btn,
+.pdf-annotation-item.selected .pdf-annotation-delete-btn {
+  display: flex;
+}
+
+.pdf-annotation-item.type-text {
+  white-space: pre-wrap;
+  word-break: break-word;
+  line-height: 1.25;
+  padding: 2px 4px;
+}
+
+.pdf-annotation-item.type-signature img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+}
+
+.pdf-annotation-item.type-redaction,
+.pdf-annotation-item.type-redact {
+  background: #000000 !important;
+  opacity: 1 !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+}
+
+.pdf-annotation-item.type-redaction.fill-white,
+.pdf-annotation-item.type-redact.fill-white {
+  background: #ffffff !important;
+  border: 1.5px dashed #94a3b8 !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.pdf-resize-handle {
+  position: absolute;
+  bottom: -4px;
+  right: -4px;
+  width: 11px;
+  height: 11px;
+  background: #3b82f6;
+  border: 1.5px solid #ffffff;
+  border-radius: 2px;
+  cursor: se-resize;
+  z-index: 30;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+.pdf-annotation-item.type-highlight {
+  background: rgba(253, 224, 71, 0.45);
+  mix-blend-mode: multiply;
+}
+
+.pdf-annotation-item.type-stamp {
+  border: 2.5px solid;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  padding: 0.25rem 0.5rem;
+}
+
+/* Full Screen Focus Mode */
+.pdf-workspace-card.is-fullscreen {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 999999 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  max-height: 100vh !important;
+  border-radius: 0 !important;
+  border: none !important;
+  margin: 0 !important;
+  background: var(--bg-color) !important;
+}
+
+.pdf-workspace-card .c-modal-overlay {
+  z-index: 2147483647 !important;
+}
+
+.pdf-workspace-card.is-fullscreen .pdf-dual-pane {
+  flex: 1;
+  height: calc(100vh - 120px) !important;
+  max-height: none !important;
+}
+
+.pdf-fullscreen-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  border: 1px solid var(--card-border);
+  background: var(--card-bg);
+  color: var(--text-main);
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.pdf-fullscreen-btn:hover {
+  background: var(--text-main);
+  color: var(--bg-color);
+  transform: translateY(-1px);
+}
+
+/* Bottom Export Action Bar */
+.pdf-bottom-bar {
+  padding: 0.85rem 1.5rem;
+  background: rgba(150, 150, 150, 0.04);
+  border-top: 1px solid var(--card-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.pdf-bottom-left {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.pdf-checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  cursor: pointer;
+  user-select: none;
+}
+
+.pdf-checkbox-label input {
+  accent-color: var(--text-main);
+  cursor: pointer;
+}
+
+.pdf-bottom-right {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+/* ==========================================================================
+   Signature Modal Inner Elements (Inside Cerilas Modal)
+   ========================================================================== */
+
+.pdf-modal-content-wrap {
+  display: flex;
+  flex-direction: column;
+}
+
+.pdf-modal-tabs {
+  display: flex;
+  gap: 0.5rem;
+  background: rgba(150, 150, 150, 0.06);
+  padding: 0.35rem;
+  border-radius: 12px;
+  margin-bottom: 1.25rem;
+  border: 1px solid var(--card-border);
+}
+
+.pdf-modal-tab {
+  flex: 1;
+  padding: 0.55rem 1rem;
+  background: transparent;
+  border: none;
+  border-radius: 9px;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.pdf-modal-tab.active {
+  background: var(--card-bg);
+  color: var(--text-main);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.pdf-draw-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.pdf-draw-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+
+.pdf-color-pills {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.color-dot {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+
+.color-dot.active {
+  border-color: var(--text-main);
+  transform: scale(1.15);
+}
+
+.pdf-line-pills {
+  display: flex;
+  gap: 0.35rem;
+}
+
+.line-btn {
+  padding: 0.25rem 0.6rem;
+  border-radius: 7px;
+  background: rgba(150, 150, 150, 0.08);
+  border: 1px solid var(--card-border);
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.line-btn.active {
+  background: var(--text-main);
+  color: var(--bg-color);
+  border-color: var(--text-main);
+}
+
+.pdf-clear-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+
+.pdf-clear-btn:hover {
+  color: #ef4444;
+}
+
+.pdf-canvas-wrap {
+  position: relative;
+  background: #ffffff;
+  border-radius: 14px;
+  border: 1px solid var(--card-border);
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.04);
+  overflow: hidden;
+}
+
+.pdf-signature-canvas {
+  width: 100%;
+  height: 190px;
+  display: block;
+  cursor: crosshair;
+}
+
+.pdf-signature-placeholder {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  color: #94a3b8;
+  font-size: 0.88rem;
+  font-style: italic;
+}
+
+.pdf-upload-container {
+  padding: 1.5rem 0;
+}
+
+.pdf-sig-upload-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2.5rem 1rem;
+  border: 1.5px dashed var(--card-border);
+  border-radius: 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: rgba(150, 150, 150, 0.03);
+}
+
+.pdf-sig-upload-box:hover {
+  border-color: var(--text-main);
+  background: rgba(150, 150, 150, 0.06);
+}
+
+.pdf-upload-idle {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  text-align: center;
+}
+
+.pdf-upload-idle .upload-icon {
+  color: var(--text-muted);
+}
+
+.pdf-upload-idle .upload-title {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--text-main);
+}
+
+.pdf-upload-idle .upload-sub {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.pdf-sig-preview {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.pdf-sig-preview img {
+  max-width: 240px;
+  max-height: 110px;
+  object-fit: contain;
+}
+
+.pdf-sig-preview .change-img-text {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.pdf-modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--card-border);
+}
+
+/* ==========================================================================
+   SEO & Educational Guide Styles (Cerilas Unified)
+   ========================================================================== */
+
+.pdf-seo-wrapper {
+  margin-top: 1.5rem;
+  color: var(--text-main);
+}
+
+.pdf-seo-header {
+  text-align: center;
+  max-width: 820px;
+  margin: 0 auto 3rem auto;
+}
+
+.pdf-seo-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.85rem;
+  border-radius: 999px;
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  color: #10b981;
+  font-size: 0.8rem;
+  font-weight: 500;
+  margin-bottom: 1rem;
+}
+
+.pdf-seo-header h2 {
+  font-size: 2.2rem;
+  font-weight: 400;
+  letter-spacing: -0.03em;
+  margin-bottom: 1rem;
+  color: var(--text-main);
+}
+
+.pdf-seo-subhead {
+  font-size: 1.05rem;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+
+.pdf-seo-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 4rem;
+}
+
+.pdf-seo-card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 20px;
+  padding: 1.75rem;
+  box-shadow: var(--card-shadow);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.pdf-seo-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(150, 150, 150, 0.2);
+}
+
+.pdf-seo-card-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.25rem;
+}
+
+.icon-blue { background: rgba(59, 130, 246, 0.1); color: #3b82f6; }
+.icon-emerald { background: rgba(16, 185, 129, 0.1); color: #10b981; }
+.icon-rose { background: rgba(244, 63, 94, 0.1); color: #f43f5e; }
+.icon-amber { background: rgba(245, 158, 11, 0.1); color: #f59e0b; }
+.icon-violet { background: rgba(139, 92, 246, 0.1); color: #8b5cf6; }
+.icon-indigo { background: rgba(99, 102, 241, 0.1); color: #6366f1; }
+
+.pdf-seo-card h3 {
+  font-size: 1.15rem;
+  font-weight: 500;
+  margin-bottom: 0.65rem;
+  color: var(--text-main);
+}
+
+.pdf-seo-card p {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* Comparison Table */
+.pdf-seo-table-wrap {
+  margin-bottom: 4rem;
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 24px;
+  padding: 2.25rem 2rem;
+  box-shadow: var(--card-shadow);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.pdf-seo-table-wrap h3 {
+  font-size: 1.5rem;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+
+.table-subhead {
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  margin-bottom: 1.75rem;
+}
+
+.table-overflow {
+  overflow-x: auto;
+}
+
+.pdf-comparison-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.92rem;
+}
+
+.pdf-comparison-table th,
+.pdf-comparison-table td {
+  padding: 1rem 1.25rem;
+  text-align: left;
+  border-bottom: 1px solid var(--card-border);
+}
+
+.pdf-comparison-table th {
+  background: rgba(150, 150, 150, 0.04);
+  color: var(--text-muted);
+  font-weight: 500;
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.pdf-comparison-table .highlight-col {
+  background: rgba(150, 150, 150, 0.05);
+}
+
+.pdf-comparison-table th.highlight-col {
+  color: var(--text-main);
+  font-weight: 600;
+}
+
+.text-emerald {
+  color: #10b981;
+}
+
+/* Workflow Steps */
+.pdf-seo-workflow {
+  margin-bottom: 4rem;
+  text-align: center;
+}
+
+.pdf-seo-workflow h3 {
+  font-size: 1.6rem;
+  font-weight: 500;
+  margin-bottom: 2.5rem;
+}
+
+.workflow-steps {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.5rem;
+}
+
+.workflow-step {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 20px;
+  padding: 1.75rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-shadow: var(--card-shadow);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.step-num {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--text-main);
+  color: var(--bg-color);
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1rem;
+  font-size: 1rem;
+}
+
+.workflow-step h4 {
+  font-size: 1.1rem;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+
+.workflow-step p {
+  font-size: 0.88rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* FAQ Accordion */
+.pdf-seo-faq-section {
+  margin-bottom: 2rem;
+}
+
+.faq-header {
+  text-align: center;
+  margin-bottom: 2.5rem;
+}
+
+.faq-header h3 {
+  font-size: 1.75rem;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+
+.faq-header p {
+  color: var(--text-muted);
+  font-size: 0.95rem;
+}
+
+.faq-accordion-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.faq-item {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: var(--card-shadow);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  transition: border-color 0.15s ease;
+}
+
+.faq-item.active {
+  border-color: rgba(150, 150, 150, 0.3);
+}
+
+.faq-question-btn {
+  width: 100%;
+  padding: 1.25rem 1.5rem;
+  background: transparent;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  color: var(--text-main);
+  cursor: pointer;
+  text-align: left;
+}
+
+.faq-q-text {
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.faq-chevron {
+  color: var(--text-muted);
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  flex-shrink: 0;
+}
+
+.faq-chevron.rotate {
+  transform: rotate(180deg);
+  color: var(--text-main);
+}
+
+.faq-answer-pane {
+  padding: 0 1.5rem 1.35rem 1.5rem;
+}
+
+.faq-answer-pane p {
+  margin: 0;
+  font-size: 0.92rem;
+  color: var(--text-muted);
+  line-height: 1.65;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 860px) {
+  .pdf-dual-pane {
+    flex-direction: column;
+    max-height: none;
+  }
+
+  .pdf-sidebar {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid var(--card-border);
+    height: 160px;
+  }
+
+  .pdf-thumbnails-list {
+    flex-direction: row;
+    overflow-x: auto;
+  }
+
+  .pdf-thumb-card {
+    min-width: 110px;
+  }
+
+  .pdf-stage {
+    padding: 1rem;
+  }
+}
+
+/* ==========================================================================
+   Guaranteed PDF Export Success Card (Direct Download Trigger)
+   ========================================================================== */
+
+.pdf-export-success-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.4rem;
+  background: rgba(16, 185, 129, 0.08);
+  border-top: 1px solid rgba(16, 185, 129, 0.25);
+  border-bottom: 1px solid rgba(16, 185, 129, 0.25);
+  animation: slideDownFade 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes slideDownFade {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.pdf-export-success-info {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.pdf-export-success-info .icon-emerald {
+  color: #10b981;
+  flex-shrink: 0;
+}
+
+.pdf-export-success-title {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--text-main);
+  letter-spacing: -0.01em;
+}
+
+.pdf-export-success-sub {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-top: 0.15rem;
+}
+
+.pdf-export-success-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.pdf-download-btn-direct {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: #10b981;
+  color: #ffffff !important;
+  font-size: 0.82rem;
+  font-weight: 600;
+  padding: 0.45rem 0.9rem;
+  border-radius: 999px;
+  text-decoration: none;
+  transition: all 0.15s ease;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.25);
+}
+
+.pdf-download-btn-direct:hover {
+  background: #059669;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.35);
+}
+
+.pdf-view-btn-direct {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: var(--card-bg);
+  color: var(--text-main);
+  border: 1px solid var(--card-border);
+  font-size: 0.82rem;
+  font-weight: 500;
+  padding: 0.45rem 0.85rem;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.pdf-view-btn-direct:hover {
+  background: rgba(150, 150, 150, 0.1);
+  color: var(--text-main);
+}
+
+.pdf-dismiss-btn-direct {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.pdf-dismiss-btn-direct:hover {
+  background: rgba(150, 150, 150, 0.15);
+  color: var(--text-main);
+}
+
+@media (max-width: 640px) {
+  .pdf-export-success-card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  .pdf-export-success-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+}

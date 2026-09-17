@@ -1,0 +1,153 @@
+/* Unified Tool Page Container - Identical top distance & footprint across all tools */
+.c-tool-page-container {
+  width: 100%;
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 2.25rem 1.5rem 5rem 1.5rem;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+}
+
+.c-tool-header-wrapper {
+  margin-bottom: 1.75rem;
+  width: 100%;
+}
+
+.c-tool-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  min-height: 40px;
+  margin-bottom: 1.25rem;
+}
+
+.c-tool-nav-right {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.c-tool-back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  color: var(--text-muted);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 0.35rem 0.8rem;
+  border-radius: 999px;
+  height: 34px;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03);
+}
+
+.c-tool-back-btn:hover {
+  color: var(--text-main);
+  background: var(--hover-bg);
+  border-color: rgba(150, 150, 150, 0.2);
+  transform: translateY(-1px);
+}
+
+.c-tool-header-badges {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.c-tool-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.c-tool-title-area {
+  text-align: left;
+}
+
+.c-tool-title-area.center {
+  text-align: center;
+  max-width: 780px;
+  margin: 0 auto;
+}
+
+.c-tool-title {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 1.95rem;
+  font-weight: 400;
+  letter-spacing: -0.03em;
+  color: var(--text-main);
+  margin: 0 0 0.25rem 0;
+  line-height: 1.2;
+}
+
+.c-tool-subtitle {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 0.92rem;
+  color: var(--text-muted);
+  line-height: 1.45;
+  margin: 0;
+  max-width: 680px;
+  font-weight: 300;
+}
+
+.c-tool-title-area.center .c-tool-subtitle {
+  margin: 0 auto;
+}
+
+/* SEO Divider for clean below-the-fold separation */
+.c-tool-seo-divider {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 5rem;
+  margin-bottom: 2rem;
+  width: 100%;
+}
+
+.c-tool-seo-divider-line {
+  flex: 1;
+  height: 1px;
+  background: var(--card-border);
+}
+
+.c-tool-seo-divider-badge {
+  font-size: 0.76rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  background: var(--card-bg);
+  padding: 0.35rem 0.85rem;
+  border-radius: 999px;
+  border: 1px solid var(--card-border);
+  backdrop-filter: blur(10px);
+}
+
+@media (max-width: 768px) {
+  .c-tool-page-container {
+    padding: 1rem 1rem 4rem 1rem;
+  }
+  .c-tool-title {
+    font-size: 1.6rem !important;
+  }
+  .c-tool-subtitle {
+    font-size: 0.85rem !important;
+  }
+  .c-tool-nav {
+    margin-bottom: 0.75rem;
+  }
+}

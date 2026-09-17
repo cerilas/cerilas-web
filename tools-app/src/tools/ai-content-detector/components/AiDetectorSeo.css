@@ -1,0 +1,272 @@
+/* AI Content Detector SEO CSS */
+.det-seo-section {
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem;
+  margin-top: 3.5rem;
+  padding-top: 2.5rem;
+  border-top: 1px solid var(--card-border);
+}
+
+.det-seo-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.det-seo-header {
+  text-align: center;
+  max-width: 720px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.det-seo-tag {
+  font-size: 0.76rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #8b5cf6;
+  font-weight: 600;
+}
+
+.det-seo-title {
+  font-size: 1.8rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--text-main);
+  margin: 0;
+}
+
+.det-seo-subtitle {
+  font-size: 0.95rem;
+  color: var(--text-muted);
+  line-height: 1.6;
+  margin: 0;
+}
+
+.det-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.25rem;
+}
+
+.det-info-card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 18px;
+  padding: 1.6rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  box-shadow: var(--card-shadow);
+}
+
+.det-icon-wrap {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.det-info-card h3 {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--text-main);
+  margin: 0;
+}
+
+.det-info-card p {
+  font-size: 0.88rem;
+  color: var(--text-muted);
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* Comparison Table */
+.det-table-card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 20px;
+  overflow-x: auto;
+  box-shadow: var(--card-shadow);
+}
+
+.det-matrix-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 0.88rem;
+}
+
+.det-matrix-table th {
+  padding: 1.1rem 1.4rem;
+  background: rgba(150, 150, 150, 0.04);
+  color: var(--text-muted);
+  font-weight: 500;
+  border-bottom: 1px solid var(--card-border);
+}
+
+.det-matrix-table td {
+  padding: 1rem 1.4rem;
+  border-bottom: 1px solid var(--card-border);
+  color: var(--text-main);
+  vertical-align: middle;
+}
+
+.det-matrix-table tr:last-child td {
+  border-bottom: none;
+}
+
+.det-good {
+  color: #10b981;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-weight: 500;
+}
+
+/* FAQ Accordion */
+.det-faq-accordion {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  max-width: 860px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.det-faq-item {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 16px;
+  overflow: hidden;
+  transition: all 0.2s ease;
+}
+
+.det-faq-item.open {
+  border-color: rgba(150, 150, 150, 0.3);
+}
+
+.det-faq-question-btn {
+  width: 100%;
+  padding: 1.2rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  gap: 1.25rem;
+}
+
+.det-faq-question {
+  font-size: 0.96rem;
+  font-weight: 500;
+  color: var(--text-main);
+}
+
+.det-faq-icon {
+  color: var(--text-muted);
+  transition: transform 0.2s ease;
+  flex-shrink: 0;
+}
+
+.det-faq-icon.rotated {
+  transform: rotate(180deg);
+}
+
+.det-faq-answer {
+  padding: 0 1.5rem 1.4rem;
+  font-size: 0.9rem;
+  line-height: 1.65;
+  color: var(--text-muted);
+}
+
+/* Use Cases Grid */
+.det-usecases-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1.25rem;
+}
+
+.det-usecase-card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 18px;
+  padding: 1.6rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  box-shadow: var(--card-shadow);
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.det-usecase-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(150, 150, 150, 0.25);
+}
+
+.det-usecase-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.det-usecase-card h3 {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--text-main);
+  margin: 0;
+}
+
+.det-usecase-card p {
+  font-size: 0.88rem;
+  color: var(--text-muted);
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* Blacklist Cliché Grid */
+.det-blacklist-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 0.9rem;
+}
+
+.det-blacklist-item {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 14px;
+  padding: 1rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  transition: all 0.15s ease;
+}
+
+.det-blacklist-item:hover {
+  border-color: rgba(239, 68, 68, 0.3);
+  background: rgba(239, 68, 68, 0.02);
+}
+
+.det-blacklist-word {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #ef4444;
+}
+
+.det-blacklist-reason {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  line-height: 1.45;
+}
+

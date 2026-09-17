@@ -24,6 +24,7 @@ import analyticsRoutes from './routes/analytics.js';
 import expensesRoutes from './routes/expenses.js';
 import accountsRoutes from './routes/accounts.js';
 import documentsRoutes from './routes/documents.js';
+import atsRoutes from './routes/ats.js';
 import { startOpportunityScannerScheduler } from './services/opportunityScanner.js';
 import pool from './db.js';
 import { getPublicUrl } from './publicUrl.js';
@@ -225,6 +226,7 @@ app.use('/api/analytics', analyticsRoutes);
 app.use('/api/expenses', expensesRoutes);
 app.use('/api/accounts', accountsRoutes);
 app.use('/api/documents', documentsRoutes);
+app.use('/api/tools/ats', atsRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => res.json({ ok: true }));

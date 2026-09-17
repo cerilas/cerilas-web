@@ -5,8 +5,11 @@ import { api } from '../../lib/api';
 export default function SmsApiDocs() {
   const baseUrl = window.location.origin;
   const [testForm, setTestForm] = useState({ no: '', msg: 'Cerilas test mesaji.' });
+  const [waTestForm, setWaTestForm] = useState({ to: '', code: '123456' });
   const [sending, setSending] = useState(false);
+  const [waSending, setWaSending] = useState(false);
   const [status, setStatus] = useState(null);
+  const [waStatus, setWaStatus] = useState(null);
 
   const handleTestSend = async (e) => {
     e.preventDefault();
@@ -22,6 +25,24 @@ export default function SmsApiDocs() {
       setStatus({ success: false, message: err.message });
     } finally {
       setSending(false);
+    }
+  };
+
+  const handleWaTestSend = async (e) => {
+    e.preventDefault();
+    setWaSending(true);
+    setWaStatus(null);
+    try {
+      await api.sendWhatsappOtp({
+        code: waTestForm.code,
+        to: waTestForm.to
+      });
+
+      setWaStatus({ success: true, message: 'WhatsApp OTP başarıyla gönderildi!' });
+    } catch (err) {
+      setWaStatus({ success: false, message: err.message });
+    } finally {
+      setWaSending(false);
     }
   };
 
@@ -60,10 +81,33 @@ export default function SmsApiDocs() {
           </div>
         </section>
 
+        {/* WhatsApp OTP Endpoint */}
+        <section>
+          <h2 className="text-xl font-semibold text-white mb-4 flex items-center gap-3">
+            <span className="w-8 h-8 rounded-lg bg-green-500/20 text-green-400 flex items-center justify-center text-sm font-bold">02</span>
+            <code>/api/sms/whatsapp-otp</code>
+          </h2>
+          <p className="text-sm text-gray-400 mb-6">
+            WhatsApp üzerinden OTP (Tek Kullanımlık Şifre) göndermek için bu uç noktayı kullanın.
+          </p>
+
+          <div className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
+            <div className="px-4 py-2 bg-gray-800 border-b border-gray-700 flex justify-between items-center">
+              <span className="text-[10px] text-gray-400 uppercase font-bold tracking-widest">Request Body (JSON)</span>
+            </div>
+            <pre className="p-4 text-xs text-cyan-300 overflow-x-auto leading-relaxed">
+{`{
+  "to": "+90510xxxxxxx",  // Hedef numara (E.164 formatında olmalı)
+  "code": "123456"        // Doğrulama kodu (Sadece rakam, maks 6 hane)
+}`}
+            </pre>
+          </div>
+        </section>
+
         {/* Authentication */}
         <section>
           <h2 className="text-xl font-semibold text-white mb-4 flex items-center gap-3">
-             <span className="w-8 h-8 rounded-lg bg-yellow-500/20 text-yellow-400 flex items-center justify-center text-sm font-bold">02</span>
+             <span className="w-8 h-8 rounded-lg bg-yellow-500/20 text-yellow-400 flex items-center justify-center text-sm font-bold">03</span>
              Kimlik Doğrulama
           </h2>
           <p className="text-sm text-gray-400 mb-4 leading-relaxed">
@@ -79,7 +123,7 @@ export default function SmsApiDocs() {
         {/* Test API Section */}
         <section className="bg-gray-900 border border-gray-800 rounded-2xl p-8 relative overflow-hidden">
           <h2 className="text-xl font-semibold text-white mb-6 flex items-center gap-3">
-            <span className="w-8 h-8 rounded-lg bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-sm font-bold">03</span>
+            <span className="w-8 h-8 rounded-lg bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-sm font-bold">04</span>
             API'yi Test Et
           </h2>
           
@@ -136,6 +180,65 @@ export default function SmsApiDocs() {
               </AnimatePresence>
             </div>
           </form>
+
+          <div className="mt-12 border-t border-gray-800 pt-8">
+            <h3 className="text-lg font-semibold text-white mb-6">WhatsApp OTP Test Et</h3>
+            <form onSubmit={handleWaTestSend} className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-xs font-medium text-gray-500 mb-1.5 uppercase tracking-wider">Telefon Numarası (E.164)</label>
+                  <input
+                    type="text"
+                    required
+                    value={waTestForm.to}
+                    onChange={(e) => setWaTestForm({ ...waTestForm, to: e.target.value })}
+                    className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+                    placeholder="+90510xxxxxxx"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-500 mb-1.5 uppercase tracking-wider">Doğrulama Kodu</label>
+                  <input
+                    type="text"
+                    required
+                    value={waTestForm.code}
+                    onChange={(e) => setWaTestForm({ ...waTestForm, code: e.target.value.replace(/\D/g, '').slice(0, 6) })}
+                    className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+                    placeholder="123456"
+                    maxLength={6}
+                  />
+                </div>
+              </div>
+              
+              <div className="flex flex-col justify-end">
+                <button
+                  type="submit"
+                  disabled={waSending || !waTestForm.to || !waTestForm.code}
+                  className="w-full px-6 py-3 bg-green-600 hover:bg-green-500 disabled:bg-gray-800 disabled:text-gray-600 text-white font-bold rounded-xl transition-all shadow-lg shadow-green-900/20 flex items-center justify-center gap-2"
+                >
+                  {waSending ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      Gönderiliyor...
+                    </>
+                  ) : 'WhatsApp OTP Gönder'}
+                </button>
+                
+                <AnimatePresence>
+                  {waStatus && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0 }}
+                      className={`mt-4 p-4 rounded-xl text-xs font-medium ${waStatus.success ? 'bg-green-500/10 text-green-400 border border-green-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'}`}
+                    >
+                      {waStatus.message}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            </form>
+          </div>
         </section>
 
         {/* Example usage */}

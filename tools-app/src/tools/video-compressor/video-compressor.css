@@ -1,0 +1,899 @@
+/* ==========================================================================
+   Cerilas Video Compressor - Apple-Minimalist Design System
+   Harmonized with Cerilas Color Tokens & Theme System
+   ========================================================================== */
+
+.vc-container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  color: var(--text-main);
+}
+
+/* ==========================================================================
+   Dropzone & Upload Area
+   ========================================================================== */
+
+.vc-dropzone {
+  background: var(--card-bg);
+  border: 1px dashed var(--card-border);
+  border-radius: 24px;
+  padding: 4.5rem 2rem;
+  text-align: center;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: var(--card-shadow);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  margin-bottom: 2rem;
+}
+
+.vc-dropzone:hover {
+  border-color: rgba(150, 150, 150, 0.35);
+  transform: translateY(-2px);
+}
+
+.vc-dropzone.is-dragover {
+  border-color: #3b82f6;
+  background: rgba(59, 130, 246, 0.05);
+  transform: scale(1.01);
+}
+
+.vc-dropzone-icon {
+  width: 68px;
+  height: 68px;
+  border-radius: 20px;
+  background: rgba(150, 150, 150, 0.08);
+  border: 1px solid var(--card-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-main);
+  margin-bottom: 1.25rem;
+}
+
+.vc-dropzone-title {
+  font-size: 1.4rem;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  margin: 0 0 0.5rem 0;
+  color: var(--text-main);
+}
+
+.vc-dropzone-sub {
+  font-size: 0.92rem;
+  color: var(--text-muted);
+  max-width: 520px;
+  line-height: 1.55;
+  margin: 0 0 1.75rem 0;
+}
+
+.vc-sample-btn {
+  margin-top: 1.25rem;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: color 0.15s ease;
+}
+
+.vc-sample-btn:hover {
+  color: var(--text-main);
+}
+
+/* ==========================================================================
+   Active Workspace Card
+   ========================================================================== */
+
+.vc-workspace {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 24px;
+  padding: 1.75rem;
+  box-shadow: var(--card-shadow);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  margin-bottom: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+}
+
+.vc-top-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid var(--card-border);
+}
+
+.vc-file-info {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.vc-file-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: rgba(59, 130, 246, 0.1);
+  color: #3b82f6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.vc-file-name {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-main);
+  letter-spacing: -0.01em;
+}
+
+.vc-file-specs {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  margin-top: 0.2rem;
+}
+
+/* ==========================================================================
+   Dual Video Player Grid
+   ========================================================================== */
+
+.vc-players-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+.vc-player-card {
+  background: rgba(150, 150, 150, 0.04);
+  border: 1px solid var(--card-border);
+  border-radius: 18px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.vc-player-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.85rem 1.15rem;
+  background: rgba(150, 150, 150, 0.05);
+  border-bottom: 1px solid var(--card-border);
+}
+
+.vc-player-tag {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-main);
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.vc-player-size {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.vc-player-size.compressed {
+  color: #10b981;
+}
+
+.vc-video-element {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background: #000000;
+  display: block;
+  object-fit: contain;
+}
+
+.vc-compressed-empty {
+  aspect-ratio: 16 / 9;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  color: var(--text-muted);
+  background: rgba(0, 0, 0, 0.2);
+  text-align: center;
+  padding: 2rem;
+}
+
+.vc-compressed-empty p {
+  margin: 0;
+  font-size: 0.88rem;
+}
+
+/* Savings Pill Banner */
+.vc-savings-banner {
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  border-radius: 14px;
+  padding: 0.85rem 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.vc-savings-text {
+  font-size: 0.92rem;
+  font-weight: 500;
+  color: var(--text-main);
+}
+
+.vc-savings-badge {
+  background: #10b981;
+  color: #ffffff;
+  font-size: 0.82rem;
+  font-weight: 700;
+  padding: 0.25rem 0.65rem;
+  border-radius: 999px;
+  letter-spacing: -0.01em;
+}
+
+/* ==========================================================================
+   Presets Selection Grid
+   ========================================================================== */
+
+.vc-section-title {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--text-main);
+  margin-bottom: 0.85rem;
+  letter-spacing: -0.01em;
+}
+
+.vc-presets-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.85rem;
+}
+
+@media (max-width: 1024px) {
+  .vc-presets-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 540px) {
+  .vc-presets-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.vc-preset-btn {
+  background: rgba(150, 150, 150, 0.04);
+  border: 1px solid var(--card-border);
+  border-radius: 16px;
+  padding: 1rem 0.9rem;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.vc-preset-btn:hover {
+  background: rgba(150, 150, 150, 0.08);
+  border-color: rgba(150, 150, 150, 0.3);
+  transform: translateY(-1px);
+}
+
+.vc-preset-btn.active {
+  background: rgba(59, 130, 246, 0.08);
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+.vc-preset-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.45rem;
+  white-space: nowrap;
+  width: 100%;
+  min-width: 0;
+}
+
+.vc-preset-name {
+  font-size: 0.86rem;
+  font-weight: 600;
+  color: var(--text-main);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
+  min-width: 0;
+}
+
+.vc-preset-tag {
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 0.15rem 0.45rem;
+  border-radius: 999px;
+  background: rgba(150, 150, 150, 0.15);
+  color: var(--text-muted);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.vc-preset-btn.active .vc-preset-tag {
+  background: rgba(59, 130, 246, 0.15);
+  color: #3b82f6;
+}
+
+.vc-preset-desc {
+  font-size: 0.74rem;
+  color: var(--text-muted);
+  line-height: 1.35;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
+}
+
+/* ==========================================================================
+   Secondary Controls (Audio Toggle, Trim, Custom Sliders)
+   ========================================================================== */
+
+.vc-controls-panel {
+  background: rgba(150, 150, 150, 0.03);
+  border: 1px solid var(--card-border);
+  border-radius: 16px;
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.vc-toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.vc-toggle-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.vc-toggle-title {
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: var(--text-main);
+}
+
+.vc-toggle-sub {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+/* Switch styling */
+.vc-switch {
+  position: relative;
+  display: inline-block;
+  width: 44px;
+  height: 24px;
+}
+
+.vc-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.vc-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(150, 150, 150, 0.25);
+  transition: 0.2s;
+  border-radius: 24px;
+}
+
+.vc-slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: 0.2s;
+  border-radius: 50%;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+input:checked + .vc-slider {
+  background-color: #10b981;
+}
+
+input:checked + .vc-slider:before {
+  transform: translateX(20px);
+}
+
+/* Trimming Sliders */
+.vc-trim-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.vc-trim-ranges {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.vc-trim-col {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.vc-trim-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.vc-range-input {
+  width: 100%;
+  accent-color: #3b82f6;
+  cursor: pointer;
+}
+
+/* Custom Settings Sliders */
+.vc-custom-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+}
+
+/* ==========================================================================
+   Progress & Action Area
+   ========================================================================== */
+
+.vc-progress-card {
+  background: rgba(59, 130, 246, 0.05);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  border-radius: 16px;
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  animation: vcFadeIn 0.25s ease;
+}
+
+@keyframes vcFadeIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.vc-progress-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.vc-progress-title {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--text-main);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.vc-progress-pct {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: #3b82f6;
+}
+
+.vc-progress-track {
+  width: 100%;
+  height: 8px;
+  background: rgba(150, 150, 150, 0.15);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.vc-progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #3b82f6, #10b981);
+  border-radius: 999px;
+  transition: width 0.15s ease-out;
+}
+
+.vc-actions-bar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.85rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--card-border);
+}
+
+/* ==========================================================================
+   Mobile Responsive Adjustments
+   ========================================================================== */
+
+@media (max-width: 768px) {
+  .vc-players-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .vc-trim-ranges,
+  .vc-custom-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .vc-dropzone {
+    padding: 3rem 1.5rem;
+  }
+}
+
+/* ==========================================================================
+   SEO & Educational Guide Styles (Cerilas Unified Apple-Minimalist)
+   ========================================================================== */
+
+.vc-seo-wrapper {
+  margin-top: 1.5rem;
+  color: var(--text-main);
+  width: 100%;
+}
+
+.vc-seo-header {
+  text-align: center;
+  max-width: 840px;
+  margin: 0 auto 3rem auto;
+}
+
+.vc-seo-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.35rem 0.9rem;
+  border-radius: 999px;
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  color: #10b981;
+  font-size: 0.8rem;
+  font-weight: 500;
+  margin-bottom: 1rem;
+}
+
+.vc-seo-header h2 {
+  font-size: 2.2rem;
+  font-weight: 400;
+  letter-spacing: -0.03em;
+  margin-bottom: 1rem;
+  color: var(--text-main);
+  line-height: 1.25;
+}
+
+.vc-seo-subhead {
+  font-size: 1.05rem;
+  color: var(--text-muted);
+  line-height: 1.65;
+}
+
+/* Feature Highlights Grid */
+.vc-seo-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 4rem;
+}
+
+.vc-seo-card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 20px;
+  padding: 1.75rem;
+  box-shadow: var(--card-shadow);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.vc-seo-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(150, 150, 150, 0.25);
+}
+
+.vc-seo-card-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.25rem;
+}
+
+.icon-blue { background: rgba(59, 130, 246, 0.1); color: #3b82f6; }
+.icon-emerald { background: rgba(16, 185, 129, 0.1); color: #10b981; }
+.icon-rose { background: rgba(244, 63, 94, 0.1); color: #f43f5e; }
+.icon-amber { background: rgba(245, 158, 11, 0.1); color: #f59e0b; }
+.icon-violet { background: rgba(139, 92, 246, 0.1); color: #8b5cf6; }
+.icon-indigo { background: rgba(99, 102, 241, 0.1); color: #6366f1; }
+
+.vc-seo-card h3 {
+  font-size: 1.15rem;
+  font-weight: 500;
+  margin-bottom: 0.65rem;
+  color: var(--text-main);
+  letter-spacing: -0.01em;
+}
+
+.vc-seo-card p {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* Comparison Table */
+.vc-seo-table-wrap {
+  margin-bottom: 4rem;
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 24px;
+  padding: 2.25rem 2rem;
+  box-shadow: var(--card-shadow);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.vc-seo-table-wrap h3 {
+  font-size: 1.5rem;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+  letter-spacing: -0.02em;
+  color: var(--text-main);
+}
+
+.vc-seo-table-wrap .table-subhead {
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  margin-bottom: 1.75rem;
+}
+
+.table-overflow {
+  overflow-x: auto;
+}
+
+.vc-comparison-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.92rem;
+}
+
+.vc-comparison-table th,
+.vc-comparison-table td {
+  padding: 1rem 1.25rem;
+  text-align: left;
+  border-bottom: 1px solid var(--card-border);
+}
+
+.vc-comparison-table th {
+  background: rgba(150, 150, 150, 0.04);
+  color: var(--text-muted);
+  font-weight: 500;
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.vc-comparison-table .highlight-col {
+  background: rgba(150, 150, 150, 0.05);
+}
+
+.vc-comparison-table th.highlight-col {
+  color: var(--text-main);
+  font-weight: 600;
+}
+
+.vc-badge-pos {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #10b981;
+  background: rgba(16, 185, 129, 0.08);
+  padding: 0.25rem 0.65rem;
+  border-radius: 999px;
+  border: 1px solid rgba(16, 185, 129, 0.15);
+}
+
+.vc-badge-neg {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  background: rgba(150, 150, 150, 0.08);
+  padding: 0.25rem 0.65rem;
+  border-radius: 999px;
+}
+
+/* Workflow Steps */
+.vc-seo-workflow {
+  margin-bottom: 4rem;
+  text-align: center;
+}
+
+.vc-seo-workflow h3 {
+  font-size: 1.6rem;
+  font-weight: 500;
+  margin-bottom: 2.5rem;
+  letter-spacing: -0.02em;
+  color: var(--text-main);
+}
+
+.workflow-steps {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.5rem;
+}
+
+.workflow-step {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 20px;
+  padding: 1.75rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-shadow: var(--card-shadow);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  text-align: center;
+}
+
+.step-num {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--text-main);
+  color: var(--bg-color);
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1rem;
+  font-size: 0.95rem;
+}
+
+.workflow-step h4 {
+  font-size: 1.1rem;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+  color: var(--text-main);
+}
+
+.workflow-step p {
+  font-size: 0.88rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* FAQ Accordion */
+.vc-seo-faq-section {
+  margin-bottom: 3rem;
+}
+
+.vc-seo-faq-section .faq-header {
+  text-align: center;
+  margin-bottom: 2.5rem;
+}
+
+.vc-seo-faq-section .faq-header h3 {
+  font-size: 1.75rem;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+  letter-spacing: -0.02em;
+  color: var(--text-main);
+}
+
+.vc-seo-faq-section .faq-header p {
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  margin: 0;
+}
+
+.faq-accordion-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.faq-item {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: var(--card-shadow);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  transition: border-color 0.15s ease;
+}
+
+.faq-item.active {
+  border-color: rgba(150, 150, 150, 0.3);
+}
+
+.faq-question-btn {
+  width: 100%;
+  padding: 1.25rem 1.5rem;
+  background: transparent;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  color: var(--text-main);
+  cursor: pointer;
+  text-align: left;
+}
+
+.faq-q-text {
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--text-main);
+}
+
+.faq-chevron {
+  color: var(--text-muted);
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  flex-shrink: 0;
+}
+
+.faq-chevron.rotate {
+  transform: rotate(180deg);
+  color: var(--text-main);
+}
+
+.faq-answer-pane {
+  padding: 0 1.5rem 1.35rem 1.5rem;
+}
+
+.faq-answer-pane p {
+  margin: 0;
+  font-size: 0.92rem;
+  color: var(--text-muted);
+  line-height: 1.65;
+}

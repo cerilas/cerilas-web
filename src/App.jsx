@@ -20,6 +20,7 @@ import ScrollToTop from "./components/ScrollToTop";
 import CookieConsent from "./components/CookieConsent";
 import SiteAnalytics from "./components/SiteAnalytics";
 import SharedDocument from "./pages/SharedDocument";
+import AtsChecker from "./pages/AtsChecker";
 
 // Admin
 import Login from "./pages/admin/Login";
@@ -81,6 +82,7 @@ function buildPublicRoutes(prefix = "") {
     <Route key={`${prefix}-careers`} path={routePath("/careers")} element={<Layout><Careers /></Layout>} />,
     <Route key={`${prefix}-apply`} path={routePath("/careers/apply")} element={<Layout><Apply /></Layout>} />,
     <Route key={`${prefix}-contact`} path={routePath("/contact")} element={<Layout><Contact /></Layout>} />,
+    <Route key={`${prefix}-ats-checker`} path={routePath("/ats-checker")} element={<Layout><AtsChecker /></Layout>} />,
     <Route key={`${prefix}-legal`} path={routePath("/legal/:slug")} element={<Layout><Legal /></Layout>} />,
   ];
 }

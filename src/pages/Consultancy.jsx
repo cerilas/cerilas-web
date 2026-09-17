@@ -59,7 +59,7 @@ export default function Consultancy() {
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <FadeIn>
-              <img src={imgConsultancy} alt="Consultancy" className="rounded-2xl border border-cyan-500/20 object-cover w-full aspect-video" loading="lazy" />
+              <img src={imgConsultancy} alt={t.seoAlts?.consultancyImage || "Consultancy"} className="rounded-2xl border border-cyan-500/20 object-cover w-full aspect-video" loading="lazy" />
             </FadeIn>
             <FadeIn delay={0.2}>
               <h2 className="text-3xl font-bold text-white">{c.ctaTitle}</h2>

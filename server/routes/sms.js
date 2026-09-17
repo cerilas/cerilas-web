@@ -136,4 +136,72 @@ router.post('/send', authMiddleware, async (req, res) => {
   }
 });
 
+/**
+ * POST /api/sms/whatsapp-otp
+ * 
+ * Authentication:
+ * Requires a valid JWT token in the Authorization header.
+ * 
+ * Body:
+ * {
+ *   "code": "123456",
+ *   "to": "+90510xxxxxxx"
+ * }
+ */
+router.post('/whatsapp-otp', authMiddleware, async (req, res) => {
+  try {
+    const { code, to } = req.body;
+    
+    if (!code || !to) {
+      return res.status(400).json({ error: 'code (kod) ve to (numara) alanları gereklidir.' });
+    }
+
+    if (!/^\d{1,6}$/.test(code)) {
+      return res.status(400).json({ error: 'code parametresi en fazla 6 haneli ve yalnızca sayısal olmalıdır.' });
+    }
+
+    const settingsResult = await pool.query('SELECT * FROM sms_settings LIMIT 1');
+    if (settingsResult.rows.length === 0) {
+      return res.status(500).json({ error: 'SMS ayarları yapılandırılmamış' });
+    }
+    const settings = settingsResult.rows[0];
+
+    if (!settings.is_active) {
+      return res.status(400).json({ error: 'SMS gönderimi ayarlardan kapatılmış' });
+    }
+
+    if (!settings.netgsm_usercode || !settings.netgsm_password) {
+      return res.status(400).json({ error: 'Netgsm bilgileri eksik' });
+    }
+
+    const authString = Buffer.from(`${settings.netgsm_usercode}:${settings.netgsm_password}`).toString('base64');
+
+    const netgsmPayload = {
+      to: to,
+      code: code
+    };
+
+    const response = await fetch('https://whatsappapi.netgsm.com.tr/v1/otp', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Basic ${authString}`
+      },
+      body: JSON.stringify(netgsmPayload)
+    });
+
+    const data = await response.json();
+    
+    if (data.code === "00") {
+      return res.json({ success: true, netgsmResponse: data });
+    } else {
+      return res.status(400).json({ error: data.description || 'WhatsApp OTP gönderilemedi', code: data.code });
+    }
+
+  } catch (err) {
+    console.error('Send WhatsApp OTP error:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 export default router;

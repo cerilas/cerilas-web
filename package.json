@@ -15,6 +15,7 @@
     "start": "node server/index.js"
   },
   "dependencies": {
+    "@google/genai": "^2.23.0",
     "@hello-pangea/dnd": "^18.0.1",
     "@react-three/fiber": "^9.3.0",
     "@react-three/postprocessing": "^3.0.4",
