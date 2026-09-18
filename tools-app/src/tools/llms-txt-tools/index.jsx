@@ -150,6 +150,31 @@ export default function LlmsTxtTools({ onBack, toolMeta }) {
   const [checkUrl, setCheckUrl] = useState('');
   const [isChecking, setIsChecking] = useState(false);
   const [checkData, setCheckData] = useState(null);
+  const [chkFilter, setChkFilter] = useState('all'); // 'all' | 'valid' | 'redirect' | 'broken'
+  const [chkSearch, setChkSearch] = useState('');
+
+  // Filtered links list for the Checker Table
+  const filteredAuditedLinks = useMemo(() => {
+    if (!checkData?.linksSummary?.auditedLinks) return [];
+    let list = checkData.linksSummary.auditedLinks;
+
+    if (chkFilter === 'valid') {
+      list = list.filter((l) => l.status === 'valid');
+    } else if (chkFilter === 'redirect') {
+      list = list.filter((l) => l.status === 'redirect');
+    } else if (chkFilter === 'broken') {
+      list = list.filter((l) => ['not_found', 'forbidden', 'warning'].includes(l.status));
+    }
+
+    if (chkSearch.trim()) {
+      const q = chkSearch.toLowerCase().trim();
+      list = list.filter(
+        (l) => (l.title || '').toLowerCase().includes(q) || (l.url || '').toLowerCase().includes(q)
+      );
+    }
+
+    return list;
+  }, [checkData, chkFilter, chkSearch]);
 
   // -----------------------------------------------------------------
   // 3. VALIDATOR STATE
@@ -373,14 +398,15 @@ export default function LlmsTxtTools({ onBack, toolMeta }) {
     }
   }, [activeMode]);
 
-  // Send from Generator to Validator
-  const handleSendToValidator = () => {
-    setValText(editableMarkdown);
+  // Send from Generator or Checker to Validator
+  const handleSendToValidator = (contentOverride) => {
+    const textToSend = typeof contentOverride === 'string' ? contentOverride : editableMarkdown;
+    setValText(textToSend);
     setValInputMode('paste');
     setActiveMode('validator');
     // Trigger validation
     setTimeout(() => {
-      handleValidate();
+      handleValidate(textToSend);
     }, 100);
   };
 
@@ -758,151 +784,360 @@ export default function LlmsTxtTools({ onBack, toolMeta }) {
                 ))}
               </div>
             </form>
-          </div>
-
-          {/* Checker Results */}
+          </div>          {/* Checker Results */}
           {checkData && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-              {/* Scorecard Grid */}
-              <div className="llms-scorecard-grid">
-                {/* Root llms.txt */}
-                <div className="llms-kpi-card">
-                  <span className="llms-kpi-title">Root /llms.txt</span>
-                  <div className="llms-kpi-value" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+              {/* File Inspection Status Banner */}
+              <div className="chk-status-banner">
+                <div className="chk-status-left">
+                  <div
+                    className={`chk-status-icon-circle ${
+                      checkData.rootReport.status === 'found' ? 'success' : 'danger'
+                    }`}
+                  >
                     {checkData.rootReport.status === 'found' ? (
-                      <>
-                        <CheckCircle2 size={18} color="#10b981" />
-                        <span style={{ color: '#059669', fontSize: '1.2rem' }}>Found (200 OK)</span>
-                      </>
+                      <CheckCircle2 size={24} />
                     ) : (
-                      <>
-                        <XCircle size={18} color="#ef4444" />
-                        <span style={{ color: '#dc2626', fontSize: '1.2rem' }}>Not Found (404)</span>
-                      </>
+                      <XCircle size={24} />
                     )}
                   </div>
-                  <p className="llms-kpi-subtext">
-                    {checkData.rootReport.sizeBytes
-                      ? `${(checkData.rootReport.sizeBytes / 1024).toFixed(1)} KB • ${checkData.rootReport.responseTimeMs}ms`
-                      : 'No file at domain root.'}
-                  </p>
-                </div>
 
-                {/* Path-level file if tested */}
-                {checkData.pathReport && (
-                  <div className="llms-kpi-card">
-                    <span className="llms-kpi-title">Path-Level File</span>
-                    <div className="llms-kpi-value" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                      <CheckCircle2 size={18} color="#10b981" />
-                      <span style={{ color: '#059669', fontSize: '1.2rem' }}>Found (200 OK)</span>
+                  <div className="chk-status-info">
+                    <div className="chk-status-headline">
+                      <span className="chk-status-url">{checkData.rootReport.url}</span>
+                      <span
+                        className={`chk-status-pill ${
+                          checkData.rootReport.status === 'found' ? 'success' : 'danger'
+                        }`}
+                      >
+                        {checkData.rootReport.status === 'found' ? (
+                          <>
+                            <CheckCircle2 size={12} />
+                            <span>HTTP 200 OK • Deployed</span>
+                          </>
+                        ) : (
+                          <>
+                            <XCircle size={12} />
+                            <span>{checkData.rootReport.httpCode ? `HTTP ${checkData.rootReport.httpCode}` : 'Not Found'}</span>
+                          </>
+                        )}
+                      </span>
                     </div>
-                    <p className="llms-kpi-subtext">
-                      Located at {checkData.pathReport.url}
-                    </p>
-                  </div>
-                )}
 
-                {/* Discoverability */}
-                <div className="llms-kpi-card">
-                  <span className="llms-kpi-title">Agent Discovery</span>
-                  <div className="llms-kpi-value">
-                    {checkData.discoverability.describedByDetected ? (
-                      <span style={{ color: '#059669', fontSize: '1.2rem' }}>✅ rel="describedby"</span>
-                    ) : (
-                      <span style={{ color: 'var(--text-muted)', fontSize: '1.2rem' }}>ℹ️ No tag detected</span>
-                    )}
+                    <div className="chk-meta-list">
+                      {checkData.rootReport.sizeBytes > 0 && (
+                        <span>{(checkData.rootReport.sizeBytes / 1024).toFixed(1)} KB</span>
+                      )}
+                      {checkData.rootReport.responseTimeMs > 0 && (
+                        <>
+                          <span>•</span>
+                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
+                            <Clock size={12} />
+                            {checkData.rootReport.responseTimeMs}ms response
+                          </span>
+                        </>
+                      )}
+                      {checkData.rootReport.contentType && (
+                        <>
+                          <span>•</span>
+                          <span>{checkData.rootReport.contentType}</span>
+                        </>
+                      )}
+                      <span>•</span>
+                      <span>{checkData.rootReport.hasBom ? 'UTF-8 with BOM' : 'UTF-8 Clean'}</span>
+                    </div>
                   </div>
-                  <p className="llms-kpi-subtext">
-                    {checkData.discoverability.describedByDetected
-                      ? 'Homepage advertises llms.txt in HTML/headers.'
-                      : 'Add <link rel="describedby" href="/llms.txt"> to homepage.'}
-                  </p>
                 </div>
 
-                {/* Link Health */}
-                <div className="llms-kpi-card">
-                  <span className="llms-kpi-title">Link Health</span>
-                  <div className="llms-kpi-value">
-                    {checkData.linksSummary.validCount} / {checkData.linksSummary.testedCount} Valid
-                  </div>
-                  <p className="llms-kpi-subtext">
-                    {checkData.linksSummary.brokenCount > 0 ? (
-                      <span style={{ color: '#dc2626' }}>{checkData.linksSummary.brokenCount} broken link(s) detected.</span>
-                    ) : (
-                      <span style={{ color: '#059669' }}>All sampled links resolved successfully.</span>
-                    )}
-                  </p>
-                </div>
-
-                {/* Curation Heuristic */}
-                <div className="llms-kpi-card">
-                  <span className="llms-kpi-title">Curation Density</span>
-                  <div className="llms-kpi-value" style={{ fontSize: '1.2rem' }}>
-                    {checkData.linksSummary.totalFound} Resources
-                  </div>
-                  <p className="llms-kpi-subtext">
-                    {checkData.curationComparison.feedback}
-                  </p>
+                <div className="chk-status-actions">
+                  {checkData.rootReport.content && (
+                    <>
+                      <Button
+                        variant="primary"
+                        size="sm"
+                        onClick={() => handleSendToValidator(checkData.rootReport.content)}
+                        icon={<Wand2 size={13} />}
+                      >
+                        Send to Validator
+                      </Button>
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        onClick={() => handleCopy(checkData.rootReport.content, 'chk-copy')}
+                        icon={copiedId === 'chk-copy' ? <Check size={13} /> : <Copy size={13} />}
+                      >
+                        {copiedId === 'chk-copy' ? 'Copied' : 'Copy'}
+                      </Button>
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        onClick={() => handleDownload(checkData.rootReport.content, 'llms.txt')}
+                        icon={<Download size={13} />}
+                      >
+                        Download
+                      </Button>
+                    </>
+                  )}
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => window.open(checkData.rootReport.url, '_blank')}
+                    icon={<ExternalLink size={13} />}
+                  >
+                    Open File
+                  </Button>
                 </div>
               </div>
 
-              {/* Audited Links Table */}
+              {/* Path-level file banner if detected */}
+              {checkData.pathReport && (
+                <div className="chk-path-banner">
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                    <Layers size={16} color="#059669" />
+                    <div>
+                      <strong>Path-Level llms.txt Detected:</strong>{' '}
+                      <code>{checkData.pathReport.url}</code> (HTTP 200 OK • {(checkData.pathReport.sizeBytes / 1024).toFixed(1)} KB)
+                    </div>
+                  </div>
+                  <Badge variant="success">Scoped Precedence</Badge>
+                </div>
+              )}
+
+              {/* 4 Apple KPI Scorecard Grid */}
+              <div className="val-kpi-grid">
+                {/* 1. Agent Discovery */}
+                <div className="val-kpi-card">
+                  <div className="val-kpi-top">
+                    <span>Agent Discovery</span>
+                    <Sparkles size={15} color="#6366f1" />
+                  </div>
+                  <div className="val-kpi-val" style={{ fontSize: '1.25rem' }}>
+                    {checkData.discoverability.describedByDetected ? (
+                      <span style={{ color: '#059669', display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
+                        <CheckCircle2 size={16} /> rel="describedby"
+                      </span>
+                    ) : (
+                      <span style={{ color: 'var(--text-muted)', display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
+                        <AlertTriangle size={16} color="#f59e0b" /> Not Advertised
+                      </span>
+                    )}
+                  </div>
+                  <div className="val-kpi-label">
+                    {checkData.discoverability.describedByDetected
+                      ? 'Advertised in homepage HTML or HTTP Link headers'
+                      : 'Missing <link rel="describedby" href="/llms.txt"> tag'}
+                  </div>
+                </div>
+
+                {/* 2. Link Health */}
+                <div className="val-kpi-card">
+                  <div className="val-kpi-top">
+                    <span>Link Health Sample</span>
+                    <Activity size={15} color="#10b981" />
+                  </div>
+                  <div className="val-kpi-val" style={{ fontSize: '1.25rem' }}>
+                    <span style={{ color: checkData.linksSummary.brokenCount === 0 ? '#059669' : '#dc2626' }}>
+                      {checkData.linksSummary.validCount} / {checkData.linksSummary.testedCount} Live
+                    </span>
+                  </div>
+                  <div className="val-kpi-label">
+                    {checkData.linksSummary.brokenCount > 0
+                      ? `${checkData.linksSummary.brokenCount} broken link(s) detected`
+                      : 'All tested links resolved with HTTP 200 OK'}
+                  </div>
+                </div>
+
+                {/* 3. Markdown Alternatives */}
+                <div className="val-kpi-card">
+                  <div className="val-kpi-top">
+                    <span>Markdown Alternatives</span>
+                    <FileCode size={15} color="#3b82f6" />
+                  </div>
+                  <div className="val-kpi-val" style={{ fontSize: '1.25rem' }}>
+                    <span style={{ color: (checkData.linksSummary.markdownAltCount || 0) > 0 ? '#059669' : 'var(--text-main)' }}>
+                      {checkData.linksSummary.markdownAltCount || 0} Alternate .md
+                    </span>
+                  </div>
+                  <div className="val-kpi-label">
+                    Discovered via <code>&lt;link rel="alternate" type="text/markdown"&gt;</code>
+                  </div>
+                </div>
+
+                {/* 4. Curation Density */}
+                <div className="val-kpi-card">
+                  <div className="val-kpi-top">
+                    <span>Curation Density</span>
+                    <Layers size={15} color="#8b5cf6" />
+                  </div>
+                  <div className="val-kpi-val" style={{ fontSize: '1.25rem' }}>
+                    {checkData.linksSummary.totalFound} Resources
+                  </div>
+                  <div className="val-kpi-label">
+                    {checkData.curationComparison.feedback}
+                  </div>
+                </div>
+              </div>
+
+              {/* Spacious, Modern Link Health Audit Table */}
               {checkData.linksSummary.auditedLinks?.length > 0 && (
-                <div className="acc-table-container">
-                  <table className="acc-compare-table">
-                    <thead>
-                      <tr>
-                        <th>Resource Title</th>
-                        <th>URL</th>
-                        <th>Status</th>
-                        <th>Response Time</th>
-                        <th>Markdown Alternative</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {checkData.linksSummary.auditedLinks.map((link, idx) => (
-                        <tr key={idx}>
-                          <td>
-                            <strong>{link.title}</strong>
-                          </td>
-                          <td>
-                            <a
-                              href={link.url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              style={{ color: 'var(--text-muted)', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '0.2rem' }}
-                            >
-                              <span>{link.url}</span>
-                              <ExternalLink size={11} />
-                            </a>
-                          </td>
-                          <td>
-                            <span
-                              className={`acc-status-badge ${
-                                link.status === 'valid'
-                                  ? 'allowed'
-                                  : link.status === 'redirect'
-                                  ? 'partial'
-                                  : 'blocked'
-                              }`}
-                            >
-                              {link.httpCode ? `HTTP ${link.httpCode}` : link.status}
-                            </span>
-                          </td>
-                          <td style={{ fontSize: '0.84rem', color: 'var(--text-muted)' }}>
-                            {link.responseTimeMs}ms
-                          </td>
-                          <td>
-                            {link.hasMarkdownAlt ? (
-                              <span style={{ color: '#059669', fontSize: '0.82rem' }}>✅ Discoverable</span>
-                            ) : (
-                              <span style={{ color: 'var(--text-muted)', fontSize: '0.82rem' }}>None</span>
-                            )}
-                          </td>
+                <div className="chk-table-card">
+                  <div className="chk-table-header">
+                    <div className="chk-table-title">
+                      <Link2 size={16} />
+                      <span>Audited Resource Links</span>
+                      <Badge variant="neutral">
+                        {filteredAuditedLinks.length} of {checkData.linksSummary.testedCount} links
+                      </Badge>
+                    </div>
+
+                    <div className="chk-table-controls">
+                      {/* Search Input */}
+                      <div className="chk-search-wrapper">
+                        <Search size={13} className="chk-search-icon" />
+                        <input
+                          type="text"
+                          className="chk-search-input"
+                          placeholder="Search links or URLs..."
+                          value={chkSearch}
+                          onChange={(e) => setChkSearch(e.target.value)}
+                        />
+                      </div>
+
+                      {/* Filter Tabs */}
+                      <div className="chk-filter-tabs">
+                        <button
+                          type="button"
+                          className={`chk-filter-btn ${chkFilter === 'all' ? 'active' : ''}`}
+                          onClick={() => setChkFilter('all')}
+                        >
+                          All ({checkData.linksSummary.testedCount})
+                        </button>
+                        <button
+                          type="button"
+                          className={`chk-filter-btn ${chkFilter === 'valid' ? 'active' : ''}`}
+                          onClick={() => setChkFilter('valid')}
+                        >
+                          Valid ({checkData.linksSummary.validCount})
+                        </button>
+                        {checkData.linksSummary.redirectCount > 0 && (
+                          <button
+                            type="button"
+                            className={`chk-filter-btn ${chkFilter === 'redirect' ? 'active' : ''}`}
+                            onClick={() => setChkFilter('redirect')}
+                          >
+                            Redirects ({checkData.linksSummary.redirectCount})
+                          </button>
+                        )}
+                        {checkData.linksSummary.brokenCount > 0 && (
+                          <button
+                            type="button"
+                            className={`chk-filter-btn ${chkFilter === 'broken' ? 'active' : ''}`}
+                            onClick={() => setChkFilter('broken')}
+                          >
+                            Broken ({checkData.linksSummary.brokenCount})
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="chk-table-wrapper">
+                    <table className="chk-table">
+                      <thead>
+                        <tr>
+                          <th>Resource &amp; Canonical URL</th>
+                          <th>HTTP Status</th>
+                          <th>Response Latency</th>
+                          <th>Markdown Alternative</th>
+                          <th style={{ textAlign: 'right' }}>Action</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                      </thead>
+                      <tbody>
+                        {filteredAuditedLinks.length > 0 ? (
+                          filteredAuditedLinks.map((link, idx) => (
+                            <tr key={idx}>
+                              <td>
+                                <span className="chk-title-text">{link.title || 'Untitled Resource'}</span>
+                                <a
+                                  href={link.url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="chk-url-link"
+                                >
+                                  <span>{link.url}</span>
+                                  <ExternalLink size={11} />
+                                </a>
+                              </td>
+
+                              <td>
+                                <span
+                                  className={`chk-status-pill ${
+                                    link.status === 'valid'
+                                      ? 'success'
+                                      : link.status === 'redirect'
+                                      ? 'warning'
+                                      : 'danger'
+                                  }`}
+                                >
+                                  {link.status === 'valid' && <CheckCircle2 size={12} />}
+                                  {link.status === 'redirect' && <AlertTriangle size={12} />}
+                                  {['not_found', 'forbidden', 'warning'].includes(link.status) && (
+                                    <XCircle size={12} />
+                                  )}
+                                  <span>
+                                    {link.httpCode ? `HTTP ${link.httpCode}` : link.status}
+                                  </span>
+                                </span>
+                              </td>
+
+                              <td>
+                                <span className="chk-latency-badge">
+                                  <span
+                                    className={`chk-latency-dot ${
+                                      link.responseTimeMs < 400
+                                        ? 'fast'
+                                        : link.responseTimeMs < 1200
+                                        ? 'medium'
+                                        : 'slow'
+                                    }`}
+                                  />
+                                  {link.responseTimeMs}ms
+                                </span>
+                              </td>
+
+                              <td>
+                                {link.hasMarkdownAlt ? (
+                                  <span className="chk-alt-tag yes">
+                                    <FileCode size={12} />
+                                    <span>Discoverable (.md)</span>
+                                  </span>
+                                ) : (
+                                  <span className="chk-alt-tag no">Standard HTML</span>
+                                )}
+                              </td>
+
+                              <td style={{ textAlign: 'right' }}>
+                                <Button
+                                  variant="secondary"
+                                  size="sm"
+                                  onClick={() => handleCopy(link.url, `chk-link-${idx}`)}
+                                  icon={copiedId === `chk-link-${idx}` ? <Check size={11} /> : <Copy size={11} />}
+                                >
+                                  {copiedId === `chk-link-${idx}` ? 'Copied' : 'Copy'}
+                                </Button>
+                              </td>
+                            </tr>
+                          ))
+                        ) : (
+                          <tr>
+                            <td colSpan={5} style={{ padding: '2.5rem', textAlign: 'center', color: 'var(--text-muted)' }}>
+                              No links matched the selected filter or search query.
+                            </td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               )}
             </div>
