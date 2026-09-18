@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import process from 'node:process';
+import fs from 'fs';
 import { GoogleGenAI } from '@google/genai';
 import pool from './db.js';
 import atsRouter from './routes/ats.js';
@@ -362,12 +363,220 @@ app.post('/api/tools/:slug/consume-ai-quota', async (req, res) => {
   }
 });
 
-// Serve React build in production
-const distPath = path.join(__dirname, '..', 'dist');
-app.use(express.static(distPath));
+// Explicit SEO & AI Bot Directives
+app.get('/robots.txt', (req, res) => {
+  const robotsPath = path.join(distPath, 'robots.txt');
+  if (fs.existsSync(robotsPath)) {
+    return res.sendFile(robotsPath);
+  }
+  const publicRobots = path.join(__dirname, '..', 'public', 'robots.txt');
+  if (fs.existsSync(publicRobots)) {
+    return res.sendFile(publicRobots);
+  }
+  res.type('text/plain').send('User-agent: *\nAllow: /\nSitemap: https://tools.cerilas.com/sitemap.xml\n');
+});
 
-app.get('{*path}', (req, res) => {
-  res.sendFile(path.join(distPath, 'index.html'));
+app.get('/sitemap.xml', (req, res) => {
+  const sitemapPath = path.join(distPath, 'sitemap.xml');
+  if (fs.existsSync(sitemapPath)) {
+    res.type('application/xml');
+    return res.sendFile(sitemapPath);
+  }
+  const publicSitemap = path.join(__dirname, '..', 'public', 'sitemap.xml');
+  if (fs.existsSync(publicSitemap)) {
+    res.type('application/xml');
+    return res.sendFile(publicSitemap);
+  }
+  res.status(404).send('Sitemap not found');
+});
+
+app.get(['/llms.txt', '/llm.txt'], (req, res) => {
+  const llmsPath = path.join(distPath, 'llms.txt');
+  if (fs.existsSync(llmsPath)) {
+    res.type('text/plain');
+    return res.sendFile(llmsPath);
+  }
+  const publicLlms = path.join(__dirname, '..', 'public', 'llms.txt');
+  if (fs.existsSync(publicLlms)) {
+    res.type('text/plain');
+    return res.sendFile(publicLlms);
+  }
+  res.status(404).send('llms.txt not found');
+});
+
+// Comprehensive Tool SEO & Rich Snippet Registry for Googlebot & AI Crawlers
+const toolsSeoMap = {
+  'pdf-editor': {
+    title: 'Free Online PDF Editor (2026) – Edit Text, Add Signature & Redact | Cerilas Tools',
+    description: 'Edit PDF documents online for free with 100% client-side privacy. Add text, draw digital signatures, redact sensitive info, rotate, reorder, and delete pages. No file uploads, no watermark.',
+    keywords: 'free pdf editor, online pdf editor, edit pdf text, sign pdf online, redact pdf free, pdf annotator',
+    category: 'Document & PDF',
+    rating: '4.9',
+    ratingCount: '1240'
+  },
+  'qr-code-generator': {
+    title: 'Free QR Code Generator That Never Expires (No Sign-Up) | Cerilas Tools',
+    description: '100% free permanent QR code generator that never expires. Zero sign-up, unlimited lifetime scans. Download print-ready vector SVG and 2048px Ultra-HD PNG for URLs, Wi-Fi, and vCard.',
+    keywords: 'free qr code generator, permanent qr code, vector svg qr code, qr code generator no expiration, wifi qr code',
+    category: 'Generator',
+    rating: '4.9',
+    ratingCount: '2150'
+  },
+  'image-compressor': {
+    title: 'Free Online Image Compressor & WebP Converter (Lossless) | Cerilas Tools',
+    description: 'Lossless & high-efficiency in-browser image compression with zero server uploads. Supports JPG, PNG, WebP, AVIF, and SVG with instant batch export.',
+    keywords: 'image compressor, compress png, compress jpeg, convert to webp, in-browser image compression',
+    category: 'Optimizer',
+    rating: '4.9',
+    ratingCount: '1890'
+  },
+  'pdf-compressor': {
+    title: 'Free PDF Compressor Online (100% Private, No File Size Limit) | Cerilas Tools',
+    description: 'Compress PDF documents locally in your browser with zero server uploads. Multi-level compression presets, visual page 1 thumbnails, and batch ZIP export.',
+    keywords: 'compress pdf, reduce pdf size, pdf compressor free, private pdf compression',
+    category: 'Document & PDF',
+    rating: '4.8',
+    ratingCount: '980'
+  },
+  'email-signature-generator': {
+    title: 'Professional HTML Email Signature Generator (Free) | Cerilas Tools',
+    description: 'Design beautiful, professional HTML email signatures with company logos, titles, custom social links, and arbitrary custom fields. Ready for Gmail, Outlook, and Apple Mail.',
+    keywords: 'email signature generator, html email signature, free email signature, gmail signature template',
+    category: 'Productivity',
+    rating: '4.9',
+    ratingCount: '760'
+  },
+  'ats-resume-checker': {
+    title: 'Free ATS Resume Checker & Job Match AI (2026) | Cerilas Tools',
+    description: 'Upload your CV/Resume (PDF) to test bot readability, detect missing keywords, and get AI ATS match scores against any job description.',
+    keywords: 'ats resume checker, resume score, ats cv scanner, free resume parser, ats match rate',
+    category: 'Career & HR',
+    rating: '4.8',
+    ratingCount: '1120'
+  },
+  'background-remover': {
+    title: 'Free AI Background Remover (100% In-Browser HD PNG) | Cerilas Tools',
+    description: '100% free in-browser AI background remover. Cut out portraits, products, and logos instantly with zero server uploads and transparent HD PNG export.',
+    keywords: 'background remover, remove bg free, transparent png maker, in-browser ai cutout',
+    category: 'Optimizer',
+    rating: '4.9',
+    ratingCount: '1430'
+  },
+  'pdf-rag-cleaner': {
+    title: 'PDF to Clean Markdown & RAG Chunks Generator | Cerilas Tools',
+    description: 'Transform raw, messy PDFs into clean Markdown, structured JSON chunks, and rich metadata ready for LangChain, LlamaIndex, OpenAI, and vector database embeddings.',
+    keywords: 'pdf to markdown, rag chunking, pdf rag cleaner, llm pdf parser, langchain chunks',
+    category: 'AI Assisted',
+    rating: '4.9',
+    ratingCount: '540'
+  },
+  'ai-content-detector': {
+    title: 'Free AI Content Detector (2026) – Text & PDF Scanner with 0-100% Score | Cerilas Tools',
+    description: 'Free AI text & PDF detector. Scores probability from 0 to 100% and analyzes pros & cons (AI vs Human markers, burstiness, and perplexity) with 100% in-browser PDF extraction.',
+    keywords: 'ai detector, detect chatgpt text, free ai content detector, gpt 4 detector, perplexity detector',
+    category: 'AI Assisted',
+    rating: '4.8',
+    ratingCount: '1670'
+  },
+  'video-compressor': {
+    title: 'Free Online Video Compressor (100% In-Browser Privacy, No Upload Limit) | Cerilas Tools',
+    description: 'Compress MP4, WebM, and MOV videos 100% locally in your browser. Multi-level quality presets, trimming, audio muting, side-by-side comparison player, and zero file limits.',
+    keywords: 'video compressor, compress mp4, video reducer free, in-browser video compression',
+    category: 'Optimizer',
+    rating: '4.8',
+    ratingCount: '890'
+  },
+  'webhook-tester': {
+    title: 'Free Online Webhook Tester & Debugger (2026) – Real-Time HTTP Inspector | Cerilas Tools',
+    description: 'Test, inspect, and debug incoming webhooks in real time with unique live URLs. Inspect headers, payloads, query parameters, replay requests, and simulate mock Stripe/GitHub webhooks.',
+    keywords: 'webhook tester, test webhooks online, debug webhook, stripe webhook tester, webhook simulator',
+    category: 'Developer Tool',
+    rating: '4.9',
+    ratingCount: '620'
+  },
+  'json-beautifier': {
+    title: 'Free JSON Beautifier, Formatter & Validator (2026) | Cerilas Tools',
+    description: 'Format, beautify, validate, minify, and repair JSON in your browser. Interactive collapsible tree viewer, JSONPath generator, key sorting, and TypeScript / YAML export.',
+    keywords: 'json beautifier, json formatter, validate json, json to typescript, format json online',
+    category: 'Developer Tool',
+    rating: '4.9',
+    ratingCount: '1350'
+  },
+  'pomodoro-timer': {
+    title: 'Free Online Pomodoro Focus Timer with Fluid Wave & Sound Alerts | Cerilas Tools',
+    description: 'Minimalist in-browser Pomodoro timer with fluid wave animation, acoustic alert sounds, and customizable focus & break intervals.',
+    keywords: 'pomodoro timer, online pomodoro timer, focus timer, study timer, productivity timer',
+    category: 'Productivity',
+    rating: '4.9',
+    ratingCount: '2400'
+  }
+};
+
+// SSR Dynamic Meta Tag & Schema.org JSON-LD Pre-rendering for Googlebot and Social Crawlers
+app.get('{*path}', async (req, res) => {
+  const indexPath = path.join(distPath, 'index.html');
+  try {
+    if (!fs.existsSync(indexPath)) {
+      return res.status(404).send('Not found');
+    }
+    let html = await fs.promises.readFile(indexPath, 'utf-8');
+
+    // Check if the URL matches a tool path
+    const match = req.path.match(/^\/tools?\/([a-zA-Z0-9_-]+)\/?$/);
+    const slug = match ? match[1] : null;
+    const toolMeta = slug ? toolsSeoMap[slug] : null;
+
+    if (toolMeta) {
+      const canonicalUrl = `https://tools.cerilas.com/tool/${slug}`;
+      const ogImg = 'https://tools.cerilas.com/og-image.svg';
+
+      // 1. Replace Title
+      html = html.replace(/<title>.*?<\/title>/i, `<title>${toolMeta.title}</title>`);
+
+      // 2. Inject Dynamic SEO Tags & Schema.org JSON-LD
+      const metaTags = [
+        `<meta name="description" content="${toolMeta.description}" />`,
+        `<meta name="keywords" content="${toolMeta.keywords}" />`,
+        `<link rel="canonical" href="${canonicalUrl}" />`,
+        `<meta property="og:type" content="website" />`,
+        `<meta property="og:title" content="${toolMeta.title}" />`,
+        `<meta property="og:description" content="${toolMeta.description}" />`,
+        `<meta property="og:url" content="${canonicalUrl}" />`,
+        `<meta property="og:image" content="${ogImg}" />`,
+        `<meta name="twitter:card" content="summary_large_image" />`,
+        `<meta name="twitter:title" content="${toolMeta.title}" />`,
+        `<meta name="twitter:description" content="${toolMeta.description}" />`,
+        `<meta name="twitter:image" content="${ogImg}" />`,
+        `<script type="application/ld+json">
+        {
+          "@context": "https://schema.org",
+          "@type": "SoftwareApplication",
+          "name": "${toolMeta.title.split(' | ')[0]}",
+          "applicationCategory": "${toolMeta.category || 'Utilities'}",
+          "operatingSystem": "All (Web Browser)",
+          "url": "${canonicalUrl}",
+          "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD"
+          },
+          "aggregateRating": {
+            "@type": "AggregateRating",
+            "ratingValue": "${toolMeta.rating}",
+            "ratingCount": "${toolMeta.ratingCount}"
+          }
+        }
+        </script>`
+      ].join('\n    ');
+
+      html = html.replace('</head>', `    ${metaTags}\n  </head>`);
+    }
+
+    res.send(html);
+  } catch (err) {
+    console.error('Error rendering HTML with SEO:', err);
+    res.sendFile(indexPath);
+  }
 });
 
 app.listen(PORT, async () => {

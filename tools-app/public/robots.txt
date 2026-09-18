@@ -1,8 +1,68 @@
+# Cerilas Tools Platform - Advanced Robots & AI Search Configuration (2026)
+# https://tools.cerilas.com
+
+# 1. Global Search Engines
 User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /admin
+Disallow: /server/
+
+# 2. Google Search & Google Gemini (Google-Extended)
+User-agent: Googlebot
+Allow: /
+
+User-agent: Googlebot-Image
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+# 3. OpenAI (ChatGPT Search & Browsing)
+User-agent: GPTBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+# 4. Perplexity AI Search Engine
+User-agent: PerplexityBot
+Allow: /
+
+# 5. Anthropic (Claude AI Assistant & Research)
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: anthropic-ai
+Allow: /
+
+# 6. Apple Intelligence & Siri
+User-agent: Applebot
+Allow: /
+
+User-agent: Applebot-Extended
+Allow: /
+
+# 7. Microsoft Bing & Copilot
+User-agent: Bingbot
+Allow: /
+
+# 8. Meta / Facebook
+User-agent: FacebookBot
+Allow: /
+
+# 9. Cohere AI
+User-agent: cohere-ai
+Allow: /
+
+# 10. Common Crawl Open Web Archive
+User-agent: CCBot
 Allow: /
 
 # Host
 Host: https://tools.cerilas.com
 
-# Sitemaps
+# Sitemaps & LLM Manifest
 Sitemap: https://tools.cerilas.com/sitemap.xml
+# LLMs discovery standard
+# https://tools.cerilas.com/llms.txt

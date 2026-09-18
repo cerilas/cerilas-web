@@ -299,16 +299,61 @@ app.get('/robots.txt', (req, res) => {
   const baseUrl = getBaseUrl();
   res.type('text/plain');
   res.send([
+    '# CERİLAS High Tech - Robots & AI Search Configuration',
     'User-agent: *',
     'Allow: /',
     'Disallow: /admin',
     'Disallow: /api/',
     'Disallow: /server/',
     '',
+    'User-agent: Googlebot',
+    'Allow: /',
+    '',
+    'User-agent: Google-Extended',
+    'Allow: /',
+    '',
+    'User-agent: GPTBot',
+    'Allow: /',
+    '',
+    'User-agent: ChatGPT-User',
+    'Allow: /',
+    '',
+    'User-agent: PerplexityBot',
+    'Allow: /',
+    '',
+    'User-agent: ClaudeBot',
+    'Allow: /',
+    '',
+    'User-agent: anthropic-ai',
+    'Allow: /',
+    '',
+    'User-agent: Applebot',
+    'Allow: /',
+    '',
+    'User-agent: Applebot-Extended',
+    'Allow: /',
+    '',
+    'User-agent: Bingbot',
+    'Allow: /',
+    '',
     `Sitemap: ${baseUrl}/sitemap.xml`,
     `Host: ${baseUrl.replace(/^https?:\/\//, '')}`,
     ''
   ].join('\n'));
+});
+
+app.get(['/llms.txt', '/llm.txt'], (req, res) => {
+  const publicLlms = path.join(__dirname, '..', 'public', 'llms.txt');
+  if (fs.existsSync(publicLlms)) {
+    res.type('text/plain');
+    return res.sendFile(publicLlms);
+  }
+  const distLlms = path.join(distPath, 'llms.txt');
+  if (fs.existsSync(distLlms)) {
+    res.type('text/plain');
+    return res.sendFile(distLlms);
+  }
+  res.status(404).send('llms.txt not found');
 });
 
 app.get('{*path}', async (req, res) => {

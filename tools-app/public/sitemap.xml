@@ -1,95 +1,265 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
         xmlns:image="http://www.google.com/schemas/sitemap-image/1.1"
-        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd
-                            http://www.google.com/schemas/sitemap-image/1.1 http://www.google.com/schemas/sitemap-image/1.1/sitemap-image.xsd">
-  <!-- Homepage / Tools Catalog -->
+        xmlns:xhtml="http://www.w3.org/1999/xhtml">
+
+  <!-- 1. Tools Catalog Homepage -->
   <url>
     <loc>https://tools.cerilas.com/</loc>
-    <lastmod>2026-09-17</lastmod>
+    <lastmod>2026-09-18</lastmod>
     <changefreq>daily</changefreq>
-    <priority>1.0</priority>
+    <priority>1.00</priority>
     <image:image>
       <image:loc>https://tools.cerilas.com/og-image.svg</image:loc>
-      <image:title>Cerilas Tools Platform</image:title>
-      <image:caption>Free in-browser privacy-focused high-tech utilities by Cerilas.</image:caption>
+      <image:title>Cerilas Free Developer &amp; Privacy Tools Platform</image:title>
+      <image:caption>100% free, client-side, zero-server-upload tools for developers, creators, and professionals.</image:caption>
     </image:image>
   </url>
 
-  <!-- Image Compressor & WebP Converter Tool -->
+  <!-- 2. Free Online PDF Editor -->
   <url>
-    <loc>https://tools.cerilas.com/#/tool/image-compressor</loc>
-    <lastmod>2026-09-17</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.95</priority>
+    <loc>https://tools.cerilas.com/tool/pdf-editor</loc>
+    <lastmod>2026-09-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.98</priority>
     <image:image>
-      <image:loc>https://tools.cerilas.com/og-image-compressor.svg</image:loc>
-      <image:title>Free Image Compressor and WebP Converter</image:title>
-      <image:caption>Lossless and high-efficiency client-side image compressor for JPG, PNG, WebP, AVIF, and SVG.</image:caption>
+      <image:loc>https://tools.cerilas.com/og-image.svg</image:loc>
+      <image:title>Free Online PDF Editor – Edit Text, Add Signature &amp; Redact</image:title>
+      <image:caption>100% client-side free PDF editor with permanent redaction, electronic signatures, and page management.</image:caption>
     </image:image>
   </url>
-
-  <!-- Image Compressor Direct Clean URL for Web Crawlers -->
   <url>
-    <loc>https://tools.cerilas.com/tool/image-compressor</loc>
-    <lastmod>2026-09-17</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.95</priority>
-    <image:image>
-      <image:loc>https://tools.cerilas.com/og-image-compressor.svg</image:loc>
-      <image:title>Free Image Compressor and WebP Converter</image:title>
-      <image:caption>Lossless and high-efficiency client-side image compressor for JPG, PNG, WebP, AVIF, and SVG.</image:caption>
-    </image:image>
-  </url>
-
-  <!-- Free QR Code Generator Tool -->
-  <url>
-    <loc>https://tools.cerilas.com/#/tool/qr-code-generator</loc>
-    <lastmod>2026-09-17</lastmod>
+    <loc>https://tools.cerilas.com/#/tool/pdf-editor</loc>
+    <lastmod>2026-09-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.90</priority>
-    <image:image>
-      <image:loc>https://tools.cerilas.com/og-image.svg</image:loc>
-      <image:title>Free QR Code Generator That Never Expires</image:title>
-      <image:caption>100% free permanent QR code generator with unlimited lifetime scans and SVG export.</image:caption>
-    </image:image>
   </url>
 
+  <!-- 3. Free QR Code Generator -->
   <url>
     <loc>https://tools.cerilas.com/tool/qr-code-generator</loc>
-    <lastmod>2026-09-17</lastmod>
+    <lastmod>2026-09-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.98</priority>
+    <image:image>
+      <image:loc>https://tools.cerilas.com/og-image.svg</image:loc>
+      <image:title>Free Permanent QR Code Generator That Never Expires</image:title>
+      <image:caption>High-resolution vector SVG and Ultra-HD PNG QR codes with zero expiration and unlimited scans.</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://tools.cerilas.com/#/tool/qr-code-generator</loc>
+    <lastmod>2026-09-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.90</priority>
-    <image:image>
-      <image:loc>https://tools.cerilas.com/og-image.svg</image:loc>
-      <image:title>Free QR Code Generator That Never Expires</image:title>
-      <image:caption>100% free permanent QR code generator with unlimited lifetime scans and SVG export.</image:caption>
-    </image:image>
   </url>
 
-  <!-- Pomodoro Focus Timer Tool -->
+  <!-- 4. Image Compressor & WebP Converter -->
   <url>
-    <loc>https://tools.cerilas.com/#/tool/pomodoro-timer</loc>
-    <lastmod>2026-09-17</lastmod>
-    <changefreq>daily</changefreq>
+    <loc>https://tools.cerilas.com/tool/image-compressor</loc>
+    <lastmod>2026-09-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.98</priority>
+    <image:image>
+      <image:loc>https://tools.cerilas.com/og-image.svg</image:loc>
+      <image:title>Free In-Browser Image Compressor &amp; WebP Converter</image:title>
+      <image:caption>Lossless and high-efficiency image compression for JPG, PNG, WebP, AVIF, and SVG.</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://tools.cerilas.com/#/tool/image-compressor</loc>
+    <lastmod>2026-09-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.90</priority>
+  </url>
+
+  <!-- 5. PDF Compressor -->
+  <url>
+    <loc>https://tools.cerilas.com/tool/pdf-compressor</loc>
+    <lastmod>2026-09-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.96</priority>
+    <image:image>
+      <image:loc>https://tools.cerilas.com/og-image.svg</image:loc>
+      <image:title>Free Client-Side PDF Compressor</image:title>
+      <image:caption>Compress PDF documents directly in browser without server upload.</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://tools.cerilas.com/#/tool/pdf-compressor</loc>
+    <lastmod>2026-09-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.90</priority>
+  </url>
+
+  <!-- 6. Professional Email Signature Generator -->
+  <url>
+    <loc>https://tools.cerilas.com/tool/email-signature-generator</loc>
+    <lastmod>2026-09-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.96</priority>
+    <image:image>
+      <image:loc>https://tools.cerilas.com/og-image.svg</image:loc>
+      <image:title>Free Professional HTML Email Signature Generator</image:title>
+      <image:caption>Create sleek, responsive email signatures for Gmail, Apple Mail, Outlook with live preview.</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://tools.cerilas.com/#/tool/email-signature-generator</loc>
+    <lastmod>2026-09-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.90</priority>
+  </url>
+
+  <!-- 7. ATS Resume Checker -->
+  <url>
+    <loc>https://tools.cerilas.com/tool/ats-resume-checker</loc>
+    <lastmod>2026-09-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.96</priority>
+    <image:image>
+      <image:loc>https://tools.cerilas.com/og-image.svg</image:loc>
+      <image:title>Free ATS Resume Checker &amp; Job Match AI</image:title>
+      <image:caption>Test CV readability against ATS bots, find missing keywords, and optimize formatting.</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://tools.cerilas.com/#/tool/ats-resume-checker</loc>
+    <lastmod>2026-09-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.90</priority>
+  </url>
+
+  <!-- 8. AI Background Remover -->
+  <url>
+    <loc>https://tools.cerilas.com/tool/background-remover</loc>
+    <lastmod>2026-09-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.96</priority>
+    <image:image>
+      <image:loc>https://tools.cerilas.com/og-image.svg</image:loc>
+      <image:title>100% Free In-Browser AI Background Remover</image:title>
+      <image:caption>Cut out portraits and products with local WebAssembly AI models and transparent HD PNG export.</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://tools.cerilas.com/#/tool/background-remover</loc>
+    <lastmod>2026-09-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.90</priority>
+  </url>
+
+  <!-- 9. PDF to RAG Cleaner -->
+  <url>
+    <loc>https://tools.cerilas.com/tool/pdf-rag-cleaner</loc>
+    <lastmod>2026-09-18</lastmod>
+    <changefreq>weekly</changefreq>
     <priority>0.95</priority>
     <image:image>
       <image:loc>https://tools.cerilas.com/og-image.svg</image:loc>
-      <image:title>Free Online Pomodoro Timer with Fluid Wave and Sound Alerts</image:title>
-      <image:caption>Minimalist Pomodoro timer with fluid wave animation, acoustic alert sounds, and customizable focus &amp; break intervals.</image:caption>
+      <image:title>PDF to RAG Cleaner &amp; Markdown Chunk Generator</image:title>
+      <image:caption>Clean raw PDF documents into LLM-ready markdown chunks for LangChain and vector databases.</image:caption>
     </image:image>
   </url>
+  <url>
+    <loc>https://tools.cerilas.com/#/tool/pdf-rag-cleaner</loc>
+    <lastmod>2026-09-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.90</priority>
+  </url>
 
+  <!-- 10. AI Content Detector -->
+  <url>
+    <loc>https://tools.cerilas.com/tool/ai-content-detector</loc>
+    <lastmod>2026-09-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.95</priority>
+    <image:image>
+      <image:loc>https://tools.cerilas.com/og-image.svg</image:loc>
+      <image:title>Free AI Content &amp; Essay Detector</image:title>
+      <image:caption>Scan text and PDF files for ChatGPT, Claude, Gemini markers with 0-100% score breakdown.</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://tools.cerilas.com/#/tool/ai-content-detector</loc>
+    <lastmod>2026-09-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.90</priority>
+  </url>
+
+  <!-- 11. Video Compressor -->
+  <url>
+    <loc>https://tools.cerilas.com/tool/video-compressor</loc>
+    <lastmod>2026-09-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.95</priority>
+    <image:image>
+      <image:loc>https://tools.cerilas.com/og-image.svg</image:loc>
+      <image:title>Free In-Browser Video Compressor</image:title>
+      <image:caption>Compress MP4, WebM, MOV videos locally with zero uploads and customizable quality presets.</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://tools.cerilas.com/#/tool/video-compressor</loc>
+    <lastmod>2026-09-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.90</priority>
+  </url>
+
+  <!-- 12. Webhook Tester & Debugger -->
+  <url>
+    <loc>https://tools.cerilas.com/tool/webhook-tester</loc>
+    <lastmod>2026-09-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.95</priority>
+    <image:image>
+      <image:loc>https://tools.cerilas.com/og-image.svg</image:loc>
+      <image:title>Free Webhook Tester &amp; HTTP Inspector</image:title>
+      <image:caption>Test, inspect and replay HTTP webhooks for Stripe, GitHub, Discord, and Slack.</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://tools.cerilas.com/#/tool/webhook-tester</loc>
+    <lastmod>2026-09-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.90</priority>
+  </url>
+
+  <!-- 13. JSON Beautifier & Validator -->
+  <url>
+    <loc>https://tools.cerilas.com/tool/json-beautifier</loc>
+    <lastmod>2026-09-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.95</priority>
+    <image:image>
+      <image:loc>https://tools.cerilas.com/og-image.svg</image:loc>
+      <image:title>JSON Beautifier, Formatter &amp; Validator</image:title>
+      <image:caption>Format, repair, validate JSON with interactive tree viewer and TypeScript/YAML converters.</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://tools.cerilas.com/#/tool/json-beautifier</loc>
+    <lastmod>2026-09-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.90</priority>
+  </url>
+
+  <!-- 14. Pomodoro Focus Timer -->
   <url>
     <loc>https://tools.cerilas.com/tool/pomodoro-timer</loc>
-    <lastmod>2026-09-17</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.95</priority>
+    <lastmod>2026-09-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.94</priority>
     <image:image>
       <image:loc>https://tools.cerilas.com/og-image.svg</image:loc>
-      <image:title>Free Online Pomodoro Timer with Fluid Wave and Sound Alerts</image:title>
-      <image:caption>Minimalist Pomodoro timer with fluid wave animation, acoustic alert sounds, and customizable focus &amp; break intervals.</image:caption>
+      <image:title>Pomodoro Focus Timer with Fluid Wave Animation</image:title>
+      <image:caption>Minimalist online Pomodoro timer with soothing acoustic sound alerts and session tracking.</image:caption>
     </image:image>
+  </url>
+  <url>
+    <loc>https://tools.cerilas.com/#/tool/pomodoro-timer</loc>
+    <lastmod>2026-09-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.90</priority>
   </url>
 </urlset>

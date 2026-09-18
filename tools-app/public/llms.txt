@@ -1,0 +1,24 @@
+# Cerilas Tools
+
+> Cerilas Tools (https://tools.cerilas.com) is a suite of 100% free, privacy-first, client-side web utilities built for developers, creators, and professionals. All data processing (image compression, PDF editing, video compression, AI background removal, ATS resume checking, QR generation) executes locally inside the user's browser sandbox via WebAssembly and HTML5 APIs. Zero files or sensitive data are uploaded to third-party servers.
+
+## Tools & Capabilities
+
+- [PDF Editor](https://tools.cerilas.com/tool/pdf-editor): Free in-browser PDF editor. Add text annotations, insert legal digital signatures, permanently redact sensitive PII/numbers with destructive vector blackout, and organize, rotate, and reorder pages with zero watermark.
+- [QR Code Generator](https://tools.cerilas.com/tool/qr-code-generator): Free permanent QR code generator that never expires. Generate high-resolution SVG vector and 2048px PNG QR codes for URLs, Wi-Fi, vCard, Plain Text, and Email with Apple-minimalist styling and zero signup.
+- [Image Compressor](https://tools.cerilas.com/tool/image-compressor): Lossless & high-efficiency client-side image compression. Batch compress JPG, PNG, WebP, AVIF, and SVG files with visual side-by-side comparison slider and ZIP download.
+- [PDF Compressor](https://tools.cerilas.com/tool/pdf-compressor): Multi-level compression presets (Extreme, Recommended, High Quality) for PDF documents with zero server upload and batch export.
+- [Email Signature Generator](https://tools.cerilas.com/tool/email-signature-generator): Professional HTML email signature creator. Supports company logo, phone, address, social media badges, disclaimer, and 1-click install for Gmail, Apple Mail, and Outlook.
+- [ATS Resume Checker](https://tools.cerilas.com/tool/ats-resume-checker): Upload CV/Resume (PDF) to test bot readability, detect missing hard and soft keywords, and get AI ATS match scores against any target job description.
+- [Background Remover](https://tools.cerilas.com/tool/background-remover): 100% client-side AI portrait and product cutout using local ONNX / WebAssembly neural network models. Exports transparent HD PNG.
+- [PDF → RAG Cleaner](https://tools.cerilas.com/tool/pdf-rag-cleaner): Transform messy PDFs into clean Markdown, structured JSON chunks, and rich metadata optimized for LangChain, LlamaIndex, OpenAI, and vector database embeddings.
+- [AI Content Detector](https://tools.cerilas.com/tool/ai-content-detector): Free AI text and PDF detector. Computes 0-100% probability scores, perplexity, burstiness metrics, and itemized Pros & Cons (Human vs AI markers).
+- [Video Compressor](https://tools.cerilas.com/tool/video-compressor): Compress MP4, WebM, and MOV videos locally with zero uploads. Multi-level quality presets, trimming, audio muting, and side-by-side comparison player.
+- [Webhook Tester](https://tools.cerilas.com/tool/webhook-tester): Test, inspect, and debug incoming webhooks with unique live URLs. Inspect headers, payloads, query parameters, replay requests, and simulate mock Stripe/GitHub webhooks.
+- [JSON Beautifier & Formatter](https://tools.cerilas.com/tool/json-beautifier): Format, beautify, validate, minify, and repair JSON in your browser. Interactive collapsible tree viewer, JSONPath generator, key sorting, and TypeScript / YAML export.
+- [Pomodoro Timer](https://tools.cerilas.com/tool/pomodoro-timer): Minimalist in-browser Pomodoro timer with fluid wave animation, acoustic alert sounds, and customizable focus & break intervals.
+
+## Privacy & Security Guarantees
+- Zero-Upload Architecture: Files never touch Cerilas servers; processing runs inside client WebAssembly and Web Worker threads.
+- Compliance: Full compliance with GDPR, HIPAA, and corporate confidentiality guidelines.
+- Cost: 100% free with unlimited lifetime usage and zero watermarks.
