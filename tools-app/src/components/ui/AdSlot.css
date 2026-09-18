@@ -90,3 +90,12 @@
   margin: 2rem auto;
 }
 
+/* 6. In-Article Native Unit (Fluid, integrated into reading / SEO flows) */
+.ad-slot-in-article {
+  width: 100%;
+  max-width: 100%;
+  min-height: 90px;
+  margin: 2rem auto;
+}
+
+

@@ -3,9 +3,13 @@ import './AdSlot.css';
 
 /**
  * Google AdSense Ad Slot Component.
- * Supports standard Leaderboard banners and Vertical Multiplex autorelaxed units.
+ * Supports:
+ * - Leaderboard banners (slot 3592000841, data-ad-format="auto")
+ * - Vertical Multiplex autorelaxed units (slot 2582171503, data-ad-format="autorelaxed")
+ * - In-Article fluid native units (slot 4093371757, data-ad-layout="in-article", data-ad-format="fluid")
  *
  * Formats:
+ * - 'in-article' / 'article': In-Article Fluid Native Unit (slot 4093371757)
  * - 'leaderboard': Leaderboard Banner (auto responsive, slot 3592000841)
  * - 'billboard': Large Billboard Banner (slot 3592000841)
  * - 'multiplex': Vertical Multiplex Matched Content (autorelaxed, slot 2582171503)
@@ -21,19 +25,29 @@ export default function AdSlot({
 }) {
   const adRef = useRef(null);
 
-  const isMultiplex = 
-    format === 'multiplex' || 
-    format === 'vertical-multiplex' || 
-    format === 'vertical' || 
-    format === 'rectangle' || 
-    slotId === '2582171503';
+  const isInArticle = 
+    format === 'in-article' || 
+    format === 'article' || 
+    slotId === '4093371757';
 
-  // Effective slot ID: 2582171503 for multiplex/vertical, 3592000841 for leaderboard/billboard
+  const isMultiplex = 
+    !isInArticle && (
+      format === 'multiplex' || 
+      format === 'vertical-multiplex' || 
+      format === 'vertical' || 
+      format === 'rectangle' || 
+      slotId === '2582171503'
+    );
+
+  // Effective slot ID:
+  // - In-article: 4093371757
+  // - Multiplex / vertical: 2582171503
+  // - Leaderboard / billboard / default: 3592000841
   const effectiveSlotId = (slotId && /^\d+$/.test(slotId))
     ? slotId
-    : (isMultiplex ? '2582171503' : '3592000841');
+    : (isInArticle ? '4093371757' : (isMultiplex ? '2582171503' : '3592000841'));
 
-  const effectiveAdFormat = isMultiplex ? 'autorelaxed' : 'auto';
+  const effectiveAdFormat = isInArticle ? 'fluid' : (isMultiplex ? 'autorelaxed' : 'auto');
 
   const effectiveAdClient = (adClient && adClient.startsWith('ca-pub-') && !adClient.includes('X'))
     ? adClient
@@ -55,6 +69,9 @@ export default function AdSlot({
 
   const getFormatClass = () => {
     switch (format) {
+      case 'in-article':
+      case 'article':
+        return 'ad-slot-in-article';
       case 'multiplex':
       case 'vertical-multiplex':
       case 'vertical':
@@ -80,11 +97,16 @@ export default function AdSlot({
       <ins 
         ref={adRef}
         className="adsbygoogle"
-        style={{ display: 'block', width: '100%', textAlign: 'center' }}
+        style={{
+          display: 'block',
+          textAlign: 'center',
+          ...(!isInArticle ? { width: '100%' } : {})
+        }}
         data-ad-client={effectiveAdClient}
         data-ad-slot={effectiveSlotId}
         data-ad-format={effectiveAdFormat}
-        {...(!isMultiplex ? { 'data-full-width-responsive': 'true' } : {})}
+        {...(isInArticle ? { 'data-ad-layout': 'in-article' } : {})}
+        {...(!isMultiplex && !isInArticle ? { 'data-full-width-responsive': 'true' } : {})}
       />
     </div>
   );
