@@ -501,9 +501,6 @@ export default function App() {
               ))}
             </div>
 
-            {/* Google AdSense Slot: Top Leaderboard (728x90 / 320x50) */}
-            <AdSlot format="leaderboard" slotId="ad-catalog-top-leaderboard" />
-
             <main className="grid">
               {loading ? (
                 <>
