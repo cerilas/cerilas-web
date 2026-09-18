@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   FileText,
   Globe,
@@ -11,14 +11,18 @@ import {
   Code2,
   Clock,
   Eye,
-  Sliders,
   ExternalLink,
   Layers,
   ArrowRight,
   ShieldCheck,
   Bot,
   Link2,
-  RotateCcw
+  RotateCcw,
+  Users,
+  Activity,
+  AlertTriangle,
+  X,
+  Trash2
 } from 'lucide-react';
 import { htmlToMarkdownManifest } from './manifest';
 import { useToolAnalytics } from '../../hooks/useToolAnalytics';
@@ -37,7 +41,7 @@ const SAMPLE_SITES = [
 const SAMPLE_HTML = `<article>
   <header>
     <h1>Deep Learning Architectures for Agentic Reasoning</h1>
-    <p class="byline">Published on September 18, 2026 by AI Engineering Lab</p>
+    <p class="byline">Published by AI Engineering Lab</p>
   </header>
 
   <p>Modern Large Language Models rely heavily on <strong>contextual grounding</strong> and structured tool-use frameworks.</p>
@@ -83,23 +87,23 @@ const SAMPLE_HTML = `<article>
 const PROMPT_TEMPLATES = [
   {
     title: 'Executive Summary',
-    desc: 'Condense into 3 bullet points with key takeaways.',
-    wrap: (md) => `Please provide a concise executive summary of the following document in 3-5 bullet points:\n\n${md}`
+    desc: 'Condense into 3 bullet points with key takeaways and conclusions.',
+    wrap: (md) => `Please provide a concise executive summary of the following document in 3-5 high-impact bullet points:\n\n${md}`
   },
   {
     title: 'Extract Key Facts & Data',
-    desc: 'Isolate all quantitative data, tables, and statistics.',
+    desc: 'Isolate all quantitative data, tables, figures, and technical statistics.',
     wrap: (md) => `Extract all quantitative metrics, facts, and tabular data from this document:\n\n${md}`
   },
   {
     title: 'Technical Q&A Context',
-    desc: 'Prepare document as grounded RAG reference context.',
-    wrap: (md) => `You are an expert AI assistant. Use the following verified reference context to answer user questions:\n\n<context>\n${md}\n</context>`
+    desc: 'Prepare document as grounded RAG reference context for zero hallucination.',
+    wrap: (md) => `You are an expert AI assistant. Use the following verified reference context to answer user questions with citations:\n\n<context>\n${md}\n</context>`
   },
   {
     title: 'Explain Like I\'m 5 (ELI5)',
-    desc: 'Explain complex jargon in simple, accessible language.',
-    wrap: (md) => `Explain the core ideas of the following article in simple, everyday language that a 10-year-old can understand:\n\n${md}`
+    desc: 'Translate complex technical jargon into simple, everyday language.',
+    wrap: (md) => `Explain the core concepts and findings of this article in clear, everyday language suitable for a beginner:\n\n${md}`
   }
 ];
 
@@ -113,7 +117,7 @@ export default function HtmlToLlmMarkdown({ onBack, toolMeta }) {
     getConversionLabel
   } = useToolAnalytics(htmlToMarkdownManifest.slug, toolMeta);
 
-  // Mode: 'url' | 'html'
+  // Input modes: 'url' | 'html'
   const [inputMode, setInputMode] = useState('url');
   const [targetUrl, setTargetUrl] = useState('');
   const [rawHtml, setRawHtml] = useState(SAMPLE_HTML);
@@ -126,77 +130,71 @@ export default function HtmlToLlmMarkdown({ onBack, toolMeta }) {
   const [keepImages, setKeepImages] = useState(false);
   const [addFrontmatter, setAddFrontmatter] = useState(true);
 
-  // Result state
+  // Results State
   const [resultData, setResultData] = useState(null);
   const [editableMarkdown, setEditableMarkdown] = useState('');
   const [activeTab, setActiveTab] = useState('markdown'); // 'markdown' | 'preview' | 'prompts'
   const [copiedId, setCopiedId] = useState(null);
 
-  // Conversion handler
-  const handleConvert = async (overrideUrl) => {
+  // Handle URL or HTML conversion
+  const handleConvert = async (overrideUrl = null) => {
     setErrorMessage(null);
+    const urlToUse = overrideUrl || targetUrl;
+
+    if (inputMode === 'url' && !urlToUse.trim()) {
+      setErrorMessage('Please enter a valid website URL to convert.');
+      return;
+    }
+
+    if (inputMode === 'html' && !rawHtml.trim()) {
+      setErrorMessage('Please paste some HTML content to convert.');
+      return;
+    }
+
     setIsLoading(true);
 
     try {
-      const isUrl = inputMode === 'url' || overrideUrl;
-      const urlToUse = overrideUrl || targetUrl;
-
-      if (isUrl && !urlToUse.trim()) {
-        throw new Error('Please enter a website URL to fetch and convert.');
-      }
-      if (!isUrl && !rawHtml.trim()) {
-        throw new Error('Please enter or paste HTML code to convert.');
-      }
-
-      const body = {
+      const payload = {
         options: {
-          extractArticleOnly,
-          removeLinks: !keepLinks,
-          removeImages: !keepImages,
-          addFrontmatter
+          isolateArticle: extractArticleOnly,
+          preserveLinks: keepLinks,
+          preserveImages: keepImages,
+          includeFrontmatter: addFrontmatter
         }
       };
 
-      if (isUrl) {
-        body.url = urlToUse.trim();
+      if (inputMode === 'url') {
+        payload.url = urlToUse.trim();
       } else {
-        body.html = rawHtml;
+        payload.html = rawHtml;
       }
 
-      const resp = await fetch('/api/tools/html-to-markdown/convert', {
+      const response = await fetch('/api/tools/html-to-markdown/convert', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body)
+        body: JSON.stringify(payload)
       });
 
-      if (!resp.ok) {
-        const errJson = await resp.json().catch(() => ({}));
-        throw new Error(errJson.error || `Conversion failed with status ${resp.status}`);
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || 'Failed to convert HTML to Markdown.');
       }
 
-      const resJson = await resp.json();
-      if (!resJson.success) {
-        throw new Error(resJson.error || 'Failed to convert HTML to Markdown.');
-      }
-
-      setResultData(resJson.data);
-      setEditableMarkdown(resJson.data.markdown);
-      trackUse({
-        mode: isUrl ? 'url' : 'html',
-        originalSize: resJson.data.originalSizeBytes,
-        markdownSize: resJson.data.markdownSizeBytes,
-        savingsPercent: resJson.data.savingsPercent
-      });
+      setResultData(data.data);
+      setEditableMarkdown(data.data.markdown || '');
+      setActiveTab('markdown');
+      trackUse({ mode: inputMode, tokens: data.data.estimatedTokens });
     } catch (err) {
-      setErrorMessage(err.message);
+      setErrorMessage(err.message || 'An unexpected error occurred while converting content.');
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleCopy = (text, id = 'copy-btn') => {
-    if (!text) return;
-    navigator.clipboard.writeText(text);
+  const handleCopy = (content, id = 'main') => {
+    if (!content) return;
+    navigator.clipboard.writeText(content);
     trackCopy({ mode: inputMode });
     setCopiedId(id);
     setTimeout(() => setCopiedId(null), 2000);
@@ -216,78 +214,155 @@ export default function HtmlToLlmMarkdown({ onBack, toolMeta }) {
     trackDownload({ mode: inputMode, filename });
   };
 
+  const handleReset = () => {
+    setResultData(null);
+    setEditableMarkdown('');
+    setErrorMessage(null);
+  };
+
+  // Simple Markdown to HTML preview renderer
+  const renderedPreviewHtml = useMemo(() => {
+    if (!editableMarkdown) return '';
+
+    // Strip frontmatter from preview if present
+    let content = editableMarkdown.replace(/^---[\s\S]*?---\n*/, '');
+
+    // Escape HTML entities to prevent injection
+    let html = content
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+
+    // Fenced Code blocks
+    html = html.replace(/```([a-zA-Z0-9_-]*)\n([\s\S]*?)```/g, (_m, lang, code) => {
+      return `<pre><code class="language-${lang}">${code.trim()}</code></pre>`;
+    });
+
+    // Inline code
+    html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
+
+    // Headings
+    html = html.replace(/^### (.*$)/gim, '<h3>$1</h3>');
+    html = html.replace(/^## (.*$)/gim, '<h2>$1</h2>');
+    html = html.replace(/^# (.*$)/gim, '<h1>$1</h1>');
+
+    // Blockquotes
+    html = html.replace(/^\> (.*$)/gim, '<blockquote>$1</blockquote>');
+
+    // Bold & Italics
+    html = html.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+    html = html.replace(/\*([^*]+)\*/g, '<em>$1</em>');
+
+    // Markdown Links
+    html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
+
+    // Lists
+    html = html.replace(/^\s*[-*]\s+(.*)$/gim, '<li>$1</li>');
+    html = html.replace(/(<li>.*<\/li>)/gms, '<ul>$1</ul>');
+
+    // Paragraphs
+    html = html.split(/\n{2,}/).map(para => {
+      para = para.trim();
+      if (!para) return '';
+      if (para.startsWith('<h') || para.startsWith('<pre') || para.startsWith('<ul') || para.startsWith('<blockquote') || para.startsWith('<table')) {
+        return para;
+      }
+      return `<p>${para.replace(/\n/g, '<br/>')}</p>`;
+    }).join('\n');
+
+    return html;
+  }, [editableMarkdown]);
+
   return (
-    <div className="htm-container">
-      {/* Tool Header */}
+    <div className="c-tool-page-container htm-root">
+      {/* Standardized ToolHeader */}
       <ToolHeader
-        title={toolMeta?.title || htmlToMarkdownManifest.title}
-        subtitle="Convert webpages and raw HTML into clean, token-efficient Markdown optimized for ChatGPT, Claude, Gemini, and RAG pipelines."
-        slug={htmlToMarkdownManifest.slug}
-        category={toolMeta?.category || htmlToMarkdownManifest.category}
-        badgeText={toolMeta?.badge || htmlToMarkdownManifest.badge}
-        viewsCount={visitorCount}
-        usesCount={conversionCount}
-        conversionLabel={getConversionLabel()}
+        title={htmlToMarkdownManifest.title}
+        subtitle={htmlToMarkdownManifest.shortDescription}
         onBack={onBack}
+        slug={htmlToMarkdownManifest.slug}
+        badges={
+          <>
+            {visitorCount > 0 && (
+              <Badge variant="blue" icon={<Users size={12} strokeWidth={2} />}>
+                {visitorCount.toLocaleString()} visitors
+              </Badge>
+            )}
+            {conversionCount > 0 && (
+              <Badge variant="brand" icon={<Activity size={12} strokeWidth={2} />}>
+                {conversionCount.toLocaleString()} {getConversionLabel()}
+              </Badge>
+            )}
+            <Badge variant="neutral" icon={<Bot size={12} strokeWidth={2} />}>
+              AI Assisted
+            </Badge>
+            <Badge variant="success" icon={<ShieldCheck size={12} strokeWidth={2} />}>
+              SSRF Protected
+            </Badge>
+          </>
+        }
       />
 
-      <AdSlot slot="header-sub" />
-
-      {/* Error Alert */}
+      {/* Error Alert Banner */}
       {errorMessage && (
-        <div style={{
-          padding: '1rem 1.25rem',
-          background: 'rgba(239, 68, 68, 0.08)',
-          border: '1px solid rgba(239, 68, 68, 0.25)',
-          borderRadius: '14px',
-          color: '#dc2626',
-          fontSize: '0.88rem',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '0.6rem'
-        }}>
-          <strong>Error:</strong> {errorMessage}
+        <div className="htm-error-banner">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+            <AlertTriangle size={18} />
+            <span>{errorMessage}</span>
+          </div>
+          <button
+            type="button"
+            className="htm-error-close"
+            onClick={() => setErrorMessage(null)}
+            aria-label="Dismiss error"
+          >
+            <X size={16} />
+          </button>
         </div>
       )}
 
-      {/* Hero & Input Card */}
+      {/* Main Hero & Input Card */}
       <div className="htm-hero-card">
-        <span className="htm-hero-eyebrow">
-          <Sparkles size={14} /> Free In-Browser &amp; URL Converter
-        </span>
-        <h2 className="htm-hero-title">HTML to LLM Markdown Converter</h2>
-        <p className="htm-hero-subtitle">
-          Strip navigation bars, tracking scripts, and cookie banners to reduce prompt token consumption by up to <strong>90%</strong>.
-        </p>
-
-        {/* Input Mode Switcher */}
-        <div className="htm-mode-switcher">
-          <button
-            type="button"
-            className={`htm-mode-btn ${inputMode === 'url' ? 'active' : ''}`}
-            onClick={() => setInputMode('url')}
-          >
-            <Globe size={14} />
-            <span>Webpage URL</span>
-          </button>
-          <button
-            type="button"
-            className={`htm-mode-btn ${inputMode === 'html' ? 'active' : ''}`}
-            onClick={() => setInputMode('html')}
-          >
-            <Code2 size={14} />
-            <span>Paste HTML Snippet</span>
-          </button>
+        <div className="htm-hero-header">
+          <span className="htm-hero-eyebrow">
+            <Sparkles size={14} /> Free Web &amp; HTML Converter
+          </span>
+          <h2 className="htm-hero-title">Convert Webpages to Clean Markdown for LLMs</h2>
+          <p className="htm-hero-subtitle">
+            Strip boilerplate, cookie banners, navigation, and ads to reduce prompt tokens by up to <strong>90%</strong> for Claude, ChatGPT, and RAG pipelines.
+          </p>
         </div>
 
-        {/* URL Input Form */}
+        {/* Input Mode Segmented Control */}
+        <div className="htm-mode-switcher-container">
+          <div className="htm-mode-switcher">
+            <button
+              type="button"
+              className={`htm-mode-btn ${inputMode === 'url' ? 'active' : ''}`}
+              onClick={() => setInputMode('url')}
+            >
+              <Globe size={15} />
+              <span>Webpage URL</span>
+            </button>
+            <button
+              type="button"
+              className={`htm-mode-btn ${inputMode === 'html' ? 'active' : ''}`}
+              onClick={() => setInputMode('html')}
+            >
+              <Code2 size={15} />
+              <span>Paste Raw HTML</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Input Form: URL Mode */}
         {inputMode === 'url' ? (
           <form
+            className="htm-input-form"
             onSubmit={(e) => {
               e.preventDefault();
               handleConvert();
             }}
-            style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}
           >
             <div className="htm-input-wrapper">
               <Globe className="htm-input-icon" size={18} />
@@ -299,6 +374,7 @@ export default function HtmlToLlmMarkdown({ onBack, toolMeta }) {
                 onChange={(e) => setTargetUrl(e.target.value)}
                 disabled={isLoading}
                 spellCheck="false"
+                autoCapitalize="none"
               />
               <Button
                 variant="primary"
@@ -311,7 +387,7 @@ export default function HtmlToLlmMarkdown({ onBack, toolMeta }) {
             </div>
 
             <div className="htm-samples-row">
-              <span>Try sample:</span>
+              <span className="htm-sample-label">Try sample:</span>
               {SAMPLE_SITES.map((s, idx) => (
                 <button
                   key={idx}
@@ -329,44 +405,56 @@ export default function HtmlToLlmMarkdown({ onBack, toolMeta }) {
             </div>
           </form>
         ) : (
-          /* Raw HTML Input Form */
-          <div className="htm-textarea-wrapper">
-            <textarea
-              className="htm-textarea"
-              value={rawHtml}
-              onChange={(e) => setRawHtml(e.target.value)}
-              placeholder="Paste raw HTML code here..."
-              disabled={isLoading}
-              spellCheck="false"
-            />
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
-              <div className="htm-samples-row">
-                <span>Preset:</span>
-                <button
-                  type="button"
-                  className="htm-sample-btn"
-                  onClick={() => setRawHtml(SAMPLE_HTML)}
-                  disabled={isLoading}
+          /* Input Form: Raw HTML Mode */
+          <div className="htm-input-form">
+            <div className="htm-textarea-wrapper">
+              <textarea
+                className="htm-textarea"
+                value={rawHtml}
+                onChange={(e) => setRawHtml(e.target.value)}
+                placeholder="Paste raw HTML code here..."
+                disabled={isLoading}
+                spellCheck="false"
+              />
+              <div className="htm-textarea-actions">
+                <div className="htm-samples-row">
+                  <span className="htm-sample-label">Preset:</span>
+                  <button
+                    type="button"
+                    className="htm-sample-btn"
+                    onClick={() => setRawHtml(SAMPLE_HTML)}
+                    disabled={isLoading}
+                  >
+                    Load Tech Article Sample
+                  </button>
+                  {rawHtml && (
+                    <button
+                      type="button"
+                      className="htm-sample-btn clear-btn"
+                      onClick={() => setRawHtml('')}
+                      disabled={isLoading}
+                    >
+                      <Trash2 size={12} /> Clear
+                    </button>
+                  )}
+                </div>
+                <Button
+                  variant="primary"
+                  onClick={() => handleConvert()}
+                  disabled={isLoading || !rawHtml.trim()}
+                  icon={isLoading ? <Clock size={16} className="spin" /> : <Zap size={16} />}
                 >
-                  Load Tech Article Sample
-                </button>
+                  {isLoading ? 'Converting...' : 'Convert HTML to Markdown'}
+                </Button>
               </div>
-              <Button
-                variant="primary"
-                onClick={() => handleConvert()}
-                disabled={isLoading || !rawHtml.trim()}
-                icon={isLoading ? <Clock size={16} className="spin" /> : <Zap size={16} />}
-              >
-                {isLoading ? 'Converting...' : 'Convert HTML to Markdown'}
-              </Button>
             </div>
           </div>
         )}
 
-        {/* Options Toggles Bar */}
+        {/* Conversion Options Bar */}
         <div className="htm-options-bar">
-          <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 600 }}>Options:</span>
-          
+          <span className="htm-options-label">Options:</span>
+
           <button
             type="button"
             className={`htm-option-toggle ${extractArticleOnly ? 'active' : ''}`}
@@ -412,15 +500,13 @@ export default function HtmlToLlmMarkdown({ onBack, toolMeta }) {
       {/* Loading Progress State */}
       {isLoading && (
         <div className="htm-loading-card">
-          <Clock size={24} className="spin" style={{ color: 'var(--text-main)' }} />
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', alignItems: 'center' }}>
-            <strong style={{ fontSize: '1.05rem', color: 'var(--text-main)' }}>
-              Parsing HTML &amp; Synthesizing Token-Efficient Markdown...
-            </strong>
-            <span style={{ fontSize: '0.84rem', color: 'var(--text-muted)' }}>
-              Stripping navigation chrome, translating tables, and estimating context tokens.
-            </span>
-          </div>
+          <Clock size={28} className="spin" style={{ color: 'var(--text-main)' }} />
+          <h3 className="htm-loading-title">
+            Parsing HTML &amp; Synthesizing Token-Efficient Markdown...
+          </h3>
+          <p className="htm-loading-desc">
+            Stripping navigation boilerplate, translating tables, and estimating context tokens.
+          </p>
           <div className="htm-loading-track">
             <div className="htm-loading-bar" />
           </div>
@@ -429,7 +515,7 @@ export default function HtmlToLlmMarkdown({ onBack, toolMeta }) {
 
       {/* Results Workspace */}
       {resultData && !isLoading && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+        <div className="htm-results-container">
           {/* 4 Apple KPI Scorecards */}
           <div className="htm-kpi-grid">
             {/* 1. Original vs Clean Size */}
@@ -442,14 +528,14 @@ export default function HtmlToLlmMarkdown({ onBack, toolMeta }) {
                 {(resultData.originalSizeBytes / 1024).toFixed(1)} KB → {(resultData.markdownSizeBytes / 1024).toFixed(1)} KB
               </div>
               <div className="htm-kpi-label">
-                Cleaned document size compressed by {resultData.savingsPercent}%
+                Cleaned document compressed by {resultData.savingsPercent}%
               </div>
             </div>
 
             {/* 2. Token Savings */}
             <div className="htm-kpi-card">
               <div className="htm-kpi-top">
-                <span>Prompt Token Savings</span>
+                <span>Token Savings</span>
                 <Zap size={15} color="#10b981" />
               </div>
               <div className="htm-kpi-val savings">
@@ -500,7 +586,7 @@ export default function HtmlToLlmMarkdown({ onBack, toolMeta }) {
                   className={`htm-view-tab ${activeTab === 'markdown' ? 'active' : ''}`}
                   onClick={() => setActiveTab('markdown')}
                 >
-                  <Code2 size={13} />
+                  <Code2 size={14} />
                   <span>Clean Markdown</span>
                 </button>
                 <button
@@ -508,7 +594,7 @@ export default function HtmlToLlmMarkdown({ onBack, toolMeta }) {
                   className={`htm-view-tab ${activeTab === 'preview' ? 'active' : ''}`}
                   onClick={() => setActiveTab('preview')}
                 >
-                  <Eye size={13} />
+                  <Eye size={14} />
                   <span>Reader Preview</span>
                 </button>
                 <button
@@ -516,8 +602,8 @@ export default function HtmlToLlmMarkdown({ onBack, toolMeta }) {
                   className={`htm-view-tab ${activeTab === 'prompts' ? 'active' : ''}`}
                   onClick={() => setActiveTab('prompts')}
                 >
-                  <Bot size={13} />
-                  <span>Prompt Wrappers</span>
+                  <Bot size={14} />
+                  <span>Prompt Templates</span>
                 </button>
               </div>
 
@@ -527,15 +613,15 @@ export default function HtmlToLlmMarkdown({ onBack, toolMeta }) {
                   variant="primary"
                   size="sm"
                   onClick={() => handleCopy(editableMarkdown, 'main-copy')}
-                  icon={copiedId === 'main-copy' ? <Check size={13} /> : <Copy size={13} />}
+                  icon={copiedId === 'main-copy' ? <Check size={14} /> : <Copy size={14} />}
                 >
-                  {copiedId === 'main-copy' ? 'Copied' : 'Copy Markdown'}
+                  {copiedId === 'main-copy' ? 'Copied!' : 'Copy Markdown'}
                 </Button>
                 <Button
                   variant="secondary"
                   size="sm"
                   onClick={() => handleDownload(editableMarkdown, `${(resultData.title || 'document').toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 40)}.md`)}
-                  icon={<Download size={13} />}
+                  icon={<Download size={14} />}
                 >
                   Download .md
                 </Button>
@@ -544,69 +630,101 @@ export default function HtmlToLlmMarkdown({ onBack, toolMeta }) {
                     variant="secondary"
                     size="sm"
                     onClick={() => window.open(resultData.sourceUrl, '_blank')}
-                    icon={<ExternalLink size={13} />}
+                    icon={<ExternalLink size={14} />}
                   >
                     Open Source
                   </Button>
                 )}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleReset}
+                  icon={<RotateCcw size={14} />}
+                >
+                  Reset
+                </Button>
               </div>
             </div>
 
             {/* Tab 1: Clean Markdown Editor */}
             {activeTab === 'markdown' && (
-              <div className="htm-editor-body">
+              <div className="htm-editor-wrapper">
                 <textarea
                   className="htm-markdown-editor"
                   value={editableMarkdown}
                   onChange={(e) => setEditableMarkdown(e.target.value)}
                   spellCheck="false"
                 />
+                <div className="htm-editor-footer">
+                  <div className="htm-editor-stats">
+                    <span>{editableMarkdown.length.toLocaleString()} characters</span>
+                    <span>•</span>
+                    <span>{editableMarkdown.split(/\s+/).filter(Boolean).length.toLocaleString()} words</span>
+                    <span>•</span>
+                    <span>~{Math.round(editableMarkdown.length / 4).toLocaleString()} tokens</span>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleCopy(editableMarkdown, 'footer-copy')}
+                    icon={copiedId === 'footer-copy' ? <Check size={13} /> : <Copy size={13} />}
+                  >
+                    {copiedId === 'footer-copy' ? 'Copied' : 'Quick Copy'}
+                  </Button>
+                </div>
               </div>
             )}
 
             {/* Tab 2: Rendered Reader Preview */}
             {activeTab === 'preview' && (
-              <div className="htm-preview-body">
-                {/* Simulated minimal markdown render */}
-                <div style={{ whiteSpace: 'pre-wrap', fontFamily: 'inherit' }}>
-                  {editableMarkdown}
-                </div>
-              </div>
+              <div
+                className="htm-preview-wrapper"
+                dangerouslySetInnerHTML={{ __html: renderedPreviewHtml }}
+              />
             )}
 
             {/* Tab 3: Prompt Wrappers */}
             {activeTab === 'prompts' && (
               <div className="htm-prompt-body">
-                <div>
-                  <h3 style={{ fontSize: '1.05rem', fontWeight: 700, margin: '0 0 0.25rem 0' }}>
-                    1-Click Prompt Wrapper Templates
-                  </h3>
-                  <p style={{ fontSize: '0.84rem', color: 'var(--text-muted)', margin: 0 }}>
-                    Select a template to instantly copy your converted document wrapped in targeted AI instructions:
+                <div className="htm-prompt-header">
+                  <h3>1-Click Prompt Wrapper Templates</h3>
+                  <p>
+                    Select a template to instantly copy your converted document wrapped in targeted AI instructions for ChatGPT, Claude, or DeepSeek:
                   </p>
                 </div>
 
                 <div className="htm-prompt-cards">
-                  {PROMPT_TEMPLATES.map((tpl, idx) => (
-                    <div
-                      key={idx}
-                      className="htm-prompt-card"
-                      onClick={() => handleCopy(tpl.wrap(editableMarkdown), `prompt-${idx}`)}
-                    >
-                      <h4>
-                        <span>{tpl.title}</span>
-                        {copiedId === `prompt-${idx}` ? (
-                          <Check size={14} color="#10b981" />
-                        ) : (
-                          <Copy size={13} color="var(--text-muted)" />
-                        )}
-                      </h4>
-                      <p>{tpl.desc}</p>
-                      <span style={{ fontSize: '0.74rem', color: '#6366f1', fontWeight: 600, marginTop: '0.35rem' }}>
-                        {copiedId === `prompt-${idx}` ? 'Copied to Clipboard!' : 'Click to Copy Wrapped Prompt'}
-                      </span>
-                    </div>
-                  ))}
+                  {PROMPT_TEMPLATES.map((tpl, idx) => {
+                    const isCopied = copiedId === `prompt-${idx}`;
+                    return (
+                      <div
+                        key={idx}
+                        className="htm-prompt-card"
+                        onClick={() => handleCopy(tpl.wrap(editableMarkdown), `prompt-${idx}`)}
+                      >
+                        <h4>
+                          <span>{tpl.title}</span>
+                          {isCopied ? (
+                            <Check size={15} color="#10b981" />
+                          ) : (
+                            <Copy size={14} color="var(--text-muted)" />
+                          )}
+                        </h4>
+                        <p>{tpl.desc}</p>
+                        <span className={`htm-prompt-cta ${isCopied ? 'copied' : ''}`}>
+                          {isCopied ? (
+                            <>
+                              <Check size={13} /> Copied to Clipboard!
+                            </>
+                          ) : (
+                            <>
+                              <Copy size={13} /> Click to Copy Wrapped Prompt
+                            </>
+                          )}
+                        </span>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             )}
