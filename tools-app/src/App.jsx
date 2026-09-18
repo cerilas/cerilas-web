@@ -434,7 +434,7 @@ export default function App() {
                     }
                   }}
                 />
-                <h1 style={{ margin: 0, fontFamily: "'Roboto', -apple-system, BlinkMacSystemFont, sans-serif", fontWeight: 700, letterSpacing: '-0.02em' }}>Cerilas' Tools</h1>
+                <h1 style={{ margin: 0, fontFamily: "'Garet', -apple-system, BlinkMacSystemFont, sans-serif", fontWeight: 100, fontVariationSettings: "'wght' 100", color: '#272727', letterSpacing: '-0.02em' }}>Cerilas' Tools</h1>
               </div>
               <p>{t('catalog.subtitle')}</p>
             </header>

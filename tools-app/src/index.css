@@ -1,5 +1,15 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Roboto:wght@400;500;700;900&display=swap');
 
+@font-face {
+  font-family: 'Garet';
+  src: url('/fonts/GaretVariableVF.woff2') format('woff2-variations'),
+       url('/fonts/GaretVariableVF.woff2') format('woff2'),
+       url('/fonts/Garet-Book.woff2') format('woff2');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
   --bg-color: #ffffff;
   --card-bg: rgba(255, 255, 255, 0.6);
@@ -305,11 +315,12 @@ body {
 }
 
 .nav-brand-text {
-  font-family: 'Roboto', -apple-system, BlinkMacSystemFont, sans-serif !important;
-  font-weight: 500;
+  font-family: 'Garet', -apple-system, BlinkMacSystemFont, sans-serif !important;
+  font-weight: 100;
+  font-variation-settings: 'wght' 100;
   font-size: 1.15rem;
   letter-spacing: -0.01em;
-  color: var(--text-main);
+  color: #272727 !important;
   white-space: nowrap;
 }
 
