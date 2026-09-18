@@ -353,11 +353,23 @@ body {
    SEO-Rich Mega Footer - Apple Minimalist Typography & Layout
    ========================================================================== */
 .seo-footer {
-  border-top: 1px solid var(--card-border);
+  border-top: 1px solid rgba(0, 0, 0, 0.12);
   background: var(--bg-color);
   padding: 4.5rem 1.5rem 3rem 1.5rem;
   margin-top: 5rem;
   box-sizing: border-box;
+  position: relative;
+}
+
+[data-theme="dark"] .seo-footer,
+.dark .seo-footer {
+  border-top-color: rgba(255, 255, 255, 0.15);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .seo-footer {
+    border-top-color: rgba(255, 255, 255, 0.15);
+  }
 }
 
 .seo-footer-inner {
@@ -376,7 +388,18 @@ body {
   gap: 2.5rem;
   flex-wrap: wrap;
   padding-bottom: 2.5rem;
-  border-bottom: 1px solid var(--card-border);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="dark"] .seo-footer-top,
+.dark .seo-footer-top {
+  border-bottom-color: rgba(255, 255, 255, 0.1);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .seo-footer-top {
+    border-bottom-color: rgba(255, 255, 255, 0.1);
+  }
 }
 
 .seo-footer-brand-col {
@@ -648,7 +671,18 @@ body {
   flex-direction: column;
   gap: 1.5rem;
   padding-top: 2rem;
-  border-top: 1px solid var(--card-border);
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="dark"] .seo-footer-bottom,
+.dark .seo-footer-bottom {
+  border-top-color: rgba(255, 255, 255, 0.1);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .seo-footer-bottom {
+    border-top-color: rgba(255, 255, 255, 0.1);
+  }
 }
 
 .seo-privacy-notice {
