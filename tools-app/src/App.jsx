@@ -1,5 +1,30 @@
 import React, { useState, useEffect, useLayoutEffect, Suspense } from 'react';
-import { Search, ArrowRight, Box, QrCode, Minimize2, Image as ImageIcon, Clock, FileText, FileCheck, Sparkles, SlidersHorizontal, Database, Cpu, PenTool, Video, Webhook, Braces, Mail, Users, Activity } from 'lucide-react';
+import { 
+  Search, 
+  ArrowRight, 
+  Box, 
+  QrCode, 
+  Minimize2, 
+  Image as ImageIcon, 
+  Clock, 
+  FileText, 
+  FileCheck, 
+  Sparkles, 
+  SlidersHorizontal, 
+  Database, 
+  Cpu, 
+  PenTool, 
+  Video, 
+  Webhook, 
+  Braces, 
+  Mail, 
+  Users, 
+  Activity,
+  TrendingUp,
+  RotateCcw,
+  DollarSign,
+  Scale
+} from 'lucide-react';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import StatsModal from './components/StatsModal';
@@ -61,7 +86,13 @@ const ICON_MAP = {
   Video,
   Webhook,
   Braces,
-  Mail
+  Mail,
+  TrendingUp,
+  RotateCcw,
+  DollarSign,
+  Users,
+  Scale,
+  Activity
 };
 
 const ToolCard = ({ tool, onSelect }) => {

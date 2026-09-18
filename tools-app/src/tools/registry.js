@@ -13,6 +13,13 @@ import { webhookTesterManifest } from './webhook-tester/manifest';
 import { jsonBeautifierManifest } from './json-beautifier/manifest';
 import { emailSignatureGeneratorManifest } from './email-signature-generator/manifest';
 import { youtubeThumbnailDownloaderManifest } from './youtube-thumbnail-downloader/manifest';
+import { startupRunwayCalculatorManifest } from './startup-runway-calculator/manifest';
+import { mrrCalculatorManifest } from './mrr-calculator/manifest';
+import { arrCalculatorManifest } from './arr-calculator/manifest';
+import { churnCalculatorManifest } from './churn-calculator/manifest';
+import { ltvCalculatorManifest } from './ltv-calculator/manifest';
+import { cacCalculatorManifest } from './cac-calculator/manifest';
+import { ltvCacCalculatorManifest } from './ltv-cac-calculator/manifest';
 
 /**
  * Enterprise Scalable Tool Registry.
@@ -76,6 +83,34 @@ export const toolsRegistry = {
   [youtubeThumbnailDownloaderManifest.slug]: {
     manifest: youtubeThumbnailDownloaderManifest,
     component: lazy(() => import('./youtube-thumbnail-downloader'))
+  },
+  [startupRunwayCalculatorManifest.slug]: {
+    manifest: startupRunwayCalculatorManifest,
+    component: lazy(() => import('./startup-runway-calculator'))
+  },
+  [mrrCalculatorManifest.slug]: {
+    manifest: mrrCalculatorManifest,
+    component: lazy(() => import('./mrr-calculator'))
+  },
+  [arrCalculatorManifest.slug]: {
+    manifest: arrCalculatorManifest,
+    component: lazy(() => import('./arr-calculator'))
+  },
+  [churnCalculatorManifest.slug]: {
+    manifest: churnCalculatorManifest,
+    component: lazy(() => import('./churn-calculator'))
+  },
+  [ltvCalculatorManifest.slug]: {
+    manifest: ltvCalculatorManifest,
+    component: lazy(() => import('./ltv-calculator'))
+  },
+  [cacCalculatorManifest.slug]: {
+    manifest: cacCalculatorManifest,
+    component: lazy(() => import('./cac-calculator'))
+  },
+  [ltvCacCalculatorManifest.slug]: {
+    manifest: ltvCacCalculatorManifest,
+    component: lazy(() => import('./ltv-cac-calculator'))
   }
 };
 

@@ -11,7 +11,8 @@ import {
   Code, 
   Cpu, 
   CheckCircle2,
-  ArrowUpRight
+  ArrowUpRight,
+  TrendingUp
 } from 'lucide-react';
 import { useTranslation } from '../i18n';
 
@@ -99,7 +100,7 @@ export default function Footer({ onOpenStats }) {
           </div>
         </div>
 
-        {/* 4 Categorized SEO Directory Columns */}
+        {/* 5 Categorized SEO Directory Columns */}
         <div className="seo-footer-grid">
           {/* Column 1: PDF & Document Suite */}
           <div className="seo-footer-col">
@@ -181,7 +182,59 @@ export default function Footer({ onOpenStats }) {
             </ul>
           </div>
 
-          {/* Column 3: Developer & Productivity Utilities */}
+          {/* Column 3: Startup & SaaS Finance */}
+          <div className="seo-footer-col">
+            <h3 className="seo-col-title">
+              <TrendingUp size={15} />
+              <span>Startup &amp; SaaS Finance</span>
+            </h3>
+            <ul className="seo-col-list">
+              <li>
+                <a href="#/tool/startup-runway-calculator" onClick={() => handleToolClick('startup-runway-calculator')} title="Startup Runway Calculator">
+                  <span className="seo-tool-title">Startup Runway Calculator</span>
+                  <span className="seo-link-tag">Burn &amp; Zero-Cash</span>
+                </a>
+              </li>
+              <li>
+                <a href="#/tool/mrr-calculator" onClick={() => handleToolClick('mrr-calculator')} title="MRR Calculator">
+                  <span className="seo-tool-title">MRR Calculator</span>
+                  <span className="seo-link-tag">Net Growth</span>
+                </a>
+              </li>
+              <li>
+                <a href="#/tool/arr-calculator" onClick={() => handleToolClick('arr-calculator')} title="ARR Calculator">
+                  <span className="seo-tool-title">ARR Calculator</span>
+                  <span className="seo-link-tag">Run-Rate &amp; Scale</span>
+                </a>
+              </li>
+              <li>
+                <a href="#/tool/churn-calculator" onClick={() => handleToolClick('churn-calculator')} title="Churn Calculator">
+                  <span className="seo-tool-title">Churn Calculator</span>
+                  <span className="seo-link-tag">Logo &amp; Revenue</span>
+                </a>
+              </li>
+              <li>
+                <a href="#/tool/ltv-calculator" onClick={() => handleToolClick('ltv-calculator')} title="LTV Calculator">
+                  <span className="seo-tool-title">LTV Calculator</span>
+                  <span className="seo-link-tag">Lifetime Value</span>
+                </a>
+              </li>
+              <li>
+                <a href="#/tool/cac-calculator" onClick={() => handleToolClick('cac-calculator')} title="CAC Calculator">
+                  <span className="seo-tool-title">CAC Calculator</span>
+                  <span className="seo-link-tag">Payback Period</span>
+                </a>
+              </li>
+              <li>
+                <a href="#/tool/ltv-cac-calculator" onClick={() => handleToolClick('ltv-cac-calculator')} title="LTV:CAC Calculator">
+                  <span className="seo-tool-title">LTV:CAC Ratio Calculator</span>
+                  <span className="seo-link-tag">Unit Economics</span>
+                </a>
+              </li>
+            </ul>
+          </div>
+
+          {/* Column 4: Developer & Productivity Utilities */}
           <div className="seo-footer-col">
             <h3 className="seo-col-title">
               <Code size={15} />
@@ -221,7 +274,7 @@ export default function Footer({ onOpenStats }) {
             </ul>
           </div>
 
-          {/* Column 4: Ecosystem & Corporate */}
+          {/* Column 5: Ecosystem & Corporate */}
           <div className="seo-footer-col">
             <h3 className="seo-col-title">
               <ShieldCheck size={15} />
@@ -266,7 +319,7 @@ export default function Footer({ onOpenStats }) {
                   window.location.hash = '#/'; 
                 }} title="All Tools Catalog">
                   <span className="seo-tool-title">All Tools Catalog</span>
-                  <span className="seo-link-tag">14 Utilities</span>
+                  <span className="seo-link-tag">21 Utilities</span>
                 </a>
               </li>
             </ul>
@@ -277,6 +330,13 @@ export default function Footer({ onOpenStats }) {
         <div className="seo-footer-keywords-section">
           <h4 className="seo-keywords-title">Popular Free Utilities &amp; Search Queries</h4>
           <div className="seo-keywords-cloud">
+            <a href="#/tool/startup-runway-calculator" onClick={() => handleToolClick('startup-runway-calculator')}>Startup Runway Calculator</a>
+            <a href="#/tool/mrr-calculator" onClick={() => handleToolClick('mrr-calculator')}>SaaS MRR Calculator</a>
+            <a href="#/tool/arr-calculator" onClick={() => handleToolClick('arr-calculator')}>ARR to MRR Calculator</a>
+            <a href="#/tool/churn-calculator" onClick={() => handleToolClick('churn-calculator')}>SaaS Churn Rate Formula</a>
+            <a href="#/tool/ltv-calculator" onClick={() => handleToolClick('ltv-calculator')}>Customer Lifetime Value LTV</a>
+            <a href="#/tool/cac-calculator" onClick={() => handleToolClick('cac-calculator')}>Customer Acquisition Cost CAC</a>
+            <a href="#/tool/ltv-cac-calculator" onClick={() => handleToolClick('ltv-cac-calculator')}>LTV to CAC Ratio Benchmark</a>
             <a href="#/tool/qr-code-generator" onClick={() => handleToolClick('qr-code-generator')}>Free Dynamic QR Code</a>
             <a href="#/tool/pdf-compressor" onClick={() => handleToolClick('pdf-compressor')}>Compress PDF to 200KB</a>
             <a href="#/tool/pdf-editor" onClick={() => handleToolClick('pdf-editor')}>Edit PDF Text Online</a>
