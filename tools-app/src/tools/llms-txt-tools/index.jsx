@@ -639,76 +639,135 @@ export default function LlmsTxtTools({ onBack, toolMeta }) {
               <div className="llms-curation-grid">
                 {/* Left: Interactive Resource List */}
                 <div className="llms-resource-list">
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <h4 style={{ fontSize: '1rem', fontWeight: 600, margin: 0 }}>
-                      Curate Resources ({resourcesList.filter((r) => r.selected).length} selected)
-                    </h4>
-                    <button
-                      type="button"
-                      className="acc-sample-btn"
+                  <div className="llms-resource-list-header">
+                    <div className="llms-resource-list-title">
+                      <span>Curate Resources</span>
+                      <Badge variant="neutral">
+                        {resourcesList.filter((r) => r.selected).length} of {resourcesList.length} included
+                      </Badge>
+                    </div>
+                    <Button
+                      variant="secondary"
+                      size="sm"
                       onClick={handleAddCustomResource}
+                      icon={<Plus size={13} />}
                     >
-                      <Plus size={12} /> Add Link
-                    </button>
+                      Add Link
+                    </Button>
                   </div>
 
-                  {resourcesList.map((item) => (
-                    <div
-                      key={item.id}
-                      className={`llms-resource-card ${item.selected ? '' : 'deselected'}`}
-                    >
-                      <div className="llms-resource-top">
-                        <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
-                          <input
-                            type="checkbox"
-                            checked={item.selected}
-                            onChange={() => handleToggleResource(item.id)}
-                          />
-                          <strong style={{ fontSize: '0.92rem' }}>{item.title}</strong>
-                        </label>
+                  {resourcesList.length > 0 ? (
+                    resourcesList.map((item) => (
+                      <div
+                        key={item.id}
+                        className={`llms-resource-card ${item.selected ? '' : 'deselected'}`}
+                      >
+                        <div className="llms-resource-top">
+                          <div className="llms-resource-title-row">
+                            <input
+                              type="checkbox"
+                              className="llms-resource-checkbox"
+                              checked={item.selected}
+                              onChange={() => handleToggleResource(item.id)}
+                              id={`chk-${item.id}`}
+                              title={item.selected ? 'Include in llms.txt' : 'Exclude from llms.txt'}
+                            />
+                            <input
+                              type="text"
+                              className="llms-resource-title-input"
+                              value={item.title}
+                              placeholder="Resource Title..."
+                              onChange={(e) => {
+                                const updated = resourcesList.map((r) =>
+                                  r.id === item.id ? { ...r, title: e.target.value } : r
+                                );
+                                setResourcesList(updated);
+                                regenerateMarkdownFromList(updated);
+                              }}
+                            />
+                          </div>
 
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                          <select
-                            className="llms-resource-select"
-                            value={item.section}
-                            onChange={(e) => handleChangeSection(item.id, e.target.value)}
+                          <div className="llms-resource-actions-row">
+                            <select
+                              className="llms-resource-select"
+                              value={item.section}
+                              onChange={(e) => handleChangeSection(item.id, e.target.value)}
+                              title="Assign section in llms.txt"
+                            >
+                              {SECTIONS_LIST.map((sec) => (
+                                <option key={sec} value={sec}>
+                                  {sec}
+                                </option>
+                              ))}
+                            </select>
+                            <button
+                              type="button"
+                              className="llms-resource-delete-btn"
+                              onClick={() => handleDeleteResource(item.id)}
+                              title="Delete link"
+                              aria-label="Delete resource link"
+                            >
+                              <Trash2 size={13} />
+                            </button>
+                          </div>
+                        </div>
+
+                        <input
+                          type="text"
+                          className="llms-resource-input"
+                          value={item.description}
+                          placeholder="Description for AI agents (optional)..."
+                          onChange={(e) => {
+                            const updated = resourcesList.map((r) =>
+                              r.id === item.id ? { ...r, description: e.target.value } : r
+                            );
+                            setResourcesList(updated);
+                            regenerateMarkdownFromList(updated);
+                          }}
+                        />
+
+                        <div className="llms-resource-url-row">
+                          <Globe size={12} className="llms-resource-url-icon" />
+                          <input
+                            type="text"
+                            className="llms-resource-url-input"
+                            value={item.url}
+                            placeholder="https://example.com/page"
+                            onChange={(e) => {
+                              const updated = resourcesList.map((r) =>
+                                r.id === item.id ? { ...r, url: e.target.value } : r
+                              );
+                              setResourcesList(updated);
+                              regenerateMarkdownFromList(updated);
+                            }}
+                          />
+                          <a
+                            href={item.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="llms-resource-url-external"
+                            title="Open link in new tab"
                           >
-                            {SECTIONS_LIST.map((sec) => (
-                              <option key={sec} value={sec}>
-                                {sec}
-                              </option>
-                            ))}
-                          </select>
-                          <button
-                            type="button"
-                            className="acc-error-close"
-                            onClick={() => handleDeleteResource(item.id)}
-                            title="Remove"
-                          >
-                            <Trash2 size={13} />
-                          </button>
+                            <ExternalLink size={11} />
+                          </a>
                         </div>
                       </div>
-
-                      <input
-                        type="text"
-                        className="llms-resource-input"
-                        value={item.description}
-                        placeholder="Description..."
-                        onChange={(e) => {
-                          const updated = resourcesList.map((r) =>
-                            r.id === item.id ? { ...r, description: e.target.value } : r
-                          );
-                          setResourcesList(updated);
-                          regenerateMarkdownFromList(updated);
-                        }}
-                      />
-
-                      <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                        {item.url}
-                      </span>
+                    ))
+                  ) : (
+                    <div style={{ padding: '3rem 1.5rem', textAlign: 'center', color: 'var(--text-muted)' }}>
+                      <p style={{ margin: '0 0 1rem 0', fontSize: '0.9rem' }}>
+                        No resources in your list yet.
+                      </p>
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        onClick={handleAddCustomResource}
+                        icon={<Plus size={13} />}
+                      >
+                        Add your first link
+                      </Button>
                     </div>
-                  ))}
+                  )}
                 </div>
 
                 {/* Right: Live Markdown Output Preview */}
