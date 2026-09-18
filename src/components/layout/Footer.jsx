@@ -19,6 +19,7 @@ const navRoutes = [
 export default function Footer() {
   const { t, localizedPath } = useLang();
   const { resolvedTheme } = usePublicTheme();
+  const isLight = resolvedTheme === "light";
   const f = t.footer;
   const year = new Date().getFullYear();
   const [nlEmail, setNlEmail] = useState("");
@@ -79,13 +80,21 @@ export default function Footer() {
                   href="https://tools.cerilas.com"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-sm text-gray-400 hover:text-cyan-400 transition-colors inline-flex items-center gap-1.5 group"
+                  className={`text-sm transition-colors inline-flex items-center gap-1.5 group ${
+                    isLight ? 'text-slate-600 hover:text-blue-600' : 'text-gray-400 hover:text-cyan-400'
+                  }`}
                 >
                   <span>Cerilas Tools</span>
-                  <span className="text-[10px] font-semibold bg-cyan-950 text-cyan-400 border border-cyan-800/60 px-1.5 py-0.5 rounded leading-none">
+                  <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded leading-none ${
+                    isLight
+                      ? 'bg-blue-50 text-blue-600 border border-blue-200'
+                      : 'bg-cyan-950 text-cyan-400 border border-cyan-800/60'
+                  }`}>
                     Free
                   </span>
-                  <svg className="w-3.5 h-3.5 text-gray-500 group-hover:text-cyan-400 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg className={`w-3.5 h-3.5 transition-all group-hover:translate-x-0.5 group-hover:-translate-y-0.5 ${
+                    isLight ? 'text-slate-400 group-hover:text-blue-600' : 'text-gray-500 group-hover:text-cyan-400'
+                  }`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                   </svg>
                 </a>
@@ -157,13 +166,17 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="mt-12 pt-6 border-t border-gray-800/60 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-4 text-xs text-gray-500 text-center sm:text-left">
-            <p>
+        <div className={`mt-12 pt-6 border-t flex flex-col sm:flex-row items-center justify-between gap-4 ${
+          isLight ? 'border-slate-200' : 'border-gray-800/60'
+        }`}>
+          <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-4 text-xs text-center sm:text-left">
+            <p className={isLight ? 'text-slate-500' : 'text-gray-500'}>
               © {year} {t.brand.fullName}. {f.rights}
             </p>
-            <span className="hidden sm:inline-block w-1 h-1 bg-gray-800 rounded-full" />
-            <p className="text-gray-600">
+            <span className={`hidden sm:inline-block w-1 h-1 rounded-full ${
+              isLight ? 'bg-slate-300' : 'bg-gray-800'
+            }`} />
+            <p className={isLight ? 'text-slate-400' : 'text-gray-600'}>
               Gaziantep, Türkiye
             </p>
           </div>
@@ -173,7 +186,11 @@ export default function Footer() {
             href="https://tools.cerilas.com"
             target="_blank"
             rel="noopener noreferrer"
-            className="group flex items-center gap-3 px-3.5 py-2 rounded-xl bg-gray-900/90 border border-gray-800 hover:border-cyan-500/50 hover:bg-gray-900 transition-all duration-300 shadow-sm hover:shadow-cyan-500/10"
+            className={`tools-footer-badge group flex items-center gap-3 px-3.5 py-2 rounded-xl transition-all duration-300 ${
+              isLight
+                ? 'bg-white border border-slate-200/90 hover:border-blue-400/80 hover:bg-slate-50/80 shadow-[0_2px_8px_rgba(16,24,40,0.04)] hover:shadow-[0_4px_16px_rgba(37,99,235,0.12)]'
+                : 'bg-gray-900/90 border border-gray-800 hover:border-cyan-500/50 hover:bg-gray-900 shadow-sm hover:shadow-cyan-500/10'
+            }`}
             title="Cerilas Tools — Free AI & Developer Utilities"
           >
             <img
@@ -185,18 +202,28 @@ export default function Footer() {
               }}
             />
             <div className="flex flex-col text-left">
-              <span className="text-xs font-semibold text-gray-200 group-hover:text-cyan-400 transition-colors flex items-center gap-1.5">
-                Cerilas' <span className="font-bold text-white group-hover:text-cyan-300">Tools</span>
-                <span className="text-[9px] font-bold uppercase tracking-wider text-cyan-400 bg-cyan-950/80 border border-cyan-800/60 px-1.5 py-0.5 rounded-full leading-none">
+              <span className={`text-xs font-semibold transition-colors flex items-center gap-1.5 ${
+                isLight ? 'text-slate-700 group-hover:text-blue-600' : 'text-gray-200 group-hover:text-cyan-400'
+              }`}>
+                Cerilas' <span className={`font-bold ${isLight ? 'text-slate-900 group-hover:text-blue-600' : 'text-white group-hover:text-cyan-300'}`}>Tools</span>
+                <span className={`text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full leading-none ${
+                  isLight
+                    ? 'text-blue-600 bg-blue-50 border border-blue-200/80'
+                    : 'text-cyan-400 bg-cyan-950/80 border border-cyan-800/60'
+                }`}>
                   Free
                 </span>
               </span>
-              <span className="text-[11px] text-gray-500 group-hover:text-gray-400 transition-colors">
+              <span className={`text-[11px] transition-colors ${
+                isLight ? 'text-slate-400 group-hover:text-slate-600' : 'text-gray-500 group-hover:text-gray-400'
+              }`}>
                 tools.cerilas.com
               </span>
             </div>
             <svg 
-              className="w-3.5 h-3.5 text-gray-500 group-hover:text-cyan-400 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all ml-1" 
+              className={`w-3.5 h-3.5 transition-all ml-1 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 ${
+                isLight ? 'text-slate-400 group-hover:text-blue-600' : 'text-gray-500 group-hover:text-cyan-400'
+              }`}
               fill="none" 
               viewBox="0 0 24 24" 
               stroke="currentColor"
