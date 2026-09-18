@@ -12,6 +12,7 @@ import { videoCompressorManifest } from './video-compressor/manifest';
 import { webhookTesterManifest } from './webhook-tester/manifest';
 import { jsonBeautifierManifest } from './json-beautifier/manifest';
 import { emailSignatureGeneratorManifest } from './email-signature-generator/manifest';
+import { youtubeThumbnailDownloaderManifest } from './youtube-thumbnail-downloader/manifest';
 
 /**
  * Enterprise Scalable Tool Registry.
@@ -71,6 +72,10 @@ export const toolsRegistry = {
   [emailSignatureGeneratorManifest.slug]: {
     manifest: emailSignatureGeneratorManifest,
     component: lazy(() => import('./email-signature-generator'))
+  },
+  [youtubeThumbnailDownloaderManifest.slug]: {
+    manifest: youtubeThumbnailDownloaderManifest,
+    component: lazy(() => import('./youtube-thumbnail-downloader'))
   }
 };
 

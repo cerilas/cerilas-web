@@ -262,4 +262,23 @@
     <changefreq>weekly</changefreq>
     <priority>0.90</priority>
   </url>
+
+  <!-- 15. YouTube Thumbnail Downloader -->
+  <url>
+    <loc>https://tools.cerilas.com/tool/youtube-thumbnail-downloader</loc>
+    <lastmod>2026-09-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.96</priority>
+    <image:image>
+      <image:loc>https://tools.cerilas.com/tool-icons/youtube-thumbnail-downloader.png</image:loc>
+      <image:title>Free YouTube Thumbnail Downloader (4K, 1080p HD &amp; Shorts)</image:title>
+      <image:caption>Download 4K Ultra HD and 1080p YouTube video and Shorts thumbnails instantly.</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://tools.cerilas.com/#/tool/youtube-thumbnail-downloader</loc>
+    <lastmod>2026-09-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.90</priority>
+  </url>
 </urlset>

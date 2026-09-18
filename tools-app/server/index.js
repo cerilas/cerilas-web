@@ -540,6 +540,14 @@ const toolsSeoMap = {
     category: 'Productivity',
     rating: '4.9',
     ratingCount: '2400'
+  },
+  'youtube-thumbnail-downloader': {
+    title: 'Free YouTube Thumbnail Downloader (4K, 1080p HD & Shorts) | Cerilas Tools',
+    description: 'Download YouTube video and Shorts thumbnails in maximum 4K (1920x1080), High Definition (1280x720), and WebP resolution for free. No watermark, instant one-click download, and responsive HTML embed generator.',
+    keywords: 'youtube thumbnail downloader, download youtube thumbnail 4k, youtube shorts thumbnail download, hd youtube thumbnail grabber, get youtube cover image 1080p, youtube thumbnail saver, maxresdefault downloader',
+    category: 'Media & Video',
+    rating: '4.9',
+    ratingCount: '1850'
   }
 };
 
@@ -855,6 +863,25 @@ app.listen(PORT, async () => {
         11,
         true
       ) ON CONFLICT (slug) DO UPDATE SET 
+        seo_title = EXCLUDED.seo_title, 
+        seo_description = EXCLUDED.seo_description;
+
+      INSERT INTO cerilas_tools (
+        title, slug, short_description, icon_name, target_url, seo_title, seo_description, category, sort_order, is_active
+      ) VALUES (
+        'YouTube Thumbnail Downloader',
+        'youtube-thumbnail-downloader',
+        'Download full-resolution 4K, HD (1080p), and WebP thumbnails from any YouTube video or Shorts URL. Instant direct download, metadata inspection, and copy embed code.',
+        'Video',
+        '#/tool/youtube-thumbnail-downloader',
+        'Free YouTube Thumbnail Downloader (4K, 1080p HD & Shorts) | Cerilas Tools',
+        'Download YouTube video and Shorts thumbnails in maximum 4K (1920x1080), High Definition (1280x720), and WebP resolution for free. No watermark, instant one-click download, and responsive HTML embed generator.',
+        'Media & Video',
+        14,
+        true
+      ) ON CONFLICT (slug) DO UPDATE SET 
+        title = EXCLUDED.title,
+        short_description = EXCLUDED.short_description,
         seo_title = EXCLUDED.seo_title, 
         seo_description = EXCLUDED.seo_description;
     `);

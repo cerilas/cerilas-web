@@ -17,6 +17,7 @@
 - [Webhook Tester](https://tools.cerilas.com/tool/webhook-tester): Test, inspect, and debug incoming webhooks with unique live URLs. Inspect headers, payloads, query parameters, replay requests, and simulate mock Stripe/GitHub webhooks.
 - [JSON Beautifier & Formatter](https://tools.cerilas.com/tool/json-beautifier): Format, beautify, validate, minify, and repair JSON in your browser. Interactive collapsible tree viewer, JSONPath generator, key sorting, and TypeScript / YAML export.
 - [Pomodoro Timer](https://tools.cerilas.com/tool/pomodoro-timer): Minimalist in-browser Pomodoro timer with fluid wave animation, acoustic alert sounds, and customizable focus & break intervals.
+- [YouTube Thumbnail Downloader](https://tools.cerilas.com/tool/youtube-thumbnail-downloader): Download full-resolution 4K, HD (1080p), and WebP thumbnails from any YouTube video or Shorts URL with zero watermarks, instant copy to clipboard, and responsive embed generator.
 
 ## Privacy & Security Guarantees
 - Zero-Upload Architecture: Files never touch Cerilas servers; processing runs inside client WebAssembly and Web Worker threads.
