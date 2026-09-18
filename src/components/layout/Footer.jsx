@@ -4,6 +4,7 @@ import { useLang } from "../../context/LanguageContext";
 import { usePublicTheme } from "../../context/publicTheme";
 import logoDarkMode from "../../assets/cerilas-logo-darkmode.png";
 import logoLightMode from "../../assets/cerilas-logo-lightmode.png";
+import toolsLogo from "../../assets/platform-logo.webp";
 
 const navRoutes = [
   { key: "home", path: "/" },
@@ -73,6 +74,22 @@ export default function Footer() {
                   </Link>
                 </li>
               ))}
+              <li>
+                <a
+                  href="https://tools.cerilas.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm text-gray-400 hover:text-cyan-400 transition-colors inline-flex items-center gap-1.5 group"
+                >
+                  <span>Cerilas Tools</span>
+                  <span className="text-[10px] font-semibold bg-cyan-950 text-cyan-400 border border-cyan-800/60 px-1.5 py-0.5 rounded leading-none">
+                    Free
+                  </span>
+                  <svg className="w-3.5 h-3.5 text-gray-500 group-hover:text-cyan-400 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                  </svg>
+                </a>
+              </li>
             </ul>
           </div>
 
@@ -141,12 +158,52 @@ export default function Footer() {
         </div>
 
         <div className="mt-12 pt-6 border-t border-gray-800/60 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p className="text-xs text-gray-500">
-            © {year} {t.brand.fullName}. {f.rights}
-          </p>
-          <p className="text-xs text-gray-600">
-            Gaziantep, Türkiye
-          </p>
+          <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-4 text-xs text-gray-500 text-center sm:text-left">
+            <p>
+              © {year} {t.brand.fullName}. {f.rights}
+            </p>
+            <span className="hidden sm:inline-block w-1 h-1 bg-gray-800 rounded-full" />
+            <p className="text-gray-600">
+              Gaziantep, Türkiye
+            </p>
+          </div>
+
+          {/* Sağ Alt Köşe: Tools Cerilas Logo & Link */}
+          <a
+            href="https://tools.cerilas.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="group flex items-center gap-3 px-3.5 py-2 rounded-xl bg-gray-900/90 border border-gray-800 hover:border-cyan-500/50 hover:bg-gray-900 transition-all duration-300 shadow-sm hover:shadow-cyan-500/10"
+            title="Cerilas Tools — Free AI & Developer Utilities"
+          >
+            <img
+              src={toolsLogo}
+              alt="Cerilas' Tools"
+              className="w-7 h-7 rounded-lg object-contain transition-transform duration-300 group-hover:scale-110 shadow-sm flex-shrink-0"
+              onError={(e) => {
+                e.target.src = "/platform-logo.png";
+              }}
+            />
+            <div className="flex flex-col text-left">
+              <span className="text-xs font-semibold text-gray-200 group-hover:text-cyan-400 transition-colors flex items-center gap-1.5">
+                Cerilas' <span className="font-bold text-white group-hover:text-cyan-300">Tools</span>
+                <span className="text-[9px] font-bold uppercase tracking-wider text-cyan-400 bg-cyan-950/80 border border-cyan-800/60 px-1.5 py-0.5 rounded-full leading-none">
+                  Free
+                </span>
+              </span>
+              <span className="text-[11px] text-gray-500 group-hover:text-gray-400 transition-colors">
+                tools.cerilas.com
+              </span>
+            </div>
+            <svg 
+              className="w-3.5 h-3.5 text-gray-500 group-hover:text-cyan-400 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all ml-1" 
+              fill="none" 
+              viewBox="0 0 24 24" 
+              stroke="currentColor"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+            </svg>
+          </a>
         </div>
       </div>
     </footer>
