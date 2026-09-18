@@ -460,8 +460,8 @@ export default function App() {
               )}
             </main>
 
-            {/* Google AdSense Slot: Bottom Billboard / Responsive */}
-            <AdSlot format="billboard" slotId="ad-catalog-bottom-billboard" />
+            {/* Google AdSense Slot: Bottom Vertical Multiplex */}
+            <AdSlot format="multiplex" slotId="2582171503" />
           </div>
         )}
       </div>

@@ -600,8 +600,8 @@ export default function QrGeneratorTool({ onBack, toolMeta }) {
             </div>
           </div>
 
-          {/* Google AdSense Slot: 300x250 Medium Rectangle */}
-          <AdSlot format="rectangle" slotId="ad-qr-sidebar-rectangle" />
+          {/* Google AdSense Slot: Vertical Multiplex */}
+          <AdSlot format="multiplex" slotId="2582171503" />
         </div>
       </div>
 

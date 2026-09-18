@@ -81,3 +81,12 @@
   min-height: 85px;
   margin: 2.5rem 0;
 }
+
+/* 5. Vertical Multiplex Unit (Matched Content / Autorelaxed Grid) */
+.ad-slot-multiplex {
+  width: 100%;
+  max-width: 100%;
+  min-height: 250px;
+  margin: 2rem auto;
+}
+

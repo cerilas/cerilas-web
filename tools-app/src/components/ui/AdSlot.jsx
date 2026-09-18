@@ -3,13 +3,14 @@ import './AdSlot.css';
 
 /**
  * Google AdSense Ad Slot Component.
- * Implements standard IAB/Google ad unit dimensions with responsive auto sizing.
+ * Supports standard Leaderboard banners and Vertical Multiplex autorelaxed units.
  *
  * Formats:
- * - 'leaderboard': Leaderboard Banner (auto responsive)
- * - 'billboard': Billboard / Super Leaderboard
- * - 'rectangle': Medium Rectangle
- * - 'horizontal': Fluid In-Content Banner
+ * - 'leaderboard': Leaderboard Banner (auto responsive, slot 3592000841)
+ * - 'billboard': Large Billboard Banner (slot 3592000841)
+ * - 'multiplex': Vertical Multiplex Matched Content (autorelaxed, slot 2582171503)
+ * - 'rectangle': Vertical / Medium Rectangle (slot 2582171503)
+ * - 'horizontal': Fluid In-Content Banner (slot 3592000841)
  */
 export default function AdSlot({ 
   format = 'leaderboard', 
@@ -20,8 +21,20 @@ export default function AdSlot({
 }) {
   const adRef = useRef(null);
 
-  // Default to user's Leaderboard Banners unit (3592000841) if slotId is not numeric
-  const effectiveSlotId = (slotId && /^\d+$/.test(slotId)) ? slotId : '3592000841';
+  const isMultiplex = 
+    format === 'multiplex' || 
+    format === 'vertical-multiplex' || 
+    format === 'vertical' || 
+    format === 'rectangle' || 
+    slotId === '2582171503';
+
+  // Effective slot ID: 2582171503 for multiplex/vertical, 3592000841 for leaderboard/billboard
+  const effectiveSlotId = (slotId && /^\d+$/.test(slotId))
+    ? slotId
+    : (isMultiplex ? '2582171503' : '3592000841');
+
+  const effectiveAdFormat = isMultiplex ? 'autorelaxed' : 'auto';
+
   const effectiveAdClient = (adClient && adClient.startsWith('ca-pub-') && !adClient.includes('X'))
     ? adClient
     : 'ca-pub-9892289069070642';
@@ -42,6 +55,10 @@ export default function AdSlot({
 
   const getFormatClass = () => {
     switch (format) {
+      case 'multiplex':
+      case 'vertical-multiplex':
+      case 'vertical':
+        return 'ad-slot-multiplex';
       case 'rectangle':
         return 'ad-slot-rectangle';
       case 'billboard':
@@ -66,8 +83,8 @@ export default function AdSlot({
         style={{ display: 'block', width: '100%', textAlign: 'center' }}
         data-ad-client={effectiveAdClient}
         data-ad-slot={effectiveSlotId}
-        data-ad-format="auto"
-        data-full-width-responsive="true"
+        data-ad-format={effectiveAdFormat}
+        {...(!isMultiplex ? { 'data-full-width-responsive': 'true' } : {})}
       />
     </div>
   );
