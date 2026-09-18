@@ -1,5 +1,4 @@
 import React from 'react';
-import { AlertTriangle, RotateCcw, Home } from 'lucide-react';
 
 export default class ErrorBoundary extends React.Component {
   constructor(props) {
@@ -51,7 +50,7 @@ export default class ErrorBoundary extends React.Component {
             justifyContent: 'center',
             margin: '0 auto 1.25rem auto'
           }}>
-            <AlertTriangle size={26} />
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
           </div>
 
           <h2 style={{ fontSize: '1.4rem', fontWeight: 600, margin: '0 0 0.5rem 0' }}>
@@ -94,7 +93,7 @@ export default class ErrorBoundary extends React.Component {
                 cursor: 'pointer'
               }}
             >
-              <RotateCcw size={14} /> Reload
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg> Reload
             </button>
             <button
               type="button"
@@ -112,7 +111,7 @@ export default class ErrorBoundary extends React.Component {
                 cursor: 'pointer'
               }}
             >
-              <Home size={14} /> Tools Home
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg> Tools Home
             </button>
           </div>
         </div>
