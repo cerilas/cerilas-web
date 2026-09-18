@@ -316,8 +316,8 @@ body {
 
 .nav-brand-text {
   font-family: 'Garet', -apple-system, BlinkMacSystemFont, sans-serif !important;
-  font-weight: 100;
-  font-variation-settings: 'wght' 100;
+  font-weight: 300;
+  font-variation-settings: 'wght' 300;
   font-size: 1.15rem;
   letter-spacing: -0.01em;
   color: #272727 !important;
