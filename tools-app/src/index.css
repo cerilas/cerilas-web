@@ -412,9 +412,13 @@ body {
 .seo-footer-brand-desc {
   font-size: 0.88rem;
   color: var(--text-muted);
-  line-height: 1.55;
+  line-height: 1.4;
   margin: 0;
   font-weight: 300;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
 }
 
 .seo-footer-badges {
@@ -436,6 +440,8 @@ body {
   border: 1px solid var(--card-border);
   padding: 0.25rem 0.65rem;
   border-radius: 999px;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .seo-footer-pill .pill-icon {
@@ -462,6 +468,7 @@ body {
   font-size: 0.85rem;
   font-weight: 500;
   color: var(--text-main);
+  white-space: nowrap;
 }
 
 .stats-box-text {
@@ -469,6 +476,10 @@ body {
   color: var(--text-muted);
   line-height: 1.45;
   margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
 }
 
 .stats-box-link {
@@ -486,6 +497,7 @@ body {
   text-decoration: underline;
   text-underline-offset: 3px;
   transition: opacity 0.2s ease;
+  white-space: nowrap;
 }
 
 .stats-box-link:hover {
@@ -495,7 +507,7 @@ body {
 /* 4 Categorized Columns Grid */
 .seo-footer-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 2.5rem;
 }
 
@@ -514,6 +526,7 @@ body {
   color: var(--text-main);
   letter-spacing: -0.01em;
   margin: 0;
+  white-space: nowrap;
 }
 
 .seo-col-list {
@@ -529,6 +542,7 @@ body {
   display: inline-flex;
   align-items: center;
   justify-content: space-between;
+  gap: 0.5rem;
   width: 100%;
   color: var(--text-muted);
   text-decoration: none;
@@ -536,6 +550,14 @@ body {
   font-weight: 300;
   transition: all 0.2s ease;
   line-height: 1.35;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.seo-col-list li a .seo-tool-title {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .seo-col-list li a:hover {
@@ -552,8 +574,9 @@ body {
   border-radius: 6px;
   font-weight: 400;
   opacity: 0.8;
-  margin-left: 0.5rem;
+  margin-left: auto;
   white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .seo-col-list li a:hover .seo-link-tag {
@@ -564,6 +587,8 @@ body {
 .ext-icon {
   opacity: 0.5;
   transition: opacity 0.2s ease;
+  flex-shrink: 0;
+  margin-left: auto;
 }
 
 .seo-col-list li a:hover .ext-icon {
@@ -588,6 +613,7 @@ body {
   color: var(--text-main);
   margin: 0;
   letter-spacing: -0.01em;
+  white-space: nowrap;
 }
 
 .seo-keywords-cloud {
@@ -606,6 +632,8 @@ body {
   text-decoration: none;
   transition: all 0.2s ease;
   font-weight: 300;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .seo-keywords-cloud a:hover {
@@ -628,19 +656,28 @@ body {
   color: var(--text-muted);
   line-height: 1.5;
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 0.5rem;
   margin: 0;
   padding: 0.85rem 1.15rem;
   border-radius: 10px;
   background: rgba(16, 185, 129, 0.06);
   border: 1px solid rgba(16, 185, 129, 0.15);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.seo-privacy-notice span {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .privacy-check-icon {
   color: #10b981;
   flex-shrink: 0;
-  margin-top: 0.15rem;
 }
 
 .seo-footer-bottom-meta {
@@ -656,6 +693,9 @@ body {
   color: var(--text-muted);
   font-weight: 300;
   margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .seo-footer-bottom-links {
@@ -663,6 +703,8 @@ body {
   align-items: center;
   gap: 0.75rem;
   font-size: 0.8rem;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .seo-footer-bottom-links a {
@@ -686,6 +728,7 @@ body {
   font-size: 0.75rem;
   color: #10b981;
   font-weight: 500;
+  white-space: nowrap;
 }
 
 .status-dot {

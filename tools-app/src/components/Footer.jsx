@@ -51,8 +51,8 @@ export default function Footer({ onOpenStats }) {
               />
               <span className="seo-footer-brand-name">Cerilas' Tools</span>
             </div>
-            <p className="seo-footer-brand-desc">
-              High-performance, privacy-first web utilities and intelligent developer tools. Powered by local browser WebAssembly &amp; WebGPU with zero server-side file uploads.
+            <p className="seo-footer-brand-desc" title="Privacy-first developer utilities powered 100% locally by browser WebAssembly.">
+              Privacy-first developer utilities powered 100% locally by browser WebAssembly.
             </p>
             <div className="seo-footer-badges">
               <span className="seo-footer-pill">
@@ -72,13 +72,13 @@ export default function Footer({ onOpenStats }) {
               <Cpu size={16} />
               <span>Edge Client Architecture</span>
             </div>
-            <p className="stats-box-text">
-              Every document, video, image, and payload is processed in isolated local memory. No databases store your files.
+            <p className="stats-box-text" title="Local isolated memory processing with zero server storage.">
+              Local isolated memory processing with zero server storage.
             </p>
             {onOpenStats && (
               <button type="button" onClick={handleStatsClick} className="stats-box-link">
                 <BarChart3 size={14} />
-                <span>View Platform Live Analytics</span>
+                <span>View Live Analytics</span>
               </button>
             )}
           </div>
@@ -94,33 +94,33 @@ export default function Footer({ onOpenStats }) {
             </h3>
             <ul className="seo-col-list">
               <li>
-                <a href="#/tool/pdf-editor" onClick={() => handleToolClick('pdf-editor')}>
-                  Free Online PDF Editor
-                  <span className="seo-link-tag">Text &amp; Sign</span>
+                <a href="#/tool/pdf-editor" onClick={() => handleToolClick('pdf-editor')} title="Online PDF Editor">
+                  <span className="seo-tool-title">Online PDF Editor</span>
+                  <span className="seo-link-tag">Edit &amp; Sign</span>
                 </a>
               </li>
               <li>
-                <a href="#/tool/pdf-compressor" onClick={() => handleToolClick('pdf-compressor')}>
-                  Compress PDF Online Free
+                <a href="#/tool/pdf-compressor" onClick={() => handleToolClick('pdf-compressor')} title="Compress PDF Online">
+                  <span className="seo-tool-title">Compress PDF Online</span>
                   <span className="seo-link-tag">MB to KB</span>
                 </a>
               </li>
               <li>
-                <a href="#/tool/pdf-rag-cleaner" onClick={() => handleToolClick('pdf-rag-cleaner')}>
-                  PDF to RAG &amp; Markdown Chunker
+                <a href="#/tool/pdf-rag-cleaner" onClick={() => handleToolClick('pdf-rag-cleaner')} title="PDF to RAG Chunker">
+                  <span className="seo-tool-title">PDF to RAG Chunker</span>
                   <span className="seo-link-tag">Vector DB</span>
                 </a>
               </li>
               <li>
-                <a href="#/tool/ai-content-detector" onClick={() => handleToolClick('ai-content-detector')}>
-                  AI PDF Scanner &amp; Content Detector
+                <a href="#/tool/ai-content-detector" onClick={() => handleToolClick('ai-content-detector')} title="AI Content Detector">
+                  <span className="seo-tool-title">AI Content Detector</span>
                   <span className="seo-link-tag">0-100% Score</span>
                 </a>
               </li>
               <li>
-                <a href="#/tool/ats-resume-checker" onClick={() => handleToolClick('ats-resume-checker')}>
-                  AI ATS Resume &amp; CV Checker
-                  <span className="seo-link-tag">Bot Audit</span>
+                <a href="#/tool/ats-resume-checker" onClick={() => handleToolClick('ats-resume-checker')} title="ATS Resume Checker">
+                  <span className="seo-tool-title">ATS Resume Checker</span>
+                  <span className="seo-link-tag">CV Audit</span>
                 </a>
               </li>
             </ul>
@@ -134,32 +134,32 @@ export default function Footer({ onOpenStats }) {
             </h3>
             <ul className="seo-col-list">
               <li>
-                <a href="#/tool/image-compressor" onClick={() => handleToolClick('image-compressor')}>
-                  Image Compressor &amp; WebP Converter
-                  <span className="seo-link-tag">JPEG/PNG</span>
+                <a href="#/tool/image-compressor" onClick={() => handleToolClick('image-compressor')} title="Image Compressor & WebP">
+                  <span className="seo-tool-title">Image Compressor</span>
+                  <span className="seo-link-tag">WebP/JPEG</span>
                 </a>
               </li>
               <li>
-                <a href="#/tool/video-compressor" onClick={() => handleToolClick('video-compressor')}>
-                  Free Video Compressor (MP4 &amp; MOV)
-                  <span className="seo-link-tag">Fast Export</span>
+                <a href="#/tool/video-compressor" onClick={() => handleToolClick('video-compressor')} title="Video Compressor">
+                  <span className="seo-tool-title">Video Compressor</span>
+                  <span className="seo-link-tag">MP4 &amp; MOV</span>
                 </a>
               </li>
               <li>
-                <a href="#/tool/youtube-thumbnail-downloader" onClick={() => handleToolClick('youtube-thumbnail-downloader')}>
-                  YouTube 4K Thumbnail Downloader
-                  <span className="seo-link-tag">Ultra HD</span>
+                <a href="#/tool/youtube-thumbnail-downloader" onClick={() => handleToolClick('youtube-thumbnail-downloader')} title="YouTube Thumbnail Grab">
+                  <span className="seo-tool-title">YouTube Thumbnail Grab</span>
+                  <span className="seo-link-tag">4K Ultra HD</span>
                 </a>
               </li>
               <li>
-                <a href="#/tool/background-remover" onClick={() => handleToolClick('background-remover')}>
-                  In-Browser AI Background Remover
-                  <span className="seo-link-tag">Transparent PNG</span>
+                <a href="#/tool/background-remover" onClick={() => handleToolClick('background-remover')} title="AI Background Remover">
+                  <span className="seo-tool-title">AI Background Remover</span>
+                  <span className="seo-link-tag">PNG Cutout</span>
                 </a>
               </li>
               <li>
-                <a href="#/tool/qr-code-generator" onClick={() => handleToolClick('qr-code-generator')}>
-                  Permanent QR Code Generator
+                <a href="#/tool/qr-code-generator" onClick={() => handleToolClick('qr-code-generator')} title="Permanent QR Generator">
+                  <span className="seo-tool-title">Permanent QR Generator</span>
                   <span className="seo-link-tag">Vector SVG</span>
                 </a>
               </li>
@@ -174,33 +174,33 @@ export default function Footer({ onOpenStats }) {
             </h3>
             <ul className="seo-col-list">
               <li>
-                <a href="#/tool/webhook-tester" onClick={() => handleToolClick('webhook-tester')}>
-                  Free Online Webhook Tester
-                  <span className="seo-link-tag">Discord &amp; Slack</span>
+                <a href="#/tool/webhook-tester" onClick={() => handleToolClick('webhook-tester')} title="Online Webhook Tester">
+                  <span className="seo-tool-title">Online Webhook Tester</span>
+                  <span className="seo-link-tag">HTTP/JSON</span>
                 </a>
               </li>
               <li>
-                <a href="#/tool/json-beautifier" onClick={() => handleToolClick('json-beautifier')}>
-                  JSON Beautifier, Formatter &amp; Validator
-                  <span className="seo-link-tag">Tree View</span>
+                <a href="#/tool/json-beautifier" onClick={() => handleToolClick('json-beautifier')} title="JSON Formatter & Validator">
+                  <span className="seo-tool-title">JSON Formatter</span>
+                  <span className="seo-link-tag">Tree &amp; Lint</span>
                 </a>
               </li>
               <li>
-                <a href="#/tool/email-signature-generator" onClick={() => handleToolClick('email-signature-generator')}>
-                  Professional Email Signature Generator
+                <a href="#/tool/email-signature-generator" onClick={() => handleToolClick('email-signature-generator')} title="Email Signature Creator">
+                  <span className="seo-tool-title">Email Signature Creator</span>
                   <span className="seo-link-tag">HTML Ready</span>
                 </a>
               </li>
               <li>
-                <a href="#/tool/pomodoro-timer" onClick={() => handleToolClick('pomodoro-timer')}>
-                  Online Pomodoro Focus Timer
-                  <span className="seo-link-tag">Fluid Wave</span>
+                <a href="#/tool/pomodoro-timer" onClick={() => handleToolClick('pomodoro-timer')} title="Pomodoro Focus Timer">
+                  <span className="seo-tool-title">Pomodoro Focus Timer</span>
+                  <span className="seo-link-tag">Wave Audio</span>
                 </a>
               </li>
               <li>
-                <a href="#/tool/qr-code-generator" onClick={() => handleToolClick('qr-code-generator')}>
-                  Wi-Fi &amp; vCard QR Code Creator
-                  <span className="seo-link-tag">Unlimited Scans</span>
+                <a href="#/tool/qr-code-generator" onClick={() => handleToolClick('qr-code-generator')} title="Wi-Fi & vCard QR Creator">
+                  <span className="seo-tool-title">Wi-Fi &amp; vCard QR</span>
+                  <span className="seo-link-tag">Scan Code</span>
                 </a>
               </li>
             </ul>
@@ -214,32 +214,32 @@ export default function Footer({ onOpenStats }) {
             </h3>
             <ul className="seo-col-list">
               <li>
-                <a href="https://cerilas.com" target="_blank" rel="noopener noreferrer">
-                  Cerilas High Tech Corporate Site
+                <a href="https://cerilas.com" target="_blank" rel="noopener noreferrer" title="Cerilas Corporate Site">
+                  <span className="seo-tool-title">Cerilas Corporate Site</span>
                   <ArrowUpRight size={13} className="ext-icon" />
                 </a>
               </li>
               <li>
-                <a href="https://cerilas.com/#services" target="_blank" rel="noopener noreferrer">
-                  Research &amp; Engineering Labs
+                <a href="https://cerilas.com/#services" target="_blank" rel="noopener noreferrer" title="Engineering Labs">
+                  <span className="seo-tool-title">Engineering Labs</span>
                   <ArrowUpRight size={13} className="ext-icon" />
                 </a>
               </li>
               <li>
-                <a href="https://cerilas.com/#contact" target="_blank" rel="noopener noreferrer">
-                  Enterprise Support &amp; Inquiries
+                <a href="https://cerilas.com/#contact" target="_blank" rel="noopener noreferrer" title="Enterprise Support">
+                  <span className="seo-tool-title">Enterprise Support</span>
                   <ArrowUpRight size={13} className="ext-icon" />
                 </a>
               </li>
               <li>
-                <a href="https://github.com/cerilas/cerilas-web" target="_blank" rel="noopener noreferrer">
-                  Open Source Architecture &amp; GitHub
+                <a href="https://github.com/cerilas/cerilas-web" target="_blank" rel="noopener noreferrer" title="Open Source GitHub">
+                  <span className="seo-tool-title">Open Source GitHub</span>
                   <ArrowUpRight size={13} className="ext-icon" />
                 </a>
               </li>
               <li>
-                <a href="#/" onClick={() => { window.location.hash = '#/'; window.scrollTo({ top: 0, behavior: 'smooth' }); }}>
-                  All Tools Catalog
+                <a href="#/" onClick={() => { window.location.hash = '#/'; window.scrollTo({ top: 0, behavior: 'smooth' }); }} title="All Tools Catalog">
+                  <span className="seo-tool-title">All Tools Catalog</span>
                   <span className="seo-link-tag">14 Utilities</span>
                 </a>
               </li>
@@ -251,41 +251,41 @@ export default function Footer({ onOpenStats }) {
         <div className="seo-footer-keywords-section">
           <h4 className="seo-keywords-title">Popular Free Utilities &amp; Search Queries</h4>
           <div className="seo-keywords-cloud">
-            <a href="#/tool/qr-code-generator" onClick={() => handleToolClick('qr-code-generator')}>Free Dynamic QR Code Generator</a>
-            <a href="#/tool/pdf-compressor" onClick={() => handleToolClick('pdf-compressor')}>Compress PDF to 200KB Free</a>
-            <a href="#/tool/pdf-editor" onClick={() => handleToolClick('pdf-editor')}>Edit PDF Text Online Free</a>
-            <a href="#/tool/ats-resume-checker" onClick={() => handleToolClick('ats-resume-checker')}>Free AI Resume Checker ATS</a>
-            <a href="#/tool/background-remover" onClick={() => handleToolClick('background-remover')}>Remove Background HD Cutout</a>
-            <a href="#/tool/youtube-thumbnail-downloader" onClick={() => handleToolClick('youtube-thumbnail-downloader')}>YouTube Shorts Thumbnail Downloader 4K</a>
+            <a href="#/tool/qr-code-generator" onClick={() => handleToolClick('qr-code-generator')}>Free Dynamic QR Code</a>
+            <a href="#/tool/pdf-compressor" onClick={() => handleToolClick('pdf-compressor')}>Compress PDF to 200KB</a>
+            <a href="#/tool/pdf-editor" onClick={() => handleToolClick('pdf-editor')}>Edit PDF Text Online</a>
+            <a href="#/tool/ats-resume-checker" onClick={() => handleToolClick('ats-resume-checker')}>Free AI Resume Checker</a>
+            <a href="#/tool/background-remover" onClick={() => handleToolClick('background-remover')}>Remove Background HD</a>
+            <a href="#/tool/youtube-thumbnail-downloader" onClick={() => handleToolClick('youtube-thumbnail-downloader')}>YouTube 4K Thumbnail Grab</a>
             <a href="#/tool/image-compressor" onClick={() => handleToolClick('image-compressor')}>JPEG to WebP Converter</a>
-            <a href="#/tool/video-compressor" onClick={() => handleToolClick('video-compressor')}>Compress MP4 Video File Size</a>
-            <a href="#/tool/webhook-tester" onClick={() => handleToolClick('webhook-tester')}>Discord Webhook Sender &amp; Tester</a>
-            <a href="#/tool/json-beautifier" onClick={() => handleToolClick('json-beautifier')}>Minify and Beautify JSON</a>
-            <a href="#/tool/email-signature-generator" onClick={() => handleToolClick('email-signature-generator')}>Gmail &amp; Outlook HTML Signature</a>
-            <a href="#/tool/pdf-rag-cleaner" onClick={() => handleToolClick('pdf-rag-cleaner')}>PDF to Markdown for LangChain</a>
-            <a href="#/tool/ai-content-detector" onClick={() => handleToolClick('ai-content-detector')}>AI Detection Score 0 to 100%</a>
-            <a href="#/tool/pomodoro-timer" onClick={() => handleToolClick('pomodoro-timer')}>Pomodoro Timer with Chime</a>
-            <a href="#/tool/qr-code-generator" onClick={() => handleToolClick('qr-code-generator')}>Print Ready Vector SVG QR Code</a>
-            <a href="#/tool/pdf-compressor" onClick={() => handleToolClick('pdf-compressor')}>Reduce PDF Size in Browser</a>
-            <a href="#/tool/background-remover" onClick={() => handleToolClick('background-remover')}>100% In-Browser Privacy Tools</a>
-            <a href="#/tool/pdf-editor" onClick={() => handleToolClick('pdf-editor')}>Add Signature to PDF Free</a>
+            <a href="#/tool/video-compressor" onClick={() => handleToolClick('video-compressor')}>Compress MP4 Video</a>
+            <a href="#/tool/webhook-tester" onClick={() => handleToolClick('webhook-tester')}>Discord Webhook Tester</a>
+            <a href="#/tool/json-beautifier" onClick={() => handleToolClick('json-beautifier')}>JSON Beautifier Online</a>
+            <a href="#/tool/email-signature-generator" onClick={() => handleToolClick('email-signature-generator')}>HTML Email Signature</a>
+            <a href="#/tool/pdf-rag-cleaner" onClick={() => handleToolClick('pdf-rag-cleaner')}>PDF to Markdown RAG</a>
+            <a href="#/tool/ai-content-detector" onClick={() => handleToolClick('ai-content-detector')}>AI Content Detector 100%</a>
+            <a href="#/tool/pomodoro-timer" onClick={() => handleToolClick('pomodoro-timer')}>Pomodoro Timer Online</a>
+            <a href="#/tool/qr-code-generator" onClick={() => handleToolClick('qr-code-generator')}>Vector SVG QR Code</a>
+            <a href="#/tool/pdf-compressor" onClick={() => handleToolClick('pdf-compressor')}>Reduce PDF Size Free</a>
+            <a href="#/tool/background-remover" onClick={() => handleToolClick('background-remover')}>100% In-Browser Privacy</a>
+            <a href="#/tool/pdf-editor" onClick={() => handleToolClick('pdf-editor')}>Add PDF Signature Free</a>
           </div>
         </div>
 
         {/* Bottom Legal, Privacy Guarantee & Copyright Bar */}
         <div className="seo-footer-bottom">
           <div className="seo-footer-bottom-legal">
-            <p className="seo-privacy-notice">
+            <p className="seo-privacy-notice" title="Privacy Assurance: 100% local in-browser processing via WebAssembly & WebGPU. Zero server file uploads.">
               <CheckCircle2 size={14} className="privacy-check-icon" />
               <span>
-                <strong>Privacy Assurance:</strong> All media, documents, and code are processed 100% locally in your device's browser memory using WebAssembly and WebGPU workers. No personal files or data are ever uploaded, transferred, or stored on external servers.
+                <strong>Privacy Assurance:</strong> 100% local in-browser processing via WebAssembly &amp; WebGPU. Zero server file uploads.
               </span>
             </p>
           </div>
 
           <div className="seo-footer-bottom-meta">
             <p className="seo-copyright">
-              © {currentYear} Cerilas High Tech. All rights reserved. Engineered for privacy, speed, and precision.
+              © {currentYear} Cerilas High Tech. All rights reserved. Built for speed &amp; privacy.
             </p>
             <div className="seo-footer-bottom-links">
               <a href="https://cerilas.com" target="_blank" rel="noopener noreferrer">Cerilas.com</a>
