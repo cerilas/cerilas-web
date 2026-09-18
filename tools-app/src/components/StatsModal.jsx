@@ -199,7 +199,30 @@ export default function StatsModal({ isOpen, onClose }) {
                       const cLabel = getConversionLabel(tItem.slug, cCount, 'en');
                       return (
                         <tr key={tItem.id} style={{ borderBottom: '1px solid var(--card-border)' }}>
-                          <td style={{ padding: '0.75rem 1rem', fontWeight: '500', color: 'var(--text-main)' }}>{tItem.title}</td>
+                          <td style={{ padding: '0.75rem 1rem', fontWeight: '500', color: 'var(--text-main)' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+                              <img 
+                                src={`/tool-icons/${tItem.slug}.webp`} 
+                                alt="" 
+                                style={{ 
+                                  width: '22px', 
+                                  height: '22px', 
+                                  borderRadius: '5px', 
+                                  objectFit: 'contain',
+                                  filter: 'drop-shadow(0 1px 3px rgba(0,0,0,0.12))' 
+                                }}
+                                onError={(e) => {
+                                  if (!e.target.dataset.triedPng) {
+                                    e.target.dataset.triedPng = 'true';
+                                    e.target.src = `/tool-icons/${tItem.slug}.png`;
+                                  } else {
+                                    e.target.style.display = 'none';
+                                  }
+                                }}
+                              />
+                              <span>{tItem.title}</span>
+                            </div>
+                          </td>
                           <td style={{ padding: '0.75rem 1rem', color: 'var(--text-muted)' }}>{tItem.category}</td>
                           <td style={{ padding: '0.75rem 1rem', textAlign: 'right', color: '#3b82f6', fontWeight: '600' }}>
                             {tItem.unique_visitors_count}

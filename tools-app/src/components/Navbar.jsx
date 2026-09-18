@@ -34,9 +34,28 @@ export default function Navbar({ activeTool, onNavigateHome, onOpenStats }) {
           </a>
 
           {activeTool && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
               <span>/</span>
-              <span style={{ color: 'var(--text-main)', fontWeight: '400' }}>{activeTool.title}</span>
+              <img 
+                src={`/tool-icons/${activeTool.slug}.webp`} 
+                alt="" 
+                style={{ 
+                  width: '20px', 
+                  height: '20px', 
+                  borderRadius: '5px', 
+                  objectFit: 'contain',
+                  filter: 'drop-shadow(0 1px 3px rgba(0,0,0,0.15))'
+                }}
+                onError={(e) => {
+                  if (!e.target.dataset.triedPng) {
+                    e.target.dataset.triedPng = 'true';
+                    e.target.src = `/tool-icons/${activeTool.slug}.png`;
+                  } else {
+                    e.target.style.display = 'none';
+                  }
+                }}
+              />
+              <span style={{ color: 'var(--text-main)', fontWeight: '500' }}>{activeTool.title}</span>
               {isAi && (
                 <span style={{
                   fontSize: '0.68rem',

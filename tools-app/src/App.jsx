@@ -48,8 +48,27 @@ const ToolCard = ({ tool, onSelect }) => {
       style={{ cursor: 'pointer' }}
     >
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem' }}>
-        <div className="icon-wrapper" style={{ flexShrink: 0 }}>
-          <IconComponent strokeWidth={1.5} size={28} />
+        <div className="icon-wrapper tool-logo-container" style={{ flexShrink: 0 }}>
+          <img 
+            src={`/tool-icons/${tool.slug}.webp`} 
+            alt={tool.title}
+            className="tool-apple-logo"
+            width={46}
+            height={46}
+            loading="lazy"
+            onError={(e) => {
+              if (!e.target.dataset.triedPng) {
+                e.target.dataset.triedPng = 'true';
+                e.target.src = `/tool-icons/${tool.slug}.png`;
+              } else {
+                e.target.style.display = 'none';
+                if (e.target.nextElementSibling) e.target.nextElementSibling.style.display = 'flex';
+              }
+            }}
+          />
+          <div className="icon-wrapper-fallback" style={{ display: 'none' }}>
+            <IconComponent strokeWidth={1.5} size={28} />
+          </div>
         </div>
         <div style={{ display: 'flex', gap: '0.35rem', alignItems: 'center', flexShrink: 0 }}>
           <span className="card-stat-pill" style={{

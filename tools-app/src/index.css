@@ -133,7 +133,29 @@ body {
 .icon-wrapper {
   color: var(--icon-color);
   margin-bottom: 0.5rem;
-  transition: transform 0.4s ease;
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.tool-logo-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.65rem;
+}
+
+.tool-apple-logo {
+  width: 46px;
+  height: 46px;
+  border-radius: 11px;
+  object-fit: contain;
+  display: block;
+  filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.08));
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), filter 0.35s ease;
+}
+
+.card:hover .tool-apple-logo {
+  transform: scale(1.08) translateY(-2px);
+  filter: drop-shadow(0 8px 20px rgba(0, 0, 0, 0.18));
 }
 
 .card:hover .icon-wrapper {
