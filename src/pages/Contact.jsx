@@ -1,8 +1,9 @@
 import { useState, useRef, useEffect } from "react";
 import { useLang } from "../context/LanguageContext";
+import { usePublicTheme } from "../context/publicTheme";
 import { FadeIn, GlowCard } from "../components/ui";
 
-function CategoryDropdown({ label, value, options, onChange }) {
+function CategoryDropdown({ label, value, options, onChange, isLight }) {
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
 
@@ -14,24 +15,36 @@ function CategoryDropdown({ label, value, options, onChange }) {
 
   return (
     <div ref={ref} className="relative">
-      <label className="block text-xs text-gray-400 mb-1.5">{label}</label>
+      <label className={`block text-xs mb-1.5 ${isLight ? "text-slate-600" : "text-gray-400"}`}>{label}</label>
       <button
         type="button"
         onClick={() => setOpen(!open)}
-        className={`w-full bg-gray-900 border rounded-xl px-4 py-3 text-sm text-left flex items-center justify-between transition-colors ${
-          open ? "border-cyan-500 ring-1 ring-cyan-500/20" : "border-gray-700 hover:border-gray-600"
+        className={`w-full border rounded-xl px-4 py-3 text-sm text-left flex items-center justify-between transition-colors ${
+          isLight
+            ? open
+              ? "bg-white border-blue-500 ring-1 ring-blue-500/20 text-slate-900"
+              : "bg-white border-slate-300 hover:border-slate-400 text-slate-900"
+            : open
+              ? "bg-gray-900 border-cyan-500 ring-1 ring-cyan-500/20 text-white"
+              : "bg-gray-900 border-gray-700 hover:border-gray-600 text-white"
         }`}
       >
-        <span className="text-white truncate">{value}</span>
+        <span className="truncate">{value}</span>
         <svg
-          className={`w-4 h-4 text-gray-400 shrink-0 ml-2 transition-transform ${open ? "rotate-180" : ""}`}
+          className={`w-4 h-4 shrink-0 ml-2 transition-transform ${open ? "rotate-180" : ""} ${
+            isLight ? "text-slate-400" : "text-gray-400"
+          }`}
           fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor"
         >
           <path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
         </svg>
       </button>
       {open && (
-        <div className="absolute z-50 mt-1.5 w-full bg-gray-900 border border-gray-700 rounded-xl shadow-2xl shadow-black/40 overflow-hidden py-1">
+        <div className={`absolute z-50 mt-1.5 w-full rounded-xl overflow-hidden py-1 ${
+          isLight
+            ? "bg-white border border-slate-200 shadow-xl shadow-slate-900/10 text-slate-700"
+            : "bg-gray-900 border border-gray-700 shadow-2xl shadow-black/40 text-gray-300"
+        }`}>
           {options.map((opt) => (
             <button
               key={opt}
@@ -39,12 +52,18 @@ function CategoryDropdown({ label, value, options, onChange }) {
               onClick={() => { onChange(opt); setOpen(false); }}
               className={`w-full text-left px-4 py-2.5 text-sm transition-colors ${
                 opt === value
-                  ? "bg-cyan-500/10 text-cyan-400"
-                  : "text-gray-300 hover:bg-gray-800 hover:text-white"
+                  ? isLight
+                    ? "bg-blue-50 text-blue-600 font-medium"
+                    : "bg-cyan-500/10 text-cyan-400 font-medium"
+                  : isLight
+                    ? "text-slate-700 hover:bg-slate-50 hover:text-slate-950"
+                    : "text-gray-300 hover:bg-gray-800 hover:text-white"
               }`}
             >
               {opt === value && (
-                <span className="inline-block w-1.5 h-1.5 bg-cyan-400 rounded-full mr-2.5 -translate-y-px" />
+                <span className={`inline-block w-1.5 h-1.5 rounded-full mr-2.5 -translate-y-px ${
+                  isLight ? "bg-blue-600" : "bg-cyan-400"
+                }`} />
               )}
               {opt}
             </button>
@@ -60,6 +79,8 @@ const embedMapsUrl = "https://www.google.com/maps?q=37.027409,37.307163&z=14&hl=
 
 export default function Contact() {
   const { t } = useLang();
+  const { resolvedTheme } = usePublicTheme();
+  const isLight = resolvedTheme === "light";
   const c = t.contact;
   const common = t.common;
 
@@ -147,6 +168,7 @@ export default function Contact() {
                       value={form.category}
                       options={c.categories}
                       onChange={(val) => setForm({ ...form, category: val })}
+                      isLight={isLight}
                     />
                     <textarea
                       required
@@ -200,32 +222,54 @@ export default function Contact() {
                 </div>
               </GlowCard>
 
-              <div className="rounded-2xl border border-gray-800/60 bg-black overflow-hidden">
-                <div className="p-5 border-b border-gray-800/70 bg-gradient-to-r from-gray-950 to-black">
+              <div className={`rounded-2xl overflow-hidden transition-all duration-300 ${
+                isLight 
+                  ? "border border-slate-200/90 bg-white shadow-[0_2px_12px_rgba(16,24,40,0.04)]" 
+                  : "border border-gray-800/60 bg-black"
+              }`}>
+                <div className={`p-5 border-b transition-colors ${
+                  isLight 
+                    ? "border-slate-200/80 bg-slate-50/70" 
+                    : "border-gray-800/70 bg-gradient-to-r from-gray-950 to-black"
+                }`}>
                   <div className="flex items-start justify-between gap-4">
                     <div>
-                      <h3 className="text-lg font-semibold text-white">{c.mapTitle}</h3>
-                      <p className="mt-2 text-sm text-gray-400 leading-relaxed">{c.mapDesc}</p>
+                      <h3 className={`text-lg font-semibold transition-colors ${
+                        isLight ? "text-slate-900" : "text-white"
+                      }`}>
+                        {c.mapTitle}
+                      </h3>
+                      <p className={`mt-2 text-sm leading-relaxed transition-colors ${
+                        isLight ? "text-slate-500" : "text-gray-400"
+                      }`}>
+                        {c.mapDesc}
+                      </p>
                     </div>
                     <a
                       href={mapsUrl}
                       target="_blank"
                       rel="noreferrer"
-                      className="shrink-0 px-3 py-2 rounded-lg border border-gray-700 text-xs font-semibold text-gray-300 hover:bg-white hover:text-black hover:border-white transition-colors"
+                      className={`shrink-0 px-3 py-2 rounded-lg text-xs font-semibold transition-colors ${
+                        isLight
+                          ? "border border-slate-200 bg-white text-slate-700 hover:bg-slate-100 hover:text-slate-950 hover:border-slate-300 shadow-2xs"
+                          : "border border-gray-700 text-gray-300 hover:bg-white hover:text-black hover:border-white"
+                      }`}
                     >
                       {c.mapLinkLabel}
                     </a>
                   </div>
                 </div>
 
-                <div className="relative h-80 bg-black">
+                <div className={`relative h-80 transition-colors ${isLight ? "bg-slate-100" : "bg-black"}`}>
                   <iframe
                     title={c.mapTitle}
                     src={embedMapsUrl}
                     loading="lazy"
                     allowFullScreen
                     referrerPolicy="no-referrer-when-downgrade"
-                    className="absolute inset-0 h-full w-full border-0 grayscale contrast-125 brightness-75"
+                    className={`absolute inset-0 h-full w-full border-0 transition-all ${
+                      isLight ? "" : "grayscale contrast-125 brightness-75"
+                    }`}
                   />
                 </div>
               </div>
