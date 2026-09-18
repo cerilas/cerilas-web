@@ -25,6 +25,10 @@ import expensesRoutes from './routes/expenses.js';
 import accountsRoutes from './routes/accounts.js';
 import documentsRoutes from './routes/documents.js';
 import atsRoutes from './routes/ats.js';
+import toolsRoutes from './routes/tools.js';
+import pdfRagRoutes from './routes/pdfRag.js';
+import aiDetectorRoutes from './routes/aiDetector.js';
+import webhookTesterRoutes from './routes/webhookTester.js';
 import { startOpportunityScannerScheduler } from './services/opportunityScanner.js';
 import pool from './db.js';
 import { getPublicUrl } from './publicUrl.js';
@@ -227,6 +231,10 @@ app.use('/api/expenses', expensesRoutes);
 app.use('/api/accounts', accountsRoutes);
 app.use('/api/documents', documentsRoutes);
 app.use('/api/tools/ats', atsRoutes);
+app.use('/api/tools', toolsRoutes);
+app.use(['/api/tools/pdf-rag-cleaner', '/api/pdf-rag-cleaner'], pdfRagRoutes);
+app.use(['/api/tools/ai-content-detector', '/api/ai-content-detector'], aiDetectorRoutes);
+app.use(['/api/tools/webhook-tester', '/api/webhook-test'], webhookTesterRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => res.json({ ok: true }));
