@@ -30,6 +30,10 @@ if (fs.existsSync(publicPath)) {
   app.use(express.static(publicPath));
 }
 
+// Explicit static mounts for tool icons
+app.use('/tool-icons', express.static(path.join(distPath, 'tool-icons')));
+app.use('/tool-icons', express.static(path.join(publicPath, 'tool-icons')));
+
 // Mount webhook tester router
 app.use('/api/webhook-test', webhookTesterRouter);
 
@@ -39,9 +43,20 @@ app.get('/ads.txt', (req, res) => {
   res.send('google.com, pub-9892289069070642, DIRECT, f08c47fec0942fa0\n');
 });
 
-// Health check endpoint
+// Health check endpoint with diagnostic info
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', tools: true });
+  const distIcons = path.join(distPath, 'tool-icons');
+  const pubIcons = path.join(publicPath, 'tool-icons');
+  res.json({ 
+    status: 'ok', 
+    tools: true,
+    __dirname,
+    distPath,
+    distIconsExists: fs.existsSync(distIcons),
+    distIconsCount: fs.existsSync(distIcons) ? fs.readdirSync(distIcons).length : 0,
+    publicIconsExists: fs.existsSync(pubIcons),
+    publicIconsCount: fs.existsSync(pubIcons) ? fs.readdirSync(pubIcons).length : 0
+  });
 });
 
 // Database check endpoint
