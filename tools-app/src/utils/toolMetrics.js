@@ -343,6 +343,28 @@ export const TOOL_CONVERSION_METRICS = {
       singular: 'metin doğrulandı',
       short: 'doğrulama'
     }
+  },
+  'llms-txt': {
+    actionKey: 'generated',
+    getConversionCount: (tool) => {
+      if (!tool) return 0;
+      const downloads = tool.download_count || 0;
+      const copies = tool.copy_count || 0;
+      const uses = tool.use_count || 0;
+      return (downloads + copies) > 0 ? (downloads + copies) : uses;
+    },
+    en: {
+      action: 'generated',
+      badge: 'guides generated',
+      singular: 'guide generated',
+      short: 'guides'
+    },
+    tr: {
+      action: 'oluşturuldu',
+      badge: 'rehber oluşturuldu',
+      singular: 'rehber oluşturuldu',
+      short: 'rehber'
+    }
   }
 };
 

@@ -260,6 +260,18 @@ export default function App() {
         forceScrollToTop();
         return;
       }
+      const directLlmsMatch = window.location.pathname.match(/^\/(llms-txt(?:-(?:generator|checker|validator))?)\/?/);
+      if (directLlmsMatch) {
+        setCurrentSlug(directLlmsMatch[1]);
+        forceScrollToTop();
+        return;
+      }
+      const directHashLlmsMatch = hash.match(/^#\/(llms-txt(?:-(?:generator|checker|validator))?)\/?/);
+      if (directHashLlmsMatch) {
+        setCurrentSlug(directHashLlmsMatch[1]);
+        forceScrollToTop();
+        return;
+      }
       setCurrentSlug(null);
       forceScrollToTop();
     };

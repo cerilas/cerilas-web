@@ -22,6 +22,7 @@ import { cacCalculatorManifest } from './cac-calculator/manifest';
 import { ltvCacCalculatorManifest } from './ltv-cac-calculator/manifest';
 import { aiLinkHallucinationCheckerManifest } from './ai-link-hallucination-checker/manifest';
 import { aiCrawlerCheckerManifest } from './ai-crawler-checker/manifest';
+import { llmsTxtManifest } from './llms-txt-tools/manifest';
 
 /**
  * Enterprise Scalable Tool Registry.
@@ -121,6 +122,22 @@ export const toolsRegistry = {
   [aiCrawlerCheckerManifest.slug]: {
     manifest: aiCrawlerCheckerManifest,
     component: lazy(() => import('./ai-crawler-checker'))
+  },
+  [llmsTxtManifest.slug]: {
+    manifest: llmsTxtManifest,
+    component: lazy(() => import('./llms-txt-tools'))
+  },
+  'llms-txt-generator': {
+    manifest: { ...llmsTxtManifest, slug: 'llms-txt-generator', title: 'LLMs.txt Generator' },
+    component: lazy(() => import('./llms-txt-tools'))
+  },
+  'llms-txt-checker': {
+    manifest: { ...llmsTxtManifest, slug: 'llms-txt-checker', title: 'LLMs.txt Checker' },
+    component: lazy(() => import('./llms-txt-tools'))
+  },
+  'llms-txt-validator': {
+    manifest: { ...llmsTxtManifest, slug: 'llms-txt-validator', title: 'LLMs.txt Validator' },
+    component: lazy(() => import('./llms-txt-tools'))
   }
 };
 
