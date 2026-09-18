@@ -79,5 +79,9 @@ export function getRegisteredTool(slug) {
 }
 
 export function getAllRegisteredTools() {
-  return Object.values(toolsRegistry).map((item) => item.manifest);
+  return Object.values(toolsRegistry).map((item) => ({
+    ...item.manifest,
+    short_description: item.manifest.short_description || item.manifest.shortDescription || item.manifest.seo?.description || ''
+  }));
 }
+

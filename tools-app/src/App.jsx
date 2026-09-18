@@ -95,7 +95,7 @@ const ToolCard = ({ tool, onSelect }) => {
           </span>
         )}
       </div>
-      <p>{tool.short_description}</p>
+      <p>{tool.short_description || tool.shortDescription || tool.description || tool.seo?.description || ''}</p>
       
       <div style={{
         display: 'flex',
@@ -296,11 +296,23 @@ export default function App() {
           const registered = getAllRegisteredTools();
           const merged = registered.map((reg) => {
             const dbTool = result.data.find((d) => d.slug === reg.slug);
-            return dbTool ? { ...reg, ...dbTool } : reg;
+            if (!dbTool) return reg;
+            const desc = dbTool.short_description || dbTool.description || reg.short_description || reg.shortDescription || '';
+            return { 
+              ...reg, 
+              ...dbTool,
+              short_description: desc,
+              shortDescription: desc
+            };
           });
           result.data.forEach((dbTool) => {
             if (!merged.find((m) => m.slug === dbTool.slug)) {
-              merged.push(dbTool);
+              const desc = dbTool.short_description || dbTool.description || '';
+              merged.push({
+                ...dbTool,
+                short_description: desc,
+                shortDescription: desc
+              });
             }
           });
           setTools(merged);
