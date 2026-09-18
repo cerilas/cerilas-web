@@ -236,6 +236,12 @@ app.use(['/api/tools/pdf-rag-cleaner', '/api/pdf-rag-cleaner'], pdfRagRoutes);
 app.use(['/api/tools/ai-content-detector', '/api/ai-content-detector'], aiDetectorRoutes);
 app.use(['/api/tools/webhook-tester', '/api/webhook-test'], webhookTesterRoutes);
 
+// Google AdSense ads.txt verification route
+app.get('/ads.txt', (req, res) => {
+  res.type('text/plain');
+  res.send('google.com, pub-9892289069070642, DIRECT, f08c47fec0942fa0\n');
+});
+
 // Health check
 app.get('/api/health', (req, res) => res.json({ ok: true }));
 

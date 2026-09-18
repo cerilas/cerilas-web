@@ -24,6 +24,12 @@ app.use(express.json());
 // Mount webhook tester router
 app.use('/api/webhook-test', webhookTesterRouter);
 
+// Google AdSense ads.txt verification route
+app.get('/ads.txt', (req, res) => {
+  res.type('text/plain');
+  res.send('google.com, pub-9892289069070642, DIRECT, f08c47fec0942fa0\n');
+});
+
 // Health check endpoint
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', tools: true });
