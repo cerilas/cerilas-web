@@ -1,5 +1,5 @@
 /* ==========================================================================
-   Apple-Minimalist Google AdSlot Placeholder Styles
+   Apple-Minimalist Google AdSlot Styles
    Zero Cumulative Layout Shift (CLS) Compliant
    ========================================================================== */
 
@@ -9,63 +9,16 @@
   align-items: center;
   justify-content: center;
   position: relative;
-  border-radius: 14px;
-  background: rgba(150, 150, 150, 0.03);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px dashed var(--border-color);
   box-sizing: border-box;
   overflow: hidden;
-  transition: border-color 0.2s ease, background 0.2s ease;
-}
-
-.ad-slot-wrapper:hover {
-  border-color: rgba(150, 150, 150, 0.35);
-  background: rgba(150, 150, 150, 0.05);
-}
-
-.ad-slot-inner {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 0.35rem;
-  padding: 0.8rem 1.2rem;
   text-align: center;
-  user-select: none;
+  width: 100%;
 }
 
-.ad-slot-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  font-size: 0.72rem;
-  font-weight: 500;
-  color: var(--text-muted);
-  opacity: 0.85;
-  background: rgba(150, 150, 150, 0.08);
-  padding: 0.2rem 0.55rem;
-  border-radius: 999px;
-}
-
-.ad-slot-info {
-  display: flex;
-  flex-direction: column;
-  gap: 0.15rem;
-}
-
-.ad-slot-size {
-  font-size: 0.8rem;
-  font-weight: 500;
-  color: var(--text-main);
-  opacity: 0.75;
-  letter-spacing: -0.01em;
-}
-
-.ad-slot-sub {
-  font-size: 0.7rem;
-  color: var(--text-muted);
-  opacity: 0.6;
+.ad-slot-wrapper ins.adsbygoogle {
+  display: block;
+  width: 100%;
+  margin: 0 auto;
 }
 
 /* ==========================================================================
@@ -77,20 +30,12 @@
   width: 100%;
   max-width: 728px;
   min-height: 90px;
-  height: 90px;
 }
 
 @media (max-width: 768px) {
   .ad-slot-leaderboard {
     max-width: 320px;
-    min-height: 60px;
-    height: 60px;
-  }
-  .ad-slot-sub {
-    display: none;
-  }
-  .ad-slot-size {
-    font-size: 0.72rem;
+    min-height: 50px;
   }
 }
 
@@ -99,7 +44,6 @@
   width: 100%;
   max-width: 300px;
   min-height: 250px;
-  height: 250px;
   margin: 1.25rem auto 0 auto;
 }
 
@@ -107,7 +51,6 @@
   .ad-slot-rectangle {
     max-width: 280px;
     min-height: 220px;
-    height: 220px;
   }
 }
 
@@ -115,23 +58,20 @@
 .ad-slot-billboard {
   width: 100%;
   max-width: 970px;
-  min-height: 120px;
-  height: 120px;
+  min-height: 90px;
 }
 
 @media (max-width: 1000px) {
   .ad-slot-billboard {
     max-width: 728px;
     min-height: 90px;
-    height: 90px;
   }
 }
 
 @media (max-width: 768px) {
   .ad-slot-billboard {
     max-width: 320px;
-    min-height: 70px;
-    height: 70px;
+    min-height: 50px;
   }
 }
 
