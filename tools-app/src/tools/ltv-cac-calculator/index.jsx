@@ -9,9 +9,10 @@ import {
   Check, 
   RotateCcw, 
   CheckCircle2, 
-  AlertTriangle,
   Sparkles,
-  Percent
+  Percent,
+  Lock,
+  Eye
 } from 'lucide-react';
 import { ltvCacCalculatorManifest } from './manifest';
 import { useToolAnalytics } from '../../hooks/useToolAnalytics';
@@ -22,7 +23,7 @@ import AdSlot from '../../components/ui/AdSlot';
 import '../finance-shared/finance-tools.css';
 
 export default function LtvCacCalculator({ onBack, toolMeta }) {
-  const { trackAction } = useToolAnalytics(ltvCacCalculatorManifest.slug, toolMeta);
+  const { visitorCount, trackAction } = useToolAnalytics(ltvCacCalculatorManifest.slug, toolMeta);
 
   // Inputs
   const [ltv, setLtv] = useState(4800);
@@ -106,24 +107,33 @@ Generated via https://tools.cerilas.com/#/tool/ltv-cac-calculator`;
   };
 
   return (
-    <div className="calc-container">
+    <div className="c-tool-page-container finance-tool-container">
       <ToolHeader 
-        title="LTV:CAC Calculator"
-        subtitle="Evaluate the golden ratio of unit economics, payback duration, and capital efficiency."
+        title={ltvCacCalculatorManifest.title}
+        subtitle={ltvCacCalculatorManifest.shortDescription}
         onBack={onBack}
         backLabel="All Tools"
-        slug="ltv-cac-calculator"
+        slug={ltvCacCalculatorManifest.slug}
         badges={
           <>
+            <Badge variant="success" icon={<Lock size={12} strokeWidth={2} />}>
+              100% In-Browser Privacy
+            </Badge>
+            {visitorCount > 0 && (
+              <Badge variant="neutral" icon={<Eye size={12} strokeWidth={2} />}>
+                {visitorCount.toLocaleString()} visitors
+              </Badge>
+            )}
             <Badge variant="blue" icon={<Scale size={11} />}>Unit Economics</Badge>
             <Badge variant="success" icon={<CheckCircle2 size={11} />}>Payback Period</Badge>
           </>
         }
       />
 
-      <div className="calc-grid">
-        {/* Left Column: Inputs */}
-        <div className="calc-panel">
+      <div className="calc-workspace">
+        <div className="calc-grid">
+          {/* Left Column: Inputs */}
+          <div className="calc-panel">
           <div className="calc-panel-header">
             <h2 className="calc-panel-title">
               <Scale size={18} />
@@ -285,6 +295,7 @@ Generated via https://tools.cerilas.com/#/tool/ltv-cac-calculator`;
             </button>
           </div>
         </div>
+      </div>
       </div>
 
       {/* SEO Guide */}

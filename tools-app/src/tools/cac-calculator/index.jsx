@@ -10,7 +10,9 @@ import {
   ShieldCheck, 
   PieChart,
   CheckCircle2,
-  Sparkles
+  Sparkles,
+  Lock,
+  Eye
 } from 'lucide-react';
 import { cacCalculatorManifest } from './manifest';
 import { useToolAnalytics } from '../../hooks/useToolAnalytics';
@@ -21,7 +23,7 @@ import AdSlot from '../../components/ui/AdSlot';
 import '../finance-shared/finance-tools.css';
 
 export default function CacCalculator({ onBack, toolMeta }) {
-  const { trackAction } = useToolAnalytics(cacCalculatorManifest.slug, toolMeta);
+  const { visitorCount, trackAction } = useToolAnalytics(cacCalculatorManifest.slug, toolMeta);
 
   // Inputs
   const [adSpend, setAdSpend] = useState(15000);
@@ -112,24 +114,33 @@ Generated via https://tools.cerilas.com/#/tool/cac-calculator`;
   };
 
   return (
-    <div className="calc-container">
+    <div className="c-tool-page-container finance-tool-container">
       <ToolHeader 
-        title="CAC Calculator"
-        subtitle="Deconstruct Customer Acquisition Cost, compare Blended vs Paid CAC, and track sales efficiency."
+        title={cacCalculatorManifest.title}
+        subtitle={cacCalculatorManifest.shortDescription}
         onBack={onBack}
         backLabel="All Tools"
-        slug="cac-calculator"
+        slug={cacCalculatorManifest.slug}
         badges={
           <>
+            <Badge variant="success" icon={<Lock size={12} strokeWidth={2} />}>
+              100% In-Browser Privacy
+            </Badge>
+            {visitorCount > 0 && (
+              <Badge variant="neutral" icon={<Eye size={12} strokeWidth={2} />}>
+                {visitorCount.toLocaleString()} visitors
+              </Badge>
+            )}
             <Badge variant="blue" icon={<BarChart3 size={11} />}>Blended vs Paid</Badge>
             <Badge variant="success" icon={<CheckCircle2 size={11} />}>Acquisition Efficiency</Badge>
           </>
         }
       />
 
-      <div className="calc-grid">
-        {/* Left Column: Input Form */}
-        <div className="calc-panel">
+      <div className="calc-workspace">
+        <div className="calc-grid">
+          {/* Left Column: Input Form */}
+          <div className="calc-panel">
           <div className="calc-panel-header">
             <h2 className="calc-panel-title">
               <DollarSign size={18} />
@@ -312,6 +323,7 @@ Generated via https://tools.cerilas.com/#/tool/cac-calculator`;
             </button>
           </div>
         </div>
+      </div>
       </div>
 
       {/* SEO Guide */}

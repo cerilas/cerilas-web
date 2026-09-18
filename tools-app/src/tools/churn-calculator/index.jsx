@@ -11,7 +11,9 @@ import {
   ShieldCheck, 
   Activity,
   ArrowDownRight,
-  ArrowUpRight
+  ArrowUpRight,
+  Lock,
+  Eye
 } from 'lucide-react';
 import { churnCalculatorManifest } from './manifest';
 import { useToolAnalytics } from '../../hooks/useToolAnalytics';
@@ -22,7 +24,7 @@ import AdSlot from '../../components/ui/AdSlot';
 import '../finance-shared/finance-tools.css';
 
 export default function ChurnCalculator({ onBack, toolMeta }) {
-  const { trackAction } = useToolAnalytics(churnCalculatorManifest.slug, toolMeta);
+  const { visitorCount, trackAction } = useToolAnalytics(churnCalculatorManifest.slug, toolMeta);
 
   // Inputs
   const [startCustomers, setStartCustomers] = useState(500);
@@ -114,24 +116,33 @@ Generated via https://tools.cerilas.com/#/tool/churn-calculator`;
   };
 
   return (
-    <div className="calc-container">
+    <div className="c-tool-page-container finance-tool-container">
       <ToolHeader 
-        title="Churn Calculator"
-        subtitle="Analyze Customer (Logo) Churn, Gross Revenue Churn, and Net Revenue Retention (NRR)."
+        title={churnCalculatorManifest.title}
+        subtitle={churnCalculatorManifest.shortDescription}
         onBack={onBack}
         backLabel="All Tools"
-        slug="churn-calculator"
+        slug={churnCalculatorManifest.slug}
         badges={
           <>
+            <Badge variant="success" icon={<Lock size={12} strokeWidth={2} />}>
+              100% In-Browser Privacy
+            </Badge>
+            {visitorCount > 0 && (
+              <Badge variant="neutral" icon={<Eye size={12} strokeWidth={2} />}>
+                {visitorCount.toLocaleString()} visitors
+              </Badge>
+            )}
             <Badge variant="blue" icon={<Activity size={11} />}>Net Revenue Retention</Badge>
             <Badge variant="success" icon={<CheckCircle2 size={11} />}>Cohort Life</Badge>
           </>
         }
       />
 
-      <div className="calc-grid">
-        {/* Left Column: Inputs */}
-        <div className="calc-panel">
+      <div className="calc-workspace">
+        <div className="calc-grid">
+          {/* Left Column: Inputs */}
+          <div className="calc-panel">
           <div className="calc-panel-header">
             <h2 className="calc-panel-title">
               <Users size={18} />
@@ -345,6 +356,7 @@ Generated via https://tools.cerilas.com/#/tool/churn-calculator`;
             </button>
           </div>
         </div>
+      </div>
       </div>
 
       {/* SEO Guide */}

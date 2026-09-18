@@ -3,13 +3,19 @@
    Apple Minimalist & High-Contrast Visual Standards
    ========================================================================== */
 
+/* Unified Tool Page Container alignment */
+.finance-tool-container,
 .calc-container {
-  max-width: 1120px;
+  max-width: 1200px;
   margin: 0 auto;
-  padding: 0 1rem 3rem 1rem;
+  width: 100%;
+}
+
+.calc-workspace {
   display: flex;
   flex-direction: column;
   gap: 2rem;
+  width: 100%;
 }
 
 /* Two-column responsive workspace */

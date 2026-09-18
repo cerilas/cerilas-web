@@ -11,7 +11,9 @@ import {
   Sparkles,
   BarChart3,
   Calendar,
-  CheckCircle2
+  CheckCircle2,
+  Lock,
+  Eye
 } from 'lucide-react';
 import { arrCalculatorManifest } from './manifest';
 import { useToolAnalytics } from '../../hooks/useToolAnalytics';
@@ -22,7 +24,7 @@ import AdSlot from '../../components/ui/AdSlot';
 import '../finance-shared/finance-tools.css';
 
 export default function ArrCalculator({ onBack, toolMeta }) {
-  const { trackAction } = useToolAnalytics(arrCalculatorManifest.slug, toolMeta);
+  const { visitorCount, trackAction } = useToolAnalytics(arrCalculatorManifest.slug, toolMeta);
 
   // Inputs
   const [currentMrr, setCurrentMrr] = useState(83333);
@@ -106,24 +108,33 @@ Generated via https://tools.cerilas.com/#/tool/arr-calculator`;
   };
 
   return (
-    <div className="calc-container">
+    <div className="c-tool-page-container finance-tool-container">
       <ToolHeader 
-        title="ARR Calculator"
-        subtitle="Annual Recurring Revenue modeling, Rule of 40 score, and multi-year valuation trajectories."
+        title={arrCalculatorManifest.title}
+        subtitle={arrCalculatorManifest.shortDescription}
         onBack={onBack}
         backLabel="All Tools"
-        slug="arr-calculator"
+        slug={arrCalculatorManifest.slug}
         badges={
           <>
+            <Badge variant="success" icon={<Lock size={12} strokeWidth={2} />}>
+              100% In-Browser Privacy
+            </Badge>
+            {visitorCount > 0 && (
+              <Badge variant="neutral" icon={<Eye size={12} strokeWidth={2} />}>
+                {visitorCount.toLocaleString()} visitors
+              </Badge>
+            )}
             <Badge variant="blue" icon={<Award size={11} />}>Rule of 40</Badge>
             <Badge variant="success" icon={<TrendingUp size={11} />}>3-Year Forecast</Badge>
           </>
         }
       />
 
-      <div className="calc-grid">
-        {/* Left Column: Input Form */}
-        <div className="calc-panel">
+      <div className="calc-workspace">
+        <div className="calc-grid">
+          {/* Left Column: Input Form */}
+          <div className="calc-panel">
           <div className="calc-panel-header">
             <h2 className="calc-panel-title">
               <DollarSign size={18} />
@@ -304,6 +315,7 @@ Generated via https://tools.cerilas.com/#/tool/arr-calculator`;
             </button>
           </div>
         </div>
+      </div>
       </div>
 
       {/* SEO Guide */}

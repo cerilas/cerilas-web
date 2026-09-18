@@ -9,7 +9,9 @@ import {
   RotateCcw, 
   Award,
   CheckCircle2,
-  Sparkles
+  Sparkles,
+  Lock,
+  Eye
 } from 'lucide-react';
 import { ltvCalculatorManifest } from './manifest';
 import { useToolAnalytics } from '../../hooks/useToolAnalytics';
@@ -20,7 +22,7 @@ import AdSlot from '../../components/ui/AdSlot';
 import '../finance-shared/finance-tools.css';
 
 export default function LtvCalculator({ onBack, toolMeta }) {
-  const { trackAction } = useToolAnalytics(ltvCalculatorManifest.slug, toolMeta);
+  const { visitorCount, trackAction } = useToolAnalytics(ltvCalculatorManifest.slug, toolMeta);
 
   // Inputs
   const [arpu, setArpu] = useState(150);
@@ -104,24 +106,33 @@ Generated via https://tools.cerilas.com/#/tool/ltv-calculator`;
   };
 
   return (
-    <div className="calc-container">
+    <div className="c-tool-page-container finance-tool-container">
       <ToolHeader 
-        title="LTV Calculator"
-        subtitle="Calculate Customer Lifetime Value, average customer lifespan, and margin-adjusted revenue."
+        title={ltvCalculatorManifest.title}
+        subtitle={ltvCalculatorManifest.shortDescription}
         onBack={onBack}
         backLabel="All Tools"
-        slug="ltv-calculator"
+        slug={ltvCalculatorManifest.slug}
         badges={
           <>
+            <Badge variant="success" icon={<Lock size={12} strokeWidth={2} />}>
+              100% In-Browser Privacy
+            </Badge>
+            {visitorCount > 0 && (
+              <Badge variant="neutral" icon={<Eye size={12} strokeWidth={2} />}>
+                {visitorCount.toLocaleString()} visitors
+              </Badge>
+            )}
             <Badge variant="blue" icon={<Percent size={11} />}>Margin Adjusted</Badge>
             <Badge variant="success" icon={<CheckCircle2 size={11} />}>SaaS Benchmark</Badge>
           </>
         }
       />
 
-      <div className="calc-grid">
-        {/* Left Column: Inputs */}
-        <div className="calc-panel">
+      <div className="calc-workspace">
+        <div className="calc-grid">
+          {/* Left Column: Inputs */}
+          <div className="calc-panel">
           <div className="calc-panel-header">
             <h2 className="calc-panel-title">
               <DollarSign size={18} />
@@ -267,6 +278,7 @@ Generated via https://tools.cerilas.com/#/tool/ltv-calculator`;
             </button>
           </div>
         </div>
+      </div>
       </div>
 
       {/* SEO Guide */}

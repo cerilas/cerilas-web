@@ -12,7 +12,9 @@ import {
   Sparkles,
   BarChart3,
   CheckCircle2,
-  AlertCircle
+  AlertCircle,
+  Lock,
+  Eye
 } from 'lucide-react';
 import { mrrCalculatorManifest } from './manifest';
 import { useToolAnalytics } from '../../hooks/useToolAnalytics';
@@ -23,7 +25,7 @@ import AdSlot from '../../components/ui/AdSlot';
 import '../finance-shared/finance-tools.css';
 
 export default function MrrCalculator({ onBack, toolMeta }) {
-  const { trackAction } = useToolAnalytics(mrrCalculatorManifest.slug, toolMeta);
+  const { visitorCount, trackAction } = useToolAnalytics(mrrCalculatorManifest.slug, toolMeta);
 
   // Inputs
   const [startingMrr, setStartingMrr] = useState(50000);
@@ -111,24 +113,33 @@ Generated via https://tools.cerilas.com/#/tool/mrr-calculator`;
   };
 
   return (
-    <div className="calc-container">
+    <div className="c-tool-page-container finance-tool-container">
       <ToolHeader 
-        title="MRR Calculator"
-        subtitle="Deconstruct your Monthly Recurring Revenue into New, Expansion, Contraction, and Churn components."
+        title={mrrCalculatorManifest.title}
+        subtitle={mrrCalculatorManifest.shortDescription}
         onBack={onBack}
         backLabel="All Tools"
-        slug="mrr-calculator"
+        slug={mrrCalculatorManifest.slug}
         badges={
           <>
+            <Badge variant="success" icon={<Lock size={12} strokeWidth={2} />}>
+              100% In-Browser Privacy
+            </Badge>
+            {visitorCount > 0 && (
+              <Badge variant="neutral" icon={<Eye size={12} strokeWidth={2} />}>
+                {visitorCount.toLocaleString()} visitors
+              </Badge>
+            )}
             <Badge variant="blue" icon={<BarChart3 size={11} />}>SaaS Quick Ratio</Badge>
             <Badge variant="success" icon={<CheckCircle2 size={11} />}>B2B Benchmarks</Badge>
           </>
         }
       />
 
-      <div className="calc-grid">
-        {/* Left Column: Input Form */}
-        <div className="calc-panel">
+      <div className="calc-workspace">
+        <div className="calc-grid">
+          {/* Left Column: Input Form */}
+          <div className="calc-panel">
           <div className="calc-panel-header">
             <h2 className="calc-panel-title">
               <DollarSign size={18} />
@@ -314,6 +325,7 @@ Generated via https://tools.cerilas.com/#/tool/mrr-calculator`;
             </button>
           </div>
         </div>
+      </div>
       </div>
 
       {/* SEO Technical Guide */}

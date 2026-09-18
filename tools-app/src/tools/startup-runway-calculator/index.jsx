@@ -13,7 +13,9 @@ import {
   ArrowRight,
   ShieldCheck,
   Zap,
-  Info
+  Info,
+  Lock,
+  Eye
 } from 'lucide-react';
 import { startupRunwayCalculatorManifest } from './manifest';
 import { useToolAnalytics } from '../../hooks/useToolAnalytics';
@@ -24,7 +26,7 @@ import AdSlot from '../../components/ui/AdSlot';
 import '../finance-shared/finance-tools.css';
 
 export default function StartupRunwayCalculator({ onBack, toolMeta }) {
-  const { trackAction } = useToolAnalytics(startupRunwayCalculatorManifest.slug, toolMeta);
+  const { visitorCount, trackAction } = useToolAnalytics(startupRunwayCalculatorManifest.slug, toolMeta);
 
   // Default initial values
   const [cashBalance, setCashBalance] = useState(600000);
@@ -149,24 +151,33 @@ Generated via https://tools.cerilas.com/#/tool/startup-runway-calculator`;
   };
 
   return (
-    <div className="calc-container">
+    <div className="c-tool-page-container finance-tool-container">
       <ToolHeader 
-        title="Startup Runway Calculator"
-        subtitle="Model cash out dates, monthly net burn rate, and simulate revenue growth scenarios."
+        title={startupRunwayCalculatorManifest.title}
+        subtitle={startupRunwayCalculatorManifest.shortDescription}
         onBack={onBack}
         backLabel="All Tools"
-        slug="startup-runway-calculator"
+        slug={startupRunwayCalculatorManifest.slug}
         badges={
           <>
+            <Badge variant="success" icon={<Lock size={12} strokeWidth={2} />}>
+              100% In-Browser Privacy
+            </Badge>
+            {visitorCount > 0 && (
+              <Badge variant="neutral" icon={<Eye size={12} strokeWidth={2} />}>
+                {visitorCount.toLocaleString()} visitors
+              </Badge>
+            )}
             <Badge variant="blue" icon={<Calendar size={11} />}>Dynamic MoM Model</Badge>
             <Badge variant="success" icon={<CheckCircle2 size={11} />}>VC Benchmark</Badge>
           </>
         }
       />
 
-      <div className="calc-grid">
-        {/* Left Column: Interactive Input Controls */}
-        <div className="calc-panel">
+      <div className="calc-workspace">
+        <div className="calc-grid">
+          {/* Left Column: Interactive Input Controls */}
+          <div className="calc-panel">
           <div className="calc-panel-header">
             <h2 className="calc-panel-title">
               <DollarSign size={18} />
@@ -370,6 +381,7 @@ Generated via https://tools.cerilas.com/#/tool/startup-runway-calculator`;
             </button>
           </div>
         </div>
+      </div>
       </div>
 
       {/* SEO Technical Guide & FAQs */}
