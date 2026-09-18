@@ -38,12 +38,31 @@ app.get('/api/health', (req, res) => {
 
 // Database check endpoint
 app.get('/api/db-check', async (req, res) => {
+  let host = 'none';
+  let hasEnv = false;
   try {
+    hasEnv = !!process.env.DATABASE_URL;
+    if (process.env.DATABASE_URL) {
+      try {
+        const u = new URL(process.env.DATABASE_URL);
+        host = u.host;
+      } catch (e) {
+        host = 'invalid-url';
+      }
+    }
     const result = await pool.query('SELECT NOW()');
-    res.json({ status: 'success', time: result.rows[0].now });
+    res.json({ status: 'success', time: result.rows[0].now, host, hasEnv });
   } catch (error) {
     console.error('Database connection error:', error);
-    res.status(500).json({ status: 'error', message: 'Failed to connect to database', detail: error.message });
+    res.status(500).json({ 
+      status: 'error', 
+      message: 'Failed to connect to database', 
+      errorName: error?.name,
+      errorMessage: error?.message,
+      errorCode: error?.code,
+      host, 
+      hasEnv 
+    });
   }
 });
 
