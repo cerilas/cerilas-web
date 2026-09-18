@@ -1,4 +1,4 @@
-import React, { useState, useEffect, Suspense } from 'react';
+import React, { useState, useEffect, useLayoutEffect, Suspense } from 'react';
 import { Search, ArrowRight, Box, QrCode, Minimize2, Image as ImageIcon, Clock, FileText, FileCheck, Sparkles, SlidersHorizontal, Database, Cpu, PenTool, Video, Webhook, Braces, Mail, Users, Activity } from 'lucide-react';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
@@ -9,6 +9,42 @@ import { toolsRegistry, getAllRegisteredTools, getRegisteredTool } from './tools
 import { useTranslation } from './i18n';
 import { getConversionCount, getConversionLabel, getShortConversionLabel } from './utils/toolMetrics';
 import './index.css';
+
+// Force instant scroll position to the very top (functional workspace)
+export const forceScrollToTop = () => {
+  try {
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+  } catch (e) {
+    window.scrollTo(0, 0);
+  }
+  if (typeof document !== 'undefined') {
+    if (document.documentElement) document.documentElement.scrollTop = 0;
+    if (document.body) document.body.scrollTop = 0;
+  }
+};
+
+// Wrapper that guarantees scroll reset before and after tool component mounts
+function ToolScrollResetWrapper({ slug, children }) {
+  useLayoutEffect(() => {
+    forceScrollToTop();
+  }, [slug]);
+
+  useEffect(() => {
+    forceScrollToTop();
+    const raf = requestAnimationFrame(forceScrollToTop);
+    const t1 = setTimeout(forceScrollToTop, 50);
+    const t2 = setTimeout(forceScrollToTop, 150);
+    const t3 = setTimeout(forceScrollToTop, 350);
+    return () => {
+      cancelAnimationFrame(raf);
+      clearTimeout(t1);
+      clearTimeout(t2);
+      clearTimeout(t3);
+    };
+  }, [slug]);
+
+  return <div key={slug} className="tool-viewport-container">{children}</div>;
+}
 
 const ICON_MAP = {
   QrCode,
@@ -162,19 +198,27 @@ export default function App() {
 
   // Sync hash and path routing for both SPA navigation and web crawler indexing
   useEffect(() => {
+    if (typeof window !== 'undefined' && 'scrollRestoration' in window.history) {
+      window.history.scrollRestoration = 'manual';
+    }
+
     const handleLocationChange = () => {
+      forceScrollToTop();
       const hash = window.location.hash;
       const hashMatch = hash.match(/^#\/tools?\/([a-zA-Z0-9_-]+)\/?/);
       if (hashMatch) {
         setCurrentSlug(hashMatch[1]);
+        forceScrollToTop();
         return;
       }
       const pathMatch = window.location.pathname.match(/^\/tools?\/([a-zA-Z0-9_-]+)\/?/);
       if (pathMatch) {
         setCurrentSlug(pathMatch[1]);
+        forceScrollToTop();
         return;
       }
       setCurrentSlug(null);
+      forceScrollToTop();
     };
 
     handleLocationChange();
@@ -185,6 +229,19 @@ export default function App() {
       window.removeEventListener('popstate', handleLocationChange);
     };
   }, []);
+
+  // Guarantee scroll position is at the very top whenever active tool changes
+  useEffect(() => {
+    forceScrollToTop();
+    const raf = requestAnimationFrame(forceScrollToTop);
+    const t1 = setTimeout(forceScrollToTop, 50);
+    const t2 = setTimeout(forceScrollToTop, 150);
+    return () => {
+      cancelAnimationFrame(raf);
+      clearTimeout(t1);
+      clearTimeout(t2);
+    };
+  }, [currentSlug]);
 
   // Dynamic SEO Title, Open Graph, Twitter, Canonical & Breadcrumbs Management
   useEffect(() => {
@@ -366,11 +423,15 @@ export default function App() {
   }, []);
 
   const navigateToTool = (slug) => {
+    forceScrollToTop();
     window.location.hash = `#/tool/${slug}`;
+    forceScrollToTop();
   };
 
   const navigateToHome = () => {
+    forceScrollToTop();
     window.location.hash = '#/';
+    forceScrollToTop();
   };
 
   // Find active tool configuration from registry
@@ -416,7 +477,9 @@ export default function App() {
                 <p style={{ fontSize: '0.9rem', margin: 0, fontWeight: 300 }}>Loading workspace...</p>
               </div>
             }>
-              <ActiveToolComponent onBack={navigateToHome} toolMeta={activeToolMeta} />
+              <ToolScrollResetWrapper slug={currentSlug}>
+                <ActiveToolComponent onBack={navigateToHome} toolMeta={activeToolMeta} />
+              </ToolScrollResetWrapper>
             </Suspense>
           </ErrorBoundary>
         ) : (

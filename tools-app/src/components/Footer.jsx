@@ -20,8 +20,23 @@ export default function Footer({ onOpenStats }) {
   const currentYear = new Date().getFullYear();
 
   const handleToolClick = (slug) => {
+    try {
+      window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    } catch (e) {
+      window.scrollTo(0, 0);
+    }
+    if (typeof document !== 'undefined') {
+      if (document.documentElement) document.documentElement.scrollTop = 0;
+      if (document.body) document.body.scrollTop = 0;
+    }
     window.location.hash = `#/tool/${slug}`;
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    requestAnimationFrame(() => {
+      try {
+        window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+      } catch (e) {
+        window.scrollTo(0, 0);
+      }
+    });
   };
 
   const handleStatsClick = (e) => {
@@ -238,7 +253,18 @@ export default function Footer({ onOpenStats }) {
                 </a>
               </li>
               <li>
-                <a href="#/" onClick={() => { window.location.hash = '#/'; window.scrollTo({ top: 0, behavior: 'smooth' }); }} title="All Tools Catalog">
+                <a href="#/" onClick={() => { 
+                  try {
+                    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+                  } catch (e) {
+                    window.scrollTo(0, 0);
+                  }
+                  if (typeof document !== 'undefined') {
+                    if (document.documentElement) document.documentElement.scrollTop = 0;
+                    if (document.body) document.body.scrollTop = 0;
+                  }
+                  window.location.hash = '#/'; 
+                }} title="All Tools Catalog">
                   <span className="seo-tool-title">All Tools Catalog</span>
                   <span className="seo-link-tag">14 Utilities</span>
                 </a>
