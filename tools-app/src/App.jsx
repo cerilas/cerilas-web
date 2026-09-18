@@ -529,7 +529,7 @@ export default function App() {
         )}
       </div>
 
-      <Footer />
+      <Footer onOpenStats={() => setIsStatsOpen(true)} />
 
       <StatsModal 
         isOpen={isStatsOpen} 
