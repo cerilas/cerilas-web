@@ -43,7 +43,7 @@ app.get('/api/db-check', async (req, res) => {
     res.json({ status: 'success', time: result.rows[0].now });
   } catch (error) {
     console.error('Database connection error:', error);
-    res.status(500).json({ status: 'error', message: 'Failed to connect to database' });
+    res.status(500).json({ status: 'error', message: 'Failed to connect to database', detail: error.message });
   }
 });
 
