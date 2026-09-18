@@ -422,7 +422,20 @@ export default function App() {
         ) : (
           <div className="container">
             <header className="header">
-              <h1>{t('catalog.title')}</h1>
+              <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '0.85rem', marginBottom: '0.75rem' }}>
+                <img 
+                  src="/platform-logo.webp" 
+                  alt="Cerilas' Tools" 
+                  style={{ width: '48px', height: '48px', borderRadius: '12px', objectFit: 'contain', filter: 'drop-shadow(0 4px 12px rgba(0,0,0,0.12))' }}
+                  onError={(e) => {
+                    if (!e.target.dataset.triedPng) {
+                      e.target.dataset.triedPng = 'true';
+                      e.target.src = '/platform-logo.png';
+                    }
+                  }}
+                />
+                <h1 style={{ margin: 0, fontFamily: "'Roboto', -apple-system, BlinkMacSystemFont, sans-serif", fontWeight: 700, letterSpacing: '-0.02em' }}>Cerilas' Tools</h1>
+              </div>
               <p>{t('catalog.subtitle')}</p>
             </header>
 

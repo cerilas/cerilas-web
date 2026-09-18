@@ -1,5 +1,5 @@
 import React from 'react';
-import { LayoutTemplate, BarChart3, Code, Sparkles } from 'lucide-react';
+import { BarChart3, Code, Sparkles } from 'lucide-react';
 import { useTranslation } from '../i18n';
 
 export default function Navbar({ activeTool, onNavigateHome, onOpenStats }) {
@@ -18,19 +18,20 @@ export default function Navbar({ activeTool, onNavigateHome, onOpenStats }) {
               onNavigateHome();
             }}
           >
-            <div style={{
-              width: '28px',
-              height: '28px',
-              borderRadius: '8px',
-              background: 'var(--text-main)',
-              color: 'var(--bg-color)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}>
-              <LayoutTemplate size={16} />
-            </div>
-            <span style={{ fontWeight: '500' }}>{t('nav.brand')}</span>
+            <img 
+              src="/platform-logo.webp" 
+              alt="Cerilas' Tools" 
+              className="nav-platform-logo"
+              width={30}
+              height={30}
+              onError={(e) => {
+                if (!e.target.dataset.triedPng) {
+                  e.target.dataset.triedPng = 'true';
+                  e.target.src = '/platform-logo.png';
+                }
+              }}
+            />
+            <span className="nav-brand-text">Cerilas' Tools</span>
           </a>
 
           {activeTool && (

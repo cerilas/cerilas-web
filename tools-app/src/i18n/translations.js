@@ -1,14 +1,14 @@
 export const translations = {
   en: {
     nav: {
-      brand: 'Cerilas Tools',
+      brand: "Cerilas' Tools",
       allTools: 'All Tools',
       stats: 'Stats',
       mainSite: 'Main Site',
       github: 'GitHub'
     },
     catalog: {
-      title: 'Cerilas Tools',
+      title: "Cerilas' Tools",
       subtitle: 'Advanced utilities for high-tech research, engineering, and creative development.',
       searchPlaceholder: 'Search: QR Code, converter, utility...',
       noResults: 'No tools found matching your query.',
