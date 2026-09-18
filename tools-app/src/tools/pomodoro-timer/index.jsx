@@ -742,9 +742,6 @@ export default function PomodoroTimerTool({ onBack, toolMeta }) {
         }
       />
 
-      {/* Top Billboard AdSlot */}
-      <AdSlot format="billboard" slotId="ad-pomodoro-top-billboard" />
-
       {/* Toast Notification Banner (Modern Lucide Vector Icons, Strictly Zero Emojis) */}
       {toast && (
         <div role="status" aria-live="polite" className="pom-toast-banner">

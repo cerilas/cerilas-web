@@ -268,9 +268,6 @@ export default function VideoCompressor({ onBack, toolMeta }) {
         }
       />
 
-      {/* Top Billboard Ad Slot */}
-      <AdSlot format="billboard" slotId="ad-video-compressor-top" />
-
       {/* Toast Notification Banner */}
       {toast && (
         <div role="status" aria-live="polite" className="pom-toast-banner" style={{ marginBottom: '1.25rem' }}>

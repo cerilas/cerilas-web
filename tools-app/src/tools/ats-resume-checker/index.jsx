@@ -325,9 +325,6 @@ ${result.suggestions?.map((s, i) => `${i + 1}. ${s}`).join('\n') || 'None'}
         toolName="ATS Resume Checker"
       />
 
-      {/* Top Leaderboard Ad */}
-      <AdSlot format="leaderboard" slotId="ad-ats-top-leaderboard" />
-
       {/* Inputs Grid */}
       <div className="ats-input-grid">
         {/* Step 1: Resume Upload (PDF) */}

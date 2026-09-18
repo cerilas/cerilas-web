@@ -747,9 +747,6 @@ export default function PdfEditorTool({ onBack, toolMeta }) {
         }
       />
 
-      {/* Top Billboard Ad Slot */}
-      <AdSlot format="billboard" slotId="ad-pdf-editor-top" />
-
       {/* Toast Notification Banner */}
       {toast && (
         <div role="status" aria-live="polite" className="pom-toast-banner" style={{ marginBottom: '1.25rem' }}>

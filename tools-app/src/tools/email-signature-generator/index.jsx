@@ -241,9 +241,6 @@ export default function EmailSignatureGenerator({ onBack, toolMeta }) {
         }
       />
 
-      {/* Top Billboard Ad Slot */}
-      <AdSlot format="billboard" slotId="ad-email-signature-top" />
-
       {/* Top Preset & Template Control Card */}
       <div className="sig-control-card">
         <div className="sig-presets-bar">

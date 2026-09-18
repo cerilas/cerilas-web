@@ -335,9 +335,6 @@ export default function PdfCompressorTool({ onBack, toolMeta }) {
         }
       />
 
-      {/* Top Billboard AdSlot */}
-      <AdSlot format="billboard" slotId="ad-pdf-top-billboard" />
-
       {/* Compression Preset Selector */}
       <div className="pdf-comp-presets-card">
         <div className="pdf-presets-header">

@@ -530,9 +530,6 @@ export default function WebhookTester({ onBack, toolMeta: initialToolMeta }) {
         }
       />
 
-      {/* Top Billboard Ad Slot */}
-      <AdSlot format="billboard" slotId="ad-webhook-tester-top" />
-
       {/* Top Banner: Webhook Sender Controller */}
       <div className="wt-control-card">
         {/* Preset Templates Quick Selector */}

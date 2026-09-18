@@ -387,9 +387,6 @@ export default function ImageCompressorTool({ onBack, toolMeta }) {
         }
       />
 
-      {/* Google AdSense Slot: Top Billboard / Leaderboard */}
-      <AdSlot format="billboard" slotId="ad-img-top-billboard" />
-
       {/* Global Control Bar */}
       <div className="img-settings-panel">
         {/* Format Selector */}

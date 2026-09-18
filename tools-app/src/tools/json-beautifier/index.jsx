@@ -351,9 +351,6 @@ export default function JsonBeautifier({ onBack, toolMeta }) {
         }
       />
 
-      {/* Top Billboard Ad Slot */}
-      <AdSlot format="billboard" slotId="ad-json-beautifier-top" />
-
       {/* Top Action & Preset Toolbar */}
       <div className="jb-control-card">
         {/* Sample Templates Bar */}

@@ -242,9 +242,6 @@ export default function QrGeneratorTool({ onBack, toolMeta }) {
         }
       />
 
-      {/* Google AdSense Slot: Top Leaderboard / Billboard */}
-      <AdSlot format="billboard" slotId="ad-qr-top-leaderboard" />
-
       {/* Main Grid: Control Panel (Left) & Preview (Right) */}
       <div className="qr-tool-container">
         {/* Left Side: Form Controls */}
@@ -599,14 +596,9 @@ export default function QrGeneratorTool({ onBack, toolMeta }) {
               </button>
             </div>
           </div>
-
-          {/* Google AdSense Slot: Vertical Multiplex */}
-          <AdSlot format="multiplex" slotId="2582171503" />
         </div>
       </div>
 
-      {/* Google AdSense Slot: Mid-Content 728x90 Leaderboard */}
-      <AdSlot format="leaderboard" slotId="ad-qr-mid-leaderboard" />
 
       {/* Modern High-Conversion SEO & FAQ Guide for US Search Intent (Partitioned below the fold) */}
       <ToolSeoDivider label="QR Code Standards, Design Guidelines & FAQs" />
