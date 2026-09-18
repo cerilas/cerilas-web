@@ -305,6 +305,44 @@ export const TOOL_CONVERSION_METRICS = {
       singular: 'imza oluşturuldu',
       short: 'imza'
     }
+  },
+  'ai-crawler-checker': {
+    actionKey: 'checked',
+    getConversionCount: (tool) => {
+      if (!tool) return 0;
+      return tool.use_count || 0;
+    },
+    en: {
+      action: 'checked',
+      badge: 'websites audited',
+      singular: 'website audited',
+      short: 'audits'
+    },
+    tr: {
+      action: 'denetlendi',
+      badge: 'site denetlendi',
+      singular: 'site denetlendi',
+      short: 'denetim'
+    }
+  },
+  'ai-link-hallucination-checker': {
+    actionKey: 'verified',
+    getConversionCount: (tool) => {
+      if (!tool) return 0;
+      return tool.use_count || 0;
+    },
+    en: {
+      action: 'verified',
+      badge: 'audits completed',
+      singular: 'audit completed',
+      short: 'audits'
+    },
+    tr: {
+      action: 'doğrulandı',
+      badge: 'metin doğrulandı',
+      singular: 'metin doğrulandı',
+      short: 'doğrulama'
+    }
   }
 };
 
