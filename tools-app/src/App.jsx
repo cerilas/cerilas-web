@@ -420,38 +420,59 @@ export default function App() {
             </Suspense>
           </ErrorBoundary>
         ) : (
-          <div className="container">
-            <header className="header">
-              <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '0.85rem', marginBottom: '0.75rem' }}>
+          <div className="home-catalog-root">
+            <section className="catalog-hero-banner">
+              <div className="catalog-hero-bg">
                 <img 
-                  src="/platform-logo.webp" 
-                  alt="Cerilas' Tools" 
-                  style={{ width: '48px', height: '48px', borderRadius: '12px', objectFit: 'contain', filter: 'drop-shadow(0 4px 12px rgba(0,0,0,0.12))' }}
+                  src="/hero-bg.webp" 
+                  alt="" 
+                  className="catalog-hero-img"
                   onError={(e) => {
-                    if (!e.target.dataset.triedPng) {
-                      e.target.dataset.triedPng = 'true';
-                      e.target.src = '/platform-logo.png';
+                    if (!e.target.dataset.triedJpg) {
+                      e.target.dataset.triedJpg = 'true';
+                      e.target.src = '/hero-bg.jpg';
                     }
                   }}
                 />
-                <h1 style={{ margin: 0, fontFamily: "'Garet', -apple-system, BlinkMacSystemFont, sans-serif", fontWeight: 300, fontVariationSettings: "'wght' 300", color: '#272727', letterSpacing: '-0.02em' }}>Cerilas' Tools</h1>
+                <div className="catalog-hero-overlay" />
               </div>
-              <p>{t('catalog.subtitle')}</p>
-            </header>
 
-            <div className="search-container">
-              <div className="search-bar">
-                <Search className="search-icon" size={20} strokeWidth={1.5} />
-                <input 
-                  type="text" 
-                  className="search-input" 
-                  placeholder={t('catalog.searchPlaceholder')}
-                  spellCheck="false"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
+              <div className="catalog-hero-content">
+                <header className="header hero-header">
+                  <div className="hero-brand-badge">
+                    <img 
+                      src="/platform-logo.webp" 
+                      alt="Cerilas' Tools" 
+                      className="hero-brand-logo"
+                      onError={(e) => {
+                        if (!e.target.dataset.triedPng) {
+                          e.target.dataset.triedPng = 'true';
+                          e.target.src = '/platform-logo.png';
+                        }
+                      }}
+                    />
+                    <h1 className="hero-brand-title">Cerilas' Tools</h1>
+                  </div>
+                  <p className="hero-brand-subtitle">{t('catalog.subtitle')}</p>
+                </header>
+
+                <div className="search-container hero-search-container">
+                  <div className="search-bar hero-search-bar">
+                    <Search className="search-icon hero-search-icon" size={20} strokeWidth={1.5} />
+                    <input 
+                      type="text" 
+                      className="search-input hero-search-input" 
+                      placeholder={t('catalog.searchPlaceholder')}
+                      spellCheck="false"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                    />
+                  </div>
+                </div>
               </div>
-            </div>
+            </section>
+
+            <div className="container catalog-container">
 
             {/* Category Filter Bar for Scalable Navigation */}
             <div className="category-filter-bar" style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', justifyContent: 'center', margin: '1rem 0 2rem 0' }}>
@@ -507,6 +528,7 @@ export default function App() {
             {/* Google AdSense Slot: Bottom Vertical Multiplex */}
             <AdSlot format="multiplex" slotId="2582171503" />
           </div>
+        </div>
         )}
       </div>
 

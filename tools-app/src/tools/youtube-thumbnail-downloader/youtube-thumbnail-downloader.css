@@ -7,19 +7,19 @@
 
 /* Input Section */
 .ytd-input-card {
-  background: var(--card-bg, rgba(255, 255, 255, 0.03));
-  border: 1px solid var(--card-border, rgba(150, 150, 150, 0.15));
-  border-radius: 20px;
-  padding: 1.75rem;
+  background: var(--card-bg, rgba(255, 255, 255, 0.6));
+  border: 1px solid var(--card-border, rgba(0, 0, 0, 0.05));
+  border-radius: 16px;
+  padding: 1.5rem;
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
-  margin-bottom: 2rem;
-  transition: border-color 0.3s ease;
+  box-shadow: var(--card-shadow, 0 8px 30px rgba(0, 0, 0, 0.04));
+  margin-bottom: 1.5rem;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .ytd-input-card:focus-within {
-  border-color: rgba(239, 68, 68, 0.4);
+  border-color: rgba(150, 150, 150, 0.3);
 }
 
 .ytd-input-label {
@@ -29,27 +29,27 @@
   font-size: 0.88rem;
   font-weight: 500;
   color: var(--text-muted);
-  margin-bottom: 0.85rem;
+  margin-bottom: 0.75rem;
 }
 
 .ytd-input-wrapper {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  background: var(--input-bg, rgba(0, 0, 0, 0.1));
-  border: 1px solid var(--card-border, rgba(150, 150, 150, 0.2));
-  border-radius: 14px;
-  padding: 0.4rem 0.5rem 0.4rem 1rem;
-  transition: all 0.25s ease;
+  gap: 0.6rem;
+  background: var(--bg-color, #ffffff);
+  border: 1px solid var(--card-border, rgba(0, 0, 0, 0.1));
+  border-radius: 12px;
+  padding: 0.35rem 0.5rem 0.35rem 0.85rem;
+  transition: all 0.2s ease;
 }
 
 .ytd-input-wrapper:focus-within {
-  border-color: #ef4444;
-  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15);
+  border-color: var(--text-main);
+  box-shadow: 0 0 0 1px var(--text-main);
 }
 
 .ytd-input-icon {
-  color: #ef4444;
+  color: var(--text-muted);
   flex-shrink: 0;
 }
 
@@ -58,14 +58,14 @@
   background: transparent;
   border: none;
   outline: none;
-  font-size: 1rem;
+  font-size: 0.95rem;
   color: var(--text-main);
   font-family: inherit;
 }
 
 .ytd-url-input::placeholder {
   color: var(--text-muted);
-  opacity: 0.6;
+  opacity: 0.7;
 }
 
 .ytd-input-actions {
@@ -76,11 +76,11 @@
 
 .ytd-btn-clear,
 .ytd-btn-paste {
-  background: rgba(150, 150, 150, 0.1);
-  border: 1px solid rgba(150, 150, 150, 0.15);
+  background: rgba(150, 150, 150, 0.08);
+  border: 1px solid rgba(150, 150, 150, 0.14);
   color: var(--text-muted);
-  border-radius: 10px;
-  padding: 0.45rem 0.75rem;
+  border-radius: 9px;
+  padding: 0.42rem 0.7rem;
   font-size: 0.82rem;
   font-weight: 500;
   cursor: pointer;
@@ -92,21 +92,15 @@
 
 .ytd-btn-clear:hover,
 .ytd-btn-paste:hover {
-  background: rgba(150, 150, 150, 0.2);
+  background: rgba(150, 150, 150, 0.16);
   color: var(--text-main);
 }
 
 .ytd-btn-fetch {
-  background: #ef4444 !important;
-  color: #ffffff !important;
-  border-radius: 10px !important;
-  padding: 0.5rem 1.1rem !important;
-  font-weight: 600 !important;
-}
-
-.ytd-btn-fetch:hover {
-  background: #dc2626 !important;
-  transform: translateY(-1px);
+  border-radius: 9px !important;
+  padding: 0.45rem 1rem !important;
+  font-weight: 500 !important;
+  font-size: 0.88rem !important;
 }
 
 /* Quick Examples Pills */
@@ -126,33 +120,39 @@
 
 .ytd-example-pill {
   background: rgba(150, 150, 150, 0.08);
-  border: 1px solid rgba(150, 150, 150, 0.12);
+  border: 1px solid var(--card-border, rgba(150, 150, 150, 0.14));
   color: var(--text-muted);
-  padding: 0.25rem 0.65rem;
+  padding: 0.28rem 0.7rem;
   border-radius: 999px;
   font-size: 0.76rem;
   cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
   transition: all 0.2s ease;
 }
 
 .ytd-example-pill:hover {
-  background: rgba(239, 68, 68, 0.12);
-  border-color: rgba(239, 68, 68, 0.3);
-  color: #ef4444;
+  background: var(--text-main);
+  color: var(--bg-color);
+  border-color: var(--text-main);
 }
 
 /* Active Video Overview Header */
 .ytd-video-info-card {
-  background: var(--card-bg, rgba(255, 255, 255, 0.02));
-  border: 1px solid var(--card-border, rgba(150, 150, 150, 0.15));
-  border-radius: 18px;
+  background: var(--card-bg, rgba(255, 255, 255, 0.6));
+  border: 1px solid var(--card-border, rgba(0, 0, 0, 0.05));
+  border-radius: 16px;
   padding: 1.25rem 1.5rem;
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 1rem;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: var(--card-shadow, 0 4px 20px rgba(0, 0, 0, 0.03));
 }
 
 .ytd-video-info-left {
@@ -162,11 +162,11 @@
 }
 
 .ytd-video-icon-badge {
-  width: 44px;
-  height: 44px;
-  border-radius: 12px;
-  background: rgba(239, 68, 68, 0.12);
-  color: #ef4444;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: var(--text-main);
+  color: var(--bg-color);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -174,7 +174,7 @@
 }
 
 .ytd-video-title {
-  font-size: 1.1rem;
+  font-size: 1.05rem;
   font-weight: 500;
   color: var(--text-main);
   margin: 0 0 0.2rem 0;

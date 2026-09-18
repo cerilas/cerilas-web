@@ -19,7 +19,6 @@ import ToolHeader from '../../components/ui/ToolHeader';
 import ToolSeoDivider from '../../components/ui/ToolSeoDivider';
 import Badge from '../../components/ui/Badge';
 import Button from '../../components/ui/Button';
-import AdSlot from '../../components/ui/AdSlot';
 import ThumbnailCard from './components/ThumbnailCard';
 import YoutubeSeoSection from './components/YoutubeSeoSection';
 import {
@@ -30,9 +29,9 @@ import {
 import './youtube-thumbnail-downloader.css';
 
 const EXAMPLE_VIDEOS = [
-  { label: '🎵 MKBHD Studio', id: 'dQw4w9WgXcQ' },
-  { label: '⚡ Apple Keynote', id: 'f_n3gE5Y66Q' },
-  { label: '🚀 SpaceX Launch', id: 'bvim4rsNHkQ' }
+  { label: 'Tech Studio (4K)', id: 'dQw4w9WgXcQ', icon: Film },
+  { label: 'Apple Keynote (HD)', id: 'f_n3gE5Y66Q', icon: Sparkles },
+  { label: 'Aerospace Stream', id: 'bvim4rsNHkQ', icon: Play }
 ];
 
 export default function YoutubeThumbnailDownloaderTool({ onBack, toolMeta }) {
@@ -118,18 +117,6 @@ export default function YoutubeThumbnailDownloaderTool({ onBack, toolMeta }) {
 
   return (
     <div className="c-tool-page-container ytd-page-container">
-      {/* Top Banner Ad - Minimal 90px Leaderboard */}
-      <AdSlot
-        slotId="3592000841"
-        format="auto"
-        style={{
-          maxHeight: '90px',
-          overflow: 'hidden',
-          marginBottom: '1.25rem',
-          display: 'block'
-        }}
-      />
-
       {/* Standard Tool Header */}
       <ToolHeader
         slug={youtubeThumbnailDownloaderManifest.slug}
@@ -140,10 +127,10 @@ export default function YoutubeThumbnailDownloaderTool({ onBack, toolMeta }) {
         badges={
           <>
             <Badge variant="brand" icon={<Sparkles size={11} strokeWidth={2.2} />}>
-              4K Ultra HD
+              4K Ultra HD &amp; WebP
             </Badge>
-            <Badge variant="neutral">
-              Shorts Ready
+            <Badge variant="success" icon={<Check size={11} strokeWidth={2.2} />}>
+              Shorts Compatible
             </Badge>
             {visitorCount > 0 && (
               <Badge variant="neutral" icon={<Eye size={12} strokeWidth={2} />}>
@@ -157,8 +144,8 @@ export default function YoutubeThumbnailDownloaderTool({ onBack, toolMeta }) {
       {/* URL Input Box */}
       <div className="ytd-input-card">
         <label className="ytd-input-label" htmlFor="youtube-url-input">
-          <Film size={16} className="icon-rose" />
-          <span>Paste YouTube Video or Shorts URL</span>
+          <Film size={15} />
+          <span>YouTube Video or Shorts URL</span>
         </label>
 
         <div className="ytd-input-wrapper">
@@ -172,7 +159,7 @@ export default function YoutubeThumbnailDownloaderTool({ onBack, toolMeta }) {
             onKeyDown={(e) => {
               if (e.key === 'Enter') handleFetch();
             }}
-            placeholder="https://www.youtube.com/watch?v=... or youtu.be/... or Shorts URL"
+            placeholder="Paste YouTube link (e.g. youtube.com/watch?v=... or youtu.be/... or Shorts URL)"
             autoComplete="off"
             spellCheck="false"
           />
@@ -211,21 +198,25 @@ export default function YoutubeThumbnailDownloaderTool({ onBack, toolMeta }) {
 
         {/* Quick Example Suggestions */}
         <div className="ytd-examples">
-          <span className="ytd-examples-label">Try Examples:</span>
-          {EXAMPLE_VIDEOS.map((ex) => (
-            <button
-              key={ex.id}
-              type="button"
-              className="ytd-example-pill"
-              onClick={() => {
-                const sampleUrl = `https://www.youtube.com/watch?v=${ex.id}`;
-                setInputUrl(sampleUrl);
-                handleFetch(sampleUrl);
-              }}
-            >
-              {ex.label}
-            </button>
-          ))}
+          <span className="ytd-examples-label">Examples:</span>
+          {EXAMPLE_VIDEOS.map((ex) => {
+            const ExIcon = ex.icon;
+            return (
+              <button
+                key={ex.id}
+                type="button"
+                className="ytd-example-pill"
+                onClick={() => {
+                  const sampleUrl = `https://www.youtube.com/watch?v=${ex.id}`;
+                  setInputUrl(sampleUrl);
+                  handleFetch(sampleUrl);
+                }}
+              >
+                <ExIcon size={12} strokeWidth={2} />
+                <span>{ex.label}</span>
+              </button>
+            );
+          })}
         </div>
       </div>
 
