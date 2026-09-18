@@ -16,11 +16,19 @@ import { checkAiRateLimit, getClientIp } from './utils/aiRateLimit.js';
 dotenv.config();
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const distPath = path.resolve(__dirname, '..', 'dist');
+const publicPath = path.resolve(__dirname, '..', 'public');
 const app = express();
 const PORT = process.env.PORT || 3002;
 
 app.use(cors());
 app.use(express.json());
+
+// Serve static assets from build output
+app.use(express.static(distPath));
+if (fs.existsSync(publicPath)) {
+  app.use(express.static(publicPath));
+}
 
 // Mount webhook tester router
 app.use('/api/webhook-test', webhookTesterRouter);
@@ -594,7 +602,11 @@ app.get('{*path}', async (req, res) => {
     res.send(html);
   } catch (err) {
     console.error('Error rendering HTML with SEO:', err);
-    res.sendFile(indexPath);
+    if (fs.existsSync(indexPath)) {
+      res.sendFile(indexPath);
+    } else {
+      res.status(500).send('Internal Server Error');
+    }
   }
 });
 
