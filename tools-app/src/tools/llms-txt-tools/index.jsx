@@ -30,7 +30,11 @@ import {
   Eye,
   FileCheck2,
   CheckSquare,
-  RefreshCw
+  RefreshCw,
+  Link2,
+  Zap,
+  ArrowRight,
+  CornerDownRight
 } from 'lucide-react';
 import { llmsTxtManifest } from './manifest';
 import { useToolAnalytics } from '../../hooks/useToolAnalytics';
@@ -40,10 +44,10 @@ import LlmsTxtSeo from './components/LlmsTxtSeo';
 import './llms-txt-tools.css';
 
 const SAMPLE_DOMAINS = [
-  { name: 'Cerilas', url: 'cerilas.com' },
-  { name: 'Anthropic Docs', url: 'docs.anthropic.com' },
-  { name: 'FastAPI', url: 'fastapi.tiangolo.com' },
-  { name: 'OpenAI', url: 'openai.com' }
+  { name: 'llmstxt.org', url: 'https://llmstxt.org' },
+  { name: 'Anthropic Docs', url: 'https://docs.anthropic.com' },
+  { name: 'FastAPI', url: 'https://fastapi.tiangolo.com' },
+  { name: 'Missing File Demo', url: 'https://example.com' }
 ];
 
 const VALID_SAMPLE = `# Cerilas
@@ -150,7 +154,7 @@ export default function LlmsTxtTools({ onBack, toolMeta }) {
   const [checkUrl, setCheckUrl] = useState('');
   const [isChecking, setIsChecking] = useState(false);
   const [checkData, setCheckData] = useState(null);
-  const [chkFilter, setChkFilter] = useState('all'); // 'all' | 'valid' | 'redirect' | 'broken'
+  const [chkFilter, setChkFilter] = useState('all'); // 'all' | 'valid' | 'redirect' | 'broken' | 'markdown'
   const [chkSearch, setChkSearch] = useState('');
 
   // Filtered links list for the Checker Table
@@ -164,6 +168,8 @@ export default function LlmsTxtTools({ onBack, toolMeta }) {
       list = list.filter((l) => l.status === 'redirect');
     } else if (chkFilter === 'broken') {
       list = list.filter((l) => ['not_found', 'forbidden', 'warning'].includes(l.status));
+    } else if (chkFilter === 'markdown') {
+      list = list.filter((l) => l.hasMarkdownAlt);
     }
 
     if (chkSearch.trim()) {
@@ -978,8 +984,8 @@ export default function LlmsTxtTools({ onBack, toolMeta }) {
                 </div>
               </div>
 
-              {/* Spacious, Modern Link Health Audit Table */}
-              {checkData.linksSummary.auditedLinks?.length > 0 && (
+              {/* Link Health Audit Table OR Diagnostic Endpoint Probes Table */}
+              {checkData.linksSummary.auditedLinks?.length > 0 ? (
                 <div className="chk-table-card">
                   <div className="chk-table-header">
                     <div className="chk-table-title">
@@ -1035,6 +1041,15 @@ export default function LlmsTxtTools({ onBack, toolMeta }) {
                             onClick={() => setChkFilter('broken')}
                           >
                             Broken ({checkData.linksSummary.brokenCount})
+                          </button>
+                        )}
+                        {(checkData.linksSummary.markdownAltCount || 0) > 0 && (
+                          <button
+                            type="button"
+                            className={`chk-filter-btn ${chkFilter === 'markdown' ? 'active' : ''}`}
+                            onClick={() => setChkFilter('markdown')}
+                          >
+                            Markdown Alt ({checkData.linksSummary.markdownAltCount})
                           </button>
                         )}
                       </div>
@@ -1137,6 +1152,164 @@ export default function LlmsTxtTools({ onBack, toolMeta }) {
                         )}
                       </tbody>
                     </table>
+                  </div>
+                </div>
+              ) : (
+                <div className="chk-table-card">
+                  <div className="chk-table-header">
+                    <div className="chk-table-title">
+                      <ShieldCheck size={16} />
+                      <span>Discovery Endpoints &amp; Diagnostic Probes</span>
+                    </div>
+                    <Badge variant="neutral">Probed Endpoints</Badge>
+                  </div>
+
+                  <div className="chk-table-wrapper">
+                    <table className="chk-table">
+                      <thead>
+                        <tr>
+                          <th>Probed Standard Endpoint</th>
+                          <th>Target URL</th>
+                          <th>HTTP Status</th>
+                          <th>Response Latency</th>
+                          <th>Technical Diagnostic</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td>
+                            <span className="chk-title-text">Root Specification</span>
+                            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>RFC Standard Endpoint</span>
+                          </td>
+                          <td>
+                            <code style={{ fontSize: '0.8rem' }}>{checkData.rootReport.url}</code>
+                          </td>
+                          <td>
+                            <span
+                              className={`chk-status-pill ${
+                                checkData.rootReport.status === 'found' ? 'success' : 'danger'
+                              }`}
+                            >
+                              {checkData.rootReport.status === 'found' ? (
+                                <>
+                                  <CheckCircle2 size={12} />
+                                  <span>HTTP 200 OK</span>
+                                </>
+                              ) : (
+                                <>
+                                  <XCircle size={12} />
+                                  <span>{checkData.rootReport.httpCode ? `HTTP ${checkData.rootReport.httpCode}` : 'Not Found'}</span>
+                                </>
+                              )}
+                            </span>
+                          </td>
+                          <td>
+                            <span className="chk-latency-badge">
+                              <span
+                                className={`chk-latency-dot ${
+                                  checkData.rootReport.responseTimeMs < 400
+                                    ? 'fast'
+                                    : checkData.rootReport.responseTimeMs < 1200
+                                    ? 'medium'
+                                    : 'slow'
+                                }`}
+                              />
+                              {checkData.rootReport.responseTimeMs || 0}ms
+                            </span>
+                          </td>
+                          <td style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                            {checkData.rootReport.status === 'found'
+                              ? 'Valid llms.txt found, but no resource links were declared inside the markdown.'
+                              : 'Domain does not serve a public /llms.txt file at its root.'}
+                          </td>
+                        </tr>
+
+                        <tr>
+                          <td>
+                            <span className="chk-title-text">Full Bundle Endpoint</span>
+                            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>High-Context Target</span>
+                          </td>
+                          <td>
+                            <code style={{ fontSize: '0.8rem' }}>{checkData.origin}/llms-full.txt</code>
+                          </td>
+                          <td>
+                            <span className="chk-status-pill neutral">
+                              <Clock size={12} />
+                              <span>Optional Spec</span>
+                            </span>
+                          </td>
+                          <td style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>—</td>
+                          <td style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                            Comprehensive documentation bundle for large LLM context windows.
+                          </td>
+                        </tr>
+
+                        <tr>
+                          <td>
+                            <span className="chk-title-text">Discovery Header &amp; Link</span>
+                            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Agent Autodiscovery</span>
+                          </td>
+                          <td>
+                            <code style={{ fontSize: '0.8rem' }}>&lt;link rel="describedby"&gt;</code>
+                          </td>
+                          <td>
+                            <span
+                              className={`chk-status-pill ${
+                                checkData.discoverability.describedByDetected ? 'success' : 'neutral'
+                              }`}
+                            >
+                              {checkData.discoverability.describedByDetected ? (
+                                <>
+                                  <CheckCircle2 size={12} />
+                                  <span>Advertised</span>
+                                </>
+                              ) : (
+                                <>
+                                  <AlertTriangle size={12} />
+                                  <span>Not Detected</span>
+                                </>
+                              )}
+                            </span>
+                          </td>
+                          <td style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>—</td>
+                          <td style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                            {checkData.discoverability.describedByDetected
+                              ? 'Homepage exposes rel="describedby" header pointing agents to llms.txt.'
+                              : 'Add <link rel="describedby" href="/llms.txt"> to your homepage HTML head.'}
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {/* Apple Callout to Generate llms.txt in 1 click */}
+                  <div className="chk-cta-banner">
+                    <div className="chk-cta-content">
+                      <div className="chk-cta-icon-box">
+                        <Wand2 size={20} />
+                      </div>
+                      <div>
+                        <h4 className="chk-cta-title">
+                          Generate an llms.txt site guide for {checkData.domain}
+                        </h4>
+                        <p className="chk-cta-desc">
+                          Help AI agents like ChatGPT, Claude, and Perplexity understand your website with a clean, curated Markdown guide.
+                        </p>
+                      </div>
+                    </div>
+                    <Button
+                      variant="primary"
+                      size="md"
+                      onClick={() => {
+                        const targetDomain = checkData.checkedUrl || `https://${checkData.domain}`;
+                        setGenUrl(targetDomain);
+                        setActiveMode('generator');
+                        handleGenerate(targetDomain);
+                      }}
+                      icon={<Sparkles size={14} />}
+                    >
+                      Generate with 1-Click
+                    </Button>
                   </div>
                 </div>
               )}
@@ -1343,10 +1516,10 @@ export default function LlmsTxtTools({ onBack, toolMeta }) {
                     <Button
                       variant={showDiff ? 'secondary' : 'primary'}
                       onClick={() => setShowDiff(!showDiff)}
-                      icon={<GitCompare size={14} />}
+                      icon={<Zap size={14} />}
                       size="sm"
                     >
-                      {showDiff ? 'Hide Diff' : '⚡ View Auto-Fix Diff'}
+                      {showDiff ? 'Hide Diff' : 'View Auto-Fix Diff'}
                     </Button>
                   )}
                   <Button
