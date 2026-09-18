@@ -337,22 +337,4 @@
     <changefreq>weekly</changefreq>
     <priority>0.98</priority>
   </url>
-  <url>
-    <loc>https://tools.cerilas.com/llms-txt-generator</loc>
-    <lastmod>2026-09-18</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.98</priority>
-  </url>
-  <url>
-    <loc>https://tools.cerilas.com/llms-txt-checker</loc>
-    <lastmod>2026-09-18</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.98</priority>
-  </url>
-  <url>
-    <loc>https://tools.cerilas.com/llms-txt-validator</loc>
-    <lastmod>2026-09-18</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.98</priority>
-  </url>
 </urlset>

@@ -1,7 +1,7 @@
 export const llmsTxtManifest = {
   slug: 'llms-txt',
-  title: 'LLMs.txt Tools',
-  shortDescription: 'Create, check, and validate your llms.txt site guide under the latest v2 specification. Scan website resources, audit markdown link health, and test agent discoverability.',
+  title: 'LLMs.txt Generator, Checker & Validator',
+  shortDescription: 'All-in-one suite to create, inspect, and validate your llms.txt site guide under the latest v2 specification. Scan website resources, audit link health, and verify formatting.',
   category: 'AI Assisted',
   iconName: 'FileText',
   badge: 'AI Assisted',

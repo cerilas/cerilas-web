@@ -126,23 +126,18 @@ export const toolsRegistry = {
   [llmsTxtManifest.slug]: {
     manifest: llmsTxtManifest,
     component: lazy(() => import('./llms-txt-tools'))
-  },
-  'llms-txt-generator': {
-    manifest: { ...llmsTxtManifest, slug: 'llms-txt-generator', title: 'LLMs.txt Generator' },
-    component: lazy(() => import('./llms-txt-tools'))
-  },
-  'llms-txt-checker': {
-    manifest: { ...llmsTxtManifest, slug: 'llms-txt-checker', title: 'LLMs.txt Checker' },
-    component: lazy(() => import('./llms-txt-tools'))
-  },
-  'llms-txt-validator': {
-    manifest: { ...llmsTxtManifest, slug: 'llms-txt-validator', title: 'LLMs.txt Validator' },
-    component: lazy(() => import('./llms-txt-tools'))
   }
 };
 
+const toolAliases = {
+  'llms-txt-generator': 'llms-txt',
+  'llms-txt-checker': 'llms-txt',
+  'llms-txt-validator': 'llms-txt'
+};
+
 export function getRegisteredTool(slug) {
-  return toolsRegistry[slug] || null;
+  const targetSlug = toolAliases[slug] || slug;
+  return toolsRegistry[targetSlug] || null;
 }
 
 export function getAllRegisteredTools() {
