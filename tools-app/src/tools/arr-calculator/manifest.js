@@ -16,6 +16,7 @@ export const arrCalculatorManifest = {
     'Average Contract Value (ACV): Automatically computes mean revenue per customer account',
     '100% In-Browser Privacy: All financial computations run locally without server tracking or uploads'
   ],
+  conversionLabel: 'Calculations',
   seo: {
     title: 'ARR Calculator - Annual Recurring Revenue & Rule of 40 | Cerilas Tools',
     description: 'Free SaaS ARR Calculator. Convert MRR to ARR, project multi-year revenue compounding, measure ACV (Average Contract Value), and calculate Rule of 40 score.',

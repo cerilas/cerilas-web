@@ -1,18 +1,20 @@
-import React, { useState, useMemo } from 'react';
-import { 
-  Users, 
-  DollarSign, 
-  TrendingUp, 
-  BarChart3, 
-  Copy, 
-  Check, 
-  RotateCcw, 
-  ShieldCheck, 
+import React, { useEffect,  useState, useMemo  } from 'react';
+import {
+  Users,
+  DollarSign,
+  TrendingUp,
+  BarChart3,
+  Copy,
+  Check,
+  RotateCcw,
+  ShieldCheck,
   PieChart,
   CheckCircle2,
   Sparkles,
   Lock,
-  Eye
+  Eye,
+  Activity,
+  Zap
 } from 'lucide-react';
 import { cacCalculatorManifest } from './manifest';
 import { useToolAnalytics } from '../../hooks/useToolAnalytics';
@@ -20,10 +22,11 @@ import ToolHeader from '../../components/ui/ToolHeader';
 import ToolSeoDivider from '../../components/ui/ToolSeoDivider';
 import Badge from '../../components/ui/Badge';
 import AdSlot from '../../components/ui/AdSlot';
+import CacSeo from './components/CacSeo';
 import '../finance-shared/finance-tools.css';
 
 export default function CacCalculator({ onBack, toolMeta }) {
-  const { visitorCount, trackAction } = useToolAnalytics(cacCalculatorManifest.slug, toolMeta);
+  const { visitorCount, trackAction, trackUse, conversionCount, getConversionLabel } = useToolAnalytics(cacCalculatorManifest.slug, toolMeta);
 
   // Inputs
   const [adSpend, setAdSpend] = useState(15000);
@@ -33,6 +36,15 @@ export default function CacCalculator({ onBack, toolMeta }) {
   const [totalNewCustomers, setTotalNewCustomers] = useState(75);
   const [paidNewCustomers, setPaidNewCustomers] = useState(45);
   const [copied, setCopied] = useState(false);
+
+  // Analytics: Track calculations when inputs change (debounced)
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      trackUse?.();
+    }, 2000);
+    return () => clearTimeout(handler);
+  }, [adSpend, salaries, softwareTools, agencyFees, totalNewCustomers, paidNewCustomers, trackUse]);
+
 
   // Calculations
   const metrics = useMemo(() => {
@@ -126,6 +138,11 @@ Generated via https://tools.cerilas.com/#/tool/cac-calculator`;
             <Badge variant="success" icon={<Lock size={12} strokeWidth={2} />}>
               100% In-Browser Privacy
             </Badge>
+            {conversionCount > 0 && (
+              <Badge variant="brand" icon={<Activity size={12} strokeWidth={2} />}>
+                {conversionCount.toLocaleString()} {getConversionLabel()}
+              </Badge>
+            )}
             {visitorCount > 0 && (
               <Badge variant="neutral" icon={<Eye size={12} strokeWidth={2} />}>
                 {visitorCount.toLocaleString()} visitors
@@ -326,44 +343,8 @@ Generated via https://tools.cerilas.com/#/tool/cac-calculator`;
       </div>
       </div>
 
-      {/* SEO Guide */}
-      <ToolSeoDivider label="CAC Formulas, Blended vs Paid Differences & FAQs" />
-
-      <section className="calc-guide-section">
-        <div className="calc-guide-card">
-          <h3 className="calc-guide-title">How to Calculate Customer Acquisition Cost (CAC)</h3>
-          <p className="calc-guide-text">
-            Customer Acquisition Cost (CAC) is the total amount of capital invested to convince a potential customer to buy your product or service. In SaaS, computing a <strong>fully-loaded Blended CAC</strong> is critical because ad spend alone only represents a fraction of true acquisition costs.
-          </p>
-
-          <div className="calc-formula-box">
-            <strong>Blended CAC Formula:</strong><br />
-            Blended CAC = Total S&M Spend (Ads + Payroll + Software + Agencies) / Total New Customers
-          </div>
-
-          <p className="calc-guide-text">
-            By contrast, <strong>Paid CAC</strong> only divides direct ad spend by paid customer conversions. While Paid CAC is useful for measuring campaign ad efficiency, investors prioritize Blended CAC because it reflects true economic unit viability.
-          </p>
-        </div>
-
-        <div className="calc-guide-card">
-          <h3 className="calc-guide-title">Frequently Asked Questions</h3>
-          <div className="calc-faq-grid">
-            <div className="calc-faq-item">
-              <h4 className="calc-faq-q">Should customer success salaries be included in CAC?</h4>
-              <p className="calc-faq-a">
-                Customer success salaries dedicated to onboarding and retention are typically classified under Cost of Goods Sold (COGS) rather than CAC. However, SDRs, Account Executives, and growth marketers must always be included in CAC.
-              </p>
-            </div>
-            <div className="calc-faq-item">
-              <h4 className="calc-faq-q">How does organic acquisition impact Blended CAC?</h4>
-              <p className="calc-faq-a">
-                A strong organic acquisition motion (word of mouth, product-led growth, and organic search SEO) drives Blended CAC down significantly, allowing you to acquire customers at a fraction of your competitors' cost.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* Comprehensive Long-Form SEO & Venture Guide */}
+      <CacSeo />
 
       {/* AdSlot */}
       <AdSlot format="billboard" slotId="ad-cac-billboard" />

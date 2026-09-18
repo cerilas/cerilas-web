@@ -16,6 +16,7 @@ export const ltvCacCalculatorManifest = {
     'One-Click Pitch Deck Summary: Copy a clean, executive-ready summary of unit economics for investors',
     '100% In-Browser Privacy: All financial calculations run locally with zero server logging or tracking'
   ],
+  conversionLabel: 'Calculations',
   seo: {
     title: 'LTV:CAC Ratio & Payback Period Calculator | Cerilas Tools',
     description: 'Free SaaS LTV:CAC Calculator. Calculate your LTV to CAC ratio, CAC payback period in months, and evaluate unit economics against top venture capital benchmarks.',

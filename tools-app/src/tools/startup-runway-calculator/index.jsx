@@ -1,13 +1,13 @@
-import React, { useState, useMemo } from 'react';
-import { 
-  DollarSign, 
-  TrendingUp, 
-  Flame, 
-  Calendar, 
-  AlertTriangle, 
-  CheckCircle2, 
-  Copy, 
-  Check, 
+import React, { useEffect,  useState, useMemo  } from 'react';
+import {
+  DollarSign,
+  TrendingUp,
+  Flame,
+  Calendar,
+  AlertTriangle,
+  CheckCircle2,
+  Copy,
+  Check,
   RotateCcw,
   Sparkles,
   ArrowRight,
@@ -15,7 +15,8 @@ import {
   Zap,
   Info,
   Lock,
-  Eye
+  Eye,
+  Activity
 } from 'lucide-react';
 import { startupRunwayCalculatorManifest } from './manifest';
 import { useToolAnalytics } from '../../hooks/useToolAnalytics';
@@ -23,10 +24,11 @@ import ToolHeader from '../../components/ui/ToolHeader';
 import ToolSeoDivider from '../../components/ui/ToolSeoDivider';
 import Badge from '../../components/ui/Badge';
 import AdSlot from '../../components/ui/AdSlot';
+import StartupRunwaySeo from './components/StartupRunwaySeo';
 import '../finance-shared/finance-tools.css';
 
 export default function StartupRunwayCalculator({ onBack, toolMeta }) {
-  const { visitorCount, trackAction } = useToolAnalytics(startupRunwayCalculatorManifest.slug, toolMeta);
+  const { visitorCount, trackAction, trackUse, conversionCount, getConversionLabel } = useToolAnalytics(startupRunwayCalculatorManifest.slug, toolMeta);
 
   // Default initial values
   const [cashBalance, setCashBalance] = useState(600000);
@@ -36,6 +38,15 @@ export default function StartupRunwayCalculator({ onBack, toolMeta }) {
   const [additionalSpend, setAdditionalSpend] = useState(0);
   const [expenseCutPercent, setExpenseCutPercent] = useState(0);
   const [copied, setCopied] = useState(false);
+
+  // Analytics: Track calculations when inputs change (debounced)
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      trackUse?.();
+    }, 2000);
+    return () => clearTimeout(handler);
+  }, [cashBalance, grossBurn, monthlyRevenue, growthRate, additionalSpend, expenseCutPercent, trackUse]);
+
 
   // Calculate dynamic month-by-month runway
   const runwayData = useMemo(() => {
@@ -163,6 +174,11 @@ Generated via https://tools.cerilas.com/#/tool/startup-runway-calculator`;
             <Badge variant="success" icon={<Lock size={12} strokeWidth={2} />}>
               100% In-Browser Privacy
             </Badge>
+            {conversionCount > 0 && (
+              <Badge variant="brand" icon={<Activity size={12} strokeWidth={2} />}>
+                {conversionCount.toLocaleString()} {getConversionLabel()}
+              </Badge>
+            )}
             {visitorCount > 0 && (
               <Badge variant="neutral" icon={<Eye size={12} strokeWidth={2} />}>
                 {visitorCount.toLocaleString()} visitors
@@ -384,50 +400,8 @@ Generated via https://tools.cerilas.com/#/tool/startup-runway-calculator`;
       </div>
       </div>
 
-      {/* SEO Technical Guide & FAQs */}
-      <ToolSeoDivider label="Startup Runway Formulas, Metrics & VC FAQs" />
-
-      <section className="calc-guide-section">
-        <div className="calc-guide-card">
-          <h3 className="calc-guide-title">How to Calculate Startup Runway</h3>
-          <p className="calc-guide-text">
-            Startup runway is the amount of time a company has before it runs out of cash, assuming current income and expense trends continue. In venture-backed ecosystems, managing cash runway is the primary survival metric for pre-profitability technology startups.
-          </p>
-
-          <div className="calc-formula-box">
-            <strong>Static Runway Formula:</strong><br />
-            Runway (Months) = Total Cash Balance / (Gross Monthly Expenses - Monthly Revenue)
-          </div>
-
-          <p className="calc-guide-text">
-            Unlike basic linear runway calculators, our tool computes <strong>dynamic month-over-month compounding revenue growth</strong>. As your MRR expands each month, net burn declines, providing a realistic depiction of whether your startup reaches "Default Alive" profitability or needs to initiate a fundraising round.
-          </p>
-        </div>
-
-        <div className="calc-guide-card">
-          <h3 className="calc-guide-title">Frequently Asked Questions</h3>
-          <div className="calc-faq-grid">
-            <div className="calc-faq-item">
-              <h4 className="calc-faq-q">How much runway should a seed or Series A startup maintain?</h4>
-              <p className="calc-faq-a">
-                Most top venture capital firms (including Y Combinator, Sequoia, and Andreessen Horowitz) advise maintaining at least <strong>18 to 24 months of runway</strong> post-financing. Once runway drops below 6 months, founders should either have term sheets signed or execute aggressive expense reductions.
-              </p>
-            </div>
-            <div className="calc-faq-item">
-              <h4 className="calc-faq-q">What is the difference between Gross Burn and Net Burn?</h4>
-              <p className="calc-faq-a">
-                <strong>Gross Burn</strong> is the absolute total of all cash going out the door in a given month (payroll, servers, marketing, office rent). <strong>Net Burn</strong> is gross burn minus incoming cash collections from customers (Gross Burn - Revenue).
-              </p>
-            </div>
-            <div className="calc-faq-item">
-              <h4 className="calc-faq-q">What is the "Burn Multiple" metric?</h4>
-              <p className="calc-faq-a">
-                Popularized by Craft Ventures, Burn Multiple is calculated as <code>Net Burn / Net New ARR</code>. A burn multiple under 1.0x is considered extraordinary, 1.0x to 1.5x is good, and greater than 2.0x indicates poor capital efficiency.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* Comprehensive Long-Form SEO & Venture Guide */}
+      <StartupRunwaySeo />
 
       {/* AdSlot */}
       <AdSlot format="billboard" slotId="ad-runway-billboard" />

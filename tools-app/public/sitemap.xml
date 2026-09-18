@@ -281,4 +281,35 @@
     <changefreq>weekly</changefreq>
     <priority>0.90</priority>
   </url>
+
+  <!-- 16. AI Link Hallucination Checker -->
+  <url>
+    <loc>https://tools.cerilas.com/tool/ai-link-hallucination-checker</loc>
+    <lastmod>2026-09-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.97</priority>
+    <image:image>
+      <image:loc>https://tools.cerilas.com/tool-icons/ai-link-hallucination-checker.png</image:loc>
+      <image:title>Free AI Link Hallucination Checker (2026) – Detect Fake &amp; 404 URLs</image:title>
+      <image:caption>Scan AI-generated text and Markdown for hallucinated URLs, dead 404 links, and fabricated domains.</image:caption>
+    </image:image>
+  </url>
+  <!-- 17. AI Crawler Checker -->
+  <url>
+    <loc>https://tools.cerilas.com/tool/ai-crawler-checker</loc>
+    <lastmod>2026-09-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.98</priority>
+    <image:image>
+      <image:loc>https://tools.cerilas.com/tool-icons/ai-crawler-checker.png</image:loc>
+      <image:title>AI Crawler Checker – Check ChatGPT, Claude &amp; Perplexity Access</image:title>
+      <image:caption>Check whether ChatGPT, Claude, Perplexity, and other AI systems can access your website. Analyze robots.txt, sitemaps, and indexability.</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://tools.cerilas.com/#/tool/ai-crawler-checker</loc>
+    <lastmod>2026-09-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.95</priority>
+  </url>
 </urlset>

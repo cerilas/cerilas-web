@@ -16,6 +16,7 @@ export const mrrCalculatorManifest = {
     'Investor Ready Summary: Instant copy-paste text formatting for investor updates',
     '100% In-Browser Privacy: All financial data is calculated locally with zero server persistence'
   ],
+  conversionLabel: 'Calculations',
   seo: {
     title: 'MRR Calculator - Monthly Recurring Revenue & Quick Ratio | Cerilas Tools',
     description: 'Free SaaS MRR Calculator. Calculate Net New Monthly Recurring Revenue, Expansion MRR, Churn rate, and SaaS Quick Ratio with investor benchmarks.',

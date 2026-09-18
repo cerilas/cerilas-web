@@ -16,6 +16,7 @@ export const cacCalculatorManifest = {
     'One-Click Metrics Export: Clean report formatting for marketing reviews and investor presentations',
     '100% In-Browser Privacy: All financial figures are computed locally in client memory with zero server uploads'
   ],
+  conversionLabel: 'Calculations',
   seo: {
     title: 'CAC Calculator - Customer Acquisition Cost & Blended CAC | Cerilas Tools',
     description: 'Free SaaS CAC Calculator. Calculate Customer Acquisition Cost, compare Paid vs Blended CAC, track marketing payroll and ad spend efficiency with SaaS benchmarks.',

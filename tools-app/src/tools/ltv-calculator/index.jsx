@@ -1,17 +1,19 @@
-import React, { useState, useMemo } from 'react';
-import { 
-  DollarSign, 
-  TrendingUp, 
-  Calendar, 
-  Percent, 
-  Copy, 
-  Check, 
-  RotateCcw, 
+import React, { useEffect,  useState, useMemo  } from 'react';
+import {
+  DollarSign,
+  TrendingUp,
+  Calendar,
+  Percent,
+  Copy,
+  Check,
+  RotateCcw,
   Award,
   CheckCircle2,
   Sparkles,
   Lock,
-  Eye
+  Eye,
+  Activity,
+  Zap
 } from 'lucide-react';
 import { ltvCalculatorManifest } from './manifest';
 import { useToolAnalytics } from '../../hooks/useToolAnalytics';
@@ -19,10 +21,11 @@ import ToolHeader from '../../components/ui/ToolHeader';
 import ToolSeoDivider from '../../components/ui/ToolSeoDivider';
 import Badge from '../../components/ui/Badge';
 import AdSlot from '../../components/ui/AdSlot';
+import LtvSeo from './components/LtvSeo';
 import '../finance-shared/finance-tools.css';
 
 export default function LtvCalculator({ onBack, toolMeta }) {
-  const { visitorCount, trackAction } = useToolAnalytics(ltvCalculatorManifest.slug, toolMeta);
+  const { visitorCount, trackAction, trackUse, conversionCount, getConversionLabel } = useToolAnalytics(ltvCalculatorManifest.slug, toolMeta);
 
   // Inputs
   const [arpu, setArpu] = useState(150);
@@ -30,6 +33,15 @@ export default function LtvCalculator({ onBack, toolMeta }) {
   const [monthlyChurn, setMonthlyChurn] = useState(2.5);
   const [discountRate, setDiscountRate] = useState(10);
   const [copied, setCopied] = useState(false);
+
+  // Analytics: Track calculations when inputs change (debounced)
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      trackUse?.();
+    }, 2000);
+    return () => clearTimeout(handler);
+  }, [arpu, grossMargin, monthlyChurn, discountRate, trackUse]);
+
 
   // Calculations
   const metrics = useMemo(() => {
@@ -118,6 +130,11 @@ Generated via https://tools.cerilas.com/#/tool/ltv-calculator`;
             <Badge variant="success" icon={<Lock size={12} strokeWidth={2} />}>
               100% In-Browser Privacy
             </Badge>
+            {conversionCount > 0 && (
+              <Badge variant="brand" icon={<Activity size={12} strokeWidth={2} />}>
+                {conversionCount.toLocaleString()} {getConversionLabel()}
+              </Badge>
+            )}
             {visitorCount > 0 && (
               <Badge variant="neutral" icon={<Eye size={12} strokeWidth={2} />}>
                 {visitorCount.toLocaleString()} visitors
@@ -281,44 +298,8 @@ Generated via https://tools.cerilas.com/#/tool/ltv-calculator`;
       </div>
       </div>
 
-      {/* SEO Guide */}
-      <ToolSeoDivider label="Customer Lifetime Value Formulas, Margins & FAQs" />
-
-      <section className="calc-guide-section">
-        <div className="calc-guide-card">
-          <h3 className="calc-guide-title">How to Calculate Customer Lifetime Value (LTV)</h3>
-          <p className="calc-guide-text">
-            Customer Lifetime Value (LTV) represents the total net gross profit a business expects to earn from an individual customer account over the entire duration of the relationship. It determines how much capital your company can profitably invest into sales and marketing to acquire each new account.
-          </p>
-
-          <div className="calc-formula-box">
-            <strong>True SaaS LTV Formula:</strong><br />
-            LTV = [ARPU × Gross Margin (%)] / Monthly Customer Churn Rate (%)
-          </div>
-
-          <p className="calc-guide-text">
-            Many common online calculators omit <strong>Gross Margin</strong>, mistakenly presenting top-line revenue as LTV. In venture-backed SaaS, true LTV must always reflect gross margin (deducting cloud hosting, payment processing, and third-party APIs) because operating costs directly reduce the capital available to recover acquisition spend.
-          </p>
-        </div>
-
-        <div className="calc-guide-card">
-          <h3 className="calc-guide-title">Frequently Asked Questions</h3>
-          <div className="calc-faq-grid">
-            <div className="calc-faq-item">
-              <h4 className="calc-faq-q">Why is Gross Margin essential in LTV calculations?</h4>
-              <p className="calc-faq-a">
-                If your SaaS product generates $100/mo but costs $25/mo in AWS servers, AI model inferencing, and Stripe fees, your gross margin is 75%. Failing to apply gross margin overstates your LTV by 33%, leading to dangerous marketing overspend.
-              </p>
-            </div>
-            <div className="calc-faq-item">
-              <h4 className="calc-faq-q">What is the relationship between Churn Rate and Customer Lifespan?</h4>
-              <p className="calc-faq-a">
-                Customer lifespan in months is the mathematical reciprocal of monthly churn: <code>Lifespan = 1 / Churn</code>. A 2% monthly churn rate yields an average lifespan of 50 months (over 4 years). Reducing churn from 4% to 2% doubles customer lifespan and doubles LTV!
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* Comprehensive Long-Form SEO & Venture Guide */}
+      <LtvSeo />
 
       {/* AdSlot */}
       <AdSlot format="billboard" slotId="ad-ltv-billboard" />

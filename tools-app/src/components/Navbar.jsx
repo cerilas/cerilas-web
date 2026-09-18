@@ -31,7 +31,7 @@ export default function Navbar({ activeTool, onNavigateHome, onOpenStats }) {
                 }
               }}
             />
-            <span className="nav-brand-text">Cerilas' Tools</span>
+            <span className="nav-brand-text">Cerilas' <span className="brand-bold-word">Tools</span></span>
           </a>
 
           {activeTool && (

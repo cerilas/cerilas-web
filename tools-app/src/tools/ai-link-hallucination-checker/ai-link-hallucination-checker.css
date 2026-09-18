@@ -1,0 +1,621 @@
+/* ==========================================================================
+   Apple-Minimalist AI Link Hallucination Checker Styles
+   Monochrome, Sleek, Precision Engineered Design
+   Cerilas Design System
+   ========================================================================== */
+
+.alhc-root {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  width: 100%;
+}
+
+/* Error Notification Banner */
+.alhc-error-banner {
+  background: rgba(239, 68, 68, 0.06);
+  border: 1px solid rgba(239, 68, 68, 0.18);
+  color: #dc2626;
+  border-radius: 12px;
+  padding: 0.85rem 1.25rem;
+  font-size: 0.88rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.alhc-error-close {
+  background: transparent;
+  border: none;
+  color: #dc2626;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  padding: 0.2rem;
+  border-radius: 6px;
+  opacity: 0.8;
+  transition: opacity 0.15s;
+}
+
+.alhc-error-close:hover {
+  opacity: 1;
+  background: rgba(239, 68, 68, 0.1);
+}
+
+/* Main Input Card */
+.alhc-card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 20px;
+  padding: 1.5rem 1.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  box-shadow: var(--card-shadow);
+  transition: all 0.25s ease;
+}
+
+.alhc-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.alhc-card-title {
+  font-size: 0.92rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  color: var(--text-main);
+}
+
+.alhc-samples-group {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+}
+
+.alhc-sample-label {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-right: 0.2rem;
+}
+
+.alhc-sample-chip {
+  padding: 0.35rem 0.75rem;
+  border-radius: 8px;
+  background: rgba(150, 150, 150, 0.06);
+  border: 1px solid var(--card-border);
+  color: var(--text-main);
+  font-size: 0.78rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  line-height: 1;
+  vertical-align: middle;
+}
+
+.alhc-sample-chip:hover {
+  background: rgba(150, 150, 150, 0.12);
+}
+
+.alhc-sample-chip.danger {
+  color: #dc2626;
+  border-color: rgba(239, 68, 68, 0.18);
+}
+
+.alhc-sample-chip.danger:hover {
+  background: rgba(239, 68, 68, 0.08);
+}
+
+/* Minimalist Textarea */
+.alhc-textarea {
+  width: 100%;
+  min-height: 190px;
+  background: transparent;
+  border: none;
+  outline: none;
+  font-family: inherit;
+  font-size: 0.95rem;
+  line-height: 1.65;
+  color: var(--text-main);
+  resize: vertical;
+  box-sizing: border-box;
+}
+
+.alhc-textarea::placeholder {
+  color: var(--text-muted);
+  opacity: 0.65;
+}
+
+.alhc-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-top: 1px solid var(--card-border);
+  padding-top: 0.85rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.alhc-meta-info {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+
+.alhc-meta-links-badge {
+  font-weight: 500;
+  color: var(--text-main);
+}
+
+/* Scanning Progress State */
+.alhc-scan-progress-box {
+  background: rgba(150, 150, 150, 0.04);
+  border: 1px solid var(--card-border);
+  border-radius: 12px;
+  padding: 0.85rem 1.2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin: 0.35rem 0;
+}
+
+.alhc-scan-progress-text {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+.alhc-progress-track {
+  width: 100%;
+  height: 4px;
+  background: rgba(150, 150, 150, 0.12);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.alhc-progress-bar {
+  height: 100%;
+  background: var(--text-main);
+  border-radius: 999px;
+  width: 75%;
+  animation: alhc-pulse 1.8s infinite ease-in-out;
+}
+
+@keyframes alhc-pulse {
+  0% { opacity: 0.4; }
+  50% { opacity: 0.9; }
+  100% { opacity: 0.4; }
+}
+
+/* ==========================================================================
+   RESULTS SECTION (Apple Monochrome Aesthetic)
+   ========================================================================== */
+
+.alhc-results-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* Hero Score Banner */
+.alhc-score-hero {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 20px;
+  padding: 2rem 2.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1.75rem;
+  box-shadow: var(--card-shadow);
+}
+
+.alhc-gauge-container {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+/* Circle Gauge - Fixed to prevent text overflow */
+.alhc-score-circle {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 3.5px solid;
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+  box-sizing: border-box;
+}
+
+.alhc-score-number {
+  font-size: 2.1rem;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+}
+
+.alhc-score-circle.clean {
+  border-color: #10b981;
+  background: rgba(16, 185, 129, 0.05);
+  color: #059669;
+}
+
+.alhc-score-circle.low {
+  border-color: #64748b;
+  background: rgba(100, 116, 139, 0.05);
+  color: #475569;
+}
+
+.alhc-score-circle.moderate {
+  border-color: #f59e0b;
+  background: rgba(245, 158, 11, 0.05);
+  color: #d97706;
+}
+
+.alhc-score-circle.critical {
+  border-color: #ef4444;
+  background: rgba(239, 68, 68, 0.05);
+  color: #dc2626;
+}
+
+.alhc-verdict-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.alhc-verdict-title {
+  font-size: 1.35rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--text-main);
+  margin: 0;
+}
+
+.alhc-verdict-desc {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  max-width: 480px;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.alhc-hero-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+}
+
+/* 4-Metric Grid */
+.alhc-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.alhc-metric-card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 16px;
+  padding: 1.25rem 1.4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  box-shadow: var(--card-shadow);
+}
+
+.alhc-metric-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: var(--text-muted);
+  font-size: 0.82rem;
+  font-weight: 500;
+}
+
+.alhc-metric-value {
+  font-size: 1.75rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  color: var(--text-main);
+  margin: 0.2rem 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.alhc-metric-subtext {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+/* View Sub-Navigation (Pill tabs) */
+.alhc-view-tabs {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-top: 0.25rem;
+}
+
+.alhc-pill-nav {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: rgba(150, 150, 150, 0.05);
+  padding: 0.25rem;
+  border-radius: 12px;
+  border: 1px solid var(--card-border);
+}
+
+.alhc-pill-btn {
+  padding: 0.45rem 0.9rem;
+  border-radius: 9px;
+  background: transparent;
+  border: none;
+  font-size: 0.84rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  line-height: 1;
+}
+
+.alhc-pill-btn.active {
+  background: var(--card-bg);
+  color: var(--text-main);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+}
+
+.alhc-filter-pills {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+}
+
+.alhc-filter-tag {
+  padding: 0.35rem 0.75rem;
+  border-radius: 8px;
+  font-size: 0.78rem;
+  font-weight: 500;
+  border: 1px solid var(--card-border);
+  background: var(--card-bg);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+}
+
+.alhc-filter-tag.active {
+  background: var(--text-main);
+  border-color: var(--text-main);
+  color: var(--card-bg);
+  font-weight: 600;
+}
+
+/* Itemized Link Cards */
+.alhc-links-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.alhc-link-item-card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 16px;
+  padding: 1.25rem 1.4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  box-shadow: var(--card-shadow);
+  transition: border-color 0.15s ease;
+}
+
+.alhc-link-item-card:hover {
+  border-color: rgba(150, 150, 150, 0.35);
+}
+
+.alhc-link-item-card.alive {
+  border-left: 3.5px solid #10b981;
+}
+
+.alhc-link-item-card.hallucinated {
+  border-left: 3.5px solid #ef4444;
+}
+
+.alhc-link-item-card.redirect {
+  border-left: 3.5px solid #f59e0b;
+}
+
+.alhc-link-top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.alhc-link-title-group {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.alhc-link-anchor-text {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.alhc-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.2rem 0.55rem;
+  border-radius: 6px;
+  font-size: 0.74rem;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.alhc-status-badge.alive {
+  background: rgba(16, 185, 129, 0.08);
+  color: #059669;
+}
+
+.alhc-status-badge.nxdomain {
+  background: rgba(239, 68, 68, 0.08);
+  color: #dc2626;
+}
+
+.alhc-status-badge.not_found {
+  background: rgba(249, 115, 22, 0.08);
+  color: #c2410c;
+}
+
+.alhc-status-badge.redirect {
+  background: rgba(245, 158, 11, 0.08);
+  color: #b45309;
+}
+
+.alhc-status-badge.restricted {
+  background: rgba(100, 116, 139, 0.08);
+  color: #475569;
+}
+
+.alhc-link-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.alhc-link-action-btn {
+  padding: 0.35rem 0.65rem;
+  border-radius: 7px;
+  background: rgba(150, 150, 150, 0.05);
+  border: 1px solid var(--card-border);
+  color: var(--text-main);
+  font-size: 0.76rem;
+  font-weight: 500;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  text-decoration: none;
+  line-height: 1;
+  vertical-align: middle;
+  transition: all 0.15s ease;
+}
+
+.alhc-link-action-btn:hover {
+  background: rgba(150, 150, 150, 0.12);
+}
+
+.alhc-link-url-text {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  text-decoration: none;
+  word-break: break-all;
+}
+
+.alhc-link-url-text:hover {
+  color: var(--text-main);
+  text-decoration: underline;
+}
+
+.alhc-link-diagnostic-box {
+  background: rgba(150, 150, 150, 0.03);
+  border: 1px solid var(--card-border);
+  border-radius: 9px;
+  padding: 0.5rem 0.8rem;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  line-height: 1.4;
+}
+
+.alhc-link-context-quote {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  font-style: italic;
+  line-height: 1.5;
+  background: rgba(150, 150, 150, 0.03);
+  padding: 0.45rem 0.75rem;
+  border-radius: 8px;
+}
+
+/* Sanitized Text Tab View */
+.alhc-sanitized-wrapper {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 20px;
+  padding: 1.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  box-shadow: var(--card-shadow);
+}
+
+.alhc-sanitized-textarea {
+  width: 100%;
+  min-height: 220px;
+  background: rgba(150, 150, 150, 0.03);
+  border: 1px solid var(--card-border);
+  border-radius: 14px;
+  padding: 1.25rem;
+  font-size: 0.95rem;
+  line-height: 1.65;
+  color: var(--text-main);
+  resize: vertical;
+  font-family: inherit;
+  box-sizing: border-box;
+}
+
+@media (max-width: 768px) {
+  .alhc-score-hero {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .alhc-gauge-container {
+    width: 100%;
+  }
+  .alhc-hero-actions {
+    width: 100%;
+  }
+  .alhc-link-top-bar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

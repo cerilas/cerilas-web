@@ -324,6 +324,12 @@ body {
   white-space: nowrap;
 }
 
+.brand-bold-word {
+  font-weight: 650 !important;
+  font-variation-settings: 'wght' 650 !important;
+  letter-spacing: -0.015em;
+}
+
 .nav-links {
   display: flex;
   gap: 1.5rem;
@@ -956,26 +962,33 @@ body {
   justify-content: center;
   gap: 0.85rem;
   margin-bottom: 0.75rem;
+  vertical-align: middle;
 }
 
 .hero-brand-logo {
-  width: 48px;
-  height: 48px;
+  width: 44px;
+  height: 44px;
   border-radius: 12px;
   object-fit: contain;
   filter: drop-shadow(0 6px 20px rgba(0, 0, 0, 0.5));
+  display: block;
+  flex-shrink: 0;
 }
 
+.hero-header .hero-brand-title,
 .hero-brand-title {
-  margin: 0;
+  margin: 0 !important;
+  padding: 0 !important;
   font-family: 'Garet', -apple-system, BlinkMacSystemFont, sans-serif !important;
   font-weight: 300 !important;
   font-variation-settings: 'wght' 300;
-  font-size: 3rem !important;
+  font-size: 2.85rem !important;
   letter-spacing: -0.025em;
   color: #ffffff !important;
   text-shadow: 0 2px 20px rgba(0, 0, 0, 0.6);
-  line-height: 1.15;
+  line-height: 1 !important;
+  display: inline-flex;
+  align-items: center;
 }
 
 .hero-brand-subtitle {
@@ -1032,11 +1045,70 @@ body {
     padding: 4rem 1.25rem 2.5rem 1.25rem;
     min-height: 340px;
   }
+  .hero-brand-badge {
+    flex-wrap: nowrap;
+    gap: 0.65rem;
+  }
+  .hero-brand-logo {
+    width: 32px;
+    height: 32px;
+  }
+  .hero-header .hero-brand-title,
   .hero-brand-title {
-    font-size: 2.2rem !important;
+    font-size: 1.85rem !important;
+    white-space: nowrap !important;
+    line-height: 1 !important;
   }
   .hero-brand-subtitle {
     font-size: 0.98rem !important;
   }
 }
 
+
+@media (max-width: 768px) {
+  html, body {
+    overflow-x: hidden;
+    width: 100%;
+    position: relative;
+  }
+  .app-layout {
+    overflow-x: hidden;
+    width: 100%;
+  }
+  .navbar-inner {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1rem;
+    padding: 1rem;
+  }
+  .nav-links {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1rem;
+  }
+  .card-footer-stats {
+    flex-wrap: wrap;
+    white-space: normal !important;
+  }
+}
+
+
+/* Fix Footer Horizontal Overflow Bug */
+.seo-privacy-notice {
+  min-width: 0;
+  max-width: 100%;
+}
+.seo-privacy-notice span {
+  white-space: normal !important;
+}
+
+@media (max-width: 768px) {
+  .seo-footer-bottom-links {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+}
+
+.seo-copyright {
+  white-space: normal !important;
+}

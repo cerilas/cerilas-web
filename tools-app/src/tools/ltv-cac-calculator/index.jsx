@@ -1,18 +1,20 @@
-import React, { useState, useMemo } from 'react';
-import { 
-  Scale, 
-  DollarSign, 
-  TrendingUp, 
-  Clock, 
-  Award, 
-  Copy, 
-  Check, 
-  RotateCcw, 
-  CheckCircle2, 
+import React, { useEffect,  useState, useMemo  } from 'react';
+import {
+  Scale,
+  DollarSign,
+  TrendingUp,
+  Clock,
+  Award,
+  Copy,
+  Check,
+  RotateCcw,
+  CheckCircle2,
   Sparkles,
   Percent,
   Lock,
-  Eye
+  Eye,
+  Activity,
+  Zap
 } from 'lucide-react';
 import { ltvCacCalculatorManifest } from './manifest';
 import { useToolAnalytics } from '../../hooks/useToolAnalytics';
@@ -20,10 +22,11 @@ import ToolHeader from '../../components/ui/ToolHeader';
 import ToolSeoDivider from '../../components/ui/ToolSeoDivider';
 import Badge from '../../components/ui/Badge';
 import AdSlot from '../../components/ui/AdSlot';
+import LtvCacSeo from './components/LtvCacSeo';
 import '../finance-shared/finance-tools.css';
 
 export default function LtvCacCalculator({ onBack, toolMeta }) {
-  const { visitorCount, trackAction } = useToolAnalytics(ltvCacCalculatorManifest.slug, toolMeta);
+  const { visitorCount, trackAction, trackUse, conversionCount, getConversionLabel } = useToolAnalytics(ltvCacCalculatorManifest.slug, toolMeta);
 
   // Inputs
   const [ltv, setLtv] = useState(4800);
@@ -31,6 +34,15 @@ export default function LtvCacCalculator({ onBack, toolMeta }) {
   const [arpu, setArpu] = useState(150);
   const [grossMargin, setGrossMargin] = useState(80);
   const [copied, setCopied] = useState(false);
+
+  // Analytics: Track calculations when inputs change (debounced)
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      trackUse?.();
+    }, 2000);
+    return () => clearTimeout(handler);
+  }, [ltv, cac, arpu, grossMargin, trackUse]);
+
 
   // Calculations
   const metrics = useMemo(() => {
@@ -119,6 +131,11 @@ Generated via https://tools.cerilas.com/#/tool/ltv-cac-calculator`;
             <Badge variant="success" icon={<Lock size={12} strokeWidth={2} />}>
               100% In-Browser Privacy
             </Badge>
+            {conversionCount > 0 && (
+              <Badge variant="brand" icon={<Activity size={12} strokeWidth={2} />}>
+                {conversionCount.toLocaleString()} {getConversionLabel()}
+              </Badge>
+            )}
             {visitorCount > 0 && (
               <Badge variant="neutral" icon={<Eye size={12} strokeWidth={2} />}>
                 {visitorCount.toLocaleString()} visitors
@@ -298,48 +315,8 @@ Generated via https://tools.cerilas.com/#/tool/ltv-cac-calculator`;
       </div>
       </div>
 
-      {/* SEO Guide */}
-      <ToolSeoDivider label="LTV:CAC Benchmarks, Payback Periods & Venture FAQs" />
-
-      <section className="calc-guide-section">
-        <div className="calc-guide-card">
-          <h3 className="calc-guide-title">Why the LTV:CAC Ratio Governs SaaS Success</h3>
-          <p className="calc-guide-text">
-            The ratio between Customer Lifetime Value (LTV) and Customer Acquisition Cost (CAC) is universally considered the ultimate litmus test of a startup's unit economics and scalability. It indicates how much value you unlock for every dollar funneled into growth.
-          </p>
-
-          <div className="calc-formula-box">
-            <strong>LTV:CAC Ratio Formula:</strong><br />
-            LTV:CAC = Customer Lifetime Value / Customer Acquisition Cost
-          </div>
-
-          <p className="calc-guide-text">
-            Alongside the ratio, venture capital investors closely examine the <strong>CAC Payback Period</strong>, which measures the number of months required to recoup the upfront cash spent to win each account.
-          </p>
-          <div className="calc-formula-box">
-            <strong>CAC Payback Period Formula:</strong><br />
-            Payback Period (Months) = CAC / [Monthly ARPU × Gross Margin (%)]
-          </div>
-        </div>
-
-        <div className="calc-guide-card">
-          <h3 className="calc-guide-title">Frequently Asked Questions</h3>
-          <div className="calc-faq-grid">
-            <div className="calc-faq-item">
-              <h4 className="calc-faq-q">What is the "Golden Ratio" for SaaS?</h4>
-              <p className="calc-faq-a">
-                An LTV:CAC ratio of <strong>3.0x to 5.0x</strong> is considered ideal. A ratio below 1.0x destroys capital on every customer, whereas a ratio above 5.0x suggests you are being overly conservative and leaving market share on the table.
-              </p>
-            </div>
-            <div className="calc-faq-item">
-              <h4 className="calc-faq-q">What is an ideal CAC Payback Period?</h4>
-              <p className="calc-faq-a">
-                Top-quartile venture-backed SaaS startups achieve a payback period of <strong>under 12 months</strong>. A payback under 12 months enables you to recycle customer revenue into new marketing channels within the same fiscal year, accelerating compounding growth.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* Comprehensive Long-Form SEO & Venture Guide */}
+      <LtvCacSeo />
 
       {/* AdSlot */}
       <AdSlot format="billboard" slotId="ad-ltv-cac-billboard" />

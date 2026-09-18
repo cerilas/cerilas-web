@@ -1,14 +1,14 @@
-import React, { useState, useMemo } from 'react';
-import { 
-  RotateCcw, 
-  Users, 
-  DollarSign, 
-  TrendingUp, 
-  AlertTriangle, 
-  CheckCircle2, 
-  Copy, 
-  Check, 
-  ShieldCheck, 
+import React, { useEffect,  useState, useMemo  } from 'react';
+import {
+  RotateCcw,
+  Users,
+  DollarSign,
+  TrendingUp,
+  AlertTriangle,
+  CheckCircle2,
+  Copy,
+  Check,
+  ShieldCheck,
   Activity,
   ArrowDownRight,
   ArrowUpRight,
@@ -21,10 +21,11 @@ import ToolHeader from '../../components/ui/ToolHeader';
 import ToolSeoDivider from '../../components/ui/ToolSeoDivider';
 import Badge from '../../components/ui/Badge';
 import AdSlot from '../../components/ui/AdSlot';
+import ChurnSeo from './components/ChurnSeo';
 import '../finance-shared/finance-tools.css';
 
 export default function ChurnCalculator({ onBack, toolMeta }) {
-  const { visitorCount, trackAction } = useToolAnalytics(churnCalculatorManifest.slug, toolMeta);
+  const { visitorCount, trackAction, trackUse, conversionCount, getConversionLabel } = useToolAnalytics(churnCalculatorManifest.slug, toolMeta);
 
   // Inputs
   const [startCustomers, setStartCustomers] = useState(500);
@@ -34,6 +35,15 @@ export default function ChurnCalculator({ onBack, toolMeta }) {
   const [expansionMrr, setExpansionMrr] = useState(4200);
   const [contractionMrr, setContractionMrr] = useState(600);
   const [copied, setCopied] = useState(false);
+
+  // Analytics: Track calculations when inputs change (debounced)
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      trackUse?.();
+    }, 2000);
+    return () => clearTimeout(handler);
+  }, [startCustomers, lostCustomers, startMrr, churnedMrr, expansionMrr, contractionMrr, trackUse]);
+
 
   // Calculations
   const metrics = useMemo(() => {
@@ -128,6 +138,11 @@ Generated via https://tools.cerilas.com/#/tool/churn-calculator`;
             <Badge variant="success" icon={<Lock size={12} strokeWidth={2} />}>
               100% In-Browser Privacy
             </Badge>
+            {conversionCount > 0 && (
+              <Badge variant="brand" icon={<Activity size={12} strokeWidth={2} />}>
+                {conversionCount.toLocaleString()} {getConversionLabel()}
+              </Badge>
+            )}
             {visitorCount > 0 && (
               <Badge variant="neutral" icon={<Eye size={12} strokeWidth={2} />}>
                 {visitorCount.toLocaleString()} visitors
@@ -359,45 +374,8 @@ Generated via https://tools.cerilas.com/#/tool/churn-calculator`;
       </div>
       </div>
 
-      {/* SEO Guide */}
-      <ToolSeoDivider label="Customer vs Revenue Churn, NRR Formulas & FAQs" />
-
-      <section className="calc-guide-section">
-        <div className="calc-guide-card">
-          <h3 className="calc-guide-title">Customer (Logo) Churn vs Revenue Churn</h3>
-          <p className="calc-guide-text">
-            Understanding churn requires distinguishing between how many <strong>customers</strong> cancel (Logo Churn) versus how much <strong>recurring revenue</strong> is lost (Revenue Churn). A startup can lose 5% of its lowest-tier customers while retaining 99% of its revenue if enterprise accounts remain loyal.
-          </p>
-
-          <div className="calc-formula-box">
-            <strong>Customer (Logo) Churn Rate:</strong><br />
-            Logo Churn (%) = (Lost Customers / Starting Customers) × 100
-          </div>
-
-          <div className="calc-formula-box">
-            <strong>Net Revenue Retention (NRR):</strong><br />
-            NRR (%) = [(Starting MRR + Expansion MRR - Contraction MRR - Churned MRR) / Starting MRR] × 100
-          </div>
-        </div>
-
-        <div className="calc-guide-card">
-          <h3 className="calc-guide-title">Frequently Asked Questions</h3>
-          <div className="calc-faq-grid">
-            <div className="calc-faq-item">
-              <h4 className="calc-faq-q">What is Negative Net Churn?</h4>
-              <p className="calc-faq-a">
-                Negative Net Churn occurs when expansion revenue from existing customers exceeds the total revenue lost to churn and downgrades. In this scenario, NRR is greater than 100%, meaning your business grows naturally even without winning a single new customer.
-              </p>
-            </div>
-            <div className="calc-faq-item">
-              <h4 className="calc-faq-q">What is an acceptable monthly churn rate for SaaS?</h4>
-              <p className="calc-faq-a">
-                In self-serve SMB SaaS, monthly logo churn of <strong>2% to 5%</strong> is common. For mid-market and enterprise B2B SaaS, monthly churn should be strictly below <strong>1% (under 7%–10% annualized)</strong>.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* Comprehensive Long-Form SEO & Venture Guide */}
+      <ChurnSeo />
 
       {/* AdSlot */}
       <AdSlot format="billboard" slotId="ad-churn-billboard" />

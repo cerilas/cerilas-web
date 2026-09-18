@@ -16,6 +16,7 @@ export const startupRunwayCalculatorManifest = {
     'One-Click Pitch Deck Summary: Copy a cleanly formatted investor update with burn multiple and monthly runway',
     '100% In-Browser Privacy: All financial figures are calculated locally in your browser with zero server storage'
   ],
+  conversionLabel: 'Calculations',
   seo: {
     title: 'Startup Runway Calculator - Net Burn & Cash Out Date | Cerilas Tools',
     description: 'Free startup cash runway calculator. Calculate net burn rate, months of runway left, zero cash date, and dynamic revenue growth projections with B2B SaaS benchmarks.',

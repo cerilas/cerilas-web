@@ -1,19 +1,21 @@
-import React, { useState, useMemo } from 'react';
-import { 
-  Database, 
-  DollarSign, 
-  TrendingUp, 
-  Users, 
-  Award, 
-  Copy, 
-  Check, 
+import React, { useEffect,  useState, useMemo  } from 'react';
+import {
+  Database,
+  DollarSign,
+  TrendingUp,
+  Users,
+  Award,
+  Copy,
+  Check,
   RotateCcw,
   Sparkles,
   BarChart3,
   Calendar,
   CheckCircle2,
   Lock,
-  Eye
+  Eye,
+  Activity,
+  Zap
 } from 'lucide-react';
 import { arrCalculatorManifest } from './manifest';
 import { useToolAnalytics } from '../../hooks/useToolAnalytics';
@@ -21,10 +23,11 @@ import ToolHeader from '../../components/ui/ToolHeader';
 import ToolSeoDivider from '../../components/ui/ToolSeoDivider';
 import Badge from '../../components/ui/Badge';
 import AdSlot from '../../components/ui/AdSlot';
+import ArrSeo from './components/ArrSeo';
 import '../finance-shared/finance-tools.css';
 
 export default function ArrCalculator({ onBack, toolMeta }) {
-  const { visitorCount, trackAction } = useToolAnalytics(arrCalculatorManifest.slug, toolMeta);
+  const { visitorCount, trackAction, trackUse, conversionCount, getConversionLabel } = useToolAnalytics(arrCalculatorManifest.slug, toolMeta);
 
   // Inputs
   const [currentMrr, setCurrentMrr] = useState(83333);
@@ -33,6 +36,15 @@ export default function ArrCalculator({ onBack, toolMeta }) {
   const [employees, setEmployees] = useState(7);
   const [customerCount, setCustomerCount] = useState(95);
   const [copied, setCopied] = useState(false);
+
+  // Analytics: Track calculations when inputs change (debounced)
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      trackUse?.();
+    }, 2000);
+    return () => clearTimeout(handler);
+  }, [currentMrr, growthRate, profitMargin, employees, customerCount, trackUse]);
+
 
   // Calculations
   const metrics = useMemo(() => {
@@ -120,6 +132,11 @@ Generated via https://tools.cerilas.com/#/tool/arr-calculator`;
             <Badge variant="success" icon={<Lock size={12} strokeWidth={2} />}>
               100% In-Browser Privacy
             </Badge>
+            {conversionCount > 0 && (
+              <Badge variant="brand" icon={<Activity size={12} strokeWidth={2} />}>
+                {conversionCount.toLocaleString()} {getConversionLabel()}
+              </Badge>
+            )}
             {visitorCount > 0 && (
               <Badge variant="neutral" icon={<Eye size={12} strokeWidth={2} />}>
                 {visitorCount.toLocaleString()} visitors
@@ -318,48 +335,8 @@ Generated via https://tools.cerilas.com/#/tool/arr-calculator`;
       </div>
       </div>
 
-      {/* SEO Guide */}
-      <ToolSeoDivider label="ARR Calculation, Rule of 40 & SaaS Valuation FAQs" />
-
-      <section className="calc-guide-section">
-        <div className="calc-guide-card">
-          <h3 className="calc-guide-title">What is Annual Recurring Revenue (ARR)?</h3>
-          <p className="calc-guide-text">
-            Annual Recurring Revenue (ARR) is the core metric used by venture capitalists and public equity markets to evaluate SaaS enterprise value. It normalizes all subscription contracts to a single 12-month annual period.
-          </p>
-
-          <div className="calc-formula-box">
-            <strong>ARR Formula:</strong><br />
-            ARR = Current MRR × 12
-          </div>
-
-          <p className="calc-guide-text">
-            For growth-stage startups, investors measure the <strong>Rule of 40</strong>, a principle stating that a software company's combined growth rate and profit margin should exceed 40%. Companies meeting the Rule of 40 consistently command 2x to 3x higher enterprise value multiples.
-          </p>
-          <div className="calc-formula-box">
-            <strong>Rule of 40 Formula:</strong><br />
-            Rule of 40 (%) = Year-over-Year Growth Rate (%) + Free Cash Flow Margin (%)
-          </div>
-        </div>
-
-        <div className="calc-guide-card">
-          <h3 className="calc-guide-title">Frequently Asked Questions</h3>
-          <div className="calc-faq-grid">
-            <div className="calc-faq-item">
-              <h4 className="calc-faq-q">What is a good ARR per employee benchmark?</h4>
-              <p className="calc-faq-a">
-                For early-stage startups (Seed to Series A), <strong>$100,000 to $150,000 per employee</strong> indicates strong capital efficiency. At scale (Series B to IPO), best-in-class SaaS companies (like Datadog, Snowflake, and Atlassian) achieve <strong>$250,000 to $400,000+ ARR per employee</strong>.
-              </p>
-            </div>
-            <div className="calc-faq-item">
-              <h4 className="calc-faq-q">Can a startup with negative profit margin still pass the Rule of 40?</h4>
-              <p className="calc-faq-a">
-                Yes! If a high-growth startup is growing at 70% YoY while burning cash at a -20% margin, its Rule of 40 score is <code>70% + (-20%) = 50%</code>, easily passing the benchmark.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* Comprehensive Long-Form SEO & Venture Guide */}
+      <ArrSeo />
 
       {/* AdSlot */}
       <AdSlot format="billboard" slotId="ad-arr-billboard" />

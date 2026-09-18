@@ -471,3 +471,20 @@
   line-height: 1.6;
   margin: 0;
 }
+
+@media (max-width: 768px) {
+  .calc-kpi-value {
+    font-size: 2rem;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+  }
+  .calc-hero-kpi {
+    padding: 1.2rem;
+  }
+  .calc-panel {
+    padding: 1.25rem;
+  }
+  .calc-inputs-list {
+    gap: 1rem;
+  }
+}

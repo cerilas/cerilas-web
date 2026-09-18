@@ -16,6 +16,7 @@ export const ltvCalculatorManifest = {
     'One-Click Metrics Export: Clean report formatting for investor pitches and unit economic reviews',
     '100% In-Browser Privacy: All financial data is calculated locally with zero external tracking'
   ],
+  conversionLabel: 'Calculations',
   seo: {
     title: 'Customer Lifetime Value (LTV) Calculator | Cerilas Tools',
     description: 'Free SaaS LTV Calculator. Calculate Customer Lifetime Value from ARPU, Gross Margin %, and Monthly Churn with discounted cohort modeling.',

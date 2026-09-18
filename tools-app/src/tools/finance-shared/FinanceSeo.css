@@ -1,0 +1,443 @@
+/* ==========================================================================
+   Cerilas Financial & Startup Calculators Long-Form Pillar SEO Styles
+   Engineered for Top Search Engine Ranking & High-Intent Founder Queries
+   ========================================================================== */
+
+.finance-seo-root {
+  margin-top: 3.5rem;
+  padding-top: 2.5rem;
+  border-top: 1px solid var(--card-border);
+  display: flex;
+  flex-direction: column;
+  gap: 3rem;
+  width: 100%;
+}
+
+/* Header */
+.finance-seo-header {
+  text-align: center;
+  max-width: 880px;
+  margin: 0 auto;
+}
+
+.finance-seo-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 0.95rem;
+  background: rgba(59, 130, 246, 0.08);
+  border: 1px solid rgba(59, 130, 246, 0.25);
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #3b82f6;
+  margin-bottom: 1.25rem;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.finance-seo-main-title {
+  font-size: 2.15rem;
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--text-main);
+  margin-bottom: 0.85rem;
+  letter-spacing: -0.03em;
+}
+
+.finance-seo-main-desc {
+  font-size: 1.05rem;
+  font-weight: 400;
+  line-height: 1.65;
+  color: var(--text-muted);
+}
+
+/* Executive Knowledge Capsule */
+.finance-ai-capsule {
+  background: var(--card-bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--card-border);
+  border-radius: 20px;
+  padding: 2rem;
+  box-shadow: var(--card-shadow);
+  position: relative;
+  overflow: hidden;
+}
+
+.finance-capsule-header {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  margin-bottom: 0.85rem;
+}
+
+.finance-capsule-icon {
+  color: #3b82f6;
+  flex-shrink: 0;
+}
+
+.finance-capsule-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-main);
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+
+.finance-capsule-body {
+  font-size: 0.94rem;
+  line-height: 1.65;
+  color: var(--text-muted);
+}
+
+.finance-capsule-body strong {
+  color: var(--text-main);
+  font-weight: 600;
+}
+
+.finance-capsule-highlights {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.finance-capsule-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 1rem 1.15rem;
+  background: rgba(120, 120, 128, 0.05);
+  border: 1px solid var(--card-border);
+  border-radius: 12px;
+  font-size: 0.88rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.finance-capsule-item strong {
+  color: var(--text-main);
+  display: block;
+  margin-bottom: 0.2rem;
+}
+
+/* Strategic Pillars Section */
+.finance-pillars-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+.finance-pillar-card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 18px;
+  padding: 1.75rem;
+  box-shadow: var(--card-shadow);
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.finance-pillar-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(59, 130, 246, 0.4);
+}
+
+.finance-pillar-icon-box {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: rgba(59, 130, 246, 0.08);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #3b82f6;
+  margin-bottom: 1.25rem;
+}
+
+.finance-pillar-title {
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--text-main);
+  margin: 0 0 0.5rem 0;
+  letter-spacing: -0.01em;
+}
+
+.finance-pillar-desc {
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+/* Section Headings */
+.finance-section-heading {
+  font-size: 1.55rem;
+  font-weight: 600;
+  color: var(--text-main);
+  letter-spacing: -0.02em;
+  margin: 0 0 0.4rem 0;
+}
+
+.finance-section-subheading {
+  font-size: 0.95rem;
+  color: var(--text-muted);
+  margin: 0;
+  line-height: 1.55;
+}
+
+/* Benchmark Tables */
+.finance-table-container {
+  overflow-x: auto;
+  border: 1px solid var(--card-border);
+  border-radius: 18px;
+  background: var(--card-bg);
+  box-shadow: var(--card-shadow);
+  margin-top: 1rem;
+}
+
+.finance-benchmark-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 0.9rem;
+}
+
+.finance-benchmark-table th {
+  padding: 1.1rem 1.35rem;
+  background: rgba(120, 120, 128, 0.06);
+  font-weight: 600;
+  color: var(--text-main);
+  border-bottom: 1px solid var(--card-border);
+  white-space: nowrap;
+}
+
+.finance-benchmark-table td {
+  padding: 1.1rem 1.35rem;
+  border-bottom: 1px solid var(--card-border);
+  color: var(--text-muted);
+  line-height: 1.55;
+  vertical-align: top;
+}
+
+.finance-benchmark-table tr:last-child td {
+  border-bottom: none;
+}
+
+.finance-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.2rem 0.65rem;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 0.78rem;
+}
+
+.finance-tag.tier-green {
+  background: rgba(16, 185, 129, 0.12);
+  color: #10b981;
+}
+
+.finance-tag.tier-blue {
+  background: rgba(59, 130, 246, 0.12);
+  color: #3b82f6;
+}
+
+.finance-tag.tier-orange {
+  background: rgba(245, 158, 11, 0.12);
+  color: #f59e0b;
+}
+
+.finance-tag.tier-red {
+  background: rgba(239, 68, 68, 0.12);
+  color: #ef4444;
+}
+
+/* Real-World Case Study Card */
+.finance-case-study {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 18px;
+  padding: 2rem;
+  box-shadow: var(--card-shadow);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.finance-case-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--card-border);
+  padding-bottom: 1rem;
+}
+
+.finance-case-title {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--text-main);
+  margin: 0;
+}
+
+.finance-case-math-box {
+  background: var(--bg-color);
+  border: 1px solid rgba(120, 120, 128, 0.15);
+  border-radius: 12px;
+  padding: 1.25rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.88rem;
+  line-height: 1.7;
+  color: var(--text-main);
+}
+
+.finance-case-math-box .highlight {
+  color: #3b82f6;
+  font-weight: 600;
+}
+
+/* Actionable Steps Grid */
+.finance-steps-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.25rem;
+  margin-top: 1rem;
+}
+
+.finance-step-card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 16px;
+  padding: 1.6rem;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.finance-step-number {
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #3b82f6;
+  margin-bottom: 0.75rem;
+}
+
+.finance-step-title {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--text-main);
+  margin: 0 0 0.5rem 0;
+  letter-spacing: -0.01em;
+}
+
+.finance-step-text {
+  font-size: 0.88rem;
+  color: var(--text-muted);
+  line-height: 1.55;
+  margin: 0;
+}
+
+/* FAQ Accordion Section */
+.finance-faq-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.finance-faq-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  margin-top: 0.5rem;
+}
+
+.finance-faq-item {
+  border: 1px solid var(--card-border);
+  border-radius: 16px;
+  background: var(--card-bg);
+  overflow: hidden;
+  transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.finance-faq-item.open {
+  border-color: rgba(59, 130, 246, 0.4);
+}
+
+.finance-faq-question-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.2rem 1.45rem;
+  background: transparent;
+  border: none;
+  font-size: 0.98rem;
+  font-weight: 600;
+  color: var(--text-main);
+  text-align: left;
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+
+.finance-faq-question-btn:hover {
+  color: #3b82f6;
+}
+
+.finance-faq-chevron {
+  flex-shrink: 0;
+  color: var(--text-muted);
+  transition: transform 0.25s ease;
+}
+
+.finance-faq-item.open .finance-faq-chevron {
+  transform: rotate(180deg);
+  color: #3b82f6;
+}
+
+.finance-faq-answer {
+  padding: 0 1.45rem 1.35rem 1.45rem;
+  font-size: 0.9rem;
+  line-height: 1.65;
+  color: var(--text-muted);
+}
+
+.finance-faq-answer p {
+  margin: 0;
+}
+
+.finance-faq-answer strong {
+  color: var(--text-main);
+  font-weight: 600;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .finance-seo-main-title {
+    font-size: 1.7rem;
+  }
+  .finance-ai-capsule {
+    padding: 1.35rem;
+  }
+  .finance-capsule-highlights {
+    grid-template-columns: 1fr;
+  }
+  .finance-pillars-grid {
+    grid-template-columns: 1fr;
+  }
+  .finance-steps-grid {
+    grid-template-columns: 1fr;
+  }
+  .finance-faq-question-btn {
+    padding: 1rem 1.15rem;
+    font-size: 0.92rem;
+  }
+  .finance-faq-answer {
+    padding: 0 1.15rem 1.15rem 1.15rem;
+  }
+}

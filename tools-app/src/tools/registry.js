@@ -20,6 +20,8 @@ import { churnCalculatorManifest } from './churn-calculator/manifest';
 import { ltvCalculatorManifest } from './ltv-calculator/manifest';
 import { cacCalculatorManifest } from './cac-calculator/manifest';
 import { ltvCacCalculatorManifest } from './ltv-cac-calculator/manifest';
+import { aiLinkHallucinationCheckerManifest } from './ai-link-hallucination-checker/manifest';
+import { aiCrawlerCheckerManifest } from './ai-crawler-checker/manifest';
 
 /**
  * Enterprise Scalable Tool Registry.
@@ -111,6 +113,14 @@ export const toolsRegistry = {
   [ltvCacCalculatorManifest.slug]: {
     manifest: ltvCacCalculatorManifest,
     component: lazy(() => import('./ltv-cac-calculator'))
+  },
+  [aiLinkHallucinationCheckerManifest.slug]: {
+    manifest: aiLinkHallucinationCheckerManifest,
+    component: lazy(() => import('./ai-link-hallucination-checker'))
+  },
+  [aiCrawlerCheckerManifest.slug]: {
+    manifest: aiCrawlerCheckerManifest,
+    component: lazy(() => import('./ai-crawler-checker'))
   }
 };
 

@@ -1,20 +1,22 @@
-import React, { useState, useMemo } from 'react';
-import { 
-  TrendingUp, 
-  DollarSign, 
-  PlusCircle, 
-  ArrowUpRight, 
-  ArrowDownRight, 
-  MinusCircle, 
-  Copy, 
-  Check, 
+import React, { useEffect,  useState, useMemo  } from 'react';
+import {
+  TrendingUp,
+  DollarSign,
+  PlusCircle,
+  ArrowUpRight,
+  ArrowDownRight,
+  MinusCircle,
+  Copy,
+  Check,
   RotateCcw,
   Sparkles,
   BarChart3,
   CheckCircle2,
   AlertCircle,
   Lock,
-  Eye
+  Eye,
+  Activity,
+  Zap
 } from 'lucide-react';
 import { mrrCalculatorManifest } from './manifest';
 import { useToolAnalytics } from '../../hooks/useToolAnalytics';
@@ -22,10 +24,11 @@ import ToolHeader from '../../components/ui/ToolHeader';
 import ToolSeoDivider from '../../components/ui/ToolSeoDivider';
 import Badge from '../../components/ui/Badge';
 import AdSlot from '../../components/ui/AdSlot';
+import MrrSeo from './components/MrrSeo';
 import '../finance-shared/finance-tools.css';
 
 export default function MrrCalculator({ onBack, toolMeta }) {
-  const { visitorCount, trackAction } = useToolAnalytics(mrrCalculatorManifest.slug, toolMeta);
+  const { visitorCount, trackAction, trackUse, conversionCount, getConversionLabel } = useToolAnalytics(mrrCalculatorManifest.slug, toolMeta);
 
   // Inputs
   const [startingMrr, setStartingMrr] = useState(50000);
@@ -34,6 +37,15 @@ export default function MrrCalculator({ onBack, toolMeta }) {
   const [contractionMrr, setContractionMrr] = useState(1000);
   const [churnedMrr, setChurnedMrr] = useState(2000);
   const [copied, setCopied] = useState(false);
+
+  // Analytics: Track calculations when inputs change (debounced)
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      trackUse?.();
+    }, 2000);
+    return () => clearTimeout(handler);
+  }, [startingMrr, newMrr, expansionMrr, contractionMrr, churnedMrr, trackUse]);
+
 
   // Calculations
   const metrics = useMemo(() => {
@@ -125,6 +137,11 @@ Generated via https://tools.cerilas.com/#/tool/mrr-calculator`;
             <Badge variant="success" icon={<Lock size={12} strokeWidth={2} />}>
               100% In-Browser Privacy
             </Badge>
+            {conversionCount > 0 && (
+              <Badge variant="brand" icon={<Activity size={12} strokeWidth={2} />}>
+                {conversionCount.toLocaleString()} {getConversionLabel()}
+              </Badge>
+            )}
             {visitorCount > 0 && (
               <Badge variant="neutral" icon={<Eye size={12} strokeWidth={2} />}>
                 {visitorCount.toLocaleString()} visitors
@@ -328,48 +345,8 @@ Generated via https://tools.cerilas.com/#/tool/mrr-calculator`;
       </div>
       </div>
 
-      {/* SEO Technical Guide */}
-      <ToolSeoDivider label="MRR Formulas, Quick Ratio Standards & SaaS FAQs" />
-
-      <section className="calc-guide-section">
-        <div className="calc-guide-card">
-          <h3 className="calc-guide-title">Understanding Monthly Recurring Revenue (MRR)</h3>
-          <p className="calc-guide-text">
-            Monthly Recurring Revenue (MRR) is the single most important top-line health metric for subscription businesses. It normalizes variable contract terms into a predictable monthly figure, enabling accurate cash planning, valuation multiples, and growth benchmarking.
-          </p>
-
-          <div className="calc-formula-box">
-            <strong>Net New MRR Formula:</strong><br />
-            Net New MRR = (New MRR + Expansion MRR) - (Contraction MRR + Churned MRR)
-          </div>
-
-          <p className="calc-guide-text">
-            To evaluate the quality of your growth, venture capitalists inspect the <strong>SaaS Quick Ratio</strong>. Coined by Social Capital, this ratio measures how many dollars of recurring revenue you gain for every dollar lost to churn and contraction.
-          </p>
-          <div className="calc-formula-box">
-            <strong>SaaS Quick Ratio Formula:</strong><br />
-            Quick Ratio = (New MRR + Expansion MRR) / (Contraction MRR + Churned MRR)
-          </div>
-        </div>
-
-        <div className="calc-guide-card">
-          <h3 className="calc-guide-title">Frequently Asked Questions</h3>
-          <div className="calc-faq-grid">
-            <div className="calc-faq-item">
-              <h4 className="calc-faq-q">What is a good SaaS Quick Ratio benchmark?</h4>
-              <p className="calc-faq-a">
-                A Quick Ratio greater than <strong>4.0x</strong> is considered the venture capital gold standard. This indicates that for every $1 of churned revenue, your business generates $4+ of new and expansion revenue. Ratios between 2.0x and 4.0x are typical for stable growth, while ratios below 1.0x signify a shrinking business.
-              </p>
-            </div>
-            <div className="calc-faq-item">
-              <h4 className="calc-faq-q">Should one-time setup fees or consulting be included in MRR?</h4>
-              <p className="calc-faq-a">
-                No. MRR must strictly include predictable, recurring subscription revenue. Non-recurring implementation fees, one-time onboarding charges, and consulting services should be tracked separately as non-recurring revenue.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* Comprehensive Long-Form SEO & Venture Guide */}
+      <MrrSeo />
 
       {/* AdSlot */}
       <AdSlot format="billboard" slotId="ad-mrr-billboard" />

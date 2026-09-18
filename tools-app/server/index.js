@@ -11,6 +11,8 @@ import atsRouter from './routes/ats.js';
 import pdfRagRouter from './routes/pdfRag.js';
 import aiDetectorRouter from './routes/aiDetector.js';
 import webhookTesterRouter from './routes/webhookTester.js';
+import linkCheckerRouter from './routes/linkChecker.js';
+import crawlerCheckerRouter from './routes/crawlerChecker.js';
 import { checkAiRateLimit, getClientIp } from './utils/aiRateLimit.js';
 
 dotenv.config();
@@ -336,6 +338,8 @@ const AI_HOURLY_LIMIT = 3;
 app.use(['/api/ats', '/api/tools/ats'], atsRouter);
 app.use(['/api/tools/pdf-rag-cleaner', '/api/pdf-rag-cleaner'], pdfRagRouter);
 app.use(['/api/tools/ai-content-detector', '/api/ai-content-detector'], aiDetectorRouter);
+app.use(['/api/tools/ai-link-hallucination-checker', '/api/link-checker'], linkCheckerRouter);
+app.use(['/api/tools/ai-crawler-checker', '/api/crawler-checker'], crawlerCheckerRouter);
 
 // Generic AI tool quota check endpoint
 app.get('/api/tools/:slug/ai-quota', async (req, res) => {

@@ -23,7 +23,10 @@ import {
   TrendingUp,
   RotateCcw,
   DollarSign,
-  Scale
+  Scale,
+  Link2,
+  Unlink,
+  ShieldAlert
 } from 'lucide-react';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
@@ -92,7 +95,10 @@ const ICON_MAP = {
   DollarSign,
   Users,
   Scale,
-  Activity
+  Activity,
+  Link2,
+  Unlink,
+  ShieldAlert
 };
 
 const ToolCard = ({ tool, onSelect }) => {
@@ -114,7 +120,7 @@ const ToolCard = ({ tool, onSelect }) => {
       onClick={() => onSelect(tool.slug)}
       style={{ cursor: 'pointer' }}
     >
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem' }}>
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '0.5rem', flexDirection: 'row', flexWrap: 'nowrap' }}>
         <div className="icon-wrapper tool-logo-container" style={{ flexShrink: 0 }}>
           <img 
             src={`/tool-icons/${tool.slug}.webp`} 
@@ -137,13 +143,16 @@ const ToolCard = ({ tool, onSelect }) => {
             <IconComponent strokeWidth={1.5} size={28} />
           </div>
         </div>
-        <div style={{ display: 'flex', gap: '0.35rem', alignItems: 'center', flexShrink: 0 }}>
+        <div style={{ display: 'flex', gap: '0.35rem', alignItems: 'flex-end', flexDirection: 'column', flexShrink: 1, minWidth: 0, overflow: 'hidden' }}>
           <span className="card-stat-pill" style={{
             fontSize: '0.72rem',
             padding: '0.2rem 0.55rem',
             borderRadius: '999px',
             background: 'rgba(150, 150, 150, 0.1)',
-            color: 'var(--text-muted)'
+            color: 'var(--text-muted)',
+            maxWidth: '100%',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis'
           }}>
             {tool.category || 'Tool'}
           </span>
@@ -154,10 +163,13 @@ const ToolCard = ({ tool, onSelect }) => {
               borderRadius: '999px',
               background: 'rgba(16, 185, 129, 0.12)',
               color: '#10b981',
-              fontWeight: '600'
+              fontWeight: '600',
+              maxWidth: '100%',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis'
             }}>
-              <Activity size={11} strokeWidth={2.2} />
-              <span>{conversionCount.toLocaleString()} {shortLabel}</span>
+              <Activity size={11} strokeWidth={2.2} style={{ flexShrink: 0 }} />
+              <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{conversionCount.toLocaleString()} {shortLabel}</span>
             </span>
           ) : null}
         </div>
@@ -408,6 +420,7 @@ export default function App() {
             return { 
               ...reg, 
               ...dbTool,
+              title: reg.title || dbTool.title,
               short_description: desc,
               shortDescription: desc
             };
@@ -471,7 +484,7 @@ export default function App() {
   const activeToolMeta = tools.find((tItem) => tItem.slug === currentSlug) || activeRegistered?.manifest;
 
   // Dynamic categories list
-  const categories = ['All', 'AI Assisted', ...new Set(tools.map((t) => t.category).filter(Boolean))];
+  const categories = Array.from(new Set(['All', 'AI Assisted', ...tools.map((t) => t.category).filter(Boolean)]));
 
   // Filter tools for catalog search and selected category
   const filteredTools = tools.filter((tool) => {
@@ -545,7 +558,7 @@ export default function App() {
                         }
                       }}
                     />
-                    <h1 className="hero-brand-title">Cerilas' Tools</h1>
+                    <h1 className="hero-brand-title">Cerilas' <span className="brand-bold-word">Tools</span></h1>
                   </div>
                   <p className="hero-brand-subtitle">{t('catalog.subtitle')}</p>
                 </header>
