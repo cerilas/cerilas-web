@@ -23,6 +23,7 @@ import { ltvCacCalculatorManifest } from './ltv-cac-calculator/manifest';
 import { aiLinkHallucinationCheckerManifest } from './ai-link-hallucination-checker/manifest';
 import { aiCrawlerCheckerManifest } from './ai-crawler-checker/manifest';
 import { llmsTxtManifest } from './llms-txt-tools/manifest';
+import { htmlToMarkdownManifest } from './html-to-llm-markdown/manifest';
 
 /**
  * Enterprise Scalable Tool Registry.
@@ -126,13 +127,18 @@ export const toolsRegistry = {
   [llmsTxtManifest.slug]: {
     manifest: llmsTxtManifest,
     component: lazy(() => import('./llms-txt-tools'))
+  },
+  [htmlToMarkdownManifest.slug]: {
+    manifest: htmlToMarkdownManifest,
+    component: lazy(() => import('./html-to-llm-markdown'))
   }
 };
 
 const toolAliases = {
   'llms-txt-generator': 'llms-txt',
   'llms-txt-checker': 'llms-txt',
-  'llms-txt-validator': 'llms-txt'
+  'llms-txt-validator': 'llms-txt',
+  'html-to-markdown': 'html-to-llm-markdown'
 };
 
 export function getRegisteredTool(slug) {

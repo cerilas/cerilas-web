@@ -331,8 +331,26 @@
     <changefreq>weekly</changefreq>
     <priority>0.95</priority>
   </url>
+  <!-- 19. HTML to LLM Markdown Converter -->
   <url>
-    <loc>https://tools.cerilas.com/llms-txt</loc>
+    <loc>https://tools.cerilas.com/tool/html-to-llm-markdown</loc>
+    <lastmod>2026-09-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.99</priority>
+    <image:image>
+      <image:loc>https://tools.cerilas.com/tool-icons/html-to-llm-markdown.png</image:loc>
+      <image:title>HTML to LLM Markdown Converter – Clean Web Content for ChatGPT, Claude &amp; RAG</image:title>
+      <image:caption>Convert webpages and raw HTML into clean, token-efficient Markdown for LLM prompt context and vector embeddings.</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://tools.cerilas.com/#/tool/html-to-llm-markdown</loc>
+    <lastmod>2026-09-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.95</priority>
+  </url>
+  <url>
+    <loc>https://tools.cerilas.com/html-to-llm-markdown</loc>
     <lastmod>2026-09-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.98</priority>

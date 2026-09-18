@@ -14,6 +14,7 @@ import webhookTesterRouter from './routes/webhookTester.js';
 import linkCheckerRouter from './routes/linkChecker.js';
 import crawlerCheckerRouter from './routes/crawlerChecker.js';
 import llmsTxtRouter from './routes/llmsTxt.js';
+import htmlToMarkdownRouter from './routes/htmlToMarkdown.js';
 import { checkAiRateLimit, getClientIp } from './utils/aiRateLimit.js';
 
 dotenv.config();
@@ -342,6 +343,7 @@ app.use(['/api/tools/ai-content-detector', '/api/ai-content-detector'], aiDetect
 app.use(['/api/tools/ai-link-hallucination-checker', '/api/link-checker'], linkCheckerRouter);
 app.use(['/api/tools/ai-crawler-checker', '/api/crawler-checker'], crawlerCheckerRouter);
 app.use(['/api/tools/llms-txt', '/api/llms-txt'], llmsTxtRouter);
+app.use(['/api/tools/html-to-markdown', '/api/html-to-markdown', '/api/tools/html-to-llm-markdown'], htmlToMarkdownRouter);
 
 // Generic AI tool quota check endpoint
 app.get('/api/tools/:slug/ai-quota', async (req, res) => {

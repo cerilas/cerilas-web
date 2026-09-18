@@ -365,6 +365,50 @@ export const TOOL_CONVERSION_METRICS = {
       singular: 'rehber oluşturuldu',
       short: 'rehber'
     }
+  },
+  'html-to-llm-markdown': {
+    actionKey: 'converted',
+    getConversionCount: (tool) => {
+      if (!tool) return 0;
+      const downloads = tool.download_count || 0;
+      const copies = tool.copy_count || 0;
+      const uses = tool.use_count || 0;
+      return (downloads + copies) > 0 ? (downloads + copies) : uses;
+    },
+    en: {
+      action: 'converted',
+      badge: 'pages converted',
+      singular: 'page converted',
+      short: 'pages'
+    },
+    tr: {
+      action: 'dönüştürüldü',
+      badge: 'sayfa dönüştürüldü',
+      singular: 'sayfa dönüştürüldü',
+      short: 'sayfa'
+    }
+  },
+  'html-to-markdown': {
+    actionKey: 'converted',
+    getConversionCount: (tool) => {
+      if (!tool) return 0;
+      const downloads = tool.download_count || 0;
+      const copies = tool.copy_count || 0;
+      const uses = tool.use_count || 0;
+      return (downloads + copies) > 0 ? (downloads + copies) : uses;
+    },
+    en: {
+      action: 'converted',
+      badge: 'pages converted',
+      singular: 'page converted',
+      short: 'pages'
+    },
+    tr: {
+      action: 'dönüştürüldü',
+      badge: 'sayfa dönüştürüldü',
+      singular: 'sayfa dönüştürüldü',
+      short: 'sayfa'
+    }
   }
 };
 
