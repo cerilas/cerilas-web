@@ -243,7 +243,7 @@ function assembleRichDescription(m, isCompetitiveCall) {
       sections.push(`
         <div class="ec-section" style="margin-bottom: 1.25rem;">
           <h4 style="font-size: 0.95rem; font-weight: 700; color: var(--text-main, #1e293b); margin: 0 0 0.5rem;">
-            🎯 Kimler Başvurabilir? (Eligibility & Target Applicants)
+            🎯 Eligibility & Target Applicants
           </h4>
           <div style="font-size: 0.88rem; line-height: 1.6; color: var(--text-muted, #475569);">
             ${m.description[0]}
@@ -257,7 +257,7 @@ function assembleRichDescription(m, isCompetitiveCall) {
       sections.push(`
         <div class="ec-section" style="margin-bottom: 1.25rem;">
           <h4 style="font-size: 0.95rem; font-weight: 700; color: var(--text-main, #1e293b); margin: 0 0 0.5rem;">
-            📋 Çağrı Amacı ve Kapsamı (Call Purpose & Scope)
+            📋 Call Objectives & Scope
           </h4>
           <div style="font-size: 0.88rem; line-height: 1.6; color: var(--text-muted, #475569);">
             ${m.furtherInformation[0]}
@@ -271,7 +271,7 @@ function assembleRichDescription(m, isCompetitiveCall) {
       sections.push(`
         <div class="ec-section" style="margin-bottom: 1.25rem;">
           <h4 style="font-size: 0.95rem; font-weight: 700; color: var(--text-main, #1e293b); margin: 0 0 0.5rem;">
-            🚀 Başvuru Yöntemi ve Süreci (How to Apply)
+            🚀 How to Apply & Submission Process
           </h4>
           <div style="font-size: 0.88rem; line-height: 1.6; color: var(--text-muted, #475569);">
             ${m.beneficiaryAdministration?.[0] || m.destinationDetails[0]}
@@ -285,7 +285,7 @@ function assembleRichDescription(m, isCompetitiveCall) {
       sections.push(`
         <div class="ec-section" style="margin-bottom: 1.25rem;">
           <h4 style="font-size: 0.95rem; font-weight: 700; color: var(--text-main, #1e293b); margin: 0 0 0.5rem;">
-            ⏱️ Zaman Çizelgesi ve Çağrı Süresi (Timeline & Schedule)
+            ⏱️ Timeline & Schedule
           </h4>
           <p style="font-size: 0.88rem; line-height: 1.6; color: var(--text-muted, #475569); margin: 0;">
             ${m.duration[0].replace(/\n/g, '<br/>')}
@@ -300,7 +300,7 @@ function assembleRichDescription(m, isCompetitiveCall) {
       sections.push(`
         <div class="ec-section" style="margin-bottom: 1.25rem;">
           <h4 style="font-size: 0.95rem; font-weight: 700; color: var(--text-main, #1e293b); margin: 0 0 0.5rem;">
-            🎯 Beklenen Sonuçlar ve Çağrı Kapsamı (Expected Outcome & Scope)
+            🎯 Expected Outcome & Scope
           </h4>
           <div style="font-size: 0.88rem; line-height: 1.6; color: var(--text-muted, #475569);">
             ${m.descriptionByte[0]}
@@ -314,7 +314,7 @@ function assembleRichDescription(m, isCompetitiveCall) {
       sections.push(`
         <div class="ec-section" style="margin-bottom: 1.25rem;">
           <h4 style="font-size: 0.95rem; font-weight: 700; color: var(--text-main, #1e293b); margin: 0 0 0.5rem;">
-            🌍 Program Arka Planı ve Hedefler (Destination & Strategic Context)
+            🌍 Destination & Policy Context
           </h4>
           <div style="font-size: 0.88rem; line-height: 1.6; color: var(--text-muted, #475569);">
             ${m.destinationDetails[0]}
@@ -328,7 +328,7 @@ function assembleRichDescription(m, isCompetitiveCall) {
       sections.push(`
         <div class="ec-section" style="margin-bottom: 1.25rem;">
           <h4 style="font-size: 0.95rem; font-weight: 700; color: var(--text-main, #1e293b); margin: 0 0 0.5rem;">
-            ⚖️ Katılım Şartları ve Başvuru Kriterleri (General Conditions & Eligibility)
+            ⚖️ Conditions & Eligibility Criteria
           </h4>
           <div style="font-size: 0.88rem; line-height: 1.6; color: var(--text-muted, #475569);">
             ${m.topicConditions[0]}
@@ -342,7 +342,7 @@ function assembleRichDescription(m, isCompetitiveCall) {
       sections.push(`
         <div class="ec-section" style="margin-bottom: 1.25rem;">
           <h4 style="font-size: 0.95rem; font-weight: 700; color: var(--text-main, #1e293b); margin: 0 0 0.5rem;">
-            📚 Rehberler ve Başvuru Desteği (Support & Guidance)
+            📚 Support & Documentation Guidance
           </h4>
           <div style="font-size: 0.88rem; line-height: 1.6; color: var(--text-muted, #475569);">
             ${m.supportInfo[0]}
