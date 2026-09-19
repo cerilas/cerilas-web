@@ -74,6 +74,18 @@
   animation: personaFadeIn 0.22s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+/* Invisible bridge connecting trigger button to dropdown to prevent mouseleave flicker */
+.persona-mega-dropdown::before {
+  content: '';
+  position: absolute;
+  top: -14px;
+  left: 0;
+  right: 0;
+  height: 14px;
+  background: transparent;
+  pointer-events: auto;
+}
+
 @media (prefers-color-scheme: dark) {
   .persona-mega-dropdown {
     background: #18181b;
@@ -442,14 +454,10 @@
   }
 }
 
-/* Backdrop Overlay for mobile touch screens */
+/* Backdrop Overlay: Mobile touch screens only (hidden on desktop) */
 .persona-backdrop {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.45);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
-  z-index: 999;
+  display: none;
+  pointer-events: none;
 }
 
 /* Mobile Header: Hidden on Desktop, Visible on Mobile */
@@ -459,6 +467,17 @@
 
 /* Mobile Responsive Optimization (<= 768px) */
 @media (max-width: 768px) {
+  .persona-backdrop {
+    display: block;
+    pointer-events: auto;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    z-index: 999;
+  }
+
   .persona-menu-trigger {
     padding: 0.28rem 0.65rem;
     font-size: 0.78rem;

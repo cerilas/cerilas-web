@@ -334,15 +334,22 @@ export default function PersonaMenu({ onSelectTool, onNavigateHome }) {
   };
 
   const handleMouseLeave = () => {
+    if (closeTimeoutRef.current) {
+      clearTimeout(closeTimeoutRef.current);
+    }
     closeTimeoutRef.current = setTimeout(() => {
       setIsOpen(false);
-    }, 220);
+    }, 280);
   };
 
   // Close on outside click
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (menuRef.current && !menuRef.current.contains(e.target)) {
+        if (closeTimeoutRef.current) {
+          clearTimeout(closeTimeoutRef.current);
+          closeTimeoutRef.current = null;
+        }
         setIsOpen(false);
       }
     };
@@ -354,6 +361,10 @@ export default function PersonaMenu({ onSelectTool, onNavigateHome }) {
   }, []);
 
   const handleToolClick = (slug) => {
+    if (closeTimeoutRef.current) {
+      clearTimeout(closeTimeoutRef.current);
+      closeTimeoutRef.current = null;
+    }
     setIsOpen(false);
     if (onSelectTool) {
       onSelectTool(slug);
