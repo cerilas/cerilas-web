@@ -141,48 +141,65 @@ export default function EuFundingOpportunities({ onBack, toolMeta }) {
     fetchStats();
   }, []);
 
-  // Fetch opportunities whenever filters change
-  const fetchOpportunities = useCallback(async () => {
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  // Fetch opportunities whenever filters change (with debounced search)
+  useEffect(() => {
+    let cancelled = false;
     setLoading(true);
     setError(null);
-    try {
-      const params = new URLSearchParams();
-      if (search.trim()) params.set('search', search.trim());
-      if (selectedSource !== 'all') params.set('source', selectedSource);
-      if (selectedDomain !== 'All Domains') params.set('domain', selectedDomain);
-      if (selectedBeneficiary !== 'All Beneficiaries') params.set('beneficiary', selectedBeneficiary);
-      if (selectedCallType !== 'all') params.set('call_type', selectedCallType);
-      params.set('status', 'open'); // strictly open opportunities
-      params.set('sort', sortOrder);
-      params.set('page', String(page));
-      params.set('limit', String(limit));
 
-      const res = await fetch(`/api/scrapers/opportunities?${params.toString()}`);
-      if (!res.ok) throw new Error(`HTTP error ${res.status}`);
-      const json = await res.json();
+    const timer = setTimeout(async () => {
+      try {
+        const params = new URLSearchParams();
+        if (search.trim()) params.set('search', search.trim());
+        if (selectedSource !== 'all') params.set('source', selectedSource);
+        if (selectedDomain !== 'All Domains') params.set('domain', selectedDomain);
+        if (selectedBeneficiary !== 'All Beneficiaries') params.set('beneficiary', selectedBeneficiary);
+        if (selectedCallType !== 'all') params.set('call_type', selectedCallType);
+        params.set('status', 'open'); // strictly open opportunities
+        params.set('sort', sortOrder);
+        params.set('page', String(page));
+        params.set('limit', String(limit));
 
-      if (json.status === 'success') {
-        setOpportunities(json.data.items || []);
-        setTotalItems(json.data.total || 0);
-        setTotalPages(json.data.total_pages || 1);
-        if (trackUse) trackUse();
-      } else {
-        throw new Error(json.message || 'Failed to load opportunities');
+        const res = await fetch(`/api/scrapers/opportunities?${params.toString()}`);
+        if (!res.ok) throw new Error(`HTTP error ${res.status}`);
+        const json = await res.json();
+
+        if (cancelled) return;
+
+        if (json.status === 'success' && json.data) {
+          setOpportunities(json.data.items || []);
+          setTotalItems(json.data.total || 0);
+          setTotalPages(json.data.total_pages || 1);
+        } else {
+          throw new Error(json.message || 'Failed to load opportunities');
+        }
+      } catch (err) {
+        if (!cancelled) {
+          console.error('Error fetching opportunities:', err);
+          setError(err.message);
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
       }
-    } catch (err) {
-      console.error('Error fetching opportunities:', err);
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  }, [search, selectedSource, selectedDomain, selectedBeneficiary, selectedCallType, sortOrder, page, limit, trackUse]);
+    }, search ? 300 : 0);
 
-  useEffect(() => {
-    fetchOpportunities();
-  }, [fetchOpportunities]);
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+  }, [search, selectedSource, selectedDomain, selectedBeneficiary, selectedCallType, sortOrder, page, limit, refreshKey]);
+
+  const fetchOpportunities = useCallback(() => {
+    setRefreshKey((k) => k + 1);
+  }, []);
 
   // Open Call Detail Modal
   const openDetail = async (id) => {
+    if (trackUse) trackUse({ callId: id });
     setLoadingDetail(true);
     try {
       const res = await fetch(`/api/scrapers/opportunities/${id}`);
