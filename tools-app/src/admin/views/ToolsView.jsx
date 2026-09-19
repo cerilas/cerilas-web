@@ -20,7 +20,7 @@ import {
 } from 'lucide-react';
 import ToolDetailModal from '../components/ToolDetailModal';
 
-export default function ToolsView({ tools = [], statsOverview = null, loading = false }) {
+export default function ToolsView({ tools = [], statsOverview = null, loading = false, onSelectTool }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [viewMode, setViewMode] = useState('table'); // 'table' | 'grid'
@@ -236,7 +236,12 @@ export default function ToolsView({ tools = [], statsOverview = null, loading = 
                   return (
                     <tr key={tool.slug}>
                       <td>
-                        <div className="admin-tool-cell">
+                        <div 
+                          className="admin-tool-cell"
+                          style={{ cursor: 'pointer' }}
+                          onClick={() => onSelectTool ? onSelectTool(tool.slug) : setSelectedToolForModal(tool)}
+                          title="Click to view tool details"
+                        >
                           <img 
                             src={`/tool-icons/${tool.slug}.webp`} 
                             alt="" 
@@ -249,7 +254,7 @@ export default function ToolsView({ tools = [], statsOverview = null, loading = 
                             }}
                           />
                           <div className="admin-tool-title-wrap">
-                            <span className="admin-tool-title">{tool.title}</span>
+                            <span className="admin-tool-title" style={{ transition: 'color 0.15s' }}>{tool.title}</span>
                             <span className="admin-tool-slug">/{tool.slug}</span>
                           </div>
                         </div>
@@ -292,10 +297,10 @@ export default function ToolsView({ tools = [], statsOverview = null, loading = 
                           <button 
                             type="button" 
                             className="admin-action-btn"
-                            onClick={() => setSelectedToolForModal(tool)}
-                            title="Inspect Tool Metadata"
+                            onClick={() => onSelectTool ? onSelectTool(tool.slug) : setSelectedToolForModal(tool)}
+                            title="View Tool Details & Analytics"
                           >
-                            <Info size={13} />
+                            <Eye size={13} />
                             <span>Details</span>
                           </button>
                           <button 
@@ -333,7 +338,11 @@ export default function ToolsView({ tools = [], statsOverview = null, loading = 
               <div key={tool.slug} className="admin-grid-card">
                 <div>
                   <div className="admin-grid-top">
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                    <div 
+                      style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'pointer' }}
+                      onClick={() => onSelectTool ? onSelectTool(tool.slug) : setSelectedToolForModal(tool)}
+                      title="Click to view tool details"
+                    >
                       <img 
                         src={`/tool-icons/${tool.slug}.webp`} 
                         alt="" 
@@ -389,10 +398,11 @@ export default function ToolsView({ tools = [], statsOverview = null, loading = 
                   <button 
                     type="button" 
                     className="admin-action-btn"
-                    onClick={() => setSelectedToolForModal(tool)}
+                    onClick={() => onSelectTool ? onSelectTool(tool.slug) : setSelectedToolForModal(tool)}
+                    title="View Tool Details & Analytics"
                   >
-                    <Info size={13} />
-                    <span>Inspect</span>
+                    <Eye size={13} />
+                    <span>Details</span>
                   </button>
 
                   <div style={{ display: 'flex', gap: '0.4rem' }}>

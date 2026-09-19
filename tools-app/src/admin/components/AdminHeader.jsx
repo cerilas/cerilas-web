@@ -5,11 +5,16 @@ import { useTheme } from '../../context/ThemeContext';
 export default function AdminHeader({ 
   currentTab, 
   onToggleSidebar, 
-  liveVisitors = 1 
+  liveVisitors = 1,
+  selectedToolTitle = null,
+  onBackToTools = null
 }) {
   const { isDark, toggleTheme } = useTheme();
 
   const getSectionTitle = () => {
+    if (selectedToolTitle) {
+      return selectedToolTitle;
+    }
     switch (currentTab) {
       case 'tools':
         return 'Tools Management';
@@ -40,9 +45,33 @@ export default function AdminHeader({
           <div className="admin-header-breadcrumbs">
             <span>Admin</span>
             <span>/</span>
-            <span style={{ color: 'var(--text-main)', fontWeight: 500, textTransform: 'capitalize' }}>
-              {currentTab}
-            </span>
+            {selectedToolTitle ? (
+              <>
+                <button 
+                  type="button"
+                  onClick={onBackToTools}
+                  style={{ 
+                    background: 'none', 
+                    border: 'none', 
+                    padding: 0, 
+                    color: 'inherit', 
+                    cursor: 'pointer', 
+                    font: 'inherit',
+                    textDecoration: 'underline'
+                  }}
+                >
+                  Tools
+                </button>
+                <span>/</span>
+                <span style={{ color: 'var(--text-main)', fontWeight: 600 }}>
+                  {selectedToolTitle}
+                </span>
+              </>
+            ) : (
+              <span style={{ color: 'var(--text-main)', fontWeight: 500, textTransform: 'capitalize' }}>
+                {currentTab}
+              </span>
+            )}
           </div>
         </div>
       </div>
