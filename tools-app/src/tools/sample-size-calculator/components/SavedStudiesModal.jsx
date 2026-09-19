@@ -7,7 +7,12 @@ import {
   Calendar, 
   Layers, 
   PlusCircle, 
-  Check 
+  Check,
+  FolderOpen,
+  Sparkles,
+  Users,
+  Activity,
+  ArrowUpRight
 } from 'lucide-react';
 
 const STORAGE_KEY = 'cerilas_saved_sample_size_calculations_v1';
@@ -65,7 +70,7 @@ export default function SavedStudiesModal({
     if (isOpen) {
       setStudies(getSavedCalculations());
       setIsSaved(false);
-      setProjectName(`Research Study - ${new Date().toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}`);
+      setProjectName(`Study - ${new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`);
     }
   }, [isOpen]);
 
@@ -99,105 +104,166 @@ export default function SavedStudiesModal({
 
   return (
     <div className="ssc-modal-backdrop" onClick={onClose}>
-      <div className="ssc-modal-card" onClick={(e) => e.stopPropagation()}>
+      <div className="ssc-modal-card ssc-workspace-modal-card" onClick={(e) => e.stopPropagation()}>
+        {/* Premium Header */}
         <div className="ssc-modal-header">
-          <div className="ssc-modal-header-title">
-            <Bookmark size={18} />
-            <span>Cerilas Research Workspace • Saved Calculations</span>
+          <div className="ssc-modal-header-brand">
+            <div className="ssc-modal-header-icon-box">
+              <Bookmark size={20} strokeWidth={2.2} />
+            </div>
+            <div>
+              <h3 className="ssc-modal-header-title-text">Saved Studies & Workspace</h3>
+              <p className="ssc-modal-header-sub-text">
+                Manage, export, and reload your saved sample size calculations
+              </p>
+            </div>
           </div>
-          <button type="button" className="ssc-modal-close" onClick={onClose}>
+          <button 
+            type="button" 
+            className="ssc-modal-close-btn" 
+            onClick={onClose}
+            aria-label="Close modal"
+          >
             <X size={18} />
           </button>
         </div>
 
-        <div className="ssc-modal-body">
-          {/* Save Current Calculation Form */}
+        <div className="ssc-modal-body ssc-workspace-modal-body">
+          {/* Save Active Calculation Action Panel */}
           {currentCalculation && currentCalculation.result?.isValid && (
-            <form onSubmit={handleSaveCurrent} className="ssc-save-current-box">
-              <h4 className="ssc-save-title">Save Active Calculation</h4>
-              <div className="ssc-save-input-group">
-                <input
-                  type="text"
-                  className="ssc-input"
-                  placeholder="e.g. Hypertension Pilot Study or Q4 Checkout A/B"
-                  value={projectName}
-                  onChange={(e) => setProjectName(e.target.value)}
-                  maxLength={60}
-                />
-                <button type="submit" className="ssc-btn-primary" disabled={isSaved}>
-                  {isSaved ? (
-                    <>
-                      <Check size={14} color="#10b981" />
-                      <span>Saved!</span>
-                    </>
-                  ) : (
-                    <>
-                      <PlusCircle size={14} />
-                      <span>Save Study</span>
-                    </>
-                  )}
-                </button>
+            <div className="ssc-save-current-panel">
+              <div className="ssc-save-panel-header">
+                <div className="ssc-save-panel-badge-row">
+                  <span className="ssc-save-panel-eyebrow">Active Model</span>
+                  <span className="ssc-save-panel-mode-tag">{currentCalculation.modeTitle}</span>
+                </div>
+                <div className="ssc-save-panel-metric">
+                  <span className="ssc-save-metric-label">Required Sample:</span>
+                  <span className="ssc-save-metric-val">
+                    {currentCalculation.result.requiredSample?.toLocaleString()}
+                  </span>
+                </div>
               </div>
-              <div className="ssc-current-preview-meta">
-                <span>Model: {currentCalculation.modeTitle}</span>
-                <span>•</span>
-                <span>Sample Size: <strong>{currentCalculation.result.requiredSample.toLocaleString()}</strong></span>
-              </div>
-            </form>
+
+              <form onSubmit={handleSaveCurrent} className="ssc-save-form">
+                <div className="ssc-save-input-row">
+                  <input
+                    type="text"
+                    className="ssc-save-input"
+                    placeholder="Enter project or protocol name (e.g. Hypertension Phase II Trial)"
+                    value={projectName}
+                    onChange={(e) => setProjectName(e.target.value)}
+                    maxLength={60}
+                    autoFocus
+                  />
+                  <button 
+                    type="submit" 
+                    className="ssc-save-submit-btn" 
+                    disabled={isSaved}
+                  >
+                    {isSaved ? (
+                      <>
+                        <Check size={16} strokeWidth={2.5} />
+                        <span>Saved!</span>
+                      </>
+                    ) : (
+                      <>
+                        <PlusCircle size={16} strokeWidth={2} />
+                        <span>Save to Workspace</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              </form>
+            </div>
           )}
 
           {/* List of Saved Calculations */}
-          <div className="ssc-saved-list-wrapper">
-            <h4 className="ssc-saved-list-title">Saved Studies ({studies.length})</h4>
+          <div className="ssc-saved-section">
+            <div className="ssc-saved-section-header">
+              <div className="ssc-saved-section-title-wrap">
+                <FolderOpen size={17} />
+                <h4 className="ssc-saved-section-title">Saved Calculations</h4>
+              </div>
+              <span className="ssc-saved-count-badge">
+                {studies.length} {studies.length === 1 ? 'Study' : 'Studies'}
+              </span>
+            </div>
+
             {studies.length === 0 ? (
-              <div className="ssc-saved-empty">
-                <Layers size={32} opacity={0.4} />
-                <p>No saved studies in your workspace yet. Save calculations above to track multiple thesis or trial protocols.</p>
+              <div className="ssc-saved-empty-card">
+                <div className="ssc-empty-icon-wrap">
+                  <Layers size={28} strokeWidth={1.8} />
+                </div>
+                <h5 className="ssc-empty-title">No studies saved yet</h5>
+                <p className="ssc-empty-desc">
+                  Save your active calculation above to store model parameters, recruitment targets, and statistical assumptions for your research protocol.
+                </p>
               </div>
             ) : (
-              <div className="ssc-saved-items-grid">
+              <div className="ssc-saved-grid">
                 {studies.map((item) => (
-                  <div key={item.id} className="ssc-saved-item-card">
-                    <div className="ssc-saved-item-header">
-                      <h5 className="ssc-saved-item-name">{item.projectName}</h5>
-                      <button
-                        type="button"
-                        className="ssc-btn-del"
-                        onClick={() => handleDelete(item.id)}
-                        title="Delete calculation"
-                      >
-                        <Trash2 size={13} />
-                      </button>
+                  <div key={item.id} className="ssc-study-card">
+                    <div className="ssc-study-card-top">
+                      <div className="ssc-study-card-header">
+                        <span className="ssc-study-mode-pill">{item.modeTitle}</span>
+                        <button
+                          type="button"
+                          className="ssc-study-delete-btn"
+                          onClick={() => handleDelete(item.id)}
+                          title="Delete saved study"
+                          aria-label="Delete"
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
+                      <h5 className="ssc-study-title">{item.projectName}</h5>
                     </div>
 
-                    <div className="ssc-saved-item-metrics">
-                      <div className="ssc-saved-metric-badge">
-                        <span>Required Sample:</span>
-                        <strong>{item.requiredSample?.toLocaleString() || 'N/A'}</strong>
+                    <div className="ssc-study-card-middle">
+                      <div className="ssc-study-stat-box">
+                        <span className="ssc-study-stat-label">Required Sample</span>
+                        <div className="ssc-study-stat-num-row">
+                          <span className="ssc-study-stat-num">
+                            {item.requiredSample ? Number(item.requiredSample).toLocaleString() : 'N/A'}
+                          </span>
+                          <span className="ssc-study-stat-unit">subjects</span>
+                        </div>
                       </div>
+
                       {item.recruitmentTarget && item.recruitmentTarget > item.requiredSample && (
-                        <div className="ssc-saved-metric-sub">
-                          Target: {item.recruitmentTarget.toLocaleString()}
+                        <div className="ssc-study-target-box">
+                          <span className="ssc-study-target-label">Recruitment Target</span>
+                          <span className="ssc-study-target-val">
+                            {Number(item.recruitmentTarget).toLocaleString()}
+                          </span>
                         </div>
                       )}
                     </div>
 
-                    <div className="ssc-saved-item-footer">
-                      <span className="ssc-saved-date">
+                    <div className="ssc-study-card-bottom">
+                      <div className="ssc-study-date-pill">
                         <Calendar size={12} />
-                        <span>{new Date(item.savedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
-                      </span>
+                        <span>
+                          {new Date(item.savedAt).toLocaleDateString('en-US', { 
+                            month: 'short', 
+                            day: 'numeric', 
+                            year: 'numeric' 
+                          })}
+                        </span>
+                      </div>
+
                       {onLoadCalculation && (
                         <button
                           type="button"
-                          className="ssc-btn-load"
+                          className="ssc-study-load-btn"
                           onClick={() => {
                             onLoadCalculation(item);
                             onClose();
                           }}
                         >
                           <span>Load Model</span>
-                          <ArrowRight size={12} />
+                          <ArrowRight size={13} />
                         </button>
                       )}
                     </div>
