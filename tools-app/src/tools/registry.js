@@ -25,6 +25,7 @@ import { aiCrawlerCheckerManifest } from './ai-crawler-checker/manifest';
 import { llmsTxtManifest } from './llms-txt-tools/manifest';
 import { htmlToMarkdownManifest } from './html-to-llm-markdown/manifest';
 import { tokenCounterUniversalManifest } from './token-counter-universal/manifest';
+import { trlCalculatorManifest } from './trl-calculator/manifest';
 
 /**
  * Enterprise Scalable Tool Registry.
@@ -136,6 +137,10 @@ export const toolsRegistry = {
   [tokenCounterUniversalManifest.slug]: {
     manifest: tokenCounterUniversalManifest,
     component: lazy(() => import('./token-counter-universal'))
+  },
+  [trlCalculatorManifest.slug]: {
+    manifest: trlCalculatorManifest,
+    component: lazy(() => import('./trl-calculator'))
   }
 };
 
@@ -146,7 +151,10 @@ const toolAliases = {
   'html-to-markdown': 'html-to-llm-markdown',
   'token-counter': 'token-counter-universal',
   'token-calculator': 'token-counter-universal',
-  'universal-token-counter': 'token-counter-universal'
+  'universal-token-counter': 'token-counter-universal',
+  'technology-readiness-level': 'trl-calculator',
+  'trl-assessment': 'trl-calculator',
+  'trl-scale': 'trl-calculator'
 };
 
 export function getRegisteredTool(slug) {

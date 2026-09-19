@@ -1,0 +1,401 @@
+/* TrlCalculatorSeo.css */
+
+.trl-seo-container {
+  margin-top: 3.5rem;
+  border-top: 1px solid var(--card-border, rgba(255, 255, 255, 0.08));
+  padding-top: 3rem;
+  color: var(--text-main, #f8fafc);
+  text-align: left;
+}
+
+:root[data-theme="light"] .trl-seo-container,
+.light .trl-seo-container {
+  border-top-color: #e2e8f0;
+}
+
+.trl-seo-header {
+  margin-bottom: 2.5rem;
+}
+
+.trl-seo-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin-bottom: 0.75rem;
+  color: var(--text-main, #f8fafc);
+}
+
+:root[data-theme="light"] .trl-seo-title,
+.light .trl-seo-title {
+  color: #0f172a;
+}
+
+.trl-seo-intro {
+  font-size: 1rem;
+  color: var(--text-muted, #94a3b8);
+  line-height: 1.6;
+  max-width: 860px;
+}
+
+.trl-seo-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+  margin-bottom: 3rem;
+}
+
+@media (min-width: 768px) {
+  .trl-seo-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.trl-seo-card {
+  background: var(--card-bg, rgba(15, 23, 42, 0.5));
+  border: 1px solid var(--card-border, rgba(255, 255, 255, 0.08));
+  border-radius: 1rem;
+  padding: 1.5rem;
+  backdrop-filter: blur(12px);
+}
+
+:root[data-theme="light"] .trl-seo-card,
+.light .trl-seo-card {
+  background: #ffffff;
+  border-color: #e2e8f0;
+}
+
+.trl-seo-card-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  background: rgba(99, 102, 241, 0.15);
+  color: #818cf8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1rem;
+}
+
+.trl-seo-card-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: var(--text-main, #f8fafc);
+}
+
+:root[data-theme="light"] .trl-seo-card-title,
+.light .trl-seo-card-title {
+  color: #0f172a;
+}
+
+.trl-seo-card-desc {
+  font-size: 0.88rem;
+  color: var(--text-muted, #94a3b8);
+  line-height: 1.55;
+  margin: 0;
+}
+
+/* SEO Tables Section */
+.trl-seo-table-section {
+  margin-bottom: 3.5rem;
+}
+
+.trl-seo-section-heading {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-main, #f8fafc);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.35rem;
+}
+
+:root[data-theme="light"] .trl-seo-section-heading,
+.light .trl-seo-section-heading {
+  color: #0f172a;
+}
+
+.trl-seo-section-subtitle {
+  font-size: 0.88rem;
+  color: var(--text-muted, #94a3b8);
+  margin-bottom: 1.25rem;
+}
+
+.trl-seo-table-wrap {
+  overflow-x: auto;
+  border-radius: 12px;
+  border: 1px solid var(--card-border, rgba(255, 255, 255, 0.08));
+  background: var(--card-bg, rgba(15, 23, 42, 0.3));
+}
+
+:root[data-theme="light"] .trl-seo-table-wrap,
+.light .trl-seo-table-wrap {
+  background: #ffffff;
+  border-color: #e2e8f0;
+}
+
+.trl-seo-specs-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 0.86rem;
+}
+
+.trl-seo-specs-table th {
+  padding: 0.85rem 1rem;
+  font-weight: 600;
+  color: var(--text-muted, #94a3b8);
+  border-bottom: 1px solid var(--card-border, rgba(255, 255, 255, 0.08));
+  background: rgba(150, 150, 150, 0.04);
+  white-space: nowrap;
+}
+
+:root[data-theme="light"] .trl-seo-specs-table th,
+.light .trl-seo-specs-table th {
+  border-bottom-color: #e2e8f0;
+  background: #f8fafc;
+  color: #475569;
+}
+
+.trl-seo-specs-table td {
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid var(--card-border, rgba(255, 255, 255, 0.05));
+  color: var(--text-main, #f8fafc);
+  white-space: nowrap;
+}
+
+:root[data-theme="light"] .trl-seo-specs-table td,
+.light .trl-seo-specs-table td {
+  border-bottom-color: #f1f5f9;
+  color: #1e293b;
+}
+
+.trl-seo-specs-table tr:last-child td {
+  border-bottom: none;
+}
+
+.trl-seo-specs-table code {
+  background: rgba(150, 150, 150, 0.12);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-family: ui-monospace, monospace;
+}
+
+:root[data-theme="light"] .trl-seo-specs-table code,
+.light .trl-seo-specs-table code {
+  background: #f1f5f9;
+  color: #4338ca;
+}
+
+/* Semantic Search Keywords Cloud */
+.trl-seo-keywords-block {
+  margin-bottom: 3.5rem;
+  padding: 1.5rem;
+  background: rgba(99, 102, 241, 0.04);
+  border: 1px dashed rgba(99, 102, 241, 0.25);
+  border-radius: 14px;
+}
+
+:root[data-theme="light"] .trl-seo-keywords-block,
+.light .trl-seo-keywords-block {
+  background: #f8faff;
+  border-color: #c7d2fe;
+}
+
+.trl-seo-keywords-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #818cf8;
+  margin-bottom: 1rem;
+}
+
+:root[data-theme="light"] .trl-seo-keywords-title,
+.light .trl-seo-keywords-title {
+  color: #4f46e5;
+}
+
+.trl-seo-pills-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.trl-keyword-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  background: var(--card-bg, rgba(15, 23, 42, 0.6));
+  border: 1px solid var(--card-border, rgba(255, 255, 255, 0.08));
+  color: var(--text-main, #f8fafc);
+  transition: all 0.2s ease;
+}
+
+:root[data-theme="light"] .trl-keyword-tag,
+.light .trl-keyword-tag {
+  background: #ffffff;
+  border-color: #e2e8f0;
+  color: #334155;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.trl-keyword-tag:hover {
+  border-color: #818cf8;
+  transform: translateY(-1px);
+}
+
+.trl-tag-check {
+  color: #10b981;
+}
+
+/* FAQ Accordion */
+.trl-faq-section {
+  margin-bottom: 3.5rem;
+}
+
+.trl-faq-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  color: var(--text-main, #f8fafc);
+}
+
+:root[data-theme="light"] .trl-faq-title,
+.light .trl-faq-title {
+  color: #0f172a;
+}
+
+.trl-faq-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.trl-faq-item {
+  border: 1px solid var(--card-border, rgba(255, 255, 255, 0.08));
+  border-radius: 0.85rem;
+  background: var(--card-bg, rgba(15, 23, 42, 0.4));
+  overflow: hidden;
+  transition: all 0.2s ease;
+}
+
+:root[data-theme="light"] .trl-faq-item,
+.light .trl-faq-item {
+  background: #f8fafc;
+  border-color: #e2e8f0;
+}
+
+.trl-faq-question {
+  width: 100%;
+  padding: 1rem 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: transparent;
+  border: none;
+  color: var(--text-main, #f8fafc);
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: left;
+  gap: 1rem;
+}
+
+:root[data-theme="light"] .trl-faq-question,
+.light .trl-faq-question {
+  color: #0f172a;
+}
+
+.trl-faq-icon {
+  transition: transform 0.2s ease;
+  flex-shrink: 0;
+  color: var(--text-muted, #94a3b8);
+}
+
+.trl-faq-icon.open {
+  transform: rotate(180deg);
+  color: #818cf8;
+}
+
+.trl-faq-answer {
+  padding: 0 1.25rem 1.25rem 1.25rem;
+  font-size: 0.88rem;
+  color: var(--text-muted, #94a3b8);
+  line-height: 1.6;
+}
+
+/* Related Tools Grid */
+.trl-related-section {
+  margin-top: 3rem;
+}
+
+.trl-related-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-bottom: 1.25rem;
+  color: var(--text-main, #f8fafc);
+}
+
+:root[data-theme="light"] .trl-related-title,
+.light .trl-related-title {
+  color: #0f172a;
+}
+
+.trl-related-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 1rem;
+}
+
+.trl-related-card {
+  padding: 1.15rem;
+  border-radius: 0.85rem;
+  background: var(--card-bg, rgba(15, 23, 42, 0.4));
+  border: 1px solid var(--card-border, rgba(255, 255, 255, 0.08));
+  text-decoration: none;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.trl-related-card:hover {
+  border-color: rgba(99, 102, 241, 0.4);
+  background: rgba(99, 102, 241, 0.05);
+  transform: translateY(-2px);
+}
+
+:root[data-theme="light"] .trl-related-card,
+.light .trl-related-card {
+  background: #ffffff;
+  border-color: #e2e8f0;
+}
+
+.trl-related-name {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-main, #f8fafc);
+  margin-bottom: 0.35rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+:root[data-theme="light"] .trl-related-name,
+.light .trl-related-name {
+  color: #0f172a;
+}
+
+.trl-related-desc {
+  font-size: 0.8rem;
+  color: var(--text-muted, #94a3b8);
+  line-height: 1.45;
+  margin: 0;
+}

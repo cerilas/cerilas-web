@@ -911,6 +911,26 @@ app.listen(PORT, async () => {
         short_description = EXCLUDED.short_description,
         seo_title = EXCLUDED.seo_title, 
         seo_description = EXCLUDED.seo_description;
+
+      INSERT INTO cerilas_tools (
+        title, slug, short_description, icon_name, target_url, seo_title, seo_description, category, sort_order, is_active
+      ) VALUES (
+        'TRL Calculator (Technology Readiness Level)',
+        'trl-calculator',
+        'Interactive TRL Calculator for R&D projects and researchers. Assess Technology Readiness Level (TRL 1-9) across Horizon Europe, NASA, DeepTech SRL, and TÜBİTAK with gap analysis and grant matching.',
+        'Gauge',
+        '#/tool/trl-calculator',
+        'Free TRL Calculator (1-9) – Technology Readiness Level Assessment for R&D & Grants | Cerilas Tools',
+        'Calculate your R&D project Technology Readiness Level (TRL 1 to 9) accurately. Interactive diagnostic questionnaire for Horizon Europe, NASA ISO 16290, Software SRL, and TÜBİTAK Ar-Ge programs with grant eligibility and gap analysis roadmap.',
+        'R&D & Engineering',
+        16,
+        true
+      ) ON CONFLICT (slug) DO UPDATE SET 
+        title = EXCLUDED.title,
+        short_description = EXCLUDED.short_description,
+        seo_title = EXCLUDED.seo_title, 
+        seo_description = EXCLUDED.seo_description,
+        category = EXCLUDED.category;
     `);
 
     console.log('Database tables & migrations verified successfully.');

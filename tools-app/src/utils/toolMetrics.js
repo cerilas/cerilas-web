@@ -437,6 +437,28 @@ export const TOOL_CONVERSION_METRICS = {
     getConversionCount: (tool) => tool?.use_count || 0,
     en: { action: 'counted', badge: 'texts audited', singular: 'text audited', short: 'audits' },
     tr: { action: 'sayıldı', badge: 'metin incelendi', singular: 'metin incelendi', short: 'analiz' }
+  },
+  'trl-calculator': {
+    actionKey: 'assessed',
+    getConversionCount: (tool) => {
+      if (!tool) return 0;
+      const copies = tool.copy_count || 0;
+      const downloads = tool.download_count || 0;
+      const uses = tool.use_count || 0;
+      return (copies + downloads) > 0 ? (copies + downloads) : uses;
+    },
+    en: {
+      action: 'assessed',
+      badge: 'evaluations completed',
+      singular: 'evaluation completed',
+      short: 'assessments'
+    },
+    tr: {
+      action: 'değerlendirildi',
+      badge: 'TRL analizi yapıldı',
+      singular: 'TRL analizi yapıldı',
+      short: 'analiz'
+    }
   }
 };
 
