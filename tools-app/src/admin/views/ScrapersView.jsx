@@ -55,6 +55,23 @@ export default function ScrapersView() {
 
   // Detail Modal state
   const [activeOpportunity, setActiveOpportunity] = useState(null);
+  const [loadingDetail, setLoadingDetail] = useState(false);
+
+  const handleOpenDetail = async (opp) => {
+    setActiveOpportunity(opp);
+    setLoadingDetail(true);
+    try {
+      const res = await fetch(`/api/scrapers/opportunities/${opp.id}`);
+      const json = await res.json();
+      if (json.status === 'success' && json.data) {
+        setActiveOpportunity(json.data);
+      }
+    } catch (err) {
+      console.error('Failed to load opportunity full detail:', err);
+    } finally {
+      setLoadingDetail(false);
+    }
+  };
 
   // Ref to scroll to top of list when page changes
   const listTopRef = useRef(null);
@@ -630,7 +647,7 @@ export default function ScrapersView() {
               </thead>
               <tbody>
                 {opportunities.map((opp) => (
-                  <tr key={opp.id} onClick={() => setActiveOpportunity(opp)} style={{ cursor: 'pointer' }}>
+                  <tr key={opp.id} onClick={() => handleOpenDetail(opp)} style={{ cursor: 'pointer' }}>
                     <td>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
                         {opp.cover_image ? (
@@ -722,7 +739,7 @@ export default function ScrapersView() {
                         className="admin-action-btn secondary"
                         onClick={(e) => {
                           e.stopPropagation();
-                          setActiveOpportunity(opp);
+                          handleOpenDetail(opp);
                         }}
                       >
                         <Eye size={13} />
@@ -748,7 +765,7 @@ export default function ScrapersView() {
                 gap: '0.85rem',
                 cursor: 'pointer'
               }}
-              onClick={() => setActiveOpportunity(opp)}
+              onClick={() => handleOpenDetail(opp)}
             >
               <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '0.75rem' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
@@ -1123,6 +1140,13 @@ export default function ScrapersView() {
               </div>
 
               {/* Uzun Açıklama (HTML Detaylar) */}
+              {loadingDetail && !activeOpportunity.long_description && (
+                <div style={{ padding: '1.25rem', textAlign: 'center', color: 'var(--text-muted)', background: 'rgba(150, 150, 150, 0.04)', borderRadius: 12, border: '1px dashed var(--card-border)' }}>
+                  <RefreshCw size={18} className="spin" style={{ marginBottom: '0.4rem', display: 'inline-block' }} />
+                  <div style={{ fontSize: '0.84rem' }}>Detaylı çağrı kapsamı ve başvuru koşulları yükleniyor...</div>
+                </div>
+              )}
+
               {activeOpportunity.long_description && (
                 <div>
                   <h4 style={{ fontSize: '0.84rem', fontWeight: 700, margin: '0 0 0.35rem', color: 'var(--text-main)' }}>
