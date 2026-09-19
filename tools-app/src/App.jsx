@@ -455,6 +455,15 @@ export default function App() {
       const oldBc = document.getElementById('qr-breadcrumbs-jsonld');
       if (oldBc) oldBc.remove();
     }
+
+    // Google Analytics (GA4) Page View tracking for SPA route transitions
+    if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
+      window.gtag('event', 'page_view', {
+        page_title: document.title,
+        page_location: window.location.href,
+        page_path: window.location.pathname + window.location.hash
+      });
+    }
   }, [currentSlug]);
 
   // Fetch active tools from database
