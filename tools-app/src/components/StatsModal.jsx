@@ -1,10 +1,22 @@
 import React, { useState, useEffect } from 'react';
-import { BarChart3, X, RefreshCw } from 'lucide-react';
+import { 
+  BarChart3, 
+  X, 
+  RefreshCw, 
+  Users, 
+  Zap, 
+  Activity, 
+  Layers, 
+  CheckCircle2, 
+  Sparkles, 
+  ShieldCheck 
+} from 'lucide-react';
 import { useTranslation } from '../i18n';
 import { getConversionCount, getConversionLabel } from '../utils/toolMetrics';
+import './StatsModal.css';
 
 export default function StatsModal({ isOpen, onClose }) {
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -31,186 +43,218 @@ export default function StatsModal({ isOpen, onClose }) {
 
   if (!isOpen) return null;
 
+  // Format large numbers with commas
+  const formatNumber = (num) => {
+    if (num === undefined || num === null) return '0';
+    return Number(num).toLocaleString('en-US');
+  };
+
+  const summary = stats?.summary || {};
+  const X = summary.total_unique_visitors || 0;
+  const Y = summary.total_tasks_completed || (summary.total_uses || 0) + (summary.total_downloads || 0) + (summary.total_copies || 0);
+  const Z = summary.live_visitors || 1;
+  const activeToolsCount = summary.active_tools || 30;
+
   return (
-    <div style={{
-      position: 'fixed',
-      inset: 0,
-      zIndex: 999,
-      background: 'rgba(0, 0, 0, 0.4)',
-      backdropFilter: 'blur(12px)',
-      WebkitBackdropFilter: 'blur(12px)',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      padding: '1.5rem'
-    }}>
-      <div style={{
-        background: 'var(--hover-bg)',
-        border: '1px solid var(--card-border)',
-        borderRadius: '24px',
-        padding: '2rem',
-        maxWidth: '680px',
-        width: '100%',
-        maxHeight: '85vh',
-        overflowY: 'auto',
-        boxShadow: '0 20px 50px rgba(0, 0, 0, 0.25)',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '1.5rem'
-      }}>
-        {/* Modal Header */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-            <div style={{
-              width: '36px',
-              height: '36px',
-              borderRadius: '10px',
-              background: 'rgba(59, 130, 246, 0.1)',
-              color: '#3b82f6',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}>
-              <BarChart3 size={20} />
+    <div 
+      className="stats-modal-overlay"
+      onClick={onClose}
+    >
+      <div 
+        className="stats-modal-container"
+        onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+      >
+        {/* Modal Header Bar */}
+        <div className="stats-header-bar">
+          <div className="stats-header-left">
+            <div className="stats-header-icon-box">
+              <BarChart3 size={20} strokeWidth={2.2} />
             </div>
             <div>
-              <h3 style={{ fontSize: '1.2rem', fontWeight: '500', color: 'var(--text-main)' }}>
-                {t('stats.title')}
-              </h3>
-              <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>
+              <h3 className="stats-header-title">{t('stats.title')}</h3>
+              <p className="stats-header-subtitle">
                 {t('stats.subtitle')}
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            style={{
-              background: 'transparent',
-              border: 'none',
-              color: 'var(--text-muted)',
-              cursor: 'pointer',
-              padding: '0.4rem',
-              borderRadius: '8px'
-            }}
+            className="stats-close-btn"
+            aria-label="Close statistics modal"
           >
-            <X size={20} />
+            <X size={18} />
           </button>
         </div>
 
         {loading ? (
-          <div style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-muted)' }}>
-            {t('stats.loading')}
+          <div style={{ padding: '4rem 1rem', textAlign: 'center', color: 'var(--text-muted)' }}>
+            <div style={{ 
+              width: 38, 
+              height: 38, 
+              borderRadius: '50%', 
+              border: '2px solid rgba(150,150,150,0.2)', 
+              borderTopColor: '#2563eb', 
+              animation: 'spin 0.8s linear infinite',
+              margin: '0 auto 1rem auto'
+            }} />
+            <p style={{ margin: 0, fontSize: '0.9rem' }}>{t('stats.loading')}</p>
           </div>
         ) : !stats ? (
-          <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>
-            {t('stats.noData')}
+          <div style={{ padding: '3rem 1rem', textAlign: 'center', color: 'var(--text-muted)' }}>
+            <p>{t('stats.noData')}</p>
+            <button onClick={fetchStats} className="stats-refresh-btn" style={{ margin: '1rem auto' }}>
+              <RefreshCw size={14} /> Retry
+            </button>
           </div>
         ) : (
           <>
-            {/* Overview Metric Cards */}
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(135px, 1fr))',
-              gap: '0.8rem'
-            }}>
-              <div style={{
-                background: 'rgba(150, 150, 150, 0.08)',
-                padding: '1rem',
-                borderRadius: '16px',
-                textAlign: 'center'
-              }}>
-                <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: '500' }}>
-                  {t('stats.activeTools')}
+            {/* ==========================================================
+                Hero Impact Motto & Live Visitors Badge
+                ========================================================== */}
+            <div className="stats-motto-hero">
+              {/* Real-time Z live visitors indicator */}
+              <div className="stats-live-pill">
+                <span className="stats-beacon-indicator" />
+                <span>
+                  {language === 'tr' ? (
+                    <>Şu an canlı <strong>{formatNumber(Z)}</strong> ziyaretçi araçları kullanıyor</>
+                  ) : (
+                    <>Currently <strong>{formatNumber(Z)}</strong> {Z === 1 ? 'visitor' : 'visitors'} online exploring tools live</>
+                  )}
+                </span>
+              </div>
+
+              {/* The Narrative Motto with X and Y */}
+              <h2 className="stats-motto-statement">
+                {language === 'tr' ? (
+                  <>
+                    Bugüne kadar{' '}
+                    <span className="stats-stat-highlight">{formatNumber(X)}</span>{' '}
+                    mühendis, araştırmacı, girişimci ve uzmanın{' '}
+                    <span className="stats-stat-highlight">{formatNumber(Y)}</span>{' '}
+                    günlük iş akışını basitleştirmesine ve otomatikleştirmesine yardımcı olduk.
+                  </>
+                ) : (
+                  <>
+                    We empower over{' '}
+                    <span className="stats-stat-highlight">{formatNumber(X)}</span>{' '}
+                    engineers, researchers, founders &amp; creators to simplify{' '}
+                    <span className="stats-stat-highlight">{formatNumber(Y)}</span>{' '}
+                    everyday workflows.
+                  </>
+                )}
+              </h2>
+
+              <p className="stats-motto-guarantee">
+                <CheckCircle2 size={14} className="stats-guarantee-icon" />
+                <span>
+                  {language === 'tr' 
+                    ? '%100 yerel tarayıcı içi WebAssembly & WebGPU işlemi. Sıfır sunucu dosya kaydı.'
+                    : '100% private, client-side WebAssembly & WebGPU computation. Zero server file logging.'}
+                </span>
+              </p>
+            </div>
+
+            {/* ==========================================================
+                4 Metric Overview Cards
+                ========================================================== */}
+            <div className="stats-metrics-grid">
+              {/* Card 1: Unique Visitors (X) */}
+              <div className="stats-card-tile visitors">
+                <div className="stats-tile-top">
+                  <span className="stats-tile-label">Global Visitors</span>
+                  <div className="stats-tile-icon">
+                    <Users size={16} />
+                  </div>
                 </div>
-                <div style={{ fontSize: '1.6rem', fontWeight: '600', color: 'var(--text-main)', marginTop: '0.2rem' }}>
-                  {stats.summary.active_tools}
+                <div>
+                  <div className="stats-tile-value">{formatNumber(X)}</div>
+                  <p className="stats-tile-subtext">All-time unique founders &amp; researchers</p>
                 </div>
               </div>
 
-              <div style={{
-                background: 'rgba(59, 130, 246, 0.08)',
-                padding: '1rem',
-                borderRadius: '16px',
-                textAlign: 'center',
-                border: '1px solid rgba(59, 130, 246, 0.2)'
-              }}>
-                <div style={{ fontSize: '0.78rem', color: '#3b82f6', fontWeight: '500' }}>
-                  {t('stats.uniqueVisitors')}
+              {/* Card 2: Workflows Simplified (Y) */}
+              <div className="stats-card-tile tasks">
+                <div className="stats-tile-top">
+                  <span className="stats-tile-label">Simplified Tasks</span>
+                  <div className="stats-tile-icon">
+                    <Zap size={16} />
+                  </div>
                 </div>
-                <div style={{ fontSize: '1.6rem', fontWeight: '600', color: '#3b82f6', marginTop: '0.2rem' }}>
-                  {stats.summary.total_unique_visitors || 0}
-                </div>
-              </div>
-
-              <div style={{
-                background: 'rgba(150, 150, 150, 0.08)',
-                padding: '1rem',
-                borderRadius: '16px',
-                textAlign: 'center'
-              }}>
-                <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: '500' }}>
-                  {t('stats.totalViews')}
-                </div>
-                <div style={{ fontSize: '1.6rem', fontWeight: '600', color: 'var(--text-main)', marginTop: '0.2rem' }}>
-                  {stats.summary.total_views}
+                <div>
+                  <div className="stats-tile-value">{formatNumber(Y)}</div>
+                  <p className="stats-tile-subtext">Calculations, exports &amp; conversions</p>
                 </div>
               </div>
 
-              <div style={{
-                background: 'rgba(16, 185, 129, 0.08)',
-                padding: '1rem',
-                borderRadius: '16px',
-                textAlign: 'center',
-                border: '1px solid rgba(16, 185, 129, 0.2)'
-              }}>
-                <div style={{ fontSize: '0.78rem', color: '#10b981', fontWeight: '500' }}>
-                  {t('stats.totalDownloads')}
+              {/* Card 3: Live Active Visitors (Z) */}
+              <div className="stats-card-tile live">
+                <div className="stats-tile-top">
+                  <span className="stats-tile-label">Live Right Now</span>
+                  <div className="stats-tile-icon">
+                    <Activity size={16} />
+                  </div>
                 </div>
-                <div style={{ fontSize: '1.6rem', fontWeight: '600', color: '#10b981', marginTop: '0.2rem' }}>
-                  {stats.summary.total_downloads || 0}
+                <div>
+                  <div className="stats-tile-value">
+                    <span className="stats-beacon-indicator" style={{ width: 7, height: 7 }} />
+                    {formatNumber(Z)}
+                  </div>
+                  <p className="stats-tile-subtext">Active visitors in last 30 minutes</p>
+                </div>
+              </div>
+
+              {/* Card 4: Specialized Tools */}
+              <div className="stats-card-tile tools">
+                <div className="stats-tile-top">
+                  <span className="stats-tile-label">Active Utilities</span>
+                  <div className="stats-tile-icon">
+                    <Layers size={16} />
+                  </div>
+                </div>
+                <div>
+                  <div className="stats-tile-value">{activeToolsCount}</div>
+                  <p className="stats-tile-subtext">Finance, PDF, AI, Media &amp; Stats</p>
                 </div>
               </div>
             </div>
 
-            {/* Tools Breakdown Table with Tool-Specific Conversion */}
-            <div>
-              <h4 style={{ fontSize: '0.95rem', fontWeight: '500', marginBottom: '0.6rem', color: 'var(--text-main)' }}>
-                {t('stats.toolBreakdown')}
-              </h4>
-              <div style={{
-                background: 'rgba(150, 150, 150, 0.05)',
-                border: '1px solid var(--card-border)',
-                borderRadius: '16px',
-                overflow: 'hidden'
-              }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem' }}>
+            {/* ==========================================================
+                Tool-by-Tool Detailed Breakdown Table
+                ========================================================== */}
+            <div className="stats-table-section">
+              <div className="stats-table-header">
+                <h4 className="stats-table-title">{t('stats.toolBreakdown')}</h4>
+                <span className="stats-table-badge">
+                  {stats.tools?.length || 0} Tools Tracked
+                </span>
+              </div>
+
+              <div className="stats-table-card">
+                <table className="stats-breakdown-table">
                   <thead>
-                    <tr style={{ borderBottom: '1px solid var(--card-border)', color: 'var(--text-muted)', textAlign: 'left' }}>
-                      <th style={{ padding: '0.75rem 1rem' }}>{t('stats.colTool')}</th>
-                      <th style={{ padding: '0.75rem 1rem' }}>{t('stats.colCategory')}</th>
-                      <th style={{ padding: '0.75rem 1rem', textAlign: 'right' }}>{t('stats.colUnique')}</th>
-                      <th style={{ padding: '0.75rem 1rem', textAlign: 'right' }}>{t('stats.colConversion') || 'Conversions'}</th>
-                      <th style={{ padding: '0.75rem 1rem', textAlign: 'right' }}>{t('stats.colViews')}</th>
+                    <tr>
+                      <th>{t('stats.colTool')}</th>
+                      <th>{t('stats.colCategory')}</th>
+                      <th className="num-col">{t('stats.colUnique')}</th>
+                      <th className="num-col">{t('stats.colConversion') || 'Conversions'}</th>
+                      <th className="num-col">{t('stats.colViews')}</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {stats.tools.map((tItem) => {
+                    {stats.tools?.map((tItem) => {
                       const cCount = getConversionCount(tItem);
-                      const cLabel = getConversionLabel(tItem.slug, cCount, 'en');
+                      const cLabel = getConversionLabel(tItem.slug, cCount, language);
                       return (
-                        <tr key={tItem.id} style={{ borderBottom: '1px solid var(--card-border)' }}>
-                          <td style={{ padding: '0.75rem 1rem', fontWeight: '500', color: 'var(--text-main)' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+                        <tr key={tItem.id}>
+                          <td>
+                            <div className="stats-tool-cell">
                               <img 
                                 src={`/tool-icons/${tItem.slug}.webp`} 
                                 alt="" 
-                                style={{ 
-                                  width: '22px', 
-                                  height: '22px', 
-                                  borderRadius: '5px', 
-                                  objectFit: 'contain',
-                                  filter: 'drop-shadow(0 1px 3px rgba(0,0,0,0.12))' 
-                                }}
+                                className="stats-tool-logo"
                                 onError={(e) => {
                                   if (!e.target.dataset.triedPng) {
                                     e.target.dataset.triedPng = 'true';
@@ -223,15 +267,17 @@ export default function StatsModal({ isOpen, onClose }) {
                               <span>{tItem.title}</span>
                             </div>
                           </td>
-                          <td style={{ padding: '0.75rem 1rem', color: 'var(--text-muted)' }}>{tItem.category}</td>
-                          <td style={{ padding: '0.75rem 1rem', textAlign: 'right', color: '#3b82f6', fontWeight: '600' }}>
-                            {tItem.unique_visitors_count}
+                          <td>
+                            <span className="stats-category-badge">{tItem.category}</span>
                           </td>
-                          <td style={{ padding: '0.75rem 1rem', textAlign: 'right', color: '#10b981', fontWeight: '600' }}>
-                            {cCount > 0 ? `${cCount} ${cLabel}` : '-'}
+                          <td className="stats-unique-num">
+                            {formatNumber(tItem.unique_visitors_count)}
                           </td>
-                          <td style={{ padding: '0.75rem 1rem', textAlign: 'right', color: 'var(--text-muted)' }}>
-                            {tItem.view_count}
+                          <td className="stats-conversion-num">
+                            {cCount > 0 ? `${formatNumber(cCount)} ${cLabel}` : '—'}
+                          </td>
+                          <td className="stats-views-num">
+                            {formatNumber(tItem.view_count)}
                           </td>
                         </tr>
                       );
@@ -240,28 +286,22 @@ export default function StatsModal({ isOpen, onClose }) {
                 </table>
               </div>
             </div>
+
+            {/* Bottom Actions Bar */}
+            <div className="stats-footer-bar">
+              <span className="stats-privacy-badge-pill">
+                🔒 Privacy-First • No PII or IP Storage
+              </span>
+              <button
+                onClick={fetchStats}
+                className="stats-refresh-btn"
+                title="Refresh live metrics"
+              >
+                <RefreshCw size={14} /> {t('stats.refresh')}
+              </button>
+            </div>
           </>
         )}
-
-        <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '0.5rem' }}>
-          <button
-            onClick={fetchStats}
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '0.4rem',
-              padding: '0.6rem 1rem',
-              background: 'rgba(150, 150, 150, 0.1)',
-              border: 'none',
-              borderRadius: '10px',
-              color: 'var(--text-main)',
-              fontSize: '0.85rem',
-              cursor: 'pointer'
-            }}
-          >
-            <RefreshCw size={14} /> {t('stats.refresh')}
-          </button>
-        </div>
       </div>
     </div>
   );

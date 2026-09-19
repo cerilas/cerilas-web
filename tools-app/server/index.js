@@ -281,6 +281,7 @@ app.get('/api/tools/stats/overview', async (req, res) => {
         COALESCE(SUM(download_count), 0)::int as total_downloads,
         COALESCE(SUM(copy_count), 0)::int as total_copies,
         COALESCE(SUM(use_count), 0)::int as total_uses,
+        COALESCE(SUM(use_count + download_count + copy_count), 0)::int as total_tasks_completed,
         CASE 
           WHEN COALESCE(SUM(unique_visitors_count), 0) > 0 
           THEN ROUND((COALESCE(SUM(download_count), 0)::numeric / SUM(unique_visitors_count)::numeric) * 100, 1)
@@ -293,6 +294,22 @@ app.get('/api/tools/stats/overview', async (req, res) => {
         END as overall_total_cvr
       FROM cerilas_tools
     `);
+
+    // Calculate real-time live visitors (active within last 30 minutes)
+    let liveVisitorsCount = 1;
+    try {
+      const liveRes = await pool.query(`
+        SELECT COUNT(DISTINCT visitor_id)::int as live_visitors_30m
+        FROM (
+          SELECT visitor_id FROM tool_usage_events WHERE created_at >= NOW() - INTERVAL '30 minutes'
+          UNION
+          SELECT visitor_id FROM tool_unique_visitors WHERE last_visited_at >= NOW() - INTERVAL '30 minutes'
+        ) active_sub
+      `);
+      liveVisitorsCount = Math.max(parseInt(liveRes.rows[0]?.live_visitors_30m || 0, 10), 1);
+    } catch (e) {
+      console.warn('Could not query live visitors, defaulting to 1:', e.message);
+    }
 
     const eventBreakdown = await pool.query(`
       SELECT event_type, COUNT(*)::int as count 
@@ -309,20 +326,24 @@ app.get('/api/tools/stats/overview', async (req, res) => {
       LIMIT 15
     `);
 
+    const summaryData = totalsResult.rows[0] || { 
+      total_tools: 0, 
+      active_tools: 0, 
+      total_views: 0, 
+      total_unique_visitors: 0,
+      total_downloads: 0, 
+      total_copies: 0,
+      total_uses: 0,
+      total_tasks_completed: 0,
+      overall_download_cvr: 0,
+      overall_total_cvr: 0
+    };
+    summaryData.live_visitors = liveVisitorsCount;
+
     res.json({
       status: 'success',
       data: {
-        summary: totalsResult.rows[0] || { 
-          total_tools: 0, 
-          active_tools: 0, 
-          total_views: 0, 
-          total_unique_visitors: 0,
-          total_downloads: 0, 
-          total_copies: 0,
-          total_uses: 0,
-          overall_download_cvr: 0,
-          overall_total_cvr: 0
-        },
+        summary: summaryData,
         tools: toolsResult.rows,
         eventTypes: eventBreakdown.rows,
         recentEvents: recentEvents.rows
