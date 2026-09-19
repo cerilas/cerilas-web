@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
   BarChart3, 
-  X, 
+  X as CloseIcon, 
   RefreshCw, 
   Users, 
   Zap, 
@@ -50,9 +50,9 @@ export default function StatsModal({ isOpen, onClose }) {
   };
 
   const summary = stats?.summary || {};
-  const X = summary.total_unique_visitors || 0;
-  const Y = summary.total_tasks_completed || (summary.total_uses || 0) + (summary.total_downloads || 0) + (summary.total_copies || 0);
-  const Z = summary.live_visitors || 1;
+  const totalVisitorsX = summary.total_unique_visitors || 0;
+  const totalWorkflowsY = summary.total_tasks_completed || (summary.total_uses || 0) + (summary.total_downloads || 0) + (summary.total_copies || 0);
+  const liveVisitorsZ = summary.live_visitors || 1;
   const activeToolsCount = summary.active_tools || 30;
 
   return (
@@ -84,7 +84,7 @@ export default function StatsModal({ isOpen, onClose }) {
             className="stats-close-btn"
             aria-label="Close statistics modal"
           >
-            <X size={18} />
+            <CloseIcon size={18} />
           </button>
         </div>
 
@@ -119,9 +119,9 @@ export default function StatsModal({ isOpen, onClose }) {
                 <span className="stats-beacon-indicator" />
                 <span>
                   {language === 'tr' ? (
-                    <>Şu an canlı <strong>{formatNumber(Z)}</strong> ziyaretçi araçları kullanıyor</>
+                    <>Şu an canlı <strong>{formatNumber(liveVisitorsZ)}</strong> ziyaretçi araçları kullanıyor</>
                   ) : (
-                    <>Currently <strong>{formatNumber(Z)}</strong> {Z === 1 ? 'visitor' : 'visitors'} online exploring tools live</>
+                    <>Currently <strong>{formatNumber(liveVisitorsZ)}</strong> {liveVisitorsZ === 1 ? 'visitor' : 'visitors'} online exploring tools live</>
                   )}
                 </span>
               </div>
@@ -131,17 +131,17 @@ export default function StatsModal({ isOpen, onClose }) {
                 {language === 'tr' ? (
                   <>
                     Bugüne kadar{' '}
-                    <span className="stats-stat-highlight">{formatNumber(X)}</span>{' '}
+                    <span className="stats-stat-highlight">{formatNumber(totalVisitorsX)}</span>{' '}
                     mühendis, araştırmacı, girişimci ve uzmanın{' '}
-                    <span className="stats-stat-highlight">{formatNumber(Y)}</span>{' '}
+                    <span className="stats-stat-highlight">{formatNumber(totalWorkflowsY)}</span>{' '}
                     günlük iş akışını basitleştirmesine ve otomatikleştirmesine yardımcı olduk.
                   </>
                 ) : (
                   <>
                     We empower over{' '}
-                    <span className="stats-stat-highlight">{formatNumber(X)}</span>{' '}
+                    <span className="stats-stat-highlight">{formatNumber(totalVisitorsX)}</span>{' '}
                     engineers, researchers, founders &amp; creators to simplify{' '}
-                    <span className="stats-stat-highlight">{formatNumber(Y)}</span>{' '}
+                    <span className="stats-stat-highlight">{formatNumber(totalWorkflowsY)}</span>{' '}
                     everyday workflows.
                   </>
                 )}
@@ -170,7 +170,7 @@ export default function StatsModal({ isOpen, onClose }) {
                   </div>
                 </div>
                 <div>
-                  <div className="stats-tile-value">{formatNumber(X)}</div>
+                  <div className="stats-tile-value">{formatNumber(totalVisitorsX)}</div>
                   <p className="stats-tile-subtext">All-time unique founders &amp; researchers</p>
                 </div>
               </div>
@@ -184,7 +184,7 @@ export default function StatsModal({ isOpen, onClose }) {
                   </div>
                 </div>
                 <div>
-                  <div className="stats-tile-value">{formatNumber(Y)}</div>
+                  <div className="stats-tile-value">{formatNumber(totalWorkflowsY)}</div>
                   <p className="stats-tile-subtext">Calculations, exports &amp; conversions</p>
                 </div>
               </div>
@@ -200,7 +200,7 @@ export default function StatsModal({ isOpen, onClose }) {
                 <div>
                   <div className="stats-tile-value">
                     <span className="stats-beacon-indicator" style={{ width: 7, height: 7 }} />
-                    {formatNumber(Z)}
+                    {formatNumber(liveVisitorsZ)}
                   </div>
                   <p className="stats-tile-subtext">Active visitors in last 30 minutes</p>
                 </div>
