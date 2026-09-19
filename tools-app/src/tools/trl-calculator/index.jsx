@@ -37,11 +37,11 @@ import './trl-calculator.css';
 
 // 5 Chronological R&D Phases grouping for questionnaire
 const PHASES = [
-  { id: 'phase-1', name: 'Aşama 1: Temel Bilimsel İlkeler', en: 'Phase 1: Basic Principles & Concept', trlRange: 'TRL 1 – 2' },
-  { id: 'phase-2', name: 'Aşama 2: Laboratuvar Doğrulama & PoC', en: 'Phase 2: Laboratory Validation & Breadboards', trlRange: 'TRL 3 – 4' },
-  { id: 'phase-3', name: 'Aşama 3: İlgili Ortamda Test & Prototip', en: 'Phase 3: Relevant Environment Testing', trlRange: 'TRL 5 – 6' },
-  { id: 'phase-4', name: 'Aşama 4: Operasyonel Ortamda Kalifikasyon', en: 'Phase 4: Operational Field Qualification', trlRange: 'TRL 7 – 8' },
-  { id: 'phase-5', name: 'Aşama 5: Ticari ve Görev Kanıtlı Dağıtım', en: 'Phase 5: Mission Proven & Commercial Scale', trlRange: 'TRL 9' }
+  { id: 'phase-1', name: 'Phase 1: Basic Principles & Concept Formulation', trlRange: 'TRL 1 – 2' },
+  { id: 'phase-2', name: 'Phase 2: Laboratory Validation & Breadboards', trlRange: 'TRL 3 – 4' },
+  { id: 'phase-3', name: 'Phase 3: Relevant Environment Testing & Prototype', trlRange: 'TRL 5 – 6' },
+  { id: 'phase-4', name: 'Phase 4: Operational Field Pilot & System Qualification', trlRange: 'TRL 7 – 8' },
+  { id: 'phase-5', name: 'Phase 5: Mission Proven & Commercial Scale', trlRange: 'TRL 9' }
 ];
 
 export default function TrlCalculator({ onBack, toolMeta }) {
@@ -54,7 +54,7 @@ export default function TrlCalculator({ onBack, toolMeta }) {
     getConversionLabel
   } = useToolAnalytics(trlCalculatorManifest.slug, toolMeta);
 
-  const [projectName, setProjectName] = useState('Ar-Ge Projem');
+  const [projectName, setProjectName] = useState('DeepTech R&D Project');
   const [selectedFramework, setSelectedFramework] = useState('horizon-europe');
   const [viewMode, setViewMode] = useState('questionnaire'); // 'questionnaire' | 'matrix' | 'roadmap' | 'grants'
   const [copied, setCopied] = useState(false);
@@ -100,7 +100,7 @@ export default function TrlCalculator({ onBack, toolMeta }) {
 
   const handleReset = () => {
     setAnswers({});
-    setProjectName('Ar-Ge Projem');
+    setProjectName('DeepTech R&D Project');
     trackUse?.({ action: 'reset' });
   };
 
@@ -116,29 +116,29 @@ export default function TrlCalculator({ onBack, toolMeta }) {
 
   // Copy Executive Markdown Summary
   const handleCopyReport = () => {
-    const report = `# Teknoloji Hazırlık Seviyesi (TRL) Değerlendirme Raporu
-**Proje Adı:** ${projectName}
-**Standart Çerçeve:** ${assessment.activeFramework.name} (${assessment.activeFramework.badge})
-**Değerlendirme Tarihi:** ${new Date().toLocaleDateString('tr-TR')}
-**Cevaplanan Teşhis Sorusu:** ${answeredCount} / ${totalQuestions} (%${answeredPercent})
+    const report = `# Technology Readiness Level (TRL) Assessment Report
+**Project Name:** ${projectName}
+**Standard Framework:** ${assessment.activeFramework.name} (${assessment.activeFramework.badge})
+**Assessment Date:** ${new Date().toLocaleDateString('en-US')}
+**Criteria Audited:** ${answeredCount} / ${totalQuestions} (${answeredPercent}%)
 
-## Yönetici Özeti
-- **Kesin Doğrulanmış TRL Seviyesi:** TRL ${answeredCount === 0 ? '0 (Değerlendirme Yapılmadı)' : assessment.strictTrl} (${currentLevelData.title})
-- **Genel Teknolojik Olgunluk Skoru:** %${assessment.overallReadiness}
-- **Sonraki Hedefe (TRL ${assessment.nextLevel}) İlerleme:** %${assessment.nextLevelProgress}
-- **Mevcut Aşama:** ${currentLevelData.phase}
+## Executive Summary
+- **Strict Validated TRL Level:** TRL ${answeredCount === 0 ? '0 (Pending Evaluation)' : assessment.strictTrl} (${currentLevelData.title})
+- **Overall Technological Maturity Score:** ${assessment.overallReadiness}%
+- **Next Milestone Progress (TRL ${assessment.nextLevel}):** ${assessment.nextLevelProgress}%
+- **Maturity Phase:** ${currentLevelData.phase}
 
-## Tamamlanan Temel Çıktılar
+## Key Deliverables Completed
 ${currentLevelData.deliverables.map((d) => `- [x] ${d}`).join('\n')}
 
-## TRL ${assessment.nextLevel} Seviyesine Geçiş İçin Kritik Eksiklikler (${assessment.gaps.length} Madde)
-${assessment.gaps.length === 0 ? '- Kritik bir eksik bulunmuyor. Bir sonraki aşamaya hazırsınız.' : assessment.gaps.map((g) => `- [ ] ${g.actionRequired}`).join('\n')}
+## Critical Gaps to Reach TRL ${assessment.nextLevel} (${assessment.gaps.length} Items)
+${assessment.gaps.length === 0 ? '- No critical bottlenecks identified. Ready for subsequent milestone.' : assessment.gaps.map((g) => `- [ ] ${g.actionRequired}`).join('\n')}
 
-## Eşleşen Hibe ve Fon Destekleri (${assessment.eligibleGrants.length} Çağrı)
-${assessment.eligibleGrants.map((gr) => `- **${gr.name}** (${gr.provider}) - ${gr.grantType} [Bütçe: ${gr.budget}]`).join('\n')}
+## Matched Grant & Funding Calls (${assessment.eligibleGrants.length} Programs)
+${assessment.eligibleGrants.map((gr) => `- **${gr.name}** (${gr.provider}) - ${gr.grantType} [Budget: ${gr.budget}]`).join('\n')}
 
 ---
-*Cerilas TRL Calculator ile değerlendirildi (https://tools.cerilas.com/#/tool/trl-calculator)*
+*Evaluated with Cerilas TRL Calculator (https://tools.cerilas.com/#/tool/trl-calculator)*
 `;
 
     navigator.clipboard.writeText(report);
@@ -169,7 +169,7 @@ ${assessment.eligibleGrants.map((gr) => `- **${gr.name}** (${gr.provider}) - ${g
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `trl-raporu-${projectName.toLowerCase().replace(/[^a-z0-9]/g, '-')}.json`;
+    a.download = `trl-assessment-${projectName.toLowerCase().replace(/[^a-z0-9]/g, '-')}.json`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -198,10 +198,10 @@ ${assessment.eligibleGrants.map((gr) => `- **${gr.name}** (${gr.provider}) - ${g
               </Badge>
             )}
             <Badge variant="neutral" icon={<FlaskConical size={12} strokeWidth={2} />}>
-              Ar-Ge & Hibe
+              R&D & Grants
             </Badge>
             <Badge variant="success" icon={<ShieldCheck size={12} strokeWidth={2} />}>
-              %100 İstemci Taraflı Gizlilik
+              100% Client-Side Privacy
             </Badge>
           </>
         }
@@ -212,7 +212,7 @@ ${assessment.eligibleGrants.map((gr) => `- **${gr.name}** (${gr.provider}) - ${g
         <div className="trl-top-row">
           <div className="trl-top-label">
             <Layers size={14} />
-            <span>Hedef Standart Çerçeve (Framework):</span>
+            <span>Target Standard Framework:</span>
           </div>
           <div className="trl-framework-pills">
             {TRL_FRAMEWORKS.map((fw) => (
@@ -231,7 +231,7 @@ ${assessment.eligibleGrants.map((gr) => `- **${gr.name}** (${gr.provider}) - ${g
         <div className="trl-top-row">
           <div className="trl-top-label">
             <Bookmark size={14} />
-            <span>Hazır Proje Şablonları (Presets):</span>
+            <span>Reference Project Presets:</span>
           </div>
           <div className="trl-presets-row">
             {PRESET_PROJECTS.map((preset) => (
@@ -250,7 +250,7 @@ ${assessment.eligibleGrants.map((gr) => `- **${gr.name}** (${gr.provider}) - ${g
         </div>
       </div>
 
-      {/* PROMINENT NOTICE / WARNING BANNER (User Request #2: Bilgilendirme Uyarısı) */}
+      {/* PROMINENT NOTICE / WARNING BANNER (100% English) */}
       <div
         className={`trl-notice-banner ${
           answeredCount === 0
@@ -276,34 +276,34 @@ ${assessment.eligibleGrants.map((gr) => `- **${gr.name}** (${gr.provider}) - ${g
           <div className="trl-notice-header-row">
             <span className="trl-notice-badge">
               {answeredCount === 0
-                ? 'TRL HESAPLAMA UYARISI'
+                ? 'DIAGNOSTIC ASSESSMENT REQUIRED'
                 : answeredCount === totalQuestions
-                ? 'DEĞERLENDİRME TAMAMLANDI'
-                : 'TEŞHİS DEVAM EDİYOR'}
+                ? 'EVALUATION COMPLETED'
+                : 'DIAGNOSIS IN PROGRESS'}
             </span>
             <span className="trl-notice-counter">
-              {answeredCount} / {totalQuestions} Soru Yanıtlandı (%{answeredPercent})
+              {answeredCount} / {totalQuestions} Criteria Audited ({answeredPercent}%)
             </span>
           </div>
 
           <h3 className="trl-notice-title">
             {answeredCount === 0
-              ? 'TRL Seviyenizin Hesaplanabilmesi İçin Aşağıdaki Soruları Yanıtlamalısınız'
+              ? 'You Must Answer the Diagnostic Questions Below to Calculate Your TRL Level'
               : answeredCount === totalQuestions
-              ? 'Tüm Sorular Yanıtlandı — Projenizin TRL Düzeyi ve Hibeleri Doğrulandı'
-              : `TRL Hesaplaması Devam Ediyor — Kesin Sonuç İçin Kalan ${totalQuestions - answeredCount} Soruyu Yanıtlayınız`}
+              ? 'All Criteria Audited — Technology Readiness Level & Grants Confirmed'
+              : `Assessment in Progress — Please Answer Remaining ${totalQuestions - answeredCount} Questions`}
           </h3>
 
           <p className="trl-notice-text">
             {answeredCount === 0
-              ? 'Ar-Ge projenizin teknolojik hazırlık düzeyini (TRL 1–9) doğru hesaplamak, bir üst aşamaya geçişteki kritik eksiklikleri tespit etmek ve uygun hibe programlarını (TÜBİTAK 1501/1507, Horizon Europe EIC, vb.) eşleştirmek için lütfen aşağıdaki 18 soruyu (Hayır / Kısmen / Tamamlandı) yanıtlayınız. İsterseniz yukarıdaki hazır proje şablonlarından birini seçerek de başlayabilirsiniz.'
+              ? 'To accurately calculate your technology readiness level (TRL 1–9), detect critical milestone bottlenecks (gap analysis), and match eligible grant funding (Horizon Europe EIC, NASA, Innovate UK, etc.), please answer the 18 diagnostic criteria below (No / Partial / Validated). You can also load one of the reference project presets above to get started immediately.'
               : answeredCount === totalQuestions
-              ? 'Projenizin tüm teşhis soruları değerlendirilmiştir. Katı önkoşul kurallarına göre belirlenen resmi TRL seviyenizi, eksik adımlarınızı ve eşleşen hibe çağrılarını aşağıdaki sekmelerden inceleyebilirsiniz.'
-              : `Şu ana kadar ${answeredCount} soru yanıtlandı. Projenizin kesin ve sertifikasyon kalitesinde TRL derecesi alabilmesi için kalan ${totalQuestions - answeredCount} soruyu da projenize göre işaretleyiniz.`}
+              ? 'Your technology maturity has been comprehensively audited across all 5 R&D phases. Review your validated TRL level, milestone bottlenecks, and matched funding calls in the tabs below.'
+              : `You have evaluated ${answeredCount} of ${totalQuestions} criteria so far. Complete the remaining questions below to unlock your formal sequential TRL certification.`}
           </p>
 
           <p className="trl-notice-subtext">
-            *(Answer the diagnostic questions below to calculate your validated TRL level, milestone gaps, and grant eligibility).*
+            *Auditing your technology strictly against formal ISO 16290 and European Commission R&D standards.*
           </p>
 
           {/* Progress Bar inside Notice Banner */}
@@ -323,7 +323,7 @@ ${assessment.eligibleGrants.map((gr) => `- **${gr.name}** (${gr.provider}) - ${g
                 onClick={handleScrollToQuestions}
               >
                 <ArrowDown size={14} />
-                <span>{answeredCount === 0 ? 'Aşağıdaki Soruları Yanıtlamaya Başla' : 'Kalan Soruları Yanıtla'}</span>
+                <span>{answeredCount === 0 ? 'Start Answering Questions Below' : 'Complete Remaining Questions'}</span>
               </button>
             )}
 
@@ -333,7 +333,7 @@ ${assessment.eligibleGrants.map((gr) => `- **${gr.name}** (${gr.provider}) - ${g
               onClick={() => loadPreset(PRESET_PROJECTS[0])}
             >
               <Sparkles size={13} />
-              <span>Örnek Proje Yükle (TRL 3)</span>
+              <span>Load Preset: Biotech Lab (TRL 3)</span>
             </button>
 
             <button
@@ -342,7 +342,7 @@ ${assessment.eligibleGrants.map((gr) => `- **${gr.name}** (${gr.provider}) - ${g
               onClick={() => loadPreset(PRESET_PROJECTS[1])}
             >
               <Sparkles size={13} />
-              <span>Örnek Proje Yükle (TRL 5)</span>
+              <span>Load Preset: Autonomous AI (TRL 5)</span>
             </button>
 
             {answeredCount > 0 && (
@@ -352,7 +352,7 @@ ${assessment.eligibleGrants.map((gr) => `- **${gr.name}** (${gr.provider}) - ${g
                 onClick={handleReset}
               >
                 <RotateCcw size={13} />
-                <span>Tüm Yanıtları Sıfırla</span>
+                <span>Reset All Answers</span>
               </button>
             )}
           </div>
@@ -366,12 +366,12 @@ ${assessment.eligibleGrants.map((gr) => `- **${gr.name}** (${gr.provider}) - ${g
             {answeredCount === 0 ? 'TRL --' : `TRL ${assessment.strictTrl}`}
           </div>
           <div className="trl-big-title">
-            {answeredCount === 0 ? 'Değerlendirme Bekleniyor' : currentLevelData.title}
+            {answeredCount === 0 ? 'Evaluation Pending' : currentLevelData.title}
           </div>
           <div className="trl-phase-tag">
             {answeredCount === 0
-              ? `${totalQuestions} Soru Yanıt Bekliyor`
-              : `${currentLevelData.phase} Aşaması`}
+              ? `${totalQuestions} Questions Pending`
+              : `${currentLevelData.phase} Phase`}
           </div>
         </div>
 
@@ -380,15 +380,15 @@ ${assessment.eligibleGrants.map((gr) => `- **${gr.name}** (${gr.provider}) - ${g
             <div className="trl-roadmap-header">
               <span>
                 {answeredCount === 0 ? (
-                  <span>Değerlendirme İlerlemesi:</span>
+                  <span>Assessment Progress:</span>
                 ) : (
                   <span>
-                    Hedef: <strong>TRL {assessment.nextLevel}</strong> Yol Haritası
+                    Milestone to <strong>TRL {assessment.nextLevel}</strong> Roadmap:
                   </span>
                 )}
               </span>
               <strong style={{ color: '#0284c7' }}>
-                {answeredCount === 0 ? `%${answeredPercent}` : `%${assessment.nextLevelProgress}`}
+                {answeredCount === 0 ? `${answeredPercent}%` : `${assessment.nextLevelProgress}%`}
               </strong>
             </div>
             <div className="trl-dash-track">
@@ -406,13 +406,13 @@ ${assessment.eligibleGrants.map((gr) => `- **${gr.name}** (${gr.provider}) - ${g
               <span className="trl-stat-val">
                 {answeredCount === 0 ? '-- / 9' : `${assessment.strictTrl} / 9`}
               </span>
-              <span className="trl-stat-lbl">Kesin Doğrulanmış TRL</span>
+              <span className="trl-stat-lbl">Strict Validated TRL</span>
             </div>
             <div className="trl-stat-box">
               <span className="trl-stat-val">
-                {answeredCount === 0 ? '%0' : `%${assessment.overallReadiness}`}
+                {answeredCount === 0 ? '0%' : `${assessment.overallReadiness}%`}
               </span>
-              <span className="trl-stat-lbl">Teknolojik Olgunluk Skoru</span>
+              <span className="trl-stat-lbl">Technological Maturity Score</span>
             </div>
             <div className="trl-stat-box">
               <span
@@ -429,7 +429,7 @@ ${assessment.eligibleGrants.map((gr) => `- **${gr.name}** (${gr.provider}) - ${g
                 {answeredCount === 0 ? totalQuestions : assessment.gaps.length}
               </span>
               <span className="trl-stat-lbl">
-                {answeredCount === 0 ? 'Kalan Teşhis Sorusu' : 'Geçiş İçin Kritik Eksikler'}
+                {answeredCount === 0 ? 'Remaining Criteria' : 'Critical Gaps to Advance'}
               </span>
             </div>
           </div>
@@ -440,10 +440,10 @@ ${assessment.eligibleGrants.map((gr) => `- **${gr.name}** (${gr.provider}) - ${g
               className="trl-main-btn primary"
               onClick={handleCopyReport}
               disabled={answeredCount === 0}
-              title={answeredCount === 0 ? 'Rapor için soruları yanıtlayınız' : 'Raporu Kopyala'}
+              title={answeredCount === 0 ? 'Please answer questions to copy summary' : 'Copy Executive Report'}
             >
               {copied ? <Check size={14} /> : <Copy size={14} />}
-              <span>{copied ? 'Rapor Kopyalandı!' : 'Değerlendirme Raporunu Kopyala'}</span>
+              <span>{copied ? 'Copied to Clipboard!' : 'Copy Executive Summary'}</span>
             </button>
 
             <button
@@ -453,17 +453,17 @@ ${assessment.eligibleGrants.map((gr) => `- **${gr.name}** (${gr.provider}) - ${g
               disabled={answeredCount === 0}
             >
               <Download size={14} />
-              <span>Raporu İndir (JSON)</span>
+              <span>Export Audit (JSON)</span>
             </button>
 
             <button
               type="button"
               className="trl-main-btn secondary"
               onClick={handleReset}
-              title="Tüm soruları sıfırla"
+              title="Reset all questions to initial state"
             >
               <RotateCcw size={14} />
-              <span>Sıfırla</span>
+              <span>Reset</span>
             </button>
           </div>
         </div>
@@ -478,7 +478,7 @@ ${assessment.eligibleGrants.map((gr) => `- **${gr.name}** (${gr.provider}) - ${g
             onClick={() => setViewMode('questionnaire')}
           >
             <GitCommit size={15} />
-            <span>Teşhis Anketi</span>
+            <span>Diagnostic Questionnaire</span>
             <span className="trl-pill-badge">{answeredCount} / {totalQuestions}</span>
           </button>
 
@@ -488,7 +488,7 @@ ${assessment.eligibleGrants.map((gr) => `- **${gr.name}** (${gr.provider}) - ${g
             onClick={() => setViewMode('matrix')}
           >
             <Layers size={15} />
-            <span>9-Seviye Kriter Matrisi</span>
+            <span>9-Level Criteria Matrix</span>
           </button>
 
           <button
@@ -497,7 +497,7 @@ ${assessment.eligibleGrants.map((gr) => `- **${gr.name}** (${gr.provider}) - ${g
             onClick={() => setViewMode('roadmap')}
           >
             <Compass size={15} />
-            <span>Eksik Analizi & Yol Haritası</span>
+            <span>Gap Analysis & Roadmap</span>
             {assessment.gaps.length > 0 && (
               <span
                 className="trl-pill-badge"
@@ -514,7 +514,7 @@ ${assessment.eligibleGrants.map((gr) => `- **${gr.name}** (${gr.provider}) - ${g
             onClick={() => setViewMode('grants')}
           >
             <Award size={15} />
-            <span>Eşleşen Hibe Çağrıları</span>
+            <span>Matched Grant Calls</span>
             <span
               className="trl-pill-badge"
               style={{ background: 'rgba(16, 185, 129, 0.15)', color: '#10b981' }}
@@ -559,22 +559,21 @@ ${assessment.eligibleGrants.map((gr) => `- **${gr.name}** (${gr.provider}) - ${g
                     >
                       <div className="trl-q-top-meta">
                         <div className="trl-q-left-tags">
-                          <span className="trl-q-number">Soru {questionGlobalIdx} / {totalQuestions}</span>
-                          <span className="trl-q-target-badge">Gate TRL {q.targetTrl} Önkoşulu</span>
+                          <span className="trl-q-number">Question {questionGlobalIdx} of {totalQuestions}</span>
+                          <span className="trl-q-target-badge">Gate TRL {q.targetTrl} Prerequisite</span>
                         </div>
 
                         <span
                           className={`trl-q-state-indicator ${isAnswered ? 'done' : 'pending'}`}
                         >
-                          {isAnswered ? '✓ Yanıtlandı' : '⏳ Yanıt Bekleniyor'}
+                          {isAnswered ? '✓ Answered' : '⏳ Pending Answer'}
                         </span>
                       </div>
 
                       <div className="trl-q-texts">
-                        <h5 className="trl-q-tr-title">{q.questionTr || q.question}</h5>
-                        <p className="trl-q-en-subtitle">{q.question}</p>
+                        <h5 className="trl-q-tr-title">{q.question}</h5>
                         <p className="trl-q-help-box">
-                          <strong>Kılavuz / Açıklama:</strong> {q.helpTextTr || q.helpText}
+                          <strong>Audit Guidance:</strong> {q.helpText}
                         </p>
                       </div>
 
@@ -585,7 +584,7 @@ ${assessment.eligibleGrants.map((gr) => `- **${gr.name}** (${gr.provider}) - ${g
                           onClick={() => handleAnswerChange(q.id, 0)}
                         >
                           <AlertCircle size={15} />
-                          <span>Hayır / Başlanmadı (0)</span>
+                          <span>No / Not Started (0)</span>
                         </button>
 
                         <button
@@ -594,7 +593,7 @@ ${assessment.eligibleGrants.map((gr) => `- **${gr.name}** (${gr.provider}) - ${g
                           onClick={() => handleAnswerChange(q.id, 1)}
                         >
                           <HelpCircle size={15} />
-                          <span>Kısmen Doğrulandı (1)</span>
+                          <span>Partially Verified (1)</span>
                         </button>
 
                         <button
@@ -603,7 +602,7 @@ ${assessment.eligibleGrants.map((gr) => `- **${gr.name}** (${gr.provider}) - ${g
                           onClick={() => handleAnswerChange(q.id, 2)}
                         >
                           <CheckCircle2 size={15} />
-                          <span>Evet / Tamamlandı (2)</span>
+                          <span>Yes / Validated (2)</span>
                         </button>
                       </div>
                     </div>
@@ -631,10 +630,10 @@ ${assessment.eligibleGrants.map((gr) => `- **${gr.name}** (${gr.provider}) - ${g
                     </span>
                     <span className={`trl-m-status-text ${status}`}>
                       {status === 'validated'
-                        ? 'Doğrulandı'
+                        ? 'Validated'
                         : status === 'in-progress'
-                        ? 'Devam Ediyor'
-                        : 'Beklemede'}
+                        ? 'In Progress'
+                        : 'Pending'}
                     </span>
                   </div>
 
@@ -652,8 +651,8 @@ ${assessment.eligibleGrants.map((gr) => `- **${gr.name}** (${gr.provider}) - ${g
                       color: 'var(--text-muted)'
                     }}
                   >
-                    <span>Ölçüt Karşılama Oranı</span>
-                    <strong>%{scoreData?.percentage || 0}</strong>
+                    <span>Gate Criteria Met</span>
+                    <strong>{scoreData?.percentage || 0}%</strong>
                   </div>
 
                   <div className="trl-dash-track" style={{ height: '6px' }}>
@@ -672,7 +671,7 @@ ${assessment.eligibleGrants.map((gr) => `- **${gr.name}** (${gr.provider}) - ${g
                   </div>
 
                   <div className="trl-m-deliverables">
-                    <strong>Gerekli Başlıca Çıktılar:</strong>
+                    <strong>Key Required Deliverables:</strong>
                     <ul>
                       {lvl.deliverables.slice(0, 2).map((d, i) => (
                         <li key={i}>{d}</li>
@@ -696,23 +695,23 @@ ${assessment.eligibleGrants.map((gr) => `- **${gr.name}** (${gr.provider}) - ${g
             >
               <CheckCircle2 size={44} style={{ color: '#10b981', margin: '0 auto 1rem auto' }} />
               <h3 style={{ margin: '0 0 0.5rem 0', color: 'var(--text-main)' }}>
-                Kritik Kilometre Taşı Eksikliği Bulunmuyor!
+                No Immediate Milestone Bottlenecks!
               </h3>
               <p style={{ margin: 0, color: 'var(--text-muted)', maxWidth: '540px', marginInline: 'auto' }}>
-                Projeniz TRL {assessment.strictTrl} seviyesindeki tüm temel kriterleri karşılamaktadır. Resmi sertifikasyon veya ticarileşme adımlarına hazırsınız.
+                Your technology fulfills all core criteria for TRL {assessment.strictTrl}. You are fully qualified to advance to the next stage or commercial operations.
               </p>
             </div>
           ) : (
             assessment.gaps.map((gap) => (
               <div key={gap.id} className="trl-gap-item-card">
                 <div className="trl-gap-top-header">
-                  <span>TRL {gap.level} Seviyesine Geçiş İçin Önkoşul</span>
+                  <span>Prerequisite to Reach TRL {gap.level}</span>
                   <span style={{ textTransform: 'uppercase', fontSize: '0.72rem' }}>
-                    Durum: {gap.currentStatus === 'Partially Fulfilled' ? 'Kısmen Tamamlandı' : 'Başlanmadı'}
+                    Status: {gap.currentStatus}
                   </span>
                 </div>
                 <h4 className="trl-gap-headline">{gap.actionRequired}</h4>
-                <p className="trl-gap-guidance">{gap.helpTextTr || gap.helpText}</p>
+                <p className="trl-gap-guidance">{gap.helpText}</p>
               </div>
             ))
           )}
@@ -729,10 +728,10 @@ ${assessment.eligibleGrants.map((gr) => `- **${gr.name}** (${gr.provider}) - ${g
             >
               <Info size={44} style={{ color: '#0284c7', margin: '0 auto 1rem auto' }} />
               <h3 style={{ margin: '0 0 0.5rem 0', color: 'var(--text-main)' }}>
-                Doğrudan Eşleşen Hibe Bulunamadı
+                No Matching Grants Found Yet
               </h3>
               <p style={{ margin: 0, color: 'var(--text-muted)' }}>
-                Soruları yanıtlayarak projenizin TRL seviyesini netleştiriniz.
+                Please answer the diagnostic questions to calculate your project's formal TRL level.
               </p>
             </div>
           ) : (
@@ -755,10 +754,10 @@ ${assessment.eligibleGrants.map((gr) => `- **${gr.name}** (${gr.provider}) - ${g
 
                 <div className="trl-grant-meta-row">
                   <span>
-                    <strong>Destek Türü:</strong> {grant.grantType}
+                    <strong>Funding Type:</strong> {grant.grantType}
                   </span>
                   <span>
-                    <strong>Bütçe:</strong> {grant.budget}
+                    <strong>Budget:</strong> {grant.budget}
                   </span>
                 </div>
               </div>
