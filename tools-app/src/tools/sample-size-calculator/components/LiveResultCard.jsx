@@ -18,7 +18,9 @@ export default function LiveResultCard({
   modeTitle,
   assumptions = [],
   onOpenReport,
-  onSaveCalculation
+  onSaveCalculation,
+  onCopyTrack,
+  onDownloadTrack
 }) {
   const [copied, setCopied] = useState(false);
   const [shared, setShared] = useState(false);
@@ -62,6 +64,7 @@ export default function LiveResultCard({
 
     navigator.clipboard.writeText(text);
     setCopied(true);
+    onCopyTrack?.({ mode });
     setTimeout(() => setCopied(false), 2000);
   };
 
@@ -74,12 +77,14 @@ export default function LiveResultCard({
           text: summary,
           url
         });
+        onCopyTrack?.({ mode, type: 'share' });
       } catch {
         // user cancelled or fallback
       }
     } else {
       navigator.clipboard.writeText(url);
       setShared(true);
+      onCopyTrack?.({ mode, type: 'share_link' });
       setTimeout(() => setShared(false), 2000);
     }
   };
@@ -103,6 +108,7 @@ export default function LiveResultCard({
     a.download = `sample-size-${mode}-${new Date().toISOString().slice(0, 10)}.json`;
     a.click();
     URL.revokeObjectURL(url);
+    onDownloadTrack?.({ mode, format: 'json' });
   };
 
   return (

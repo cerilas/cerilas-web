@@ -4,7 +4,9 @@ import { X, Printer, Copy, Check, FileText, Download, ShieldCheck } from 'lucide
 export default function SampleSizeReportModal({
   isOpen,
   onClose,
-  calculation
+  calculation,
+  onDownloadTrack,
+  onCopyTrack
 }) {
   const [copied, setCopied] = useState(false);
 
@@ -19,6 +21,7 @@ export default function SampleSizeReportModal({
   });
 
   const handlePrint = () => {
+    onDownloadTrack?.({ type: 'pdf_report' });
     window.print();
   };
 
@@ -50,6 +53,7 @@ export default function SampleSizeReportModal({
 
     navigator.clipboard.writeText(md);
     setCopied(true);
+    onCopyTrack?.({ type: 'markdown_report' });
     setTimeout(() => setCopied(false), 2000);
   };
 

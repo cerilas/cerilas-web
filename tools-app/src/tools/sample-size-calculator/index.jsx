@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { 
+import {
   Scale, 
   HelpCircle, 
   Sparkles, 
@@ -8,7 +8,10 @@ import {
   RefreshCw,
   Info,
   CheckCircle2,
-  ChevronRight
+  ChevronRight,
+  Users,
+  Activity,
+  ShieldCheck
 } from 'lucide-react';
 import ModeSelector, { MODES } from './components/ModeSelector';
 import SmartAssistant from './components/SmartAssistant';
@@ -17,6 +20,10 @@ import CalculationBreakdown from './components/CalculationBreakdown';
 import SavedStudiesModal from './components/SavedStudiesModal';
 import SampleSizeReportModal from './components/SampleSizeReportModal';
 import SampleSizeCalculatorSeo from './components/SampleSizeCalculatorSeo';
+import { useToolAnalytics } from '../../hooks/useToolAnalytics';
+import { Badge, ToolHeader } from '../../components/ui';
+import ToolSeoDivider from '../../components/ui/ToolSeoDivider';
+import { sampleSizeCalculatorManifest } from './manifest';
 import {
   calculateSurveySampleSize,
   calculateProportionSampleSize,
@@ -28,7 +35,16 @@ import {
 } from './lib/sampleSizeEngine';
 import './sample-size-calculator.css';
 
-export default function SampleSizeCalculator() {
+export default function SampleSizeCalculator({ onBack, toolMeta }) {
+  const {
+    visitorCount,
+    conversionCount,
+    getConversionLabel,
+    trackCopy,
+    trackDownload,
+    trackUse
+  } = useToolAnalytics(sampleSizeCalculatorManifest.slug, toolMeta);
+
   // Active calculation mode: survey, proportion, mean, two-means, two-proportions, correlation, ab-test
   const [activeMode, setActiveMode] = useState('survey');
   const [isAdvancedMode, setIsAdvancedMode] = useState(false);
@@ -344,18 +360,35 @@ export default function SampleSizeCalculator() {
   };
 
   return (
-    <div className="ssc-root">
-      {/* Header Banner */}
-      <header className="ssc-hero-header">
-        <div className="ssc-badge-row">
-          <span className="ssc-badge">Sample Sizing & Power Analysis</span>
-          <span className="ssc-badge academic">Exact Formulas</span>
-        </div>
-        <h1 className="ssc-title">Sample Size Calculator</h1>
-        <p className="ssc-subtitle">
-          Determine the statistically required sample size and recruitment targets for surveys, clinical research, A/B experiments, means, and group comparisons without guesswork.
-        </p>
-      </header>
+    <div className="c-tool-page-container ssc-root">
+      {/* Standardized ToolHeader with All Tools back button and badges */}
+      <ToolHeader
+        title={sampleSizeCalculatorManifest.title}
+        subtitle={sampleSizeCalculatorManifest.shortDescription}
+        onBack={onBack}
+        backLabel="All Tools"
+        slug={sampleSizeCalculatorManifest.slug}
+        badges={
+          <>
+            {visitorCount > 0 && (
+              <Badge variant="blue" icon={<Users size={12} strokeWidth={2} />}>
+                {visitorCount.toLocaleString()} visitors
+              </Badge>
+            )}
+            {conversionCount > 0 && (
+              <Badge variant="brand" icon={<Activity size={12} strokeWidth={2} />}>
+                {conversionCount.toLocaleString()} {getConversionLabel()}
+              </Badge>
+            )}
+            <Badge variant="neutral" icon={<Scale size={12} strokeWidth={2} />}>
+              Scientific R&D
+            </Badge>
+            <Badge variant="success" icon={<ShieldCheck size={12} strokeWidth={2} />}>
+              100% Client-Side Privacy
+            </Badge>
+          </>
+        }
+      />
 
       {/* Top Toolbar: Beginner / Advanced Mode & Saved Calculations */}
       <div className="ssc-top-toolbar">
@@ -1218,6 +1251,8 @@ export default function SampleSizeCalculator() {
             assumptions={assumptions}
             onOpenReport={() => setIsReportModalOpen(true)}
             onSaveCalculation={() => setIsSavedModalOpen(true)}
+            onCopyTrack={trackCopy}
+            onDownloadTrack={trackDownload}
           />
 
           <CalculationBreakdown 
@@ -1227,7 +1262,8 @@ export default function SampleSizeCalculator() {
         </div>
       </div>
 
-      {/* 4. Comprehensive SEO Guide, Worked Examples, FAQs & Schemas */}
+      {/* 4. SEO Divider & Comprehensive Guide, Worked Examples, FAQs & Schemas */}
+      <ToolSeoDivider label="Comprehensive Methodology & Statistical Power Guide" />
       <SampleSizeCalculatorSeo />
 
       {/* Saved Studies Workspace Modal */}
@@ -1255,6 +1291,8 @@ export default function SampleSizeCalculator() {
           assumptions,
           inputs
         }}
+        onDownloadTrack={trackDownload}
+        onCopyTrack={trackCopy}
       />
     </div>
   );
