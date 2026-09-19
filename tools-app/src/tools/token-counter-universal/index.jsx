@@ -76,6 +76,7 @@ export default function TokenCounterUniversal({ onBack, toolMeta }) {
     if (selectedProvider === 'Anthropic') return modelMetrics.filter((m) => m.provider === 'Anthropic');
     if (selectedProvider === 'Google') return modelMetrics.filter((m) => m.provider === 'Google');
     if (selectedProvider === 'DeepSeek') return modelMetrics.filter((m) => m.provider === 'DeepSeek');
+    if (selectedProvider === 'xAI') return modelMetrics.filter((m) => m.provider === 'xAI');
     if (selectedProvider === 'Open Source') return modelMetrics.filter((m) => ['Meta', 'Mistral', 'Alibaba'].includes(m.provider));
     return modelMetrics;
   }, [modelMetrics, selectedProvider]);
@@ -541,7 +542,7 @@ export default function TokenCounterUniversal({ onBack, toolMeta }) {
           {/* Provider Filter Tabs (Visible in Matrix view) */}
           {viewMode === 'matrix' && (
             <div className="tc-provider-filters">
-              {['All', 'OpenAI', 'Anthropic', 'Google', 'DeepSeek', 'Open Source'].map((prov) => (
+              {['All', 'OpenAI', 'Anthropic', 'Google', 'DeepSeek', 'xAI', 'Open Source'].map((prov) => (
                 <button
                   key={prov}
                   type="button"

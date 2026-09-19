@@ -13,6 +13,18 @@ if (typeof window !== 'undefined' && pdfjsLib.GlobalWorkerOptions) {
 export const MODEL_CATALOG = [
   // OpenAI Models
   {
+    id: 'gpt-6-astra',
+    name: 'GPT-6 Astra',
+    provider: 'OpenAI',
+    badge: 'Frontier Agentic SOTA',
+    tokenizer: 'o200k',
+    contextWindow: 1050000,
+    maxOutput: 128000,
+    inputPricePerM: 10.00,
+    outputPricePerM: 50.00,
+    color: '#10a37f'
+  },
+  {
     id: 'gpt-4o',
     name: 'GPT-4o',
     provider: 'OpenAI',
@@ -259,6 +271,20 @@ export const MODEL_CATALOG = [
     inputPricePerM: 0.35,
     outputPricePerM: 0.40,
     color: '#a855f7'
+  },
+
+  // xAI
+  {
+    id: 'grok-3',
+    name: 'Grok 3',
+    provider: 'xAI',
+    badge: 'Frontier Reasoning',
+    tokenizer: 'o200k',
+    contextWindow: 1000000,
+    maxOutput: 64000,
+    inputPricePerM: 3.00,
+    outputPricePerM: 15.00,
+    color: '#ef4444'
   }
 ];
 
