@@ -459,6 +459,28 @@ export const TOOL_CONVERSION_METRICS = {
       singular: 'TRL analizi yapıldı',
       short: 'analiz'
     }
+  },
+  'sample-size-calculator': {
+    actionKey: 'calculated',
+    getConversionCount: (tool) => {
+      if (!tool) return 0;
+      const copies = tool.copy_count || 0;
+      const downloads = tool.download_count || 0;
+      const uses = tool.use_count || 0;
+      return (copies + downloads) > 0 ? (copies + downloads) : uses;
+    },
+    en: {
+      action: 'calculated',
+      badge: 'sample sizes calculated',
+      singular: 'sample size calculated',
+      short: 'calculated'
+    },
+    tr: {
+      action: 'hesaplandı',
+      badge: 'örneklem büyüklüğü hesaplandı',
+      singular: 'örneklem büyüklüğü hesaplandı',
+      short: 'hesaplama'
+    }
   }
 };
 

@@ -26,6 +26,7 @@ import { llmsTxtManifest } from './llms-txt-tools/manifest';
 import { htmlToMarkdownManifest } from './html-to-llm-markdown/manifest';
 import { tokenCounterUniversalManifest } from './token-counter-universal/manifest';
 import { trlCalculatorManifest } from './trl-calculator/manifest';
+import { sampleSizeCalculatorManifest } from './sample-size-calculator/manifest';
 
 /**
  * Enterprise Scalable Tool Registry.
@@ -141,6 +142,10 @@ export const toolsRegistry = {
   [trlCalculatorManifest.slug]: {
     manifest: trlCalculatorManifest,
     component: lazy(() => import('./trl-calculator'))
+  },
+  [sampleSizeCalculatorManifest.slug]: {
+    manifest: sampleSizeCalculatorManifest,
+    component: lazy(() => import('./sample-size-calculator'))
   }
 };
 
@@ -154,7 +159,12 @@ const toolAliases = {
   'universal-token-counter': 'token-counter-universal',
   'technology-readiness-level': 'trl-calculator',
   'trl-assessment': 'trl-calculator',
-  'trl-scale': 'trl-calculator'
+  'trl-scale': 'trl-calculator',
+  'sample-size': 'sample-size-calculator',
+  'sample-size-calculation': 'sample-size-calculator',
+  'power-analysis-calculator': 'sample-size-calculator',
+  'survey-sample-size': 'sample-size-calculator',
+  'ab-test-sample-size': 'sample-size-calculator'
 };
 
 export function getRegisteredTool(slug) {
