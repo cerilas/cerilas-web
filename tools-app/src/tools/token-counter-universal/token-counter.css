@@ -832,9 +832,18 @@
   line-height: 2.2;
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   font-size: 0.9rem;
-  user-select: text;
-  -webkit-user-select: text;
+  user-select: text !important;
+  -webkit-user-select: text !important;
   cursor: text;
+}
+
+/* Force high-contrast vibrant selection across the visualizer canvas and all child elements */
+.tc-visualizer-canvas ::selection,
+.tc-visualizer-canvas *::selection,
+.tc-chip::selection {
+  background: #2563eb !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
 }
 
 /* Subtle, refined token chips with true inline text flow */
@@ -842,40 +851,46 @@
   display: inline;
   box-decoration-break: clone;
   -webkit-box-decoration-break: clone;
-  padding: 2px 3px;
+  padding: 1px 3px;
   margin: 0;
   border-radius: 4px;
   font-size: 0.88rem;
-  transition: filter 0.12s ease;
   cursor: text;
   white-space: pre-wrap;
   word-break: break-word;
   position: relative;
-  user-select: text;
-  -webkit-user-select: text;
+  user-select: text !important;
+  -webkit-user-select: text !important;
+  color: var(--text-main) !important;
+  transition: opacity 0.12s ease;
 }
 
 .tc-chip:hover {
-  filter: brightness(1.15);
-  outline: 1px solid rgba(150, 150, 150, 0.4);
+  filter: brightness(1.2);
+  outline: 1px solid rgba(255, 255, 255, 0.35);
   z-index: 2;
 }
 
-/* Dark theme chip colors */
-.tc-chip-0 { background: rgba(99, 102, 241, 0.22); color: #c7d2fe; border: 1px solid rgba(99, 102, 241, 0.35); }
-.tc-chip-1 { background: rgba(168, 85, 247, 0.22); color: #e9d5ff; border: 1px solid rgba(168, 85, 247, 0.35); }
-.tc-chip-2 { background: rgba(14, 165, 233, 0.22); color: #bae6fd; border: 1px solid rgba(14, 165, 233, 0.35); }
-.tc-chip-3 { background: rgba(16, 185, 129, 0.22); color: #a7f3d0; border: 1px solid rgba(16, 185, 129, 0.35); }
-.tc-chip-4 { background: rgba(245, 158, 11, 0.22); color: #fde68a; border: 1px solid rgba(245, 158, 11, 0.35); }
-.tc-chip-5 { background: rgba(244, 63, 94, 0.22);  color: #fecdd3; border: 1px solid rgba(244, 63, 94, 0.35); }
+:root[data-theme="light"] .tc-chip:hover,
+.light .tc-chip:hover {
+  outline: 1px solid rgba(0, 0, 0, 0.25);
+}
 
-/* Light theme chip colors */
-:root[data-theme="light"] .tc-chip-0, .light .tc-chip-0 { background: #e0e7ff; color: #3730a3; border-color: #c7d2fe; }
-:root[data-theme="light"] .tc-chip-1, .light .tc-chip-1 { background: #f3e8ff; color: #6b21a8; border-color: #e9d5ff; }
-:root[data-theme="light"] .tc-chip-2, .light .tc-chip-2 { background: #e0f2fe; color: #075985; border-color: #bae6fd; }
-:root[data-theme="light"] .tc-chip-3, .light .tc-chip-3 { background: #d1fae5; color: #065f46; border-color: #a7f3d0; }
-:root[data-theme="light"] .tc-chip-4, .light .tc-chip-4 { background: #fef3c7; color: #92400e; border-color: #fde68a; }
-:root[data-theme="light"] .tc-chip-5, .light .tc-chip-5 { background: #ffe4e6; color: #9f1239; border-color: #fecdd3; }
+/* Dark theme chip colors - High contrast text with soft pastel tint */
+.tc-chip-0 { background: rgba(99, 102, 241, 0.25); border-bottom: 2px solid rgba(99, 102, 241, 0.7); }
+.tc-chip-1 { background: rgba(168, 85, 247, 0.25); border-bottom: 2px solid rgba(168, 85, 247, 0.7); }
+.tc-chip-2 { background: rgba(14, 165, 233, 0.25); border-bottom: 2px solid rgba(14, 165, 233, 0.7); }
+.tc-chip-3 { background: rgba(16, 185, 129, 0.25); border-bottom: 2px solid rgba(16, 185, 129, 0.7); }
+.tc-chip-4 { background: rgba(245, 158, 11, 0.25); border-bottom: 2px solid rgba(245, 158, 11, 0.7); }
+.tc-chip-5 { background: rgba(244, 63, 94, 0.25);  border-bottom: 2px solid rgba(244, 63, 94, 0.7); }
+
+/* Light theme chip colors - High contrast text with clear soft tint */
+:root[data-theme="light"] .tc-chip-0, .light .tc-chip-0 { background: rgba(99, 102, 241, 0.15); border-bottom: 2px solid rgba(99, 102, 241, 0.5); }
+:root[data-theme="light"] .tc-chip-1, .light .tc-chip-1 { background: rgba(168, 85, 247, 0.15); border-bottom: 2px solid rgba(168, 85, 247, 0.5); }
+:root[data-theme="light"] .tc-chip-2, .light .tc-chip-2 { background: rgba(14, 165, 233, 0.15); border-bottom: 2px solid rgba(14, 165, 233, 0.5); }
+:root[data-theme="light"] .tc-chip-3, .light .tc-chip-3 { background: rgba(16, 185, 129, 0.15); border-bottom: 2px solid rgba(16, 185, 129, 0.5); }
+:root[data-theme="light"] .tc-chip-4, .light .tc-chip-4 { background: rgba(245, 158, 11, 0.15); border-bottom: 2px solid rgba(245, 158, 11, 0.5); }
+:root[data-theme="light"] .tc-chip-5, .light .tc-chip-5 { background: rgba(244, 63, 94, 0.15);  border-bottom: 2px solid rgba(244, 63, 94, 0.5); }
 
 /* ==========================================================================
    Export & Share Footer

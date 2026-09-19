@@ -55,8 +55,7 @@ export default function TokenCounterUniversal({ onBack, toolMeta }) {
   const [isDragging, setIsDragging] = useState(false);
   const [copied, setCopied] = useState(false);
   const [optimizationResult, setOptimizationResult] = useState(null);
-  const [hoveredToken, setHoveredToken] = useState(null);
-
+  const hoverInfoRef = useRef(null);
   const fileInputRef = useRef(null);
 
   // Text statistics (chars, words, lines, bytes, reading time)
@@ -638,14 +637,23 @@ export default function TokenCounterUniversal({ onBack, toolMeta }) {
             <div className="tc-visualizer-header">
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
                 <span>Showing first {tokenDetails.tokens.length} token chunks (o200k base):</span>
-                {hoveredToken && (
-                  <span style={{ color: 'var(--text-main)', fontWeight: 600 }}>
-                    Token #{hoveredToken.index + 1} &bull; ID: <code>{hoveredToken.id}</code> &bull; Length: {hoveredToken.text.length} chars
-                  </span>
-                )}
+                <span
+                  ref={hoverInfoRef}
+                  className="tc-token-hover-badge"
+                  style={{ color: 'var(--text-main)', fontWeight: 600 }}
+                />
               </div>
 
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <button
+                  type="button"
+                  className="tc-filter-pill"
+                  onClick={() => handleCopy(inputText)}
+                  title="Copy all text"
+                >
+                  <Copy size={13} />
+                  <span>{copied ? 'Copied!' : 'Copy Text'}</span>
+                </button>
                 <button
                   type="button"
                   className={`tc-filter-pill ${showWhitespaceSymbols ? 'active' : ''}`}
@@ -657,7 +665,26 @@ export default function TokenCounterUniversal({ onBack, toolMeta }) {
               </div>
             </div>
 
-            <div className="tc-visualizer-canvas" style={{ whiteSpace: 'pre-wrap' }}>
+            <div
+              className="tc-visualizer-canvas"
+              style={{ whiteSpace: 'pre-wrap' }}
+              onMouseOver={(e) => {
+                const chip = e.target.closest('.tc-chip');
+                if (chip && hoverInfoRef.current) {
+                  const idx = chip.getAttribute('data-index');
+                  const id = chip.getAttribute('data-id');
+                  const len = chip.getAttribute('data-len');
+                  if (idx !== null) {
+                    hoverInfoRef.current.innerHTML = `Token #${Number(idx) + 1} &bull; ID: <code>${id}</code> &bull; Length: ${len} chars`;
+                  }
+                }
+              }}
+              onMouseLeave={() => {
+                if (hoverInfoRef.current) {
+                  hoverInfoRef.current.innerHTML = '';
+                }
+              }}
+            >
               {tokenDetails.tokens.length === 0 ? (
                 <span style={{ color: 'var(--text-muted)' }}>No tokens to visualize.</span>
               ) : (
@@ -667,8 +694,9 @@ export default function TokenCounterUniversal({ onBack, toolMeta }) {
                     <span
                       key={idx}
                       className={`tc-chip ${colorClass}`}
-                      onMouseEnter={() => setHoveredToken(tok)}
-                      onMouseLeave={() => setHoveredToken(null)}
+                      data-index={idx}
+                      data-id={tok.id}
+                      data-len={tok.text.length}
                       title={`Token #${idx + 1} | ID: ${tok.id} | Chars: ${tok.text.length}`}
                     >
                       {showWhitespaceSymbols ? tok.symbolic : tok.text}
