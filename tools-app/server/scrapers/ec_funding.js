@@ -243,7 +243,7 @@ function assembleRichDescription(m, isCompetitiveCall) {
       sections.push(`
         <div class="ec-section" style="margin-bottom: 1.25rem;">
           <h4 style="font-size: 0.95rem; font-weight: 700; color: var(--text-main, #1e293b); margin: 0 0 0.5rem;">
-            🎯 Eligibility & Target Applicants
+            Eligibility & Target Applicants
           </h4>
           <div style="font-size: 0.88rem; line-height: 1.6; color: var(--text-muted, #475569);">
             ${m.description[0]}
@@ -257,7 +257,7 @@ function assembleRichDescription(m, isCompetitiveCall) {
       sections.push(`
         <div class="ec-section" style="margin-bottom: 1.25rem;">
           <h4 style="font-size: 0.95rem; font-weight: 700; color: var(--text-main, #1e293b); margin: 0 0 0.5rem;">
-            📋 Call Objectives & Scope
+            Call Objectives & Scope
           </h4>
           <div style="font-size: 0.88rem; line-height: 1.6; color: var(--text-muted, #475569);">
             ${m.furtherInformation[0]}
@@ -271,7 +271,7 @@ function assembleRichDescription(m, isCompetitiveCall) {
       sections.push(`
         <div class="ec-section" style="margin-bottom: 1.25rem;">
           <h4 style="font-size: 0.95rem; font-weight: 700; color: var(--text-main, #1e293b); margin: 0 0 0.5rem;">
-            🚀 How to Apply & Submission Process
+            How to Apply & Submission Process
           </h4>
           <div style="font-size: 0.88rem; line-height: 1.6; color: var(--text-muted, #475569);">
             ${m.beneficiaryAdministration?.[0] || m.destinationDetails[0]}
@@ -285,7 +285,7 @@ function assembleRichDescription(m, isCompetitiveCall) {
       sections.push(`
         <div class="ec-section" style="margin-bottom: 1.25rem;">
           <h4 style="font-size: 0.95rem; font-weight: 700; color: var(--text-main, #1e293b); margin: 0 0 0.5rem;">
-            ⏱️ Timeline & Schedule
+            Timeline & Schedule
           </h4>
           <p style="font-size: 0.88rem; line-height: 1.6; color: var(--text-muted, #475569); margin: 0;">
             ${m.duration[0].replace(/\n/g, '<br/>')}
@@ -300,7 +300,7 @@ function assembleRichDescription(m, isCompetitiveCall) {
       sections.push(`
         <div class="ec-section" style="margin-bottom: 1.25rem;">
           <h4 style="font-size: 0.95rem; font-weight: 700; color: var(--text-main, #1e293b); margin: 0 0 0.5rem;">
-            🎯 Expected Outcome & Scope
+            Expected Outcome & Scope
           </h4>
           <div style="font-size: 0.88rem; line-height: 1.6; color: var(--text-muted, #475569);">
             ${m.descriptionByte[0]}
@@ -314,7 +314,7 @@ function assembleRichDescription(m, isCompetitiveCall) {
       sections.push(`
         <div class="ec-section" style="margin-bottom: 1.25rem;">
           <h4 style="font-size: 0.95rem; font-weight: 700; color: var(--text-main, #1e293b); margin: 0 0 0.5rem;">
-            🌍 Destination & Policy Context
+            Destination & Policy Context
           </h4>
           <div style="font-size: 0.88rem; line-height: 1.6; color: var(--text-muted, #475569);">
             ${m.destinationDetails[0]}
@@ -328,7 +328,7 @@ function assembleRichDescription(m, isCompetitiveCall) {
       sections.push(`
         <div class="ec-section" style="margin-bottom: 1.25rem;">
           <h4 style="font-size: 0.95rem; font-weight: 700; color: var(--text-main, #1e293b); margin: 0 0 0.5rem;">
-            ⚖️ Conditions & Eligibility Criteria
+            Conditions & Eligibility Criteria
           </h4>
           <div style="font-size: 0.88rem; line-height: 1.6; color: var(--text-muted, #475569);">
             ${m.topicConditions[0]}
@@ -342,7 +342,7 @@ function assembleRichDescription(m, isCompetitiveCall) {
       sections.push(`
         <div class="ec-section" style="margin-bottom: 1.25rem;">
           <h4 style="font-size: 0.95rem; font-weight: 700; color: var(--text-main, #1e293b); margin: 0 0 0.5rem;">
-            📚 Support & Documentation Guidance
+            Support & Documentation Guidance
           </h4>
           <div style="font-size: 0.88rem; line-height: 1.6; color: var(--text-muted, #475569);">
             ${m.supportInfo[0]}

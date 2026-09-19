@@ -42,7 +42,7 @@ import { getConversionCount, getConversionLabel, getShortConversionLabel } from 
 import './index.css';
 
 // Force instant scroll position to the very top (functional workspace)
-export const forceScrollToTop = () => {
+const forceScrollToTop = () => {
   try {
     window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
   } catch (e) {
