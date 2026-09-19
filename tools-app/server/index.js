@@ -15,6 +15,8 @@ import linkCheckerRouter from './routes/linkChecker.js';
 import crawlerCheckerRouter from './routes/crawlerChecker.js';
 import llmsTxtRouter from './routes/llmsTxt.js';
 import htmlToMarkdownRouter from './routes/htmlToMarkdown.js';
+import scrapersRouter from './routes/scrapers.js';
+import { initScrapersDb } from './migrations/init-scrapers-db.js';
 import { checkAiRateLimit, getClientIp } from './utils/aiRateLimit.js';
 
 dotenv.config();
@@ -40,6 +42,9 @@ app.use('/tool-icons', express.static(path.join(publicPath, 'tool-icons')));
 
 // Mount webhook tester router
 app.use('/api/webhook-test', webhookTesterRouter);
+
+// Mount scrapers router (Funding & Matcher Scrapers)
+app.use('/api/scrapers', scrapersRouter);
 
 // Google AdSense ads.txt verification route
 app.get('/ads.txt', (req, res) => {
@@ -955,6 +960,9 @@ app.listen(PORT, async () => {
     `);
 
     console.log('Database tables & migrations verified successfully.');
+
+    // Initialize Funding & Matcher Scraper tables
+    await initScrapersDb();
   } catch (error) {
     console.error('Error initializing database tables:', error);
   }

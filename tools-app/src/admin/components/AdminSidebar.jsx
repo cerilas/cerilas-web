@@ -8,6 +8,7 @@ import {
   ExternalLink, 
   ShieldCheck,
   Zap,
+  Globe,
   X
 } from 'lucide-react';
 
@@ -111,6 +112,24 @@ export default function AdminSidebar({
                 </button>
               );
             })}
+          </nav>
+
+          {/* Funding & Matcher Tool Section */}
+          <nav className="admin-nav" style={{ marginTop: '1.25rem' }}>
+            <span className="admin-nav-section-title">Funding & Matcher Tool</span>
+            <button
+              type="button"
+              className={`admin-nav-btn ${currentTab === 'scrapers' ? 'active' : ''}`}
+              onClick={() => handleNavClick('scrapers')}
+            >
+              <div className="admin-nav-btn-content">
+                <Globe size={18} strokeWidth={currentTab === 'scrapers' ? 2.2 : 1.75} />
+                <span>Scrappers</span>
+              </div>
+              <span className="admin-nav-badge" style={{ background: 'rgba(59, 130, 246, 0.15)', color: '#3b82f6', fontWeight: 600 }}>
+                Live
+              </span>
+            </button>
           </nav>
         </div>
 

@@ -6,6 +6,7 @@ import ToolDetailView from './views/ToolDetailView';
 import OverviewView from './views/OverviewView';
 import AnalyticsView from './views/AnalyticsView';
 import SystemHealthView from './views/SystemHealthView';
+import ScrapersView from './views/ScrapersView';
 import { getAllRegisteredTools } from '../tools/registry';
 import './AdminDashboard.css';
 
@@ -29,7 +30,7 @@ export default function AdminDashboard() {
         return;
       }
       
-      const tabMatch = hash.match(/#(?:(?:\/admin)?\/)(overview|analytics|system|tools)/);
+      const tabMatch = hash.match(/#(?:(?:\/admin)?\/)(overview|analytics|system|tools|scrapers)/);
       if (tabMatch && tabMatch[1]) {
         setCurrentTab(tabMatch[1]);
         setSelectedToolSlug(null);
@@ -185,6 +186,8 @@ export default function AdminDashboard() {
         );
       case 'system':
         return <SystemHealthView />;
+      case 'scrapers':
+        return <ScrapersView />;
       default:
         return (
           <ToolsView 

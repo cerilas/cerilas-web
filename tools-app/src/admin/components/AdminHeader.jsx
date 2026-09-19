@@ -24,6 +24,8 @@ export default function AdminHeader({
         return 'Analytics & Conversions';
       case 'system':
         return 'System & API Health';
+      case 'scrapers':
+        return 'Funding & Matcher Scrappers';
       default:
         return 'Admin Suite';
     }
