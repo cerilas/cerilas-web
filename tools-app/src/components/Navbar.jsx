@@ -10,7 +10,7 @@ export default function Navbar({ activeTool, onNavigateHome, onOpenStats, onSele
   return (
     <nav className="navbar">
       <div className="navbar-inner">
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem', flexWrap: 'nowrap' }}>
+        <div className={`nav-left-group ${activeTool ? 'nav-has-tool' : ''}`}>
           <a 
             href="#/" 
             className="nav-brand"
@@ -23,8 +23,8 @@ export default function Navbar({ activeTool, onNavigateHome, onOpenStats, onSele
               src="/platform-logo.webp" 
               alt="Cerilas' Tools" 
               className="nav-platform-logo"
-              width={30}
-              height={30}
+              width={28}
+              height={28}
               onError={(e) => {
                 if (!e.target.dataset.triedPng) {
                   e.target.dataset.triedPng = 'true';
@@ -39,18 +39,12 @@ export default function Navbar({ activeTool, onNavigateHome, onOpenStats, onSele
           <PersonaMenu onSelectTool={onSelectTool} onNavigateHome={onNavigateHome} />
 
           {activeTool && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
-              <span>/</span>
+            <div className="nav-active-breadcrumb">
+              <span className="nav-breadcrumb-divider">/</span>
               <img 
                 src={`/tool-icons/${activeTool.slug}.webp`} 
                 alt="" 
-                style={{ 
-                  width: '20px', 
-                  height: '20px', 
-                  borderRadius: '5px', 
-                  objectFit: 'contain',
-                  filter: 'drop-shadow(0 1px 3px rgba(0,0,0,0.15))'
-                }}
+                className="nav-breadcrumb-icon"
                 onError={(e) => {
                   if (!e.target.dataset.triedPng) {
                     e.target.dataset.triedPng = 'true';
@@ -60,23 +54,11 @@ export default function Navbar({ activeTool, onNavigateHome, onOpenStats, onSele
                   }
                 }}
               />
-              <span style={{ color: 'var(--text-main)', fontWeight: '500' }}>{activeTool.title}</span>
+              <span className="nav-breadcrumb-title">{activeTool.title}</span>
               {isAi && (
-                <span style={{
-                  fontSize: '0.68rem',
-                  padding: '0.15rem 0.5rem',
-                  borderRadius: '999px',
-                  background: 'rgba(168, 85, 247, 0.12)',
-                  color: '#a855f7',
-                  border: '1px solid rgba(168, 85, 247, 0.2)',
-                  fontWeight: '500',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '0.25rem',
-                  marginLeft: '0.2rem'
-                }}>
+                <span className="nav-breadcrumb-ai-badge">
                   <Sparkles size={10} />
-                  <span>AI Assisted</span>
+                  <span>AI</span>
                 </span>
               )}
             </div>
@@ -86,25 +68,18 @@ export default function Navbar({ activeTool, onNavigateHome, onOpenStats, onSele
         <div className="nav-links">
           <button
             onClick={onOpenStats}
-            className="nav-link"
-            style={{
-              background: 'rgba(150, 150, 150, 0.08)',
-              border: '1px solid var(--card-border)',
-              padding: '0.35rem 0.75rem',
-              borderRadius: '999px',
-              cursor: 'pointer'
-            }}
+            className="nav-link nav-stats-btn"
             title={t('stats.title')}
           >
             <BarChart3 size={15} />
-            <span>{t('nav.stats')}</span>
+            <span className="nav-stats-label">{t('nav.stats')}</span>
           </button>
 
-          <a href="https://cerilas.com" className="nav-link" target="_blank" rel="noopener noreferrer">
+          <a href="https://cerilas.com" className="nav-link nav-external-link" target="_blank" rel="noopener noreferrer">
             {t('nav.mainSite')}
           </a>
-          <a href="https://github.com/cerilas" className="nav-link" target="_blank" rel="noopener noreferrer">
-            <Code size={16} strokeWidth={1.5} /> {t('nav.github')}
+          <a href="https://github.com/cerilas" className="nav-link nav-external-link" target="_blank" rel="noopener noreferrer">
+            <Code size={16} strokeWidth={1.5} /> <span className="nav-github-label">{t('nav.github')}</span>
           </a>
         </div>
       </div>

@@ -8,7 +8,8 @@ import {
   ChevronDown, 
   ChevronRight, 
   ArrowRight,
-  Sparkles
+  Sparkles,
+  X
 } from 'lucide-react';
 import './PersonaMenu.css';
 
@@ -362,61 +363,82 @@ export default function PersonaMenu({ onSelectTool, onNavigateHome }) {
   };
 
   return (
-    <div 
-      className="persona-menu-wrapper"
-      ref={menuRef}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
-    >
-      {/* Trigger Button */}
-      <button 
-        type="button" 
-        className={`persona-menu-trigger ${isOpen ? 'is-open' : ''}`}
-        onClick={() => setIsOpen(!isOpen)}
-        aria-expanded={isOpen}
-        aria-haspopup="true"
-      >
-        <span>I'm a...</span>
-        <ChevronDown size={14} className="persona-trigger-chevron" />
-      </button>
-
-      {/* Mega Dropdown Menu */}
+    <>
       {isOpen && (
-        <div className="persona-mega-dropdown" role="menu">
-          {/* Left Column: 5 Persona Options */}
-          <div className="persona-col-left">
-            <div className="persona-col-header">Choose Your Role</div>
+        <div 
+          className="persona-backdrop" 
+          onClick={() => setIsOpen(false)} 
+          aria-hidden="true" 
+        />
+      )}
+      <div 
+        className="persona-menu-wrapper"
+        ref={menuRef}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+      >
+        {/* Trigger Button */}
+        <button 
+          type="button" 
+          className={`persona-menu-trigger ${isOpen ? 'is-open' : ''}`}
+          onClick={() => setIsOpen(!isOpen)}
+          aria-expanded={isOpen}
+          aria-haspopup="true"
+        >
+          <span>I'm a...</span>
+          <ChevronDown size={14} className="persona-trigger-chevron" />
+        </button>
 
-            {PERSONA_CONFIGS.map((persona) => {
-              const IconComp = persona.icon;
-              const isActive = persona.id === activePersonaId;
+        {/* Mega Dropdown Menu */}
+        {isOpen && (
+          <div className="persona-mega-dropdown" role="menu">
+            {/* Mobile Header / Close Button */}
+            <div className="persona-mobile-header">
+              <span className="persona-mobile-header-title">Cerilas Roles</span>
+              <button
+                type="button"
+                className="persona-mobile-close-btn"
+                onClick={() => setIsOpen(false)}
+                aria-label="Close role menu"
+              >
+                <X size={18} />
+              </button>
+            </div>
 
-              return (
-                <button
-                  key={persona.id}
-                  type="button"
-                  className={`persona-nav-item ${isActive ? 'active' : ''}`}
-                  onMouseEnter={() => setActivePersonaId(persona.id)}
-                  onClick={() => setActivePersonaId(persona.id)}
-                >
-                  <div className="persona-item-left">
-                    <div 
-                      className="persona-icon-sq"
-                      style={{ background: persona.gradient }}
-                    >
-                      <IconComp size={16} strokeWidth={2.2} />
+            {/* Left Column: 5 Persona Options */}
+            <div className="persona-col-left">
+              <div className="persona-col-header">Choose Your Role</div>
+
+              {PERSONA_CONFIGS.map((persona) => {
+                const IconComp = persona.icon;
+                const isActive = persona.id === activePersonaId;
+
+                return (
+                  <button
+                    key={persona.id}
+                    type="button"
+                    className={`persona-nav-item ${isActive ? 'active' : ''}`}
+                    onMouseEnter={() => setActivePersonaId(persona.id)}
+                    onClick={() => setActivePersonaId(persona.id)}
+                  >
+                    <div className="persona-item-left">
+                      <div 
+                        className="persona-icon-sq"
+                        style={{ background: persona.gradient }}
+                      >
+                        <IconComp size={16} strokeWidth={2.2} />
+                      </div>
+                      <div className="persona-text-wrap">
+                        <span className="persona-name">{persona.title}</span>
+                        <span className="persona-sub">{persona.subtitle}</span>
+                      </div>
                     </div>
-                    <div className="persona-text-wrap">
-                      <span className="persona-name">{persona.title}</span>
-                      <span className="persona-sub">{persona.subtitle}</span>
-                    </div>
-                  </div>
 
-                  <ChevronRight size={14} className="persona-chevron-active" />
-                </button>
-              );
-            })}
-          </div>
+                    <ChevronRight size={14} className="persona-chevron-active" />
+                  </button>
+                );
+              })}
+            </div>
 
           {/* Right Column: Curated Top Tools */}
           <div className="persona-col-right">
@@ -485,5 +507,6 @@ export default function PersonaMenu({ onSelectTool, onNavigateHome }) {
         </div>
       )}
     </div>
-  );
+  </>
+);
 }

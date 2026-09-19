@@ -442,24 +442,220 @@
   }
 }
 
-/* Mobile Responsive */
+/* Backdrop Overlay for mobile touch screens */
+.persona-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 999;
+}
+
+/* Mobile Header: Hidden on Desktop, Visible on Mobile */
+.persona-mobile-header {
+  display: none;
+}
+
+/* Mobile Responsive Optimization (<= 768px) */
 @media (max-width: 768px) {
-  .persona-mega-dropdown {
-    width: calc(100vw - 2rem);
-    left: -1rem;
-    flex-direction: column;
-    max-height: 80vh;
-    overflow-y: auto;
+  .persona-menu-trigger {
+    padding: 0.28rem 0.65rem;
+    font-size: 0.78rem;
+    gap: 0.3rem;
   }
+
+  .persona-mega-dropdown {
+    position: fixed;
+    top: 54px;
+    left: 10px;
+    right: 10px;
+    width: auto;
+    max-width: calc(100vw - 20px);
+    max-height: calc(88vh - 54px);
+    border-radius: 20px;
+    flex-direction: column;
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.35);
+    z-index: 1000;
+    animation: personaMobileSlide 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  @keyframes personaMobileSlide {
+    from {
+      opacity: 0;
+      transform: translateY(-8px) scale(0.98);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  /* Mobile Sheet Header */
+  .persona-mobile-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 1rem 0.55rem;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .persona-mobile-header {
+      border-bottom-color: rgba(255, 255, 255, 0.08);
+    }
+  }
+
+  .persona-mobile-header-title {
+    font-size: 0.82rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-muted, #64748b);
+  }
+
+  .persona-mobile-close-btn {
+    background: rgba(150, 150, 150, 0.12);
+    border: none;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-main, #0f172a);
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+
+  .persona-mobile-close-btn:active {
+    transform: scale(0.92);
+  }
+
+  /* Horizontal Tabs for 5 Personas */
   .persona-col-left {
     width: 100%;
     border-right: none;
     border-bottom: 1px solid rgba(0, 0, 0, 0.06);
     flex-direction: row;
     overflow-x: auto;
-    padding: 0.6rem;
+    padding: 0.6rem 0.75rem;
+    gap: 0.45rem;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    background: rgba(150, 150, 150, 0.05);
+    flex-shrink: 0;
   }
+
+  .persona-col-left::-webkit-scrollbar {
+    display: none;
+  }
+
+  .persona-col-header {
+    display: none;
+  }
+
+  .persona-nav-item {
+    flex: 0 0 auto;
+    width: auto;
+    padding: 0.4rem 0.75rem;
+    border-radius: 999px;
+    background: rgba(150, 150, 150, 0.08);
+    gap: 0.4rem;
+  }
+
+  .persona-nav-item.active {
+    background: #2563eb !important;
+    border-color: #2563eb !important;
+  }
+
+  .persona-nav-item.active .persona-name {
+    color: #ffffff !important;
+    font-weight: 600 !important;
+  }
+
+  .persona-nav-item.active .persona-icon-sq {
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.4);
+  }
+
+  .persona-chevron-active,
+  .persona-sub {
+    display: none;
+  }
+
+  .persona-name {
+    font-size: 0.8rem;
+  }
+
+  .persona-icon-sq {
+    width: 22px;
+    height: 22px;
+    border-radius: 6px;
+  }
+
+  .persona-icon-sq svg {
+    width: 13px;
+    height: 13px;
+  }
+
+  /* Right Tools Panel */
+  .persona-col-right {
+    padding: 0.85rem;
+    overflow-y: auto;
+    flex: 1;
+    max-height: 52vh;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .persona-showcase-header {
+    margin-bottom: 0.65rem;
+  }
+
+  .persona-showcase-title {
+    font-size: 0.92rem;
+  }
+
+  .persona-showcase-desc {
+    font-size: 0.74rem;
+    line-height: 1.35;
+  }
+
   .persona-tools-grid {
     grid-template-columns: 1fr;
+    gap: 0.45rem;
+  }
+
+  .persona-tool-card {
+    padding: 0.55rem 0.65rem;
+    gap: 0.65rem;
+    border-radius: 12px;
+  }
+
+  .persona-tool-logo-wrap {
+    width: 36px;
+    height: 36px;
+    flex-shrink: 0;
+  }
+
+  .persona-tool-name {
+    font-size: 0.84rem;
+  }
+
+  .persona-tool-desc {
+    font-size: 0.72rem;
+  }
+
+  .persona-tool-pill {
+    font-size: 0.62rem;
+    padding: 0.12rem 0.45rem;
+  }
+
+  .persona-footer {
+    margin-top: 0.75rem;
+    padding-top: 0.6rem;
+    flex-direction: column;
+    gap: 0.4rem;
+    align-items: flex-start;
   }
 }
+
