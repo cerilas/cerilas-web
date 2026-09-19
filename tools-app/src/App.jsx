@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useLayoutEffect, Suspense } from 'react';
+import React, { useState, useEffect, useLayoutEffect, Suspense, useRef, useCallback } from 'react';
 import { 
   Search, 
   ArrowRight, 
@@ -238,6 +238,47 @@ export default function App() {
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [currentSlug, setCurrentSlug] = useState(null);
   const [isStatsOpen, setIsStatsOpen] = useState(false);
+
+  const heroBannerRef = useRef(null);
+  const heroImgRef = useRef(null);
+  const heroGlowRef = useRef(null);
+
+  // Mouse parallax motion for catalog hero background photo
+  const handleHeroMouseMove = useCallback((e) => {
+    if (!heroBannerRef.current || !heroImgRef.current) return;
+    if (typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      return;
+    }
+
+    const rect = heroBannerRef.current.getBoundingClientRect();
+    if (rect.width <= 0 || rect.height <= 0) return;
+
+    // Normalized offset from center: -0.5 to +0.5
+    const x = (e.clientX - rect.left) / rect.width - 0.5;
+    const y = (e.clientY - rect.top) / rect.height - 0.5;
+
+    // Smooth inverse translation (moves opposite to cursor creating genuine 3D depth behind search bar)
+    const moveX = -(x * 32); // max ~16px left/right
+    const moveY = -(y * 20); // max ~10px up/down
+    const rotX = y * 2.5;    // subtle 3D tilt
+    const rotY = -(x * 2.5);
+
+    heroImgRef.current.style.transform = `perspective(1000px) translate3d(${moveX.toFixed(2)}px, ${moveY.toFixed(2)}px, 0) rotateX(${rotX.toFixed(2)}deg) rotateY(${rotY.toFixed(2)}deg) scale(1.08)`;
+
+    if (heroGlowRef.current) {
+      const glowX = ((e.clientX - rect.left) / rect.width) * 100;
+      const glowY = ((e.clientY - rect.top) / rect.height) * 100;
+      heroGlowRef.current.style.background = `radial-gradient(circle 520px at ${glowX.toFixed(1)}% ${glowY.toFixed(1)}%, rgba(255, 255, 255, 0.08), transparent 70%)`;
+    }
+  }, []);
+
+  const handleHeroMouseLeave = useCallback(() => {
+    if (!heroImgRef.current) return;
+    heroImgRef.current.style.transform = 'perspective(1000px) translate3d(0px, 0px, 0px) rotateX(0deg) rotateY(0deg) scale(1.05)';
+    if (heroGlowRef.current) {
+      heroGlowRef.current.style.background = 'transparent';
+    }
+  }, []);
 
   // Sync hash and path routing for both SPA navigation and web crawler indexing
   useEffect(() => {
@@ -540,9 +581,15 @@ export default function App() {
           </ErrorBoundary>
         ) : (
           <div className="home-catalog-root">
-            <section className="catalog-hero-banner">
+            <section 
+              ref={heroBannerRef}
+              className="catalog-hero-banner"
+              onMouseMove={handleHeroMouseMove}
+              onMouseLeave={handleHeroMouseLeave}
+            >
               <div className="catalog-hero-bg">
                 <img 
+                  ref={heroImgRef}
                   src="/hero-bg.webp" 
                   alt="" 
                   className="catalog-hero-img"
@@ -554,6 +601,7 @@ export default function App() {
                   }}
                 />
                 <div className="catalog-hero-overlay" />
+                <div ref={heroGlowRef} className="catalog-hero-glow" />
               </div>
 
               <div className="catalog-hero-content">

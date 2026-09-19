@@ -918,8 +918,10 @@ body {
 
 .catalog-hero-bg {
   position: absolute;
-  inset: 0;
+  inset: -15px; /* slight bleed to allow smooth parallax translation without edge clipping */
   z-index: 1;
+  overflow: hidden;
+  pointer-events: none;
 }
 
 .catalog-hero-img {
@@ -928,6 +930,9 @@ body {
   object-fit: cover;
   object-position: center 25%;
   display: block;
+  transform: perspective(1000px) translate3d(0px, 0px, 0px) scale(1.05);
+  transition: transform 0.28s cubic-bezier(0.2, 0.8, 0.2, 1);
+  will-change: transform;
 }
 
 .catalog-hero-overlay {
@@ -941,6 +946,15 @@ body {
   );
   backdrop-filter: blur(1px);
   -webkit-backdrop-filter: blur(1px);
+  pointer-events: none;
+}
+
+.catalog-hero-glow {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  transition: background 0.25s ease;
+  z-index: 2;
 }
 
 .catalog-hero-content {
