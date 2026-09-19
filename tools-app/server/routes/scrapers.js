@@ -65,7 +65,7 @@ router.get('/sources', async (req, res) => {
       {
         key: 'ec_funding',
         name: 'EU Funding & Tenders Portal (SEDIA)',
-        url: 'https://ec.europa.eu/info/funding-tenders/opportunities/portal/screen/opportunities/calls-for-proposals?isExactMatch=true&status=31094501,31094502,31094503&order=DESC&pageNumber=1&pageSize=50&sortBy=startDate',
+        url: 'https://ec.europa.eu/info/funding-tenders/opportunities/portal/screen/opportunities/calls-for-proposals?isExactMatch=true&status=31094501,31094502&order=DESC&pageNumber=1&pageSize=50&sortBy=startDate',
         description: 'Official European Commission SEDIA Portal Calls for Proposals & Horizon Europe Grants directory.',
         status: 'active',
         engine: 'Native Deterministic REST API Scraper',
@@ -234,7 +234,7 @@ router.post('/:sourceKey/run', async (req, res) => {
       result = await scrapeCascadeFunding('admin_manual');
     } else if (sourceKey === 'ec_funding') {
       console.log(`[API:Scrapers] Manual scrape requested for EU Funding & Tenders...`);
-      result = await scrapeEcFunding('admin_manual', 50, 2);
+      result = await scrapeEcFunding('admin_manual', 100, 30);
     } else {
       return res.status(400).json({ status: 'error', message: `Unknown scraper source: ${sourceKey}` });
     }
@@ -271,7 +271,7 @@ router.post('/:sourceKey/webhook', async (req, res) => {
       result = await scrapeCascadeFunding('webhook');
     } else if (sourceKey === 'ec_funding') {
       console.log(`[API:Scrapers] Webhook triggered for EU Funding & Tenders...`);
-      result = await scrapeEcFunding('webhook', 50, 2);
+      result = await scrapeEcFunding('webhook', 100, 30);
     } else {
       return res.status(400).json({ status: 'error', message: `Unknown scraper source: ${sourceKey}` });
     }

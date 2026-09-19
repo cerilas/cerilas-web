@@ -2,7 +2,7 @@ import crypto from 'crypto';
 import pool from '../db.js';
 
 const EC_SEARCH_API = 'https://api.tech.ec.europa.eu/search-api/prod/rest/search?apiKey=SEDIA&text=***';
-const EC_PORTAL_URL = 'https://ec.europa.eu/info/funding-tenders/opportunities/portal/screen/opportunities/calls-for-proposals?isExactMatch=true&status=31094501,31094502,31094503&order=DESC&pageNumber=1&pageSize=50&sortBy=startDate';
+const EC_PORTAL_URL = 'https://ec.europa.eu/info/funding-tenders/opportunities/portal/screen/opportunities/calls-for-proposals?isExactMatch=true&status=31094501,31094502&order=DESC&pageNumber=1&pageSize=50&sortBy=startDate';
 
 /**
  * Generate SHA-256 hash for deduplication
@@ -86,12 +86,12 @@ function deriveDomains(metadata) {
 }
 
 /**
- * Scrape European Commission Funding & Tenders Portal
+ * Scrape European Commission Funding & Tenders Portal (Active & Forthcoming Calls Only)
  * @param {string} triggeredBy - 'admin_manual', 'webhook', or 'cron'
- * @param {number} pageSize - default 50 items
- * @param {number} maxPages - default 2 pages (100 items)
+ * @param {number} pageSize - default 100 items per request
+ * @param {number} maxPages - default 30 pages (up to 3,000 items, covers all active calls)
  */
-export async function scrapeEcFunding(triggeredBy = 'manual', pageSize = 50, maxPages = 2) {
+export async function scrapeEcFunding(triggeredBy = 'manual', pageSize = 100, maxPages = 30) {
   const startTime = Date.now();
   const sourceKey = 'ec_funding';
   let totalFound = 0;
@@ -99,18 +99,18 @@ export async function scrapeEcFunding(triggeredBy = 'manual', pageSize = 50, max
   let itemsUpdated = 0;
   let itemsUnchanged = 0;
 
-  console.log(`[Scraper:EC_Funding] Starting scrape (triggered by: ${triggeredBy})...`);
+  console.log(`[Scraper:EC_Funding] Starting scrape for ALL active open calls (triggered by: ${triggeredBy})...`);
 
   try {
     const allResults = [];
 
-    // Fetch pages
+    // Fetch pages (Only 31094502 = Open for submission, 31094501 = Forthcoming)
     for (let page = 1; page <= maxPages; page++) {
       const query = {
         bool: {
           must: [
             { terms: { type: ['1', '2', '8'] } },
-            { terms: { status: ['31094501', '31094502', '31094503'] } }
+            { terms: { status: ['31094501', '31094502'] } }
           ]
         }
       };
@@ -133,13 +133,25 @@ export async function scrapeEcFunding(triggeredBy = 'manual', pageSize = 50, max
       const results = json.results || [];
       allResults.push(...results);
 
+      console.log(`[Scraper:EC_Funding] Page ${page}: fetched ${results.length} calls (running total: ${allResults.length})`);
+
       if (results.length < pageSize) {
-        break; // No more pages
+        break; // Reached last page of active calls
       }
     }
 
-    totalFound = allResults.length;
-    console.log(`[Scraper:EC_Funding] Fetched ${totalFound} calls from EC Search API.`);
+    // Preload existing records for this source to eliminate hundreds of individual DB roundtrips
+    const existingMap = new Map();
+    const existingRes = await pool.query(
+      'SELECT id, external_id, content_hash FROM funding_opportunities WHERE source_key = $1',
+      [sourceKey]
+    );
+    for (const row of existingRes.rows) {
+      existingMap.set(row.external_id, row);
+    }
+
+    const unchangedIds = [];
+    const activeExternalIds = new Set();
 
     for (const r of allResults) {
       const m = r.metadata || {};
@@ -150,16 +162,6 @@ export async function scrapeEcFunding(triggeredBy = 'manual', pageSize = 50, max
       if (!title || !externalId) {
         continue;
       }
-      const shortDesc = m.destinationDescription?.[0] || m.callTitle?.[0] || r.summary || '';
-      const longDesc = m.topicConditions?.[0] || shortDesc;
-      
-      const budget = extractBudget(m.budgetOverview?.[0]);
-
-      // Status mapping: 31094502 = Open, 31094501 = Forthcoming, 31094503 = Closed
-      const statusCode = m.status?.[0];
-      let status = 'open';
-      if (statusCode === '31094501') status = 'forthcoming';
-      else if (statusCode === '31094503') status = 'closed';
 
       let deadlineDate = null;
       if (m.deadlineDate?.[0]) {
@@ -167,6 +169,21 @@ export async function scrapeEcFunding(triggeredBy = 'manual', pageSize = 50, max
           deadlineDate = new Date(m.deadlineDate[0]).toISOString();
         } catch (e) {}
       }
+
+      // STRICT CHECK: Skip any calls whose deadline has already passed
+      if (deadlineDate && new Date(deadlineDate) < new Date()) {
+        continue;
+      }
+
+      activeExternalIds.add(externalId);
+
+      const shortDesc = m.destinationDescription?.[0] || m.callTitle?.[0] || r.summary || '';
+      const longDesc = m.topicConditions?.[0] || shortDesc;
+      
+      const budget = extractBudget(m.budgetOverview?.[0]);
+
+      // All calls in our database are active open calls
+      const status = 'open';
 
       let openingDate = null;
       if (m.startDate?.[0]) {
@@ -179,18 +196,20 @@ export async function scrapeEcFunding(triggeredBy = 'manual', pageSize = 50, max
         'Universities & Academic Institutions',
         'Research Organizations',
         'SMEs & Startups',
-        'Large Industrial Companies',
         'Public Authorities & Municipalities',
-        'NGOs & Civil Society'
+        'Large Enterprises & Industry Partners'
       ];
 
       const domains = deriveDomains(m);
-      const technologies = m.keywords || [];
+      const technologies = [
+        ...(m.frameworkProgramme || []),
+        ...(m.destinationDetails || [])
+      ].slice(0, 5);
 
-      const permalink = r.url || m.url?.[0] || (m.identifier?.[0] ? `https://ec.europa.eu/info/funding-tenders/opportunities/portal/screen/opportunities/topic-details/${m.identifier[0]}` : EC_PORTAL_URL);
+      const permalink = m.esUrl?.[0] || `https://ec.europa.eu/info/funding-tenders/opportunities/portal/screen/opportunities/topic-details/${externalId.toLowerCase()}`;
 
       const links = {
-        website: permalink,
+        official: permalink,
         apply: permalink,
         portal: EC_PORTAL_URL
       };
@@ -207,13 +226,10 @@ export async function scrapeEcFunding(triggeredBy = 'manual', pageSize = 50, max
 
       const contentHash = generateContentHash(programData);
 
-      // Check existing record in DB
-      const existingRes = await pool.query(
-        'SELECT id, content_hash FROM funding_opportunities WHERE source_key = $1 AND external_id = $2',
-        [sourceKey, externalId]
-      );
+      // Check existing record from in-memory cache
+      const existing = existingMap.get(externalId);
 
-      if (existingRes.rows.length === 0) {
+      if (!existing) {
         // 1. Insert new opportunity
         await pool.query(`
           INSERT INTO funding_opportunities (
@@ -248,13 +264,9 @@ export async function scrapeEcFunding(triggeredBy = 'manual', pageSize = 50, max
         ]);
         itemsInserted++;
       } else {
-        const existing = existingRes.rows[0];
         if (existing.content_hash === contentHash) {
           // 2. Unchanged (Zero redundant writes!)
-          await pool.query(
-            'UPDATE funding_opportunities SET last_scraped_at = NOW() WHERE id = $1',
-            [existing.id]
-          );
+          unchangedIds.push(existing.id);
           itemsUnchanged++;
         } else {
           // 3. Updated
@@ -302,6 +314,34 @@ export async function scrapeEcFunding(triggeredBy = 'manual', pageSize = 50, max
         }
       }
     }
+
+    totalFound = activeExternalIds.size;
+
+    // Batch update last_scraped_at for unchanged items in a single query
+    if (unchangedIds.length > 0) {
+      await pool.query(
+        'UPDATE funding_opportunities SET last_scraped_at = NOW() WHERE id = ANY($1::int[])',
+        [unchangedIds]
+      );
+    }
+
+    // Prune closed calls from database (calls no longer in EC's active list)
+    if (activeExternalIds.size > 0) {
+      const pruneRes = await pool.query(
+        `DELETE FROM funding_opportunities 
+         WHERE source_key = $1 AND NOT (external_id = ANY($2::text[]))`,
+        [sourceKey, Array.from(activeExternalIds)]
+      );
+      if (pruneRes.rowCount > 0) {
+        console.log(`[Scraper:EC_Funding] Pruned ${pruneRes.rowCount} closed/expired calls from DB.`);
+      }
+    }
+
+    // Global cleanup: ensure no expired calls exist anywhere in DB
+    await pool.query(`
+      DELETE FROM funding_opportunities 
+      WHERE (deadline_date IS NOT NULL AND deadline_date < NOW()) OR status = 'closed'
+    `);
 
     const durationMs = Date.now() - startTime;
 
