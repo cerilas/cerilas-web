@@ -9,39 +9,70 @@ import {
   FileText, 
   ArrowUpRight,
   Cpu,
-  Globe
+  Globe,
+  Gauge,
+  Zap,
+  Tag,
+  CheckCircle2
 } from 'lucide-react';
 import './TokenCounterSeo.css';
 
 const FAQ_ITEMS = [
   {
-    q: 'What is an LLM token and how is it calculated?',
-    a: 'In Large Language Models (LLMs), a token is the fundamental atomic unit of text processed by the neural network. Tokens can be single characters, whole words, or sub-word fragments. For English text, 1 token is approximately 4 characters or 0.75 words. For code, numbers, and non-Latin languages, words are often split into multiple sub-word tokens depending on the model\'s Byte-Pair Encoding (BPE) or SentencePiece vocabulary.'
+    q: 'What is an LLM token and how is it calculated in 2026 models like GPT-6 Astra and Gemini 3.8?',
+    a: 'In Large Language Models (LLMs), a token is the fundamental atomic unit of text and code processed by transformer neural networks. Tokens can be whole words, character fragments, syllables, or punctuation symbols. For standard English prose, 1 token roughly corresponds to 4 characters or ~0.75 words. Frontier 2026 models like OpenAI GPT-6 Astra and Google Gemini 3.8 utilize advanced multi-byte Byte-Pair Encoding (BPE) and SentencePiece vocabularies with over 200,000 unique token embeddings, optimizing multilingual compression and code syntax parsing.'
   },
   {
-    q: 'Why do GPT-4o, Claude 3.5, and Gemini produce different token counts for the same text?',
-    a: 'Each AI provider trains its model on a distinct tokenizer vocabulary. OpenAI\'s GPT-4o uses the o200k_base vocabulary containing ~200,000 tokens, which compresses non-English text and code significantly more efficiently than GPT-4\'s older cl100k_base (~100,000 tokens). Anthropic Claude and Google Gemini use their own customized vocabularies. As a result, the identical text will yield slightly different token counts across models.'
+    q: 'How does GPT-6 Astra\'s 1.05M context window compare to Gemini 3.8 Flash and Claude 3.7 Sonnet?',
+    a: 'GPT-6 Astra supports an expansive 1,050,000 (1.05M) token input context with up to 128,000 output tokens for complex agentic computer control and software development workflows. Gemini 3.8 Flash features a 1,000,000 (1M) token context with tunable reasoning thinking tokens, while Claude 3.7 Sonnet provides 200,000 tokens with extended hybrid reasoning budgets. Our Universal Token Counter calculates exact token consumption and remaining headroom across all three architectures simultaneously.'
   },
   {
-    q: 'Why do languages like Turkish, German, and Arabic use more tokens than English?',
-    a: 'Most LLM tokenizers are pre-trained predominantly on English corpora. In agglutinative languages like Turkish, prefixes and suffixes attached to root words are frequently segmented into separate sub-word tokens. While modern vocabularies like o200k have improved multilingual compression by 20-30%, non-English prompts generally consume 1.3x to 2.2x more tokens per word than English.'
+    q: 'Why do languages like Turkish, German, Arabic, and Japanese consume more tokens than English?',
+    a: 'Because the vast majority of training datasets for foundational LLMs are English-heavy, tokenizers allocate individual token IDs to common English words and roots. In agglutinative languages such as Turkish, affixes, suffixes, and compound word structures are split into 2 to 5 sub-word tokens per word. While modern o200k vocabularies improved Turkish compression by ~28%, non-English text still experiences 1.3x to 2.2x token inflation compared to English prose.'
   },
   {
-    q: 'Are my uploaded documents (PDF, Code, Text) sent to any external servers?',
-    a: 'No. Universal Token Counter runs 100% client-side in your web browser. When you upload a PDF or source code file, text extraction (using WebAssembly pdfjs-dist) and token counting (via pure JavaScript BPE tokenizers) are executed locally on your machine. Zero prompt data or file contents ever leave your device.'
+    q: 'Are my uploaded documents (PDF, source code, confidential prompts) sent to any server?',
+    a: 'Never. Cerilas Universal Token Counter operates 100% client-side directly within your web browser using WebAssembly and pure JavaScript. Document text extraction from PDFs and tokenization are computed entirely in local browser memory. Zero prompts, files, or sensitive payloads are uploaded or logged to any remote server.'
   },
   {
-    q: 'How does context window usage affect API latency and output quality?',
-    a: 'As your input prompt fills a higher percentage of the model\'s context window (e.g. 100k out of 128k tokens), time-to-first-token (TTFT) increases and the model may experience "needle-in-a-haystack" retrieval degradation. Keeping your context window usage under 60-70% through prompt optimization ensures faster responses, reduced costs, and higher factual accuracy.'
+    q: 'How does prompt token size impact LLM API latency, TTFT, and generation cost?',
+    a: 'Longer prompts directly increase Time to First Token (TTFT) and increase self-attention matrix operations quadratically or linearly depending on attention optimizations (FlashAttention / KV Cache). Furthermore, large prompts that fill 70%+ of the model\'s context window suffer from retrieval degradation ("lost in the middle"). Keeping your prompt compact through 1-click token reduction saves 15-40% on API billing and dramatically reduces inference latency.'
   },
   {
-    q: 'How can I optimize my prompts to save 20-40% on AI API costs?',
-    a: 'Use our 1-click Token Reducer to eliminate redundant whitespace, collapse multiple blank lines, and strip verbose code comments. In RAG pipelines, convert HTML to clean Markdown before embedding, and remove repetitive system instructions in multi-turn conversations through prompt caching.'
+    q: 'What is the difference between o200k_base, cl100k_base, and Gemini SentencePiece tokenizers?',
+    a: 'cl100k_base was the default vocabulary for GPT-4 and GPT-3.5 Turbo with a 100k-token dictionary. o200k_base (used in GPT-6 Astra, GPT-4o, o1, and o3-mini) doubled the vocabulary to 200,000 tokens, significantly decreasing token count for non-English languages, emoji sequences, and programming languages. Google Gemini uses a customized SentencePiece tokenizer specifically trained on multilingual and multimodal text representations.'
   },
   {
-    q: 'What is the difference between o200k_base and cl100k_base tokenizers?',
-    a: 'cl100k_base was introduced with GPT-4 and GPT-3.5 Turbo with a 100,000-token vocabulary. o200k_base was launched with GPT-4o and reasoning models (o1, o3-mini), expanding the vocabulary to 200,000 tokens. o200k offers superior token compression for non-English languages, emojis, and programming syntax, requiring ~10-25% fewer tokens for the same input.'
+    q: 'How can developers optimize prompts to shave 20-40% off their LLM API budget?',
+    a: '1) Strip unnecessary whitespace and redundant newlines. 2) Remove developer comments from source code files before feeding them into prompt context. 3) Strip boilerplate HTML/XML markup and convert web data to clean Markdown using our HTML-to-LLM converter. 4) Leverage prompt caching for static system messages and reference schemas.'
+  },
+  {
+    q: 'Can I calculate token counts for PDF documents and source code repositories for RAG?',
+    a: 'Yes. You can drag and drop PDF files (manuals, research papers, legal documents) or source code files (.py, .js, .ts, .go, .rs, .json, .csv). Our engine extracts text on the fly without server uploads and outputs real-time token statistics, character counts, and model cost projections for optimal RAG chunk sizing.'
+  },
+  {
+    q: 'What are "thinking tokens" in Claude 3.7 Sonnet and Gemini 3.8 Flash?',
+    a: 'Thinking tokens represent the internal chain-of-thought tokens generated by reasoning models prior to producing the final user-facing response. While users typically view the final answer, reasoning models bill for thinking tokens at output token rates. Our calculator provides baseline cost models for both standard prompts and extended reasoning workloads.'
+  },
+  {
+    q: 'How accurate is this online token counter compared to official Python SDKs?',
+    a: 'Universal Token Counter utilizes official WebAssembly and compiled JavaScript implementations of Tiktoken (o200k and cl100k BPE byte dictionaries). For GPT-6 Astra, GPT-4o, o1, and GPT-4, the token counts are 100% bit-exact with the official OpenAI tiktoken Python library.'
   }
+];
+
+const SEMANTIC_KEYWORDS = [
+  'GPT-6 Astra Token Counter',
+  'Gemini 3.8 Flash Token Calculator',
+  'Claude 3.7 Sonnet Tokenizer',
+  'OpenAI o200k_base Tiktoken Online',
+  'DeepSeek-V3 Token Cost Calculator',
+  'Free PDF Token Counter',
+  'Token to Word Ratio Converter',
+  'Client-Side Private Tokenizer',
+  'LLM Context Window Gauge',
+  'AI Prompt Cost Estimator (2026)',
+  'Llama 3.3 70B Token Counter',
+  'Turkish Token Inflation Analyzer'
 ];
 
 const RELATED_TOOLS = [
@@ -57,6 +88,7 @@ export default function TokenCounterSeo() {
   const [openFaq, setOpenFaq] = useState(null);
 
   useEffect(() => {
+    // 1. FAQ Schema
     const faqStructuredData = {
       '@context': 'https://schema.org',
       '@type': 'FAQPage',
@@ -70,41 +102,71 @@ export default function TokenCounterSeo() {
       }))
     };
 
-    let script = document.getElementById('token-counter-faq-jsonld');
-    if (!script) {
-      script = document.createElement('script');
-      script.id = 'token-counter-faq-jsonld';
-      script.type = 'application/ld+json';
-      document.head.appendChild(script);
+    // 2. WebApplication Schema
+    const appStructuredData = {
+      '@context': 'https://schema.org',
+      '@type': 'WebApplication',
+      'name': 'Universal Token Counter & LLM Cost Calculator',
+      'operatingSystem': 'All',
+      'applicationCategory': 'DeveloperApplication',
+      'url': 'https://tools.cerilas.com/#/tool/token-counter-universal',
+      'offers': {
+        '@type': 'Offer',
+        'price': '0',
+        'priceCurrency': 'USD'
+      },
+      'description': 'Free client-side token counter and API cost calculator for GPT-6 Astra, Gemini 3.8 Flash, Claude 3.7 Sonnet, DeepSeek-V3, and Llama 3.3. Interactive color visualizer with zero server uploads.'
+    };
+
+    let scriptFaq = document.getElementById('token-counter-faq-jsonld');
+    if (!scriptFaq) {
+      scriptFaq = document.createElement('script');
+      scriptFaq.id = 'token-counter-faq-jsonld';
+      scriptFaq.type = 'application/ld+json';
+      document.head.appendChild(scriptFaq);
     }
-    script.textContent = JSON.stringify(faqStructuredData);
+    scriptFaq.textContent = JSON.stringify(faqStructuredData);
+
+    let scriptApp = document.getElementById('token-counter-app-jsonld');
+    if (!scriptApp) {
+      scriptApp = document.createElement('script');
+      scriptApp.id = 'token-counter-app-jsonld';
+      scriptApp.type = 'application/ld+json';
+      document.head.appendChild(scriptApp);
+    }
+    scriptApp.textContent = JSON.stringify(appStructuredData);
 
     return () => {
-      const el = document.getElementById('token-counter-faq-jsonld');
-      if (el) el.remove();
+      const elFaq = document.getElementById('token-counter-faq-jsonld');
+      if (elFaq) elFaq.remove();
+      const elApp = document.getElementById('token-counter-app-jsonld');
+      if (elApp) elApp.remove();
     };
   }, []);
 
   return (
     <div className="tc-seo-container">
-      {/* Intro Grid */}
+      {/* Intro Header */}
       <div className="tc-seo-header">
-        <h2 className="tc-seo-title">Why Accurate Multi-Model Token Counting Matters in 2026</h2>
+        <h2 className="tc-seo-title">Universal Multi-Model Token Architecture & Cost Guide (2026)</h2>
         <p className="tc-seo-intro">
-          Understanding token distribution across frontier AI models is essential for building cost-effective,
-          high-performance AI agents and RAG applications. Cerilas Universal Token Counter provides real-time
-          bilingual analytics, interactive token visualization, and 2026 API cost estimation without sending your data anywhere.
+          Designing production LLM applications, RAG pipelines, and agentic workflows requires precise awareness of
+          tokenizer vocabularies, context window limitations, and token economics. Cerilas Universal Token Counter
+          delivers bit-exact token calculations, interactive token boundary visualization, and 2026 API cost analytics
+          with 100% in-browser client-side privacy.
         </p>
       </div>
 
+      {/* Feature Pillar Cards */}
       <div className="tc-seo-grid">
         <div className="tc-seo-card">
           <div className="tc-seo-card-icon">
             <Binary size={20} />
           </div>
-          <h3 className="tc-seo-card-title">Exact Token Boundaries</h3>
+          <h3 className="tc-seo-card-title">Bit-Exact Token Boundaries</h3>
           <p className="tc-seo-card-desc">
-            Visualize how tokenizers split your words, punctuation, whitespace, and code syntax into distinct token IDs with color-coded chips.
+            Visualize how tokenizers segment sentences, syntax, punctuation, and whitespace into token IDs. Inspect
+            exact token boundaries with color-coded chips and zero React re-render lag during text selection.
           </p>
         </div>
 
@@ -112,9 +174,10 @@ export default function TokenCounterSeo() {
           <div className="tc-seo-card-icon">
             <Coins size={20} />
           </div>
-          <h3 className="tc-seo-card-title">Real-Time Cost Audit</h3>
+          <h3 className="tc-seo-card-title">2026 Frontier Cost Audit</h3>
           <p className="tc-seo-card-desc">
-            Compare API costs across 16+ frontier models including GPT-4o, Claude 3.7 Sonnet, Gemini 2.0 Flash, and DeepSeek-V3 instantly.
+            Calculate instant prompt costs and 1k-completion estimates across 20+ models including GPT-6 Astra,
+            Gemini 3.8 Flash, Claude 3.7 Sonnet, DeepSeek-V3, and Grok 3.
           </p>
         </div>
 
@@ -124,8 +187,184 @@ export default function TokenCounterSeo() {
           </div>
           <h3 className="tc-seo-card-title">100% Client-Side Privacy</h3>
           <p className="tc-seo-card-desc">
-            All text and PDF document parsing happens in your local web browser. Your private system prompts and proprietary datasets remain secure.
+            All text and PDF document parsing runs inside your web browser via WebAssembly. Confidential corporate
+            prompts, IP-protected codebases, and customer datasets never leave your computer.
           </p>
+        </div>
+      </div>
+
+      {/* Model Architecture Comparison Table */}
+      <div className="tc-seo-table-section">
+        <h3 className="tc-seo-section-heading">
+          <Cpu size={18} style={{ color: '#6366f1' }} />
+          <span>2026 Frontier LLM Tokenizer & Pricing Specifications</span>
+        </h3>
+        <p className="tc-seo-section-subtitle">
+          Overview of official context limits, tokenizer families, and current API pricing per 1 million tokens.
+        </p>
+        <div className="tc-seo-table-wrap">
+          <table className="tc-seo-specs-table">
+            <thead>
+              <tr>
+                <th>Model</th>
+                <th>Provider</th>
+                <th>Tokenizer</th>
+                <th>Context Window</th>
+                <th>Max Output</th>
+                <th>Input / 1M</th>
+                <th>Output / 1M</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>GPT-6 Astra</strong></td>
+                <td>OpenAI</td>
+                <td><code>o200k_base</code></td>
+                <td>1,050,000 (1.05M)</td>
+                <td>128,000</td>
+                <td>$10.00</td>
+                <td>$50.00</td>
+              </tr>
+              <tr>
+                <td><strong>Gemini 3.8 Flash</strong></td>
+                <td>Google</td>
+                <td><code>SentencePiece</code></td>
+                <td>1,000,000 (1M)</td>
+                <td>64,000</td>
+                <td>$0.75</td>
+                <td>$3.75</td>
+              </tr>
+              <tr>
+                <td><strong>Claude 3.7 Sonnet</strong></td>
+                <td>Anthropic</td>
+                <td><code>Claude BPE</code></td>
+                <td>200,000</td>
+                <td>64,000</td>
+                <td>$3.00</td>
+                <td>$15.00</td>
+              </tr>
+              <tr>
+                <td><strong>DeepSeek-V3</strong></td>
+                <td>DeepSeek</td>
+                <td><code>DeepSeek BPE</code></td>
+                <td>64,000</td>
+                <td>8,000</td>
+                <td>$0.28</td>
+                <td>$2.19</td>
+              </tr>
+              <tr>
+                <td><strong>Gemini 3.1 Pro</strong></td>
+                <td>Google</td>
+                <td><code>SentencePiece</code></td>
+                <td>1,000,000 (1M)</td>
+                <td>32,768</td>
+                <td>$2.00</td>
+                <td>$12.00</td>
+              </tr>
+              <tr>
+                <td><strong>Grok 3</strong></td>
+                <td>xAI</td>
+                <td><code>o200k</code></td>
+                <td>1,000,000 (1M)</td>
+                <td>64,000</td>
+                <td>$3.00</td>
+                <td>$15.00</td>
+              </tr>
+              <tr>
+                <td><strong>Llama 3.3 70B</strong></td>
+                <td>Meta</td>
+                <td><code>tiktoken 128k</code></td>
+                <td>128,000</td>
+                <td>8,192</td>
+                <td>$0.59</td>
+                <td>$0.79</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Language Token Inflation Guide */}
+      <div className="tc-seo-table-section">
+        <h3 className="tc-seo-section-heading">
+          <Globe size={18} style={{ color: '#06b6d4' }} />
+          <span>Multilingual Token Inflation & Word-to-Token Ratios</span>
+        </h3>
+        <p className="tc-seo-section-subtitle">
+          Agglutinative and non-Latin languages require multiple sub-word tokens per word, directly scaling inference costs.
+        </p>
+        <div className="tc-seo-table-wrap">
+          <table className="tc-seo-specs-table">
+            <thead>
+              <tr>
+                <th>Language</th>
+                <th>Avg Characters / Token</th>
+                <th>Token-to-Word Ratio</th>
+                <th>Token Inflation Index</th>
+                <th>o200k Compression Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>English</strong></td>
+                <td>4.2 chars</td>
+                <td>~1.3 tokens/word</td>
+                <td>1.0x (Baseline)</td>
+                <td>Optimal</td>
+              </tr>
+              <tr>
+                <td><strong>Turkish</strong></td>
+                <td>2.6 chars</td>
+                <td>~2.4 tokens/word</td>
+                <td>1.85x inflation</td>
+                <td>+28% more efficient than cl100k</td>
+              </tr>
+              <tr>
+                <td><strong>German</strong></td>
+                <td>3.1 chars</td>
+                <td>~1.8 tokens/word</td>
+                <td>1.38x inflation</td>
+                <td>+22% more efficient</td>
+              </tr>
+              <tr>
+                <td><strong>Spanish / French</strong></td>
+                <td>3.5 chars</td>
+                <td>~1.6 tokens/word</td>
+                <td>1.23x inflation</td>
+                <td>High compression</td>
+              </tr>
+              <tr>
+                <td><strong>Arabic</strong></td>
+                <td>1.9 chars</td>
+                <td>~2.8 tokens/word</td>
+                <td>2.15x inflation</td>
+                <td>+35% more efficient</td>
+              </tr>
+              <tr>
+                <td><strong>Japanese / Chinese</strong></td>
+                <td>1.5 chars</td>
+                <td>~2.2 tokens/word</td>
+                <td>1.70x inflation</td>
+                <td>Dedicated multi-byte token maps</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Semantic Search Keywords Cloud */}
+      <div className="tc-seo-keywords-block">
+        <div className="tc-seo-keywords-title">
+          <Tag size={15} />
+          <span>Popular Search Queries & Topics</span>
+        </div>
+        <div className="tc-seo-pills-wrap">
+          {SEMANTIC_KEYWORDS.map((kw, i) => (
+            <span key={i} className="tc-keyword-tag">
+              <CheckCircle2 size={12} className="tc-tag-check" />
+              {kw}
+            </span>
+          ))}
         </div>
       </div>
 
@@ -177,3 +416,4 @@ export default function TokenCounterSeo() {
     </div>
   );
 }
+

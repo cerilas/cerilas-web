@@ -892,6 +892,25 @@ app.listen(PORT, async () => {
         short_description = EXCLUDED.short_description,
         seo_title = EXCLUDED.seo_title, 
         seo_description = EXCLUDED.seo_description;
+
+      INSERT INTO cerilas_tools (
+        title, slug, short_description, icon_name, target_url, seo_title, seo_description, category, sort_order, is_active
+      ) VALUES (
+        'Universal Token Counter',
+        'token-counter-universal',
+        'Calculate real-time token counts, context window usage, and API pricing for text and files (PDF, Code, Docs) across GPT-6 Astra, Gemini 3.8 Flash, Claude 3.7, DeepSeek-V3, and Llama 3.',
+        'Binary',
+        '#/tool/token-counter-universal',
+        'Free Universal Token Counter (2026) – GPT-6 Astra, Gemini 3.8 Flash, Claude 3.7, DeepSeek & Llama | Cerilas Tools',
+        'Calculate tokens, context window capacity, and API costs for text and documents (PDF, Code, TXT) across GPT-6 Astra, Gemini 3.8 Flash, Claude 3.7, Gemini 3.1 Pro, DeepSeek-V3, Grok 3, and Llama 3. Interactive color-coded visualizer.',
+        'AI Assisted',
+        15,
+        true
+      ) ON CONFLICT (slug) DO UPDATE SET 
+        title = EXCLUDED.title,
+        short_description = EXCLUDED.short_description,
+        seo_title = EXCLUDED.seo_title, 
+        seo_description = EXCLUDED.seo_description;
     `);
 
     console.log('Database tables & migrations verified successfully.');
