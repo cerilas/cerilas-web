@@ -1,10 +1,12 @@
 import React from 'react';
-import { BarChart3, Sparkles } from 'lucide-react';
+import { BarChart3, Sparkles, Sun, Moon } from 'lucide-react';
 import { useTranslation } from '../i18n';
+import { useTheme } from '../context/ThemeContext';
 import PersonaMenu from './PersonaMenu/PersonaMenu';
 
 export default function Navbar({ activeTool, onNavigateHome, onOpenStats, onSelectTool }) {
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
+  const { toggleTheme, isDark } = useTheme();
   const isAi = activeTool && (activeTool.isAi || activeTool.badge === 'AI Assisted' || activeTool.badge === 'AI Powered' || activeTool.slug === 'ats-resume-checker');
 
   return (
@@ -73,6 +75,15 @@ export default function Navbar({ activeTool, onNavigateHome, onOpenStats, onSele
           >
             <BarChart3 size={15} />
             <span className="nav-stats-label">{t('nav.stats')}</span>
+          </button>
+
+          <button
+            onClick={toggleTheme}
+            className="nav-theme-toggle-btn"
+            title={isDark ? (language === 'tr' ? 'Açık Tema' : 'Switch to Light Mode') : (language === 'tr' ? 'Koyu Tema' : 'Switch to Dark Mode')}
+            aria-label={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+          >
+            {isDark ? <Sun size={16} /> : <Moon size={16} />}
           </button>
         </div>
       </div>

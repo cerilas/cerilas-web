@@ -37,11 +37,18 @@
 }
 
 @media (prefers-color-scheme: dark) {
-  .stats-modal-container.stats-modal-single {
+  :root:not([data-theme="light"]):not(.light) .stats-modal-container.stats-modal-single {
     background: #141417;
     border-color: rgba(255, 255, 255, 0.1);
     box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.05);
   }
+}
+
+[data-theme="dark"] .stats-modal-container.stats-modal-single,
+html.dark .stats-modal-container.stats-modal-single {
+  background: #141417;
+  border-color: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.05);
 }
 
 @keyframes statsModalScale {
@@ -94,9 +101,14 @@
 }
 
 @media (prefers-color-scheme: dark) {
-  .stats-single-sentence {
+  :root:not([data-theme="light"]):not(.light) .stats-single-sentence {
     color: #f1f5f9;
   }
+}
+
+[data-theme="dark"] .stats-single-sentence,
+html.dark .stats-single-sentence {
+  color: #f1f5f9;
 }
 
 .stats-stat-highlight {
@@ -108,11 +120,18 @@
 }
 
 @media (prefers-color-scheme: dark) {
-  .stats-stat-highlight {
+  :root:not([data-theme="light"]):not(.light) .stats-stat-highlight {
     background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
   }
+}
+
+[data-theme="dark"] .stats-stat-highlight,
+html.dark .stats-stat-highlight {
+  background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 .stats-live-inline-badge {
