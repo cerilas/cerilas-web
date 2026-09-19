@@ -89,7 +89,7 @@ export default function OverviewView({ statsOverview = null, tools = [], onSelec
       </div>
 
       {/* Grid: Top Performing Tools & Event Breakdown */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: '1.5rem', marginBottom: '2rem' }}>
+      <div className="admin-two-col-grid">
         {/* Top Tools Card */}
         <div style={{
           background: 'var(--card-bg, #ffffff)',

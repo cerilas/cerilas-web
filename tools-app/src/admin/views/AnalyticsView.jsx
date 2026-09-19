@@ -21,7 +21,7 @@ export default function AnalyticsView({ statsOverview = null, tools = [] }) {
 
   return (
     <div className="admin-body">
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1.5rem', marginBottom: '2rem' }}>
+      <div className="admin-two-col-grid">
         {/* Event Volume Distribution */}
         <div style={{
           background: 'var(--card-bg, #ffffff)',

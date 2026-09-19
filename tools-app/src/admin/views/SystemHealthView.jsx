@@ -71,7 +71,7 @@ export default function SystemHealthView() {
       </div>
 
       {/* Health Cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.25rem', marginBottom: '2rem' }}>
+      <div className="admin-health-grid">
         {/* PostgreSQL Health */}
         <div style={{
           background: 'var(--card-bg, #ffffff)',

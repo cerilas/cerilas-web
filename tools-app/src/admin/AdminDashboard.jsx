@@ -127,12 +127,14 @@ export default function AdminDashboard() {
   const handleSelectTool = (slug) => {
     setSelectedToolSlug(slug);
     setCurrentTab('tools');
+    setIsSidebarOpen(false);
     window.location.hash = `#/tools/${slug}`;
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleBackToTools = () => {
     setSelectedToolSlug(null);
+    setIsSidebarOpen(false);
     window.location.hash = '#/tools';
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -140,6 +142,7 @@ export default function AdminDashboard() {
   const handleSelectTab = (tab) => {
     setCurrentTab(tab);
     setSelectedToolSlug(null);
+    setIsSidebarOpen(false);
     window.location.hash = `#/${tab}`;
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };

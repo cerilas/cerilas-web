@@ -80,7 +80,8 @@ export default function AdminHeader({
         {/* Real-time 30-min Live Visitors Badge */}
         <div className="admin-live-badge" title="Active users on Cerilas Tools within the last 30 minutes">
           <span className="admin-pulse-dot" />
-          <span>{Number(liveVisitors || 1).toLocaleString()} Live Visitors</span>
+          <span className="admin-live-text">{Number(liveVisitors || 1).toLocaleString()} Live Visitors</span>
+          <span className="admin-live-text-mobile">{Number(liveVisitors || 1).toLocaleString()}</span>
         </div>
 
         {/* Dark / Light Mode Toggle */}
@@ -97,11 +98,10 @@ export default function AdminHeader({
         {/* Public Catalog Link */}
         <a 
           href="/" 
-          className="admin-action-btn primary"
+          className="admin-action-btn primary admin-live-site-btn"
           title="Open Public User Catalog"
-          style={{ padding: '0.45rem 0.85rem' }}
         >
-          <span>Live Site</span>
+          <span className="admin-live-site-text">Live Site</span>
           <ExternalLink size={13} />
         </a>
       </div>

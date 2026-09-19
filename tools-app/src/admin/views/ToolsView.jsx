@@ -23,7 +23,7 @@ import ToolDetailModal from '../components/ToolDetailModal';
 export default function ToolsView({ tools = [], statsOverview = null, loading = false, onSelectTool }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
-  const [viewMode, setViewMode] = useState('table'); // 'table' | 'grid'
+  const [viewMode, setViewMode] = useState(() => (typeof window !== 'undefined' && window.innerWidth < 768 ? 'grid' : 'table'));
   const [selectedToolForModal, setSelectedToolForModal] = useState(null);
   const [copiedSlug, setCopiedSlug] = useState(null);
 

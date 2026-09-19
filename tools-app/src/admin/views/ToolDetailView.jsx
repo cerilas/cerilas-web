@@ -62,8 +62,8 @@ export default function ToolDetailView({ tool, onBack }) {
 
   return (
     <div className="admin-body">
-      {/* Top Navigation & Breadcrumbs */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
+      {/* Top Navigation & Actions */}
+      <div className="admin-detail-top-nav">
         <button 
           type="button" 
           className="admin-action-btn"
@@ -74,14 +74,15 @@ export default function ToolDetailView({ tool, onBack }) {
           <span>All Tools</span>
         </button>
 
-        <div style={{ display: 'flex', gap: '0.5rem' }}>
+        <div className="admin-detail-actions">
           <button 
             type="button" 
             className="admin-action-btn"
             onClick={handleCopyUrl}
           >
             {copiedUrl ? <Check size={14} color="#10b981" /> : <Copy size={14} />}
-            <span>{copiedUrl ? 'Copied URL' : 'Copy Live URL'}</span>
+            <span className="admin-btn-text-desktop">{copiedUrl ? 'Copied URL' : 'Copy Live URL'}</span>
+            <span className="admin-btn-text-mobile">{copiedUrl ? 'Copied' : 'Copy'}</span>
           </button>
           <a 
             href={`/tool/${tool.slug}`} 
@@ -90,32 +91,20 @@ export default function ToolDetailView({ tool, onBack }) {
             className="admin-action-btn primary"
           >
             <ExternalLink size={14} />
-            <span>Open Tool Live</span>
+            <span className="admin-btn-text-desktop">Open Tool Live</span>
+            <span className="admin-btn-text-mobile">Open</span>
           </a>
         </div>
       </div>
 
       {/* Tool Header Hero Card */}
-      <div style={{
-        background: 'var(--card-bg, #ffffff)',
-        border: '1px solid var(--card-border, rgba(0,0,0,0.07))',
-        borderRadius: 20,
-        padding: '1.75rem',
-        marginBottom: '1.5rem',
-        boxShadow: '0 4px 20px rgba(0, 0, 0, 0.02)'
-      }}>
-        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1.25rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
+      <div className="admin-detail-hero">
+        <div className="admin-detail-hero-top">
+          <div className="admin-detail-hero-left">
             <img 
               src={`/tool-icons/${tool.slug}.webp`} 
               alt="" 
-              style={{
-                width: 64,
-                height: 64,
-                borderRadius: 16,
-                objectFit: 'cover',
-                boxShadow: '0 6px 18px rgba(0, 0, 0, 0.08)'
-              }}
+              className="admin-detail-hero-icon"
               onError={(e) => {
                 if (!e.target.dataset.triedPng) {
                   e.target.dataset.triedPng = 'true';
@@ -123,29 +112,31 @@ export default function ToolDetailView({ tool, onBack }) {
                 }
               }}
             />
-            <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', flexWrap: 'wrap' }}>
-                <h1 style={{ margin: 0, fontSize: '1.5rem', fontWeight: 700, letterSpacing: '-0.02em' }}>
+            <div className="admin-detail-hero-info">
+              <div className="admin-detail-title-row">
+                <h1 className="admin-detail-title-text">
                   {tool.title}
                 </h1>
-                <span className="admin-status-pill admin-status-active">
-                  <CheckCircle2 size={11} />
-                  Active
-                </span>
-                {isAi ? (
-                  <span className="admin-status-pill admin-status-ai">
-                    <Sparkles size={11} />
-                    Gemini AI
-                  </span>
-                ) : (
+                <div className="admin-detail-status-pills">
                   <span className="admin-status-pill admin-status-active">
-                    <ShieldCheck size={11} />
-                    Client WASM
+                    <CheckCircle2 size={11} />
+                    Active
                   </span>
-                )}
+                  {isAi ? (
+                    <span className="admin-status-pill admin-status-ai">
+                      <Sparkles size={11} />
+                      Gemini AI
+                    </span>
+                  ) : (
+                    <span className="admin-status-pill admin-status-active">
+                      <ShieldCheck size={11} />
+                      Client WASM
+                    </span>
+                  )}
+                </div>
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem', marginTop: '0.35rem', fontSize: '0.82rem', color: 'var(--text-muted)' }}>
-                <span style={{ fontFamily: 'monospace' }}>tools.cerilas.com/tool/{tool.slug}</span>
+              <div className="admin-detail-meta-row">
+                <span className="admin-detail-slug-text">tools.cerilas.com/tool/{tool.slug}</span>
                 <span>•</span>
                 <span>{tool.category || 'General'}</span>
               </div>
@@ -153,7 +144,7 @@ export default function ToolDetailView({ tool, onBack }) {
           </div>
         </div>
 
-        <p style={{ margin: '1.25rem 0 0 0', fontSize: '0.92rem', lineHeight: 1.6, color: 'var(--text-muted)', maxWidth: '900px' }}>
+        <p className="admin-detail-desc">
           {tool.description || tool.short_description || tool.seo?.description || 'No detailed description available.'}
         </p>
       </div>
@@ -218,7 +209,7 @@ export default function ToolDetailView({ tool, onBack }) {
       </div>
 
       {/* Tabs Switcher for Detail Sections */}
-      <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem', borderBottom: '1px solid var(--card-border, rgba(0,0,0,0.06))', paddingBottom: '0.75rem' }}>
+      <div className="admin-detail-tabs">
         <button
           type="button"
           className={`admin-filter-pill ${activeTab === 'overview' ? 'active' : ''}`}
@@ -231,7 +222,7 @@ export default function ToolDetailView({ tool, onBack }) {
           className={`admin-filter-pill ${activeTab === 'seo' ? 'active' : ''}`}
           onClick={() => setActiveTab('seo')}
         >
-          SEO & Google SERP Preview
+          SEO & SERP Preview
         </button>
         <button
           type="button"
@@ -244,7 +235,7 @@ export default function ToolDetailView({ tool, onBack }) {
 
       {/* Tab 1: Overview & Capabilities */}
       {activeTab === 'overview' && (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: '1.5rem' }}>
+        <div className="admin-detail-panels-grid">
           {/* Features List */}
           <div style={{
             background: 'var(--card-bg, #ffffff)',
@@ -328,13 +319,7 @@ export default function ToolDetailView({ tool, onBack }) {
               How Googlebot indexes and presents this tool in search engine results
             </span>
 
-            <div style={{
-              background: 'var(--bg-color, #f8fafc)',
-              border: '1px solid var(--card-border, rgba(0,0,0,0.1))',
-              borderRadius: 14,
-              padding: '1.25rem',
-              maxWidth: '650px'
-            }}>
+            <div className="admin-serp-preview-box">
               <div style={{ fontSize: '0.78rem', color: '#1a0dab', display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.25rem' }}>
                 <span style={{ color: 'var(--text-muted)' }}>https://tools.cerilas.com › tool › {tool.slug}</span>
               </div>
@@ -405,16 +390,7 @@ export default function ToolDetailView({ tool, onBack }) {
             </button>
           </div>
 
-          <pre style={{
-            background: '#09090b',
-            color: '#38bdf8',
-            padding: '1.25rem',
-            borderRadius: 14,
-            overflowX: 'auto',
-            fontSize: '0.82rem',
-            fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
-            maxHeight: '480px'
-          }}>
+          <pre className="admin-json-code-block">
             {JSON.stringify(tool, null, 2)}
           </pre>
         </div>
