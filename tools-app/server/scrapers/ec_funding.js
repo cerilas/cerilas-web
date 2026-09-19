@@ -21,30 +21,45 @@ function generateContentHash(data) {
 }
 
 /**
- * Extract numerical & formatted budget from EC budgetOverview
+ * Extract numerical & formatted budget from EC metadata
  */
-function extractBudget(budgetOverviewStr) {
-  if (!budgetOverviewStr) return { formatted: 'EU Grant / Hibe', raw: null };
-  try {
-    const bObj = typeof budgetOverviewStr === 'string' ? JSON.parse(budgetOverviewStr) : budgetOverviewStr;
-    if (bObj?.budgetTopicActionMap) {
-      for (const actionKey in bObj.budgetTopicActionMap) {
-        const actionArr = bObj.budgetTopicActionMap[actionKey];
-        if (Array.isArray(actionArr) && actionArr[0]?.budgetYearMap) {
-          const amounts = Object.values(actionArr[0].budgetYearMap).map(Number).filter(n => !isNaN(n) && n > 0);
-          if (amounts.length > 0) {
-            const sum = amounts.reduce((a, b) => a + b, 0);
-            return {
-              formatted: '€' + sum.toLocaleString('de-DE'),
-              raw: sum.toFixed(2)
-            };
+function extractBudget(m, isCompetitiveCall) {
+  // 1. Check competitive call direct budget field
+  if (isCompetitiveCall && m.budget?.[0]) {
+    const num = parseFloat(m.budget[0]);
+    if (!isNaN(num) && num > 0) {
+      return {
+        formatted: '€' + num.toLocaleString('de-DE'),
+        raw: num.toFixed(2)
+      };
+    }
+  }
+
+  // 2. Check serialized budgetOverview JSON
+  const budgetOverviewStr = m.budgetOverview?.[0];
+  if (budgetOverviewStr) {
+    try {
+      const bObj = typeof budgetOverviewStr === 'string' ? JSON.parse(budgetOverviewStr) : budgetOverviewStr;
+      if (bObj?.budgetTopicActionMap) {
+        for (const actionKey in bObj.budgetTopicActionMap) {
+          const actionArr = bObj.budgetTopicActionMap[actionKey];
+          if (Array.isArray(actionArr) && actionArr[0]?.budgetYearMap) {
+            const amounts = Object.values(actionArr[0].budgetYearMap).map(Number).filter(n => !isNaN(n) && n > 0);
+            if (amounts.length > 0) {
+              const sum = amounts.reduce((a, b) => a + b, 0);
+              return {
+                formatted: '€' + sum.toLocaleString('de-DE'),
+                raw: sum.toFixed(2)
+              };
+            }
           }
         }
       }
+    } catch (e) {
+      // Ignore JSON parse errors
     }
-  } catch (e) {
-    // Ignore JSON parse errors
   }
+
   return { formatted: 'EU Grant / Hibe', raw: null };
 }
 
@@ -58,24 +73,30 @@ function deriveDomains(metadata) {
   const title = (metadata.title?.[0] || '').toLowerCase();
   const id = (metadata.identifier?.[0] || '').toLowerCase();
   const destDesc = (metadata.destinationDescription?.[0] || '').toLowerCase();
+  const callTitle = (metadata.callTitle?.[0] || '').toLowerCase();
 
-  if (title.includes('ai ') || title.includes('digital') || title.includes('data') || id.includes('cl4')) {
+  const combined = `${title} ${id} ${destDesc} ${callTitle}`;
+
+  if (combined.includes('ai ') || combined.includes('digital') || combined.includes('data') || combined.includes('cyber') || id.includes('cl4') || id.includes('digital')) {
     domains.add('Digital, Industry & Space');
   }
-  if (title.includes('energy') || title.includes('climate') || title.includes('mobility') || title.includes('ev') || id.includes('cl5')) {
+  if (combined.includes('energy') || combined.includes('climate') || combined.includes('mobility') || combined.includes('ev') || combined.includes('battery') || id.includes('cl5')) {
     domains.add('Climate, Energy & Mobility');
   }
-  if (title.includes('health') || title.includes('cancer') || id.includes('hlth')) {
+  if (combined.includes('health') || combined.includes('cancer') || combined.includes('biotech') || combined.includes('medical') || id.includes('hlth')) {
     domains.add('Health & Biotech');
   }
-  if (title.includes('msca') || title.includes('doctoral') || title.includes('researcher')) {
+  if (combined.includes('msca') || combined.includes('doctoral') || combined.includes('fellowship') || combined.includes('researcher')) {
     domains.add('Marie Skłodowska-Curie Actions (MSCA)');
   }
-  if (title.includes('materials') || title.includes('manufacturing')) {
+  if (combined.includes('materials') || combined.includes('manufacturing') || combined.includes('industrial') || combined.includes('sme')) {
     domains.add('Advanced Materials & Manufacturing');
   }
-  if (title.includes('circular') || title.includes('sustainab') || title.includes('green')) {
+  if (combined.includes('circular') || combined.includes('sustainab') || combined.includes('green') || combined.includes('nature') || combined.includes('life')) {
     domains.add('Circular Economy & Green Transition');
+  }
+  if (combined.includes('food') || combined.includes('agriculture') || combined.includes('bioeconomy') || combined.includes('marine')) {
+    domains.add('Food, Bioeconomy & Natural Resources');
   }
 
   if (metadata.typesOfAction?.[0]) {
@@ -86,10 +107,196 @@ function deriveDomains(metadata) {
 }
 
 /**
+ * Derive eligible applicants list from metadata
+ */
+function deriveEligibleApplicants(m, isCompetitiveCall) {
+  const text = (
+    (m.description?.[0] || '') + ' ' + 
+    (m.topicConditions?.[0] || '') + ' ' + 
+    (m.typesOfAction?.[0] || '') + ' ' +
+    (m.beneficiaryAdministration?.[0] || '')
+  ).toLowerCase();
+
+  const set = new Set();
+
+  if (text.includes('sme') || text.includes('small and medium') || text.includes('startup') || isCompetitiveCall) {
+    set.add('SMEs & Startups');
+  }
+  if (text.includes('universit') || text.includes('academic') || text.includes('higher education') || text.includes('doctoral')) {
+    set.add('Universities & Academic Institutions');
+  }
+  if (text.includes('research') || text.includes('scientific') || text.includes('r&d')) {
+    set.add('Research Organizations');
+  }
+  if (text.includes('public authorit') || text.includes('municipalit') || text.includes('public bod') || text.includes('ministry')) {
+    set.add('Public Authorities & Municipalities');
+  }
+  if (text.includes('large enterprise') || text.includes('large compan') || text.includes('industry')) {
+    set.add('Large Enterprises & Industry Partners');
+  }
+  if (text.includes('individual') || text.includes('researcher') || text.includes('postdoctoral') || text.includes('doctoral candidate')) {
+    set.add('Individual Researchers');
+  }
+  if (text.includes('ngo') || text.includes('civil society') || text.includes('non-profit')) {
+    set.add('NGOs & Non-Profits');
+  }
+
+  if (set.size === 0) {
+    set.add('SMEs & Startups');
+    set.add('Research Organizations');
+    set.add('Universities & Academic Institutions');
+  }
+
+  return Array.from(set);
+}
+
+/**
+ * Assemble comprehensive multi-section HTML details for modal display
+ */
+function assembleRichDescription(m, isCompetitiveCall) {
+  const sections = [];
+
+  if (isCompetitiveCall) {
+    // 1. Who can apply / Eligibility (Competitive sub-grants)
+    if (m.description?.[0]) {
+      sections.push(`
+        <div class="ec-section" style="margin-bottom: 1.25rem;">
+          <h4 style="font-size: 0.95rem; font-weight: 700; color: var(--text-main, #1e293b); margin: 0 0 0.5rem;">
+            🎯 Kimler Başvurabilir? (Eligibility & Target Applicants)
+          </h4>
+          <div style="font-size: 0.88rem; line-height: 1.6; color: var(--text-muted, #475569);">
+            ${m.description[0]}
+          </div>
+        </div>
+      `);
+    }
+
+    // 2. Call purpose and scope
+    if (m.furtherInformation?.[0]) {
+      sections.push(`
+        <div class="ec-section" style="margin-bottom: 1.25rem;">
+          <h4 style="font-size: 0.95rem; font-weight: 700; color: var(--text-main, #1e293b); margin: 0 0 0.5rem;">
+            📋 Çağrı Amacı ve Kapsamı (Call Purpose & Scope)
+          </h4>
+          <div style="font-size: 0.88rem; line-height: 1.6; color: var(--text-muted, #475569);">
+            ${m.furtherInformation[0]}
+          </div>
+        </div>
+      `);
+    }
+
+    // 3. How to apply & submission instructions
+    if (m.beneficiaryAdministration?.[0] || m.destinationDetails?.[0]) {
+      sections.push(`
+        <div class="ec-section" style="margin-bottom: 1.25rem;">
+          <h4 style="font-size: 0.95rem; font-weight: 700; color: var(--text-main, #1e293b); margin: 0 0 0.5rem;">
+            🚀 Başvuru Yöntemi ve Süreci (How to Apply)
+          </h4>
+          <div style="font-size: 0.88rem; line-height: 1.6; color: var(--text-muted, #475569);">
+            ${m.beneficiaryAdministration?.[0] || m.destinationDetails[0]}
+          </div>
+        </div>
+      `);
+    }
+
+    // 4. Timeline & availability
+    if (m.duration?.[0]) {
+      sections.push(`
+        <div class="ec-section" style="margin-bottom: 1.25rem;">
+          <h4 style="font-size: 0.95rem; font-weight: 700; color: var(--text-main, #1e293b); margin: 0 0 0.5rem;">
+            ⏱️ Zaman Çizelgesi ve Çağrı Süresi (Timeline & Schedule)
+          </h4>
+          <p style="font-size: 0.88rem; line-height: 1.6; color: var(--text-muted, #475569); margin: 0;">
+            ${m.duration[0].replace(/\n/g, '<br/>')}
+          </p>
+        </div>
+      `);
+    }
+  } else {
+    // Horizon Europe & Direct EU Calls
+    // 1. Objectives and Expected Outcomes (the core technical details)
+    if (m.descriptionByte?.[0]) {
+      sections.push(`
+        <div class="ec-section" style="margin-bottom: 1.25rem;">
+          <h4 style="font-size: 0.95rem; font-weight: 700; color: var(--text-main, #1e293b); margin: 0 0 0.5rem;">
+            🎯 Beklenen Sonuçlar ve Çağrı Kapsamı (Expected Outcome & Scope)
+          </h4>
+          <div style="font-size: 0.88rem; line-height: 1.6; color: var(--text-muted, #475569);">
+            ${m.descriptionByte[0]}
+          </div>
+        </div>
+      `);
+    }
+
+    // 2. Destination Details and Policy Context
+    if (m.destinationDetails?.[0]) {
+      sections.push(`
+        <div class="ec-section" style="margin-bottom: 1.25rem;">
+          <h4 style="font-size: 0.95rem; font-weight: 700; color: var(--text-main, #1e293b); margin: 0 0 0.5rem;">
+            🌍 Program Arka Planı ve Hedefler (Destination & Strategic Context)
+          </h4>
+          <div style="font-size: 0.88rem; line-height: 1.6; color: var(--text-muted, #475569);">
+            ${m.destinationDetails[0]}
+          </div>
+        </div>
+      `);
+    }
+
+    // 3. Topic Conditions & Eligibility Rules
+    if (m.topicConditions?.[0]) {
+      sections.push(`
+        <div class="ec-section" style="margin-bottom: 1.25rem;">
+          <h4 style="font-size: 0.95rem; font-weight: 700; color: var(--text-main, #1e293b); margin: 0 0 0.5rem;">
+            ⚖️ Katılım Şartları ve Başvuru Kriterleri (General Conditions & Eligibility)
+          </h4>
+          <div style="font-size: 0.88rem; line-height: 1.6; color: var(--text-muted, #475569);">
+            ${m.topicConditions[0]}
+          </div>
+        </div>
+      `);
+    }
+
+    // 4. Online Manual & Applicant Support
+    if (m.supportInfo?.[0]) {
+      sections.push(`
+        <div class="ec-section" style="margin-bottom: 1.25rem;">
+          <h4 style="font-size: 0.95rem; font-weight: 700; color: var(--text-main, #1e293b); margin: 0 0 0.5rem;">
+            📚 Rehberler ve Başvuru Desteği (Support & Guidance)
+          </h4>
+          <div style="font-size: 0.88rem; line-height: 1.6; color: var(--text-muted, #475569);">
+            ${m.supportInfo[0]}
+          </div>
+        </div>
+      `);
+    }
+  }
+
+  if (sections.length > 0) {
+    return sections.join('<hr style="margin: 1.25rem 0; border: 0; border-top: 1px solid rgba(150, 150, 150, 0.15);" />');
+  }
+
+  return m.topicConditions?.[0] || m.destinationDescription?.[0] || '';
+}
+
+/**
+ * Derive clean short preview text without raw HTML tags
+ */
+function deriveShortDescription(m, isCompetitiveCall, summary) {
+  let raw = '';
+  if (isCompetitiveCall) {
+    raw = m.furtherInformation?.[0] || m.description?.[0] || m.callTitle?.[0] || summary || '';
+  } else {
+    raw = m.destinationDescription?.[0] || m.descriptionByte?.[0] || m.callTitle?.[0] || summary || '';
+  }
+  const clean = raw.replace(/<[^>]*>?/gm, ' ').replace(/\s+/g, ' ').trim();
+  return clean.length > 280 ? clean.slice(0, 277) + '...' : clean;
+}
+
+/**
  * Scrape European Commission Funding & Tenders Portal (Active & Forthcoming Calls Only)
  * @param {string} triggeredBy - 'admin_manual', 'webhook', or 'cron'
  * @param {number} pageSize - default 100 items per request
- * @param {number} maxPages - default 30 pages (up to 3,000 items, covers all active calls)
+ * @param {number} maxPages - default 30 pages
  */
 export async function scrapeEcFunding(triggeredBy = 'manual', pageSize = 100, maxPages = 30) {
   const startTime = Date.now();
@@ -109,7 +316,7 @@ export async function scrapeEcFunding(triggeredBy = 'manual', pageSize = 100, ma
       const query = {
         bool: {
           must: [
-            { terms: { type: ['1', '2', '8'] } },
+            { terms: { type: ['1', '8'] } },
             { terms: { status: ['31094501', '31094502'] } }
           ]
         }
@@ -140,7 +347,7 @@ export async function scrapeEcFunding(triggeredBy = 'manual', pageSize = 100, ma
       }
     }
 
-    // Preload existing records for this source to eliminate hundreds of individual DB roundtrips
+    // Preload existing records into memory for instant hash comparison
     const existingMap = new Map();
     const existingRes = await pool.query(
       'SELECT id, external_id, content_hash FROM funding_opportunities WHERE source_key = $1',
@@ -155,7 +362,13 @@ export async function scrapeEcFunding(triggeredBy = 'manual', pageSize = 100, ma
 
     for (const r of allResults) {
       const m = r.metadata || {};
-      const title = m.title?.[0] || r.summary || '';
+      const isCompetitiveCall = m.type?.[0] === '8' || r.reference?.includes('COMPETITIVE');
+
+      // Title: Use specific sub-grant call title for type 8, topic title for type 1
+      const title = isCompetitiveCall
+        ? (m.callTitle?.[0] || m.caName?.[0] || r.summary || m.title?.[0] || '')
+        : (m.title?.[0] || r.summary || '');
+
       const externalId = r.reference || m.identifier?.[0] || m.ccm2Id?.[0];
 
       // Skip entries without valid title or identifier
@@ -177,12 +390,13 @@ export async function scrapeEcFunding(triggeredBy = 'manual', pageSize = 100, ma
 
       activeExternalIds.add(externalId);
 
-      const shortDesc = m.destinationDescription?.[0] || m.callTitle?.[0] || r.summary || '';
-      const longDesc = m.topicConditions?.[0] || shortDesc;
+      // Extract rich multi-section HTML description and clean summary
+      const shortDesc = deriveShortDescription(m, isCompetitiveCall, r.summary);
+      const longDesc = assembleRichDescription(m, isCompetitiveCall);
       
-      const budget = extractBudget(m.budgetOverview?.[0]);
+      const budget = extractBudget(m, isCompetitiveCall);
 
-      // All calls in our database are active open calls
+      // All active calls in our database are open
       const status = 'open';
 
       let openingDate = null;
@@ -192,27 +406,29 @@ export async function scrapeEcFunding(triggeredBy = 'manual', pageSize = 100, ma
         } catch (e) {}
       }
 
-      const eligibleApplicants = [
-        'Universities & Academic Institutions',
-        'Research Organizations',
-        'SMEs & Startups',
-        'Public Authorities & Municipalities',
-        'Large Enterprises & Industry Partners'
-      ];
-
+      const eligibleApplicants = deriveEligibleApplicants(m, isCompetitiveCall);
       const domains = deriveDomains(m);
       const technologies = [
         ...(m.frameworkProgramme || []),
         ...(m.destinationDetails || [])
       ].slice(0, 5);
 
-      const permalink = m.esUrl?.[0] || `https://ec.europa.eu/info/funding-tenders/opportunities/portal/screen/opportunities/topic-details/${externalId.toLowerCase()}`;
+      // Exact, working official EU Portal permalink directly from API
+      const permalink = r.url || m.esST_URL?.[0] || (
+        m.identifier?.[0] 
+          ? `https://ec.europa.eu/info/funding-tenders/opportunities/portal/screen/opportunities/topic-details/${m.identifier[0]}`
+          : EC_PORTAL_URL
+      );
 
       const links = {
         official: permalink,
         apply: permalink,
         portal: EC_PORTAL_URL
       };
+
+      const callType = isCompetitiveCall 
+        ? 'Cascade Funding / Competitive Call'
+        : (m.typesOfAction?.[0] || 'Calls for Proposals (EU Grants)');
 
       const programData = {
         title,
@@ -257,7 +473,7 @@ export async function scrapeEcFunding(triggeredBy = 'manual', pageSize = 100, ma
           JSON.stringify(domains),
           JSON.stringify(technologies),
           JSON.stringify(links),
-          m.typesOfAction?.[0] || 'Calls for proposals (EU Grants)',
+          callType,
           permalink,
           contentHash,
           status
@@ -269,7 +485,7 @@ export async function scrapeEcFunding(triggeredBy = 'manual', pageSize = 100, ma
           unchangedIds.push(existing.id);
           itemsUnchanged++;
         } else {
-          // 3. Updated
+          // 3. Updated (Content changed)
           await pool.query(`
             UPDATE funding_opportunities SET
               title = $1,
@@ -304,7 +520,7 @@ export async function scrapeEcFunding(triggeredBy = 'manual', pageSize = 100, ma
             JSON.stringify(domains),
             JSON.stringify(technologies),
             JSON.stringify(links),
-            m.typesOfAction?.[0] || 'Calls for proposals (EU Grants)',
+            callType,
             permalink,
             contentHash,
             status,

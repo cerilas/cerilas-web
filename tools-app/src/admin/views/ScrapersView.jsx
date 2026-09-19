@@ -1130,15 +1130,15 @@ export default function ScrapersView() {
                   </h4>
                   <div 
                     style={{
-                      maxHeight: 260,
+                      maxHeight: 480,
                       overflowY: 'auto',
-                      padding: '1rem',
+                      padding: '1.25rem',
                       borderRadius: 12,
                       background: 'rgba(150, 150, 150, 0.04)',
                       border: '1px solid var(--card-border, rgba(0,0,0,0.06))',
-                      fontSize: '0.85rem',
+                      fontSize: '0.88rem',
                       lineHeight: 1.65,
-                      color: 'var(--text-muted)'
+                      color: 'var(--text-main)'
                     }}
                     dangerouslySetInnerHTML={{ __html: activeOpportunity.long_description }}
                   />
@@ -1151,16 +1151,18 @@ export default function ScrapersView() {
                   Resmi Bağlantılar & Başvuru Portalları
                 </h4>
                 <div style={{ display: 'flex', gap: '0.65rem', flexWrap: 'wrap' }}>
-                  {activeOpportunity.links?.apply && (
+                  {(activeOpportunity.links?.apply || activeOpportunity.permalink) && (
                     <a
-                      href={activeOpportunity.links.apply}
+                      href={activeOpportunity.links?.apply || activeOpportunity.permalink}
                       target="_blank"
                       rel="noreferrer"
                       className="admin-action-btn primary"
                       style={{ textDecoration: 'none' }}
                     >
                       <ArrowUpRight size={14} />
-                      <span>Hemen Başvur (Apply Portal)</span>
+                      <span>
+                        {activeOpportunity.source_key === 'ec_funding' ? 'Resmi EU Portalı / Başvuru' : 'Hemen Başvur (Apply Portal)'}
+                      </span>
                     </a>
                   )}
 
@@ -1186,20 +1188,20 @@ export default function ScrapersView() {
                       style={{ textDecoration: 'none' }}
                     >
                       <FileText size={14} />
-                      <span>Guidelines (Call Text PDF)</span>
+                      <span>Başvuru Rehberi (PDF)</span>
                     </a>
                   )}
 
-                  {activeOpportunity.permalink && (
+                  {activeOpportunity.links?.portal && (
                     <a
-                      href={activeOpportunity.permalink}
+                      href={activeOpportunity.links.portal}
                       target="_blank"
                       rel="noreferrer"
                       className="admin-action-btn secondary"
                       style={{ textDecoration: 'none' }}
                     >
                       <ExternalLink size={14} />
-                      <span>CascadeFunding Sayfası</span>
+                      <span>Tüm Çağrılar Listesi</span>
                     </a>
                   )}
                 </div>
