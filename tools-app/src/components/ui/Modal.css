@@ -18,15 +18,73 @@
 }
 
 .c-modal-box {
-  background: var(--bg-color);
-  border: 1px solid var(--card-border);
+  background: #ffffff;
+  color: #18181b;
+  border: 1px solid rgba(0, 0, 0, 0.08);
   border-radius: 24px;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(150, 150, 150, 0.08);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(0, 0, 0, 0.04);
   width: 100%;
   max-width: 460px;
   overflow: hidden;
   position: relative;
   animation: cModalScaleIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Dark Mode Modal Enhancements */
+[data-theme="dark"] .c-modal-overlay,
+html.dark .c-modal-overlay,
+body.dark .c-modal-overlay {
+  background: rgba(0, 0, 0, 0.72);
+}
+
+[data-theme="dark"] .c-modal-box,
+html.dark .c-modal-box,
+body.dark .c-modal-box {
+  background: #141416;
+  color: #f4f4f5;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 30px 70px -15px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(255, 255, 255, 0.06);
+}
+
+[data-theme="dark"] .c-modal-title,
+html.dark .c-modal-title,
+body.dark .c-modal-title {
+  color: #ffffff;
+}
+
+[data-theme="dark"] .c-modal-close-btn,
+html.dark .c-modal-close-btn,
+body.dark .c-modal-close-btn {
+  color: #a1a1aa;
+}
+
+[data-theme="dark"] .c-modal-close-btn:hover,
+html.dark .c-modal-close-btn:hover,
+body.dark .c-modal-close-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]):not(.light) .c-modal-overlay {
+    background: rgba(0, 0, 0, 0.72);
+  }
+  :root:not([data-theme="light"]):not(.light) .c-modal-box {
+    background: #141416;
+    color: #f4f4f5;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0 30px 70px -15px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(255, 255, 255, 0.06);
+  }
+  :root:not([data-theme="light"]):not(.light) .c-modal-title {
+    color: #ffffff;
+  }
+  :root:not([data-theme="light"]):not(.light) .c-modal-close-btn {
+    color: #a1a1aa;
+  }
+  :root:not([data-theme="light"]):not(.light) .c-modal-close-btn:hover {
+    background: rgba(255, 255, 255, 0.12);
+    color: #ffffff;
+  }
 }
 
 @keyframes cModalFadeIn {
@@ -155,4 +213,39 @@
   color: var(--text-muted);
   line-height: 1.4;
   margin: 0;
+}
+
+/* Quota Elements Dark Mode */
+[data-theme="dark"] .c-quota-title,
+html.dark .c-quota-title {
+  color: #ffffff;
+}
+
+[data-theme="dark"] .c-quota-desc,
+html.dark .c-quota-desc,
+[data-theme="dark"] .c-quota-info-note,
+html.dark .c-quota-info-note {
+  color: #a1a1aa;
+}
+
+[data-theme="dark"] .c-quota-timer-box,
+html.dark .c-quota-timer-box {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.1);
+  color: #f4f4f5;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]):not(.light) .c-quota-title {
+    color: #ffffff;
+  }
+  :root:not([data-theme="light"]):not(.light) .c-quota-desc,
+  :root:not([data-theme="light"]):not(.light) .c-quota-info-note {
+    color: #a1a1aa;
+  }
+  :root:not([data-theme="light"]):not(.light) .c-quota-timer-box {
+    background: rgba(255, 255, 255, 0.04);
+    border-color: rgba(255, 255, 255, 0.1);
+    color: #f4f4f5;
+  }
 }

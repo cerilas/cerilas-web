@@ -625,6 +625,12 @@
   border: 1px solid var(--card-border);
 }
 
+[data-theme="dark"] .pdf-modal-tabs,
+html.dark .pdf-modal-tabs {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
 .pdf-modal-tab {
   flex: 1;
   padding: 0.55rem 1rem;
@@ -643,9 +649,16 @@
 }
 
 .pdf-modal-tab.active {
-  background: var(--card-bg);
+  background: var(--card-bg, #ffffff);
   color: var(--text-main);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+[data-theme="dark"] .pdf-modal-tab.active,
+html.dark .pdf-modal-tab.active {
+  background: rgba(255, 255, 255, 0.12);
+  color: #f4f4f5;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
 .pdf-draw-container {
@@ -701,6 +714,20 @@
   border-color: var(--text-main);
 }
 
+[data-theme="dark"] .line-btn,
+html.dark .line-btn {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.1);
+  color: #a1a1aa;
+}
+
+[data-theme="dark"] .line-btn.active,
+html.dark .line-btn.active {
+  background: #ffffff;
+  color: #09090b;
+  border-color: #ffffff;
+}
+
 .pdf-clear-btn {
   background: transparent;
   border: none;
@@ -724,6 +751,12 @@
   border: 1px solid var(--card-border);
   box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.04);
   overflow: hidden;
+}
+
+[data-theme="dark"] .pdf-canvas-wrap,
+html.dark .pdf-canvas-wrap {
+  border-color: rgba(255, 255, 255, 0.18);
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.2);
 }
 
 .pdf-signature-canvas {
@@ -765,6 +798,18 @@
 .pdf-sig-upload-box:hover {
   border-color: var(--text-main);
   background: rgba(150, 150, 150, 0.06);
+}
+
+[data-theme="dark"] .pdf-sig-upload-box,
+html.dark .pdf-sig-upload-box {
+  background: rgba(255, 255, 255, 0.02);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+[data-theme="dark"] .pdf-sig-upload-box:hover,
+html.dark .pdf-sig-upload-box:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.25);
 }
 
 .pdf-upload-idle {

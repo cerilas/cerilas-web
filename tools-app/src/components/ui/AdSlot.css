@@ -13,12 +13,60 @@
   overflow: hidden;
   text-align: center;
   width: 100%;
+  border-radius: 12px;
+  background-color: transparent;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
 }
 
 .ad-slot-wrapper ins.adsbygoogle {
   display: block;
   width: 100%;
   margin: 0 auto;
+  border-radius: 12px;
+}
+
+/* ==========================================================================
+   Dark Mode: Pure Solid Black Ad Container & Frames
+   ========================================================================== */
+[data-theme="dark"] .ad-slot-wrapper,
+html.dark .ad-slot-wrapper,
+body.dark .ad-slot-wrapper {
+  background-color: #000000 !important;
+  color-scheme: dark;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+}
+
+[data-theme="dark"] .ad-slot-wrapper ins.adsbygoogle,
+html.dark .ad-slot-wrapper ins.adsbygoogle,
+body.dark .ad-slot-wrapper ins.adsbygoogle,
+[data-theme="dark"] .ad-slot-wrapper iframe,
+html.dark .ad-slot-wrapper iframe,
+body.dark .ad-slot-wrapper iframe {
+  background-color: #000000 !important;
+  color-scheme: dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]):not(.light) .ad-slot-wrapper {
+    background-color: #000000 !important;
+    color-scheme: dark;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+  }
+
+  :root:not([data-theme="light"]):not(.light) .ad-slot-wrapper ins.adsbygoogle,
+  :root:not([data-theme="light"]):not(.light) .ad-slot-wrapper iframe {
+    background-color: #000000 !important;
+    color-scheme: dark;
+  }
+}
+
+/* Light Mode Styling */
+[data-theme="light"] .ad-slot-wrapper,
+html.light .ad-slot-wrapper {
+  background-color: rgba(0, 0, 0, 0.015);
+  border: 1px solid rgba(0, 0, 0, 0.04);
 }
 
 /* ==========================================================================
