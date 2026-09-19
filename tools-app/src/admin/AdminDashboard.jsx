@@ -11,7 +11,7 @@ import { getAllRegisteredTools } from '../tools/registry';
 import './AdminDashboard.css';
 
 export default function AdminDashboard() {
-  // Default tab is 'tools' as requested: "Sol menüdeki ilk item Tools olacak, girince tools'ların listesi çıkacak"
+  // Default tab is 'tools' as requested: "First item in the sidebar is Tools, showing the tools catalog on load"
   const [currentTab, setCurrentTab] = useState('tools');
   const [selectedToolSlug, setSelectedToolSlug] = useState(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);

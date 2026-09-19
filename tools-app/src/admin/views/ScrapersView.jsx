@@ -172,7 +172,7 @@ export default function ScrapersView() {
         const d = json.data;
         setScraperMessage({
           type: 'success',
-          text: `Scraping tamamlandı: ${d.items_found} program tarandı. ${d.items_inserted} yeni eklendi, ${d.items_updated} güncellendi, ${d.items_unchanged} değişmedi (SHA-256 ile korundu).`
+          text: `Scraping completed: ${d.items_found} opportunities scanned. ${d.items_inserted} inserted, ${d.items_updated} updated, ${d.items_unchanged} unchanged (verified via SHA-256).`
         });
         await fetchSources();
         await fetchFilterFacets();
@@ -180,13 +180,13 @@ export default function ScrapersView() {
       } else {
         setScraperMessage({
           type: 'error',
-          text: json.message || 'Scraping işlemi başarısız oldu.'
+          text: json.message || 'Scraping process failed.'
         });
       }
     } catch (err) {
       setScraperMessage({
         type: 'error',
-        text: 'Scraper çalıştırılırken bağlantı hatası oluştu.'
+        text: 'A connection error occurred while running the scraper.'
       });
     } finally {
       setRunningScraper(null);
@@ -203,10 +203,10 @@ export default function ScrapersView() {
 
   // Format date helper
   const formatDate = (isoString) => {
-    if (!isoString) return 'Açık / Devam Ediyor';
+    if (!isoString) return 'Open / Ongoing';
     try {
       const d = new Date(isoString);
-      return d.toLocaleDateString('tr-TR', { day: 'numeric', month: 'short', year: 'numeric' });
+      return d.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
     } catch {
       return isoString;
     }
@@ -248,7 +248,7 @@ export default function ScrapersView() {
       <div className="admin-kpi-grid">
         <div className="admin-kpi-card">
           <div className="admin-kpi-header">
-            <span className="admin-kpi-label">Toplam Fon Fırsatı</span>
+            <span className="admin-kpi-label">Total Opportunities</span>
             <div className="admin-kpi-icon-wrap" style={{ background: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6' }}>
               <Database size={16} />
             </div>
@@ -256,13 +256,13 @@ export default function ScrapersView() {
           <div className="admin-kpi-val">{totalItems}</div>
           <div className="admin-kpi-sub">
             <CheckCircle2 size={13} color="#10b981" />
-            <span style={{ color: '#10b981', fontWeight: 600 }}>Veritabanında Kayıtlı</span>
+            <span style={{ color: '#10b981', fontWeight: 600 }}>Indexed in Database</span>
           </div>
         </div>
 
         <div className="admin-kpi-card">
           <div className="admin-kpi-header">
-            <span className="admin-kpi-label">Açık Çağrılar</span>
+            <span className="admin-kpi-label">Open Calls</span>
             <div className="admin-kpi-icon-wrap" style={{ background: 'rgba(16, 185, 129, 0.1)', color: '#10b981' }}>
               <TrendingUp size={16} />
             </div>
@@ -271,33 +271,33 @@ export default function ScrapersView() {
             {sources.length > 0 ? sources.reduce((acc, s) => acc + (s.open_items || 0), 0) : openOppsCount}
           </div>
           <div className="admin-kpi-sub">
-            <span>Aktif başvuruya açık</span>
+            <span>Active for submission</span>
           </div>
         </div>
 
         <div className="admin-kpi-card">
           <div className="admin-kpi-header">
-            <span className="admin-kpi-label">Değişiklik Algılama</span>
+            <span className="admin-kpi-label">Change Detection</span>
             <div className="admin-kpi-icon-wrap" style={{ background: 'rgba(168, 85, 247, 0.1)', color: '#a855f7' }}>
               <ShieldCheck size={16} />
             </div>
           </div>
           <div className="admin-kpi-val" style={{ color: '#a855f7' }}>SHA-256</div>
           <div className="admin-kpi-sub">
-            <span>Yalnızca değişenler yazılır</span>
+            <span>Zero redundant writes</span>
           </div>
         </div>
 
         <div className="admin-kpi-card">
           <div className="admin-kpi-header">
-            <span className="admin-kpi-label">Otomasyon</span>
+            <span className="admin-kpi-label">Automation</span>
             <div className="admin-kpi-icon-wrap" style={{ background: 'rgba(245, 158, 11, 0.1)', color: '#f59e0b' }}>
               <Clock size={16} />
             </div>
           </div>
           <div className="admin-kpi-val">Webhook</div>
           <div className="admin-kpi-sub">
-            <span>Cron & Manuel Tetikleme</span>
+            <span>Cron & Manual Triggers</span>
           </div>
         </div>
       </div>
@@ -338,10 +338,10 @@ export default function ScrapersView() {
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
           <div>
             <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-main)' }}>
-              Hedef Scraper Siteleri ({sources.length})
+              Target Scraper Sources ({sources.length})
             </h3>
             <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
-              Webhook veya buton ile tetiklenen deterministik scraper modülleri
+              Deterministic scraper engines triggered on-demand or via secure webhooks
             </span>
           </div>
         </div>
@@ -395,7 +395,7 @@ export default function ScrapersView() {
                           {src.name}
                         </h4>
                         <span className="admin-badge success" style={{ fontSize: '0.68rem', padding: '0.12rem 0.45rem' }}>
-                          ● Aktif
+                          ● Active
                         </span>
                       </div>
                       <a 
@@ -437,12 +437,12 @@ export default function ScrapersView() {
                       {isRunning ? (
                         <>
                           <RefreshCw size={14} className="spin" />
-                          <span>Taranıyor...</span>
+                          <span>Scraping...</span>
                         </>
                       ) : (
                         <>
                           <Play size={14} fill="currentColor" />
-                          <span>Scrap Et (Manuel)</span>
+                          <span>Run Scraper</span>
                         </>
                       )}
                     </button>
@@ -451,11 +451,11 @@ export default function ScrapersView() {
                       type="button"
                       className="admin-action-btn secondary"
                       onClick={() => handleCopyWebhook(src.webhook_path)}
-                      title="Cron veya harici servislerle tetiklemek için Webhook URL'sini kopyala"
+                      title="Copy Webhook URL to trigger via Cron, n8n, or external services"
                       style={{ justifyContent: 'center' }}
                     >
                       {copiedWebhook ? <Check size={14} color="#10b981" /> : <Copy size={14} />}
-                      <span>{copiedWebhook ? 'Kopyalandı!' : 'Webhook URL'}</span>
+                      <span>{copiedWebhook ? 'Copied!' : 'Webhook URL'}</span>
                     </button>
                   </div>
                 </div>
@@ -486,7 +486,7 @@ export default function ScrapersView() {
                       borderRadius: 8,
                       fontSize: '0.78rem'
                     }}>
-                      <span style={{ color: 'var(--text-muted)' }}>Kayıtlı:</span>
+                      <span style={{ color: 'var(--text-muted)' }}>Indexed:</span>
                       <strong style={{ color: 'var(--text-main)' }}>{src.total_items}</strong>
                     </div>
 
@@ -499,7 +499,7 @@ export default function ScrapersView() {
                       borderRadius: 8,
                       fontSize: '0.78rem'
                     }}>
-                      <span style={{ color: '#10b981' }}>Açık Çağrı:</span>
+                      <span style={{ color: '#10b981' }}>Open Calls:</span>
                       <strong style={{ color: '#10b981' }}>{src.open_items}</strong>
                     </div>
 
@@ -528,7 +528,7 @@ export default function ScrapersView() {
                     }}>
                       <Clock size={13} style={{ flexShrink: 0 }} />
                       <span>
-                        Son Tarama: {formatDate(src.last_run.created_at)} ({src.last_run.items_found} çağrı, {src.last_run.items_unchanged} değişmedi)
+                        Last Run: {formatDate(src.last_run.created_at)} ({src.last_run.items_found} calls, {src.last_run.items_unchanged} unchanged)
                       </span>
                     </div>
                   )}
@@ -546,7 +546,7 @@ export default function ScrapersView() {
           <input 
             type="text" 
             className="admin-search-input"
-            placeholder="Hibe, anahtar kelime veya kurum ara..."
+            placeholder="Search opportunities, topics, keywords or organizations..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
@@ -559,7 +559,7 @@ export default function ScrapersView() {
             value={selectedSource}
             onChange={(e) => setSelectedSource(e.target.value)}
           >
-            <option value="all">Tüm Kaynaklar ({sources.length})</option>
+            <option value="all">All Sources ({sources.length})</option>
             {sources.map(s => (
               <option key={s.key} value={s.key}>{s.name}</option>
             ))}
@@ -570,7 +570,7 @@ export default function ScrapersView() {
             value={selectedBeneficiary}
             onChange={(e) => setSelectedBeneficiary(e.target.value)}
           >
-            <option value="all">Tüm Başvuru Sahipleri</option>
+            <option value="all">All Eligible Applicants</option>
             {availableBeneficiaries.map(b => (
               <option key={b} value={b}>{b}</option>
             ))}
@@ -581,7 +581,7 @@ export default function ScrapersView() {
             value={selectedDomain}
             onChange={(e) => setSelectedDomain(e.target.value)}
           >
-            <option value="all">Tüm Sektörler / Alanlar</option>
+            <option value="all">All Domains / Sectors</option>
             {availableDomains.map(d => (
               <option key={d} value={d}>{d}</option>
             ))}
@@ -592,9 +592,9 @@ export default function ScrapersView() {
             value={selectedStatus}
             onChange={(e) => setSelectedStatus(e.target.value)}
           >
-            <option value="all">Tüm Durumlar</option>
-            <option value="open">Sadece Açık</option>
-            <option value="closed">Kapananlar</option>
+            <option value="all">All Statuses</option>
+            <option value="open">Open Only</option>
+            <option value="closed">Closed Only</option>
           </select>
         </div>
 
@@ -604,7 +604,7 @@ export default function ScrapersView() {
             type="button"
             className={`admin-view-btn ${viewMode === 'table' ? 'active' : ''}`}
             onClick={() => setViewMode('table')}
-            title="Tablo Görünümü"
+            title="Table View"
           >
             <TableIcon size={16} />
           </button>
@@ -612,7 +612,7 @@ export default function ScrapersView() {
             type="button"
             className={`admin-view-btn ${viewMode === 'grid' ? 'active' : ''}`}
             onClick={() => setViewMode('grid')}
-            title="Kart Görünümü"
+            title="Grid View"
           >
             <LayoutGrid size={16} />
           </button>
@@ -623,12 +623,12 @@ export default function ScrapersView() {
       {loadingOpps ? (
         <div style={{ textAlign: 'center', padding: '4rem 1rem', color: 'var(--text-muted)' }}>
           <RefreshCw size={24} className="spin" style={{ marginBottom: '0.5rem' }} />
-          <div>Fon fırsatları yükleniyor...</div>
+          <div>Loading funding opportunities...</div>
         </div>
       ) : opportunities.length === 0 ? (
         <div className="admin-card" style={{ textAlign: 'center', padding: '3.5rem 1rem', color: 'var(--text-muted)' }}>
           <AlertCircle size={32} style={{ opacity: 0.5, marginBottom: '0.5rem' }} />
-          <p style={{ margin: 0 }}>Arama kriterinize uygun açık çağrı bulunamadı.</p>
+          <p style={{ margin: 0 }}>No open funding opportunities matched your search criteria.</p>
         </div>
       ) : viewMode === 'table' ? (
         /* TABLE VIEW */
@@ -637,12 +637,12 @@ export default function ScrapersView() {
             <table className="admin-table">
               <thead>
                 <tr>
-                  <th style={{ minWidth: 260 }}>Program & Başlık</th>
-                  <th>Funding Miktarı</th>
-                  <th>Kimler Başvurabilir</th>
-                  <th>Son Başvuru</th>
-                  <th>Durum</th>
-                  <th style={{ textAlign: 'right' }}>İşlem</th>
+                  <th style={{ minWidth: 260 }}>Program & Title</th>
+                  <th>Funding Amount</th>
+                  <th>Eligible Applicants</th>
+                  <th>Deadline</th>
+                  <th>Status</th>
+                  <th style={{ textAlign: 'right' }}>Action</th>
                 </tr>
               </thead>
               <tbody>
@@ -707,7 +707,7 @@ export default function ScrapersView() {
 
                     <td>
                       <span style={{ fontWeight: 700, color: '#10b981', fontSize: '0.9rem' }}>
-                        {opp.funding_amount || 'Hibe'}
+                        {opp.funding_amount || 'Grant'}
                       </span>
                     </td>
 
@@ -735,7 +735,7 @@ export default function ScrapersView() {
 
                     <td>
                       <span className={`admin-badge ${opp.status === 'open' ? 'success' : 'neutral'}`}>
-                        {opp.status === 'open' ? '● Açık' : 'Kapandı'}
+                        {opp.status === 'open' ? '● Open' : 'Closed'}
                       </span>
                     </td>
 
@@ -749,7 +749,7 @@ export default function ScrapersView() {
                         }}
                       >
                         <Eye size={13} />
-                        <span>Detay</span>
+                        <span>Details</span>
                       </button>
                     </td>
                   </tr>
@@ -840,7 +840,7 @@ export default function ScrapersView() {
                 </div>
 
                 <span className={`admin-badge ${opp.status === 'open' ? 'success' : 'neutral'}`}>
-                  {opp.status === 'open' ? 'Açık' : 'Kapandı'}
+                  {opp.status === 'open' ? 'Open' : 'Closed'}
                 </span>
               </div>
 
@@ -854,7 +854,7 @@ export default function ScrapersView() {
                 overflow: 'hidden',
                 lineHeight: 1.45
               }}>
-                {opp.short_description || 'Açıklama bulunmuyor'}
+                {opp.short_description || 'No description available'}
               </p>
 
               {/* Tags */}
@@ -876,14 +876,14 @@ export default function ScrapersView() {
                 borderTop: '1px solid var(--card-border, rgba(0,0,0,0.06))'
               }}>
                 <div>
-                  <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Maksimum Hibe</div>
+                  <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Max Funding</div>
                   <div style={{ fontSize: '1.05rem', fontWeight: 800, color: '#10b981' }}>
                     {opp.funding_amount || 'Grant'}
                   </div>
                 </div>
 
                 <div style={{ textAlign: 'right' }}>
-                  <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Son Başvuru</div>
+                  <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Deadline</div>
                   <div style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-main)' }}>
                     {formatDate(opp.deadline_date)}
                   </div>
@@ -899,10 +899,10 @@ export default function ScrapersView() {
         <div className="admin-pagination">
           <div className="admin-pagination-info">
             <span>
-              Toplam <strong>{totalItems}</strong> fırsattan <strong>{Math.min((currentPage - 1) * pageSize + 1, totalItems)} - {Math.min(currentPage * pageSize, totalItems)}</strong> arası gösteriliyor
+              Showing <strong>{Math.min((currentPage - 1) * pageSize + 1, totalItems)} - {Math.min(currentPage * pageSize, totalItems)}</strong> of <strong>{totalItems}</strong> opportunities
             </span>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-              <span style={{ fontSize: '0.78rem' }}>Sayfa başına:</span>
+              <span style={{ fontSize: '0.78rem' }}>Per page:</span>
               <select
                 className="admin-page-size-select"
                 value={pageSize}
@@ -921,7 +921,7 @@ export default function ScrapersView() {
               className="admin-page-btn"
               onClick={() => handlePageChange(1)}
               disabled={currentPage <= 1}
-              title="İlk Sayfa"
+              title="First Page"
             >
               <ChevronsLeft size={15} />
             </button>
@@ -930,7 +930,7 @@ export default function ScrapersView() {
               className="admin-page-btn"
               onClick={() => handlePageChange(currentPage - 1)}
               disabled={currentPage <= 1}
-              title="Önceki Sayfa"
+              title="Previous Page"
             >
               <ChevronLeft size={15} />
             </button>
@@ -960,7 +960,7 @@ export default function ScrapersView() {
               className="admin-page-btn"
               onClick={() => handlePageChange(currentPage + 1)}
               disabled={currentPage >= totalPages}
-              title="Sonraki Sayfa"
+              title="Next Page"
             >
               <ChevronRight size={15} />
             </button>
@@ -969,7 +969,7 @@ export default function ScrapersView() {
               className="admin-page-btn"
               onClick={() => handlePageChange(totalPages)}
               disabled={currentPage >= totalPages}
-              title="Son Sayfa"
+              title="Last Page"
             >
               <ChevronsRight size={15} />
             </button>
@@ -1068,40 +1068,40 @@ export default function ScrapersView() {
                 border: '1px solid var(--card-border, rgba(0,0,0,0.06))'
               }}>
                 <div>
-                  <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Hibe Miktarı</div>
+                  <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Funding Amount</div>
                   <div style={{ fontSize: '1.2rem', fontWeight: 800, color: '#10b981' }}>
                     {activeOpportunity.funding_amount || 'Free Grant'}
                   </div>
                 </div>
 
                 <div>
-                  <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Son Başvuru Tarihi</div>
+                  <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Deadline Date</div>
                   <div style={{ fontSize: '0.92rem', fontWeight: 700, color: 'var(--text-main)', marginTop: '0.2rem' }}>
                     {formatDate(activeOpportunity.deadline_date)}
                   </div>
                 </div>
 
                 <div>
-                  <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Açılış Tarihi</div>
+                  <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Opening Date</div>
                   <div style={{ fontSize: '0.92rem', fontWeight: 600, color: 'var(--text-main)', marginTop: '0.2rem' }}>
                     {formatDate(activeOpportunity.opening_date)}
                   </div>
                 </div>
 
                 <div>
-                  <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Durum</div>
+                  <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Status</div>
                   <div style={{ marginTop: '0.2rem' }}>
                     <span className={`admin-badge ${activeOpportunity.status === 'open' ? 'success' : 'neutral'}`}>
-                      {activeOpportunity.status === 'open' ? '● Aktif / Açık' : 'Kapandı'}
+                      {activeOpportunity.status === 'open' ? '● Active / Open' : 'Closed'}
                     </span>
                   </div>
                 </div>
               </div>
 
-              {/* Kimler Başvurabilir */}
+              {/* Eligible Applicants */}
               <div>
                 <h4 style={{ fontSize: '0.88rem', fontWeight: 700, margin: '0 0 0.5rem', color: 'var(--text-main)' }}>
-                  Kimler Başvurabilir (Eligible Applicants)
+                  Eligible Applicants
                 </h4>
                 <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
                   {(activeOpportunity.eligible_applicants || []).map(app => (
@@ -1119,7 +1119,7 @@ export default function ScrapersView() {
                   {activeOpportunity.domains && activeOpportunity.domains.length > 0 && (
                     <div>
                       <h4 style={{ fontSize: '0.84rem', fontWeight: 700, margin: '0 0 0.4rem', color: 'var(--text-main)' }}>
-                        Sektörler / Odak Alanları
+                        Sectors & Focus Domains
                       </h4>
                       <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap' }}>
                         {activeOpportunity.domains.map(d => (
@@ -1134,7 +1134,7 @@ export default function ScrapersView() {
                   {activeOpportunity.technologies && activeOpportunity.technologies.filter(t => typeof t === 'string' && !/^\d+$/.test(t) && !t.includes('<') && t.length <= 40).length > 0 && (
                     <div>
                       <h4 style={{ fontSize: '0.84rem', fontWeight: 700, margin: '0 0 0.4rem', color: 'var(--text-main)' }}>
-                        Teknolojiler
+                        Technologies
                       </h4>
                       <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap' }}>
                         {activeOpportunity.technologies
@@ -1150,28 +1150,28 @@ export default function ScrapersView() {
                 </div>
               )}
 
-              {/* Kısa Açıklama */}
+              {/* Summary */}
               <div>
                 <h4 style={{ fontSize: '0.84rem', fontWeight: 700, margin: '0 0 0.35rem', color: 'var(--text-main)' }}>
-                  Kısa Açıklama
+                  Summary & Objectives
                 </h4>
                 <p style={{ margin: 0, fontSize: '0.88rem', lineHeight: 1.55, color: 'var(--text-muted)' }}>
                   {activeOpportunity.short_description}
                 </p>
               </div>
 
-              {/* Uzun Açıklama (HTML Detaylar) */}
+              {/* Call Details & Scope (HTML) */}
               {loadingDetail && !activeOpportunity.long_description && (
                 <div style={{ padding: '1.25rem', textAlign: 'center', color: 'var(--text-muted)', background: 'rgba(150, 150, 150, 0.04)', borderRadius: 12, border: '1px dashed var(--card-border)' }}>
                   <RefreshCw size={18} className="spin" style={{ marginBottom: '0.4rem', display: 'inline-block' }} />
-                  <div style={{ fontSize: '0.84rem' }}>Detaylı çağrı kapsamı ve başvuru koşulları yükleniyor...</div>
+                  <div style={{ fontSize: '0.84rem' }}>Loading detailed call scope and eligibility conditions...</div>
                 </div>
               )}
 
               {activeOpportunity.long_description && (
                 <div>
                   <h4 style={{ fontSize: '0.84rem', fontWeight: 700, margin: '0 0 0.35rem', color: 'var(--text-main)' }}>
-                    Çağrı Detayları & Açıklama
+                    Call Details, Scope & Requirements
                   </h4>
                   <div 
                     style={{
@@ -1193,7 +1193,7 @@ export default function ScrapersView() {
               {/* External Links */}
               <div>
                 <h4 style={{ fontSize: '0.84rem', fontWeight: 700, margin: '0 0 0.5rem', color: 'var(--text-main)' }}>
-                  Resmi Bağlantılar & Başvuru Portalları
+                  Official Links & Submission Portals
                 </h4>
                 <div style={{ display: 'flex', gap: '0.65rem', flexWrap: 'wrap' }}>
                   {(activeOpportunity.links?.apply || activeOpportunity.permalink) && (
@@ -1206,7 +1206,7 @@ export default function ScrapersView() {
                     >
                       <ArrowUpRight size={14} />
                       <span>
-                        {activeOpportunity.source_key === 'ec_funding' ? 'Resmi EU Portalı / Başvuru' : 'Hemen Başvur (Apply Portal)'}
+                        {activeOpportunity.source_key === 'ec_funding' ? 'Official EU Portal / Apply' : 'Apply on Official Portal'}
                       </span>
                     </a>
                   )}
@@ -1220,7 +1220,7 @@ export default function ScrapersView() {
                       style={{ textDecoration: 'none' }}
                     >
                       <Globe size={14} />
-                      <span>Proje Web Sitesi</span>
+                      <span>Project Website</span>
                     </a>
                   )}
 
@@ -1233,7 +1233,7 @@ export default function ScrapersView() {
                       style={{ textDecoration: 'none' }}
                     >
                       <FileText size={14} />
-                      <span>Başvuru Rehberi (PDF)</span>
+                      <span>Call Guidelines (PDF)</span>
                     </a>
                   )}
 
@@ -1246,7 +1246,7 @@ export default function ScrapersView() {
                       style={{ textDecoration: 'none' }}
                     >
                       <ExternalLink size={14} />
-                      <span>Tüm Çağrılar Listesi</span>
+                      <span>All Calls Listing</span>
                     </a>
                   )}
                 </div>
@@ -1268,9 +1268,9 @@ export default function ScrapersView() {
               }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
                   <ShieldCheck size={14} color="#10b981" />
-                  <span>SHA-256 İçerik İmzası: <code>{activeOpportunity.content_hash?.substring(0, 18)}...</code></span>
+                  <span>SHA-256 Content Signature: <code>{activeOpportunity.content_hash?.substring(0, 18)}...</code></span>
                 </div>
-                <span>DB ID: #{activeOpportunity.id} | Kaynak: {activeOpportunity.source_key}</span>
+                <span>DB ID: #{activeOpportunity.id} | Source: {activeOpportunity.source_key}</span>
               </div>
             </div>
           </div>
