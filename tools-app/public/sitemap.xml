@@ -355,4 +355,34 @@
     <changefreq>weekly</changefreq>
     <priority>0.98</priority>
   </url>
+  <!-- 20. Universal Token Counter -->
+  <url>
+    <loc>https://tools.cerilas.com/tool/token-counter-universal</loc>
+    <lastmod>2026-09-19</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.99</priority>
+    <image:image>
+      <image:loc>https://tools.cerilas.com/tool-icons/token-counter-universal.png</image:loc>
+      <image:title>Universal Token Counter – Multi-Model Token Counter, Visualizer &amp; Cost Auditor</image:title>
+      <image:caption>Calculate exact token counts, context window consumption, and API costs for text and files across GPT-4o, Claude 3.7, Gemini 2.0, DeepSeek, and Llama 3.</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://tools.cerilas.com/#/tool/token-counter-universal</loc>
+    <lastmod>2026-09-19</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.95</priority>
+  </url>
+  <url>
+    <loc>https://tools.cerilas.com/token-counter-universal</loc>
+    <lastmod>2026-09-19</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.98</priority>
+  </url>
+  <url>
+    <loc>https://tools.cerilas.com/token-counter</loc>
+    <lastmod>2026-09-19</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.90</priority>
+  </url>
 </urlset>

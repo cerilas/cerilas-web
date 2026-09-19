@@ -24,6 +24,7 @@ import { aiLinkHallucinationCheckerManifest } from './ai-link-hallucination-chec
 import { aiCrawlerCheckerManifest } from './ai-crawler-checker/manifest';
 import { llmsTxtManifest } from './llms-txt-tools/manifest';
 import { htmlToMarkdownManifest } from './html-to-llm-markdown/manifest';
+import { tokenCounterUniversalManifest } from './token-counter-universal/manifest';
 
 /**
  * Enterprise Scalable Tool Registry.
@@ -131,6 +132,10 @@ export const toolsRegistry = {
   [htmlToMarkdownManifest.slug]: {
     manifest: htmlToMarkdownManifest,
     component: lazy(() => import('./html-to-llm-markdown'))
+  },
+  [tokenCounterUniversalManifest.slug]: {
+    manifest: tokenCounterUniversalManifest,
+    component: lazy(() => import('./token-counter-universal'))
   }
 };
 
@@ -138,7 +143,10 @@ const toolAliases = {
   'llms-txt-generator': 'llms-txt',
   'llms-txt-checker': 'llms-txt',
   'llms-txt-validator': 'llms-txt',
-  'html-to-markdown': 'html-to-llm-markdown'
+  'html-to-markdown': 'html-to-llm-markdown',
+  'token-counter': 'token-counter-universal',
+  'token-calculator': 'token-counter-universal',
+  'universal-token-counter': 'token-counter-universal'
 };
 
 export function getRegisteredTool(slug) {

@@ -409,6 +409,34 @@ export const TOOL_CONVERSION_METRICS = {
       singular: 'sayfa dönüştürüldü',
       short: 'sayfa'
     }
+  },
+  'token-counter-universal': {
+    actionKey: 'counted',
+    getConversionCount: (tool) => {
+      if (!tool) return 0;
+      const downloads = tool.download_count || 0;
+      const copies = tool.copy_count || 0;
+      const uses = tool.use_count || 0;
+      return (downloads + copies) > 0 ? (downloads + copies) : uses;
+    },
+    en: {
+      action: 'counted',
+      badge: 'texts audited',
+      singular: 'text audited',
+      short: 'audits'
+    },
+    tr: {
+      action: 'sayıldı',
+      badge: 'metin incelendi',
+      singular: 'metin incelendi',
+      short: 'analiz'
+    }
+  },
+  'token-counter': {
+    actionKey: 'counted',
+    getConversionCount: (tool) => tool?.use_count || 0,
+    en: { action: 'counted', badge: 'texts audited', singular: 'text audited', short: 'audits' },
+    tr: { action: 'sayıldı', badge: 'metin incelendi', singular: 'metin incelendi', short: 'analiz' }
   }
 };
 
