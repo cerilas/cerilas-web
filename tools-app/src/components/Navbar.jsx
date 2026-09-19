@@ -74,10 +74,6 @@ export default function Navbar({ activeTool, onNavigateHome, onOpenStats, onSele
             <BarChart3 size={15} />
             <span className="nav-stats-label">{t('nav.stats')}</span>
           </button>
-
-          <a href="https://cerilas.com" className="nav-link nav-external-link" target="_blank" rel="noopener noreferrer">
-            {t('nav.mainSite')}
-          </a>
         </div>
       </div>
     </nav>
