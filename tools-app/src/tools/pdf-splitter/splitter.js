@@ -182,7 +182,9 @@ export async function splitPdfByCustomParts(file, partsConfig, onProgress = () =
       blob,
       pageCount: pageIndices.length,
       byteSize: pdfBytes.byteLength,
-      pagesSummary: `Pages ${pageIndices.map((idx) => idx + 1).join(', ')}`
+      pagesSummary: `Pages ${pageIndices.map((idx) => idx + 1).join(', ')}`,
+      firstPageIndex: pageIndices[0],
+      pageIndices
     });
   }
 
@@ -216,7 +218,9 @@ export async function splitPdfAllPages(file, baseName, onProgress = () => {}) {
       blob,
       pageCount: 1,
       byteSize: pdfBytes.byteLength,
-      pagesSummary: `Page ${i + 1}`
+      pagesSummary: `Page ${i + 1}`,
+      firstPageIndex: i,
+      pageIndices: [i]
     });
   }
 
@@ -255,7 +259,9 @@ export async function splitPdfEveryNPages(file, n, baseName, onProgress = () => 
       blob,
       pageCount: indices.length,
       byteSize: pdfBytes.byteLength,
-      pagesSummary: `Pages ${start + 1} to ${end}`
+      pagesSummary: `Pages ${start + 1} to ${end}`,
+      firstPageIndex: indices[0],
+      pageIndices: indices
     });
 
     partIndex++;

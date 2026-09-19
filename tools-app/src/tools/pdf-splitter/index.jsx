@@ -20,7 +20,10 @@ import {
   Archive,
   Grid,
   FileDigit,
-  Split
+  Split,
+  FileCheck,
+  HardDrive,
+  BookOpen
 } from 'lucide-react';
 import { useToolAnalytics } from '../../hooks/useToolAnalytics';
 import { pdfSplitterManifest } from './manifest';
@@ -282,11 +285,15 @@ export default function PdfSplitterTool({ onBack, toolMeta }) {
         });
       }
 
-      // Attach Object URLs
-      const resultsWithUrls = results.map((item) => ({
-        ...item,
-        url: URL.createObjectURL(item.blob)
-      }));
+      // Attach Object URLs and real rendered cover thumbnails
+      const resultsWithUrls = results.map((item) => {
+        const thumb = (typeof item.firstPageIndex === 'number' && docMeta?.thumbnails?.[item.firstPageIndex]?.thumbUrl) || null;
+        return {
+          ...item,
+          url: URL.createObjectURL(item.blob),
+          thumbnail: thumb
+        };
+      });
 
       setSplitResults(resultsWithUrls);
 
@@ -749,84 +756,185 @@ export default function PdfSplitterTool({ onBack, toolMeta }) {
         </div>
       )}
 
-      {/* Success Result View */}
+      {/* Success Result View - Apple-Grade Download Studio */}
       {splitResults && (
         <div className="pdfs-success-panel">
-          <div className="pdfm-success-icon-wrap" style={{ background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)' }}>
-            <Check size={36} strokeWidth={2.5} />
+          {/* Celebration Header */}
+          <div className="pdfs-hero-celebration">
+            <div className="pdfs-hero-icon-wrap">
+              <CheckCircle2 size={32} strokeWidth={2.2} />
+            </div>
+            <div className="pdfs-hero-titles">
+              <div className="pdfs-hero-badge-row">
+                <span className="pdfs-ready-pill">Ready for Download</span>
+                <span className="pdfs-ready-pill" style={{ background: 'rgba(37, 99, 235, 0.1)', color: '#2563eb', borderColor: 'rgba(37, 99, 235, 0.25)' }}>
+                  100% In-Browser Secure
+                </span>
+              </div>
+              <h3 className="pdfs-hero-main-title">PDF Split Successfully!</h3>
+              <p className="pdfs-hero-sub-title">
+                Generated {splitResults.length} separate {splitResults.length === 1 ? 'document' : 'documents'} from {docMeta?.name} with zero server uploads.
+              </p>
+            </div>
           </div>
 
-          <h3 className="pdfm-success-title">PDF Split Successfully!</h3>
+          {/* Bento Stats Row */}
+          <div className="pdfs-bento-metrics">
+            <div className="pdfs-bento-card">
+              <div className="pdfs-bento-icon-sq">
+                <Layers size={20} />
+              </div>
+              <div>
+                <div className="pdfs-bento-label">Generated Files</div>
+                <div className="pdfs-bento-value">{splitResults.length} Parts</div>
+              </div>
+            </div>
 
-          <div className="pdfm-success-meta">
-            <span>Created <strong>{splitResults.length}</strong> {splitResults.length === 1 ? 'Document' : 'Documents'}</span>
-            <span>•</span>
-            <span>Original: <strong>{docMeta?.numPages}</strong> pages</span>
+            <div className="pdfs-bento-card">
+              <div className="pdfs-bento-icon-sq" style={{ color: '#10b981' }}>
+                <FileCheck size={20} />
+              </div>
+              <div>
+                <div className="pdfs-bento-label">Extracted Pages</div>
+                <div className="pdfs-bento-value">
+                  {splitResults.reduce((acc, curr) => acc + (curr.pageCount || 1), 0)} Pages
+                </div>
+              </div>
+            </div>
+
+            <div className="pdfs-bento-card">
+              <div className="pdfs-bento-icon-sq" style={{ color: '#8b5cf6' }}>
+                <HardDrive size={20} />
+              </div>
+              <div>
+                <div className="pdfs-bento-label">Combined Size</div>
+                <div className="pdfs-bento-value">
+                  {formatBytes(splitResults.reduce((acc, curr) => acc + (curr.byteSize || 0), 0))}
+                </div>
+              </div>
+            </div>
+
+            <div className="pdfs-bento-card">
+              <div className="pdfs-bento-icon-sq" style={{ color: '#f59e0b' }}>
+                <ShieldCheck size={20} />
+              </div>
+              <div>
+                <div className="pdfs-bento-label">Security Guarantee</div>
+                <div className="pdfs-bento-value" style={{ fontSize: '0.95rem' }}>Client-Side Only</div>
+              </div>
+            </div>
           </div>
 
-          {/* Download All as ZIP Button */}
+          {/* Hero ZIP Download Banner (if more than 1 file) */}
           {zipData && (
-            <div style={{ marginBottom: '1.5rem' }}>
+            <div className="pdfs-zip-hero-card">
+              <div className="pdfs-zip-hero-left">
+                <div className="pdfs-zip-hero-icon">
+                  <Archive size={28} />
+                </div>
+                <div>
+                  <h4 className="pdfs-zip-hero-title">Download All as ZIP Archive</h4>
+                  <p className="pdfs-zip-hero-sub">
+                    All {splitResults.length} split PDF documents bundled in a high-speed compressed archive ({zipData.fileName})
+                  </p>
+                </div>
+              </div>
+
               <button
                 type="button"
-                className="pdfm-download-btn"
+                className="pdfs-zip-cta-btn"
                 onClick={handleDownloadZip}
-                style={{ padding: '0.9rem 2.2rem', fontSize: '1.05rem' }}
               >
-                <Archive size={20} />
-                <span>Download All as ZIP ({formatBytes(zipData.byteSize)})</span>
+                <Download size={18} />
+                <span>Download ZIP Package ({formatBytes(zipData.byteSize)})</span>
               </button>
             </div>
           )}
 
-          {/* Individual Part Download Cards */}
-          <div className="pdfs-results-list">
-            {splitResults.map((part) => (
-              <div key={part.id} className="pdfs-result-item">
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', minWidth: 0 }}>
-                  <FileText size={20} color="#ef4444" style={{ flexShrink: 0 }} />
-                  <div style={{ minWidth: 0 }}>
-                    <div style={{ fontWeight: 700, fontSize: '0.9rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                      {part.name}
-                    </div>
-                    <div style={{ fontSize: '0.75rem', color: '#64748b' }}>
-                      {part.pageCount} {part.pageCount === 1 ? 'page' : 'pages'} ({part.pagesSummary}) • {formatBytes(part.byteSize)}
-                    </div>
+          {/* Individual Output Documents Grid */}
+          <div className="pdfs-output-section-header">
+            <h4 className="pdfs-output-section-title">
+              Generated Documents ({splitResults.length})
+            </h4>
+            {splitResults.length > 1 && (
+              <span style={{ fontSize: '0.8rem', color: '#64748b' }}>
+                Click Save on any card or use the ZIP package above
+              </span>
+            )}
+          </div>
+
+          <div className="pdfs-output-grid">
+            {splitResults.map((part, idx) => (
+              <div key={part.id || idx} className="pdfs-output-card">
+                {/* Real Rendered Cover Thumbnail */}
+                <div className="pdfs-output-thumb">
+                  {part.thumbnail ? (
+                    <img src={part.thumbnail} alt={`Preview of ${part.name}`} />
+                  ) : (
+                    <FileText size={28} color="#94a3b8" />
+                  )}
+                </div>
+
+                {/* Document Info */}
+                <div className="pdfs-output-info">
+                  <div className="pdfs-output-title" title={part.name}>
+                    {part.name}
+                  </div>
+                  <div className="pdfs-output-pills">
+                    <span className="pdfs-output-pill accent">
+                      {part.pageCount} {part.pageCount === 1 ? 'page' : 'pages'}
+                    </span>
+                    <span className="pdfs-output-pill">
+                      {part.pagesSummary}
+                    </span>
+                    <span className="pdfs-output-pill">
+                      {formatBytes(part.byteSize)}
+                    </span>
                   </div>
                 </div>
 
-                <div style={{ display: 'flex', gap: '0.5rem', flexShrink: 0 }}>
+                {/* Actions */}
+                <div className="pdfs-output-actions">
                   <button
                     type="button"
-                    className="pdfm-tool-btn"
-                    onClick={() => handlePreviewPart(part)}
-                    title="Preview in browser"
+                    className="pdfs-output-dl-btn"
+                    onClick={() => handleDownloadPart(part)}
+                    title="Download PDF document"
                   >
-                    <Eye size={14} />
-                    <span>Preview</span>
+                    <Download size={13} />
+                    <span>Save</span>
                   </button>
                   <button
                     type="button"
-                    className="pdfm-browse-btn"
-                    onClick={() => handleDownloadPart(part)}
-                    style={{ padding: '0.4rem 0.85rem', fontSize: '0.8rem' }}
+                    className="pdfs-output-prev-btn"
+                    onClick={() => handlePreviewPart(part)}
+                    title="Preview in browser"
                   >
-                    <Download size={14} />
-                    <span>Download</span>
+                    <Eye size={13} />
+                    <span>Preview</span>
                   </button>
                 </div>
               </div>
             ))}
           </div>
 
-          <div style={{ marginTop: '1.5rem' }}>
+          {/* Bottom Actions Row */}
+          <div className="pdfs-bottom-actions-row">
             <button
               type="button"
-              className="pdfm-restart-btn"
+              className="pdfs-restart-btn"
               onClick={handleReset}
             >
               <RotateCcw size={16} />
               <span>Split Another Document</span>
+            </button>
+
+            <button
+              type="button"
+              className="pdfm-tool-btn"
+              onClick={onBack || (() => { window.location.hash = '#/'; })}
+            >
+              <span>Return to All Tools</span>
             </button>
           </div>
         </div>

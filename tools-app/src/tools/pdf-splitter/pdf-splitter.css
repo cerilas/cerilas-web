@@ -597,48 +597,530 @@
   cursor: not-allowed;
 }
 
-/* Success Result Panel */
+/* ==========================================================================
+   Cerilas PDF Splitter - Premium Apple-Grade Download Studio
+   ========================================================================== */
+
 .pdfs-success-panel {
   background: #ffffff;
-  border: 1px solid rgba(16, 185, 129, 0.25);
+  border: 1px solid rgba(0, 0, 0, 0.08);
   border-radius: 24px;
   padding: 2.5rem 2rem;
-  box-shadow: 0 20px 50px -15px rgba(16, 185, 129, 0.12);
+  box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.08);
   margin-top: 1.5rem;
   animation: pdfmScaleIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  text-align: left;
 }
 
 @media (prefers-color-scheme: dark) {
   .pdfs-success-panel {
     background: #18181b;
-    border-color: rgba(16, 185, 129, 0.3);
-    box-shadow: 0 20px 50px -15px rgba(0, 0, 0, 0.6);
+    border-color: rgba(255, 255, 255, 0.12);
+    box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.6);
   }
 }
 
-.pdfs-results-list {
+/* Celebration Header */
+.pdfs-hero-celebration {
   display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  margin: 1.5rem 0;
-  text-align: left;
+  align-items: center;
+  gap: 1.25rem;
+  margin-bottom: 2rem;
+  padding-bottom: 1.75rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
 }
 
-.pdfs-result-item {
+@media (prefers-color-scheme: dark) {
+  .pdfs-hero-celebration {
+    border-bottom-color: rgba(255, 255, 255, 0.08);
+  }
+}
+
+.pdfs-hero-icon-wrap {
+  width: 60px;
+  height: 60px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 10px 25px -5px rgba(16, 185, 129, 0.4);
+}
+
+.pdfs-hero-titles {
+  flex: 1;
+}
+
+.pdfs-hero-badge-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.35rem;
+}
+
+.pdfs-ready-pill {
+  background: rgba(16, 185, 129, 0.12);
+  color: #059669;
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0.15rem 0.55rem;
+  border-radius: 999px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+@media (prefers-color-scheme: dark) {
+  .pdfs-ready-pill {
+    background: rgba(16, 185, 129, 0.2);
+    color: #34d399;
+  }
+}
+
+.pdfs-hero-main-title {
+  font-size: 1.45rem;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: -0.02em;
+  margin: 0 0 0.25rem 0;
+}
+
+@media (prefers-color-scheme: dark) {
+  .pdfs-hero-main-title {
+    color: #f8fafc;
+  }
+}
+
+.pdfs-hero-sub-title {
+  font-size: 0.88rem;
+  color: #64748b;
+  margin: 0;
+}
+
+@media (prefers-color-scheme: dark) {
+  .pdfs-hero-sub-title {
+    color: #94a3b8;
+  }
+}
+
+/* Bento Metrics Grid */
+.pdfs-bento-metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.pdfs-bento-card {
   background: #f8fafc;
   border: 1px solid #e2e8f0;
-  border-radius: 12px;
-  padding: 0.85rem 1.25rem;
+  border-radius: 16px;
+  padding: 1rem 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  transition: all 0.2s ease;
+}
+
+.pdfs-bento-card:hover {
+  background: #ffffff;
+  border-color: #cbd5e1;
+  box-shadow: 0 8px 20px -6px rgba(0, 0, 0, 0.06);
+}
+
+@media (prefers-color-scheme: dark) {
+  .pdfs-bento-card {
+    background: #27272a;
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+  .pdfs-bento-card:hover {
+    background: #323236;
+    border-color: rgba(255, 255, 255, 0.2);
+  }
+}
+
+.pdfs-bento-icon-sq {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #2563eb;
+  flex-shrink: 0;
+}
+
+@media (prefers-color-scheme: dark) {
+  .pdfs-bento-icon-sq {
+    background: #18181b;
+    border-color: rgba(255, 255, 255, 0.1);
+    color: #60a5fa;
+  }
+}
+
+.pdfs-bento-label {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: #64748b;
+  margin-bottom: 0.15rem;
+}
+
+.pdfs-bento-value {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+@media (prefers-color-scheme: dark) {
+  .pdfs-bento-label {
+    color: #a1a1aa;
+  }
+  .pdfs-bento-value {
+    color: #f8fafc;
+  }
+}
+
+/* Hero ZIP Download Banner */
+.pdfs-zip-hero-card {
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 20px;
+  padding: 1.75rem 2rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
   flex-wrap: wrap;
-  gap: 0.75rem;
+  gap: 1.5rem;
+  margin-bottom: 2.25rem;
+  box-shadow: 0 16px 36px -10px rgba(15, 23, 42, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+.pdfs-zip-hero-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 300px;
+  height: 100%;
+  background: radial-gradient(circle at top right, rgba(16, 185, 129, 0.25), transparent 70%);
+  pointer-events: none;
+}
+
+.pdfs-zip-hero-left {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  z-index: 1;
+}
+
+.pdfs-zip-hero-icon {
+  width: 54px;
+  height: 54px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
+}
+
+.pdfs-zip-hero-title {
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: #ffffff;
+  margin: 0 0 0.3rem 0;
+}
+
+.pdfs-zip-hero-sub {
+  font-size: 0.85rem;
+  color: #94a3b8;
+  margin: 0;
+}
+
+.pdfs-zip-cta-btn {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: #ffffff;
+  border: none;
+  padding: 0.85rem 1.8rem;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  transition: all 0.2s ease;
+  box-shadow: 0 8px 25px -4px rgba(16, 185, 129, 0.4);
+  z-index: 1;
+}
+
+.pdfs-zip-cta-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 30px -4px rgba(16, 185, 129, 0.55);
+}
+
+/* Individual Output Documents Section */
+.pdfs-output-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.pdfs-output-section-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
 }
 
 @media (prefers-color-scheme: dark) {
-  .pdfs-result-item {
+  .pdfs-output-section-title {
+    color: #f8fafc;
+  }
+}
+
+.pdfs-output-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+/* Modern Output Document Card */
+.pdfs-output-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 1rem 1.15rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 4px 15px -4px rgba(0, 0, 0, 0.03);
+}
+
+.pdfs-output-card:hover {
+  border-color: #cbd5e1;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px -6px rgba(0, 0, 0, 0.08);
+}
+
+@media (prefers-color-scheme: dark) {
+  .pdfs-output-card {
     background: #27272a;
     border-color: rgba(255, 255, 255, 0.1);
   }
+  .pdfs-output-card:hover {
+    background: #2e2e32;
+    border-color: rgba(255, 255, 255, 0.2);
+  }
 }
+
+/* Document Thumbnail Preview */
+.pdfs-output-thumb {
+  width: 54px;
+  height: 72px;
+  border-radius: 8px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
+  position: relative;
+}
+
+.pdfs-output-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+@media (prefers-color-scheme: dark) {
+  .pdfs-output-thumb {
+    background: #18181b;
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+}
+
+.pdfs-output-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.pdfs-output-title {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 0.35rem 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@media (prefers-color-scheme: dark) {
+  .pdfs-output-title {
+    color: #f8fafc;
+  }
+}
+
+.pdfs-output-pills {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.pdfs-output-pill {
+  font-size: 0.72rem;
+  font-weight: 600;
+  background: #f1f5f9;
+  color: #475569;
+  padding: 0.15rem 0.5rem;
+  border-radius: 6px;
+}
+
+@media (prefers-color-scheme: dark) {
+  .pdfs-output-pill {
+    background: #18181b;
+    color: #a1a1aa;
+  }
+}
+
+.pdfs-output-pill.accent {
+  background: #eff6ff;
+  color: #2563eb;
+}
+
+@media (prefers-color-scheme: dark) {
+  .pdfs-output-pill.accent {
+    background: rgba(37, 99, 235, 0.2);
+    color: #60a5fa;
+  }
+}
+
+/* Card Action Buttons */
+.pdfs-output-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  flex-shrink: 0;
+}
+
+.pdfs-output-dl-btn {
+  background: #2563eb;
+  color: #ffffff;
+  border: none;
+  padding: 0.4rem 0.85rem;
+  border-radius: 8px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  transition: all 0.15s ease;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.25);
+}
+
+.pdfs-output-dl-btn:hover {
+  background: #1d4ed8;
+  transform: translateY(-1px);
+}
+
+.pdfs-output-prev-btn {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  color: #475569;
+  padding: 0.35rem 0.75rem;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.3rem;
+  transition: all 0.15s ease;
+}
+
+.pdfs-output-prev-btn:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+@media (prefers-color-scheme: dark) {
+  .pdfs-output-prev-btn {
+    background: #18181b;
+    border-color: rgba(255, 255, 255, 0.1);
+    color: #a1a1aa;
+  }
+  .pdfs-output-prev-btn:hover {
+    background: #27272a;
+    color: #ffffff;
+  }
+}
+
+/* Bottom Actions Row */
+.pdfs-bottom-actions-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+@media (prefers-color-scheme: dark) {
+  .pdfs-bottom-actions-row {
+    border-top-color: rgba(255, 255, 255, 0.08);
+  }
+}
+
+.pdfs-restart-btn {
+  background: transparent;
+  color: #64748b;
+  border: 1px dashed #cbd5e1;
+  padding: 0.75rem 1.4rem;
+  border-radius: 12px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.2s ease;
+}
+
+.pdfs-restart-btn:hover {
+  color: #0f172a;
+  border-color: #94a3b8;
+  background: rgba(0, 0, 0, 0.02);
+}
+
+@media (prefers-color-scheme: dark) {
+  .pdfs-restart-btn {
+    border-color: rgba(255, 255, 255, 0.2);
+    color: #a1a1aa;
+  }
+  .pdfs-restart-btn:hover {
+    color: #ffffff;
+    border-color: rgba(255, 255, 255, 0.4);
+    background: rgba(255, 255, 255, 0.05);
+  }
+}
+
