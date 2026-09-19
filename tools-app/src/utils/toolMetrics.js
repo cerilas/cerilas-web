@@ -5,6 +5,13 @@
 
 export const TOOL_CONVERSION_METRICS = {
 
+  'eu-funding-opportunities': {
+    actionKey: 'explored',
+    getConversionCount: (tool) => tool?.use_count || 0,
+    en: { action: 'explored', badge: 'grants explored', singular: 'grant explored', short: 'searches' },
+    tr: { action: 'incelendi', badge: 'çağrı incelendi', singular: 'çağrı incelendi', short: 'inceleme' }
+  },
+
   'arr-calculator': {
     actionKey: 'calculated',
     getConversionCount: (tool) => tool?.use_count || 0,

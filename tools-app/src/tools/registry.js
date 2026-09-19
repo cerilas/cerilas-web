@@ -29,6 +29,7 @@ import { trlCalculatorManifest } from './trl-calculator/manifest';
 import { sampleSizeCalculatorManifest } from './sample-size-calculator/manifest';
 import { pdfMergerManifest } from './pdf-merger/manifest';
 import { pdfSplitterManifest } from './pdf-splitter/manifest';
+import { euFundingManifest } from './eu-funding-opportunities/manifest';
 
 /**
  * Enterprise Scalable Tool Registry.
@@ -156,6 +157,10 @@ export const toolsRegistry = {
   [pdfSplitterManifest.slug]: {
     manifest: pdfSplitterManifest,
     component: lazy(() => import('./pdf-splitter'))
+  },
+  [euFundingManifest.slug]: {
+    manifest: euFundingManifest,
+    component: lazy(() => import('./eu-funding-opportunities'))
   }
 };
 
@@ -180,7 +185,12 @@ const toolAliases = {
   'merge-pdf': 'pdf-merger',
   'split-pdf': 'pdf-splitter',
   'pdf-extract-pages': 'pdf-splitter',
-  'pdf-separator': 'pdf-splitter'
+  'pdf-separator': 'pdf-splitter',
+  'eu-funding': 'eu-funding-opportunities',
+  'cascade-funding': 'eu-funding-opportunities',
+  'horizon-europe': 'eu-funding-opportunities',
+  'eu-grants': 'eu-funding-opportunities',
+  'fstp-grants': 'eu-funding-opportunities'
 };
 
 export function getRegisteredTool(slug) {

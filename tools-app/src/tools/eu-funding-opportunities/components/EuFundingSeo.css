@@ -1,0 +1,230 @@
+.eu-seo-container {
+  display: flex;
+  flex-direction: column;
+  gap: 3.5rem;
+  margin-top: 1rem;
+}
+
+.eu-seo-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.eu-seo-badge-row {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.eu-seo-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.25rem 0.65rem;
+  border-radius: 999px;
+  background: rgba(150, 150, 150, 0.1);
+  color: var(--text-muted);
+  border: 1px solid rgba(150, 150, 150, 0.15);
+}
+
+.eu-seo-pill.highlight {
+  background: rgba(37, 99, 235, 0.12);
+  color: #3b82f6;
+  border-color: rgba(37, 99, 235, 0.25);
+}
+
+.eu-seo-h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-main);
+  margin: 0;
+  letter-spacing: -0.02em;
+  line-height: 1.3;
+}
+
+.eu-seo-lead {
+  font-size: 1rem;
+  line-height: 1.7;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.eu-seo-lead strong {
+  color: var(--text-main);
+}
+
+.eu-seo-grid-3 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.25rem;
+  margin-top: 0.5rem;
+}
+
+.eu-seo-card {
+  background: var(--card-bg, rgba(255, 255, 255, 0.03));
+  border: 1px solid var(--card-border, rgba(150, 150, 150, 0.15));
+  border-radius: 14px;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.eu-seo-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(59, 130, 246, 0.4);
+}
+
+.eu-seo-card-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.eu-seo-card-icon.blue {
+  background: rgba(37, 99, 235, 0.15);
+  color: #3b82f6;
+}
+
+.eu-seo-card-icon.purple {
+  background: rgba(168, 85, 247, 0.15);
+  color: #a855f7;
+}
+
+.eu-seo-card-icon.green {
+  background: rgba(16, 185, 129, 0.15);
+  color: #10b981;
+}
+
+.eu-seo-card h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-main);
+  margin: 0;
+}
+
+.eu-seo-card p {
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+/* Roadmap */
+.eu-seo-roadmap {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+
+.eu-roadmap-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 1.25rem;
+  background: var(--card-bg, rgba(255, 255, 255, 0.02));
+  border: 1px solid var(--card-border, rgba(150, 150, 150, 0.12));
+  border-radius: 12px;
+  padding: 1.25rem 1.5rem;
+}
+
+.eu-roadmap-num {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: rgba(59, 130, 246, 0.15);
+  color: #3b82f6;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 0.95rem;
+}
+
+.eu-roadmap-content h4 {
+  margin: 0 0 0.35rem 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.eu-roadmap-content p {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: var(--text-muted);
+}
+
+/* FAQ List */
+.eu-faq-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.eu-faq-item {
+  border: 1px solid var(--card-border, rgba(150, 150, 150, 0.15));
+  border-radius: 12px;
+  background: var(--card-bg, rgba(255, 255, 255, 0.02));
+  overflow: hidden;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.eu-faq-item:hover {
+  border-color: rgba(59, 130, 246, 0.35);
+}
+
+.eu-faq-item.open {
+  border-color: rgba(59, 130, 246, 0.5);
+  background: rgba(59, 130, 246, 0.02);
+}
+
+.eu-faq-question {
+  width: 100%;
+  padding: 1.15rem 1.35rem;
+  background: transparent;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  font-size: 0.98rem;
+  font-weight: 600;
+  color: var(--text-main);
+  text-align: left;
+  cursor: pointer;
+}
+
+.eu-faq-icon {
+  flex-shrink: 0;
+  color: var(--text-muted);
+  transition: transform 0.25s ease;
+}
+
+.eu-faq-icon.rotate {
+  transform: rotate(180deg);
+  color: #3b82f6;
+}
+
+.eu-faq-answer {
+  padding: 0 1.35rem 1.25rem;
+  border-top: 1px solid rgba(150, 150, 150, 0.08);
+  font-size: 0.9rem;
+  line-height: 1.65;
+  color: var(--text-muted);
+}
+
+.eu-faq-answer p {
+  margin: 0.75rem 0 0;
+}

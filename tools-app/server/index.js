@@ -957,6 +957,26 @@ app.listen(PORT, async () => {
         seo_title = EXCLUDED.seo_title, 
         seo_description = EXCLUDED.seo_description,
         category = EXCLUDED.category;
+
+      INSERT INTO cerilas_tools (
+        title, slug, short_description, icon_name, target_url, seo_title, seo_description, category, sort_order, is_active
+      ) VALUES (
+        'EU & Cascade Funding Opportunities',
+        'eu-funding-opportunities',
+        'Explore 660+ active European Commission calls, Horizon Europe research grants, and Cascade Funding (FSTP) equity-free lump-sum sub-grants for startups, SMEs, and researchers.',
+        'Compass',
+        '#/tool/eu-funding-opportunities',
+        'EU Funding & Cascade Funding Opportunities (2026) – Live Horizon Europe & FSTP Grants | Cerilas Tools',
+        'Search and filter 660+ open European Commission calls, Horizon Europe grants, EIC sub-grants, and Cascade Funding (FSTP) opportunities. Free directory with deadline trackers and eligibility guides for startups, SMEs, and researchers.',
+        'R&D & Engineering',
+        17,
+        true
+      ) ON CONFLICT (slug) DO UPDATE SET 
+        title = EXCLUDED.title,
+        short_description = EXCLUDED.short_description,
+        seo_title = EXCLUDED.seo_title, 
+        seo_description = EXCLUDED.seo_description,
+        category = EXCLUDED.category;
     `);
 
     console.log('Database tables & migrations verified successfully.');
