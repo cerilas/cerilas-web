@@ -2,14 +2,10 @@
    EU & Cascade Funding Opportunities Tool Styling
    ========================================================================== */
 
-.eu-funding-workspace {
+.eu-funding-root {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
-  width: 100%;
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 0 0.5rem;
+  gap: 2rem;
 }
 
 /* 1. KPI Stats Cards Header */

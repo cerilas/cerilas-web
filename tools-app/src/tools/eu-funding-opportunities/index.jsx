@@ -13,6 +13,7 @@ import {
   Share2,
   Copy,
   Check,
+  CheckCircle2,
   ChevronLeft,
   ChevronRight,
   LayoutGrid,
@@ -28,7 +29,7 @@ import {
 } from 'lucide-react';
 import { euFundingManifest } from './manifest';
 import { useToolAnalytics } from '../../hooks/useToolAnalytics';
-import ToolHeader from '../../components/ui/ToolHeader';
+import { ToolHeader, Badge } from '../../components/ui';
 import ToolSeoDivider from '../../components/ui/ToolSeoDivider';
 import EuFundingSeo from './components/EuFundingSeo';
 import './eu-funding.css';
@@ -279,25 +280,26 @@ export default function EuFundingOpportunities({ onBack, toolMeta }) {
   };
 
   return (
-    <div className="eu-funding-workspace">
+    <div className="c-tool-page-container eu-funding-root">
       {/* 1. Header */}
       <ToolHeader
         title={euFundingManifest.title}
         subtitle={euFundingManifest.shortDescription}
         onBack={onBack}
-        backLabel="All Tools"
         slug={euFundingManifest.slug}
-        logo="/tool-icons/eu-funding-opportunities.webp"
         badges={
           <>
-            <span className="card-stat-pill" style={{ background: 'rgba(37, 99, 235, 0.15)', color: '#3b82f6', fontWeight: 600 }}>
-              <Globe size={11} />
-              <span>Horizon Europe & Cascade FSTP</span>
-            </span>
-            <span className="card-stat-pill" style={{ background: 'rgba(16, 185, 129, 0.15)', color: '#10b981', fontWeight: 600 }}>
-              <Sparkles size={11} />
-              <span>Live Synchronized Grants</span>
-            </span>
+            {visitorCount > 0 && (
+              <Badge variant="blue" icon={<Users size={12} strokeWidth={2} />}>
+                {visitorCount.toLocaleString()} visitors
+              </Badge>
+            )}
+            <Badge variant="blue" icon={<Globe size={12} strokeWidth={2} />}>
+              Horizon Europe & Cascade FSTP
+            </Badge>
+            <Badge variant="success" icon={<CheckCircle2 size={12} strokeWidth={2} />}>
+              Live Synchronized Grants
+            </Badge>
           </>
         }
       />
