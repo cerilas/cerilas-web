@@ -324,8 +324,15 @@ export default function PersonaMenu({ onSelectTool, onNavigateHome }) {
 
   const activePersona = PERSONA_CONFIGS.find((p) => p.id === activePersonaId) || PERSONA_CONFIGS[0];
 
-  // Mouse hover opening with debounce
+  // Only trigger hover on devices that support hover (Desktop mouse pointer)
+  const isHoverSupported = () => {
+    if (typeof window === 'undefined') return true;
+    return window.matchMedia('(hover: hover) and (pointer: fine)').matches && window.innerWidth > 768;
+  };
+
+  // Mouse hover opening with debounce (desktop only)
   const handleMouseEnter = () => {
+    if (!isHoverSupported()) return;
     if (closeTimeoutRef.current) {
       clearTimeout(closeTimeoutRef.current);
       closeTimeoutRef.current = null;
@@ -334,6 +341,7 @@ export default function PersonaMenu({ onSelectTool, onNavigateHome }) {
   };
 
   const handleMouseLeave = () => {
+    if (!isHoverSupported()) return;
     if (closeTimeoutRef.current) {
       clearTimeout(closeTimeoutRef.current);
     }
@@ -353,12 +361,22 @@ export default function PersonaMenu({ onSelectTool, onNavigateHome }) {
         setIsOpen(false);
       }
     };
-    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('pointerdown', handleClickOutside);
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('pointerdown', handleClickOutside);
       if (closeTimeoutRef.current) clearTimeout(closeTimeoutRef.current);
     };
   }, []);
+
+  const handleTriggerClick = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (closeTimeoutRef.current) {
+      clearTimeout(closeTimeoutRef.current);
+      closeTimeoutRef.current = null;
+    }
+    setIsOpen((prev) => !prev);
+  };
 
   const handleToolClick = (slug) => {
     if (closeTimeoutRef.current) {
@@ -378,7 +396,10 @@ export default function PersonaMenu({ onSelectTool, onNavigateHome }) {
       {isOpen && (
         <div 
           className="persona-backdrop" 
-          onClick={() => setIsOpen(false)} 
+          onClick={(e) => {
+            e.stopPropagation();
+            setIsOpen(false);
+          }} 
           aria-hidden="true" 
         />
       )}
@@ -392,7 +413,7 @@ export default function PersonaMenu({ onSelectTool, onNavigateHome }) {
         <button 
           type="button" 
           className={`persona-menu-trigger ${isOpen ? 'is-open' : ''}`}
-          onClick={() => setIsOpen(!isOpen)}
+          onClick={handleTriggerClick}
           aria-expanded={isOpen}
           aria-haspopup="true"
         >
@@ -402,14 +423,21 @@ export default function PersonaMenu({ onSelectTool, onNavigateHome }) {
 
         {/* Mega Dropdown Menu */}
         {isOpen && (
-          <div className="persona-mega-dropdown" role="menu">
+          <div 
+            className="persona-mega-dropdown" 
+            role="menu"
+            onClick={(e) => e.stopPropagation()}
+          >
             {/* Mobile Header / Close Button */}
             <div className="persona-mobile-header">
               <span className="persona-mobile-header-title">Cerilas Roles</span>
               <button
                 type="button"
                 className="persona-mobile-close-btn"
-                onClick={() => setIsOpen(false)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsOpen(false);
+                }}
                 aria-label="Close role menu"
               >
                 <X size={18} />
@@ -429,8 +457,15 @@ export default function PersonaMenu({ onSelectTool, onNavigateHome }) {
                     key={persona.id}
                     type="button"
                     className={`persona-nav-item ${isActive ? 'active' : ''}`}
-                    onMouseEnter={() => setActivePersonaId(persona.id)}
-                    onClick={() => setActivePersonaId(persona.id)}
+                    onMouseEnter={() => {
+                      if (isHoverSupported()) {
+                        setActivePersonaId(persona.id);
+                      }
+                    }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setActivePersonaId(persona.id);
+                    }}
                   >
                     <div className="persona-item-left">
                       <div 
