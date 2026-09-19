@@ -650,9 +650,9 @@ export default function ScrapersView() {
                   <tr key={opp.id} onClick={() => handleOpenDetail(opp)} style={{ cursor: 'pointer' }}>
                     <td>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
-                        {opp.cover_image ? (
+                        {(opp.cover_image || opp.source_key === 'ec_funding') ? (
                           <img 
-                            src={opp.cover_image} 
+                            src={opp.cover_image && !opp.cover_image.includes('logo-ec.svg') ? opp.cover_image : (opp.source_key === 'ec_funding' ? '/eu-logo.svg' : opp.cover_image)} 
                             alt=""
                             style={{
                               width: 40,
@@ -662,7 +662,13 @@ export default function ScrapersView() {
                               border: '1px solid var(--card-border, rgba(0,0,0,0.06))',
                               flexShrink: 0
                             }}
-                            onError={(e) => { e.target.style.display = 'none'; }}
+                            onError={(e) => {
+                              if (opp.source_key === 'ec_funding' && e.target.src !== window.location.origin + '/eu-logo.svg') {
+                                e.target.src = '/eu-logo.svg';
+                              } else {
+                                e.target.style.display = 'none';
+                              }
+                            }}
                           />
                         ) : (
                           <div style={{
@@ -769,9 +775,9 @@ export default function ScrapersView() {
             >
               <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '0.75rem' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                  {opp.cover_image ? (
+                  {(opp.cover_image || opp.source_key === 'ec_funding') ? (
                     <img 
-                      src={opp.cover_image} 
+                      src={opp.cover_image && !opp.cover_image.includes('logo-ec.svg') ? opp.cover_image : (opp.source_key === 'ec_funding' ? '/eu-logo.svg' : opp.cover_image)} 
                       alt=""
                       style={{
                         width: 44,
@@ -780,7 +786,13 @@ export default function ScrapersView() {
                         objectFit: 'cover',
                         border: '1px solid var(--card-border, rgba(0,0,0,0.06))'
                       }}
-                      onError={(e) => { e.target.style.display = 'none'; }}
+                      onError={(e) => {
+                        if (opp.source_key === 'ec_funding' && e.target.src !== window.location.origin + '/eu-logo.svg') {
+                          e.target.src = '/eu-logo.svg';
+                        } else {
+                          e.target.style.display = 'none';
+                        }
+                      }}
                     />
                   ) : (
                     <div style={{
@@ -985,9 +997,9 @@ export default function ScrapersView() {
               gap: '1rem'
             }}>
               <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                {activeOpportunity.cover_image && (
+                {(activeOpportunity.cover_image || activeOpportunity.source_key === 'ec_funding') && (
                   <img 
-                    src={activeOpportunity.cover_image} 
+                    src={activeOpportunity.cover_image && !activeOpportunity.cover_image.includes('logo-ec.svg') ? activeOpportunity.cover_image : (activeOpportunity.source_key === 'ec_funding' ? '/eu-logo.svg' : activeOpportunity.cover_image)} 
                     alt=""
                     style={{
                       width: 54,
@@ -995,6 +1007,13 @@ export default function ScrapersView() {
                       borderRadius: 12,
                       objectFit: 'cover',
                       border: '1px solid var(--card-border, rgba(0,0,0,0.08))'
+                    }}
+                    onError={(e) => {
+                      if (activeOpportunity.source_key === 'ec_funding' && e.target.src !== window.location.origin + '/eu-logo.svg') {
+                        e.target.src = '/eu-logo.svg';
+                      } else {
+                        e.target.style.display = 'none';
+                      }
                     }}
                   />
                 )}

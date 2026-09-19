@@ -463,7 +463,7 @@ export async function scrapeEcFunding(triggeredBy = 'manual', pageSize = 100, ma
           title,
           shortDesc,
           longDesc,
-          'https://ec.europa.eu/info/funding-tenders/opportunities/portal/assets/images/logo-ec.svg',
+          '/eu-logo.svg',
           JSON.stringify(eligibleApplicants),
           deadlineDate,
           m.deadlineDate?.[0] || null,
