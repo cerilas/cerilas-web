@@ -1,14 +1,11 @@
 import { useState, useMemo, useRef, useCallback } from 'react';
 import { 
-  Binary, 
   UploadCloud, 
   FileText, 
   Trash2, 
   Copy, 
   Check, 
   FileCode, 
-  Cpu, 
-  Layers, 
   Scissors, 
   RefreshCw,
   Download,
@@ -16,9 +13,12 @@ import {
   Table,
   Eye,
   BarChart3,
-  CheckCircle2,
-  AlertTriangle
+  Bot,
+  Users,
+  Activity,
+  ShieldCheck
 } from 'lucide-react';
+import { tokenCounterUniversalManifest } from './manifest';
 import { 
   MODEL_CATALOG, 
   calculateTextStats, 
@@ -28,10 +28,22 @@ import {
   optimizeTextTokens, 
   SAMPLE_PRESETS 
 } from './tokenEngine';
+import { useToolAnalytics } from '../../hooks/useToolAnalytics';
+import { Badge, ToolHeader, AdSlot } from '../../components/ui';
+import ToolSeoDivider from '../../components/ui/ToolSeoDivider';
 import TokenCounterSeo from './components/TokenCounterSeo';
 import './token-counter.css';
 
-export default function TokenCounterUniversal() {
+export default function TokenCounterUniversal({ onBack, toolMeta }) {
+  const {
+    trackUse,
+    trackDownload,
+    trackCopy,
+    visitorCount,
+    conversionCount,
+    getConversionLabel
+  } = useToolAnalytics(tokenCounterUniversalManifest.slug, toolMeta);
+
   const [inputText, setInputText] = useState(SAMPLE_PRESETS[0].text);
   const [inputMode, setInputMode] = useState('text'); // 'text' | 'file'
   const [viewMode, setViewMode] = useState('matrix'); // 'matrix' | 'visualizer' | 'table'
@@ -95,6 +107,7 @@ export default function TokenCounterUniversal() {
       if (extracted && extracted.text) {
         setInputText(extracted.text);
         setUploadedFile(extracted);
+        trackUse?.({ mode: 'file', fileName: extracted.fileName });
       }
     } catch (err) {
       console.error('File parsing error:', err);
@@ -103,7 +116,7 @@ export default function TokenCounterUniversal() {
       setIsFileLoading(false);
       setIsDragging(false);
     }
-  }, []);
+  }, [trackUse]);
 
   const handleDrop = (e) => {
     e.preventDefault();
@@ -125,6 +138,7 @@ export default function TokenCounterUniversal() {
   const handleCopy = (content) => {
     navigator.clipboard.writeText(content);
     setCopied(true);
+    trackCopy?.();
     setTimeout(() => setCopied(false), 2000);
   };
 
@@ -138,6 +152,7 @@ export default function TokenCounterUniversal() {
     if (optimizationResult?.optimized) {
       setInputText(optimizationResult.optimized);
       setOptimizationResult(null);
+      trackUse?.({ mode: 'optimize' });
     }
   };
 
@@ -174,50 +189,64 @@ export default function TokenCounterUniversal() {
     a.download = `token-audit-${activeModel.id}-${Date.now()}.json`;
     a.click();
     URL.revokeObjectURL(url);
+    trackDownload?.({ mode: 'json' });
   };
 
   const isOverflow = activeModel.contextPercentage > 100;
 
   return (
-    <div className="tc-root">
-      {/* 1. Header Hero Card */}
-      <div className="tc-hero-card">
-        <div className="tc-hero-header">
-          <div className="tc-hero-eyebrow">
-            <Binary size={15} />
-            <span>Universal AI Tokenizer & Cost Auditor</span>
-          </div>
-          <h1 className="tc-hero-title">Universal Token Counter</h1>
-          <p className="tc-hero-subtitle">
-            Calculate exact token counts, context window consumption, and API pricing for text and files 
-            (<strong>PDF</strong>, <strong>Code</strong>, <strong>Markdown</strong>) across OpenAI, Claude, Gemini, DeepSeek, and Llama.
-          </p>
-        </div>
+    <div className="c-tool-page-container tc-root">
+      {/* Standardized ToolHeader matching all Cerilas tools */}
+      <ToolHeader
+        title={tokenCounterUniversalManifest.title}
+        subtitle={tokenCounterUniversalManifest.shortDescription}
+        onBack={onBack}
+        slug={tokenCounterUniversalManifest.slug}
+        badges={
+          <>
+            {visitorCount > 0 && (
+              <Badge variant="blue" icon={<Users size={12} strokeWidth={2} />}>
+                {visitorCount.toLocaleString()} visitors
+              </Badge>
+            )}
+            {conversionCount > 0 && (
+              <Badge variant="brand" icon={<Activity size={12} strokeWidth={2} />}>
+                {conversionCount.toLocaleString()} {getConversionLabel()}
+              </Badge>
+            )}
+            <Badge variant="neutral" icon={<Bot size={12} strokeWidth={2} />}>
+              AI Assisted
+            </Badge>
+            <Badge variant="success" icon={<ShieldCheck size={12} strokeWidth={2} />}>
+              100% Client-Side
+            </Badge>
+          </>
+        }
+      />
 
-        {/* Mode Switcher */}
-        <div className="tc-mode-switcher-container">
-          <div className="tc-mode-switcher">
-            <button
-              type="button"
-              className={`tc-mode-btn ${inputMode === 'text' ? 'active' : ''}`}
-              onClick={() => setInputMode('text')}
-            >
-              <FileText size={15} />
-              <span>Direct Prompt / Text</span>
-            </button>
-            <button
-              type="button"
-              className={`tc-mode-btn ${inputMode === 'file' ? 'active' : ''}`}
-              onClick={() => setInputMode('file')}
-            >
-              <UploadCloud size={15} />
-              <span>Upload Document (PDF / Code)</span>
-            </button>
-          </div>
+      {/* Mode Switcher Segmented Control */}
+      <div className="tc-mode-switcher-container">
+        <div className="tc-mode-switcher">
+          <button
+            type="button"
+            className={`tc-mode-btn ${inputMode === 'text' ? 'active' : ''}`}
+            onClick={() => setInputMode('text')}
+          >
+            <FileText size={15} />
+            <span>Direct Prompt / Text</span>
+          </button>
+          <button
+            type="button"
+            className={`tc-mode-btn ${inputMode === 'file' ? 'active' : ''}`}
+            onClick={() => setInputMode('file')}
+          >
+            <UploadCloud size={15} />
+            <span>Upload Document (PDF / Code)</span>
+          </button>
         </div>
       </div>
 
-      {/* 2. Input Workspace Card */}
+      {/* Input Workspace Card */}
       <div className="tc-workspace-card">
         {/* Presets & Actions Bar */}
         <div className="tc-toolbar">
@@ -409,7 +438,7 @@ export default function TokenCounterUniversal() {
         </div>
       </div>
 
-      {/* 3. Results & Multi-Model Intelligence Card */}
+      {/* Results & Multi-Model Intelligence Card */}
       <div className="tc-results-card">
         {/* Selected Model Showcase */}
         <div className="tc-summary-hero">
@@ -701,7 +730,11 @@ export default function TokenCounterUniversal() {
         </div>
       </div>
 
-      {/* 4. Educational & SEO Section */}
+      <AdSlot slot="footer-top" />
+
+      <ToolSeoDivider />
+
+      {/* Educational & SEO Section */}
       <TokenCounterSeo />
     </div>
   );
