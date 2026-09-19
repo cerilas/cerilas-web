@@ -212,6 +212,17 @@ export default function ScrapersView() {
     return pages;
   };
 
+  // Format source URL display helper
+  const formatSourceUrl = (url) => {
+    try {
+      const u = new URL(url);
+      const cleanPath = u.pathname.length > 25 ? u.pathname.slice(0, 22) + '...' : u.pathname;
+      return `${u.hostname}${cleanPath && cleanPath !== '/' ? cleanPath : ''}`;
+    } catch {
+      return url.replace(/^https?:\/\//, '').slice(0, 30);
+    }
+  };
+
   const openOppsCount = opportunities.filter(o => o.status === 'open').length;
 
   return (
@@ -254,51 +265,51 @@ export default function ScrapersView() {
               <ShieldCheck size={16} />
             </div>
           </div>
-          <div className="admin-kpi-val" style={{ color: '#a855f7', fontSize: '1.4rem' }}>
-            SHA-256
-          </div>
+          <div className="admin-kpi-val" style={{ color: '#a855f7' }}>SHA-256</div>
           <div className="admin-kpi-sub">
-            <span>Mükerrer yazma engellendi</span>
+            <span>Yalnızca değişenler yazılır</span>
           </div>
         </div>
 
         <div className="admin-kpi-card">
           <div className="admin-kpi-header">
-            <span className="admin-kpi-label">Scraper Motoru</span>
-            <div className="admin-kpi-icon-wrap" style={{ background: 'rgba(234, 179, 8, 0.1)', color: '#eab308' }}>
-              <Globe size={16} />
+            <span className="admin-kpi-label">Otomasyon</span>
+            <div className="admin-kpi-icon-wrap" style={{ background: 'rgba(245, 158, 11, 0.1)', color: '#f59e0b' }}>
+              <Clock size={16} />
             </div>
           </div>
-          <div className="admin-kpi-val" style={{ color: 'var(--text-main)', fontSize: '1.4rem' }}>
-            Deterministik
-          </div>
+          <div className="admin-kpi-val">Webhook</div>
           <div className="admin-kpi-sub">
-            <span>AI'sız & Yüksek Hızlı</span>
+            <span>Cron & Manuel Tetikleme</span>
           </div>
         </div>
       </div>
 
-      {/* Scraper Result Notification Banner */}
+      {/* Scraper Run Feedback Alert */}
       {scraperMessage && (
-        <div style={{
-          padding: '0.85rem 1.1rem',
-          borderRadius: 14,
-          marginBottom: '1.5rem',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '0.75rem',
-          background: scraperMessage.type === 'success' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)',
-          border: `1px solid ${scraperMessage.type === 'success' ? 'rgba(16, 185, 129, 0.25)' : 'rgba(239, 68, 68, 0.25)'}`,
-          color: scraperMessage.type === 'success' ? '#10b981' : '#ef4444',
-          fontSize: '0.86rem',
-          fontWeight: 600
-        }}>
-          {scraperMessage.type === 'success' ? <CheckCircle2 size={18} /> : <AlertCircle size={18} />}
-          <span style={{ flex: 1 }}>{scraperMessage.text}</span>
+        <div 
+          className={`admin-alert ${scraperMessage.type}`}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            marginBottom: '1.5rem',
+            padding: '1rem 1.25rem',
+            borderRadius: 14,
+            background: scraperMessage.type === 'success' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)',
+            border: `1px solid ${scraperMessage.type === 'success' ? 'rgba(16, 185, 129, 0.25)' : 'rgba(239, 68, 68, 0.25)'}`,
+            color: scraperMessage.type === 'success' ? '#059669' : '#dc2626',
+            fontSize: '0.9rem'
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+            {scraperMessage.type === 'success' ? <CheckCircle2 size={18} /> : <AlertCircle size={18} />}
+            <span>{scraperMessage.text}</span>
+          </div>
           <button 
             type="button" 
             onClick={() => setScraperMessage(null)}
-            style={{ background: 'none', border: 'none', color: 'inherit', cursor: 'pointer', padding: 0 }}
+            style={{ background: 'none', border: 'none', color: 'inherit', cursor: 'pointer', padding: 4 }}
           >
             <X size={16} />
           </button>
@@ -318,7 +329,7 @@ export default function ScrapersView() {
           </div>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1.25rem' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           {sources.map((src) => {
             const isRunning = runningScraper === src.key;
             return (
@@ -329,129 +340,181 @@ export default function ScrapersView() {
                   display: 'flex',
                   flexDirection: 'column',
                   gap: '1rem',
-                  position: 'relative'
+                  position: 'relative',
+                  minWidth: 0,
+                  overflow: 'hidden'
                 }}
               >
-                <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '0.75rem' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                {/* Header: Icon, Name, Link & Top Action Buttons */}
+                <div style={{ 
+                  display: 'flex', 
+                  alignItems: 'flex-start', 
+                  justifyContent: 'space-between', 
+                  gap: '1rem', 
+                  flexWrap: 'wrap' 
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem', minWidth: 0, flex: 1 }}>
                     <div style={{
                       width: 44,
                       height: 44,
                       borderRadius: 12,
-                      background: 'linear-gradient(135deg, #3b82f6, #1d4ed8)',
+                      background: src.key === 'ec_funding' 
+                        ? 'linear-gradient(135deg, #8b5cf6, #6d28d9)' 
+                        : 'linear-gradient(135deg, #3b82f6, #1d4ed8)',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
                       color: '#ffffff',
-                      boxShadow: '0 4px 12px rgba(59, 130, 246, 0.25)'
+                      boxShadow: src.key === 'ec_funding' 
+                        ? '0 4px 12px rgba(139, 92, 246, 0.25)' 
+                        : '0 4px 12px rgba(59, 130, 246, 0.25)',
+                      flexShrink: 0
                     }}>
                       <Globe size={22} />
                     </div>
-                    <div>
-                      <h4 style={{ margin: 0, fontSize: '1.02rem', fontWeight: 700, color: 'var(--text-main)' }}>
-                        {src.name}
-                      </h4>
+                    <div style={{ minWidth: 0, flex: 1 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+                        <h4 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 700, color: 'var(--text-main)' }}>
+                          {src.name}
+                        </h4>
+                        <span className="admin-badge success" style={{ fontSize: '0.68rem', padding: '0.12rem 0.45rem' }}>
+                          ● Aktif
+                        </span>
+                      </div>
                       <a 
                         href={src.url} 
                         target="_blank" 
                         rel="noreferrer"
+                        title={src.url}
                         style={{ 
-                          fontSize: '0.76rem', 
+                          fontSize: '0.78rem', 
                           color: '#3b82f6', 
                           display: 'inline-flex', 
                           alignItems: 'center', 
                           gap: '0.2rem',
-                          marginTop: '0.15rem',
-                          textDecoration: 'none'
+                          marginTop: '0.2rem',
+                          textDecoration: 'none',
+                          maxWidth: '100%',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'nowrap'
                         }}
                       >
-                        <span>{src.url.replace(/^https?:\/\//, '')}</span>
-                        <ArrowUpRight size={12} />
+                        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          {formatSourceUrl(src.url)}
+                        </span>
+                        <ArrowUpRight size={12} style={{ flexShrink: 0 }} />
                       </a>
                     </div>
                   </div>
 
-                  <span className="admin-badge success">
-                    ● Aktif
-                  </span>
+                  {/* Actions: Run Scraper & Copy Webhook */}
+                  <div style={{ display: 'flex', gap: '0.65rem', flexWrap: 'wrap', alignItems: 'center' }}>
+                    <button
+                      type="button"
+                      className="admin-action-btn primary"
+                      onClick={() => handleRunScraper(src.key)}
+                      disabled={isRunning}
+                      style={{ minWidth: 140, justifyContent: 'center' }}
+                    >
+                      {isRunning ? (
+                        <>
+                          <RefreshCw size={14} className="spin" />
+                          <span>Taranıyor...</span>
+                        </>
+                      ) : (
+                        <>
+                          <Play size={14} fill="currentColor" />
+                          <span>Scrap Et (Manuel)</span>
+                        </>
+                      )}
+                    </button>
+
+                    <button
+                      type="button"
+                      className="admin-action-btn secondary"
+                      onClick={() => handleCopyWebhook(src.webhook_path)}
+                      title="Cron veya harici servislerle tetiklemek için Webhook URL'sini kopyala"
+                      style={{ justifyContent: 'center' }}
+                    >
+                      {copiedWebhook ? <Check size={14} color="#10b981" /> : <Copy size={14} />}
+                      <span>{copiedWebhook ? 'Kopyalandı!' : 'Webhook URL'}</span>
+                    </button>
+                  </div>
                 </div>
 
-                <p style={{ margin: 0, fontSize: '0.82rem', color: 'var(--text-muted)', lineHeight: 1.45 }}>
+                {/* Description */}
+                <p style={{ margin: 0, fontSize: '0.84rem', color: 'var(--text-muted)', lineHeight: 1.5 }}>
                   {src.description}
                 </p>
 
-                {/* Scraper Stats Grid */}
+                {/* Bottom Row: Stats and Last Run */}
                 <div style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(3, 1fr)',
-                  gap: '0.5rem',
-                  background: 'rgba(150, 150, 150, 0.04)',
-                  borderRadius: 12,
-                  padding: '0.75rem 0.85rem',
-                  border: '1px solid var(--card-border, rgba(0, 0, 0, 0.05))'
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  gap: '1rem',
+                  flexWrap: 'wrap',
+                  paddingTop: '0.75rem',
+                  borderTop: '1px solid var(--card-border, rgba(0, 0, 0, 0.05))'
                 }}>
-                  <div>
-                    <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Kayıtlı Program</div>
-                    <div style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--text-main)' }}>
-                      {src.total_items}
+                  {/* Stats Badges / Grid */}
+                  <div style={{ display: 'flex', gap: '0.65rem', flexWrap: 'wrap', alignItems: 'center' }}>
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.4rem',
+                      background: 'rgba(150, 150, 150, 0.06)',
+                      padding: '0.35rem 0.65rem',
+                      borderRadius: 8,
+                      fontSize: '0.78rem'
+                    }}>
+                      <span style={{ color: 'var(--text-muted)' }}>Kayıtlı:</span>
+                      <strong style={{ color: 'var(--text-main)' }}>{src.total_items}</strong>
+                    </div>
+
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.4rem',
+                      background: 'rgba(16, 185, 129, 0.08)',
+                      padding: '0.35rem 0.65rem',
+                      borderRadius: 8,
+                      fontSize: '0.78rem'
+                    }}>
+                      <span style={{ color: '#10b981' }}>Açık Çağrı:</span>
+                      <strong style={{ color: '#10b981' }}>{src.open_items}</strong>
+                    </div>
+
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.4rem',
+                      background: 'rgba(168, 85, 247, 0.08)',
+                      padding: '0.35rem 0.65rem',
+                      borderRadius: 8,
+                      fontSize: '0.78rem'
+                    }}>
+                      <span style={{ color: '#a855f7' }}>Deduplication:</span>
+                      <strong style={{ color: '#a855f7' }}>SHA-256</strong>
                     </div>
                   </div>
-                  <div>
-                    <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Açık Çağrı</div>
-                    <div style={{ fontSize: '1.1rem', fontWeight: 800, color: '#10b981' }}>
-                      {src.open_items}
+
+                  {/* Last Run Info */}
+                  {src.last_run && (
+                    <div style={{ 
+                      fontSize: '0.76rem', 
+                      color: 'var(--text-muted)', 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      gap: '0.4rem' 
+                    }}>
+                      <Clock size={13} style={{ flexShrink: 0 }} />
+                      <span>
+                        Son Tarama: {formatDate(src.last_run.created_at)} ({src.last_run.items_found} çağrı, {src.last_run.items_unchanged} değişmedi)
+                      </span>
                     </div>
-                  </div>
-                  <div>
-                    <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Deduplication</div>
-                    <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#a855f7', marginTop: '0.2rem' }}>
-                      SHA-256
-                    </div>
-                  </div>
-                </div>
-
-                {/* Last Run Info */}
-                {src.last_run && (
-                  <div style={{ fontSize: '0.76rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                    <Clock size={13} />
-                    <span>
-                      Son Tarama: {formatDate(src.last_run.created_at)} ({src.last_run.items_found} çağrı, {src.last_run.items_unchanged} değişmedi)
-                    </span>
-                  </div>
-                )}
-
-                {/* Webhook & Trigger Actions */}
-                <div style={{ display: 'flex', gap: '0.65rem', marginTop: 'auto', paddingTop: '0.25rem', flexWrap: 'wrap' }}>
-                  <button
-                    type="button"
-                    className="admin-action-btn primary"
-                    onClick={() => handleRunScraper(src.key)}
-                    disabled={isRunning}
-                    style={{ flex: 1, justifyContent: 'center', minWidth: 140 }}
-                  >
-                    {isRunning ? (
-                      <>
-                        <RefreshCw size={14} className="spin" />
-                        <span>Taranıyor...</span>
-                      </>
-                    ) : (
-                      <>
-                        <Play size={14} fill="currentColor" />
-                        <span>Scrap Et (Manuel)</span>
-                      </>
-                    )}
-                  </button>
-
-                  <button
-                    type="button"
-                    className="admin-action-btn secondary"
-                    onClick={() => handleCopyWebhook(src.webhook_path)}
-                    title="Cron veya harici servislerle tetiklemek için Webhook URL'sini kopyala"
-                    style={{ justifyContent: 'center' }}
-                  >
-                    {copiedWebhook ? <Check size={14} color="#10b981" /> : <Copy size={14} />}
-                    <span>{copiedWebhook ? 'Kopyalandı!' : 'Webhook URL'}</span>
-                  </button>
+                  )}
                 </div>
               </div>
             );
