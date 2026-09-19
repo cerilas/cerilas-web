@@ -1,6 +1,7 @@
 import express from 'express';
 import pool from '../db.js';
 import { scrapeCascadeFunding } from '../scrapers/cascadefunding.js';
+import { scrapeEcFunding } from '../scrapers/ec_funding.js';
 
 const router = express.Router();
 
@@ -10,7 +11,7 @@ const router = express.Router();
 router.get('/sources', async (req, res) => {
   try {
     // Query stats for Cascade Funding
-    const statsRes = await pool.query(`
+    const cascadeStatsRes = await pool.query(`
       SELECT 
         COUNT(*) as total_items,
         COUNT(CASE WHEN status = 'open' THEN 1 END) as open_items,
@@ -20,9 +21,27 @@ router.get('/sources', async (req, res) => {
       WHERE source_key = 'cascadefunding'
     `);
 
-    const lastRunRes = await pool.query(`
+    const cascadeLastRunRes = await pool.query(`
       SELECT * FROM scraper_runs
       WHERE source_key = 'cascadefunding'
+      ORDER BY created_at DESC
+      LIMIT 1
+    `);
+
+    // Query stats for EU Funding & Tenders
+    const ecStatsRes = await pool.query(`
+      SELECT 
+        COUNT(*) as total_items,
+        COUNT(CASE WHEN status = 'open' THEN 1 END) as open_items,
+        MAX(last_scraped_at) as last_scraped_at,
+        MAX(last_changed_at) as last_changed_at
+      FROM funding_opportunities
+      WHERE source_key = 'ec_funding'
+    `);
+
+    const ecLastRunRes = await pool.query(`
+      SELECT * FROM scraper_runs
+      WHERE source_key = 'ec_funding'
       ORDER BY created_at DESC
       LIMIT 1
     `);
@@ -36,12 +55,27 @@ router.get('/sources', async (req, res) => {
         status: 'active',
         engine: 'Native Deterministic Scraper',
         change_detection: 'SHA-256 Content Hash',
-        total_items: parseInt(statsRes.rows[0]?.total_items || 0, 10),
-        open_items: parseInt(statsRes.rows[0]?.open_items || 0, 10),
-        last_scraped_at: statsRes.rows[0]?.last_scraped_at,
-        last_changed_at: statsRes.rows[0]?.last_changed_at,
-        last_run: lastRunRes.rows[0] || null,
+        total_items: parseInt(cascadeStatsRes.rows[0]?.total_items || 0, 10),
+        open_items: parseInt(cascadeStatsRes.rows[0]?.open_items || 0, 10),
+        last_scraped_at: cascadeStatsRes.rows[0]?.last_scraped_at,
+        last_changed_at: cascadeStatsRes.rows[0]?.last_changed_at,
+        last_run: cascadeLastRunRes.rows[0] || null,
         webhook_path: '/api/scrapers/cascadefunding/webhook'
+      },
+      {
+        key: 'ec_funding',
+        name: 'EU Funding & Tenders Portal (SEDIA)',
+        url: 'https://ec.europa.eu/info/funding-tenders/opportunities/portal/screen/opportunities/calls-for-proposals?isExactMatch=true&status=31094501,31094502,31094503&order=DESC&pageNumber=1&pageSize=50&sortBy=startDate',
+        description: 'Official European Commission SEDIA Portal Calls for Proposals & Horizon Europe Grants directory.',
+        status: 'active',
+        engine: 'Native Deterministic REST API Scraper',
+        change_detection: 'SHA-256 Content Hash',
+        total_items: parseInt(ecStatsRes.rows[0]?.total_items || 0, 10),
+        open_items: parseInt(ecStatsRes.rows[0]?.open_items || 0, 10),
+        last_scraped_at: ecStatsRes.rows[0]?.last_scraped_at,
+        last_changed_at: ecStatsRes.rows[0]?.last_changed_at,
+        last_run: ecLastRunRes.rows[0] || null,
+        webhook_path: '/api/scrapers/ec_funding/webhook'
       }
     ];
 
@@ -60,6 +94,7 @@ router.get('/opportunities', async (req, res) => {
     const { 
       search = '', 
       status = 'all', 
+      source = 'all',
       beneficiary = '', 
       domain = '',
       call_type = '',
@@ -87,6 +122,12 @@ router.get('/opportunities', async (req, res) => {
     if (status && status !== 'all') {
       params.push(status);
       conditions.push(`status = $${params.length}`);
+    }
+
+    // Source filter (e.g. 'cascadefunding', 'ec_funding')
+    if (source && source !== 'all') {
+      params.push(source);
+      conditions.push(`source_key = $${params.length}`);
     }
 
     // Beneficiary filter (e.g. 'SME', 'startups')
@@ -186,16 +227,21 @@ router.get('/opportunities/:id', async (req, res) => {
 router.post('/:sourceKey/run', async (req, res) => {
   try {
     const { sourceKey } = req.params;
-    if (sourceKey !== 'cascadefunding') {
+    let result = null;
+
+    if (sourceKey === 'cascadefunding') {
+      console.log(`[API:Scrapers] Manual scrape requested for Cascade Funding...`);
+      result = await scrapeCascadeFunding('admin_manual');
+    } else if (sourceKey === 'ec_funding') {
+      console.log(`[API:Scrapers] Manual scrape requested for EU Funding & Tenders...`);
+      result = await scrapeEcFunding('admin_manual', 50, 2);
+    } else {
       return res.status(400).json({ status: 'error', message: `Unknown scraper source: ${sourceKey}` });
     }
 
-    console.log(`[API:Scrapers] Manual scrape requested for ${sourceKey}...`);
-    const result = await scrapeCascadeFunding('admin_manual');
-
     res.json({
       status: 'success',
-      message: 'Scraping executed successfully',
+      message: `Scraping executed successfully for ${sourceKey}`,
       data: result
     });
   } catch (err) {
@@ -219,12 +265,16 @@ router.post('/:sourceKey/webhook', async (req, res) => {
       return res.status(401).json({ status: 'error', message: 'Invalid or missing webhook secret' });
     }
 
-    if (sourceKey !== 'cascadefunding') {
+    let result = null;
+    if (sourceKey === 'cascadefunding') {
+      console.log(`[API:Scrapers] Webhook triggered for Cascade Funding...`);
+      result = await scrapeCascadeFunding('webhook');
+    } else if (sourceKey === 'ec_funding') {
+      console.log(`[API:Scrapers] Webhook triggered for EU Funding & Tenders...`);
+      result = await scrapeEcFunding('webhook', 50, 2);
+    } else {
       return res.status(400).json({ status: 'error', message: `Unknown scraper source: ${sourceKey}` });
     }
-
-    console.log(`[API:Scrapers] Webhook triggered for ${sourceKey}...`);
-    const result = await scrapeCascadeFunding('webhook');
 
     res.json({
       status: 'success',

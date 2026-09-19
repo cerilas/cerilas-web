@@ -38,6 +38,7 @@ export default function ScrapersView() {
   
   // Filter & Search state
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedSource, setSelectedSource] = useState('all');
   const [selectedDomain, setSelectedDomain] = useState('all');
   const [selectedBeneficiary, setSelectedBeneficiary] = useState('all');
   const [selectedStatus, setSelectedStatus] = useState('all');
@@ -96,6 +97,7 @@ export default function ScrapersView() {
         page: currentPage.toString(), 
         limit: pageSize.toString() 
       });
+      if (selectedSource !== 'all') params.append('source', selectedSource);
       if (selectedStatus !== 'all') params.append('status', selectedStatus);
       if (selectedBeneficiary !== 'all') params.append('beneficiary', selectedBeneficiary);
       if (selectedDomain !== 'all') params.append('domain', selectedDomain);
@@ -123,7 +125,7 @@ export default function ScrapersView() {
   // Reset to page 1 whenever any filter or page size changes
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchTerm, selectedDomain, selectedBeneficiary, selectedStatus, pageSize]);
+  }, [searchTerm, selectedSource, selectedDomain, selectedBeneficiary, selectedStatus, pageSize]);
 
   // Fetch opportunities whenever page or filters change
   useEffect(() => {
@@ -131,7 +133,7 @@ export default function ScrapersView() {
       fetchOpportunities();
     }, 200);
     return () => clearTimeout(timeout);
-  }, [currentPage, pageSize, searchTerm, selectedDomain, selectedBeneficiary, selectedStatus]);
+  }, [currentPage, pageSize, searchTerm, selectedSource, selectedDomain, selectedBeneficiary, selectedStatus]);
 
   // Scroll to table when page changes
   const handlePageChange = (newPage) => {
@@ -238,7 +240,7 @@ export default function ScrapersView() {
             </div>
           </div>
           <div className="admin-kpi-val" style={{ color: '#10b981' }}>
-            {sources[0]?.open_items || openOppsCount}
+            {sources.length > 0 ? sources.reduce((acc, s) => acc + (s.open_items || 0), 0) : openOppsCount}
           </div>
           <div className="admin-kpi-sub">
             <span>Aktif başvuruya açık</span>
@@ -474,6 +476,17 @@ export default function ScrapersView() {
         <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
           <select
             className="admin-select"
+            value={selectedSource}
+            onChange={(e) => setSelectedSource(e.target.value)}
+          >
+            <option value="all">Tüm Kaynaklar ({sources.length})</option>
+            {sources.map(s => (
+              <option key={s.key} value={s.key}>{s.name}</option>
+            ))}
+          </select>
+
+          <select
+            className="admin-select"
             value={selectedBeneficiary}
             onChange={(e) => setSelectedBeneficiary(e.target.value)}
           >
@@ -591,8 +604,16 @@ export default function ScrapersView() {
                           <div style={{ fontWeight: 600, fontSize: '0.88rem', color: 'var(--text-main)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                             {opp.title}
                           </div>
-                          <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                            {opp.short_description || opp.source_key}
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', marginTop: '0.15rem' }}>
+                            <span 
+                              className={`admin-badge ${opp.source_key === 'ec_funding' ? 'purple' : 'primary'}`}
+                              style={{ fontSize: '0.62rem', padding: '0.1rem 0.35rem', flexShrink: 0 }}
+                            >
+                              {opp.source_key === 'ec_funding' ? 'EU Portal' : 'Cascade'}
+                            </span>
+                            <span style={{ fontSize: '0.74rem', color: 'var(--text-muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                              {opp.short_description || opp.source_key}
+                            </span>
                           </div>
                         </div>
                       </div>
@@ -698,9 +719,19 @@ export default function ScrapersView() {
                   )}
 
                   <div>
-                    <span className="admin-badge primary" style={{ fontSize: '0.65rem', marginBottom: '0.2rem' }}>
-                      {opp.call_type || 'Open Call'}
-                    </span>
+                    <div style={{ display: 'flex', gap: '0.35rem', alignItems: 'center', marginBottom: '0.25rem' }}>
+                      <span 
+                        className={`admin-badge ${opp.source_key === 'ec_funding' ? 'purple' : 'primary'}`} 
+                        style={{ fontSize: '0.64rem', padding: '0.12rem 0.4rem' }}
+                      >
+                        {opp.source_key === 'ec_funding' ? 'EU Tenders' : 'Cascade'}
+                      </span>
+                      {opp.call_type && opp.call_type !== 'Cascade Funding' && (
+                        <span className="admin-badge neutral" style={{ fontSize: '0.62rem', padding: '0.12rem 0.35rem' }}>
+                          {opp.call_type}
+                        </span>
+                      )}
+                    </div>
                     <h4 style={{ 
                       margin: 0, 
                       fontSize: '0.94rem', 
@@ -888,9 +919,16 @@ export default function ScrapersView() {
                   />
                 )}
                 <div>
-                  <span className="admin-badge primary" style={{ marginBottom: '0.3rem' }}>
-                    {activeOpportunity.call_type || 'Cascade Funding'}
-                  </span>
+                  <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center', marginBottom: '0.35rem' }}>
+                    <span className={`admin-badge ${activeOpportunity.source_key === 'ec_funding' ? 'purple' : 'primary'}`}>
+                      {activeOpportunity.source_key === 'ec_funding' ? 'EU Funding & Tenders Portal (SEDIA)' : 'Cascade Funding'}
+                    </span>
+                    {activeOpportunity.call_type && activeOpportunity.call_type !== 'Cascade Funding' && (
+                      <span className="admin-badge neutral">
+                        {activeOpportunity.call_type}
+                      </span>
+                    )}
+                  </div>
                   <h2 style={{ fontSize: '1.25rem', fontWeight: 800, margin: '0.2rem 0 0', color: 'var(--text-main)', letterSpacing: '-0.01em' }}>
                     {activeOpportunity.title}
                   </h2>
