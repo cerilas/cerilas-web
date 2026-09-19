@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { 
   Globe, 
   RefreshCw, 
@@ -11,7 +11,6 @@ import {
   Search, 
   Eye, 
   Calendar, 
-  Layers, 
   AlertCircle, 
   ArrowUpRight, 
   ShieldCheck, 
@@ -20,7 +19,11 @@ import {
   Table as TableIcon,
   LayoutGrid,
   TrendingUp,
-  Database
+  Database,
+  ChevronLeft,
+  ChevronRight,
+  ChevronsLeft,
+  ChevronsRight
 } from 'lucide-react';
 
 export default function ScrapersView() {
@@ -39,8 +42,21 @@ export default function ScrapersView() {
   const [selectedBeneficiary, setSelectedBeneficiary] = useState('all');
   const [selectedStatus, setSelectedStatus] = useState('all');
 
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [totalItems, setTotalItems] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
+
+  // Facet filter lists (all options from DB)
+  const [availableDomains, setAvailableDomains] = useState([]);
+  const [availableBeneficiaries, setAvailableBeneficiaries] = useState([]);
+
   // Detail Modal state
   const [activeOpportunity, setActiveOpportunity] = useState(null);
+
+  // Ref to scroll to top of list when page changes
+  const listTopRef = useRef(null);
 
   // Fetch scraper sources
   const fetchSources = async () => {
@@ -58,11 +74,28 @@ export default function ScrapersView() {
     }
   };
 
-  // Fetch opportunities
+  // Fetch filter facets
+  const fetchFilterFacets = async () => {
+    try {
+      const res = await fetch('/api/scrapers/stats');
+      const json = await res.json();
+      if (json.status === 'success' && json.data) {
+        if (Array.isArray(json.data.domains)) setAvailableDomains(json.data.domains);
+        if (Array.isArray(json.data.beneficiaries)) setAvailableBeneficiaries(json.data.beneficiaries);
+      }
+    } catch (err) {
+      console.warn('Could not fetch filter facets:', err);
+    }
+  };
+
+  // Fetch paginated opportunities
   const fetchOpportunities = async () => {
     try {
       setLoadingOpps(true);
-      const params = new URLSearchParams({ limit: '200' });
+      const params = new URLSearchParams({ 
+        page: currentPage.toString(), 
+        limit: pageSize.toString() 
+      });
       if (selectedStatus !== 'all') params.append('status', selectedStatus);
       if (selectedBeneficiary !== 'all') params.append('beneficiary', selectedBeneficiary);
       if (selectedDomain !== 'all') params.append('domain', selectedDomain);
@@ -72,6 +105,8 @@ export default function ScrapersView() {
       const json = await res.json();
       if (json.status === 'success') {
         setOpportunities(json.data?.items || []);
+        setTotalItems(json.data?.total || 0);
+        setTotalPages(json.data?.total_pages || 1);
       }
     } catch (err) {
       console.error('Failed to load opportunities:', err);
@@ -82,14 +117,29 @@ export default function ScrapersView() {
 
   useEffect(() => {
     fetchSources();
+    fetchFilterFacets();
   }, []);
 
+  // Reset to page 1 whenever any filter or page size changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, selectedDomain, selectedBeneficiary, selectedStatus, pageSize]);
+
+  // Fetch opportunities whenever page or filters change
   useEffect(() => {
     const timeout = setTimeout(() => {
       fetchOpportunities();
-    }, 250);
+    }, 200);
     return () => clearTimeout(timeout);
-  }, [searchTerm, selectedDomain, selectedBeneficiary, selectedStatus]);
+  }, [currentPage, pageSize, searchTerm, selectedDomain, selectedBeneficiary, selectedStatus]);
+
+  // Scroll to table when page changes
+  const handlePageChange = (newPage) => {
+    setCurrentPage(newPage);
+    if (listTopRef.current) {
+      listTopRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
 
   // Run scraper manually
   const handleRunScraper = async (sourceKey) => {
@@ -106,6 +156,7 @@ export default function ScrapersView() {
           text: `Scraping tamamlandı: ${d.items_found} program tarandı. ${d.items_inserted} yeni eklendi, ${d.items_updated} güncellendi, ${d.items_unchanged} değişmedi (SHA-256 ile korundu).`
         });
         await fetchSources();
+        await fetchFilterFacets();
         await fetchOpportunities();
       } else {
         setScraperMessage({
@@ -131,20 +182,6 @@ export default function ScrapersView() {
     setTimeout(() => setCopiedWebhook(false), 2500);
   };
 
-  // Extract unique domains and beneficiaries for filter dropdowns
-  const { allDomains, allBeneficiaries } = useMemo(() => {
-    const domainSet = new Set();
-    const benSet = new Set();
-    opportunities.forEach(opp => {
-      (opp.domains || []).forEach(d => domainSet.add(d));
-      (opp.eligible_applicants || []).forEach(b => benSet.add(b));
-    });
-    return {
-      allDomains: Array.from(domainSet).sort(),
-      allBeneficiaries: Array.from(benSet).sort()
-    };
-  }, [opportunities]);
-
   // Format date helper
   const formatDate = (isoString) => {
     if (!isoString) return 'Açık / Devam Ediyor';
@@ -156,7 +193,23 @@ export default function ScrapersView() {
     }
   };
 
-  const totalOppsCount = opportunities.length;
+  // Generate page numbers array with smart ellipsis
+  const getPageNumbers = () => {
+    const pages = [];
+    if (totalPages <= 7) {
+      for (let i = 1; i <= totalPages; i++) pages.push(i);
+    } else {
+      if (currentPage <= 4) {
+        pages.push(1, 2, 3, 4, 5, '...', totalPages);
+      } else if (currentPage >= totalPages - 3) {
+        pages.push(1, '...', totalPages - 4, totalPages - 3, totalPages - 2, totalPages - 1, totalPages);
+      } else {
+        pages.push(1, '...', currentPage - 1, currentPage, currentPage + 1, '...', totalPages);
+      }
+    }
+    return pages;
+  };
+
   const openOppsCount = opportunities.filter(o => o.status === 'open').length;
 
   return (
@@ -170,7 +223,7 @@ export default function ScrapersView() {
               <Database size={16} />
             </div>
           </div>
-          <div className="admin-kpi-val">{totalOppsCount}</div>
+          <div className="admin-kpi-val">{totalItems}</div>
           <div className="admin-kpi-sub">
             <CheckCircle2 size={13} color="#10b981" />
             <span style={{ color: '#10b981', fontWeight: 600 }}>Veritabanında Kayıtlı</span>
@@ -184,7 +237,9 @@ export default function ScrapersView() {
               <TrendingUp size={16} />
             </div>
           </div>
-          <div className="admin-kpi-val" style={{ color: '#10b981' }}>{openOppsCount}</div>
+          <div className="admin-kpi-val" style={{ color: '#10b981' }}>
+            {sources[0]?.open_items || openOppsCount}
+          </div>
           <div className="admin-kpi-sub">
             <span>Aktif başvuruya açık</span>
           </div>
@@ -403,7 +458,7 @@ export default function ScrapersView() {
       </div>
 
       {/* 3. Toolbar (Search, Filter, View Mode Switcher) */}
-      <div className="admin-toolbar">
+      <div className="admin-toolbar" ref={listTopRef}>
         <div className="admin-search-wrap">
           <Search size={16} className="admin-search-icon" />
           <input 
@@ -423,7 +478,7 @@ export default function ScrapersView() {
             onChange={(e) => setSelectedBeneficiary(e.target.value)}
           >
             <option value="all">Tüm Başvuru Sahipleri</option>
-            {allBeneficiaries.map(b => (
+            {availableBeneficiaries.map(b => (
               <option key={b} value={b}>{b}</option>
             ))}
           </select>
@@ -434,7 +489,7 @@ export default function ScrapersView() {
             onChange={(e) => setSelectedDomain(e.target.value)}
           >
             <option value="all">Tüm Sektörler / Alanlar</option>
-            {allDomains.map(d => (
+            {availableDomains.map(d => (
               <option key={d} value={d}>{d}</option>
             ))}
           </select>
@@ -682,7 +737,7 @@ export default function ScrapersView() {
               {/* Tags */}
               <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap' }}>
                 {(opp.eligible_applicants || []).slice(0, 3).map(b => (
-                  <span key={b} className="admin-badge neutral" style={{ fontSize: '0.68rem', padding: '0.15rem 0.45rem' }}>
+                  <span key={b} className="admin-badge neutral" style={{ fontSize: '0.68rem', padding: '0.15rem 0.4rem' }}>
                     {b}
                   </span>
                 ))}
@@ -716,7 +771,90 @@ export default function ScrapersView() {
         </div>
       )}
 
-      {/* 5. Complete Opportunity Detail Modal */}
+      {/* 5. Pagination Bar */}
+      {totalItems > 0 && (
+        <div className="admin-pagination">
+          <div className="admin-pagination-info">
+            <span>
+              Toplam <strong>{totalItems}</strong> fırsattan <strong>{Math.min((currentPage - 1) * pageSize + 1, totalItems)} - {Math.min(currentPage * pageSize, totalItems)}</strong> arası gösteriliyor
+            </span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+              <span style={{ fontSize: '0.78rem' }}>Sayfa başına:</span>
+              <select
+                className="admin-page-size-select"
+                value={pageSize}
+                onChange={(e) => setPageSize(Number(e.target.value))}
+              >
+                <option value={10}>10</option>
+                <option value={20}>20</option>
+                <option value={50}>50</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="admin-pagination-controls">
+            <button
+              type="button"
+              className="admin-page-btn"
+              onClick={() => handlePageChange(1)}
+              disabled={currentPage <= 1}
+              title="İlk Sayfa"
+            >
+              <ChevronsLeft size={15} />
+            </button>
+            <button
+              type="button"
+              className="admin-page-btn"
+              onClick={() => handlePageChange(currentPage - 1)}
+              disabled={currentPage <= 1}
+              title="Önceki Sayfa"
+            >
+              <ChevronLeft size={15} />
+            </button>
+
+            {getPageNumbers().map((p, idx) => {
+              if (p === '...') {
+                return (
+                  <span key={`ellipsis-${idx}`} className="admin-page-ellipsis">
+                    ...
+                  </span>
+                );
+              }
+              return (
+                <button
+                  key={`page-${p}`}
+                  type="button"
+                  className={`admin-page-btn ${currentPage === p ? 'active' : ''}`}
+                  onClick={() => handlePageChange(p)}
+                >
+                  {p}
+                </button>
+              );
+            })}
+
+            <button
+              type="button"
+              className="admin-page-btn"
+              onClick={() => handlePageChange(currentPage + 1)}
+              disabled={currentPage >= totalPages}
+              title="Sonraki Sayfa"
+            >
+              <ChevronRight size={15} />
+            </button>
+            <button
+              type="button"
+              className="admin-page-btn"
+              onClick={() => handlePageChange(totalPages)}
+              disabled={currentPage >= totalPages}
+              title="Son Sayfa"
+            >
+              <ChevronsRight size={15} />
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* 6. Complete Opportunity Detail Modal */}
       {activeOpportunity && (
         <div 
           className="admin-modal-backdrop"
