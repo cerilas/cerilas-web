@@ -59,36 +59,37 @@ export default function AdminSidebar({
         />
       )}
       <aside className={`admin-sidebar ${isOpen ? 'open' : ''}`}>
-        <div>
-          {/* Brand Header */}
-          <div className="admin-sidebar-brand-wrapper">
-            <a href="/admin" className="admin-sidebar-brand" onClick={(e) => { e.preventDefault(); handleNavClick('tools'); }}>
-              <img 
-                src="/platform-logo.webp" 
-                alt="Cerilas" 
-                className="admin-brand-icon"
-                onError={(e) => {
-                  if (!e.target.dataset.triedPng) {
-                    e.target.dataset.triedPng = 'true';
-                    e.target.src = '/platform-logo.png';
-                  }
-                }}
-              />
-              <div className="admin-brand-info">
-                <span className="admin-brand-title">Cerilas Tools</span>
-                <span className="admin-brand-badge">Admin Suite</span>
-              </div>
-            </a>
-            <button
-              type="button"
-              className="admin-sidebar-close-btn"
-              onClick={onClose}
-              aria-label="Close sidebar"
-            >
-              <X size={18} />
-            </button>
-          </div>
+        {/* Brand Header */}
+        <div className="admin-sidebar-brand-wrapper">
+          <a href="/admin" className="admin-sidebar-brand" onClick={(e) => { e.preventDefault(); handleNavClick('tools'); }}>
+            <img 
+              src="/platform-logo.webp" 
+              alt="Cerilas" 
+              className="admin-brand-icon"
+              onError={(e) => {
+                if (!e.target.dataset.triedPng) {
+                  e.target.dataset.triedPng = 'true';
+                  e.target.src = '/platform-logo.png';
+                }
+              }}
+            />
+            <div className="admin-brand-info">
+              <span className="admin-brand-title">Cerilas Tools</span>
+              <span className="admin-brand-badge">Admin Suite</span>
+            </div>
+          </a>
+          <button
+            type="button"
+            className="admin-sidebar-close-btn"
+            onClick={onClose}
+            aria-label="Close sidebar"
+          >
+            <X size={18} />
+          </button>
+        </div>
 
+        {/* Scrollable Navigation Area */}
+        <div className="admin-sidebar-scroll">
           {/* Navigation Menu (Tools #1) */}
           <nav className="admin-nav">
             <span className="admin-nav-section-title">Navigation</span>

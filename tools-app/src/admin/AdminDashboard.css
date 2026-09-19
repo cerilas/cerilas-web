@@ -86,13 +86,33 @@ html.dark .admin-sidebar-brand {
   margin-top: 0.15rem;
 }
 
+/* Sidebar Scrollable Area */
+.admin-sidebar-scroll {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+  padding-right: 2px;
+  margin: 0.75rem 0;
+}
+
+.admin-sidebar-scroll::-webkit-scrollbar {
+  width: 4px;
+}
+
+.admin-sidebar-scroll::-webkit-scrollbar-thumb {
+  background: rgba(150, 150, 150, 0.2);
+  border-radius: 4px;
+}
+
 /* Sidebar Navigation Items */
 .admin-nav {
   display: flex;
   flex-direction: column;
   gap: 0.35rem;
-  margin-top: 1.25rem;
-  flex-grow: 1;
+  margin-top: 0.5rem;
+  flex-shrink: 0;
 }
 
 .admin-nav-section-title {
@@ -1421,5 +1441,187 @@ html.dark .admin-serp-preview-box {
 .spin {
   animation: adminSpin 1s linear infinite;
 }
+
+/* ==========================================================================
+   Admin Card & Container Standard Components
+   ========================================================================== */
+
+.admin-card {
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.07);
+  border-radius: 18px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.02);
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+[data-theme="dark"] .admin-card,
+html.dark .admin-card {
+  background: #141416;
+  border-color: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+/* Modal Overlay & Dialog */
+.admin-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  box-sizing: border-box;
+}
+
+.admin-modal-dialog {
+  background: #ffffff;
+  color: #0f172a;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 20px;
+  width: 100%;
+  max-width: 780px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  box-sizing: border-box;
+}
+
+[data-theme="dark"] .admin-modal-dialog,
+html.dark .admin-modal-dialog {
+  background: #141416;
+  color: #f4f4f5;
+  border-color: rgba(255, 255, 255, 0.12);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
+}
+
+.admin-modal-dialog::-webkit-scrollbar {
+  width: 6px;
+}
+
+.admin-modal-dialog::-webkit-scrollbar-thumb {
+  background: rgba(150, 150, 150, 0.25);
+  border-radius: 4px;
+}
+
+/* Scraper Opportunity Row Item */
+.admin-opp-item {
+  border-radius: 14px;
+  padding: 1rem 1.25rem;
+  background: rgba(150, 150, 150, 0.03);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.25rem;
+  transition: all 0.15s ease;
+  box-sizing: border-box;
+}
+
+[data-theme="dark"] .admin-opp-item,
+html.dark .admin-opp-item {
+  background: rgba(255, 255, 255, 0.02);
+  border-color: rgba(255, 255, 255, 0.06);
+}
+
+.admin-opp-item:hover {
+  background: rgba(150, 150, 150, 0.06);
+  border-color: rgba(0, 0, 0, 0.1);
+}
+
+[data-theme="dark"] .admin-opp-item:hover,
+html.dark .admin-opp-item:hover {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Badge Utilities */
+.admin-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: 6px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.admin-badge.primary {
+  background: rgba(59, 130, 246, 0.12);
+  color: #3b82f6;
+}
+
+.admin-badge.success {
+  background: rgba(16, 185, 129, 0.12);
+  color: #10b981;
+}
+
+.admin-badge.purple {
+  background: rgba(168, 85, 247, 0.12);
+  color: #a855f7;
+}
+
+.admin-badge.neutral {
+  background: rgba(150, 150, 150, 0.08);
+  color: var(--text-muted, #64748b);
+}
+
+[data-theme="dark"] .admin-badge.neutral,
+html.dark .admin-badge.neutral {
+  color: #a1a1aa;
+}
+
+/* Select Dropdown in Admin Suite */
+.admin-select {
+  padding: 0.5rem 0.85rem;
+  border-radius: 10px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  background: #ffffff;
+  color: #0f172a;
+  font-size: 0.82rem;
+  font-weight: 500;
+  outline: none;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  box-sizing: border-box;
+}
+
+[data-theme="dark"] .admin-select,
+html.dark .admin-select {
+  background: #18181b;
+  color: #f4f4f5;
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.admin-select:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+}
+
+/* Media Queries for Scrapers & Mobile Responsiveness */
+@media (max-width: 900px) {
+  .admin-opp-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  
+  .admin-opp-actions {
+    width: 100%;
+    justify-content: space-between !important;
+    border-top: 1px solid rgba(150, 150, 150, 0.08);
+    padding-top: 0.75rem;
+    margin-top: 0.25rem;
+  }
+}
+
 
 
