@@ -1,15 +1,16 @@
 import React from 'react';
 import { BarChart3, Code, Sparkles } from 'lucide-react';
 import { useTranslation } from '../i18n';
+import PersonaMenu from './PersonaMenu/PersonaMenu';
 
-export default function Navbar({ activeTool, onNavigateHome, onOpenStats }) {
+export default function Navbar({ activeTool, onNavigateHome, onOpenStats, onSelectTool }) {
   const { t } = useTranslation();
   const isAi = activeTool && (activeTool.isAi || activeTool.badge === 'AI Assisted' || activeTool.badge === 'AI Powered' || activeTool.slug === 'ats-resume-checker');
 
   return (
     <nav className="navbar">
       <div className="navbar-inner">
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem', flexWrap: 'nowrap' }}>
           <a 
             href="#/" 
             className="nav-brand"
@@ -33,6 +34,9 @@ export default function Navbar({ activeTool, onNavigateHome, onOpenStats }) {
             />
             <span className="nav-brand-text">Cerilas' <span className="brand-bold-word">Tools</span></span>
           </a>
+
+          {/* Persona Menu: I'm a ... */}
+          <PersonaMenu onSelectTool={onSelectTool} onNavigateHome={onNavigateHome} />
 
           {activeTool && (
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-muted)', fontSize: '0.85rem' }}>

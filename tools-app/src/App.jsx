@@ -576,6 +576,7 @@ export default function App() {
         activeTool={activeToolMeta} 
         onNavigateHome={navigateToHome}
         onOpenStats={() => setIsStatsOpen(true)}
+        onSelectTool={navigateToTool}
       />
 
       <div className="main-content">
