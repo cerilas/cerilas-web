@@ -107,6 +107,87 @@ function deriveDomains(metadata) {
 }
 
 /**
+ * Derive clean, human-readable technology tags from metadata and text
+ */
+function deriveTechnologies(m, title = '', text = '') {
+  const combined = ((title || '') + ' ' + (text || '')).toLowerCase();
+  const techs = new Set();
+
+  // 1. Check official cross-cutting priorities
+  if (Array.isArray(m.crossCuttingPriorities)) {
+    for (const p of m.crossCuttingPriorities) {
+      if (p === 'AI') techs.add('Artificial Intelligence (AI)');
+      if (p === 'DigitalAgenda') techs.add('Digital Technologies');
+      if (p === 'GreenDeal') techs.add('CleanTech & Green Deal');
+      if (p === 'Space') techs.add('Space & Earth Observation');
+    }
+  }
+
+  // 2. Keyword matching on title & call scope
+  if (combined.includes('artificial intelligence') || combined.includes('generative ai') || /\bai\b/.test(combined)) {
+    techs.add('Artificial Intelligence (AI)');
+  }
+  if (combined.includes('machine learning') || combined.includes('deep learning')) {
+    techs.add('Machine Learning');
+  }
+  if (combined.includes('cybersecurity') || combined.includes('cyber security') || combined.includes('cyber attack')) {
+    techs.add('Cybersecurity');
+  }
+  if (combined.includes('cloud') || combined.includes('edge computing') || combined.includes('edge ai')) {
+    techs.add('Cloud & Edge Computing');
+  }
+  if (combined.includes('quantum')) {
+    techs.add('Quantum Technologies');
+  }
+  if (combined.includes('robot') || combined.includes('autonomous') || combined.includes('automation') || combined.includes('drone')) {
+    techs.add('Robotics & Autonomous Systems');
+  }
+  if (combined.includes('internet of things') || combined.includes('iot') || combined.includes('sensor')) {
+    techs.add('IoT & Sensor Systems');
+  }
+  if (combined.includes('5g') || combined.includes('6g') || combined.includes('connectivity') || combined.includes('telecom')) {
+    techs.add('5G/6G & Next-Gen Networks');
+  }
+  if (combined.includes('semiconductor') || combined.includes('microchip') || combined.includes('photonics') || combined.includes('microelectronics')) {
+    techs.add('Semiconductors & Photonics');
+  }
+  if (combined.includes('battery') || combined.includes('batteries') || combined.includes('energy storage')) {
+    techs.add('Batteries & Energy Storage');
+  }
+  if (combined.includes('hydrogen') || combined.includes('fuel cell')) {
+    techs.add('Hydrogen & Fuel Cells');
+  }
+  if (combined.includes('renewable energy') || combined.includes('solar') || combined.includes('photovoltaic') || combined.includes('wind energy')) {
+    techs.add('Renewable Energy & Solar/Wind');
+  }
+  if (combined.includes('biotechnology') || combined.includes('bio-based') || combined.includes('biomass') || combined.includes('genom')) {
+    techs.add('Biotechnology & Bio-based Systems');
+  }
+  if (combined.includes('advanced materials') || combined.includes('nanomaterial') || combined.includes('polymers') || combined.includes('composites')) {
+    techs.add('Advanced Materials & Nanotechnology');
+  }
+  if (combined.includes('digital twin') || combined.includes('simulation') || combined.includes('modelling')) {
+    techs.add('Digital Twins & Simulation');
+  }
+  if (combined.includes('space') || combined.includes('satellite') || combined.includes('copernicus') || combined.includes('galileo')) {
+    techs.add('Space & Satellite Tech');
+  }
+  if (combined.includes('medical device') || combined.includes('diagnostics') || combined.includes('health data') || combined.includes('clinical')) {
+    techs.add('HealthTech & Diagnostics');
+  }
+  if (combined.includes('circular') || combined.includes('recycling') || combined.includes('zero pollution')) {
+    techs.add('Circular Tech & Recycling');
+  }
+
+  // Fallback if no specific tech matched
+  if (techs.size === 0) {
+    techs.add('Deep Tech & Innovation');
+  }
+
+  return Array.from(techs).slice(0, 4);
+}
+
+/**
  * Derive eligible applicants list from metadata
  */
 function deriveEligibleApplicants(m, isCompetitiveCall) {
@@ -408,10 +489,7 @@ export async function scrapeEcFunding(triggeredBy = 'manual', pageSize = 100, ma
 
       const eligibleApplicants = deriveEligibleApplicants(m, isCompetitiveCall);
       const domains = deriveDomains(m);
-      const technologies = [
-        ...(m.frameworkProgramme || []),
-        ...(m.destinationDetails || [])
-      ].slice(0, 5);
+      const technologies = deriveTechnologies(m, title, shortDesc);
 
       // Exact, working official EU Portal permalink directly from API
       const permalink = r.url || m.esST_URL?.[0] || (

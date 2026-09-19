@@ -1131,17 +1131,19 @@ export default function ScrapersView() {
                     </div>
                   )}
 
-                  {activeOpportunity.technologies && activeOpportunity.technologies.length > 0 && (
+                  {activeOpportunity.technologies && activeOpportunity.technologies.filter(t => typeof t === 'string' && !/^\d+$/.test(t) && !t.includes('<') && t.length <= 40).length > 0 && (
                     <div>
                       <h4 style={{ fontSize: '0.84rem', fontWeight: 700, margin: '0 0 0.4rem', color: 'var(--text-main)' }}>
                         Teknolojiler
                       </h4>
                       <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap' }}>
-                        {activeOpportunity.technologies.map(t => (
-                          <span key={t} className="admin-badge purple" style={{ fontSize: '0.75rem' }}>
-                            {t}
-                          </span>
-                        ))}
+                        {activeOpportunity.technologies
+                          .filter(t => typeof t === 'string' && !/^\d+$/.test(t) && !t.includes('<') && t.length <= 40)
+                          .map(t => (
+                            <span key={t} className="admin-badge purple" style={{ fontSize: '0.75rem' }}>
+                              {t}
+                            </span>
+                          ))}
                       </div>
                     </div>
                   )}
