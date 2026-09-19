@@ -127,6 +127,25 @@ export const TOOL_CONVERSION_METRICS = {
       short: 'sıkıştırma'
     }
   },
+  'pdf-merger': {
+    actionKey: 'merged',
+    getConversionCount: (tool) => {
+      if (!tool) return 0;
+      return tool.use_count || tool.download_count || 0;
+    },
+    en: {
+      action: 'merged',
+      badge: 'PDFs merged',
+      singular: 'PDF merged',
+      short: 'merged'
+    },
+    tr: {
+      action: 'birleştirildi',
+      badge: 'PDF birleştirildi',
+      singular: 'PDF birleştirildi',
+      short: 'birleştirme'
+    }
+  },
   'ats-resume-checker': {
     actionKey: 'scanned',
     getConversionCount: (tool) => {

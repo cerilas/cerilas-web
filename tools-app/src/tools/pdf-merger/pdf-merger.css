@@ -1,0 +1,839 @@
+/* ==========================================================================
+   Cerilas PDF Merger - Apple-Grade In-Browser Styling
+   ========================================================================== */
+
+.pdfm-container {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 1.5rem 1rem 4rem;
+}
+
+/* Privacy Guarantee Banner */
+.pdfm-privacy-banner {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(16, 185, 129, 0.08);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  color: #059669;
+  padding: 0.4rem 0.85rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+}
+
+@media (prefers-color-scheme: dark) {
+  .pdfm-privacy-banner {
+    background: rgba(16, 185, 129, 0.12);
+    border-color: rgba(16, 185, 129, 0.35);
+    color: #34d399;
+  }
+}
+
+/* Drop Zone Area */
+.pdfm-dropzone {
+  border: 2px dashed rgba(37, 99, 235, 0.35);
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 20px;
+  padding: 3rem 1.5rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.04);
+}
+
+.pdfm-dropzone:hover {
+  border-color: #2563eb;
+  background: rgba(37, 99, 235, 0.03);
+  transform: translateY(-2px);
+  box-shadow: 0 16px 36px -12px rgba(37, 99, 235, 0.12);
+}
+
+.pdfm-dropzone.pdfm-is-dragover {
+  border-color: #2563eb;
+  background: rgba(37, 99, 235, 0.08);
+  transform: scale(1.01);
+  box-shadow: 0 20px 45px -10px rgba(37, 99, 235, 0.2);
+}
+
+@media (prefers-color-scheme: dark) {
+  .pdfm-dropzone {
+    border-color: rgba(96, 165, 250, 0.35);
+    background: #18181b;
+    box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.4);
+  }
+  .pdfm-dropzone:hover {
+    border-color: #60a5fa;
+    background: rgba(37, 99, 235, 0.08);
+  }
+  .pdfm-dropzone.pdfm-is-dragover {
+    background: rgba(37, 99, 235, 0.15);
+  }
+}
+
+.pdfm-dropzone-icon-wrap {
+  width: 68px;
+  height: 68px;
+  border-radius: 18px;
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.25rem;
+  box-shadow: 0 10px 25px -5px rgba(37, 99, 235, 0.4);
+}
+
+.pdfm-dropzone-title {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 0.5rem 0;
+}
+
+@media (prefers-color-scheme: dark) {
+  .pdfm-dropzone-title {
+    color: #f8fafc;
+  }
+}
+
+.pdfm-dropzone-subtitle {
+  font-size: 0.88rem;
+  color: #64748b;
+  margin: 0 0 1.25rem 0;
+}
+
+@media (prefers-color-scheme: dark) {
+  .pdfm-dropzone-subtitle {
+    color: #94a3b8;
+  }
+}
+
+.pdfm-browse-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  background: #2563eb;
+  color: #ffffff;
+  padding: 0.65rem 1.4rem;
+  border-radius: 999px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+}
+
+.pdfm-browse-btn:hover {
+  background: #1d4ed8;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(37, 99, 235, 0.35);
+}
+
+/* Uploaded Files Workspace */
+.pdfm-workspace {
+  margin-top: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* Toolbar Controls */
+.pdfm-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 14px;
+  padding: 0.75rem 1.2rem;
+  box-shadow: 0 4px 20px -5px rgba(0, 0, 0, 0.03);
+}
+
+@media (prefers-color-scheme: dark) {
+  .pdfm-toolbar {
+    background: #18181b;
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+}
+
+.pdfm-toolbar-count {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+@media (prefers-color-scheme: dark) {
+  .pdfm-toolbar-count {
+    color: #f8fafc;
+  }
+}
+
+.pdfm-toolbar-badge {
+  background: #eff6ff;
+  color: #2563eb;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+@media (prefers-color-scheme: dark) {
+  .pdfm-toolbar-badge {
+    background: rgba(37, 99, 235, 0.2);
+    color: #60a5fa;
+  }
+}
+
+.pdfm-toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.pdfm-tool-btn {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  color: #334155;
+  padding: 0.4rem 0.75rem;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  transition: all 0.15s ease;
+}
+
+.pdfm-tool-btn:hover {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+  color: #0f172a;
+}
+
+.pdfm-tool-btn.danger {
+  color: #ef4444;
+  background: #fff5f5;
+  border-color: #fee2e2;
+}
+
+.pdfm-tool-btn.danger:hover {
+  background: #fef2f2;
+  border-color: #fca5a5;
+}
+
+@media (prefers-color-scheme: dark) {
+  .pdfm-tool-btn {
+    background: #27272a;
+    border-color: rgba(255, 255, 255, 0.1);
+    color: #d4d4d8;
+  }
+  .pdfm-tool-btn:hover {
+    background: #3f3f46;
+    color: #ffffff;
+  }
+  .pdfm-tool-btn.danger {
+    background: rgba(239, 68, 68, 0.15);
+    border-color: rgba(239, 68, 68, 0.3);
+    color: #f87171;
+  }
+}
+
+/* File Items List */
+.pdfm-file-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+/* Individual File Card */
+.pdfm-file-card {
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 16px;
+  padding: 1rem 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 4px 15px -4px rgba(0, 0, 0, 0.04);
+  position: relative;
+}
+
+.pdfm-file-card:hover {
+  border-color: rgba(37, 99, 235, 0.3);
+  box-shadow: 0 8px 25px -6px rgba(0, 0, 0, 0.08);
+}
+
+.pdfm-file-card.is-dragging {
+  opacity: 0.45;
+  border: 2px dashed #2563eb;
+  transform: scale(0.98);
+}
+
+.pdfm-file-card.is-drop-target {
+  border: 2px solid #2563eb;
+  background: rgba(37, 99, 235, 0.04);
+}
+
+@media (prefers-color-scheme: dark) {
+  .pdfm-file-card {
+    background: #18181b;
+    border-color: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 4px 15px -4px rgba(0, 0, 0, 0.4);
+  }
+  .pdfm-file-card:hover {
+    border-color: rgba(96, 165, 250, 0.4);
+  }
+  .pdfm-file-card.is-drop-target {
+    background: rgba(37, 99, 235, 0.12);
+  }
+}
+
+/* Card Drag Handle & Order Badge */
+.pdfm-file-drag-handle {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  cursor: grab;
+  color: #94a3b8;
+  padding: 0.4rem 0.2rem;
+  user-select: none;
+}
+
+.pdfm-file-drag-handle:active {
+  cursor: grabbing;
+}
+
+.pdfm-order-badge {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: #f1f5f9;
+  color: #334155;
+  font-size: 0.78rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+@media (prefers-color-scheme: dark) {
+  .pdfm-order-badge {
+    background: #27272a;
+    color: #e4e4e7;
+  }
+}
+
+/* Card Thumbnail */
+.pdfm-file-thumb {
+  width: 58px;
+  height: 76px;
+  border-radius: 8px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+  position: relative;
+}
+
+.pdfm-file-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+@media (prefers-color-scheme: dark) {
+  .pdfm-file-thumb {
+    background: #27272a;
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+}
+
+/* Card Main Information */
+.pdfm-file-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.pdfm-file-name {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #0f172a;
+  margin: 0 0 0.35rem 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@media (prefers-color-scheme: dark) {
+  .pdfm-file-name {
+    color: #f8fafc;
+  }
+}
+
+.pdfm-file-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.78rem;
+  color: #64748b;
+  flex-wrap: wrap;
+}
+
+@media (prefers-color-scheme: dark) {
+  .pdfm-file-meta {
+    color: #a1a1aa;
+  }
+}
+
+.pdfm-meta-pill {
+  background: #f1f5f9;
+  color: #475569;
+  padding: 0.15rem 0.5rem;
+  border-radius: 6px;
+  font-weight: 600;
+}
+
+@media (prefers-color-scheme: dark) {
+  .pdfm-meta-pill {
+    background: #27272a;
+    color: #cbd5e1;
+  }
+}
+
+/* Page Range Input Area */
+.pdfm-page-range-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.pdfm-range-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #64748b;
+  white-space: nowrap;
+}
+
+.pdfm-range-input {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 0.25rem 0.6rem;
+  font-size: 0.78rem;
+  color: #0f172a;
+  max-width: 150px;
+  outline: none;
+  transition: all 0.15s ease;
+}
+
+.pdfm-range-input:focus {
+  border-color: #2563eb;
+  background: #ffffff;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
+}
+
+@media (prefers-color-scheme: dark) {
+  .pdfm-range-label {
+    color: #a1a1aa;
+  }
+  .pdfm-range-input {
+    background: #27272a;
+    border-color: rgba(255, 255, 255, 0.12);
+    color: #f8fafc;
+  }
+  .pdfm-range-input:focus {
+    background: #18181b;
+    border-color: #60a5fa;
+  }
+}
+
+/* Reorder Buttons (Up / Down / Delete) */
+.pdfm-file-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.pdfm-action-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  color: #475569;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.pdfm-action-btn:hover:not(:disabled) {
+  background: #f1f5f9;
+  color: #0f172a;
+  border-color: #cbd5e1;
+}
+
+.pdfm-action-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.pdfm-action-btn.delete:hover {
+  background: #fef2f2;
+  border-color: #fecaca;
+  color: #ef4444;
+}
+
+@media (prefers-color-scheme: dark) {
+  .pdfm-action-btn {
+    background: #27272a;
+    border-color: rgba(255, 255, 255, 0.1);
+    color: #d4d4d8;
+  }
+  .pdfm-action-btn:hover:not(:disabled) {
+    background: #3f3f46;
+    color: #ffffff;
+  }
+  .pdfm-action-btn.delete:hover {
+    background: rgba(239, 68, 68, 0.2);
+    border-color: rgba(239, 68, 68, 0.4);
+    color: #f87171;
+  }
+}
+
+/* Bottom Output & Summary Bar */
+.pdfm-summary-bar {
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 20px;
+  padding: 1.5rem 1.75rem;
+  box-shadow: 0 10px 35px -10px rgba(0, 0, 0, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  margin-top: 1rem;
+}
+
+@media (prefers-color-scheme: dark) {
+  .pdfm-summary-bar {
+    background: #18181b;
+    border-color: rgba(255, 255, 255, 0.12);
+    box-shadow: 0 10px 35px -10px rgba(0, 0, 0, 0.4);
+  }
+}
+
+.pdfm-summary-stats {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.pdfm-stat-box {
+  display: flex;
+  flex-direction: column;
+}
+
+.pdfm-stat-label {
+  font-size: 0.75rem;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+}
+
+.pdfm-stat-val {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+@media (prefers-color-scheme: dark) {
+  .pdfm-stat-label {
+    color: #94a3b8;
+  }
+  .pdfm-stat-val {
+    color: #f8fafc;
+  }
+}
+
+.pdfm-summary-right {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.pdfm-output-name-input {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 0.65rem 0.9rem;
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: #0f172a;
+  outline: none;
+  min-width: 220px;
+  transition: all 0.2s ease;
+}
+
+.pdfm-output-name-input:focus {
+  border-color: #2563eb;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+@media (prefers-color-scheme: dark) {
+  .pdfm-output-name-input {
+    background: #27272a;
+    border-color: rgba(255, 255, 255, 0.12);
+    color: #f8fafc;
+  }
+  .pdfm-output-name-input:focus {
+    background: #18181b;
+    border-color: #60a5fa;
+  }
+}
+
+.pdfm-merge-submit-btn {
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  color: #ffffff;
+  border: none;
+  padding: 0.75rem 1.8rem;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.2s ease;
+  box-shadow: 0 6px 20px -3px rgba(37, 99, 235, 0.4);
+}
+
+.pdfm-merge-submit-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px -3px rgba(37, 99, 235, 0.5);
+  background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
+}
+
+.pdfm-merge-submit-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Success Result Panel */
+.pdfm-success-panel {
+  background: #ffffff;
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  border-radius: 24px;
+  padding: 2.5rem 2rem;
+  text-align: center;
+  box-shadow: 0 20px 50px -15px rgba(16, 185, 129, 0.12);
+  margin-top: 1.5rem;
+  animation: pdfmScaleIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@media (prefers-color-scheme: dark) {
+  .pdfm-success-panel {
+    background: #18181b;
+    border-color: rgba(16, 185, 129, 0.3);
+    box-shadow: 0 20px 50px -15px rgba(0, 0, 0, 0.6);
+  }
+}
+
+@keyframes pdfmScaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.pdfm-success-icon-wrap {
+  width: 72px;
+  height: 72px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.25rem;
+  box-shadow: 0 10px 25px -5px rgba(16, 185, 129, 0.4);
+}
+
+.pdfm-success-title {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0 0 0.5rem 0;
+}
+
+@media (prefers-color-scheme: dark) {
+  .pdfm-success-title {
+    color: #f8fafc;
+  }
+}
+
+.pdfm-success-meta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  font-size: 0.9rem;
+  color: #64748b;
+  flex-wrap: wrap;
+}
+
+@media (prefers-color-scheme: dark) {
+  .pdfm-success-meta {
+    color: #94a3b8;
+  }
+}
+
+.pdfm-success-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.pdfm-download-btn {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: #ffffff;
+  border: none;
+  padding: 0.85rem 2rem;
+  border-radius: 14px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  transition: all 0.2s ease;
+  box-shadow: 0 8px 25px -4px rgba(16, 185, 129, 0.4);
+}
+
+.pdfm-download-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 30px -4px rgba(16, 185, 129, 0.5);
+}
+
+.pdfm-preview-btn {
+  background: #f1f5f9;
+  color: #334155;
+  border: 1px solid #cbd5e1;
+  padding: 0.85rem 1.6rem;
+  border-radius: 14px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.2s ease;
+}
+
+.pdfm-preview-btn:hover {
+  background: #e2e8f0;
+  color: #0f172a;
+}
+
+.pdfm-restart-btn {
+  background: transparent;
+  color: #64748b;
+  border: 1px dashed #cbd5e1;
+  padding: 0.85rem 1.4rem;
+  border-radius: 14px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.2s ease;
+}
+
+.pdfm-restart-btn:hover {
+  color: #0f172a;
+  border-color: #94a3b8;
+  background: rgba(0, 0, 0, 0.02);
+}
+
+@media (prefers-color-scheme: dark) {
+  .pdfm-preview-btn {
+    background: #27272a;
+    border-color: rgba(255, 255, 255, 0.15);
+    color: #e4e4e7;
+  }
+  .pdfm-preview-btn:hover {
+    background: #3f3f46;
+    color: #ffffff;
+  }
+  .pdfm-restart-btn {
+    border-color: rgba(255, 255, 255, 0.2);
+    color: #a1a1aa;
+  }
+  .pdfm-restart-btn:hover {
+    color: #ffffff;
+    border-color: rgba(255, 255, 255, 0.4);
+    background: rgba(255, 255, 255, 0.05);
+  }
+}
+
+/* Mobile Responsive Adjustments */
+@media (max-width: 640px) {
+  .pdfm-file-card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+  .pdfm-file-actions {
+    width: 100%;
+    justify-content: flex-end;
+    border-top: 1px solid #f1f5f9;
+    padding-top: 0.5rem;
+  }
+  .pdfm-summary-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .pdfm-summary-right {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .pdfm-output-name-input {
+    width: 100%;
+  }
+  .pdfm-merge-submit-btn {
+    justify-content: center;
+  }
+}

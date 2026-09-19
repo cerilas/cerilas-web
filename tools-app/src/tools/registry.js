@@ -27,6 +27,7 @@ import { htmlToMarkdownManifest } from './html-to-llm-markdown/manifest';
 import { tokenCounterUniversalManifest } from './token-counter-universal/manifest';
 import { trlCalculatorManifest } from './trl-calculator/manifest';
 import { sampleSizeCalculatorManifest } from './sample-size-calculator/manifest';
+import { pdfMergerManifest } from './pdf-merger/manifest';
 
 /**
  * Enterprise Scalable Tool Registry.
@@ -146,6 +147,10 @@ export const toolsRegistry = {
   [sampleSizeCalculatorManifest.slug]: {
     manifest: sampleSizeCalculatorManifest,
     component: lazy(() => import('./sample-size-calculator'))
+  },
+  [pdfMergerManifest.slug]: {
+    manifest: pdfMergerManifest,
+    component: lazy(() => import('./pdf-merger'))
   }
 };
 
@@ -164,7 +169,10 @@ const toolAliases = {
   'sample-size-calculation': 'sample-size-calculator',
   'power-analysis-calculator': 'sample-size-calculator',
   'survey-sample-size': 'sample-size-calculator',
-  'ab-test-sample-size': 'sample-size-calculator'
+  'ab-test-sample-size': 'sample-size-calculator',
+  'pdf-combine': 'pdf-merger',
+  'combine-pdf': 'pdf-merger',
+  'merge-pdf': 'pdf-merger'
 };
 
 export function getRegisteredTool(slug) {
