@@ -300,12 +300,6 @@ export default function Footer({ onOpenStats }) {
                 </a>
               </li>
               <li>
-                <a href="https://github.com/cerilas/cerilas-web" target="_blank" rel="noopener noreferrer" title="Open Source GitHub">
-                  <span className="seo-tool-title">Open Source GitHub</span>
-                  <ArrowUpRight size={13} className="ext-icon" />
-                </a>
-              </li>
-              <li>
                 <a href="#/" onClick={() => { 
                   try {
                     window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
@@ -377,8 +371,6 @@ export default function Footer({ onOpenStats }) {
               <a href="https://cerilas.com" target="_blank" rel="noopener noreferrer">Cerilas.com</a>
               <span className="dot">•</span>
               <a href="#/">Cerilas' Tools</a>
-              <span className="dot">•</span>
-              <a href="https://github.com/cerilas/cerilas-web" target="_blank" rel="noopener noreferrer">GitHub</a>
               <span className="dot">•</span>
               <span className="status-indicator">
                 <span className="status-dot"></span> All Systems Normal

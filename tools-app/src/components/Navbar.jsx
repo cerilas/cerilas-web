@@ -1,5 +1,5 @@
 import React from 'react';
-import { BarChart3, Code, Sparkles } from 'lucide-react';
+import { BarChart3, Sparkles } from 'lucide-react';
 import { useTranslation } from '../i18n';
 import PersonaMenu from './PersonaMenu/PersonaMenu';
 
@@ -77,9 +77,6 @@ export default function Navbar({ activeTool, onNavigateHome, onOpenStats, onSele
 
           <a href="https://cerilas.com" className="nav-link nav-external-link" target="_blank" rel="noopener noreferrer">
             {t('nav.mainSite')}
-          </a>
-          <a href="https://github.com/cerilas" className="nav-link nav-external-link" target="_blank" rel="noopener noreferrer">
-            <Code size={16} strokeWidth={1.5} /> <span className="nav-github-label">{t('nav.github')}</span>
           </a>
         </div>
       </div>
