@@ -149,6 +149,42 @@ export const MODEL_CATALOG = [
 
   // Google Gemini
   {
+    id: 'gemini-3-8-flash',
+    name: 'Gemini 3.8 Flash',
+    provider: 'Google',
+    badge: 'SOTA Agentic Flash (Sept 2026)',
+    tokenizer: 'gemini',
+    contextWindow: 1000000,
+    maxOutput: 64000,
+    inputPricePerM: 0.75,
+    outputPricePerM: 3.75,
+    color: '#1a73e8'
+  },
+  {
+    id: 'gemini-3-8-flash-cyber',
+    name: 'Gemini 3.8 Flash Cyber',
+    provider: 'Google',
+    badge: 'Autonomous Security',
+    tokenizer: 'gemini',
+    contextWindow: 1000000,
+    maxOutput: 64000,
+    inputPricePerM: 1.00,
+    outputPricePerM: 4.50,
+    color: '#0284c7'
+  },
+  {
+    id: 'gemini-3-1-pro',
+    name: 'Gemini 3.1 Pro',
+    provider: 'Google',
+    badge: 'Multimodal Reasoning Pro',
+    tokenizer: 'gemini',
+    contextWindow: 1000000,
+    maxOutput: 32768,
+    inputPricePerM: 2.00,
+    outputPricePerM: 12.00,
+    color: '#2563eb'
+  },
+  {
     id: 'gemini-2.5-pro',
     name: 'Gemini 2.5 Pro',
     provider: 'Google',
