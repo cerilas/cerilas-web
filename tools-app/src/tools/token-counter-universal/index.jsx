@@ -47,6 +47,7 @@ export default function TokenCounterUniversal({ onBack, toolMeta }) {
   const [inputText, setInputText] = useState(SAMPLE_PRESETS[0].text);
   const [inputMode, setInputMode] = useState('text'); // 'text' | 'file'
   const [viewMode, setViewMode] = useState('matrix'); // 'matrix' | 'visualizer' | 'table'
+  const [showWhitespaceSymbols, setShowWhitespaceSymbols] = useState(false);
   const [selectedProvider, setSelectedProvider] = useState('All');
   const [activeModelId, setActiveModelId] = useState('gpt-4o');
   const [uploadedFile, setUploadedFile] = useState(null);
@@ -635,15 +636,28 @@ export default function TokenCounterUniversal({ onBack, toolMeta }) {
         {viewMode === 'visualizer' && (
           <div className="tc-visualizer-panel">
             <div className="tc-visualizer-header">
-              <span>Showing first {tokenDetails.tokens.length} token chunks (o200k base):</span>
-              {hoveredToken && (
-                <span style={{ color: 'var(--text-main)', fontWeight: 600 }}>
-                  Token #{hoveredToken.index + 1} &bull; ID: <code>{hoveredToken.id}</code> &bull; Length: {hoveredToken.text.length} chars
-                </span>
-              )}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
+                <span>Showing first {tokenDetails.tokens.length} token chunks (o200k base):</span>
+                {hoveredToken && (
+                  <span style={{ color: 'var(--text-main)', fontWeight: 600 }}>
+                    Token #{hoveredToken.index + 1} &bull; ID: <code>{hoveredToken.id}</code> &bull; Length: {hoveredToken.text.length} chars
+                  </span>
+                )}
+              </div>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <button
+                  type="button"
+                  className={`tc-filter-pill ${showWhitespaceSymbols ? 'active' : ''}`}
+                  onClick={() => setShowWhitespaceSymbols(!showWhitespaceSymbols)}
+                  title="Toggle whitespace marker symbols like · and ↵"
+                >
+                  {showWhitespaceSymbols ? 'Visible Spaces (·)' : 'Natural Text'}
+                </button>
+              </div>
             </div>
 
-            <div className="tc-visualizer-canvas">
+            <div className="tc-visualizer-canvas" style={{ whiteSpace: 'pre-wrap' }}>
               {tokenDetails.tokens.length === 0 ? (
                 <span style={{ color: 'var(--text-muted)' }}>No tokens to visualize.</span>
               ) : (
@@ -657,7 +671,7 @@ export default function TokenCounterUniversal({ onBack, toolMeta }) {
                       onMouseLeave={() => setHoveredToken(null)}
                       title={`Token #${idx + 1} | ID: ${tok.id} | Chars: ${tok.text.length}`}
                     >
-                      {tok.display}
+                      {showWhitespaceSymbols ? tok.symbolic : tok.text}
                     </span>
                   );
                 })

@@ -832,28 +832,33 @@
   line-height: 2.2;
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   font-size: 0.9rem;
+  user-select: text;
+  -webkit-user-select: text;
+  cursor: text;
 }
 
-/* Subtle, refined token chips for both themes */
+/* Subtle, refined token chips with true inline text flow */
 .tc-chip {
-  display: inline-block;
-  padding: 0.1rem 0.35rem;
-  margin: 0.1rem 0.12rem;
-  border-radius: 5px;
-  font-size: 0.84rem;
-  transition: all 0.12s ease;
-  cursor: pointer;
+  display: inline;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+  padding: 2px 3px;
+  margin: 0;
+  border-radius: 4px;
+  font-size: 0.88rem;
+  transition: filter 0.12s ease;
+  cursor: text;
   white-space: pre-wrap;
   word-break: break-word;
   position: relative;
   user-select: text;
+  -webkit-user-select: text;
 }
 
 .tc-chip:hover {
-  transform: translateY(-1px);
   filter: brightness(1.15);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-  z-index: 5;
+  outline: 1px solid rgba(150, 150, 150, 0.4);
+  z-index: 2;
 }
 
 /* Dark theme chip colors */

@@ -429,7 +429,8 @@ export function tokenizeO200kWithDetails(text, maxVisualTokens = 1500) {
         id: tokenId,
         index,
         text: piece,
-        display: piece.replace(/ /g, '·').replace(/\n/g, '↵\n').replace(/\t/g, '⇥ ')
+        symbolic: piece.replace(/ /g, '·').replace(/\n/g, '↵\n').replace(/\t/g, '⇥ '),
+        display: piece
       };
     });
 
