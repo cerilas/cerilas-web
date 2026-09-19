@@ -42,11 +42,11 @@ export default function StatsModal({ isOpen, onClose }) {
   const liveVisitorsZ = summary.live_visitors || 1;
 
   return (
-    <div 
+    <div
       className="stats-modal-overlay"
       onClick={onClose}
     >
-      <div 
+      <div
         className="stats-modal-container stats-modal-single"
         onClick={(e) => e.stopPropagation()}
         role="dialog"
@@ -82,7 +82,7 @@ export default function StatsModal({ isOpen, onClose }) {
                 </>
               ) : (
                 <>
-                  We help{' '}
+                  We helped{' '}
                   <span className="stats-stat-highlight">{formatNumber(totalVisitorsX)}</span>{' '}
                   engineers, researchers, founders, and students simplify{' '}
                   <span className="stats-stat-highlight">{formatNumber(totalWorkflowsY)}</span>{' '}

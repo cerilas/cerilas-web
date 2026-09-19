@@ -12,7 +12,8 @@ import {
   Cpu, 
   CheckCircle2,
   ArrowUpRight,
-  TrendingUp
+  TrendingUp,
+  Bot
 } from 'lucide-react';
 import { useTranslation } from '../i18n';
 
@@ -119,6 +120,18 @@ export default function Footer({ onOpenStats }) {
                 <a href="#/tool/pdf-compressor" onClick={() => handleToolClick('pdf-compressor')} title="Compress PDF Online">
                   <span className="seo-tool-title">Compress PDF Online</span>
                   <span className="seo-link-tag">MB to KB</span>
+                </a>
+              </li>
+              <li>
+                <a href="#/tool/pdf-merger" onClick={() => handleToolClick('pdf-merger')} title="Merge PDF Files Online">
+                  <span className="seo-tool-title">Merge PDF Files</span>
+                  <span className="seo-link-tag">Combine</span>
+                </a>
+              </li>
+              <li>
+                <a href="#/tool/pdf-splitter" onClick={() => handleToolClick('pdf-splitter')} title="Split PDF by Pages Online">
+                  <span className="seo-tool-title">Split PDF Online</span>
+                  <span className="seo-link-tag">Custom Range</span>
                 </a>
               </li>
               <li>
@@ -283,7 +296,7 @@ export default function Footer({ onOpenStats }) {
             <ul className="seo-col-list">
               <li>
                 <a href="https://cerilas.com" target="_blank" rel="noopener noreferrer" title="Cerilas Corporate Site">
-                  <span className="seo-tool-title">Cerilas Corporate Site</span>
+                  <span className="seo-tool-title">Cerilas Corporate</span>
                   <ArrowUpRight size={13} className="ext-icon" />
                 </a>
               </li>
@@ -313,17 +326,115 @@ export default function Footer({ onOpenStats }) {
                   window.location.hash = '#/'; 
                 }} title="All Tools Catalog">
                   <span className="seo-tool-title">All Tools Catalog</span>
-                  <span className="seo-link-tag">21 Utilities</span>
+                  <span className="seo-link-tag">30+ Utilities</span>
+                </a>
+              </li>
+              <li>
+                <a href="https://cerilas.com" target="_blank" rel="noopener noreferrer" title="Cloud & Security Architecture">
+                  <span className="seo-tool-title">Security Architecture</span>
+                  <span className="seo-link-tag">SOC-2 Ready</span>
                 </a>
               </li>
             </ul>
+          </div>
+
+          {/* Column 6: AI & Research Engineering (Right of Ecosystem) */}
+          <div className="seo-footer-col">
+            <h3 className="seo-col-title">
+              <Bot size={15} />
+              <span>AI &amp; Research Engineering</span>
+            </h3>
+            <ul className="seo-col-list">
+              <li>
+                <a href="#/tool/token-counter-universal" onClick={() => handleToolClick('token-counter-universal')} title="Universal Token Counter for LLMs">
+                  <span className="seo-tool-title">LLM Token Counter</span>
+                  <span className="seo-link-tag">GPT &amp; Claude</span>
+                </a>
+              </li>
+              <li>
+                <a href="#/tool/llms-txt-tools" onClick={() => handleToolClick('llms-txt-tools')} title="llms.txt Generator and Validator">
+                  <span className="seo-tool-title">llms.txt Generator</span>
+                  <span className="seo-link-tag">AI Docs</span>
+                </a>
+              </li>
+              <li>
+                <a href="#/tool/ai-crawler-checker" onClick={() => handleToolClick('ai-crawler-checker')} title="AI Bot and Crawler Checker">
+                  <span className="seo-tool-title">AI Bot &amp; Crawler Audit</span>
+                  <span className="seo-link-tag">Robots.txt</span>
+                </a>
+              </li>
+              <li>
+                <a href="#/tool/ai-link-hallucination-checker" onClick={() => handleToolClick('ai-link-hallucination-checker')} title="AI Link Hallucination Checker">
+                  <span className="seo-tool-title">AI Link Hallucination</span>
+                  <span className="seo-link-tag">Fact Check</span>
+                </a>
+              </li>
+              <li>
+                <a href="#/tool/trl-calculator" onClick={() => handleToolClick('trl-calculator')} title="Technology Readiness Level (TRL) Calculator">
+                  <span className="seo-tool-title">TRL Assessment (1-9)</span>
+                  <span className="seo-link-tag">NASA Scale</span>
+                </a>
+              </li>
+              <li>
+                <a href="#/tool/sample-size-calculator" onClick={() => handleToolClick('sample-size-calculator')} title="A/B Test Statistical Sample Size Calculator">
+                  <span className="seo-tool-title">Sample Size Calculator</span>
+                  <span className="seo-link-tag">A/B Testing</span>
+                </a>
+              </li>
+              <li>
+                <a href="#/tool/html-to-llm-markdown" onClick={() => handleToolClick('html-to-llm-markdown')} title="HTML to Clean LLM Markdown">
+                  <span className="seo-tool-title">HTML to LLM Markdown</span>
+                  <span className="seo-link-tag">RAG Prep</span>
+                </a>
+              </li>
+            </ul>
+          </div>
+
+          {/* Right Companion: High-Impact SEO Architecture & Keywords Spotlight Card (Spans 2 columns) */}
+          <div className="seo-footer-editorial-card">
+            <div className="seo-editorial-header">
+              <Sparkles size={16} />
+              <h4 className="seo-editorial-title">Next-Gen Client-Side Computing Platform</h4>
+            </div>
+            
+            <p className="seo-editorial-lead">
+              Cerilas Tools delivers a zero-server, privacy-first utility platform engineered for <strong>entrepreneurs, researchers, white-collar professionals, freelancers, and students</strong>. Powered by <strong>WebAssembly (WASM)</strong> and <strong>WebGPU</strong>, all calculations, document modifications, and AI vision tasks run 100% locally in your browser memory.
+            </p>
+
+            <div className="seo-editorial-features">
+              <div className="seo-editorial-feature-item">
+                <Lock size={13} className="feature-item-icon" />
+                <span><strong>Zero Server Uploads:</strong> Sensitive contracts, financial spreadsheets, and CVs never touch remote servers. Full GDPR compliance.</span>
+              </div>
+              <div className="seo-editorial-feature-item">
+                <Zap size={13} className="feature-item-icon" />
+                <span><strong>WebAssembly Speed:</strong> Blazing-fast in-memory PDF merging, splitting, compression, and background removal without server queues.</span>
+              </div>
+              <div className="seo-editorial-feature-item">
+                <TrendingUp size={13} className="feature-item-icon" />
+                <span><strong>Audited SaaS &amp; Research Benchmarks:</strong> Standardized unit economics (MRR, ARR, LTV:CAC), TRL readiness, and A/B test sample sizing.</span>
+              </div>
+            </div>
+
+            <div className="seo-editorial-tags">
+              <span className="seo-editorial-tag">Client-Side WASM</span>
+              <span className="seo-editorial-tag">Zero Server Logging</span>
+              <span className="seo-editorial-tag">Free PDF Editor &amp; Merger</span>
+              <span className="seo-editorial-tag">SaaS Financial Models</span>
+              <span className="seo-editorial-tag">Vector DB RAG Chunking</span>
+              <span className="seo-editorial-tag">LLM Token Counter</span>
+              <span className="seo-editorial-tag">Privacy-First AI Tools</span>
+            </div>
           </div>
         </div>
 
         {/* High-Intent Search Keyword Tags Cloud */}
         <div className="seo-footer-keywords-section">
-          <h4 className="seo-keywords-title">Popular Free Utilities &amp; Search Queries</h4>
+          <h4 className="seo-keywords-title">Popular Free Utilities &amp; High-Intent Search Queries</h4>
           <div className="seo-keywords-cloud">
+            <a href="#/tool/pdf-merger" onClick={() => handleToolClick('pdf-merger')}>Merge PDF Files Online Free</a>
+            <a href="#/tool/pdf-splitter" onClick={() => handleToolClick('pdf-splitter')}>Split PDF by Page Numbers</a>
+            <a href="#/tool/token-counter-universal" onClick={() => handleToolClick('token-counter-universal')}>Universal LLM Token Counter</a>
             <a href="#/tool/startup-runway-calculator" onClick={() => handleToolClick('startup-runway-calculator')}>Startup Runway Calculator</a>
             <a href="#/tool/mrr-calculator" onClick={() => handleToolClick('mrr-calculator')}>SaaS MRR Calculator</a>
             <a href="#/tool/arr-calculator" onClick={() => handleToolClick('arr-calculator')}>ARR to MRR Calculator</a>
@@ -331,24 +442,26 @@ export default function Footer({ onOpenStats }) {
             <a href="#/tool/ltv-calculator" onClick={() => handleToolClick('ltv-calculator')}>Customer Lifetime Value LTV</a>
             <a href="#/tool/cac-calculator" onClick={() => handleToolClick('cac-calculator')}>Customer Acquisition Cost CAC</a>
             <a href="#/tool/ltv-cac-calculator" onClick={() => handleToolClick('ltv-cac-calculator')}>LTV to CAC Ratio Benchmark</a>
-            <a href="#/tool/qr-code-generator" onClick={() => handleToolClick('qr-code-generator')}>Free Dynamic QR Code</a>
+            <a href="#/tool/trl-calculator" onClick={() => handleToolClick('trl-calculator')}>Technology Readiness Level TRL</a>
+            <a href="#/tool/sample-size-calculator" onClick={() => handleToolClick('sample-size-calculator')}>A/B Test Statistical Sample Size</a>
+            <a href="#/tool/llms-txt-tools" onClick={() => handleToolClick('llms-txt-tools')}>Generate llms.txt Online</a>
+            <a href="#/tool/ai-crawler-checker" onClick={() => handleToolClick('ai-crawler-checker')}>AI Crawler Robots.txt Tester</a>
+            <a href="#/tool/ai-link-hallucination-checker" onClick={() => handleToolClick('ai-link-hallucination-checker')}>AI Hallucination Fact Checker</a>
             <a href="#/tool/pdf-compressor" onClick={() => handleToolClick('pdf-compressor')}>Compress PDF to 200KB</a>
-            <a href="#/tool/pdf-editor" onClick={() => handleToolClick('pdf-editor')}>Edit PDF Text Online</a>
+            <a href="#/tool/pdf-editor" onClick={() => handleToolClick('pdf-editor')}>Edit PDF Text Online Free</a>
             <a href="#/tool/ats-resume-checker" onClick={() => handleToolClick('ats-resume-checker')}>Free AI Resume Checker</a>
             <a href="#/tool/background-remover" onClick={() => handleToolClick('background-remover')}>Remove Background HD</a>
             <a href="#/tool/youtube-thumbnail-downloader" onClick={() => handleToolClick('youtube-thumbnail-downloader')}>YouTube 4K Thumbnail Grab</a>
             <a href="#/tool/image-compressor" onClick={() => handleToolClick('image-compressor')}>JPEG to WebP Converter</a>
-            <a href="#/tool/video-compressor" onClick={() => handleToolClick('video-compressor')}>Compress MP4 Video</a>
-            <a href="#/tool/webhook-tester" onClick={() => handleToolClick('webhook-tester')}>Discord Webhook Tester</a>
+            <a href="#/tool/video-compressor" onClick={() => handleToolClick('video-compressor')}>Compress MP4 Video Client-Side</a>
+            <a href="#/tool/webhook-tester" onClick={() => handleToolClick('webhook-tester')}>Discord &amp; Slack Webhook Tester</a>
             <a href="#/tool/json-beautifier" onClick={() => handleToolClick('json-beautifier')}>JSON Beautifier Online</a>
             <a href="#/tool/email-signature-generator" onClick={() => handleToolClick('email-signature-generator')}>HTML Email Signature</a>
-            <a href="#/tool/pdf-rag-cleaner" onClick={() => handleToolClick('pdf-rag-cleaner')}>PDF to Markdown RAG</a>
+            <a href="#/tool/pdf-rag-cleaner" onClick={() => handleToolClick('pdf-rag-cleaner')}>PDF to Markdown Vector RAG</a>
             <a href="#/tool/ai-content-detector" onClick={() => handleToolClick('ai-content-detector')}>AI Content Detector 100%</a>
             <a href="#/tool/pomodoro-timer" onClick={() => handleToolClick('pomodoro-timer')}>Pomodoro Timer Online</a>
             <a href="#/tool/qr-code-generator" onClick={() => handleToolClick('qr-code-generator')}>Vector SVG QR Code</a>
-            <a href="#/tool/pdf-compressor" onClick={() => handleToolClick('pdf-compressor')}>Reduce PDF Size Free</a>
-            <a href="#/tool/background-remover" onClick={() => handleToolClick('background-remover')}>100% In-Browser Privacy</a>
-            <a href="#/tool/pdf-editor" onClick={() => handleToolClick('pdf-editor')}>Add PDF Signature Free</a>
+            <a href="#/tool/html-to-llm-markdown" onClick={() => handleToolClick('html-to-llm-markdown')}>HTML to LLM Markdown</a>
           </div>
         </div>
 
