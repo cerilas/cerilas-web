@@ -1,0 +1,245 @@
+/* ==========================================================================
+   Cerilas PDF Splitter - SEO Component Styling
+   ========================================================================== */
+
+.pdfs-seo-container {
+  margin-top: 4rem;
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+  padding-top: 3.5rem;
+}
+
+@media (prefers-color-scheme: dark) {
+  .pdfs-seo-container {
+    border-top-color: rgba(255, 255, 255, 0.1);
+  }
+}
+
+.pdfs-seo-section {
+  margin-bottom: 3.5rem;
+}
+
+.pdfs-seo-section-title {
+  font-size: 1.65rem;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: -0.02em;
+  margin-bottom: 1rem;
+}
+
+@media (prefers-color-scheme: dark) {
+  .pdfs-seo-section-title {
+    color: #f8fafc;
+  }
+}
+
+.pdfs-seo-desc {
+  font-size: 0.98rem;
+  line-height: 1.7;
+  color: #475569;
+  margin-bottom: 1.5rem;
+}
+
+@media (prefers-color-scheme: dark) {
+  .pdfs-seo-desc {
+    color: #94a3b8;
+  }
+}
+
+.pdfs-steps-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+.pdfs-step-card {
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 16px;
+  padding: 1.75rem 1.5rem;
+  box-shadow: 0 4px 20px -5px rgba(0, 0, 0, 0.04);
+}
+
+@media (prefers-color-scheme: dark) {
+  .pdfs-step-card {
+    background: #18181b;
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+}
+
+.pdfs-step-num {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: #fef2f2;
+  color: #ef4444;
+  font-weight: 800;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1rem;
+}
+
+@media (prefers-color-scheme: dark) {
+  .pdfs-step-num {
+    background: rgba(239, 68, 68, 0.2);
+    color: #f87171;
+  }
+}
+
+.pdfs-step-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 0.5rem 0;
+}
+
+@media (prefers-color-scheme: dark) {
+  .pdfs-step-title {
+    color: #f8fafc;
+  }
+}
+
+.pdfs-step-text {
+  font-size: 0.88rem;
+  line-height: 1.6;
+  color: #64748b;
+  margin: 0;
+}
+
+@media (prefers-color-scheme: dark) {
+  .pdfs-step-text {
+    color: #94a3b8;
+  }
+}
+
+.pdfs-table-wrap {
+  overflow-x: auto;
+  margin-top: 1.5rem;
+  background: #ffffff;
+  border-radius: 16px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 20px -5px rgba(0, 0, 0, 0.04);
+}
+
+@media (prefers-color-scheme: dark) {
+  .pdfs-table-wrap {
+    background: #18181b;
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+}
+
+.pdfs-comp-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+  text-align: left;
+}
+
+.pdfs-comp-table th,
+.pdfs-comp-table td {
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+@media (prefers-color-scheme: dark) {
+  .pdfs-comp-table th,
+  .pdfs-comp-table td {
+    border-bottom-color: rgba(255, 255, 255, 0.08);
+  }
+}
+
+.pdfs-comp-table th {
+  background: #f8fafc;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+@media (prefers-color-scheme: dark) {
+  .pdfs-comp-table th {
+    background: #27272a;
+    color: #f8fafc;
+  }
+}
+
+.pdfs-highlight-col {
+  background: rgba(239, 68, 68, 0.03);
+  font-weight: 600;
+  color: #ef4444;
+}
+
+@media (prefers-color-scheme: dark) {
+  .pdfs-highlight-col {
+    background: rgba(239, 68, 68, 0.1);
+    color: #f87171;
+  }
+}
+
+.pdfs-faq-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  margin-top: 1.5rem;
+}
+
+.pdfs-faq-item {
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 14px;
+  overflow: hidden;
+  transition: all 0.2s ease;
+}
+
+@media (prefers-color-scheme: dark) {
+  .pdfs-faq-item {
+    background: #18181b;
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+}
+
+.pdfs-faq-question {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem 1.5rem;
+  background: transparent;
+  border: none;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #0f172a;
+  text-align: left;
+  cursor: pointer;
+  gap: 1rem;
+}
+
+@media (prefers-color-scheme: dark) {
+  .pdfs-faq-question {
+    color: #f8fafc;
+  }
+}
+
+.pdfs-faq-icon {
+  transition: transform 0.2s ease;
+  color: #64748b;
+  flex-shrink: 0;
+}
+
+.pdfs-faq-item.is-open .pdfs-faq-icon {
+  transform: rotate(180deg);
+  color: #ef4444;
+}
+
+.pdfs-faq-answer {
+  padding: 0 1.5rem 1.25rem;
+  font-size: 0.9rem;
+  line-height: 1.65;
+  color: #475569;
+}
+
+@media (prefers-color-scheme: dark) {
+  .pdfs-faq-answer {
+    color: #94a3b8;
+  }
+}

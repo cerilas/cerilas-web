@@ -27,7 +27,8 @@ import {
   Link2,
   Unlink,
   ShieldAlert,
-  Layers
+  Layers,
+  Scissors
 } from 'lucide-react';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
@@ -100,7 +101,8 @@ const ICON_MAP = {
   Link2,
   Unlink,
   ShieldAlert,
-  Layers
+  Layers,
+  Scissors
 };
 
 const ToolCard = ({ tool, onSelect }) => {

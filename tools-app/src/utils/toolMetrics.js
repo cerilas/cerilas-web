@@ -146,6 +146,25 @@ export const TOOL_CONVERSION_METRICS = {
       short: 'birleştirme'
     }
   },
+  'pdf-splitter': {
+    actionKey: 'split',
+    getConversionCount: (tool) => {
+      if (!tool) return 0;
+      return tool.use_count || tool.download_count || 0;
+    },
+    en: {
+      action: 'split',
+      badge: 'PDFs split',
+      singular: 'PDF split',
+      short: 'split'
+    },
+    tr: {
+      action: 'bölündü',
+      badge: 'PDF bölündü',
+      singular: 'PDF bölündü',
+      short: 'bölme'
+    }
+  },
   'ats-resume-checker': {
     actionKey: 'scanned',
     getConversionCount: (tool) => {

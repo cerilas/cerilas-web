@@ -28,6 +28,7 @@ import { tokenCounterUniversalManifest } from './token-counter-universal/manifes
 import { trlCalculatorManifest } from './trl-calculator/manifest';
 import { sampleSizeCalculatorManifest } from './sample-size-calculator/manifest';
 import { pdfMergerManifest } from './pdf-merger/manifest';
+import { pdfSplitterManifest } from './pdf-splitter/manifest';
 
 /**
  * Enterprise Scalable Tool Registry.
@@ -151,6 +152,10 @@ export const toolsRegistry = {
   [pdfMergerManifest.slug]: {
     manifest: pdfMergerManifest,
     component: lazy(() => import('./pdf-merger'))
+  },
+  [pdfSplitterManifest.slug]: {
+    manifest: pdfSplitterManifest,
+    component: lazy(() => import('./pdf-splitter'))
   }
 };
 
@@ -172,7 +177,10 @@ const toolAliases = {
   'ab-test-sample-size': 'sample-size-calculator',
   'pdf-combine': 'pdf-merger',
   'combine-pdf': 'pdf-merger',
-  'merge-pdf': 'pdf-merger'
+  'merge-pdf': 'pdf-merger',
+  'split-pdf': 'pdf-splitter',
+  'pdf-extract-pages': 'pdf-splitter',
+  'pdf-separator': 'pdf-splitter'
 };
 
 export function getRegisteredTool(slug) {
