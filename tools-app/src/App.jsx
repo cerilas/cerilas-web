@@ -35,6 +35,7 @@ import Footer from './components/Footer';
 import StatsModal from './components/StatsModal';
 import AdSlot from './components/ui/AdSlot';
 import ErrorBoundary from './components/ErrorBoundary';
+import AdminDashboard from './admin/AdminDashboard';
 import { toolsRegistry, getAllRegisteredTools, getRegisteredTool } from './tools/registry';
 import { useTranslation } from './i18n';
 import { getConversionCount, getConversionLabel, getShortConversionLabel } from './utils/toolMetrics';
@@ -241,6 +242,12 @@ export default function App() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [currentSlug, setCurrentSlug] = useState(null);
+  const [isAdmin, setIsAdmin] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    const p = window.location.pathname;
+    const h = window.location.hash;
+    return p === '/admin' || p.startsWith('/admin/') || h === '#/admin' || h.startsWith('#/admin/');
+  });
   const [isStatsOpen, setIsStatsOpen] = useState(false);
 
   const heroBannerRef = useRef(null);
@@ -293,6 +300,16 @@ export default function App() {
     const handleLocationChange = () => {
       forceScrollToTop();
       const hash = window.location.hash;
+      const pathname = window.location.pathname;
+
+      if (pathname === '/admin' || pathname.startsWith('/admin/') || hash === '#/admin' || hash.startsWith('#/admin/')) {
+        setIsAdmin(true);
+        setCurrentSlug(null);
+        forceScrollToTop();
+        return;
+      }
+      setIsAdmin(false);
+
       const hashMatch = hash.match(/^#\/tools?\/([a-zA-Z0-9_-]+)\/?/);
       if (hashMatch) {
         setCurrentSlug(hashMatch[1]);
@@ -569,6 +586,14 @@ export default function App() {
 
     return matchesSearch && matchesCategory;
   });
+
+  if (isAdmin) {
+    return (
+      <ErrorBoundary>
+        <AdminDashboard />
+      </ErrorBoundary>
+    );
+  }
 
   return (
     <div className="app-layout">

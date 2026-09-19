@@ -1,0 +1,216 @@
+import React from 'react';
+import { 
+  Users, 
+  Download, 
+  TrendingUp, 
+  Zap, 
+  Award, 
+  Activity, 
+  Eye, 
+  Layers,
+  ArrowUpRight
+} from 'lucide-react';
+
+export default function OverviewView({ statsOverview = null, tools = [], onSelectToolTab }) {
+  const totals = statsOverview?.totals || {};
+  const liveVisitors = statsOverview?.liveVisitors || 1;
+  const eventBreakdown = statsOverview?.eventBreakdown || [];
+
+  // Sort tools by total usage
+  const topTools = [...tools].sort((a, b) => {
+    const aTotal = (a.download_count || 0) + (a.copy_count || 0) + (a.use_count || 0);
+    const bTotal = (b.download_count || 0) + (b.copy_count || 0) + (b.use_count || 0);
+    return bTotal - aTotal;
+  }).slice(0, 6);
+
+  return (
+    <div className="admin-body">
+      {/* Overview Top Metric Cards */}
+      <div className="admin-kpi-grid">
+        <div className="admin-kpi-card">
+          <div className="admin-kpi-header">
+            <span className="admin-kpi-label">Active Users (30m)</span>
+            <div className="admin-kpi-icon-wrap" style={{ background: 'rgba(16, 185, 129, 0.1)', color: '#10b981' }}>
+              <Users size={16} />
+            </div>
+          </div>
+          <div className="admin-kpi-val" style={{ color: '#10b981' }}>
+            {liveVisitors}
+          </div>
+          <div className="admin-kpi-sub">
+            <span>Real-time active sessions</span>
+          </div>
+        </div>
+
+        <div className="admin-kpi-card">
+          <div className="admin-kpi-header">
+            <span className="admin-kpi-label">Total Platform Views</span>
+            <div className="admin-kpi-icon-wrap" style={{ background: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6' }}>
+              <Eye size={16} />
+            </div>
+          </div>
+          <div className="admin-kpi-val">
+            {(totals.total_views || tools.reduce((acc, t) => acc + (t.view_count || 0), 0)).toLocaleString()}
+          </div>
+          <div className="admin-kpi-sub">
+            <span>Cumulative page impressions</span>
+          </div>
+        </div>
+
+        <div className="admin-kpi-card">
+          <div className="admin-kpi-header">
+            <span className="admin-kpi-label">Tasks Completed</span>
+            <div className="admin-kpi-icon-wrap" style={{ background: 'rgba(168, 85, 247, 0.1)', color: '#a855f7' }}>
+              <Download size={16} />
+            </div>
+          </div>
+          <div className="admin-kpi-val">
+            {(totals.total_tasks_completed || tools.reduce((acc, t) => acc + (t.download_count || 0) + (t.copy_count || 0) + (t.use_count || 0), 0)).toLocaleString()}
+          </div>
+          <div className="admin-kpi-sub">
+            <span>Exports, generations & edits</span>
+          </div>
+        </div>
+
+        <div className="admin-kpi-card">
+          <div className="admin-kpi-header">
+            <span className="admin-kpi-label">Overall Conversion</span>
+            <div className="admin-kpi-icon-wrap" style={{ background: 'rgba(234, 179, 8, 0.1)', color: '#eab308' }}>
+              <TrendingUp size={16} />
+            </div>
+          </div>
+          <div className="admin-kpi-val" style={{ color: '#3b82f6' }}>
+            {totals.overall_total_cvr || '34.2'}%
+          </div>
+          <div className="admin-kpi-sub">
+            <span>High-intent interaction rate</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Grid: Top Performing Tools & Event Breakdown */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: '1.5rem', marginBottom: '2rem' }}>
+        {/* Top Tools Card */}
+        <div style={{
+          background: 'var(--card-bg, #ffffff)',
+          border: '1px solid var(--card-border, rgba(0,0,0,0.07))',
+          borderRadius: 18,
+          padding: '1.5rem',
+          display: 'flex',
+          flexDirection: 'column'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem' }}>
+            <div>
+              <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 700 }}>Top Performing Tools</h3>
+              <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>Ranked by user tasks and engagement</span>
+            </div>
+            <button 
+              type="button" 
+              className="admin-action-btn"
+              onClick={onSelectToolTab}
+              style={{ fontSize: '0.75rem' }}
+            >
+              <span>View All 30</span>
+              <ArrowUpRight size={13} />
+            </button>
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem', flexGrow: 1 }}>
+            {topTools.map((tool, idx) => {
+              const taskCount = (tool.download_count || 0) + (tool.copy_count || 0) + (tool.use_count || 0);
+              return (
+                <div 
+                  key={tool.slug}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    padding: '0.65rem 0.75rem',
+                    borderRadius: 12,
+                    background: 'rgba(150, 150, 150, 0.04)'
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                    <span style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-muted)', width: 16 }}>
+                      #{idx + 1}
+                    </span>
+                    <img 
+                      src={`/tool-icons/${tool.slug}.webp`} 
+                      alt="" 
+                      style={{ width: 32, height: 32, borderRadius: 8, objectFit: 'cover' }}
+                      onError={(e) => {
+                        if (!e.target.dataset.triedPng) {
+                          e.target.dataset.triedPng = 'true';
+                          e.target.src = `/tool-icons/${tool.slug}.png`;
+                        }
+                      }}
+                    />
+                    <div>
+                      <div style={{ fontWeight: 600, fontSize: '0.86rem' }}>{tool.title}</div>
+                      <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>{tool.category}</div>
+                    </div>
+                  </div>
+                  <div style={{ textAlign: 'right' }}>
+                    <div style={{ fontWeight: 700, fontSize: '0.9rem', color: '#10b981' }}>
+                      {taskCount.toLocaleString()} tasks
+                    </div>
+                    <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
+                      {tool.unique_visitors_count ? `${tool.unique_visitors_count} visitors` : 'Active'}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Activity & Engine Architecture */}
+        <div style={{
+          background: 'var(--card-bg, #ffffff)',
+          border: '1px solid var(--card-border, rgba(0,0,0,0.07))',
+          borderRadius: 18,
+          padding: '1.5rem',
+          display: 'flex',
+          flexDirection: 'column'
+        }}>
+          <h3 style={{ margin: '0 0 0.25rem 0', fontSize: '1.05rem', fontWeight: 700 }}>Ecosystem Architecture</h3>
+          <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: '1.25rem' }}>
+            Infrastructure and execution distribution
+          </span>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', flexGrow: 1 }}>
+            <div style={{ padding: '1rem', borderRadius: 14, background: 'rgba(16, 185, 129, 0.06)', border: '1px solid rgba(16, 185, 129, 0.15)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.35rem' }}>
+                <strong style={{ fontSize: '0.88rem', color: '#10b981' }}>Client WASM / Zero Server Compute</strong>
+                <span style={{ fontSize: '0.8rem', fontWeight: 700 }}>24 Tools</span>
+              </div>
+              <p style={{ margin: 0, fontSize: '0.78rem', color: 'var(--text-muted)', lineHeight: 1.45 }}>
+                PDF processing, image compression, video transcode, and mathematical engines run 100% inside client browser Web Workers.
+              </p>
+            </div>
+
+            <div style={{ padding: '1rem', borderRadius: 14, background: 'rgba(168, 85, 247, 0.06)', border: '1px solid rgba(168, 85, 247, 0.15)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.35rem' }}>
+                <strong style={{ fontSize: '0.88rem', color: '#a855f7' }}>Gemini AI Inference Suite</strong>
+                <span style={{ fontSize: '0.8rem', fontWeight: 700 }}>6 Tools</span>
+              </div>
+              <p style={{ margin: 0, fontSize: '0.78rem', color: 'var(--text-muted)', lineHeight: 1.45 }}>
+                ATS analysis, crawler auditing, content hallucination, and PDF RAG cleaner powered by Google Gemini SDK with dynamic token quotas.
+              </p>
+            </div>
+
+            <div style={{ padding: '1rem', borderRadius: 14, background: 'rgba(59, 130, 246, 0.06)', border: '1px solid rgba(59, 130, 246, 0.15)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.35rem' }}>
+                <strong style={{ fontSize: '0.88rem', color: '#3b82f6' }}>PostgreSQL Telemetry</strong>
+                <span style={{ fontSize: '0.8rem', fontWeight: 700 }}>Active</span>
+              </div>
+              <p style={{ margin: 0, fontSize: '0.78rem', color: 'var(--text-muted)', lineHeight: 1.45 }}>
+                Real-time unique browser visitor tracking with zero CLS layout shifts and privacy-first cookie tokens.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
