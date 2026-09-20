@@ -2177,6 +2177,191 @@ html.dark .admin-time-reset-btn {
 }
 
 /* ==========================================================================
+   Traffic Integrity Banner (Overview View - Desktop Base)
+   ========================================================================== */
+
+.admin-integrity-banner {
+  background: var(--card-bg, #ffffff);
+  border: 1px solid var(--card-border, rgba(0, 0, 0, 0.07));
+  border-radius: 18px;
+  padding: 1.35rem 1.65rem;
+  margin-top: 0.5rem;
+  margin-bottom: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.02);
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+[data-theme="dark"] .admin-integrity-banner,
+html.dark .admin-integrity-banner {
+  background: #141416;
+  border-color: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+.admin-integrity-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1.25rem;
+}
+
+.admin-integrity-info {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  min-width: 280px;
+  flex: 1;
+}
+
+.admin-integrity-icon-wrap {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: rgba(16, 185, 129, 0.1);
+  color: #10b981;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.admin-integrity-title {
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--text-main, #0f172a);
+  margin-bottom: 0.2rem;
+  letter-spacing: -0.01em;
+}
+
+[data-theme="dark"] .admin-integrity-title,
+html.dark .admin-integrity-title {
+  color: #f4f4f5;
+}
+
+.admin-integrity-desc {
+  font-size: 0.8rem;
+  color: var(--text-muted, #64748b);
+  line-height: 1.45;
+}
+
+.admin-integrity-badges {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.admin-integrity-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.4rem 0.85rem;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  white-space: nowrap;
+  letter-spacing: -0.01em;
+}
+
+.admin-integrity-badge.human {
+  background: rgba(16, 185, 129, 0.08);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  color: #10b981;
+}
+
+.admin-integrity-badge.bot {
+  background: rgba(168, 85, 247, 0.08);
+  border: 1px solid rgba(168, 85, 247, 0.25);
+  color: #a855f7;
+}
+
+.admin-integrity-bar-wrap {
+  display: flex;
+  height: 8px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: rgba(150, 150, 150, 0.1);
+  width: 100%;
+}
+
+.admin-integrity-bar-fill.human {
+  background: linear-gradient(90deg, #10b981, #3b82f6);
+  transition: width 0.4s ease;
+}
+
+.admin-integrity-bar-fill.bot {
+  background: linear-gradient(90deg, #a855f7, #ec4899);
+  transition: width 0.4s ease;
+}
+
+.admin-two-col-card {
+  display: flex;
+  flex-direction: column;
+}
+
+/* ==========================================================================
+   Analytics Telemetry Segmented Tabs (Desktop Base)
+   ========================================================================== */
+
+.admin-analytics-tabs {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.3rem;
+  border-radius: 14px;
+  background: rgba(150, 150, 150, 0.08);
+  border: 1px solid var(--card-border, rgba(0, 0, 0, 0.08));
+}
+
+[data-theme="dark"] .admin-analytics-tabs,
+html.dark .admin-analytics-tabs {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.admin-analytics-tab-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.45rem 1rem;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  font-size: 0.82rem;
+  font-weight: 600;
+  transition: all 0.15s ease;
+  background: transparent;
+  color: var(--text-muted, #64748b);
+  font-family: inherit;
+}
+
+.admin-analytics-tab-btn:hover {
+  color: var(--text-main, #0f172a);
+}
+
+[data-theme="dark"] .admin-analytics-tab-btn:hover,
+html.dark .admin-analytics-tab-btn:hover {
+  color: #f4f4f5;
+}
+
+.admin-analytics-tab-btn.active-human {
+  background: #3b82f6 !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+}
+
+.admin-analytics-tab-btn.active-bots {
+  background: #a855f7 !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 8px rgba(168, 85, 247, 0.3);
+}
+
+/* ==========================================================================
    Admin Suite Mobile Responsiveness Extensions (Tablets & Phones)
    ========================================================================== */
 
@@ -2339,14 +2524,24 @@ html.dark .admin-time-reset-btn {
 
   /* Overview Integrity Banner Mobile */
   .admin-integrity-banner {
-    padding: 1rem !important;
-    margin-bottom: 1.25rem !important;
+    padding: 1.15rem 1.15rem !important;
+    margin-bottom: 1.5rem !important;
   }
 
   .admin-integrity-header {
     flex-direction: column;
     align-items: stretch !important;
-    gap: 0.75rem !important;
+    gap: 0.85rem !important;
+  }
+
+  .admin-integrity-info {
+    min-width: 0 !important;
+  }
+
+  .admin-integrity-badges {
+    width: 100%;
+    justify-content: flex-start;
+    gap: 0.5rem;
   }
 
   /* Modals Mobile Sizing */
@@ -2434,6 +2629,17 @@ html.dark .admin-time-reset-btn {
 
   .admin-scraper-actions button {
     width: 100%;
+  }
+
+  .admin-integrity-badges {
+    flex-direction: column;
+    align-items: stretch !important;
+  }
+
+  .admin-integrity-badge {
+    width: 100%;
+    justify-content: center;
+    box-sizing: border-box;
   }
 
   .admin-top-tool-row {

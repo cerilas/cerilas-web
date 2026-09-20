@@ -102,70 +102,41 @@ export default function OverviewView({ statsOverview = null, tools = [], onSelec
       {/* Traffic Integrity & Bot Isolation Banner */}
       <div className="admin-integrity-banner">
         <div className="admin-integrity-header">
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
-            <div style={{
-              width: 32,
-              height: 32,
-              borderRadius: 8,
-              background: 'rgba(16, 185, 129, 0.1)',
-              color: '#10b981',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}>
-              <ShieldCheck size={18} />
+          <div className="admin-integrity-info">
+            <div className="admin-integrity-icon-wrap">
+              <ShieldCheck size={20} />
             </div>
             <div>
-              <div style={{ fontWeight: 700, fontSize: '0.95rem' }}>Traffic Integrity & Bot Isolation</div>
-              <div style={{ fontSize: '0.76rem', color: 'var(--text-muted)' }}>
+              <div className="admin-integrity-title">Traffic Integrity & Bot Isolation</div>
+              <div className="admin-integrity-desc">
                 Search engine spiders and AI crawlers are strictly filtered out of all primary analytics.
               </div>
             </div>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
-            <span style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '0.35rem',
-              padding: '0.3rem 0.65rem',
-              borderRadius: 999,
-              background: 'rgba(16, 185, 129, 0.08)',
-              border: '1px solid rgba(16, 185, 129, 0.25)',
-              fontSize: '0.78rem',
-              fontWeight: 600,
-              color: '#10b981'
-            }}>
-              <Users size={12} />
-              {humanRatio}% Human Traffic
+          <div className="admin-integrity-badges">
+            <span className="admin-integrity-badge human">
+              <Users size={13} />
+              <span>{humanRatio}% Human Traffic</span>
             </span>
 
-            <span style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '0.35rem',
-              padding: '0.3rem 0.65rem',
-              borderRadius: 999,
-              background: 'rgba(168, 85, 247, 0.08)',
-              border: '1px solid rgba(168, 85, 247, 0.25)',
-              fontSize: '0.78rem',
-              fontWeight: 600,
-              color: '#a855f7'
-            }}>
-              <Bot size={12} />
-              {totalBotViews} Bot Hits Isolated ({liveBots} active)
+            <span className="admin-integrity-badge bot">
+              <Bot size={13} />
+              <span>{totalBotViews} Bot Hits Isolated ({liveBots} active)</span>
             </span>
           </div>
         </div>
 
         {/* Visual traffic split bar */}
-        <div style={{ display: 'flex', height: 8, borderRadius: 999, overflow: 'hidden', background: 'rgba(150, 150, 150, 0.1)' }}>
+        <div className="admin-integrity-bar-wrap">
           <div 
-            style={{ width: `${humanRatio}%`, background: 'linear-gradient(90deg, #10b981, #3b82f6)', transition: 'width 0.4s ease' }} 
+            className="admin-integrity-bar-fill human"
+            style={{ width: `${humanRatio}%` }} 
             title={`Human Traffic: ${humanRatio}%`}
           />
           <div 
-            style={{ width: `${botRatio}%`, background: 'linear-gradient(90deg, #a855f7, #ec4899)', transition: 'width 0.4s ease' }} 
+            className="admin-integrity-bar-fill bot"
+            style={{ width: `${botRatio}%` }} 
             title={`Bot & Crawler Traffic: ${botRatio}%`}
           />
         </div>
@@ -174,14 +145,7 @@ export default function OverviewView({ statsOverview = null, tools = [], onSelec
       {/* Grid: Top Performing Tools & Event Breakdown */}
       <div className="admin-two-col-grid">
         {/* Top Tools Card */}
-        <div style={{
-          background: 'var(--card-bg, #ffffff)',
-          border: '1px solid var(--card-border, rgba(0,0,0,0.07))',
-          borderRadius: 18,
-          padding: '1.5rem',
-          display: 'flex',
-          flexDirection: 'column'
-        }}>
+        <div className="admin-card admin-two-col-card">
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem' }}>
             <div>
               <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 700 }}>Top Performing Tools</h3>
@@ -249,14 +213,7 @@ export default function OverviewView({ statsOverview = null, tools = [], onSelec
         </div>
 
         {/* Activity & Engine Architecture */}
-        <div style={{
-          background: 'var(--card-bg, #ffffff)',
-          border: '1px solid var(--card-border, rgba(0,0,0,0.07))',
-          borderRadius: 18,
-          padding: '1.5rem',
-          display: 'flex',
-          flexDirection: 'column'
-        }}>
+        <div className="admin-card admin-two-col-card">
           <h3 style={{ margin: '0 0 0.25rem 0', fontSize: '1.05rem', fontWeight: 700 }}>Ecosystem Architecture</h3>
           <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: '1.25rem' }}>
             Infrastructure and execution distribution
