@@ -46,6 +46,7 @@ const PHASES = [
 
 export default function TrlCalculator({ onBack, toolMeta }) {
   const {
+    trackAction,
     trackUse,
     trackDownload,
     trackCopy,
@@ -88,20 +89,20 @@ export default function TrlCalculator({ onBack, toolMeta }) {
       ...prev,
       [questionId]: value
     }));
-    trackUse?.({ action: 'answer_question', questionId, value });
+    trackAction('answer_question', { questionId, value });
   };
 
   const loadPreset = useCallback((preset) => {
     setSelectedFramework(preset.framework);
     setAnswers(preset.answers);
     setProjectName(preset.name);
-    trackUse?.({ action: 'load_preset', presetId: preset.id });
-  }, [trackUse]);
+    trackAction('load_preset', { presetId: preset.id });
+  }, [trackAction]);
 
   const handleReset = () => {
     setAnswers({});
     setProjectName('DeepTech R&D Project');
-    trackUse?.({ action: 'reset' });
+    trackAction('reset');
   };
 
   const handleScrollToQuestions = () => {
