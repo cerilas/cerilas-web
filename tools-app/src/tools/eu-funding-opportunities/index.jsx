@@ -398,6 +398,7 @@ export default function EuFundingOpportunities({ onBack, toolMeta }) {
               }}
             >
               All Portals
+              {stats?.open_count && <span className="eu-source-tab-count">{stats.open_count}</span>}
             </button>
             <button
               className={`eu-source-tab ${selectedSource === 'ec_funding' ? 'active' : ''}`}
@@ -407,7 +408,7 @@ export default function EuFundingOpportunities({ onBack, toolMeta }) {
               }}
             >
               Horizon Europe (SEDIA)
-              <span className="eu-source-tab-count">621</span>
+              <span className="eu-source-tab-count">{stats?.ec_open_count || '560+'}</span>
             </button>
             <button
               className={`eu-source-tab ${selectedSource === 'cascadefunding' ? 'active' : ''}`}
@@ -417,7 +418,7 @@ export default function EuFundingOpportunities({ onBack, toolMeta }) {
               }}
             >
               Cascade Funding (FSTP)
-              <span className="eu-source-tab-count">42</span>
+              <span className="eu-source-tab-count">{stats?.cascade_open_count || '42'}</span>
             </button>
           </div>
         </div>
@@ -467,9 +468,12 @@ export default function EuFundingOpportunities({ onBack, toolMeta }) {
               }}
             >
               <option value="all">All Call Types</option>
-              <option value="Proposals">Proposals & Sub-grants</option>
-              <option value="Evaluators">Expert Evaluators</option>
-              <option value="Mentors">Mentors & Coaches</option>
+              <option value="ria">Research & Innovation (RIA)</option>
+              <option value="ia">Innovation Actions (IA)</option>
+              <option value="cascade">Cascade & Sub-grants (FSTP)</option>
+              <option value="csa">Coordination & Support (CSA)</option>
+              <option value="lump_sum">Lump Sum & Project Grants</option>
+              <option value="msca">Doctoral & MSCA Fellowships</option>
             </select>
 
             {/* Sort Order */}
@@ -484,7 +488,7 @@ export default function EuFundingOpportunities({ onBack, toolMeta }) {
               <option value="deadline_asc">Deadline: Soonest first</option>
               <option value="deadline_desc">Deadline: Furthest first</option>
               <option value="funding_desc">Funding: Highest first</option>
-              <option value="newest">Recently Scraped</option>
+              <option value="opening_desc">Opening Date: Newest first</option>
               <option value="title_asc">Title: A to Z</option>
             </select>
           </div>

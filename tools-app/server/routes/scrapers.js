@@ -57,6 +57,15 @@ const BENEFICIARY_MAPPING = {
   'mid-caps': ['Mid-Caps', 'MidCaps', 'mid-caps', 'midcaps']
 };
 
+const CALL_TYPE_MAPPING = {
+  'ria': ['%Research and Innovation%', '%Research Actions%'],
+  'ia': ['%Innovation Actions%'],
+  'cascade': ['%Cascade%', '%Proposals%', '%Competitive Call%', '%Financial Support%'],
+  'csa': ['%Coordination and Support%'],
+  'lump_sum': ['%Lump Sum%', '%Project Grants%'],
+  'msca': ['%MSCA%', '%ERC%', '%Doctoral%', '%Fellowship%']
+};
+
 /**
  * 1. Get List of Configured Scraper Sources & Their Status
  */
@@ -214,8 +223,17 @@ router.get('/opportunities', async (req, res) => {
 
     // Call Type filter
     if (call_type && call_type !== 'all') {
-      params.push(call_type);
-      conditions.push(`call_type = $${params.length}`);
+      const mapped = CALL_TYPE_MAPPING[call_type.toLowerCase().trim()];
+      if (mapped && mapped.length > 0) {
+        const ctConditions = mapped.map((p) => {
+          params.push(p);
+          return `call_type ILIKE $${params.length}`;
+        });
+        conditions.push(`(${ctConditions.join(' OR ')})`);
+      } else {
+        params.push(`%${call_type}%`);
+        conditions.push(`call_type ILIKE $${params.length}`);
+      }
     }
 
     const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
@@ -224,7 +242,7 @@ router.get('/opportunities', async (req, res) => {
     let orderByClause = 'ORDER BY deadline_date ASC NULLS LAST';
     if (sort === 'deadline_desc') orderByClause = 'ORDER BY deadline_date DESC NULLS LAST';
     if (sort === 'funding_desc') orderByClause = 'ORDER BY funding_raw_amount DESC NULLS LAST';
-    if (sort === 'newest') orderByClause = 'ORDER BY first_scraped_at DESC';
+    if (sort === 'opening_desc' || sort === 'newest') orderByClause = 'ORDER BY opening_date DESC NULLS LAST, first_scraped_at DESC';
     if (sort === 'title_asc') orderByClause = 'ORDER BY title ASC';
 
     // Count total query
@@ -384,6 +402,8 @@ router.get('/stats', async (req, res) => {
       SELECT 
         COUNT(*) as total,
         COUNT(CASE WHEN status = 'open' THEN 1 END) as open_count,
+        COUNT(CASE WHEN status = 'open' AND source_key = 'ec_funding' THEN 1 END) as ec_open_count,
+        COUNT(CASE WHEN status = 'open' AND source_key = 'cascadefunding' THEN 1 END) as cascade_open_count,
         COUNT(CASE WHEN status = 'closed' THEN 1 END) as closed_count,
         COUNT(CASE WHEN status = 'upcoming' THEN 1 END) as upcoming_count,
         COALESCE(SUM(funding_raw_amount), 0) as total_funding_amount,
