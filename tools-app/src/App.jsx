@@ -434,6 +434,9 @@ export default function App() {
       el.setAttribute('href', href);
     };
 
+    const activeRegistered = currentSlug ? getRegisteredTool(currentSlug) : null;
+    const manifest = activeRegistered?.manifest;
+
     if (currentLegalSlug && LEGAL_DOCS[currentLegalSlug]) {
       const doc = LEGAL_DOCS[currentLegalSlug];
       const pageTitle = doc.seoTitle;
