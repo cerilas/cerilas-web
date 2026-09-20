@@ -6,7 +6,7 @@ import {
   Layers,
   Sparkles,
   Calendar,
-  DollarSign,
+  Euro,
   Globe,
   ExternalLink,
   Bookmark,
@@ -295,10 +295,10 @@ export default function EuFundingOpportunities({ onBack, toolMeta }) {
               </Badge>
             )}
             <Badge variant="blue" icon={<Globe size={12} strokeWidth={2} />}>
-              Horizon Europe & Cascade FSTP
+              EU Grants & FSTP
             </Badge>
             <Badge variant="success" icon={<CheckCircle2 size={12} strokeWidth={2} />}>
-              Live Synchronized Grants
+              Live Directory
             </Badge>
           </>
         }
@@ -319,7 +319,7 @@ export default function EuFundingOpportunities({ onBack, toolMeta }) {
 
         <div className="eu-kpi-card">
           <div className="eu-kpi-icon-wrap green">
-            <DollarSign size={24} />
+            <Euro size={24} />
           </div>
           <div className="eu-kpi-info">
             <span className="eu-kpi-label">Total Allocated Grants</span>
@@ -615,7 +615,6 @@ export default function EuFundingOpportunities({ onBack, toolMeta }) {
                 <div className="eu-card-meta-row">
                   {opp.funding_amount && (
                     <span className="eu-meta-chip funding">
-                      <DollarSign size={12} />
                       <span>{opp.funding_amount}</span>
                     </span>
                   )}
@@ -807,7 +806,6 @@ export default function EuFundingOpportunities({ onBack, toolMeta }) {
               <div className="eu-modal-pills">
                 {selectedOpp.funding_amount && (
                   <span className="eu-meta-chip funding" style={{ fontSize: '0.82rem', padding: '0.35rem 0.75rem' }}>
-                    <DollarSign size={14} />
                     <span>Grant Budget: {selectedOpp.funding_amount}</span>
                   </span>
                 )}

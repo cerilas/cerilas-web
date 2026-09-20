@@ -60,7 +60,7 @@ function extractBudget(m, isCompetitiveCall) {
     }
   }
 
-  return { formatted: 'EU Grant / Hibe', raw: null };
+  return { formatted: 'EU Grant Funding', raw: null };
 }
 
 /**
