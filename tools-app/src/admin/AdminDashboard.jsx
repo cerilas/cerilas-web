@@ -1,6 +1,7 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import AdminSidebar from './components/AdminSidebar';
 import AdminHeader from './components/AdminHeader';
+import AdminTimeFilter from './components/AdminTimeFilter';
 import ToolsView from './views/ToolsView';
 import ToolDetailView from './views/ToolDetailView';
 import OverviewView from './views/OverviewView';
@@ -23,6 +24,11 @@ export default function AdminDashboard() {
   const [tools, setTools] = useState(() => getAllRegisteredTools());
   const [statsOverview, setStatsOverview] = useState(null);
   const [loading, setLoading] = useState(false);
+
+  // Time-based filtering state (all, today, yesterday, 3days, 7days, 30days, 90days, 180days, 365days, custom)
+  const [timeRange, setTimeRange] = useState('all');
+  const [customStartDate, setCustomStartDate] = useState('');
+  const [customEndDate, setCustomEndDate] = useState('');
 
   // Hash-based deep link routing (e.g. #/tools/:slug or #/analytics)
   useEffect(() => {
@@ -94,32 +100,58 @@ export default function AdminDashboard() {
     };
   }, []);
 
-  // Fetch telemetry and stats
-  useEffect(() => {
-    let isMounted = true;
-    const fetchStats = async () => {
-      try {
-        setLoading(true);
-        const res = await fetch('/api/tools/stats/overview');
-        const json = await res.json();
-        if (isMounted && json.status === 'success' && json.data) {
-          setStatsOverview(json.data);
+  // Fetch telemetry and stats with optional time range
+  const fetchStats = useCallback(async (range = timeRange, start = customStartDate, end = customEndDate) => {
+    try {
+      setLoading(true);
+      const params = new URLSearchParams();
+      if (range && range !== 'all') {
+        params.set('range', range);
+        if (range === 'custom') {
+          if (start) params.set('startDate', start);
+          if (end) params.set('endDate', end);
         }
-      } catch (err) {
-        console.warn('Could not fetch overview stats:', err);
-      } finally {
-        if (isMounted) setLoading(false);
       }
-    };
+      const url = `/api/tools/stats/overview${params.toString() ? '?' + params.toString() : ''}`;
+      const res = await fetch(url);
+      const json = await res.json();
+      if (json.status === 'success' && json.data) {
+        setStatsOverview(json.data);
+      }
+    } catch (err) {
+      console.warn('Could not fetch overview stats:', err);
+    } finally {
+      setLoading(false);
+    }
+  }, [timeRange, customStartDate, customEndDate]);
 
-    fetchStats();
+  useEffect(() => {
+    fetchStats(timeRange, customStartDate, customEndDate);
     // Refresh stats every 60 seconds
-    const interval = setInterval(fetchStats, 60000);
-    return () => {
-      isMounted = false;
-      clearInterval(interval);
-    };
-  }, []);
+    const interval = setInterval(() => {
+      fetchStats(timeRange, customStartDate, customEndDate);
+    }, 60000);
+    return () => clearInterval(interval);
+  }, [fetchStats, timeRange, customStartDate, customEndDate]);
+
+  const handleRangeChange = (newRange) => {
+    setTimeRange(newRange);
+    fetchStats(newRange, customStartDate, customEndDate);
+  };
+
+  const handleApplyCustomRange = (start, end) => {
+    setTimeRange('custom');
+    setCustomStartDate(start);
+    setCustomEndDate(end);
+    fetchStats('custom', start, end);
+  };
+
+  const handleResetTimeRange = () => {
+    setTimeRange('all');
+    setCustomStartDate('');
+    setCustomEndDate('');
+    fetchStats('all', '', '');
+  };
 
   // Merge registered manifest tools with real-time database stats
   const mergedTools = useMemo(() => {
@@ -314,6 +346,20 @@ export default function AdminDashboard() {
           authUser={authUser}
           onLogout={handleLogout}
         />
+
+        {/* Global Time Range Filter Bar */}
+        {['overview', 'analytics', 'tools'].includes(currentTab) && (
+          <AdminTimeFilter
+            selectedRange={timeRange}
+            onSelectRange={handleRangeChange}
+            customStartDate={customStartDate}
+            customEndDate={customEndDate}
+            onApplyCustomRange={handleApplyCustomRange}
+            onReset={handleResetTimeRange}
+            loading={loading}
+            activeFilterLabel={statsOverview?.timeFilter?.label}
+          />
+        )}
 
         {/* 3. Render Active View */}
         <main style={{ flexGrow: 1 }}>

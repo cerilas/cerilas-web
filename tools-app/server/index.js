@@ -458,58 +458,181 @@ app.post('/api/tools/:slug/event', async (req, res) => {
   }
 });
 
-// Central stats overview endpoint (with strict Human vs Bot separation)
+// Central stats overview endpoint (with strict Human vs Bot separation and time range filtering)
 app.get('/api/tools/stats/overview', async (req, res) => {
   try {
-    const toolsResult = await pool.query(`
-      SELECT 
-        id, title, slug, category, 
-        COALESCE(view_count, 0) as view_count, 
-        COALESCE(unique_visitors_count, 0) as unique_visitors_count,
-        COALESCE(bot_view_count, 0) as bot_view_count,
-        COALESCE(bot_unique_visitors_count, 0) as bot_unique_visitors_count,
-        COALESCE(download_count, 0) as download_count,
-        COALESCE(copy_count, 0) as copy_count,
-        COALESCE(use_count, 0) as use_count, 
-        is_active, last_used_at, created_at,
-        CASE 
-          WHEN COALESCE(unique_visitors_count, 0) > 0 
-          THEN ROUND((COALESCE(download_count, 0)::numeric / unique_visitors_count::numeric) * 100, 1)
-          ELSE 0 
-        END as download_cvr,
-        CASE 
-          WHEN COALESCE(unique_visitors_count, 0) > 0 
-          THEN ROUND(((COALESCE(download_count, 0) + COALESCE(copy_count, 0))::numeric / unique_visitors_count::numeric) * 100, 1)
-          ELSE 0 
-        END as total_cvr
-      FROM cerilas_tools 
-      ORDER BY sort_order ASC
-    `);
+    const { range = 'all', startDate, endDate } = req.query;
 
-    const totalsResult = await pool.query(`
-      SELECT 
-        COUNT(*)::int as total_tools,
-        COUNT(CASE WHEN is_active = true THEN 1 END)::int as active_tools,
-        COALESCE(SUM(view_count), 0)::int as total_views,
-        COALESCE(SUM(unique_visitors_count), 0)::int as total_unique_visitors,
-        COALESCE(SUM(bot_view_count), 0)::int as total_bot_views,
-        COALESCE(SUM(bot_unique_visitors_count), 0)::int as total_unique_bots,
-        COALESCE(SUM(download_count), 0)::int as total_downloads,
-        COALESCE(SUM(copy_count), 0)::int as total_copies,
-        COALESCE(SUM(use_count), 0)::int as total_uses,
-        COALESCE(SUM(use_count + download_count + copy_count), 0)::int as total_tasks_completed,
-        CASE 
-          WHEN COALESCE(SUM(unique_visitors_count), 0) > 0 
-          THEN ROUND((COALESCE(SUM(download_count), 0)::numeric / SUM(unique_visitors_count)::numeric) * 100, 1)
-          ELSE 0 
-        END as overall_download_cvr,
-        CASE 
-          WHEN COALESCE(SUM(unique_visitors_count), 0) > 0 
-          THEN ROUND(((COALESCE(SUM(download_count), 0) + COALESCE(SUM(copy_count), 0))::numeric / SUM(unique_visitors_count)::numeric) * 100, 1)
-          ELSE 0 
-        END as overall_total_cvr
-      FROM cerilas_tools
-    `);
+    let dateCondition = '';
+    let queryParams = [];
+    let timeFilterLabel = 'Tüm Zamanlar';
+
+    if (range === 'today') {
+      timeFilterLabel = 'Bugün';
+      dateCondition = `created_at >= CURRENT_DATE AND created_at < CURRENT_DATE + INTERVAL '1 day'`;
+    } else if (range === 'yesterday') {
+      timeFilterLabel = 'Dün';
+      dateCondition = `created_at >= CURRENT_DATE - INTERVAL '1 day' AND created_at < CURRENT_DATE`;
+    } else if (range === '3days') {
+      timeFilterLabel = 'Son 3 Gün';
+      dateCondition = `created_at >= NOW() - INTERVAL '3 days'`;
+    } else if (range === '7days') {
+      timeFilterLabel = 'Son 1 Hafta';
+      dateCondition = `created_at >= NOW() - INTERVAL '7 days'`;
+    } else if (range === '30days') {
+      timeFilterLabel = 'Son 1 Ay';
+      dateCondition = `created_at >= NOW() - INTERVAL '30 days'`;
+    } else if (range === '90days') {
+      timeFilterLabel = 'Son 3 Ay';
+      dateCondition = `created_at >= NOW() - INTERVAL '90 days'`;
+    } else if (range === '180days') {
+      timeFilterLabel = 'Son 6 Ay';
+      dateCondition = `created_at >= NOW() - INTERVAL '180 days'`;
+    } else if (range === '365days') {
+      timeFilterLabel = 'Son 1 Yıl';
+      dateCondition = `created_at >= NOW() - INTERVAL '365 days'`;
+    } else if (range === 'custom' && startDate && endDate) {
+      timeFilterLabel = `Özel Tarih (${startDate} - ${endDate})`;
+      dateCondition = `created_at >= $1::timestamp AND created_at <= ($2::date + INTERVAL '1 day - 1 microsecond')`;
+      queryParams = [startDate, endDate];
+    } else {
+      timeFilterLabel = 'Tüm Zamanlar';
+      dateCondition = '';
+    }
+
+    let toolsResult;
+    let totalsResult;
+
+    if (dateCondition) {
+      // Dynamic aggregation for specific time window
+      toolsResult = await pool.query(`
+        WITH range_events AS (
+          SELECT * FROM tool_usage_events
+          WHERE ${dateCondition}
+        ),
+        event_aggregates AS (
+          SELECT 
+            tool_slug,
+            COUNT(CASE WHEN event_type = 'view' AND is_bot = false THEN 1 END)::int as view_count,
+            COUNT(DISTINCT CASE WHEN is_bot = false AND visitor_id IS NOT NULL THEN visitor_id END)::int as unique_visitors_count,
+            COUNT(CASE WHEN is_bot = true AND event_type IN ('view', 'crawler_visit') THEN 1 END)::int as bot_view_count,
+            COUNT(DISTINCT CASE WHEN is_bot = true AND visitor_id IS NOT NULL THEN visitor_id END)::int as bot_unique_visitors_count,
+            COUNT(CASE WHEN is_bot = false AND (event_type = 'download' OR event_type LIKE 'download%' OR event_type = 'pdf_export') THEN 1 END)::int as download_count,
+            COUNT(CASE WHEN is_bot = false AND (event_type = 'copy' OR event_type LIKE 'copy%') THEN 1 END)::int as copy_count,
+            COUNT(CASE WHEN is_bot = false AND event_type IN ('use', 'calculate', 'scan', 'analyze', 'verify', 'convert', 'session_complete', 'complete_session') THEN 1 END)::int as use_count,
+            MAX(created_at) as last_used_at
+          FROM range_events
+          GROUP BY tool_slug
+        )
+        SELECT 
+          ct.id, ct.title, ct.slug, ct.category, ct.is_active, ct.sort_order,
+          COALESCE(ea.view_count, 0)::int as view_count,
+          COALESCE(ea.unique_visitors_count, 0)::int as unique_visitors_count,
+          COALESCE(ea.bot_view_count, 0)::int as bot_view_count,
+          COALESCE(ea.bot_unique_visitors_count, 0)::int as bot_unique_visitors_count,
+          COALESCE(ea.download_count, 0)::int as download_count,
+          COALESCE(ea.copy_count, 0)::int as copy_count,
+          COALESCE(ea.use_count, 0)::int as use_count,
+          ea.last_used_at,
+          CASE 
+            WHEN COALESCE(ea.unique_visitors_count, 0) > 0 
+            THEN ROUND((COALESCE(ea.download_count, 0)::numeric / ea.unique_visitors_count::numeric) * 100, 1)
+            ELSE 0 
+          END as download_cvr,
+          CASE 
+            WHEN COALESCE(ea.unique_visitors_count, 0) > 0 
+            THEN ROUND(((COALESCE(ea.download_count, 0) + COALESCE(ea.copy_count, 0))::numeric / ea.unique_visitors_count::numeric) * 100, 1)
+            ELSE 0 
+          END as total_cvr
+        FROM cerilas_tools ct
+        LEFT JOIN event_aggregates ea ON ct.slug = ea.tool_slug
+        ORDER BY ct.sort_order ASC
+      `, queryParams);
+
+      totalsResult = await pool.query(`
+        WITH range_events AS (
+          SELECT * FROM tool_usage_events
+          WHERE ${dateCondition}
+        )
+        SELECT 
+          (SELECT COUNT(*)::int FROM cerilas_tools) as total_tools,
+          (SELECT COUNT(*)::int FROM cerilas_tools WHERE is_active = true) as active_tools,
+          COUNT(CASE WHEN event_type = 'view' AND is_bot = false THEN 1 END)::int as total_views,
+          COUNT(DISTINCT CASE WHEN is_bot = false AND visitor_id IS NOT NULL THEN visitor_id END)::int as total_unique_visitors,
+          COUNT(CASE WHEN is_bot = true AND event_type IN ('view', 'crawler_visit') THEN 1 END)::int as total_bot_views,
+          COUNT(DISTINCT CASE WHEN is_bot = true AND visitor_id IS NOT NULL THEN visitor_id END)::int as total_unique_bots,
+          COUNT(CASE WHEN is_bot = false AND (event_type = 'download' OR event_type LIKE 'download%' OR event_type = 'pdf_export') THEN 1 END)::int as total_downloads,
+          COUNT(CASE WHEN is_bot = false AND (event_type = 'copy' OR event_type LIKE 'copy%') THEN 1 END)::int as total_copies,
+          COUNT(CASE WHEN is_bot = false AND event_type IN ('use', 'calculate', 'scan', 'analyze', 'verify', 'convert', 'session_complete', 'complete_session') THEN 1 END)::int as total_uses
+        FROM range_events
+      `, queryParams);
+
+      const totRow = totalsResult.rows[0] || {};
+      const tDownloads = totRow.total_downloads || 0;
+      const tCopies = totRow.total_copies || 0;
+      const tUses = totRow.total_uses || 0;
+      const tVisitors = totRow.total_unique_visitors || 0;
+
+      totRow.total_tasks_completed = tDownloads + tCopies + tUses;
+      totRow.overall_download_cvr = tVisitors > 0 
+        ? Number(((tDownloads / tVisitors) * 100).toFixed(1)) 
+        : 0;
+      totRow.overall_total_cvr = tVisitors > 0 
+        ? Number((((tDownloads + tCopies) / tVisitors) * 100).toFixed(1)) 
+        : 0;
+      totalsResult.rows[0] = totRow;
+    } else {
+      // All-time query from cerilas_tools
+      toolsResult = await pool.query(`
+        SELECT 
+          id, title, slug, category, 
+          COALESCE(view_count, 0) as view_count, 
+          COALESCE(unique_visitors_count, 0) as unique_visitors_count,
+          COALESCE(bot_view_count, 0) as bot_view_count,
+          COALESCE(bot_unique_visitors_count, 0) as bot_unique_visitors_count,
+          COALESCE(download_count, 0) as download_count,
+          COALESCE(copy_count, 0) as copy_count,
+          COALESCE(use_count, 0) as use_count, 
+          is_active, last_used_at, created_at,
+          CASE 
+            WHEN COALESCE(unique_visitors_count, 0) > 0 
+            THEN ROUND((COALESCE(download_count, 0)::numeric / unique_visitors_count::numeric) * 100, 1)
+            ELSE 0 
+          END as download_cvr,
+          CASE 
+            WHEN COALESCE(unique_visitors_count, 0) > 0 
+            THEN ROUND(((COALESCE(download_count, 0) + COALESCE(copy_count, 0))::numeric / unique_visitors_count::numeric) * 100, 1)
+            ELSE 0 
+          END as total_cvr
+        FROM cerilas_tools 
+        ORDER BY sort_order ASC
+      `);
+
+      totalsResult = await pool.query(`
+        SELECT 
+          COUNT(*)::int as total_tools,
+          COUNT(CASE WHEN is_active = true THEN 1 END)::int as active_tools,
+          COALESCE(SUM(view_count), 0)::int as total_views,
+          COALESCE(SUM(unique_visitors_count), 0)::int as total_unique_visitors,
+          COALESCE(SUM(bot_view_count), 0)::int as total_bot_views,
+          COALESCE(SUM(bot_unique_visitors_count), 0)::int as total_unique_bots,
+          COALESCE(SUM(download_count), 0)::int as total_downloads,
+          COALESCE(SUM(copy_count), 0)::int as total_copies,
+          COALESCE(SUM(use_count), 0)::int as total_uses,
+          COALESCE(SUM(use_count + download_count + copy_count), 0)::int as total_tasks_completed,
+          CASE 
+            WHEN COALESCE(SUM(unique_visitors_count), 0) > 0 
+            THEN ROUND((COALESCE(SUM(download_count), 0)::numeric / SUM(unique_visitors_count)::numeric) * 100, 1)
+            ELSE 0 
+          END as overall_download_cvr,
+          CASE 
+            WHEN COALESCE(SUM(unique_visitors_count), 0) > 0 
+            THEN ROUND(((COALESCE(SUM(download_count), 0) + COALESCE(SUM(copy_count), 0))::numeric / SUM(unique_visitors_count)::numeric) * 100, 1)
+            ELSE 0 
+          END as overall_total_cvr
+        FROM cerilas_tools
+      `);
+    }
 
     // Calculate real-time human live visitors (active within last 30 minutes)
     let liveVisitorsCount = 1;
@@ -543,44 +666,46 @@ app.get('/api/tools/stats/overview', async (req, res) => {
       console.warn('Could not query live bots:', e.message);
     }
 
-    // Human events breakdown
+    // Human events breakdown (respects time filter)
     const eventBreakdown = await pool.query(`
       SELECT event_type, COUNT(*)::int as count 
       FROM tool_usage_events 
-      WHERE is_bot = false
+      WHERE is_bot = false ${dateCondition ? `AND ${dateCondition}` : ''}
       GROUP BY event_type 
       ORDER BY count DESC
-    `);
+    `, queryParams);
 
-    // Bot crawler breakdown
+    // Bot crawler breakdown (respects time filter)
     const botBreakdown = await pool.query(`
       SELECT COALESCE(bot_name, 'Generic Crawler') as bot_name, COUNT(*)::int as count 
       FROM tool_usage_events 
-      WHERE is_bot = true
+      WHERE is_bot = true ${dateCondition ? `AND ${dateCondition}` : ''}
       GROUP BY bot_name 
       ORDER BY count DESC
       LIMIT 10
-    `);
+    `, queryParams);
 
-    // Recent human events
+    const eventDateCondition = dateCondition ? dateCondition.replace(/\bcreated_at\b/g, 'e.created_at') : '';
+
+    // Recent human events (respects time filter)
     const recentHumanEvents = await pool.query(`
       SELECT e.id, e.tool_slug, t.title as tool_title, e.event_type, e.visitor_id, e.metadata, e.created_at
       FROM tool_usage_events e
       LEFT JOIN cerilas_tools t ON t.slug = e.tool_slug
-      WHERE e.is_bot = false
+      WHERE e.is_bot = false ${eventDateCondition ? `AND ${eventDateCondition}` : ''}
       ORDER BY e.created_at DESC
       LIMIT 15
-    `);
+    `, queryParams);
 
-    // Recent bot crawler events
+    // Recent bot crawler events (respects time filter)
     const recentBotEvents = await pool.query(`
       SELECT e.id, e.tool_slug, t.title as tool_title, e.bot_name, e.client_type, e.metadata, e.created_at
       FROM tool_usage_events e
       LEFT JOIN cerilas_tools t ON t.slug = e.tool_slug
-      WHERE e.is_bot = true
+      WHERE e.is_bot = true ${eventDateCondition ? `AND ${eventDateCondition}` : ''}
       ORDER BY e.created_at DESC
       LIMIT 15
-    `);
+    `, queryParams);
 
     const summaryData = totalsResult.rows[0] || { 
       total_tools: 0, 
@@ -607,6 +732,12 @@ app.get('/api/tools/stats/overview', async (req, res) => {
     res.json({
       status: 'success',
       data: {
+        timeFilter: {
+          range,
+          label: timeFilterLabel,
+          startDate: startDate || null,
+          endDate: endDate || null
+        },
         summary: summaryData,
         tools: toolsResult.rows,
         eventTypes: eventBreakdown.rows,

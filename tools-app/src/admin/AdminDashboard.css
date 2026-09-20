@@ -1826,6 +1826,347 @@ html.dark .admin-page-size-select {
   color: #f4f4f5;
 }
 
+/* ==========================================================================
+   Admin Time Filter Bar (Historical & Real-Time Analytics Range)
+   ========================================================================== */
+
+.admin-time-filter-bar {
+  background: var(--card-bg, #ffffff);
+  border-bottom: 1px solid var(--card-border, rgba(0, 0, 0, 0.08));
+  padding: 0.65rem 1.5rem;
+  position: sticky;
+  top: 64px;
+  z-index: 40;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  transition: all 0.2s ease;
+}
+
+[data-theme="dark"] .admin-time-filter-bar,
+html.dark .admin-time-filter-bar {
+  background: rgba(17, 17, 19, 0.95);
+  border-bottom-color: rgba(255, 255, 255, 0.07);
+}
+
+.admin-time-filter-container {
+  max-width: 1600px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.admin-time-filter-left {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  position: relative;
+}
+
+.admin-time-filter-badge-wrap {
+  display: flex;
+  align-items: center;
+}
+
+.admin-time-filter-caption {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-muted, #64748b);
+  letter-spacing: -0.01em;
+}
+
+.admin-time-icon {
+  color: var(--text-muted, #64748b);
+}
+
+.admin-time-dropdown-wrap {
+  position: relative;
+}
+
+.admin-time-dropdown-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.4rem 0.75rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  background: var(--bg-color, #f8fafc);
+  border: 1px solid var(--card-border, rgba(0, 0, 0, 0.1));
+  border-radius: 8px;
+  color: var(--text-main, #0f172a);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+[data-theme="dark"] .admin-time-dropdown-btn,
+html.dark .admin-time-dropdown-btn {
+  background: #18181b;
+  border-color: rgba(255, 255, 255, 0.1);
+  color: #f4f4f5;
+}
+
+.admin-time-dropdown-btn:hover {
+  border-color: rgba(59, 130, 246, 0.4);
+  background: rgba(59, 130, 246, 0.05);
+}
+
+.admin-time-dropdown-btn.is-active {
+  border-color: rgba(59, 130, 246, 0.5);
+  background: rgba(59, 130, 246, 0.08);
+  color: #3b82f6;
+}
+
+.admin-time-chevron {
+  transition: transform 0.2s ease;
+  color: var(--text-muted, #64748b);
+}
+
+.admin-time-chevron.is-open {
+  transform: rotate(180deg);
+}
+
+.admin-time-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  min-width: 200px;
+  background: var(--card-bg, #ffffff);
+  border: 1px solid var(--card-border, rgba(0, 0, 0, 0.1));
+  border-radius: 10px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  padding: 0.35rem;
+  z-index: 100;
+  animation: adminFadeIn 0.15s ease-out;
+}
+
+[data-theme="dark"] .admin-time-dropdown-menu,
+html.dark .admin-time-dropdown-menu {
+  background: #18181b;
+  border-color: rgba(255, 255, 255, 0.12);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+.admin-time-dropdown-header {
+  padding: 0.35rem 0.6rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted, #64748b);
+  border-bottom: 1px solid var(--card-border, rgba(0, 0, 0, 0.06));
+  margin-bottom: 0.25rem;
+}
+
+[data-theme="dark"] .admin-time-dropdown-header,
+html.dark .admin-time-dropdown-header {
+  border-bottom-color: rgba(255, 255, 255, 0.06);
+}
+
+.admin-time-dropdown-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.45rem 0.65rem;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--text-main, #0f172a);
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.12s ease;
+}
+
+[data-theme="dark"] .admin-time-dropdown-item,
+html.dark .admin-time-dropdown-item {
+  color: #e4e4e7;
+}
+
+.admin-time-dropdown-item:hover {
+  background: rgba(59, 130, 246, 0.08);
+  color: #3b82f6;
+}
+
+.admin-time-dropdown-item.is-selected {
+  background: rgba(59, 130, 246, 0.12);
+  color: #3b82f6;
+  font-weight: 600;
+}
+
+.admin-time-check-icon {
+  color: #3b82f6;
+}
+
+.admin-time-quick-pills {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+@media (max-width: 900px) {
+  .admin-time-quick-pills {
+    display: none;
+  }
+}
+
+.admin-time-pill {
+  padding: 0.3rem 0.6rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text-muted, #64748b);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.admin-time-pill:hover {
+  background: rgba(0, 0, 0, 0.04);
+  color: var(--text-main, #0f172a);
+}
+
+[data-theme="dark"] .admin-time-pill:hover,
+html.dark .admin-time-pill:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: #f4f4f5;
+}
+
+.admin-time-pill.is-active {
+  background: rgba(59, 130, 246, 0.1);
+  color: #3b82f6;
+  font-weight: 600;
+  border-color: rgba(59, 130, 246, 0.25);
+}
+
+.admin-time-filter-right {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.admin-time-custom-form {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.admin-time-date-inputs {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.admin-time-date-field {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.admin-time-field-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--text-muted, #64748b);
+}
+
+.admin-time-input {
+  padding: 0.3rem 0.5rem;
+  font-size: 0.78rem;
+  border-radius: 6px;
+  border: 1px solid var(--card-border, rgba(0, 0, 0, 0.12));
+  background: var(--bg-color, #ffffff);
+  color: var(--text-main, #0f172a);
+  outline: none;
+  font-family: inherit;
+  transition: border-color 0.15s ease;
+}
+
+[data-theme="dark"] .admin-time-input,
+html.dark .admin-time-input {
+  background: #18181b;
+  border-color: rgba(255, 255, 255, 0.12);
+  color: #f4f4f5;
+}
+
+.admin-time-input:focus {
+  border-color: #3b82f6;
+}
+
+.admin-time-date-sep {
+  color: var(--text-muted, #64748b);
+  display: flex;
+  align-items: center;
+}
+
+.admin-time-apply-btn {
+  padding: 0.35rem 0.75rem !important;
+  font-size: 0.78rem !important;
+}
+
+.admin-time-status-info {
+  display: flex;
+  align-items: center;
+}
+
+.admin-time-active-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.6rem;
+  background: rgba(59, 130, 246, 0.08);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #3b82f6;
+}
+
+.admin-time-reset-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.32rem 0.55rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  background: transparent;
+  border: 1px solid var(--card-border, rgba(0, 0, 0, 0.1));
+  border-radius: 6px;
+  color: var(--text-muted, #64748b);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+[data-theme="dark"] .admin-time-reset-btn,
+html.dark .admin-time-reset-btn {
+  border-color: rgba(255, 255, 255, 0.1);
+  color: #a1a1aa;
+}
+
+.admin-time-reset-btn:hover {
+  background: rgba(239, 68, 68, 0.08);
+  border-color: rgba(239, 68, 68, 0.3);
+  color: #ef4444;
+}
+
+.admin-time-spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(59, 130, 246, 0.2);
+  border-top-color: #3b82f6;
+  border-radius: 50%;
+  animation: adminSpin 0.7s linear infinite;
+}
+
+
 
 
 
