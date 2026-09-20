@@ -279,6 +279,19 @@ export default function EuFundingOpportunities({ onBack, toolMeta }) {
     return <span className="eu-meta-chip deadline-normal">{diffDays} days left</span>;
   };
 
+  const formatTotalGrants = (amount) => {
+    const num = Number(amount);
+    if (!num || isNaN(num) || num <= 0) return '€1.2B+';
+    if (num >= 1e9) {
+      const b = num / 1e9;
+      return `€${b.toFixed(1).replace(/\.0$/, '')}B+`;
+    }
+    if (num >= 1e6) {
+      return `€${(num / 1e6).toFixed(0)}M+`;
+    }
+    return `€${num.toLocaleString()}`;
+  };
+
   return (
     <div className="c-tool-page-container eu-funding-root">
       {/* 1. Header */}
@@ -324,9 +337,7 @@ export default function EuFundingOpportunities({ onBack, toolMeta }) {
           <div className="eu-kpi-info">
             <span className="eu-kpi-label">Total Allocated Grants</span>
             <span className="eu-kpi-value">
-              {stats?.total_funding_amount && Number(stats.total_funding_amount) > 0
-                ? `€${(Number(stats.total_funding_amount) / 1000000).toFixed(0)}M+`
-                : '€1.2B+'}
+              {formatTotalGrants(stats?.total_funding_amount)}
             </span>
             <span className="eu-kpi-sub">Direct & sub-grant funding</span>
           </div>
