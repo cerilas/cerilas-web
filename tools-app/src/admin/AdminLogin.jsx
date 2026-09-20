@@ -15,7 +15,7 @@ export default function AdminLogin({ onLoginSuccess }) {
     setError('');
 
     if (!email.trim() || !password.trim()) {
-      setError('Lütfen e-posta ve şifrenizi girin.');
+      setError('Please enter both email and password.');
       return;
     }
 
@@ -35,7 +35,7 @@ export default function AdminLogin({ onLoginSuccess }) {
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data.error || 'Giriş yapılamadı. Bilgilerinizi kontrol edin.');
+        throw new Error(data.error || 'Invalid email or password.');
       }
 
       if (data.token) {
@@ -44,10 +44,10 @@ export default function AdminLogin({ onLoginSuccess }) {
           onLoginSuccess(data.user);
         }
       } else {
-        throw new Error('Geçersiz sunucu yanıtı.');
+        throw new Error('Invalid authentication response from server.');
       }
     } catch (err) {
-      setError(err.message || 'Giriş sırasında bir hata oluştu.');
+      setError(err.message || 'An error occurred during authentication.');
     } finally {
       setLoading(false);
     }
@@ -70,7 +70,7 @@ export default function AdminLogin({ onLoginSuccess }) {
           onClick={toggleTheme}
           className="admin-login-theme-btn"
           aria-label="Toggle Theme"
-          title={isDark ? 'Açık Moda Geç' : 'Koyu Moda Geç'}
+          title={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
         >
           {isDark ? <Sun size={17} /> : <Moon size={17} />}
         </button>
@@ -91,9 +91,9 @@ export default function AdminLogin({ onLoginSuccess }) {
                 }}
               />
             </div>
-            <h1 className="admin-login-title">Tools Yönetim Paneli</h1>
+            <h1 className="admin-login-title">Tools Management Suite</h1>
             <p className="admin-login-subtitle">
-              cerilas.com/admin yetkili hesap bilgilerinizle oturum açın
+              Sign in with your Cerilas Admin credentials
             </p>
           </div>
 
@@ -109,7 +109,7 @@ export default function AdminLogin({ onLoginSuccess }) {
           <form onSubmit={handleSubmit} className="admin-login-form">
             <div className="admin-login-field">
               <label htmlFor="admin-email" className="admin-login-label">
-                Yönetici E-posta
+                Administrator Email
               </label>
               <div className="admin-login-input-wrap">
                 <Mail size={18} className="admin-login-field-icon" />
@@ -129,7 +129,7 @@ export default function AdminLogin({ onLoginSuccess }) {
 
             <div className="admin-login-field">
               <label htmlFor="admin-password" className="admin-login-label">
-                Şifre
+                Password
               </label>
               <div className="admin-login-input-wrap">
                 <Lock size={18} className="admin-login-field-icon" />
@@ -155,11 +155,11 @@ export default function AdminLogin({ onLoginSuccess }) {
               {loading ? (
                 <>
                   <Loader2 size={18} className="admin-login-spinner" />
-                  <span>Doğrulanıyor...</span>
+                  <span>Verifying...</span>
                 </>
               ) : (
                 <>
-                  <span>Giriş Yap</span>
+                  <span>Sign In</span>
                   <ArrowRight size={18} />
                 </>
               )}
@@ -170,10 +170,10 @@ export default function AdminLogin({ onLoginSuccess }) {
           <div className="admin-login-footer">
             <span className="admin-login-footer-badge">
               <span className="admin-login-footer-dot" />
-              Merkezi Kimlik Doğrulama
+              Unified Enterprise Auth
             </span>
             <p className="admin-login-footer-text">
-              Ana panelden (cerilas.com/admin) oluşturulan tüm hesaplar doğrudan yetkilendirilmiştir.
+              All administrators provisioned in cerilas.com/admin have direct access.
             </p>
           </div>
         </div>

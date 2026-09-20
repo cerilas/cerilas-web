@@ -280,7 +280,7 @@ export default function AdminDashboard() {
           animation: 'adminSpin 0.8s linear infinite'
         }} />
         <span style={{ fontSize: '0.875rem', color: 'var(--text-muted, #94a3b8)' }}>
-          Yönetici yetkisi kontrol ediliyor...
+          Verifying administrator credentials...
         </span>
       </div>
     );

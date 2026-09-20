@@ -111,7 +111,7 @@ export default function AdminHeader({
 
         {/* Authenticated Admin Profile & Logout */}
         {authUser && (
-          <div className="admin-user-profile-badge" title={`Oturum: ${authUser.email}`}>
+          <div className="admin-user-profile-badge" title={`Signed in as: ${authUser.email}`}>
             <div className="admin-user-avatar">
               <User size={13} />
             </div>
@@ -121,11 +121,11 @@ export default function AdminHeader({
                 type="button"
                 className="admin-user-logout-btn"
                 onClick={onLogout}
-                title="Güvenli Çıkış Yap"
-                aria-label="Çıkış Yap"
+                title="Sign Out"
+                aria-label="Sign Out"
               >
                 <LogOut size={13} />
-                <span className="admin-logout-text">Çıkış</span>
+                <span className="admin-logout-text">Sign Out</span>
               </button>
             )}
           </div>
