@@ -239,7 +239,7 @@ const SkeletonCard = () => (
 );
 
 export default function App() {
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
   const [tools, setTools] = useState(() => getAllRegisteredTools());
   const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
