@@ -35,23 +35,58 @@ function extractBudget(m, isCompetitiveCall) {
     }
   }
 
+  const topicId = m.identifier?.[0] || '';
+
   // 2. Check serialized budgetOverview JSON
   const budgetOverviewStr = m.budgetOverview?.[0];
   if (budgetOverviewStr) {
     try {
       const bObj = typeof budgetOverviewStr === 'string' ? JSON.parse(budgetOverviewStr) : budgetOverviewStr;
       if (bObj?.budgetTopicActionMap) {
+        let matchingAction = null;
+        let anyTopicAction = null;
+
+        // Search through all action groups for the specific topic identifier
         for (const actionKey in bObj.budgetTopicActionMap) {
           const actionArr = bObj.budgetTopicActionMap[actionKey];
-          if (Array.isArray(actionArr) && actionArr[0]?.budgetYearMap) {
-            const amounts = Object.values(actionArr[0].budgetYearMap).map(Number).filter(n => !isNaN(n) && n > 0);
-            if (amounts.length > 0) {
-              const sum = amounts.reduce((a, b) => a + b, 0);
-              return {
-                formatted: '€' + sum.toLocaleString('de-DE'),
-                raw: sum.toFixed(2)
-              };
+          if (Array.isArray(actionArr)) {
+            const found = actionArr.find(a => topicId && a.action && a.action.includes(topicId));
+            if (found) {
+              matchingAction = found;
+              break;
             }
+            if (!anyTopicAction && actionArr.length > 0) {
+              anyTopicAction = actionArr[0];
+            }
+          }
+        }
+
+        const target = matchingAction || anyTopicAction;
+        if (target) {
+          const maxCont = Number(target.maxContribution) || 0;
+          const minCont = Number(target.minContribution) || 0;
+          const projectContribution = maxCont > 0 ? maxCont : (minCont > 0 ? minCont : 0);
+
+          let yearMapTotal = 0;
+          if (target.budgetYearMap && typeof target.budgetYearMap === 'object') {
+            const amounts = Object.values(target.budgetYearMap).map(Number).filter(n => !isNaN(n) && n > 0);
+            if (amounts.length > 0) {
+              yearMapTotal = amounts.reduce((a, b) => a + b, 0);
+            }
+          }
+
+          if (projectContribution > 0) {
+            return {
+              formatted: '€' + projectContribution.toLocaleString('de-DE'),
+              raw: projectContribution.toFixed(2)
+            };
+          }
+
+          if (yearMapTotal > 0) {
+            return {
+              formatted: '€' + yearMapTotal.toLocaleString('de-DE'),
+              raw: yearMapTotal.toFixed(2)
+            };
           }
         }
       }
