@@ -110,6 +110,7 @@ router.get('/sources', async (req, res) => {
     const sources = [
       {
         key: 'cascadefunding',
+        source_key: 'cascadefunding',
         name: 'Cascade Funding Hub',
         url: 'https://cascadefunding.eu/open-calls/',
         description: 'Official European Commission Cascade Funding & Financial Support to Third Parties (FSTP) directory.',
@@ -125,6 +126,7 @@ router.get('/sources', async (req, res) => {
       },
       {
         key: 'ec_funding',
+        source_key: 'ec_funding',
         name: 'EU Funding & Tenders Portal (SEDIA)',
         url: 'https://ec.europa.eu/info/funding-tenders/opportunities/portal/screen/opportunities/calls-for-proposals?isExactMatch=true&status=31094501,31094502&order=DESC&pageNumber=1&pageSize=50&sortBy=startDate',
         description: 'Official European Commission SEDIA Portal Calls for Proposals & Horizon Europe Grants directory.',
