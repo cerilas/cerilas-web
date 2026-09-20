@@ -36,6 +36,8 @@ import StatsModal from './components/StatsModal';
 import AdSlot from './components/ui/AdSlot';
 import ErrorBoundary from './components/ErrorBoundary';
 import AdminDashboard from './admin/AdminDashboard';
+import LegalView from './legal/LegalView';
+import { LEGAL_DOCS } from './legal/legalContent';
 import { toolsRegistry, getAllRegisteredTools, getRegisteredTool } from './tools/registry';
 import { useTranslation } from './i18n';
 import { getConversionCount, getConversionLabel, getShortConversionLabel } from './utils/toolMetrics';
@@ -242,6 +244,7 @@ export default function App() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [currentSlug, setCurrentSlug] = useState(null);
+  const [currentLegalSlug, setCurrentLegalSlug] = useState(null);
   const [isAdmin, setIsAdmin] = useState(() => {
     if (typeof window === 'undefined') return false;
     const p = window.location.pathname;
@@ -305,11 +308,60 @@ export default function App() {
       if (pathname === '/admin' || pathname.startsWith('/admin/') || hash === '#/admin' || hash.startsWith('#/admin/')) {
         setIsAdmin(true);
         setCurrentSlug(null);
+        setCurrentLegalSlug(null);
         forceScrollToTop();
         return;
       }
       setIsAdmin(false);
 
+      // 1. Legal compliance routes matching (/terms, /privacy, /refund, /cookies, /legal/:slug, #/legal/:slug)
+      const legalAliasMap = {
+        'terms': 'terms',
+        'terms-of-service': 'terms',
+        'privacy': 'privacy',
+        'privacy-policy': 'privacy',
+        'refund': 'refund',
+        'refund-policy': 'refund',
+        'cancellation-refund': 'refund',
+        'cookies': 'cookies',
+        'cookie-policy': 'cookies'
+      };
+
+      const legalHashMatch = hash.match(/^#\/legal\/([a-zA-Z0-9_-]+)\/?/);
+      if (legalHashMatch && legalAliasMap[legalHashMatch[1].toLowerCase()]) {
+        setCurrentLegalSlug(legalAliasMap[legalHashMatch[1].toLowerCase()]);
+        setCurrentSlug(null);
+        forceScrollToTop();
+        return;
+      }
+
+      const directHashLegalMatch = hash.match(/^#\/(terms(?:-of-service)?|privacy(?:-policy)?|refund(?:-policy)?|cancellation-refund|cookies(?:-policy)?)\/?$/i);
+      if (directHashLegalMatch && legalAliasMap[directHashLegalMatch[1].toLowerCase()]) {
+        setCurrentLegalSlug(legalAliasMap[directHashLegalMatch[1].toLowerCase()]);
+        setCurrentSlug(null);
+        forceScrollToTop();
+        return;
+      }
+
+      const legalPathMatch = pathname.match(/^\/legal\/([a-zA-Z0-9_-]+)\/?/);
+      if (legalPathMatch && legalAliasMap[legalPathMatch[1].toLowerCase()]) {
+        setCurrentLegalSlug(legalAliasMap[legalPathMatch[1].toLowerCase()]);
+        setCurrentSlug(null);
+        forceScrollToTop();
+        return;
+      }
+
+      const directPathLegalMatch = pathname.match(/^\/(terms(?:-of-service)?|privacy(?:-policy)?|refund(?:-policy)?|cancellation-refund|cookies(?:-policy)?)\/?$/i);
+      if (directPathLegalMatch && legalAliasMap[directPathLegalMatch[1].toLowerCase()]) {
+        setCurrentLegalSlug(legalAliasMap[directPathLegalMatch[1].toLowerCase()]);
+        setCurrentSlug(null);
+        forceScrollToTop();
+        return;
+      }
+
+      setCurrentLegalSlug(null);
+
+      // 2. Tool routes matching
       const hashMatch = hash.match(/^#\/tools?\/([a-zA-Z0-9_-]+)\/?/);
       if (hashMatch) {
         setCurrentSlug(hashMatch[1]);
@@ -382,10 +434,39 @@ export default function App() {
       el.setAttribute('href', href);
     };
 
-    const activeRegistered = currentSlug ? getRegisteredTool(currentSlug) : null;
-    const manifest = activeRegistered?.manifest;
+    if (currentLegalSlug && LEGAL_DOCS[currentLegalSlug]) {
+      const doc = LEGAL_DOCS[currentLegalSlug];
+      const pageTitle = doc.seoTitle;
+      const pageDesc = doc.seoDescription;
+      const pageUrl = window.location.pathname.startsWith('/legal/') || window.location.pathname.startsWith('/terms') || window.location.pathname.startsWith('/privacy') || window.location.pathname.startsWith('/refund') || window.location.pathname.startsWith('/cookies')
+        ? `https://tools.cerilas.com${window.location.pathname}`
+        : `https://tools.cerilas.com/#/legal/${currentLegalSlug}`;
+      const ogImgUrl = 'https://tools.cerilas.com/og-image.svg';
 
-    if (manifest && manifest.seo) {
+      document.title = pageTitle;
+      setMeta('description', 'name', pageDesc);
+      setCanonical(pageUrl);
+
+      // Open Graph
+      setMeta('og:title', 'property', pageTitle);
+      setMeta('og:description', 'property', pageDesc);
+      setMeta('og:url', 'property', pageUrl);
+      setMeta('og:image', 'property', ogImgUrl);
+      setMeta('og:image:width', 'property', '1200');
+      setMeta('og:image:height', 'property', '630');
+      setMeta('og:image:type', 'property', 'image/svg+xml');
+
+      // Twitter Card
+      setMeta('twitter:title', 'name', pageTitle);
+      setMeta('twitter:description', 'name', pageDesc);
+      setMeta('twitter:url', 'name', pageUrl);
+      setMeta('twitter:image', 'name', ogImgUrl);
+
+      const bcScript = document.getElementById('tool-breadcrumbs-jsonld');
+      if (bcScript) bcScript.remove();
+      const oldBc = document.getElementById('qr-breadcrumbs-jsonld');
+      if (oldBc) oldBc.remove();
+    } else if (manifest && manifest.seo) {
       const seo = manifest.seo;
       const pageTitle = seo.title || `${manifest.title} | Cerilas Tools`;
       const pageDesc = seo.description || manifest.shortDescription;
@@ -485,7 +566,7 @@ export default function App() {
         page_path: window.location.pathname + window.location.hash
       });
     }
-  }, [currentSlug]);
+  }, [currentSlug, currentLegalSlug]);
 
   // Fetch active tools from database
   useEffect(() => {
@@ -551,12 +632,15 @@ export default function App() {
 
   const navigateToTool = (slug) => {
     forceScrollToTop();
+    setCurrentLegalSlug(null);
     window.location.hash = `#/tool/${slug}`;
     forceScrollToTop();
   };
 
   const navigateToHome = () => {
     forceScrollToTop();
+    setCurrentLegalSlug(null);
+    setCurrentSlug(null);
     window.location.hash = '#/';
     forceScrollToTop();
   };
@@ -605,7 +689,11 @@ export default function App() {
       />
 
       <div className="main-content">
-        {ActiveToolComponent ? (
+        {currentLegalSlug ? (
+          <ErrorBoundary>
+            <LegalView initialSlug={currentLegalSlug} onBack={navigateToHome} />
+          </ErrorBoundary>
+        ) : ActiveToolComponent ? (
           <ErrorBoundary>
             <Suspense fallback={
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '60vh', gap: '1.25rem', color: 'var(--text-muted)' }}>

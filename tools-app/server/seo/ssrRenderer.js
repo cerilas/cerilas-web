@@ -1,4 +1,5 @@
 import { getToolSeo, CATEGORIES, TOOLS_SEO_REGISTRY } from './toolsSeoRegistry.js';
+import { COMPANY_INFO, LEGAL_DOCS } from '../../src/legal/legalContent.js';
 
 function escapeHtml(str) {
   if (!str) return '';
@@ -427,3 +428,86 @@ export function renderHomePageHtml(templateHtml) {
 
   return html;
 }
+
+/**
+ * Pre-renders semantic HTML and dynamic SEO metadata for official Legal compliance pages.
+ */
+export function renderLegalPageHtml(templateHtml, slug) {
+  const cleanSlug = slug ? slug.toLowerCase().replace(/^(legal\/|legal-)/, '') : 'terms';
+  const doc = LEGAL_DOCS[cleanSlug] || LEGAL_DOCS.terms;
+  const canonicalUrl = `https://tools.cerilas.com/${doc.slug}`;
+  const ogImg = 'https://tools.cerilas.com/og-image.svg';
+
+  const sectionsHtml = doc.sections.map(sec => `
+    <article style="margin-bottom: 2.25rem; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 1.75rem;">
+      <h2 style="font-size: 1.3rem; font-weight: 600; color: #f8fafc; margin: 0 0 0.85rem 0;">${escapeHtml(sec.heading)}</h2>
+      <div style="font-size: 0.95rem; color: #cbd5e1; line-height: 1.8; white-space: pre-line;">
+        ${escapeHtml(sec.body)}
+      </div>
+    </article>
+  `).join('');
+
+  const ssrBodyHtml = `
+    <div id="ssr-legal-content" class="ssr-legal-wrapper" style="max-width: 900px; margin: 0 auto; padding: 3rem 1.5rem; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #f1f5f9; line-height: 1.7;">
+      <nav style="margin-bottom: 2rem; font-size: 0.85rem; color: #94a3b8; display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: center;">
+        <a href="/" style="color: #38bdf8; text-decoration: none; font-weight: 500;">&larr; Back to Tools</a>
+        <span>&bull;</span>
+        <a href="/terms" style="color: ${doc.slug === 'terms' ? '#38bdf8' : '#94a3b8'}; text-decoration: none; font-weight: ${doc.slug === 'terms' ? 600 : 400};">Terms of Service</a>
+        <span>&bull;</span>
+        <a href="/privacy" style="color: ${doc.slug === 'privacy' ? '#38bdf8' : '#94a3b8'}; text-decoration: none; font-weight: ${doc.slug === 'privacy' ? 600 : 400};">Privacy Policy</a>
+        <span>&bull;</span>
+        <a href="/refund" style="color: ${doc.slug === 'refund' ? '#38bdf8' : '#94a3b8'}; text-decoration: none; font-weight: ${doc.slug === 'refund' ? 600 : 400};">Refund &amp; Cancellation</a>
+        <span>&bull;</span>
+        <a href="/cookies" style="color: ${doc.slug === 'cookies' ? '#38bdf8' : '#94a3b8'}; text-decoration: none; font-weight: ${doc.slug === 'cookies' ? 600 : 400};">Cookie Policy</a>
+      </nav>
+
+      <header style="margin-bottom: 2.5rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 1.5rem;">
+        <div style="display: inline-block; padding: 0.3rem 0.8rem; background: rgba(56, 189, 248, 0.1); border: 1px solid rgba(56, 189, 248, 0.25); border-radius: 999px; font-size: 0.78rem; font-weight: 600; color: #38bdf8; margin-bottom: 1rem;">
+          OFFICIAL LEGAL NOTICE &bull; VKN: ${escapeHtml(COMPANY_INFO.vkn)}
+        </div>
+        <h1 style="font-size: 2.3rem; font-weight: 700; margin: 0 0 0.75rem 0; letter-spacing: -0.02em; color: #ffffff;">
+          ${escapeHtml(doc.title)}
+        </h1>
+        <p style="font-size: 1.05rem; color: #94a3b8; margin: 0 0 1rem 0;">
+          ${escapeHtml(doc.subtitle)}
+        </p>
+        <p style="font-size: 0.85rem; color: #64748b; margin: 0;">
+          Legal Entity: <strong>${escapeHtml(COMPANY_INFO.legalName)}</strong> &bull; Contact: <strong>${escapeHtml(COMPANY_INFO.legalEmail)}</strong> &bull; Effective: ${escapeHtml(COMPANY_INFO.lastUpdated)}
+        </p>
+      </header>
+
+      <main>
+        ${sectionsHtml}
+      </main>
+
+      <footer style="margin-top: 3rem; padding-top: 2rem; border-top: 1px solid rgba(255,255,255,0.1); font-size: 0.85rem; color: #94a3b8; text-align: center;">
+        <p>&copy; ${new Date().getFullYear()} ${escapeHtml(COMPANY_INFO.legalName)} (VKN: ${escapeHtml(COMPANY_INFO.vkn)}). All rights reserved.</p>
+        <p>Official Legal Correspondence: <a href="mailto:${escapeHtml(COMPANY_INFO.legalEmail)}" style="color: #38bdf8;">${escapeHtml(COMPANY_INFO.legalEmail)}</a></p>
+      </footer>
+    </div>
+  `;
+
+  let html = stripOldMetaTags(templateHtml);
+
+  const metaTags = [
+    `<title>${escapeHtml(doc.seoTitle)}</title>`,
+    `<meta name="description" content="${escapeHtml(doc.seoDescription)}" />`,
+    `<meta name="robots" content="index, follow" />`,
+    `<link rel="canonical" href="${canonicalUrl}" />`,
+    `<meta property="og:type" content="article" />`,
+    `<meta property="og:title" content="${escapeHtml(doc.seoTitle)}" />`,
+    `<meta property="og:description" content="${escapeHtml(doc.seoDescription)}" />`,
+    `<meta property="og:url" content="${canonicalUrl}" />`,
+    `<meta property="og:image" content="${ogImg}" />`,
+    `<meta name="twitter:card" content="summary_large_image" />`,
+    `<meta name="twitter:title" content="${escapeHtml(doc.seoTitle)}" />`,
+    `<meta name="twitter:description" content="${escapeHtml(doc.seoDescription)}" />`,
+    `<meta name="twitter:image" content="${ogImg}" />`
+  ].join('\n    ');
+
+  html = html.replace('</head>', `    ${metaTags}\n  </head>`);
+  html = html.replace('<div id="root"></div>', `<div id="root">${ssrBodyHtml}</div>`);
+
+  return html;
+}
+

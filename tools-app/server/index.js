@@ -21,7 +21,7 @@ import { detectBot } from './utils/botDetector.js';
 import { initScrapersDb } from './migrations/init-scrapers-db.js';
 import { checkAiRateLimit, getClientIp } from './utils/aiRateLimit.js';
 import { CATEGORIES, TOOLS_SEO_REGISTRY, getAllToolSlugs } from './seo/toolsSeoRegistry.js';
-import { renderToolPageHtml, renderCategoryPageHtml, renderHomePageHtml } from './seo/ssrRenderer.js';
+import { renderToolPageHtml, renderCategoryPageHtml, renderHomePageHtml, renderLegalPageHtml } from './seo/ssrRenderer.js';
 
 dotenv.config();
 
@@ -159,6 +159,17 @@ app.get('/sitemap.xml', (req, res) => {
     xml += `    <lastmod>${today}</lastmod>\n`;
     xml += `    <changefreq>weekly</changefreq>\n`;
     xml += `    <priority>0.9</priority>\n`;
+    xml += `  </url>\n`;
+  }
+
+  // 4. Official Legal & Compliance Pages
+  const legalPages = ['terms', 'privacy', 'refund', 'cookies'];
+  for (const legalSlug of legalPages) {
+    xml += `  <url>\n`;
+    xml += `    <loc>https://tools.cerilas.com/${legalSlug}</loc>\n`;
+    xml += `    <lastmod>${today}</lastmod>\n`;
+    xml += `    <changefreq>monthly</changefreq>\n`;
+    xml += `    <priority>0.7</priority>\n`;
     xml += `  </url>\n`;
   }
 
@@ -809,14 +820,41 @@ app.get('{*path}', async (req, res) => {
       return res.send(html);
     }
 
-    // 4. Category page SSR pre-rendering (e.g. /research-tools, /ai-tools, etc.)
+    // 4. Legal Compliance pages SSR pre-rendering (/terms, /privacy, /refund, /cookies, /legal/:slug)
+    const legalRouteMap = {
+      'terms': 'terms',
+      'terms-of-service': 'terms',
+      'privacy': 'privacy',
+      'privacy-policy': 'privacy',
+      'refund': 'refund',
+      'refund-policy': 'refund',
+      'cancellation-refund': 'refund',
+      'cookies': 'cookies',
+      'cookie-policy': 'cookies'
+    };
+
+    let targetLegalSlug = null;
+    if (req.path.startsWith('/legal/')) {
+      const sub = req.path.replace(/^\/legal\//, '').replace(/\/+$/, '').toLowerCase();
+      if (legalRouteMap[sub]) targetLegalSlug = legalRouteMap[sub];
+    } else {
+      const cleanReq = req.path.replace(/^\/+|\/+$/g, '').toLowerCase();
+      if (legalRouteMap[cleanReq]) targetLegalSlug = legalRouteMap[cleanReq];
+    }
+
+    if (targetLegalSlug) {
+      html = renderLegalPageHtml(html, targetLegalSlug);
+      return res.send(html);
+    }
+
+    // 5. Category page SSR pre-rendering (e.g. /research-tools, /ai-tools, etc.)
     const cleanPath = req.path.replace(/^\/+|\/+$/g, '').toLowerCase();
     if (CATEGORIES[cleanPath]) {
       html = renderCategoryPageHtml(html, cleanPath);
       return res.send(html);
     }
 
-    // 5. Homepage SSR pre-rendering
+    // 6. Homepage SSR pre-rendering
     if (req.path === '/' || req.path === '') {
       html = renderHomePageHtml(html);
       return res.send(html);

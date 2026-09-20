@@ -46,6 +46,19 @@ export default function Footer({ onOpenStats }) {
     if (onOpenStats) onOpenStats();
   };
 
+  const handleLegalClick = (slug) => {
+    try {
+      window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    } catch (e) {
+      window.scrollTo(0, 0);
+    }
+    if (typeof document !== 'undefined') {
+      if (document.documentElement) document.documentElement.scrollTop = 0;
+      if (document.body) document.body.scrollTop = 0;
+    }
+    window.location.hash = `#/legal/${slug}`;
+  };
+
   return (
     <footer className="seo-footer" role="contentinfo">
       <div className="seo-footer-inner">
@@ -396,6 +409,46 @@ export default function Footer({ onOpenStats }) {
             </ul>
           </div>
 
+          {/* Column: Legal & Compliance */}
+          <div className="seo-footer-col">
+            <h3 className="seo-col-title">
+              <ShieldCheck size={15} />
+              <span>Legal &amp; Compliance</span>
+            </h3>
+            <ul className="seo-col-list">
+              <li>
+                <a href="#/legal/terms" onClick={() => handleLegalClick('terms')} title="Terms of Service & Subscription Agreement">
+                  <span className="seo-tool-title">Terms of Service</span>
+                  <span className="seo-link-tag">Pro &amp; Billing</span>
+                </a>
+              </li>
+              <li>
+                <a href="#/legal/privacy" onClick={() => handleLegalClick('privacy')} title="Privacy Policy & KVKK / GDPR Compliance">
+                  <span className="seo-tool-title">Privacy Policy</span>
+                  <span className="seo-link-tag">KVKK &amp; GDPR</span>
+                </a>
+              </li>
+              <li>
+                <a href="#/legal/refund" onClick={() => handleLegalClick('refund')} title="Refund & Cancellation Policy">
+                  <span className="seo-tool-title">Refund &amp; Cancellation</span>
+                  <span className="seo-link-tag">14-Day Right</span>
+                </a>
+              </li>
+              <li>
+                <a href="#/legal/cookies" onClick={() => handleLegalClick('cookies')} title="Cookie Policy & Telemetry Consent">
+                  <span className="seo-tool-title">Cookie Policy</span>
+                  <span className="seo-link-tag">Compliance</span>
+                </a>
+              </li>
+              <li>
+                <a href="mailto:law@cerilas.com" title="Corporate Legal Department Contact">
+                  <span className="seo-tool-title">law@cerilas.com</span>
+                  <span className="seo-link-tag">Contact</span>
+                </a>
+              </li>
+            </ul>
+          </div>
+
           {/* Right Companion: High-Impact SEO Architecture & Keywords Spotlight Card (Spans 2 columns) */}
           <div className="seo-footer-editorial-card">
             <div className="seo-editorial-header">
@@ -479,7 +532,7 @@ export default function Footer({ onOpenStats }) {
           </div>
         </div>
 
-        {/* Bottom Legal, Privacy Guarantee & Copyright Bar */}
+        {/* Bottom Legal, Privacy Guarantee & Corporate Entity Bar */}
         <div className="seo-footer-bottom">
           <div className="seo-footer-bottom-legal">
             <p className="seo-privacy-notice" title="Privacy Assurance: 100% local in-browser processing via WebAssembly & WebGPU. Zero server file uploads.">
@@ -488,16 +541,25 @@ export default function Footer({ onOpenStats }) {
                 <strong>Privacy Assurance:</strong> 100% local in-browser processing via WebAssembly &amp; WebGPU. Zero server file uploads.
               </span>
             </p>
+            <p className="seo-corporate-badge" style={{ fontSize: '0.8rem', color: 'var(--text-muted)', margin: '0.45rem 0 0 0', lineHeight: 1.5 }}>
+              <strong>CERİLAS Yüksek Teknoloji San. ve Tic. AŞ</strong> &bull; VKN: 2061561435 &bull; <a href="mailto:law@cerilas.com" style={{ color: 'var(--text-main)', textDecoration: 'underline' }}>law@cerilas.com</a> &bull; Gaziantep, Türkiye
+            </p>
           </div>
 
           <div className="seo-footer-bottom-meta">
             <p className="seo-copyright">
-              © {currentYear} Cerilas High Tech. All rights reserved. Built for speed &amp; privacy.
+              © {currentYear} CERİLAS Yüksek Teknoloji San. ve Tic. AŞ. All rights reserved.
             </p>
             <div className="seo-footer-bottom-links">
-              <a href="https://cerilas.com" target="_blank" rel="noopener noreferrer">Cerilas.com</a>
+              <a href="#/legal/terms" onClick={() => handleLegalClick('terms')}>Terms</a>
               <span className="dot">•</span>
-              <a href="#/">Cerilas' Tools</a>
+              <a href="#/legal/privacy" onClick={() => handleLegalClick('privacy')}>Privacy</a>
+              <span className="dot">•</span>
+              <a href="#/legal/refund" onClick={() => handleLegalClick('refund')}>Refund</a>
+              <span className="dot">•</span>
+              <a href="#/legal/cookies" onClick={() => handleLegalClick('cookies')}>Cookies</a>
+              <span className="dot">•</span>
+              <a href="https://cerilas.com" target="_blank" rel="noopener noreferrer">Cerilas.com</a>
               <span className="dot">•</span>
               <span className="status-indicator">
                 <span className="status-dot"></span> All Systems Normal
