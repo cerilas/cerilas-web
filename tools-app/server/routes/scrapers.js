@@ -5,6 +5,58 @@ import { scrapeEcFunding } from '../scrapers/ec_funding.js';
 
 const router = express.Router();
 
+const DOMAIN_MAPPING = {
+  'ai & data': [
+    'Digital, Industry & Space',
+    'Information and Communication Technologies (ICT)',
+    'Robotics and Automation'
+  ],
+  'cleantech & energy': [
+    'Climate, Energy & Mobility',
+    'Energy and Environment',
+    'Circular Economy & Green Transition',
+    'Circular Economy and Sustainability'
+  ],
+  'health & biotech': [
+    'Health & Biotech',
+    'Life Sciences and Health'
+  ],
+  'smart mobility': [
+    'Transportation and Mobility',
+    'Climate, Energy & Mobility',
+    'Smart Cities'
+  ],
+  'bioeconomy & agrifood': [
+    'Food, Bioeconomy & Natural Resources',
+    'Agriculture and Food'
+  ],
+  'security & society': [
+    'Security and Defense',
+    'Digital Society and E-Inclusion',
+    'Social Sciences and Humanities',
+    'Public Policy and Governance'
+  ],
+  'digital & space': [
+    'Digital, Industry & Space',
+    'Space and Space Exploration',
+    'Information and Communication Technologies (ICT)'
+  ],
+  'manufacturing & industry': [
+    'Advanced Materials & Manufacturing',
+    'Advanced Manufacturing and Industry',
+    'Nanotechnology and Advanced Materials'
+  ]
+};
+
+const BENEFICIARY_MAPPING = {
+  'sme': ['SME', 'SMEs & Startups', 'sme'],
+  'startups': ['Startups', 'SMEs & Startups', 'startups'],
+  'universities': ['Universities & Academic Institutions', 'university', 'Universities'],
+  'research organizations': ['Research Organizations', 'research organisation', 'research organization'],
+  'individuals': ['Individuals', 'individuals', 'Individual Researchers'],
+  'mid-caps': ['Mid-Caps', 'MidCaps', 'mid-caps', 'midcaps']
+};
+
 /**
  * 1. Get List of Configured Scraper Sources & Their Status
  */
@@ -132,14 +184,32 @@ router.get('/opportunities', async (req, res) => {
 
     // Beneficiary filter (e.g. 'SME', 'startups')
     if (beneficiary && beneficiary !== 'all') {
-      params.push(`%"${beneficiary}"%`);
-      conditions.push(`eligible_applicants::text ILIKE $${params.length}`);
+      const mapped = BENEFICIARY_MAPPING[beneficiary.toLowerCase().trim()];
+      if (mapped && mapped.length > 0) {
+        const benConditions = mapped.map((b) => {
+          params.push(`%"${b}"%`);
+          return `eligible_applicants::text ILIKE $${params.length}`;
+        });
+        conditions.push(`(${benConditions.join(' OR ')})`);
+      } else {
+        params.push(`%${beneficiary}%`);
+        conditions.push(`eligible_applicants::text ILIKE $${params.length}`);
+      }
     }
 
     // Domain filter
     if (domain && domain !== 'all') {
-      params.push(`%"${domain}"%`);
-      conditions.push(`domains::text ILIKE $${params.length}`);
+      const mapped = DOMAIN_MAPPING[domain.toLowerCase().trim()];
+      if (mapped && mapped.length > 0) {
+        const domainConditions = mapped.map((d) => {
+          params.push(`%"${d}"%`);
+          return `domains::text ILIKE $${params.length}`;
+        });
+        conditions.push(`(${domainConditions.join(' OR ')})`);
+      } else {
+        params.push(`%${domain}%`);
+        conditions.push(`domains::text ILIKE $${params.length}`);
+      }
     }
 
     // Call Type filter
