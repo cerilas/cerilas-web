@@ -326,7 +326,7 @@ export default function Footer({ onOpenStats }) {
                   window.location.hash = '#/'; 
                 }} title="All Tools Catalog">
                   <span className="seo-tool-title">All Tools Catalog</span>
-                  <span className="seo-link-tag">30+ Utilities</span>
+                  <span className="seo-link-tag">31 In-Browser Tools</span>
                 </a>
               </li>
               <li>
@@ -338,13 +338,31 @@ export default function Footer({ onOpenStats }) {
             </ul>
           </div>
 
-          {/* Column 6: AI & Research Engineering (Right of Ecosystem) */}
+          {/* Column 6: AI, R&D & Funding Grants */}
           <div className="seo-footer-col">
             <h3 className="seo-col-title">
               <Bot size={15} />
-              <span>AI &amp; Research Engineering</span>
+              <span>AI, R&amp;D &amp; Funding Grants</span>
             </h3>
             <ul className="seo-col-list">
+              <li>
+                <a href="#/tool/eu-funding-opportunities" onClick={() => handleToolClick('eu-funding-opportunities')} title="EU & Cascade Funding Opportunities Directory">
+                  <span className="seo-tool-title">EU &amp; Cascade Funding</span>
+                  <span className="seo-link-tag">600+ Grants</span>
+                </a>
+              </li>
+              <li>
+                <a href="#/tool/trl-calculator" onClick={() => handleToolClick('trl-calculator')} title="Technology Readiness Level (TRL) Calculator">
+                  <span className="seo-tool-title">TRL Assessment (1-9)</span>
+                  <span className="seo-link-tag">NASA &amp; Horizon</span>
+                </a>
+              </li>
+              <li>
+                <a href="#/tool/sample-size-calculator" onClick={() => handleToolClick('sample-size-calculator')} title="A/B Test Statistical Sample Size Calculator">
+                  <span className="seo-tool-title">Sample Size Calculator</span>
+                  <span className="seo-link-tag">A/B Testing</span>
+                </a>
+              </li>
               <li>
                 <a href="#/tool/token-counter-universal" onClick={() => handleToolClick('token-counter-universal')} title="Universal Token Counter for LLMs">
                   <span className="seo-tool-title">LLM Token Counter</span>
@@ -370,18 +388,6 @@ export default function Footer({ onOpenStats }) {
                 </a>
               </li>
               <li>
-                <a href="#/tool/trl-calculator" onClick={() => handleToolClick('trl-calculator')} title="Technology Readiness Level (TRL) Calculator">
-                  <span className="seo-tool-title">TRL Assessment (1-9)</span>
-                  <span className="seo-link-tag">NASA Scale</span>
-                </a>
-              </li>
-              <li>
-                <a href="#/tool/sample-size-calculator" onClick={() => handleToolClick('sample-size-calculator')} title="A/B Test Statistical Sample Size Calculator">
-                  <span className="seo-tool-title">Sample Size Calculator</span>
-                  <span className="seo-link-tag">A/B Testing</span>
-                </a>
-              </li>
-              <li>
                 <a href="#/tool/html-to-llm-markdown" onClick={() => handleToolClick('html-to-llm-markdown')} title="HTML to Clean LLM Markdown">
                   <span className="seo-tool-title">HTML to LLM Markdown</span>
                   <span className="seo-link-tag">RAG Prep</span>
@@ -398,7 +404,7 @@ export default function Footer({ onOpenStats }) {
             </div>
             
             <p className="seo-editorial-lead">
-              Cerilas Tools delivers a zero-server, privacy-first utility platform engineered for <strong>entrepreneurs, researchers, white-collar professionals, freelancers, and students</strong>. Powered by <strong>WebAssembly (WASM)</strong> and <strong>WebGPU</strong>, all calculations, document modifications, and AI vision tasks run 100% locally in your browser memory.
+              Cerilas Tools delivers a zero-server, privacy-first utility platform engineered for <strong>entrepreneurs, researchers, startups, white-collar professionals, and developers</strong>. Powered by <strong>WebAssembly (WASM)</strong>, <strong>WebGPU</strong>, and synchronized live grant crawlers, all calculations, document modifications, AI vision tasks, and Horizon Europe grant discoveries run seamlessly.
             </p>
 
             <div className="seo-editorial-features">
@@ -412,7 +418,11 @@ export default function Footer({ onOpenStats }) {
               </div>
               <div className="seo-editorial-feature-item">
                 <TrendingUp size={13} className="feature-item-icon" />
-                <span><strong>Audited SaaS &amp; Research Benchmarks:</strong> Standardized unit economics (MRR, ARR, LTV:CAC), TRL readiness, and A/B test sample sizing.</span>
+                <span><strong>Audited SaaS &amp; Research Benchmarks:</strong> Standardized unit economics (MRR, ARR, LTV:CAC), TRL readiness (1-9), and A/B test sample sizing.</span>
+              </div>
+              <div className="seo-editorial-feature-item">
+                <Sparkles size={13} className="feature-item-icon" />
+                <span><strong>Live EU &amp; Cascade Grants:</strong> Real-time discovery of 600+ European Commission Horizon Europe calls and FSTP sub-grants with deadline trackers.</span>
               </div>
             </div>
 
@@ -420,8 +430,9 @@ export default function Footer({ onOpenStats }) {
               <span className="seo-editorial-tag">Client-Side WASM</span>
               <span className="seo-editorial-tag">Zero Server Logging</span>
               <span className="seo-editorial-tag">Free PDF Editor &amp; Merger</span>
+              <span className="seo-editorial-tag">EU Funding &amp; Cascade Grants</span>
               <span className="seo-editorial-tag">SaaS Financial Models</span>
-              <span className="seo-editorial-tag">Vector DB RAG Chunking</span>
+              <span className="seo-editorial-tag">TRL Readiness Calculator</span>
               <span className="seo-editorial-tag">LLM Token Counter</span>
               <span className="seo-editorial-tag">Privacy-First AI Tools</span>
             </div>
@@ -432,6 +443,11 @@ export default function Footer({ onOpenStats }) {
         <div className="seo-footer-keywords-section">
           <h4 className="seo-keywords-title">Popular Free Utilities &amp; High-Intent Search Queries</h4>
           <div className="seo-keywords-cloud">
+            <a href="#/tool/eu-funding-opportunities" onClick={() => handleToolClick('eu-funding-opportunities')}>EU Horizon Europe Funding Calls 2026</a>
+            <a href="#/tool/eu-funding-opportunities" onClick={() => handleToolClick('eu-funding-opportunities')}>Cascade Funding FSTP Grants Directory</a>
+            <a href="#/tool/eu-funding-opportunities" onClick={() => handleToolClick('eu-funding-opportunities')}>European Commission Open Tenders</a>
+            <a href="#/tool/trl-calculator" onClick={() => handleToolClick('trl-calculator')}>Technology Readiness Level TRL Calculator</a>
+            <a href="#/tool/sample-size-calculator" onClick={() => handleToolClick('sample-size-calculator')}>A/B Test Statistical Sample Size</a>
             <a href="#/tool/pdf-merger" onClick={() => handleToolClick('pdf-merger')}>Merge PDF Files Online Free</a>
             <a href="#/tool/pdf-splitter" onClick={() => handleToolClick('pdf-splitter')}>Split PDF by Page Numbers</a>
             <a href="#/tool/token-counter-universal" onClick={() => handleToolClick('token-counter-universal')}>Universal LLM Token Counter</a>
@@ -442,8 +458,6 @@ export default function Footer({ onOpenStats }) {
             <a href="#/tool/ltv-calculator" onClick={() => handleToolClick('ltv-calculator')}>Customer Lifetime Value LTV</a>
             <a href="#/tool/cac-calculator" onClick={() => handleToolClick('cac-calculator')}>Customer Acquisition Cost CAC</a>
             <a href="#/tool/ltv-cac-calculator" onClick={() => handleToolClick('ltv-cac-calculator')}>LTV to CAC Ratio Benchmark</a>
-            <a href="#/tool/trl-calculator" onClick={() => handleToolClick('trl-calculator')}>Technology Readiness Level TRL</a>
-            <a href="#/tool/sample-size-calculator" onClick={() => handleToolClick('sample-size-calculator')}>A/B Test Statistical Sample Size</a>
             <a href="#/tool/llms-txt-tools" onClick={() => handleToolClick('llms-txt-tools')}>Generate llms.txt Online</a>
             <a href="#/tool/ai-crawler-checker" onClick={() => handleToolClick('ai-crawler-checker')}>AI Crawler Robots.txt Tester</a>
             <a href="#/tool/ai-link-hallucination-checker" onClick={() => handleToolClick('ai-link-hallucination-checker')}>AI Hallucination Fact Checker</a>
