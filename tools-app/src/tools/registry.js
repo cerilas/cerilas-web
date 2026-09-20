@@ -30,6 +30,7 @@ import { sampleSizeCalculatorManifest } from './sample-size-calculator/manifest'
 import { pdfMergerManifest } from './pdf-merger/manifest';
 import { pdfSplitterManifest } from './pdf-splitter/manifest';
 import { euFundingManifest } from './eu-funding-opportunities/manifest';
+import { websiteEmailExtractorManifest } from './website-email-extractor/manifest';
 
 /**
  * Enterprise Scalable Tool Registry.
@@ -161,10 +162,17 @@ export const toolsRegistry = {
   [euFundingManifest.slug]: {
     manifest: euFundingManifest,
     component: lazy(() => import('./eu-funding-opportunities'))
+  },
+  [websiteEmailExtractorManifest.slug]: {
+    manifest: websiteEmailExtractorManifest,
+    component: lazy(() => import('./website-email-extractor'))
   }
 };
 
 const toolAliases = {
+  'email-extractor': 'website-email-extractor',
+  'website-email-finder': 'website-email-extractor',
+  'site-email-extractor': 'website-email-extractor',
   'llms-txt-generator': 'llms-txt',
   'llms-txt-checker': 'llms-txt',
   'llms-txt-validator': 'llms-txt',

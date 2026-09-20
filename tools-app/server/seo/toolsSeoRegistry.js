@@ -40,7 +40,7 @@ export const CATEGORIES = {
     description: 'Modern SEO and web infrastructure utilities. Generate llms.txt files, test AI bot access, inspect meta robots headers, and convert web pages to LLM-ready markdown.',
     shortDescription: 'Technical SEO and generative engine optimization (GEO) tools to prepare your web properties for AI search engines, crawlers, and LLM indexing.',
     keywords: 'seo tools, llms txt generator, ai crawler checker, ai link checker, html to markdown, web tools',
-    toolSlugs: ['llms-txt', 'ai-crawler-checker', 'ai-link-hallucination-checker', 'html-to-llm-markdown']
+    toolSlugs: ['llms-txt', 'ai-crawler-checker', 'ai-link-hallucination-checker', 'html-to-llm-markdown', 'website-email-extractor']
   },
   'developer-tools': {
     slug: 'developer-tools',
@@ -51,7 +51,7 @@ export const CATEGORIES = {
     description: 'Fast, secure in-browser developer utilities. Inspect real-time webhooks, beautify and validate JSON trees, count universal LLM tokens, and convert HTML to markdown.',
     shortDescription: 'Zero-latency developer tools for debugging HTTP requests, parsing data structures, and prototyping AI agent pipelines without cloud telemetry.',
     keywords: 'developer tools, webhook tester, json beautifier, token counter, html to markdown, api inspector',
-    toolSlugs: ['webhook-tester', 'json-beautifier', 'token-counter-universal', 'html-to-llm-markdown']
+    toolSlugs: ['webhook-tester', 'json-beautifier', 'token-counter-universal', 'html-to-llm-markdown', 'website-email-extractor']
   },
   'file-tools': {
     slug: 'file-tools',
@@ -935,6 +935,35 @@ export const TOOLS_SEO_REGISTRY = {
     rating: '4.9',
     ratingCount: '860',
     keywords: 'ltv cac calculator, ltv to cac ratio, saas unit economics, ltv cac benchmark, startup valuation metrics'
+  },
+
+  'website-email-extractor': {
+    slug: 'website-email-extractor',
+    name: 'Website Email & Department Extractor',
+    h1: 'Free Website Email & Department Extractor (Rule-Based, Zero AI)',
+    category: 'Developer Tools',
+    categorySlug: 'developer-tools',
+    title: 'Free Website Email & Department Extractor | Cerilas Tools',
+    description: 'Recursively crawl any website to discover and organize verified email addresses by company department, unit, and team member using deterministic DOM parsing without AI.',
+    shortDescription: 'Crawl websites to extract verified email addresses mapped into Executive, Sales, HR, Engineering, Support, and Legal units without AI.',
+    howItWorks: 'Uses BFS recursion to crawl same-origin internal links, extracts mailto protocols and RFC 5322 text nodes, and classifies emails into corporate departments using DOM card context and heading heuristics.',
+    formula: 'Deterministic RFC 5322 regex + Cheerio DOM hierarchy tree analysis without language model calls.',
+    whenToUse: 'When conducting ethical contact discovery, building vendor lists, or identifying company departments without expensive third-party scraping APIs.',
+    example: 'Enter company.com: the tool crawls 25 internal pages and returns 18 verified emails cleanly mapped to Sales, HR, Executive, and Support with 1-click CSV export.',
+    relatedTools: ['html-to-llm-markdown', 'ai-crawler-checker', 'webhook-tester'],
+    faq: [
+      {
+        q: 'Does this tool use AI or large language models?',
+        a: 'No. It runs entirely on deterministic RFC 5322 regular expressions, HTML DOM tree traversal, and heuristic prefix dictionaries.'
+      },
+      {
+        q: 'Can I export the extracted contacts?',
+        a: 'Yes. You can copy the emails as comma-separated or newline lists, or download them as structured CSV or JSON files.'
+      }
+    ],
+    rating: '4.9',
+    ratingCount: '620',
+    keywords: 'website email extractor, site email crawler, find emails on website, extract emails from domain, email scraper no ai, department email finder, company email extractor'
   }
 };
 

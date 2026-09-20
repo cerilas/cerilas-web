@@ -16,6 +16,7 @@
     "@imgly/background-removal": "^1.7.0",
     "bcryptjs": "^3.0.3",
     "browser-image-compression": "^2.0.2",
+    "cheerio": "^1.2.0",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
