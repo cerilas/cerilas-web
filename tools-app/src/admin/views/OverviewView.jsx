@@ -100,17 +100,8 @@ export default function OverviewView({ statsOverview = null, tools = [], onSelec
       </div>
 
       {/* Traffic Integrity & Bot Isolation Banner */}
-      <div style={{
-        background: 'var(--card-bg, #ffffff)',
-        border: '1px solid var(--card-border, rgba(0,0,0,0.07))',
-        borderRadius: 18,
-        padding: '1.25rem 1.5rem',
-        marginBottom: '2rem',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '0.85rem'
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem' }}>
+      <div className="admin-integrity-banner">
+        <div className="admin-integrity-header">
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
             <div style={{
               width: 32,
@@ -213,6 +204,7 @@ export default function OverviewView({ statsOverview = null, tools = [], onSelec
               return (
                 <div 
                   key={tool.slug}
+                  className="admin-top-tool-row"
                   style={{
                     display: 'flex',
                     alignItems: 'center',

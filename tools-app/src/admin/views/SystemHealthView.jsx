@@ -51,7 +51,7 @@ export default function SystemHealthView() {
   return (
     <div className="admin-body">
       {/* Header bar */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.75rem', flexWrap: 'wrap', gap: '1rem' }}>
+      <div className="admin-health-topbar" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.75rem', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
           <h3 style={{ margin: 0, fontSize: '1.15rem', fontWeight: 700 }}>Infrastructure & Services Health</h3>
           <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>

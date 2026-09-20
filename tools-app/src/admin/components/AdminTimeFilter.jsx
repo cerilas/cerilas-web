@@ -76,7 +76,7 @@ export default function AdminTimeFilter({
           <div className="admin-time-filter-badge-wrap">
             <span className="admin-time-filter-caption">
               <Clock size={14} className="admin-time-icon" />
-              Time Range:
+              <span className="admin-time-caption-text">Time Range:</span>
             </span>
           </div>
 

@@ -356,7 +356,7 @@ export default function ScrapersView() {
             return (
               <div 
                 key={src.key}
-                className="admin-card"
+                className="admin-card admin-scraper-card"
                 style={{
                   display: 'flex',
                   flexDirection: 'column',
@@ -367,7 +367,7 @@ export default function ScrapersView() {
                 }}
               >
                 {/* Header: Icon, Name, Link & Top Action Buttons */}
-                <div style={{ 
+                <div className="admin-scraper-header" style={{ 
                   display: 'flex', 
                   alignItems: 'flex-start', 
                   justifyContent: 'space-between', 
@@ -405,7 +405,7 @@ export default function ScrapersView() {
                       <a 
                         href={src.url} 
                         target="_blank" 
-                        rel="noreferrer"
+                        rel="noreferrer" 
                         title={src.url}
                         style={{ 
                           fontSize: '0.78rem', 
@@ -430,7 +430,7 @@ export default function ScrapersView() {
                   </div>
 
                   {/* Actions: Run Scraper & Copy Webhook */}
-                  <div style={{ display: 'flex', gap: '0.65rem', flexWrap: 'wrap', alignItems: 'center' }}>
+                  <div className="admin-scraper-actions" style={{ display: 'flex', gap: '0.65rem', flexWrap: 'wrap', alignItems: 'center' }}>
                     <button
                       type="button"
                       className="admin-action-btn primary"
@@ -470,7 +470,7 @@ export default function ScrapersView() {
                 </p>
 
                 {/* Bottom Row: Stats and Last Run */}
-                <div style={{
+                <div className="admin-scraper-footer" style={{
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'space-between',
@@ -480,7 +480,7 @@ export default function ScrapersView() {
                   borderTop: '1px solid var(--card-border, rgba(0, 0, 0, 0.05))'
                 }}>
                   {/* Stats Badges / Grid */}
-                  <div style={{ display: 'flex', gap: '0.65rem', flexWrap: 'wrap', alignItems: 'center' }}>
+                  <div className="admin-scraper-stats" style={{ display: 'flex', gap: '0.65rem', flexWrap: 'wrap', alignItems: 'center' }}>
                     <div style={{
                       display: 'flex',
                       alignItems: 'center',
@@ -557,7 +557,7 @@ export default function ScrapersView() {
         </div>
 
         {/* Filter Dropdowns */}
-        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
+        <div className="admin-scraper-filters" style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
           <select
             className="admin-select"
             value={selectedSource}

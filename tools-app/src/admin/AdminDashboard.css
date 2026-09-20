@@ -697,6 +697,7 @@ html.dark .admin-table-container {
 
 .admin-table-wrap {
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
   width: 100%;
 }
 
@@ -705,6 +706,7 @@ html.dark .admin-table-container {
   border-collapse: collapse;
   text-align: left;
   font-size: 0.88rem;
+  min-width: 640px;
 }
 
 .admin-table th {
@@ -1225,6 +1227,14 @@ html.dark .admin-serp-preview-box {
 
 .admin-btn-text-mobile {
   display: none;
+}
+
+.admin-tab-text-mobile {
+  display: none;
+}
+
+.admin-tab-text-desktop {
+  display: inline;
 }
 
 /* ==========================================================================
@@ -2164,6 +2174,364 @@ html.dark .admin-time-reset-btn {
   border-top-color: #3b82f6;
   border-radius: 50%;
   animation: adminSpin 0.7s linear infinite;
+}
+
+/* ==========================================================================
+   Admin Suite Mobile Responsiveness Extensions (Tablets & Phones)
+   ========================================================================== */
+
+@media (max-width: 768px) {
+  /* Global Time Range Filter Mobile */
+  .admin-time-filter-bar {
+    top: 58px;
+    padding: 0.5rem 0.85rem;
+  }
+
+  .admin-time-filter-container {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.55rem;
+  }
+
+  .admin-time-filter-left {
+    width: 100%;
+    justify-content: space-between;
+    gap: 0.5rem;
+  }
+
+  .admin-time-dropdown-wrap {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .admin-time-dropdown-btn {
+    width: 100%;
+    justify-content: space-between;
+    min-height: 38px;
+    padding: 0.45rem 0.75rem;
+  }
+
+  .admin-time-dropdown-menu {
+    width: 100%;
+    min-width: 100%;
+    max-height: 280px;
+    overflow-y: auto;
+    left: 0;
+    right: 0;
+    box-sizing: border-box;
+  }
+
+  .admin-time-filter-right {
+    width: 100%;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .admin-time-custom-form {
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+  }
+
+  .admin-time-date-inputs {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.4rem;
+  }
+
+  .admin-time-date-field {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+
+  .admin-time-input {
+    flex: 1;
+    min-width: 0;
+    width: 100%;
+    min-height: 36px;
+    box-sizing: border-box;
+  }
+
+  .admin-time-apply-btn {
+    width: 100%;
+    min-height: 38px;
+    justify-content: center;
+  }
+
+  /* Scraper Cards & Actions Mobile */
+  .admin-scraper-header {
+    flex-direction: column;
+    align-items: stretch !important;
+    gap: 0.85rem !important;
+  }
+
+  .admin-scraper-actions {
+    width: 100%;
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .admin-scraper-actions button {
+    flex: 1;
+    min-width: 0 !important;
+    justify-content: center;
+  }
+
+  .admin-scraper-footer {
+    flex-direction: column;
+    align-items: stretch !important;
+    gap: 0.75rem !important;
+  }
+
+  .admin-scraper-stats {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.4rem !important;
+  }
+
+  .admin-scraper-stats > div {
+    justify-content: center;
+    padding: 0.35rem 0.4rem !important;
+    font-size: 0.72rem !important;
+  }
+
+  .admin-scraper-filters {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    width: 100%;
+    gap: 0.45rem !important;
+  }
+
+  .admin-select {
+    width: 100%;
+    min-width: 0;
+    min-height: 38px;
+  }
+
+  /* Analytics Tabs Switcher Mobile */
+  .admin-analytics-tabs {
+    width: 100%;
+    display: flex !important;
+  }
+
+  .admin-analytics-tab-btn {
+    flex: 1;
+    justify-content: center;
+    padding: 0.45rem 0.5rem !important;
+    font-size: 0.76rem !important;
+  }
+
+  .admin-tab-text-desktop {
+    display: none;
+  }
+
+  .admin-tab-text-mobile {
+    display: inline;
+  }
+
+  /* Overview Integrity Banner Mobile */
+  .admin-integrity-banner {
+    padding: 1rem !important;
+    margin-bottom: 1.25rem !important;
+  }
+
+  .admin-integrity-header {
+    flex-direction: column;
+    align-items: stretch !important;
+    gap: 0.75rem !important;
+  }
+
+  /* Modals Mobile Sizing */
+  .admin-modal-dialog,
+  .admin-detail-modal-box {
+    max-width: 95vw !important;
+    max-height: 92vh !important;
+    border-radius: 16px !important;
+    margin: 0.5rem auto !important;
+    box-sizing: border-box;
+  }
+
+  /* Pagination Bar Mobile */
+  .admin-pagination {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+    padding: 0.85rem 1rem;
+  }
+
+  .admin-pagination-info {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .admin-pagination-controls {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* Extra Small Phone Screens (<= 480px) */
+@media (max-width: 480px) {
+  .admin-header {
+    padding: 0 0.65rem;
+    height: 56px;
+  }
+
+  .admin-header-title-wrap {
+    min-width: 0;
+    flex: 1;
+  }
+
+  .admin-header-title-wrap h2 {
+    font-size: 0.88rem;
+    max-width: 125px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .admin-header-breadcrumbs {
+    display: none;
+  }
+
+  .admin-time-filter-bar {
+    top: 56px;
+    padding: 0.45rem 0.65rem;
+  }
+
+  .admin-time-caption-text {
+    display: none;
+  }
+
+  .admin-time-date-inputs {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .admin-time-date-sep {
+    display: none;
+  }
+
+  .admin-scraper-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-scraper-filters {
+    grid-template-columns: 1fr !important;
+  }
+
+  .admin-scraper-actions {
+    flex-direction: column;
+  }
+
+  .admin-scraper-actions button {
+    width: 100%;
+  }
+
+  .admin-top-tool-row {
+    flex-direction: column;
+    align-items: flex-start !important;
+    gap: 0.5rem;
+  }
+
+  .admin-top-tool-row > div:last-child {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid rgba(150, 150, 150, 0.08);
+    padding-top: 0.4rem;
+  }
+
+  .admin-event-row {
+    flex-direction: column;
+    align-items: flex-start !important;
+    gap: 0.4rem;
+  }
+
+  .admin-event-row > div:last-child {
+    width: 100%;
+    justify-content: space-between !important;
+  }
+
+  .admin-health-topbar {
+    flex-direction: column;
+    align-items: stretch !important;
+    gap: 0.75rem;
+  }
+
+  .admin-health-topbar button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .admin-modal-metrics-grid {
+    grid-template-columns: 1fr !important;
+    gap: 0.5rem !important;
+  }
+
+  .admin-kpi-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+  }
+
+  .admin-kpi-card {
+    padding: 0.75rem;
+  }
+
+  .admin-kpi-val {
+    font-size: 1.2rem;
+  }
+
+  .admin-detail-title-text {
+    font-size: 1.05rem;
+  }
+
+  .admin-detail-tabs {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    width: 100%;
+    flex-wrap: nowrap;
+    padding-bottom: 4px;
+  }
+
+  .admin-detail-tabs .admin-filter-pill {
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+}
+
+/* Micro Phone Screens (<= 380px) */
+@media (max-width: 380px) {
+  .admin-header-title-wrap h2 {
+    max-width: 105px;
+    font-size: 0.84rem;
+  }
+
+  .admin-kpi-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-page-btn {
+    min-width: 28px;
+    height: 28px;
+    font-size: 0.75rem;
+    padding: 0 0.3rem;
+  }
+
+  .admin-page-ellipsis {
+    width: 18px;
+    font-size: 0.75rem;
+  }
 }
 
 

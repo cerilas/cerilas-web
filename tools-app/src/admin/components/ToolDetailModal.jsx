@@ -62,7 +62,7 @@ export default function ToolDetailModal({ tool, isOpen, onClose }) {
 
         <div className="c-modal-body" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
           {/* Quick Metrics Bar */}
-          <div style={{
+          <div className="admin-modal-metrics-grid" style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(3, 1fr)',
             gap: '0.75rem',

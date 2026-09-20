@@ -61,55 +61,25 @@ export default function AnalyticsView({ statsOverview = null, tools = [] }) {
           </span>
         </div>
 
-        <div style={{
-          display: 'inline-flex',
-          padding: '0.25rem',
-          borderRadius: '14px',
-          background: 'rgba(150, 150, 150, 0.08)',
-          border: '1px solid var(--card-border, rgba(0,0,0,0.08))'
-        }}>
+        <div className="admin-analytics-tabs">
           <button
             type="button"
+            className={`admin-analytics-tab-btn ${activeTab === 'human' ? 'active-human' : ''}`}
             onClick={() => setActiveTab('human')}
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '0.45rem',
-              padding: '0.45rem 0.95rem',
-              borderRadius: '10px',
-              border: 'none',
-              cursor: 'pointer',
-              fontSize: '0.82rem',
-              fontWeight: 600,
-              transition: 'all 0.15s ease',
-              background: activeTab === 'human' ? '#3b82f6' : 'transparent',
-              color: activeTab === 'human' ? '#ffffff' : 'var(--text-muted)'
-            }}
           >
             <Users size={14} />
-            <span>Human Analytics (Real Users)</span>
+            <span className="admin-tab-text-desktop">Human Analytics (Real Users)</span>
+            <span className="admin-tab-text-mobile">Humans (Real)</span>
           </button>
 
           <button
             type="button"
+            className={`admin-analytics-tab-btn ${activeTab === 'bots' ? 'active-bots' : ''}`}
             onClick={() => setActiveTab('bots')}
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '0.45rem',
-              padding: '0.45rem 0.95rem',
-              borderRadius: '10px',
-              border: 'none',
-              cursor: 'pointer',
-              fontSize: '0.82rem',
-              fontWeight: 600,
-              transition: 'all 0.15s ease',
-              background: activeTab === 'bots' ? '#a855f7' : 'transparent',
-              color: activeTab === 'bots' ? '#ffffff' : 'var(--text-muted)'
-            }}
           >
             <Bot size={14} />
-            <span>Bot & Crawler Intelligence ({totalBotHits})</span>
+            <span className="admin-tab-text-desktop">Bot & Crawler Intelligence ({totalBotHits})</span>
+            <span className="admin-tab-text-mobile">Bots ({totalBotHits})</span>
           </button>
         </div>
       </div>
@@ -221,6 +191,7 @@ export default function AnalyticsView({ statsOverview = null, tools = [] }) {
                 recentEvents.map(ev => (
                   <div 
                     key={ev.id}
+                    className="admin-event-row"
                     style={{
                       display: 'flex',
                       alignItems: 'center',
@@ -390,6 +361,7 @@ export default function AnalyticsView({ statsOverview = null, tools = [] }) {
                   recentBotEvents.map(ev => (
                     <div 
                       key={ev.id}
+                      className="admin-event-row"
                       style={{
                         display: 'flex',
                         alignItems: 'center',
