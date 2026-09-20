@@ -465,38 +465,38 @@ app.get('/api/tools/stats/overview', async (req, res) => {
 
     let dateCondition = '';
     let queryParams = [];
-    let timeFilterLabel = 'Tüm Zamanlar';
+    let timeFilterLabel = 'All Time';
 
     if (range === 'today') {
-      timeFilterLabel = 'Bugün';
+      timeFilterLabel = 'Today';
       dateCondition = `created_at >= CURRENT_DATE AND created_at < CURRENT_DATE + INTERVAL '1 day'`;
     } else if (range === 'yesterday') {
-      timeFilterLabel = 'Dün';
+      timeFilterLabel = 'Yesterday';
       dateCondition = `created_at >= CURRENT_DATE - INTERVAL '1 day' AND created_at < CURRENT_DATE`;
     } else if (range === '3days') {
-      timeFilterLabel = 'Son 3 Gün';
+      timeFilterLabel = 'Last 3 Days';
       dateCondition = `created_at >= NOW() - INTERVAL '3 days'`;
     } else if (range === '7days') {
-      timeFilterLabel = 'Son 1 Hafta';
+      timeFilterLabel = 'Last 7 Days';
       dateCondition = `created_at >= NOW() - INTERVAL '7 days'`;
     } else if (range === '30days') {
-      timeFilterLabel = 'Son 1 Ay';
+      timeFilterLabel = 'Last 30 Days';
       dateCondition = `created_at >= NOW() - INTERVAL '30 days'`;
     } else if (range === '90days') {
-      timeFilterLabel = 'Son 3 Ay';
+      timeFilterLabel = 'Last 3 Months';
       dateCondition = `created_at >= NOW() - INTERVAL '90 days'`;
     } else if (range === '180days') {
-      timeFilterLabel = 'Son 6 Ay';
+      timeFilterLabel = 'Last 6 Months';
       dateCondition = `created_at >= NOW() - INTERVAL '180 days'`;
     } else if (range === '365days') {
-      timeFilterLabel = 'Son 1 Yıl';
+      timeFilterLabel = 'Last 1 Year';
       dateCondition = `created_at >= NOW() - INTERVAL '365 days'`;
     } else if (range === 'custom' && startDate && endDate) {
-      timeFilterLabel = `Özel Tarih (${startDate} - ${endDate})`;
+      timeFilterLabel = `Custom Range (${startDate} - ${endDate})`;
       dateCondition = `created_at >= $1::timestamp AND created_at <= ($2::date + INTERVAL '1 day - 1 microsecond')`;
       queryParams = [startDate, endDate];
     } else {
-      timeFilterLabel = 'Tüm Zamanlar';
+      timeFilterLabel = 'All Time';
       dateCondition = '';
     }
 

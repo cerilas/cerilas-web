@@ -2,16 +2,16 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Calendar, ChevronDown, Check, RotateCcw, Clock, ArrowRight } from 'lucide-react';
 
 const PRESET_RANGES = [
-  { id: 'all', label: 'Tüm Zamanlar' },
-  { id: 'today', label: 'Bugün' },
-  { id: 'yesterday', label: 'Dün' },
-  { id: '3days', label: 'Son 3 Gün' },
-  { id: '7days', label: 'Son 1 Hafta' },
-  { id: '30days', label: 'Son 1 Ay' },
-  { id: '90days', label: 'Son 3 Ay' },
-  { id: '180days', label: 'Son 6 Ay' },
-  { id: '365days', label: 'Son 1 Yıl' },
-  { id: 'custom', label: 'Özel Tarih' }
+  { id: 'all', label: 'All Time' },
+  { id: 'today', label: 'Today' },
+  { id: 'yesterday', label: 'Yesterday' },
+  { id: '3days', label: 'Last 3 Days' },
+  { id: '7days', label: 'Last 7 Days' },
+  { id: '30days', label: 'Last 30 Days' },
+  { id: '90days', label: 'Last 3 Months' },
+  { id: '180days', label: 'Last 6 Months' },
+  { id: '365days', label: 'Last 1 Year' },
+  { id: 'custom', label: 'Custom Range' }
 ];
 
 export default function AdminTimeFilter({
@@ -22,7 +22,7 @@ export default function AdminTimeFilter({
   onApplyCustomRange,
   onReset,
   loading = false,
-  activeFilterLabel = 'Tüm Zamanlar'
+  activeFilterLabel = 'All Time'
 }) {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [isCustomMode, setIsCustomMode] = useState(selectedRange === 'custom');
@@ -65,7 +65,7 @@ export default function AdminTimeFilter({
     }
   };
 
-  const currentLabel = PRESET_RANGES.find(r => r.id === selectedRange)?.label || activeFilterLabel || 'Tüm Zamanlar';
+  const currentLabel = PRESET_RANGES.find(r => r.id === selectedRange)?.label || activeFilterLabel || 'All Time';
   const isFiltered = selectedRange !== 'all';
 
   return (
@@ -76,7 +76,7 @@ export default function AdminTimeFilter({
           <div className="admin-time-filter-badge-wrap">
             <span className="admin-time-filter-caption">
               <Clock size={14} className="admin-time-icon" />
-              Zaman Aralığı:
+              Time Range:
             </span>
           </div>
 
@@ -86,7 +86,7 @@ export default function AdminTimeFilter({
               className={`admin-time-dropdown-btn ${isFiltered ? 'is-active' : ''}`}
               onClick={() => setDropdownOpen(prev => !prev)}
               aria-expanded={dropdownOpen}
-              aria-label="Tarih aralığı seçin"
+              aria-label="Select time range"
             >
               <Calendar size={15} />
               <span className="admin-time-dropdown-label">{currentLabel}</span>
@@ -96,7 +96,7 @@ export default function AdminTimeFilter({
             {dropdownOpen && (
               <div className="admin-time-dropdown-menu">
                 <div className="admin-time-dropdown-header">
-                  <span>Hazır Zaman Aralıkları</span>
+                  <span>Preset Ranges</span>
                 </div>
                 {PRESET_RANGES.map((preset) => {
                   const isSelected = selectedRange === preset.id;
@@ -141,7 +141,7 @@ export default function AdminTimeFilter({
             <form className="admin-time-custom-form" onSubmit={handleApplyCustom}>
               <div className="admin-time-date-inputs">
                 <label className="admin-time-date-field">
-                  <span className="admin-time-field-label">Başlangıç</span>
+                  <span className="admin-time-field-label">Start Date</span>
                   <input
                     type="date"
                     className="admin-time-input"
@@ -154,7 +154,7 @@ export default function AdminTimeFilter({
                   <ArrowRight size={13} />
                 </span>
                 <label className="admin-time-date-field">
-                  <span className="admin-time-field-label">Bitiş</span>
+                  <span className="admin-time-field-label">End Date</span>
                   <input
                     type="date"
                     className="admin-time-input"
@@ -170,14 +170,14 @@ export default function AdminTimeFilter({
                 className="admin-action-btn primary admin-time-apply-btn"
                 disabled={!startDate || !endDate || loading}
               >
-                Uygula
+                Apply
               </button>
             </form>
           ) : (
             <div className="admin-time-status-info">
               {isFiltered && (
                 <div className="admin-time-active-pill">
-                  <span>Aktif Filtre: {currentLabel}</span>
+                  <span>Active Filter: {currentLabel}</span>
                 </div>
               )}
             </div>
@@ -188,16 +188,16 @@ export default function AdminTimeFilter({
               type="button"
               className="admin-time-reset-btn"
               onClick={onReset}
-              title="Tüm Zamanlara Sıfırla"
-              aria-label="Tarih filtresini sıfırla"
+              title="Reset to All Time"
+              aria-label="Reset date filter"
             >
               <RotateCcw size={13} />
-              <span>Sıfırla</span>
+              <span>Reset</span>
             </button>
           )}
 
           {loading && (
-            <div className="admin-time-spinner" title="Veriler güncelleniyor..." />
+            <div className="admin-time-spinner" title="Updating metrics..." />
           )}
         </div>
       </div>
