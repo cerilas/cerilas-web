@@ -1,4 +1,4 @@
-import React, { useEffect,  useState, useMemo  } from 'react';
+import React, { useEffect, useState, useMemo, useRef } from 'react';
 import {
   Database,
   DollarSign,
@@ -37,11 +37,16 @@ export default function ArrCalculator({ onBack, toolMeta }) {
   const [customerCount, setCustomerCount] = useState(95);
   const [copied, setCopied] = useState(false);
 
-  // Analytics: Track calculations when inputs change (debounced)
+  // Analytics: Track calculations when inputs change (debounced, skip initial mount)
+  const isInitialMount = useRef(true);
   useEffect(() => {
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
+    }
     const handler = setTimeout(() => {
       trackUse?.();
-    }, 2000);
+    }, 2500);
     return () => clearTimeout(handler);
   }, [currentMrr, growthRate, profitMargin, employees, customerCount, trackUse]);
 

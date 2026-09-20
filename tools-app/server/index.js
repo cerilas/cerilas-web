@@ -387,34 +387,51 @@ app.post('/api/tools/:slug/event', async (req, res) => {
       } else if (
         eventType === 'download' || 
         eventType.startsWith('download') || 
-        eventType === 'session_complete' || 
-        eventType === 'complete_session'
+        eventType === 'pdf_export'
       ) {
-        // Real human conversion!
+        // Real human download conversion (exclusively increments download_count)
         await pool.query(
           `UPDATE cerilas_tools 
            SET download_count = COALESCE(download_count, 0) + 1, 
-               use_count = COALESCE(use_count, 0) + 1, 
                last_used_at = NOW() 
            WHERE slug = $1`,
           [slug]
         );
-      } else if (eventType === 'copy') {
-        // Direct clipboard copy conversion
+      } else if (
+        eventType === 'copy' || 
+        eventType.startsWith('copy')
+      ) {
+        // Direct clipboard copy conversion (exclusively increments copy_count)
         await pool.query(
           `UPDATE cerilas_tools 
            SET copy_count = COALESCE(copy_count, 0) + 1, 
-               use_count = COALESCE(use_count, 0) + 1, 
+               last_used_at = NOW() 
+           WHERE slug = $1`,
+          [slug]
+        );
+      } else if (
+        [
+          'use', 
+          'calculate', 
+          'scan', 
+          'analyze', 
+          'verify', 
+          'convert', 
+          'session_complete', 
+          'complete_session'
+        ].includes(eventType)
+      ) {
+        // Genuine non-download interactive tool completion (exclusively increments use_count)
+        await pool.query(
+          `UPDATE cerilas_tools 
+           SET use_count = COALESCE(use_count, 0) + 1, 
                last_used_at = NOW() 
            WHERE slug = $1`,
           [slug]
         );
       } else {
-        // General in-app human interaction
-        await pool.query(
-          'UPDATE cerilas_tools SET use_count = COALESCE(use_count, 0) + 1, last_used_at = NOW() WHERE slug = $1',
-          [slug]
-        );
+        // Telemetry & intermediate preview events (generate, search, upload_batch, files_added, pdf_loaded, video_loaded, start_timer, upload_file, compress, split, merge, process_complete, etc.)
+        // These are saved to tool_usage_events for telemetry and debugging, but MUST NOT increment completed task counters.
       }
     }
 

@@ -314,7 +314,7 @@ export default function PdfSplitterTool({ onBack, toolMeta }) {
         }
       }
 
-      trackAction('use', {
+      trackAction('split', {
         mode: splitMode,
         originalPages: docMeta.numPages,
         generatedParts: resultsWithUrls.length

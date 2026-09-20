@@ -123,10 +123,9 @@ export default function QrGeneratorTool({ onBack, toolMeta }) {
   useEffect(() => {
     const timer = setTimeout(() => {
       renderQr();
-      trackAction('generate', { type: qrType, size: resolution });
     }, 200);
     return () => clearTimeout(timer);
-  }, [renderQr, trackAction, qrType, resolution]);
+  }, [renderQr]);
 
   // Actions
   const handleDownloadPng = () => {

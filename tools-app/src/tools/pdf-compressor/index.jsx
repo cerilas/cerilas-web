@@ -85,7 +85,7 @@ export default function PdfCompressorTool({ onBack, toolMeta }) {
     }));
 
     setFiles((prev) => [...prev, ...newItems]);
-    trackAction('use', { file_count: pdfFiles.length });
+    trackAction('files_added', { file_count: pdfFiles.length });
 
     // Asynchronously extract thumbnails & metadata for each added file
     for (const item of newItems) {

@@ -14,43 +14,43 @@ export const TOOL_CONVERSION_METRICS = {
 
   'arr-calculator': {
     actionKey: 'calculated',
-    getConversionCount: (tool) => tool?.use_count || 0,
+    getConversionCount: (tool) => (tool?.use_count || 0) + (tool?.copy_count || 0),
     en: { action: 'calculated', badge: 'calculations made', singular: 'calculation made', short: 'calculations' },
     tr: { action: 'hesaplandı', badge: 'hesaplama yapıldı', singular: 'hesaplama yapıldı', short: 'hesaplama' }
   },
   'cac-calculator': {
     actionKey: 'calculated',
-    getConversionCount: (tool) => tool?.use_count || 0,
+    getConversionCount: (tool) => (tool?.use_count || 0) + (tool?.copy_count || 0),
     en: { action: 'calculated', badge: 'calculations made', singular: 'calculation made', short: 'calculations' },
     tr: { action: 'hesaplandı', badge: 'hesaplama yapıldı', singular: 'hesaplama yapıldı', short: 'hesaplama' }
   },
   'churn-calculator': {
     actionKey: 'calculated',
-    getConversionCount: (tool) => tool?.use_count || 0,
+    getConversionCount: (tool) => (tool?.use_count || 0) + (tool?.copy_count || 0),
     en: { action: 'calculated', badge: 'calculations made', singular: 'calculation made', short: 'calculations' },
     tr: { action: 'hesaplandı', badge: 'hesaplama yapıldı', singular: 'hesaplama yapıldı', short: 'hesaplama' }
   },
   'ltv-cac-calculator': {
     actionKey: 'calculated',
-    getConversionCount: (tool) => tool?.use_count || 0,
+    getConversionCount: (tool) => (tool?.use_count || 0) + (tool?.copy_count || 0),
     en: { action: 'calculated', badge: 'calculations made', singular: 'calculation made', short: 'calculations' },
     tr: { action: 'hesaplandı', badge: 'hesaplama yapıldı', singular: 'hesaplama yapıldı', short: 'hesaplama' }
   },
   'ltv-calculator': {
     actionKey: 'calculated',
-    getConversionCount: (tool) => tool?.use_count || 0,
+    getConversionCount: (tool) => (tool?.use_count || 0) + (tool?.copy_count || 0),
     en: { action: 'calculated', badge: 'calculations made', singular: 'calculation made', short: 'calculations' },
     tr: { action: 'hesaplandı', badge: 'hesaplama yapıldı', singular: 'hesaplama yapıldı', short: 'hesaplama' }
   },
   'mrr-calculator': {
     actionKey: 'calculated',
-    getConversionCount: (tool) => tool?.use_count || 0,
+    getConversionCount: (tool) => (tool?.use_count || 0) + (tool?.copy_count || 0),
     en: { action: 'calculated', badge: 'calculations made', singular: 'calculation made', short: 'calculations' },
     tr: { action: 'hesaplandı', badge: 'hesaplama yapıldı', singular: 'hesaplama yapıldı', short: 'hesaplama' }
   },
   'startup-runway-calculator': {
     actionKey: 'calculated',
-    getConversionCount: (tool) => tool?.use_count || 0,
+    getConversionCount: (tool) => (tool?.use_count || 0) + (tool?.copy_count || 0),
     en: { action: 'calculated', badge: 'calculations made', singular: 'calculation made', short: 'calculations' },
     tr: { action: 'hesaplandı', badge: 'hesaplama yapıldı', singular: 'hesaplama yapıldı', short: 'hesaplama' }
   },

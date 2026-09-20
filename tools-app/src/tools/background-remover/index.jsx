@@ -212,7 +212,7 @@ export default function BackgroundRemover({ onBack, toolMeta }) {
       const url = URL.createObjectURL(blob);
       setCutoutBlob(blob);
       setCutoutUrl(url);
-      trackUse?.();
+      trackAction('process_complete');
     } catch (err) {
       console.error('Background removal error:', err);
       setProcessError(err.message || 'Failed to remove background from this image.');

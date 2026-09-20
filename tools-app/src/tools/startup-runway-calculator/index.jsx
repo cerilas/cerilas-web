@@ -1,4 +1,4 @@
-import React, { useEffect,  useState, useMemo  } from 'react';
+import React, { useEffect, useState, useMemo, useRef } from 'react';
 import {
   DollarSign,
   TrendingUp,
@@ -39,11 +39,16 @@ export default function StartupRunwayCalculator({ onBack, toolMeta }) {
   const [expenseCutPercent, setExpenseCutPercent] = useState(0);
   const [copied, setCopied] = useState(false);
 
-  // Analytics: Track calculations when inputs change (debounced)
+  // Analytics: Track calculations when inputs change (debounced, skip initial mount)
+  const isInitialMount = useRef(true);
   useEffect(() => {
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
+    }
     const handler = setTimeout(() => {
       trackUse?.();
-    }, 2000);
+    }, 2500);
     return () => clearTimeout(handler);
   }, [cashBalance, grossBurn, monthlyRevenue, growthRate, additionalSpend, expenseCutPercent, trackUse]);
 

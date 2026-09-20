@@ -244,7 +244,7 @@ export default function PdfMergerTool({ onBack, toolMeta }) {
         fileName: outputFileName.endsWith('.pdf') ? outputFileName : `${outputFileName}.pdf`
       });
 
-      trackAction('use', {
+      trackAction('merge', {
         fileCount: files.length,
         totalPages: result.totalPages,
         byteSize: result.byteSize
