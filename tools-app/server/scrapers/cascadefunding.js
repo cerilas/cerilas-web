@@ -1,5 +1,6 @@
 import crypto from 'crypto';
 import pool from '../db.js';
+import { generateOpportunitySeo } from '../utils/seoGenerator.js';
 
 /**
  * Deterministic Web Scraper for Cascade Funding Hub (https://cascadefunding.eu/open-calls/)
@@ -202,9 +203,13 @@ export async function scrapeCascadeFunding(triggeredBy = 'manual') {
               content_hash = $16,
               status = $17,
               raw_data = $18,
+              seo_title = $19,
+              meta_description = $20,
+              meta_keywords = $21,
+              schema_json = $22,
               last_scraped_at = NOW(),
               last_changed_at = NOW()
-             WHERE id = $19`,
+             WHERE id = $23`,
             [
               title,
               shortDesc,
@@ -224,6 +229,10 @@ export async function scrapeCascadeFunding(triggeredBy = 'manual') {
               contentHash,
               status,
               JSON.stringify(item),
+              seoMeta.seo_title,
+              seoMeta.meta_description,
+              seoMeta.meta_keywords,
+              JSON.stringify(seoMeta.schema_json),
               existing.id
             ]
           );
@@ -237,12 +246,14 @@ export async function scrapeCascadeFunding(triggeredBy = 'manual') {
             cover_image, eligible_applicants, deadline_date, deadline_raw, opening_date,
             funding_amount, funding_raw_amount, domains, technologies, links,
             call_type, permalink, content_hash, status, raw_data,
+            slug, seo_title, meta_description, meta_keywords, schema_json,
             first_scraped_at, last_scraped_at, last_changed_at
           ) VALUES (
             $1, $2, $3, $4, $5,
             $6, $7, $8, $9, $10,
             $11, $12, $13, $14, $15,
             $16, $17, $18, $19, $20,
+            $21, $22, $23, $24, $25,
             NOW(), NOW(), NOW()
           )`,
           [
@@ -265,7 +276,12 @@ export async function scrapeCascadeFunding(triggeredBy = 'manual') {
             permalink,
             contentHash,
             status,
-            JSON.stringify(item)
+            JSON.stringify(item),
+            seoMeta.slug,
+            seoMeta.seo_title,
+            seoMeta.meta_description,
+            seoMeta.meta_keywords,
+            JSON.stringify(seoMeta.schema_json)
           ]
         );
         itemsInserted++;

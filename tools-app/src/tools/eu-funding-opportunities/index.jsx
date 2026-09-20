@@ -198,15 +198,48 @@ export default function EuFundingOpportunities({ onBack, toolMeta }) {
     setRefreshKey((k) => k + 1);
   }, []);
 
+  // Synchronize browser history and handle deep-linking
+  useEffect(() => {
+    const handlePopState = () => {
+      const match = window.location.pathname.match(/\/tools?\/eu-funding-opportunities\/([a-zA-Z0-9_-]+)/);
+      if (match && match[1]) {
+        openDetail(match[1]);
+      } else if (selectedOpp) {
+        setSelectedOpp(null);
+      }
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, [selectedOpp]);
+
+  // Initial deep-link check on mount
+  useEffect(() => {
+    const pathMatch = window.location.pathname.match(/\/tools?\/eu-funding-opportunities\/([a-zA-Z0-9_-]+)/);
+    const hashMatch = window.location.hash.match(/[?&]call=([a-zA-Z0-9_-]+)/) ||
+                      window.location.hash.match(/#\/tools?\/eu-funding-opportunities\/([a-zA-Z0-9_-]+)/);
+    const targetSlug = pathMatch ? pathMatch[1] : (hashMatch ? hashMatch[1] : null);
+    if (targetSlug && targetSlug !== 'all') {
+      openDetail(targetSlug);
+    }
+  }, []);
+
   // Open Call Detail Modal
-  const openDetail = async (id) => {
-    if (trackUse) trackUse({ callId: id });
+  const openDetail = async (idOrSlug) => {
+    if (trackUse) trackUse({ callId: idOrSlug });
     setLoadingDetail(true);
     try {
-      const res = await fetch(`/api/scrapers/opportunities/${id}`);
+      const res = await fetch(`/api/scrapers/opportunities/${idOrSlug}`);
       const json = await res.json();
-      if (json.status === 'success') {
+      if (json.status === 'success' && json.data) {
         setSelectedOpp(json.data);
+        const slug = json.data.slug || json.data.id;
+        const targetUrl = `/tool/eu-funding-opportunities/${slug}`;
+        if (window.location.pathname !== targetUrl && !window.location.hash.includes(slug)) {
+          window.history.pushState({ grantSlug: slug }, '', targetUrl);
+        }
+        if (json.data.seo_title) {
+          document.title = json.data.seo_title;
+        }
       }
     } catch (err) {
       console.error('Failed to load call details:', err);
@@ -218,10 +251,15 @@ export default function EuFundingOpportunities({ onBack, toolMeta }) {
   const closeDetail = () => {
     setSelectedOpp(null);
     setCopiedLink(false);
+    if (window.location.pathname.match(/\/tools?\/eu-funding-opportunities\/[a-zA-Z0-9_-]+/)) {
+      window.history.pushState({}, '', '/tool/eu-funding-opportunities');
+    }
+    document.title = 'EU Funding & Cascade Funding Opportunities (2026) – Live Horizon Europe & FSTP Grants | Cerilas Tools';
   };
 
   const copyShareLink = (opp) => {
-    const url = opp.permalink || (opp.links && opp.links[0]) || window.location.href;
+    const slug = opp.slug || opp.id;
+    const url = `https://tools.cerilas.com/tool/eu-funding-opportunities/${slug}`;
     navigator.clipboard.writeText(url);
     setCopiedLink(true);
     setTimeout(() => setCopiedLink(false), 2000);
@@ -618,9 +656,18 @@ export default function EuFundingOpportunities({ onBack, toolMeta }) {
                   </button>
                 </div>
 
-                <h3 className="eu-card-title" onClick={() => openDetail(opp.id)}>
-                  {opp.title}
-                </h3>
+                <a
+                  href={`/tool/eu-funding-opportunities/${opp.slug || opp.id}`}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    openDetail(opp.slug || opp.id);
+                  }}
+                  style={{ textDecoration: 'none', color: 'inherit' }}
+                >
+                  <h3 className="eu-card-title">
+                    {opp.title}
+                  </h3>
+                </a>
 
                 <p className="eu-card-desc">
                   {opp.short_description || 'Detailed eligibility criteria, objectives, and application instructions.'}
@@ -658,9 +705,17 @@ export default function EuFundingOpportunities({ onBack, toolMeta }) {
                     )}
                   </div>
 
-                  <button className="eu-details-btn" onClick={() => openDetail(opp.id)}>
+                  <a
+                    href={`/tool/eu-funding-opportunities/${opp.slug || opp.id}`}
+                    className="eu-details-btn"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      openDetail(opp.slug || opp.id);
+                    }}
+                    style={{ textDecoration: 'none' }}
+                  >
                     View Details
-                  </button>
+                  </a>
                 </div>
               </div>
             );
@@ -697,9 +752,18 @@ export default function EuFundingOpportunities({ onBack, toolMeta }) {
                       </button>
                     </td>
                     <td className="eu-table-title-cell">
-                      <div className="eu-table-title" onClick={() => openDetail(opp.id)}>
-                        {opp.title}
-                      </div>
+                      <a
+                        href={`/tool/eu-funding-opportunities/${opp.slug || opp.id}`}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          openDetail(opp.slug || opp.id);
+                        }}
+                        style={{ textDecoration: 'none', color: 'inherit' }}
+                      >
+                        <div className="eu-table-title">
+                          {opp.title}
+                        </div>
+                      </a>
                       <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
                         {opp.external_id && <span style={{ marginRight: '0.5rem' }}>ID: {opp.external_id}</span>}
                       </div>
@@ -738,9 +802,17 @@ export default function EuFundingOpportunities({ onBack, toolMeta }) {
                       </div>
                     </td>
                     <td style={{ textAlign: 'right' }}>
-                      <button className="eu-details-btn" onClick={() => openDetail(opp.id)}>
+                      <a
+                        href={`/tool/eu-funding-opportunities/${opp.slug || opp.id}`}
+                        className="eu-details-btn"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          openDetail(opp.slug || opp.id);
+                        }}
+                        style={{ textDecoration: 'none' }}
+                      >
                         Details
-                      </button>
+                      </a>
                     </td>
                   </tr>
                 );

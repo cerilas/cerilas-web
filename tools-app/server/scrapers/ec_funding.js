@@ -1,5 +1,6 @@
 import crypto from 'crypto';
 import pool from '../db.js';
+import { generateOpportunitySeo } from '../utils/seoGenerator.js';
 
 const EC_SEARCH_API = 'https://api.tech.ec.europa.eu/search-api/prod/rest/search?apiKey=SEDIA&text=***';
 const EC_PORTAL_URL = 'https://ec.europa.eu/info/funding-tenders/opportunities/portal/screen/opportunities/calls-for-proposals?isExactMatch=true&status=31094501,31094502&order=DESC&pageNumber=1&pageSize=50&sortBy=startDate';
@@ -558,17 +559,34 @@ export async function scrapeEcFunding(triggeredBy = 'manual', pageSize = 100, ma
       // Check existing record from in-memory cache
       const existing = existingMap.get(externalId);
 
+      // Automatically generate SEO fields (Slug, Title, Description, Keywords, Schema.org)
+      const seoMeta = generateOpportunitySeo({
+        title,
+        external_id: externalId,
+        source_key: sourceKey,
+        short_description: shortDesc,
+        eligible_applicants: eligibleApplicants,
+        deadline_date: deadlineDate,
+        funding_amount: budget.formatted,
+        funding_raw_amount: budget.raw,
+        domains,
+        technologies,
+        call_type: callType
+      });
+
       if (!existing) {
-        // 1. Insert new opportunity
+        // 1. Insert new opportunity with full SEO metadata
         await pool.query(`
           INSERT INTO funding_opportunities (
             source_key, external_id, title, short_description, long_description,
             cover_image, eligible_applicants, deadline_date, deadline_raw,
             opening_date, funding_amount, funding_raw_amount, domains,
             technologies, links, call_type, permalink, content_hash,
-            status, first_scraped_at, last_scraped_at, last_changed_at
+            status, slug, seo_title, meta_description, meta_keywords, schema_json,
+            first_scraped_at, last_scraped_at, last_changed_at
           ) VALUES (
-            $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, NOW(), NOW(), NOW()
+            $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19,
+            $20, $21, $22, $23, $24, NOW(), NOW(), NOW()
           )
         `, [
           sourceKey,
@@ -589,7 +607,12 @@ export async function scrapeEcFunding(triggeredBy = 'manual', pageSize = 100, ma
           callType,
           permalink,
           contentHash,
-          status
+          status,
+          seoMeta.slug,
+          seoMeta.seo_title,
+          seoMeta.meta_description,
+          seoMeta.meta_keywords,
+          JSON.stringify(seoMeta.schema_json)
         ]);
         itemsInserted++;
       } else {
@@ -598,7 +621,7 @@ export async function scrapeEcFunding(triggeredBy = 'manual', pageSize = 100, ma
           unchangedIds.push(existing.id);
           itemsUnchanged++;
         } else {
-          // 3. Updated (Content changed)
+          // 3. Updated (Content changed, refresh SEO metadata)
           await pool.query(`
             UPDATE funding_opportunities SET
               title = $1,
@@ -617,9 +640,13 @@ export async function scrapeEcFunding(triggeredBy = 'manual', pageSize = 100, ma
               permalink = $14,
               content_hash = $15,
               status = $16,
+              seo_title = $17,
+              meta_description = $18,
+              meta_keywords = $19,
+              schema_json = $20,
               last_scraped_at = NOW(),
               last_changed_at = NOW()
-            WHERE id = $17
+            WHERE id = $21
           `, [
             title,
             shortDesc,
@@ -637,6 +664,10 @@ export async function scrapeEcFunding(triggeredBy = 'manual', pageSize = 100, ma
             permalink,
             contentHash,
             status,
+            seoMeta.seo_title,
+            seoMeta.meta_description,
+            seoMeta.meta_keywords,
+            JSON.stringify(seoMeta.schema_json),
             existing.id
           ]);
           itemsUpdated++;

@@ -380,9 +380,20 @@
     <priority>0.98</priority>
   </url>
   <url>
-    <loc>https://tools.cerilas.com/token-counter</loc>
-    <lastmod>2026-09-19</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.90</priority>
+    <loc>https://tools.cerilas.com/tool/eu-funding-opportunities</loc>
+    <lastmod>2026-09-20</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.99</priority>
+    <image:image>
+      <image:loc>https://tools.cerilas.com/tool-icons/eu-funding-opportunities.webp</image:loc>
+      <image:title>EU Funding &amp; Cascade Funding Opportunities – Live Horizon Europe &amp; FSTP Grants</image:title>
+      <image:caption>Search and filter 600+ open European Commission calls, Horizon Europe research grants, and Cascade Funding (FSTP) equity-free lump-sum sub-grants.</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://tools.cerilas.com/#/tool/eu-funding-opportunities</loc>
+    <lastmod>2026-09-20</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.95</priority>
   </url>
 </urlset>

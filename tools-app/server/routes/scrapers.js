@@ -263,7 +263,7 @@ router.get('/opportunities', async (req, res) => {
         id, source_key, external_id, title, short_description, cover_image,
         eligible_applicants, deadline_date, deadline_raw, opening_date,
         funding_amount, funding_raw_amount, domains, technologies, links,
-        call_type, permalink, content_hash, status,
+        call_type, permalink, content_hash, status, slug, seo_title, meta_description,
         first_scraped_at, last_scraped_at, last_changed_at
       FROM funding_opportunities
       ${whereClause}
@@ -290,15 +290,24 @@ router.get('/opportunities', async (req, res) => {
 });
 
 /**
- * 3. Get Single Opportunity Detail (Includes Long Description & Links)
+ * 3. Get Single Opportunity Detail (Accepts either numerical ID or SEO Slug)
  */
-router.get('/opportunities/:id', async (req, res) => {
+router.get('/opportunities/:idOrSlug', async (req, res) => {
   try {
-    const { id } = req.params;
-    const result = await pool.query(
-      `SELECT * FROM funding_opportunities WHERE id = $1`,
-      [id]
-    );
+    const { idOrSlug } = req.params;
+    const isNumeric = /^\d+$/.test(idOrSlug);
+    let result;
+    if (isNumeric) {
+      result = await pool.query(
+        `SELECT * FROM funding_opportunities WHERE id = $1 OR slug = $2`,
+        [parseInt(idOrSlug, 10), idOrSlug]
+      );
+    } else {
+      result = await pool.query(
+        `SELECT * FROM funding_opportunities WHERE slug = $1 OR external_id = $1`,
+        [idOrSlug]
+      );
+    }
 
     if (result.rows.length === 0) {
       return res.status(404).json({ status: 'error', message: 'Opportunity not found' });
@@ -308,6 +317,41 @@ router.get('/opportunities/:id', async (req, res) => {
   } catch (err) {
     console.error('[API:Scrapers] Error getting opportunity detail:', err.message);
     res.status(500).json({ status: 'error', message: err.message });
+  }
+});
+
+/**
+ * 3.1 Dynamic XML Sitemap for All Active Funding Opportunities
+ */
+router.get('/sitemap.xml', async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT slug, last_scraped_at, last_changed_at, first_scraped_at
+      FROM funding_opportunities
+      WHERE status = 'open' AND slug IS NOT NULL
+      ORDER BY last_scraped_at DESC
+    `);
+
+    let xml = `<?xml version="1.0" encoding="UTF-8"?>\n`;
+    xml += `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n`;
+
+    for (const row of result.rows) {
+      const date = (row.last_changed_at || row.last_scraped_at || row.first_scraped_at || new Date()).toISOString().slice(0, 10);
+      xml += `  <url>\n`;
+      xml += `    <loc>https://tools.cerilas.com/tool/eu-funding-opportunities/${row.slug}</loc>\n`;
+      xml += `    <lastmod>${date}</lastmod>\n`;
+      xml += `    <changefreq>daily</changefreq>\n`;
+      xml += `    <priority>0.85</priority>\n`;
+      xml += `  </url>\n`;
+    }
+
+    xml += `</urlset>`;
+
+    res.header('Content-Type', 'application/xml');
+    res.send(xml);
+  } catch (err) {
+    console.error('[API:Scrapers] Error generating sitemap:', err.message);
+    res.status(500).send('Error generating sitemap');
   }
 });
 

@@ -64,5 +64,6 @@ Host: https://tools.cerilas.com
 
 # Sitemaps & LLM Manifest
 Sitemap: https://tools.cerilas.com/sitemap.xml
+Sitemap: https://tools.cerilas.com/sitemap-grants.xml
 # LLMs discovery standard
 # https://tools.cerilas.com/llms.txt

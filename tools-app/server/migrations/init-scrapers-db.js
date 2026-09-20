@@ -1,4 +1,5 @@
 import pool from '../db.js';
+import { migrateSeoColumns } from './add-seo-columns.js';
 
 export async function initScrapersDb() {
   const client = await pool.connect();
@@ -26,6 +27,11 @@ export async function initScrapersDb() {
         content_hash VARCHAR(64) NOT NULL,
         status VARCHAR(32) DEFAULT 'open',
         raw_data JSONB DEFAULT '{}'::jsonb,
+        slug VARCHAR(255),
+        seo_title VARCHAR(255),
+        meta_description TEXT,
+        meta_keywords TEXT,
+        schema_json JSONB,
         first_scraped_at TIMESTAMPTZ DEFAULT NOW(),
         last_scraped_at TIMESTAMPTZ DEFAULT NOW(),
         last_changed_at TIMESTAMPTZ DEFAULT NOW(),
@@ -36,6 +42,7 @@ export async function initScrapersDb() {
       CREATE INDEX IF NOT EXISTS idx_funding_deadline ON funding_opportunities (deadline_date);
       CREATE INDEX IF NOT EXISTS idx_funding_status ON funding_opportunities (status);
       CREATE INDEX IF NOT EXISTS idx_funding_content_hash ON funding_opportunities (content_hash);
+      CREATE INDEX IF NOT EXISTS idx_funding_opportunities_slug ON funding_opportunities (slug);
 
       CREATE TABLE IF NOT EXISTS scraper_runs (
         id SERIAL PRIMARY KEY,
@@ -59,6 +66,13 @@ export async function initScrapersDb() {
     console.error('[DB] Error initializing Funding Scraper tables:', err.message);
   } finally {
     client.release();
+  }
+
+  // Ensure SEO columns are present and backfilled if any missing
+  try {
+    await migrateSeoColumns();
+  } catch (err) {
+    console.error('[DB] Error ensuring SEO columns:', err.message);
   }
 }
 

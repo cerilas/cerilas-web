@@ -438,7 +438,7 @@ app.get('/robots.txt', (req, res) => {
   if (fs.existsSync(publicRobots)) {
     return res.sendFile(publicRobots);
   }
-  res.type('text/plain').send('User-agent: *\nAllow: /\nSitemap: https://tools.cerilas.com/sitemap.xml\n');
+  res.type('text/plain').send('User-agent: *\nAllow: /\nSitemap: https://tools.cerilas.com/sitemap.xml\nSitemap: https://tools.cerilas.com/sitemap-grants.xml\n');
 });
 
 app.get('/sitemap.xml', (req, res) => {
@@ -453,6 +453,39 @@ app.get('/sitemap.xml', (req, res) => {
     return res.sendFile(publicSitemap);
   }
   res.status(404).send('Sitemap not found');
+});
+
+// Dynamic XML Sitemap for Scraped EU & Cascade Funding Opportunities
+app.get('/sitemap-grants.xml', async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT slug, last_scraped_at, last_changed_at, first_scraped_at
+      FROM funding_opportunities
+      WHERE status = 'open' AND slug IS NOT NULL
+      ORDER BY last_scraped_at DESC
+    `);
+
+    let xml = `<?xml version="1.0" encoding="UTF-8"?>\n`;
+    xml += `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n`;
+
+    for (const row of result.rows) {
+      const date = (row.last_changed_at || row.last_scraped_at || row.first_scraped_at || new Date()).toISOString().slice(0, 10);
+      xml += `  <url>\n`;
+      xml += `    <loc>https://tools.cerilas.com/tool/eu-funding-opportunities/${row.slug}</loc>\n`;
+      xml += `    <lastmod>${date}</lastmod>\n`;
+      xml += `    <changefreq>daily</changefreq>\n`;
+      xml += `    <priority>0.85</priority>\n`;
+      xml += `  </url>\n`;
+    }
+
+    xml += `</urlset>`;
+
+    res.header('Content-Type', 'application/xml');
+    res.send(xml);
+  } catch (err) {
+    console.error('Error generating grants sitemap:', err.message);
+    res.status(500).send('Error generating sitemap');
+  }
 });
 
 app.get(['/llms.txt', '/llm.txt'], (req, res) => {
@@ -582,6 +615,14 @@ const toolsSeoMap = {
     category: 'Media & Video',
     rating: '4.9',
     ratingCount: '1850'
+  },
+  'eu-funding-opportunities': {
+    title: 'EU Funding & Cascade Funding Opportunities (2026) – Live Horizon Europe & FSTP Grants | Cerilas Tools',
+    description: 'Search and filter 600+ open European Commission calls, Horizon Europe research grants, and Cascade Funding (FSTP) equity-free lump-sum sub-grants. Deadline trackers and eligibility guides.',
+    keywords: 'EU funding, Horizon Europe, Cascade funding open calls, FSTP grants, European Commission funding tenders, research grants 2026, startup grants europe',
+    category: 'R&D & Engineering',
+    rating: '4.9',
+    ratingCount: '1680'
   }
 };
 
@@ -594,7 +635,51 @@ app.get('{*path}', async (req, res) => {
     }
     let html = await fs.promises.readFile(indexPath, 'utf-8');
 
-    // Check if the URL matches a tool path
+    // 1. Check if URL matches an individual grant opportunity sub-path
+    const grantMatch = req.path.match(/^\/tools?\/eu-funding-opportunities\/([a-zA-Z0-9_-]+)\/?$/);
+    if (grantMatch) {
+      const grantSlug = grantMatch[1];
+      try {
+        const grantRes = await pool.query(
+          `SELECT id, title, slug, seo_title, meta_description, meta_keywords, schema_json, short_description 
+           FROM funding_opportunities 
+           WHERE slug = $1 OR external_id = $1 LIMIT 1`,
+          [grantSlug]
+        );
+        if (grantRes.rows.length > 0) {
+          const opp = grantRes.rows[0];
+          const canonicalUrl = `https://tools.cerilas.com/tool/eu-funding-opportunities/${opp.slug}`;
+          const ogImg = 'https://tools.cerilas.com/tool-icons/eu-funding-opportunities.webp';
+          const pageTitle = opp.seo_title || `${opp.title} | EU Horizon Grants`;
+          const pageDesc = opp.meta_description || opp.short_description || `Apply for ${opp.title} on Cerilas Tools.`;
+          const pageKeywords = opp.meta_keywords || 'EU funding, Horizon Europe, Cascade funding, grants 2026';
+
+          html = html.replace(/<title>.*?<\/title>/i, `<title>${pageTitle}</title>`);
+          const metaTags = [
+            `<meta name="description" content="${pageDesc.replace(/"/g, '&quot;')}" />`,
+            `<meta name="keywords" content="${pageKeywords.replace(/"/g, '&quot;')}" />`,
+            `<link rel="canonical" href="${canonicalUrl}" />`,
+            `<meta property="og:type" content="article" />`,
+            `<meta property="og:title" content="${pageTitle.replace(/"/g, '&quot;')}" />`,
+            `<meta property="og:description" content="${pageDesc.replace(/"/g, '&quot;')}" />`,
+            `<meta property="og:url" content="${canonicalUrl}" />`,
+            `<meta property="og:image" content="${ogImg}" />`,
+            `<meta name="twitter:card" content="summary_large_image" />`,
+            `<meta name="twitter:title" content="${pageTitle.replace(/"/g, '&quot;')}" />`,
+            `<meta name="twitter:description" content="${pageDesc.replace(/"/g, '&quot;')}" />`,
+            `<meta name="twitter:image" content="${ogImg}" />`,
+            opp.schema_json ? `<script type="application/ld+json">\n    ${JSON.stringify(opp.schema_json, null, 2)}\n    </script>` : ''
+          ].filter(Boolean).join('\n    ');
+
+          html = html.replace('</head>', `    ${metaTags}\n  </head>`);
+          return res.send(html);
+        }
+      } catch (err) {
+        console.warn('Error fetching grant SEO metadata for SSR:', err.message);
+      }
+    }
+
+    // 2. Check if the URL matches a tool path
     const match = req.path.match(/^\/tools?\/([a-zA-Z0-9_-]+)\/?$/);
     const slug = match ? match[1] : null;
     const toolMeta = slug ? toolsSeoMap[slug] : null;
