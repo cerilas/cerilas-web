@@ -81,6 +81,17 @@ export default function Navbar() {
                   {t.nav[key]}
                 </NavLink>
               ))}
+              <a
+                href="https://tools.cerilas.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className={`px-2 xl:px-3 py-2 text-[13px] xl:text-sm font-medium rounded-md transition-colors inline-flex items-center gap-1.5 ${navTextClass}`}
+              >
+                <span>Tools</span>
+                <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded leading-none bg-cyan-950 text-cyan-400 border border-cyan-800/60">
+                  Free
+                </span>
+              </a>
             </div>
 
             {/* Show Main + Dropdown on LG screens */}
@@ -152,6 +163,21 @@ export default function Navbar() {
                           {t.nav[key]}
                         </NavLink>
                       ))}
+                      <a
+                        href="https://tools.cerilas.com"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={`px-4 py-2 text-sm transition-colors flex items-center justify-between ${
+                          useLightNavigation
+                            ? "text-slate-600 hover:text-slate-950 hover:bg-slate-900/5"
+                            : "text-gray-400 hover:text-white hover:bg-white/5"
+                        }`}
+                      >
+                        <span>Cerilas Tools</span>
+                        <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded leading-none bg-cyan-950 text-cyan-400 border border-cyan-800/60">
+                          Free
+                        </span>
+                      </a>
                     </Motion.div>
                   )}
                 </AnimatePresence>
@@ -250,6 +276,22 @@ export default function Navbar() {
                   {t.nav[key]}
                 </NavLink>
               ))}
+              <a
+                href="https://tools.cerilas.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => setMenuOpen(false)}
+                className={`px-4 py-3 text-sm font-medium rounded-md transition-colors flex items-center justify-between ${
+                  resolvedTheme === "light"
+                    ? "text-slate-600 hover:text-slate-950 hover:bg-slate-900/5"
+                    : "text-gray-300 hover:text-white hover:bg-white/5"
+                }`}
+              >
+                <span>Cerilas Tools</span>
+                <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded leading-none bg-cyan-950 text-cyan-400 border border-cyan-800/60">
+                  Free
+                </span>
+              </a>
               <div className={`pt-3 border-t mt-2 ${resolvedTheme === "light" ? "border-slate-200" : "border-gray-800"}`}>
                 <button
                   onClick={toggleLang}
