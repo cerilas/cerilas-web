@@ -31,6 +31,10 @@ const pool = new Pool({
   max: 20
 });
 
+pool.on('error', (err) => {
+  console.error('Unexpected error on idle PostgreSQL client:', err.message);
+});
+
 const defaultAuthDbUrl = 'postgresql://postgres:hsoBagLNcqmWtixlkrDzDrkkbBVjaIfY@roundhouse.proxy.rlwy.net:48765/railway';
 const authConnectionString = (process.env.AUTH_DATABASE_URL && !isInvalidHost(process.env.AUTH_DATABASE_URL))
   ? process.env.AUTH_DATABASE_URL
