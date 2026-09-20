@@ -45,13 +45,17 @@ export function useToolAnalytics(toolSlug, initialMeta = null) {
     if (!toolSlug) return null;
     try {
       const visitorId = getOrCreateVisitorId();
+      const isWebDriver = typeof navigator !== 'undefined' ? Boolean(navigator.webdriver) : false;
       const res = await fetch(`/api/tools/${toolSlug}/event`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
           eventType, 
           visitorId,
-          metadata 
+          metadata: {
+            ...metadata,
+            isWebDriver
+          }
         })
       });
       if (res.ok) {

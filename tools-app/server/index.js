@@ -17,6 +17,7 @@ import llmsTxtRouter from './routes/llmsTxt.js';
 import htmlToMarkdownRouter from './routes/htmlToMarkdown.js';
 import scrapersRouter from './routes/scrapers.js';
 import authRouter from './routes/auth.js';
+import { detectBot } from './utils/botDetector.js';
 import { initScrapersDb } from './migrations/init-scrapers-db.js';
 import { checkAiRateLimit, getClientIp } from './utils/aiRateLimit.js';
 
@@ -162,7 +163,7 @@ app.get('/api/tools/:slug', async (req, res) => {
   }
 });
 
-// Record event and update tool stats with unique visitor tracking
+// Record event and update tool stats with unique visitor tracking (Human vs Bot separation)
 app.post('/api/tools/:slug/event', async (req, res) => {
   try {
     const { slug } = req.params;
@@ -172,74 +173,111 @@ app.post('/api/tools/:slug/event', async (req, res) => {
       return res.status(400).json({ status: 'error', message: 'eventType is required' });
     }
 
-    // Insert into events table with visitor_id
+    const botInfo = detectBot(req, metadata);
+    const isBot = botInfo.isBot;
+    const botName = botInfo.botName;
+    const clientType = botInfo.category;
+
+    // Insert into events table with visitor_id, is_bot, bot_name, client_type
     await pool.query(
-      'INSERT INTO tool_usage_events (tool_slug, event_type, visitor_id, metadata) VALUES ($1, $2, $3, $4)',
-      [slug, eventType, visitorId || null, JSON.stringify(metadata)]
+      `INSERT INTO tool_usage_events (tool_slug, event_type, visitor_id, metadata, is_bot, bot_name, client_type) 
+       VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+      [slug, eventType, visitorId || null, JSON.stringify(metadata), isBot, botName, clientType]
     );
 
-    // Update counters on cerilas_tools
-    if (eventType === 'view') {
-      // 1. Increment total views
-      await pool.query(
-        'UPDATE cerilas_tools SET view_count = COALESCE(view_count, 0) + 1 WHERE slug = $1',
-        [slug]
-      );
-
-      // 2. Track unique visitor via persistent cookie ID
-      if (visitorId) {
-        const uniqueRes = await pool.query(
-          `INSERT INTO tool_unique_visitors (tool_slug, visitor_id)
-           VALUES ($1, $2)
-           ON CONFLICT (tool_slug, visitor_id)
-           DO UPDATE SET last_visited_at = NOW(), view_count = tool_unique_visitors.view_count + 1
-           RETURNING (xmax = 0) AS is_new_visitor`,
-          [slug, visitorId]
+    if (isBot) {
+      // 1. BOT TRAFFIC: Only update separate bot counters, NEVER modify real human metrics
+      if (eventType === 'view') {
+        await pool.query(
+          'UPDATE cerilas_tools SET bot_view_count = COALESCE(bot_view_count, 0) + 1 WHERE slug = $1',
+          [slug]
         );
 
-        if (uniqueRes.rows.length > 0 && uniqueRes.rows[0].is_new_visitor) {
-          await pool.query(
-            'UPDATE cerilas_tools SET unique_visitors_count = COALESCE(unique_visitors_count, 0) + 1 WHERE slug = $1',
-            [slug]
+        if (visitorId) {
+          const uniqueBotRes = await pool.query(
+            `INSERT INTO tool_unique_visitors (tool_slug, visitor_id, is_bot, bot_name, client_type)
+             VALUES ($1, $2, true, $3, $4)
+             ON CONFLICT (tool_slug, visitor_id)
+             DO UPDATE SET last_visited_at = NOW(), view_count = tool_unique_visitors.view_count + 1
+             RETURNING (xmax = 0) AS is_new_visitor`,
+            [slug, visitorId, botName, clientType]
           );
+
+          if (uniqueBotRes.rows.length > 0 && uniqueBotRes.rows[0].is_new_visitor) {
+            await pool.query(
+              'UPDATE cerilas_tools SET bot_unique_visitors_count = COALESCE(bot_unique_visitors_count, 0) + 1 WHERE slug = $1',
+              [slug]
+            );
+          }
         }
       }
-    } else if (
-      eventType === 'download' || 
-      eventType.startsWith('download') || 
-      eventType === 'session_complete' || 
-      eventType === 'complete_session'
-    ) {
-      // Real conversion! (downloads, exports, and completed pomodoro focus sessions)
-      await pool.query(
-        `UPDATE cerilas_tools 
-         SET download_count = COALESCE(download_count, 0) + 1, 
-             use_count = COALESCE(use_count, 0) + 1, 
-             last_used_at = NOW() 
-         WHERE slug = $1`,
-        [slug]
-      );
-    } else if (eventType === 'copy') {
-      // Direct clipboard copy conversion
-      await pool.query(
-        `UPDATE cerilas_tools 
-         SET copy_count = COALESCE(copy_count, 0) + 1, 
-             use_count = COALESCE(use_count, 0) + 1, 
-             last_used_at = NOW() 
-         WHERE slug = $1`,
-        [slug]
-      );
     } else {
-      // General in-app interaction (e.g. preview generation, batch upload)
-      await pool.query(
-        'UPDATE cerilas_tools SET use_count = COALESCE(use_count, 0) + 1, last_used_at = NOW() WHERE slug = $1',
-        [slug]
-      );
+      // 2. REAL HUMAN TRAFFIC: Update primary human metrics
+      if (eventType === 'view') {
+        // 1. Increment total human views
+        await pool.query(
+          'UPDATE cerilas_tools SET view_count = COALESCE(view_count, 0) + 1 WHERE slug = $1',
+          [slug]
+        );
+
+        // 2. Track unique human visitor via persistent cookie ID
+        if (visitorId) {
+          const uniqueRes = await pool.query(
+            `INSERT INTO tool_unique_visitors (tool_slug, visitor_id, is_bot, client_type)
+             VALUES ($1, $2, false, 'human')
+             ON CONFLICT (tool_slug, visitor_id)
+             DO UPDATE SET last_visited_at = NOW(), view_count = tool_unique_visitors.view_count + 1
+             RETURNING (xmax = 0) AS is_new_visitor`,
+            [slug, visitorId]
+          );
+
+          if (uniqueRes.rows.length > 0 && uniqueRes.rows[0].is_new_visitor) {
+            await pool.query(
+              'UPDATE cerilas_tools SET unique_visitors_count = COALESCE(unique_visitors_count, 0) + 1 WHERE slug = $1',
+              [slug]
+            );
+          }
+        }
+      } else if (
+        eventType === 'download' || 
+        eventType.startsWith('download') || 
+        eventType === 'session_complete' || 
+        eventType === 'complete_session'
+      ) {
+        // Real human conversion!
+        await pool.query(
+          `UPDATE cerilas_tools 
+           SET download_count = COALESCE(download_count, 0) + 1, 
+               use_count = COALESCE(use_count, 0) + 1, 
+               last_used_at = NOW() 
+           WHERE slug = $1`,
+          [slug]
+        );
+      } else if (eventType === 'copy') {
+        // Direct clipboard copy conversion
+        await pool.query(
+          `UPDATE cerilas_tools 
+           SET copy_count = COALESCE(copy_count, 0) + 1, 
+               use_count = COALESCE(use_count, 0) + 1, 
+               last_used_at = NOW() 
+           WHERE slug = $1`,
+          [slug]
+        );
+      } else {
+        // General in-app human interaction
+        await pool.query(
+          'UPDATE cerilas_tools SET use_count = COALESCE(use_count, 0) + 1, last_used_at = NOW() WHERE slug = $1',
+          [slug]
+        );
+      }
     }
 
     // Fetch updated counters for instant real-time client UI sync
     const statsRes = await pool.query(
-      'SELECT view_count, unique_visitors_count, download_count, copy_count, use_count FROM cerilas_tools WHERE slug = $1',
+      `SELECT view_count, unique_visitors_count, download_count, copy_count, use_count, 
+              COALESCE(bot_view_count, 0) as bot_view_count,
+              COALESCE(bot_unique_visitors_count, 0) as bot_unique_visitors_count
+       FROM cerilas_tools WHERE slug = $1`,
       [slug]
     );
     const stats = statsRes.rows[0] || {};
@@ -247,6 +285,8 @@ app.post('/api/tools/:slug/event', async (req, res) => {
     res.json({ 
       status: 'success', 
       message: 'Event tracked successfully',
+      isBot,
+      botName,
       stats
     });
   } catch (error) {
@@ -255,7 +295,7 @@ app.post('/api/tools/:slug/event', async (req, res) => {
   }
 });
 
-// Central stats overview endpoint
+// Central stats overview endpoint (with strict Human vs Bot separation)
 app.get('/api/tools/stats/overview', async (req, res) => {
   try {
     const toolsResult = await pool.query(`
@@ -263,6 +303,8 @@ app.get('/api/tools/stats/overview', async (req, res) => {
         id, title, slug, category, 
         COALESCE(view_count, 0) as view_count, 
         COALESCE(unique_visitors_count, 0) as unique_visitors_count,
+        COALESCE(bot_view_count, 0) as bot_view_count,
+        COALESCE(bot_unique_visitors_count, 0) as bot_unique_visitors_count,
         COALESCE(download_count, 0) as download_count,
         COALESCE(copy_count, 0) as copy_count,
         COALESCE(use_count, 0) as use_count, 
@@ -287,6 +329,8 @@ app.get('/api/tools/stats/overview', async (req, res) => {
         COUNT(CASE WHEN is_active = true THEN 1 END)::int as active_tools,
         COALESCE(SUM(view_count), 0)::int as total_views,
         COALESCE(SUM(unique_visitors_count), 0)::int as total_unique_visitors,
+        COALESCE(SUM(bot_view_count), 0)::int as total_bot_views,
+        COALESCE(SUM(bot_unique_visitors_count), 0)::int as total_unique_bots,
         COALESCE(SUM(download_count), 0)::int as total_downloads,
         COALESCE(SUM(copy_count), 0)::int as total_copies,
         COALESCE(SUM(use_count), 0)::int as total_uses,
@@ -304,15 +348,15 @@ app.get('/api/tools/stats/overview', async (req, res) => {
       FROM cerilas_tools
     `);
 
-    // Calculate real-time live visitors (active within last 30 minutes)
+    // Calculate real-time human live visitors (active within last 30 minutes)
     let liveVisitorsCount = 1;
     try {
       const liveRes = await pool.query(`
         SELECT COUNT(DISTINCT visitor_id)::int as live_visitors_30m
         FROM (
-          SELECT visitor_id FROM tool_usage_events WHERE created_at >= NOW() - INTERVAL '30 minutes'
+          SELECT visitor_id FROM tool_usage_events WHERE is_bot = false AND created_at >= NOW() - INTERVAL '30 minutes'
           UNION
-          SELECT visitor_id FROM tool_unique_visitors WHERE last_visited_at >= NOW() - INTERVAL '30 minutes'
+          SELECT visitor_id FROM tool_unique_visitors WHERE is_bot = false AND last_visited_at >= NOW() - INTERVAL '30 minutes'
         ) active_sub
       `);
       liveVisitorsCount = Math.max(parseInt(liveRes.rows[0]?.live_visitors_30m || 0, 10), 1);
@@ -320,17 +364,57 @@ app.get('/api/tools/stats/overview', async (req, res) => {
       console.warn('Could not query live visitors, defaulting to 1:', e.message);
     }
 
+    // Calculate live bots in the last 30 minutes
+    let liveBotsCount = 0;
+    try {
+      const liveBotRes = await pool.query(`
+        SELECT COUNT(DISTINCT visitor_id)::int as live_bots_30m
+        FROM (
+          SELECT visitor_id FROM tool_usage_events WHERE is_bot = true AND created_at >= NOW() - INTERVAL '30 minutes'
+          UNION
+          SELECT visitor_id FROM tool_unique_visitors WHERE is_bot = true AND last_visited_at >= NOW() - INTERVAL '30 minutes'
+        ) bot_sub
+      `);
+      liveBotsCount = parseInt(liveBotRes.rows[0]?.live_bots_30m || 0, 10);
+    } catch (e) {
+      console.warn('Could not query live bots:', e.message);
+    }
+
+    // Human events breakdown
     const eventBreakdown = await pool.query(`
       SELECT event_type, COUNT(*)::int as count 
       FROM tool_usage_events 
+      WHERE is_bot = false
       GROUP BY event_type 
       ORDER BY count DESC
     `);
 
-    const recentEvents = await pool.query(`
+    // Bot crawler breakdown
+    const botBreakdown = await pool.query(`
+      SELECT COALESCE(bot_name, 'Generic Crawler') as bot_name, COUNT(*)::int as count 
+      FROM tool_usage_events 
+      WHERE is_bot = true
+      GROUP BY bot_name 
+      ORDER BY count DESC
+      LIMIT 10
+    `);
+
+    // Recent human events
+    const recentHumanEvents = await pool.query(`
       SELECT e.id, e.tool_slug, t.title as tool_title, e.event_type, e.visitor_id, e.metadata, e.created_at
       FROM tool_usage_events e
       LEFT JOIN cerilas_tools t ON t.slug = e.tool_slug
+      WHERE e.is_bot = false
+      ORDER BY e.created_at DESC
+      LIMIT 15
+    `);
+
+    // Recent bot crawler events
+    const recentBotEvents = await pool.query(`
+      SELECT e.id, e.tool_slug, t.title as tool_title, e.bot_name, e.client_type, e.metadata, e.created_at
+      FROM tool_usage_events e
+      LEFT JOIN cerilas_tools t ON t.slug = e.tool_slug
+      WHERE e.is_bot = true
       ORDER BY e.created_at DESC
       LIMIT 15
     `);
@@ -340,6 +424,8 @@ app.get('/api/tools/stats/overview', async (req, res) => {
       active_tools: 0, 
       total_views: 0, 
       total_unique_visitors: 0,
+      total_bot_views: 0,
+      total_unique_bots: 0,
       total_downloads: 0, 
       total_copies: 0,
       total_uses: 0,
@@ -348,6 +434,12 @@ app.get('/api/tools/stats/overview', async (req, res) => {
       overall_total_cvr: 0
     };
     summaryData.live_visitors = liveVisitorsCount;
+    summaryData.live_bots = liveBotsCount;
+
+    const totalTraffic = (summaryData.total_views || 0) + (summaryData.total_bot_views || 0);
+    const humanTrafficRatio = totalTraffic > 0 
+      ? Math.round(((summaryData.total_views || 0) / totalTraffic) * 100)
+      : 100;
 
     res.json({
       status: 'success',
@@ -355,7 +447,16 @@ app.get('/api/tools/stats/overview', async (req, res) => {
         summary: summaryData,
         tools: toolsResult.rows,
         eventTypes: eventBreakdown.rows,
-        recentEvents: recentEvents.rows
+        recentEvents: recentHumanEvents.rows,
+        botAnalytics: {
+          totalBotViews: summaryData.total_bot_views || 0,
+          totalUniqueBots: summaryData.total_unique_bots || 0,
+          liveBots30m: liveBotsCount,
+          humanTrafficRatio,
+          botTrafficRatio: 100 - humanTrafficRatio,
+          botBreakdown: botBreakdown.rows,
+          recentBotEvents: recentBotEvents.rows
+        }
       }
     });
   } catch (error) {
@@ -687,6 +788,29 @@ app.get('{*path}', async (req, res) => {
     const match = req.path.match(/^\/tools?\/([a-zA-Z0-9_-]+)\/?$/);
     const slug = match ? match[1] : null;
     const toolMeta = slug ? toolsSeoMap[slug] : null;
+
+    // Track bot/crawler visits asynchronously during SSR
+    if (slug) {
+      const botInfo = detectBot(req);
+      if (botInfo.isBot) {
+        pool.query(
+          'UPDATE cerilas_tools SET bot_view_count = COALESCE(bot_view_count, 0) + 1 WHERE slug = $1',
+          [slug]
+        ).catch(() => {});
+
+        pool.query(
+          `INSERT INTO tool_usage_events (tool_slug, event_type, visitor_id, metadata, is_bot, bot_name, client_type)
+           VALUES ($1, 'crawler_visit', $2, $3, true, $4, $5)`,
+          [
+            slug,
+            botInfo.botName || 'crawler',
+            JSON.stringify({ ip: req.ip, ua: req.headers['user-agent'] }),
+            botInfo.botName,
+            botInfo.category
+          ]
+        ).catch(() => {});
+      }
+    }
 
     if (toolMeta) {
       const canonicalUrl = `https://tools.cerilas.com/tool/${slug}`;

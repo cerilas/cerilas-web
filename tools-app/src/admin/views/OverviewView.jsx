@@ -8,28 +8,39 @@ import {
   Activity, 
   Eye, 
   Layers,
-  ArrowUpRight
+  ArrowUpRight,
+  ShieldCheck,
+  Bot,
+  Search
 } from 'lucide-react';
 
 export default function OverviewView({ statsOverview = null, tools = [], onSelectToolTab }) {
-  const totals = statsOverview?.totals || {};
-  const liveVisitors = statsOverview?.liveVisitors || 1;
-  const eventBreakdown = statsOverview?.eventBreakdown || [];
+  const totals = statsOverview?.summary || statsOverview?.totals || {};
+  const liveVisitors = totals.live_visitors !== undefined ? totals.live_visitors : (statsOverview?.liveVisitors || 1);
+  const botAnalytics = statsOverview?.botAnalytics || {};
 
-  // Sort tools by total usage
+  // Sort tools by total human usage
   const topTools = [...tools].sort((a, b) => {
     const aTotal = (a.download_count || 0) + (a.copy_count || 0) + (a.use_count || 0);
     const bTotal = (b.download_count || 0) + (b.copy_count || 0) + (b.use_count || 0);
     return bTotal - aTotal;
   }).slice(0, 6);
 
+  const humanViews = totals.total_views || tools.reduce((acc, t) => acc + (t.view_count || 0), 0);
+  const humanTasks = totals.total_tasks_completed || tools.reduce((acc, t) => acc + (t.download_count || 0) + (t.copy_count || 0) + (t.use_count || 0), 0);
+  const humanCvr = totals.overall_total_cvr || '0.0';
+  const humanRatio = botAnalytics.humanTrafficRatio !== undefined ? botAnalytics.humanTrafficRatio : 100;
+  const botRatio = botAnalytics.botTrafficRatio !== undefined ? botAnalytics.botTrafficRatio : 0;
+  const totalBotViews = botAnalytics.totalBotViews || totals.total_bot_views || 0;
+  const liveBots = botAnalytics.liveBots30m !== undefined ? botAnalytics.liveBots30m : (totals.live_bots || 0);
+
   return (
     <div className="admin-body">
-      {/* Overview Top Metric Cards */}
+      {/* Overview Top Metric Cards (Real Human Traffic) */}
       <div className="admin-kpi-grid">
         <div className="admin-kpi-card">
           <div className="admin-kpi-header">
-            <span className="admin-kpi-label">Active Users (30m)</span>
+            <span className="admin-kpi-label">Active Human Users (30m)</span>
             <div className="admin-kpi-icon-wrap" style={{ background: 'rgba(16, 185, 129, 0.1)', color: '#10b981' }}>
               <Users size={16} />
             </div>
@@ -38,53 +49,134 @@ export default function OverviewView({ statsOverview = null, tools = [], onSelec
             {liveVisitors}
           </div>
           <div className="admin-kpi-sub">
-            <span>Real-time active sessions</span>
+            <span>Verified human active sessions</span>
           </div>
         </div>
 
         <div className="admin-kpi-card">
           <div className="admin-kpi-header">
-            <span className="admin-kpi-label">Total Platform Views</span>
+            <span className="admin-kpi-label">Human Platform Views</span>
             <div className="admin-kpi-icon-wrap" style={{ background: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6' }}>
               <Eye size={16} />
             </div>
           </div>
           <div className="admin-kpi-val">
-            {(totals.total_views || tools.reduce((acc, t) => acc + (t.view_count || 0), 0)).toLocaleString()}
+            {humanViews.toLocaleString()}
           </div>
           <div className="admin-kpi-sub">
-            <span>Cumulative page impressions</span>
+            <span>Real human page impressions</span>
           </div>
         </div>
 
         <div className="admin-kpi-card">
           <div className="admin-kpi-header">
-            <span className="admin-kpi-label">Tasks Completed</span>
+            <span className="admin-kpi-label">Human Tasks Completed</span>
             <div className="admin-kpi-icon-wrap" style={{ background: 'rgba(168, 85, 247, 0.1)', color: '#a855f7' }}>
               <Download size={16} />
             </div>
           </div>
           <div className="admin-kpi-val">
-            {(totals.total_tasks_completed || tools.reduce((acc, t) => acc + (t.download_count || 0) + (t.copy_count || 0) + (t.use_count || 0), 0)).toLocaleString()}
+            {humanTasks.toLocaleString()}
           </div>
           <div className="admin-kpi-sub">
-            <span>Exports, generations & edits</span>
+            <span>Exports, generations & conversions</span>
           </div>
         </div>
 
         <div className="admin-kpi-card">
           <div className="admin-kpi-header">
-            <span className="admin-kpi-label">Overall Conversion</span>
+            <span className="admin-kpi-label">Human Conversion Rate</span>
             <div className="admin-kpi-icon-wrap" style={{ background: 'rgba(234, 179, 8, 0.1)', color: '#eab308' }}>
               <TrendingUp size={16} />
             </div>
           </div>
           <div className="admin-kpi-val" style={{ color: '#3b82f6' }}>
-            {totals.overall_total_cvr || '34.2'}%
+            {humanCvr}%
           </div>
           <div className="admin-kpi-sub">
-            <span>High-intent interaction rate</span>
+            <span>Real user task completion rate</span>
           </div>
+        </div>
+      </div>
+
+      {/* Traffic Integrity & Bot Isolation Banner */}
+      <div style={{
+        background: 'var(--card-bg, #ffffff)',
+        border: '1px solid var(--card-border, rgba(0,0,0,0.07))',
+        borderRadius: 18,
+        padding: '1.25rem 1.5rem',
+        marginBottom: '2rem',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '0.85rem'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+            <div style={{
+              width: 32,
+              height: 32,
+              borderRadius: 8,
+              background: 'rgba(16, 185, 129, 0.1)',
+              color: '#10b981',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}>
+              <ShieldCheck size={18} />
+            </div>
+            <div>
+              <div style={{ fontWeight: 700, fontSize: '0.95rem' }}>Traffic Integrity & Bot Isolation</div>
+              <div style={{ fontSize: '0.76rem', color: 'var(--text-muted)' }}>
+                Search engine spiders and AI crawlers are strictly filtered out of all primary analytics.
+              </div>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
+            <span style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.35rem',
+              padding: '0.3rem 0.65rem',
+              borderRadius: 999,
+              background: 'rgba(16, 185, 129, 0.08)',
+              border: '1px solid rgba(16, 185, 129, 0.25)',
+              fontSize: '0.78rem',
+              fontWeight: 600,
+              color: '#10b981'
+            }}>
+              <Users size={12} />
+              {humanRatio}% Human Traffic
+            </span>
+
+            <span style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.35rem',
+              padding: '0.3rem 0.65rem',
+              borderRadius: 999,
+              background: 'rgba(168, 85, 247, 0.08)',
+              border: '1px solid rgba(168, 85, 247, 0.25)',
+              fontSize: '0.78rem',
+              fontWeight: 600,
+              color: '#a855f7'
+            }}>
+              <Bot size={12} />
+              {totalBotViews} Bot Hits Isolated ({liveBots} active)
+            </span>
+          </div>
+        </div>
+
+        {/* Visual traffic split bar */}
+        <div style={{ display: 'flex', height: 8, borderRadius: 999, overflow: 'hidden', background: 'rgba(150, 150, 150, 0.1)' }}>
+          <div 
+            style={{ width: `${humanRatio}%`, background: 'linear-gradient(90deg, #10b981, #3b82f6)', transition: 'width 0.4s ease' }} 
+            title={`Human Traffic: ${humanRatio}%`}
+          />
+          <div 
+            style={{ width: `${botRatio}%`, background: 'linear-gradient(90deg, #a855f7, #ec4899)', transition: 'width 0.4s ease' }} 
+            title={`Bot & Crawler Traffic: ${botRatio}%`}
+          />
         </div>
       </div>
 
@@ -102,7 +194,7 @@ export default function OverviewView({ statsOverview = null, tools = [], onSelec
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem' }}>
             <div>
               <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 700 }}>Top Performing Tools</h3>
-              <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>Ranked by user tasks and engagement</span>
+              <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>Ranked by real user tasks and engagement</span>
             </div>
             <button 
               type="button" 
@@ -155,7 +247,7 @@ export default function OverviewView({ statsOverview = null, tools = [], onSelec
                       {taskCount.toLocaleString()} tasks
                     </div>
                     <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
-                      {tool.unique_visitors_count ? `${tool.unique_visitors_count} visitors` : 'Active'}
+                      {tool.unique_visitors_count ? `${tool.unique_visitors_count} human visitors` : 'Active'}
                     </div>
                   </div>
                 </div>
@@ -205,7 +297,7 @@ export default function OverviewView({ statsOverview = null, tools = [], onSelec
                 <span style={{ fontSize: '0.8rem', fontWeight: 700 }}>Active</span>
               </div>
               <p style={{ margin: 0, fontSize: '0.78rem', color: 'var(--text-muted)', lineHeight: 1.45 }}>
-                Real-time unique browser visitor tracking with zero CLS layout shifts and privacy-first cookie tokens.
+                Real-time unique human visitor tracking with bot isolation and privacy-first cookie tokens.
               </p>
             </div>
           </div>

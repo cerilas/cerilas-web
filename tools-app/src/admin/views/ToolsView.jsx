@@ -50,6 +50,8 @@ export default function ToolsView({ tools = [], statsOverview = null, loading = 
       const uniqueVisitors = dbStat.unique_visitors_count !== undefined 
         ? dbStat.unique_visitors_count 
         : (tool.unique_visitors_count || 0);
+      const botViews = dbStat.bot_view_count !== undefined ? dbStat.bot_view_count : (tool.bot_view_count || 0);
+      const botUniqueVisitors = dbStat.bot_unique_visitors_count !== undefined ? dbStat.bot_unique_visitors_count : (tool.bot_unique_visitors_count || 0);
       const downloads = dbStat.download_count !== undefined ? dbStat.download_count : (tool.download_count || 0);
       const copies = dbStat.copy_count !== undefined ? dbStat.copy_count : (tool.copy_count || 0);
       const uses = dbStat.use_count !== undefined ? dbStat.use_count : (tool.use_count || 0);
@@ -62,6 +64,8 @@ export default function ToolsView({ tools = [], statsOverview = null, loading = 
       return {
         ...tool,
         unique_visitors_count: uniqueVisitors,
+        bot_view_count: botViews,
+        bot_unique_visitors_count: botUniqueVisitors,
         download_count: downloads,
         copy_count: copies,
         use_count: uses,
@@ -126,20 +130,20 @@ export default function ToolsView({ tools = [], statsOverview = null, loading = 
 
         <div className="admin-kpi-card">
           <div className="admin-kpi-header">
-            <span className="admin-kpi-label">Unique Visitors</span>
+            <span className="admin-kpi-label">Human Visitors</span>
             <div className="admin-kpi-icon-wrap" style={{ background: 'rgba(168, 85, 247, 0.1)', color: '#a855f7' }}>
               <Users size={16} />
             </div>
           </div>
           <div className="admin-kpi-val">{totalVisitorsCount.toLocaleString()}</div>
           <div className="admin-kpi-sub">
-            <span>Verified browser devices</span>
+            <span>Verified human devices</span>
           </div>
         </div>
 
         <div className="admin-kpi-card">
           <div className="admin-kpi-header">
-            <span className="admin-kpi-label">Tasks Executed</span>
+            <span className="admin-kpi-label">Human Tasks Completed</span>
             <div className="admin-kpi-icon-wrap" style={{ background: 'rgba(16, 185, 129, 0.1)', color: '#10b981' }}>
               <Download size={16} />
             </div>
@@ -148,13 +152,13 @@ export default function ToolsView({ tools = [], statsOverview = null, loading = 
             {totalTasksCompleted.toLocaleString()}
           </div>
           <div className="admin-kpi-sub">
-            <span>Downloads, copies & generations</span>
+            <span>Downloads, copies & exports</span>
           </div>
         </div>
 
         <div className="admin-kpi-card">
           <div className="admin-kpi-header">
-            <span className="admin-kpi-label">Conversion Rate</span>
+            <span className="admin-kpi-label">Human Conversion (CVR)</span>
             <div className="admin-kpi-icon-wrap" style={{ background: 'rgba(234, 179, 8, 0.1)', color: '#eab308' }}>
               <TrendingUp size={16} />
             </div>
@@ -163,7 +167,7 @@ export default function ToolsView({ tools = [], statsOverview = null, loading = 
             {avgCvr}%
           </div>
           <div className="admin-kpi-sub">
-            <span>Visitor to task conversion</span>
+            <span>Human visitor to task conversion</span>
           </div>
         </div>
       </div>
@@ -224,9 +228,9 @@ export default function ToolsView({ tools = [], statsOverview = null, loading = 
                   <th>Tool</th>
                   <th>Category</th>
                   <th>Engine / Privacy</th>
-                  <th>Visitors</th>
-                  <th>Tasks Done</th>
-                  <th>CVR</th>
+                  <th>Human Visitors</th>
+                  <th>Human Tasks</th>
+                  <th>Human CVR</th>
                   <th style={{ textAlign: 'right' }}>Actions</th>
                 </tr>
               </thead>
@@ -278,9 +282,28 @@ export default function ToolsView({ tools = [], statsOverview = null, loading = 
                         )}
                       </td>
                       <td>
-                        <span className="admin-metric-num">
-                          {Number(tool.unique_visitors_count || 0).toLocaleString()}
-                        </span>
+                        <div style={{ display: 'flex', flexDirection: 'column' }}>
+                          <span className="admin-metric-num">
+                            {Number(tool.unique_visitors_count || 0).toLocaleString()}
+                          </span>
+                          {tool.bot_view_count > 0 && (
+                            <span 
+                              style={{ 
+                                fontSize: '0.68rem', 
+                                color: '#a855f7', 
+                                fontWeight: 600,
+                                background: 'rgba(168, 85, 247, 0.08)',
+                                padding: '0.1rem 0.35rem',
+                                borderRadius: 4,
+                                width: 'fit-content',
+                                marginTop: 2
+                              }} 
+                              title="Automated crawler requests isolated from human analytics"
+                            >
+                              {tool.bot_view_count} bots
+                            </span>
+                          )}
+                        </div>
                       </td>
                       <td>
                         <span className="admin-metric-num" style={{ color: '#10b981' }}>
