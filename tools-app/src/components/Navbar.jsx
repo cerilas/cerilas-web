@@ -1,10 +1,10 @@
 import React from 'react';
-import { BarChart3, Sparkles, Sun, Moon, CreditCard } from 'lucide-react';
+import { BarChart3, Sparkles, Sun, Moon } from 'lucide-react';
 import { useTranslation } from '../i18n';
 import { useTheme } from '../context/ThemeContext';
 import PersonaMenu from './PersonaMenu/PersonaMenu';
 
-export default function Navbar({ activeTool, onNavigateHome, onOpenStats, onSelectTool, onNavigatePricing }) {
+export default function Navbar({ activeTool, onNavigateHome, onOpenStats, onSelectTool }) {
   const { t, language } = useTranslation();
   const { toggleTheme, isDark } = useTheme();
   const isAi = activeTool && (activeTool.isAi || activeTool.badge === 'AI Assisted' || activeTool.badge === 'AI Powered' || activeTool.slug === 'ats-resume-checker');
@@ -76,20 +76,6 @@ export default function Navbar({ activeTool, onNavigateHome, onOpenStats, onSele
             <BarChart3 size={15} />
             <span className="nav-stats-label">{t('nav.stats')}</span>
           </button>
-
-          <a
-            href="#/pricing"
-            onClick={(e) => {
-              e.preventDefault();
-              if (onNavigatePricing) onNavigatePricing();
-              else window.location.hash = '#/pricing';
-            }}
-            className="nav-link nav-pricing-btn"
-            title="Pricing & Plans"
-          >
-            <CreditCard size={15} />
-            <span className="nav-pricing-label">Pricing</span>
-          </a>
 
           <button
             onClick={toggleTheme}

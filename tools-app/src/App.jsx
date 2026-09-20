@@ -747,7 +747,6 @@ export default function App() {
         onNavigateHome={navigateToHome}
         onOpenStats={() => setIsStatsOpen(true)}
         onSelectTool={navigateToTool}
-        onNavigatePricing={navigateToPricing}
       />
 
       <div className="main-content">
