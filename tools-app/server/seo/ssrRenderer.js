@@ -511,3 +511,141 @@ export function renderLegalPageHtml(templateHtml, slug) {
   return html;
 }
 
+/**
+ * Pre-renders semantic HTML and dynamic SEO metadata for the Pricing page (/pricing).
+ */
+export function renderPricingPageHtml(templateHtml) {
+  const canonicalUrl = 'https://tools.cerilas.com/pricing';
+  const pageTitle = 'Pricing & Plans – Cerilas Tools | Transparent Zero-Surprise Pricing';
+  const pageDesc = 'Explore flexible, transparent pricing plans for Cerilas Tools. Free forever tier, Pro with 5x higher limits, and Unlimited plans with 2 months free on annual billing.';
+  const ogImg = 'https://tools.cerilas.com/og-image.svg';
+
+  const pricingSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: 'Cerilas Tools Subscription Plans',
+    description: pageDesc,
+    url: canonicalUrl,
+    offers: [
+      {
+        '@type': 'Offer',
+        name: 'Forever Free',
+        price: '0',
+        priceCurrency: 'USD',
+        description: 'All Tools with limited usage',
+        availability: 'https://schema.org/InStock'
+      },
+      {
+        '@type': 'Offer',
+        name: 'Pro Plan',
+        price: '4.99',
+        priceCurrency: 'USD',
+        description: 'Tiny & basic tools are unlimited usage, premium tools x5 more usage than free plan. $4.99/mo or $49.90/yr with 2 months free.',
+        availability: 'https://schema.org/PreOrder'
+      },
+      {
+        '@type': 'Offer',
+        name: 'Unlimited Plan',
+        price: '9.99',
+        priceCurrency: 'USD',
+        description: 'Unlimited usage all tiny & premium tools. $9.99/mo or $99.90/yr with 2 months free.',
+        availability: 'https://schema.org/PreOrder'
+      }
+    ]
+  };
+
+  const ssrBodyHtml = `
+    <div id="ssr-pricing-content" style="max-width: 1100px; margin: 0 auto; padding: 3rem 1.5rem 6rem 1.5rem; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #f1f5f9; line-height: 1.6;">
+      <nav style="margin-bottom: 2rem; font-size: 0.88rem;">
+        <a href="/" style="color: #38bdf8; text-decoration: none; font-weight: 500;">&larr; Back to Tools</a>
+        <span style="margin: 0 0.5rem; color: #64748b;">/</span>
+        <span style="color: #94a3b8;">Pricing &amp; Plans</span>
+      </nav>
+
+      <header style="text-align: center; margin-bottom: 3.5rem;">
+        <div style="display: inline-block; padding: 0.35rem 0.9rem; background: rgba(56, 189, 248, 0.1); border: 1px solid rgba(56, 189, 248, 0.25); border-radius: 999px; font-size: 0.76rem; font-weight: 600; color: #38bdf8; margin-bottom: 1.25rem;">
+          TRANSPARENT VALUE &bull; ZERO SERVER STORAGE
+        </div>
+        <h1 style="font-size: 2.75rem; font-weight: 700; margin: 0 0 1rem 0; letter-spacing: -0.03em; color: #ffffff;">
+          Simple, Predictable Plans for Everyone
+        </h1>
+        <p style="font-size: 1.05rem; color: #94a3b8; max-width: 640px; margin: 0 auto; line-height: 1.6;">
+          Access 31+ privacy-first utilities powered 100% locally by browser WebAssembly. 2 Months Free on any annual billing plan.
+        </p>
+      </header>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.75rem; margin-bottom: 4rem;">
+        <!-- Plan 1 -->
+        <div style="background: rgba(30, 41, 59, 0.5); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; padding: 2rem;">
+          <h2 style="font-size: 1.5rem; margin: 0 0 0.5rem 0; color: #ffffff;">Forever Free</h2>
+          <p style="font-size: 0.92rem; color: #94a3b8; margin: 0 0 1.5rem 0;">All Tools with limited usage</p>
+          <div style="font-size: 2.5rem; font-weight: 700; color: #ffffff; margin-bottom: 1.5rem;">$0 <span style="font-size: 1rem; font-weight: 400; color: #94a3b8;">/ month</span></div>
+          <ul style="list-style: none; padding: 0; margin: 0; line-height: 1.8; font-size: 0.9rem; color: #cbd5e1;">
+            <li>&bull; Access all 31+ online tools</li>
+            <li>&bull; Standard limited usage limits</li>
+            <li>&bull; 100% In-Browser &amp; WebAssembly privacy</li>
+            <li>&bull; Zero file uploads or data storage</li>
+            <li>&bull; Free forever, no card required</li>
+          </ul>
+        </div>
+
+        <!-- Plan 2 -->
+        <div style="background: rgba(30, 41, 59, 0.8); border: 1px solid rgba(56, 189, 248, 0.4); border-radius: 20px; padding: 2rem; position: relative;">
+          <div style="position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: #0284c7; color: #ffffff; padding: 0.2rem 0.75rem; border-radius: 999px; font-size: 0.72rem; font-weight: 700;">POPULAR</div>
+          <h2 style="font-size: 1.5rem; margin: 0 0 0.5rem 0; color: #ffffff;">Pro</h2>
+          <p style="font-size: 0.92rem; color: #94a3b8; margin: 0 0 1.5rem 0;">Tiny &amp; basic tools are unlimited usage, premium tools x5 more usage than free plan.</p>
+          <div style="font-size: 2.5rem; font-weight: 700; color: #ffffff; margin-bottom: 0.25rem;">$4.99 <span style="font-size: 1rem; font-weight: 400; color: #94a3b8;">/ month</span></div>
+          <div style="font-size: 0.8rem; color: #10b981; font-weight: 600; margin-bottom: 1.5rem;">Annual: $49.90/yr (2 Months Free)</div>
+          <ul style="list-style: none; padding: 0; margin: 0; line-height: 1.8; font-size: 0.9rem; color: #cbd5e1;">
+            <li>&bull; <strong>Unlimited usage</strong> on all tiny &amp; basic utilities</li>
+            <li>&bull; <strong>x5 more usage</strong> on premium tools than free plan</li>
+            <li>&bull; Priority concurrency WebAssembly execution</li>
+            <li>&bull; Ad-free workspace &amp; commercial rights</li>
+            <li>&bull; Checkout: <em>Coming Soon</em></li>
+          </ul>
+        </div>
+
+        <!-- Plan 3 -->
+        <div style="background: rgba(30, 41, 59, 0.5); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; padding: 2rem;">
+          <h2 style="font-size: 1.5rem; margin: 0 0 0.5rem 0; color: #ffffff;">Unlimited</h2>
+          <p style="font-size: 0.92rem; color: #94a3b8; margin: 0 0 1.5rem 0;">Unlimited usage all tiny &amp; premium tools</p>
+          <div style="font-size: 2.5rem; font-weight: 700; color: #ffffff; margin-bottom: 0.25rem;">$9.99 <span style="font-size: 1rem; font-weight: 400; color: #94a3b8;">/ month</span></div>
+          <div style="font-size: 0.8rem; color: #10b981; font-weight: 600; margin-bottom: 1.5rem;">Annual: $99.90/yr (2 Months Free)</div>
+          <ul style="list-style: none; padding: 0; margin: 0; line-height: 1.8; font-size: 0.9rem; color: #cbd5e1;">
+            <li>&bull; <strong>Unlimited usage</strong> on all tiny &amp; premium tools</li>
+            <li>&bull; Unlimited AI queries, ATS evaluations &amp; PDF tools</li>
+            <li>&bull; Horizon Europe &amp; Cascade Grants tracking &amp; exports</li>
+            <li>&bull; Maximum turbo execution speed</li>
+            <li>&bull; Checkout: <em>Coming Soon</em></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  `;
+
+  let html = stripOldMetaTags(templateHtml);
+
+  const metaTags = [
+    `<title>${escapeHtml(pageTitle)}</title>`,
+    `<meta name="description" content="${escapeHtml(pageDesc)}" />`,
+    `<meta name="robots" content="index, follow" />`,
+    `<link rel="canonical" href="${canonicalUrl}" />`,
+    `<meta property="og:type" content="website" />`,
+    `<meta property="og:title" content="${escapeHtml(pageTitle)}" />`,
+    `<meta property="og:description" content="${escapeHtml(pageDesc)}" />`,
+    `<meta property="og:url" content="${canonicalUrl}" />`,
+    `<meta property="og:image" content="${ogImg}" />`,
+    `<meta name="twitter:card" content="summary_large_image" />`,
+    `<meta name="twitter:title" content="${escapeHtml(pageTitle)}" />`,
+    `<meta name="twitter:description" content="${escapeHtml(pageDesc)}" />`,
+    `<meta name="twitter:image" content="${ogImg}" />`,
+    `<script type="application/ld+json">${JSON.stringify(pricingSchema)}</script>`
+  ].join('\n    ');
+
+  html = html.replace('</head>', `    ${metaTags}\n  </head>`);
+  html = html.replace('<div id="root"></div>', `<div id="root">${ssrBodyHtml}</div>`);
+
+  return html;
+}
+
+

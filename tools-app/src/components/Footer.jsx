@@ -13,13 +13,32 @@ import {
   CheckCircle2,
   ArrowUpRight,
   TrendingUp,
-  Bot
+  Bot,
+  CreditCard
 } from 'lucide-react';
 import { useTranslation } from '../i18n';
 
-export default function Footer({ onOpenStats }) {
+export default function Footer({ onOpenStats, onNavigatePricing }) {
   const { t } = useTranslation();
   const currentYear = new Date().getFullYear();
+
+  const handlePricingClick = (e) => {
+    if (e) e.preventDefault();
+    try {
+      window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    } catch (err) {
+      window.scrollTo(0, 0);
+    }
+    if (typeof document !== 'undefined') {
+      if (document.documentElement) document.documentElement.scrollTop = 0;
+      if (document.body) document.body.scrollTop = 0;
+    }
+    if (onNavigatePricing) {
+      onNavigatePricing();
+    } else {
+      window.location.hash = '#/pricing';
+    }
+  };
 
   const handleToolClick = (slug) => {
     try {
@@ -105,12 +124,23 @@ export default function Footer({ onOpenStats }) {
             <p className="stats-box-text" title="Local isolated memory processing with zero server storage.">
               Local isolated memory processing with zero server storage.
             </p>
-            {onOpenStats && (
-              <button type="button" onClick={handleStatsClick} className="stats-box-link">
-                <BarChart3 size={14} />
-                <span>View Live Analytics</span>
-              </button>
-            )}
+            <div style={{ display: 'flex', gap: '0.6rem', flexWrap: 'wrap', marginTop: '0.6rem' }}>
+              {onOpenStats && (
+                <button type="button" onClick={handleStatsClick} className="stats-box-link">
+                  <BarChart3 size={14} />
+                  <span>Live Analytics</span>
+                </button>
+              )}
+              <a 
+                href="#/pricing" 
+                onClick={handlePricingClick} 
+                className="stats-box-link"
+                style={{ textDecoration: 'none' }}
+              >
+                <CreditCard size={14} />
+                <span>Pricing Plans</span>
+              </a>
+            </div>
           </div>
         </div>
 
@@ -551,6 +581,8 @@ export default function Footer({ onOpenStats }) {
               © {currentYear} CERİLAS Yüksek Teknoloji San. ve Tic. AŞ. All rights reserved.
             </p>
             <div className="seo-footer-bottom-links">
+              <a href="#/pricing" onClick={handlePricingClick} style={{ fontWeight: 600, color: 'var(--text-main)' }}>Pricing</a>
+              <span className="dot">•</span>
               <a href="#/legal/terms" onClick={() => handleLegalClick('terms')}>Terms</a>
               <span className="dot">•</span>
               <a href="#/legal/privacy" onClick={() => handleLegalClick('privacy')}>Privacy</a>

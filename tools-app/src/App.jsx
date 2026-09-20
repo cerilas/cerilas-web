@@ -37,6 +37,7 @@ import AdSlot from './components/ui/AdSlot';
 import ErrorBoundary from './components/ErrorBoundary';
 import AdminDashboard from './admin/AdminDashboard';
 import LegalView from './legal/LegalView';
+import PricingView from './pricing/PricingView';
 import { LEGAL_DOCS } from './legal/legalContent';
 import { toolsRegistry, getAllRegisteredTools, getRegisteredTool } from './tools/registry';
 import { useTranslation } from './i18n';
@@ -252,6 +253,12 @@ export default function App() {
     return p === '/admin' || p.startsWith('/admin/') || h === '#/admin' || h.startsWith('#/admin/');
   });
   const [isStatsOpen, setIsStatsOpen] = useState(false);
+  const [isPricing, setIsPricing] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    const p = window.location.pathname;
+    const h = window.location.hash;
+    return p === '/pricing' || p.startsWith('/pricing/') || h === '#/pricing' || h.startsWith('#/pricing/');
+  });
 
   const heroBannerRef = useRef(null);
   const heroImgRef = useRef(null);
@@ -307,12 +314,23 @@ export default function App() {
 
       if (pathname === '/admin' || pathname.startsWith('/admin/') || hash === '#/admin' || hash.startsWith('#/admin/')) {
         setIsAdmin(true);
+        setIsPricing(false);
         setCurrentSlug(null);
         setCurrentLegalSlug(null);
         forceScrollToTop();
         return;
       }
       setIsAdmin(false);
+
+      // 0. Pricing route matching (/pricing, #/pricing)
+      if (pathname === '/pricing' || pathname.startsWith('/pricing/') || hash === '#/pricing' || hash.startsWith('#/pricing/')) {
+        setIsPricing(true);
+        setCurrentSlug(null);
+        setCurrentLegalSlug(null);
+        forceScrollToTop();
+        return;
+      }
+      setIsPricing(false);
 
       // 1. Legal compliance routes matching (/terms, /privacy, /refund, /cookies, /legal/:slug, #/legal/:slug)
       const legalAliasMap = {
@@ -436,6 +454,35 @@ export default function App() {
 
     const activeRegistered = currentSlug ? getRegisteredTool(currentSlug) : null;
     const manifest = activeRegistered?.manifest;
+
+    if (isPricing) {
+      const pageTitle = 'Pricing & Plans – Cerilas Tools | Transparent Zero-Surprise Pricing';
+      const pageDesc = 'Explore flexible, transparent pricing plans for Cerilas Tools. Free forever tier, Pro with 5x higher limits, and Unlimited plans with 2 months free on annual billing.';
+      const pageUrl = window.location.pathname.startsWith('/pricing')
+        ? `https://tools.cerilas.com${window.location.pathname}`
+        : 'https://tools.cerilas.com/#/pricing';
+      const ogImgUrl = 'https://tools.cerilas.com/og-image.svg';
+
+      document.title = pageTitle;
+      setMeta('description', 'name', pageDesc);
+      setCanonical(pageUrl);
+
+      // Open Graph
+      setMeta('og:title', 'property', pageTitle);
+      setMeta('og:description', 'property', pageDesc);
+      setMeta('og:url', 'property', pageUrl);
+      setMeta('og:image', 'property', ogImgUrl);
+      setMeta('og:image:width', 'property', '1200');
+      setMeta('og:image:height', 'property', '630');
+      setMeta('og:type', 'property', 'website');
+
+      // Twitter Cards
+      setMeta('twitter:card', 'name', 'summary_large_image');
+      setMeta('twitter:title', 'name', pageTitle);
+      setMeta('twitter:description', 'name', pageDesc);
+      setMeta('twitter:image', 'name', ogImgUrl);
+      return;
+    }
 
     if (currentLegalSlug && LEGAL_DOCS[currentLegalSlug]) {
       const doc = LEGAL_DOCS[currentLegalSlug];
@@ -569,7 +616,7 @@ export default function App() {
         page_path: window.location.pathname + window.location.hash
       });
     }
-  }, [currentSlug, currentLegalSlug]);
+  }, [currentSlug, currentLegalSlug, isPricing, tools, language]);
 
   // Fetch active tools from database
   useEffect(() => {
@@ -633,8 +680,18 @@ export default function App() {
     return () => window.removeEventListener('tool_stats_updated', handleStatsUpdated);
   }, []);
 
+  const navigateToPricing = () => {
+    forceScrollToTop();
+    setIsPricing(true);
+    setCurrentLegalSlug(null);
+    setCurrentSlug(null);
+    window.location.hash = '#/pricing';
+    forceScrollToTop();
+  };
+
   const navigateToTool = (slug) => {
     forceScrollToTop();
+    setIsPricing(false);
     setCurrentLegalSlug(null);
     window.location.hash = `#/tool/${slug}`;
     forceScrollToTop();
@@ -642,6 +699,7 @@ export default function App() {
 
   const navigateToHome = () => {
     forceScrollToTop();
+    setIsPricing(false);
     setCurrentLegalSlug(null);
     setCurrentSlug(null);
     window.location.hash = '#/';
@@ -689,10 +747,15 @@ export default function App() {
         onNavigateHome={navigateToHome}
         onOpenStats={() => setIsStatsOpen(true)}
         onSelectTool={navigateToTool}
+        onNavigatePricing={navigateToPricing}
       />
 
       <div className="main-content">
-        {currentLegalSlug ? (
+        {isPricing ? (
+          <ErrorBoundary>
+            <PricingView onBack={navigateToHome} />
+          </ErrorBoundary>
+        ) : currentLegalSlug ? (
           <ErrorBoundary>
             <LegalView initialSlug={currentLegalSlug} onBack={navigateToHome} />
           </ErrorBoundary>
@@ -826,7 +889,10 @@ export default function App() {
         )}
       </div>
 
-      <Footer onOpenStats={() => setIsStatsOpen(true)} />
+      <Footer 
+        onOpenStats={() => setIsStatsOpen(true)} 
+        onNavigatePricing={navigateToPricing}
+      />
 
       <StatsModal 
         isOpen={isStatsOpen} 

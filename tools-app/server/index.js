@@ -21,7 +21,7 @@ import { detectBot } from './utils/botDetector.js';
 import { initScrapersDb } from './migrations/init-scrapers-db.js';
 import { checkAiRateLimit, getClientIp } from './utils/aiRateLimit.js';
 import { CATEGORIES, TOOLS_SEO_REGISTRY, getAllToolSlugs } from './seo/toolsSeoRegistry.js';
-import { renderToolPageHtml, renderCategoryPageHtml, renderHomePageHtml, renderLegalPageHtml } from './seo/ssrRenderer.js';
+import { renderToolPageHtml, renderCategoryPageHtml, renderHomePageHtml, renderLegalPageHtml, renderPricingPageHtml } from './seo/ssrRenderer.js';
 
 dotenv.config();
 
@@ -992,6 +992,13 @@ app.get('{*path}', async (req, res) => {
 
     if (targetLegalSlug) {
       html = renderLegalPageHtml(html, targetLegalSlug);
+      return res.send(html);
+    }
+
+    // 4b. Pricing page SSR pre-rendering (/pricing)
+    const normalizedPath = req.path.replace(/^\/+|\/+$/g, '').toLowerCase();
+    if (normalizedPath === 'pricing') {
+      html = renderPricingPageHtml(html);
       return res.send(html);
     }
 
