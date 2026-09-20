@@ -478,47 +478,47 @@ export default function Footer({ onOpenStats, onNavigatePricing }) {
               </li>
             </ul>
           </div>
+        </div>
 
-          {/* Right Companion: High-Impact SEO Architecture & Keywords Spotlight Card (Spans 2 columns) */}
-          <div className="seo-footer-editorial-card">
-            <div className="seo-editorial-header">
-              <Sparkles size={16} />
-              <h4 className="seo-editorial-title">Next-Gen Client-Side Computing Platform</h4>
-            </div>
-            
-            <p className="seo-editorial-lead">
-              Cerilas Tools delivers a zero-server, privacy-first utility platform engineered for <strong>entrepreneurs, researchers, startups, white-collar professionals, and developers</strong>. Powered by <strong>WebAssembly (WASM)</strong>, <strong>WebGPU</strong>, and synchronized live grant crawlers, all calculations, document modifications, AI vision tasks, and Horizon Europe grant discoveries run seamlessly.
-            </p>
+        {/* Full-Width Showcase: High-Impact SEO Architecture & Computing Platform Spotlight Card */}
+        <div className="seo-footer-editorial-card full-width">
+          <div className="seo-editorial-header">
+            <Sparkles size={16} />
+            <h4 className="seo-editorial-title">Next-Gen Client-Side Computing Platform</h4>
+          </div>
+          
+          <p className="seo-editorial-lead">
+            Cerilas Tools delivers a zero-server, privacy-first utility platform engineered for <strong>entrepreneurs, researchers, startups, white-collar professionals, and developers</strong>. Powered by <strong>WebAssembly (WASM)</strong>, <strong>WebGPU</strong>, and synchronized live grant crawlers, all calculations, document modifications, AI vision tasks, and Horizon Europe grant discoveries run seamlessly.
+          </p>
 
-            <div className="seo-editorial-features">
-              <div className="seo-editorial-feature-item">
-                <Lock size={13} className="feature-item-icon" />
-                <span><strong>Zero Server Uploads:</strong> Sensitive contracts, financial spreadsheets, and CVs never touch remote servers. Full GDPR compliance.</span>
-              </div>
-              <div className="seo-editorial-feature-item">
-                <Zap size={13} className="feature-item-icon" />
-                <span><strong>WebAssembly Speed:</strong> Blazing-fast in-memory PDF merging, splitting, compression, and background removal without server queues.</span>
-              </div>
-              <div className="seo-editorial-feature-item">
-                <TrendingUp size={13} className="feature-item-icon" />
-                <span><strong>Audited SaaS &amp; Research Benchmarks:</strong> Standardized unit economics (MRR, ARR, LTV:CAC), TRL readiness (1-9), and A/B test sample sizing.</span>
-              </div>
-              <div className="seo-editorial-feature-item">
-                <Sparkles size={13} className="feature-item-icon" />
-                <span><strong>Live EU &amp; Cascade Grants:</strong> Real-time discovery of 600+ European Commission Horizon Europe calls and FSTP sub-grants with deadline trackers.</span>
-              </div>
+          <div className="seo-editorial-features">
+            <div className="seo-editorial-feature-item">
+              <Lock size={14} className="feature-item-icon" />
+              <span><strong>Zero Server Uploads:</strong> Sensitive contracts, financial spreadsheets, and CVs never touch remote servers. Full GDPR compliance.</span>
             </div>
+            <div className="seo-editorial-feature-item">
+              <Zap size={14} className="feature-item-icon" />
+              <span><strong>WebAssembly Speed:</strong> Blazing-fast in-memory PDF merging, splitting, compression, and background removal without server queues.</span>
+            </div>
+            <div className="seo-editorial-feature-item">
+              <TrendingUp size={14} className="feature-item-icon" />
+              <span><strong>Audited SaaS &amp; Research Benchmarks:</strong> Standardized unit economics (MRR, ARR, LTV:CAC), TRL readiness (1-9), and A/B test sample sizing.</span>
+            </div>
+            <div className="seo-editorial-feature-item">
+              <Sparkles size={14} className="feature-item-icon" />
+              <span><strong>Live EU &amp; Cascade Grants:</strong> Real-time discovery of 600+ European Commission Horizon Europe calls and FSTP sub-grants with deadline trackers.</span>
+            </div>
+          </div>
 
-            <div className="seo-editorial-tags">
-              <span className="seo-editorial-tag">Client-Side WASM</span>
-              <span className="seo-editorial-tag">Zero Server Logging</span>
-              <span className="seo-editorial-tag">Free PDF Editor &amp; Merger</span>
-              <span className="seo-editorial-tag">EU Funding &amp; Cascade Grants</span>
-              <span className="seo-editorial-tag">SaaS Financial Models</span>
-              <span className="seo-editorial-tag">TRL Readiness Calculator</span>
-              <span className="seo-editorial-tag">LLM Token Counter</span>
-              <span className="seo-editorial-tag">Privacy-First AI Tools</span>
-            </div>
+          <div className="seo-editorial-tags">
+            <span className="seo-editorial-tag">Client-Side WASM</span>
+            <span className="seo-editorial-tag">Zero Server Logging</span>
+            <span className="seo-editorial-tag">Free PDF Editor &amp; Merger</span>
+            <span className="seo-editorial-tag">EU Funding &amp; Cascade Grants</span>
+            <span className="seo-editorial-tag">SaaS Financial Models</span>
+            <span className="seo-editorial-tag">TRL Readiness Calculator</span>
+            <span className="seo-editorial-tag">LLM Token Counter</span>
+            <span className="seo-editorial-tag">Privacy-First AI Tools</span>
           </div>
         </div>
 

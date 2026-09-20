@@ -651,54 +651,65 @@ body {
   opacity: 0.8;
 }
 
-/* 4 Categorized Columns Grid */
+/* Categorized Tools Columns Grid */
 .seo-footer-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 2.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 2.25rem;
 }
 
-@media (min-width: 1100px) {
+@media (min-width: 1200px) {
   .seo-footer-grid {
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(5, 1fr);
   }
 }
 
-/* SEO Editorial Card in Footer Grid (Filling right side of Cerilas Ecosystem) */
-.seo-footer-editorial-card {
-  grid-column: span 2;
-  background: var(--card-bg, rgba(255, 255, 255, 0.7));
-  border: 1px solid var(--card-border, rgba(0, 0, 0, 0.08));
-  border-radius: 16px;
-  padding: 1.4rem 1.6rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.85rem;
-  box-shadow: var(--card-shadow, 0 4px 20px -5px rgba(0, 0, 0, 0.04));
-  box-sizing: border-box;
-}
-
-@media (prefers-color-scheme: dark) {
-  .seo-footer-editorial-card {
-    background: rgba(255, 255, 255, 0.03);
-    border-color: rgba(255, 255, 255, 0.08);
-    box-shadow: 0 4px 20px -5px rgba(0, 0, 0, 0.4);
+@media (max-width: 1199px) and (min-width: 768px) {
+  .seo-footer-grid {
+    grid-template-columns: repeat(3, 1fr);
   }
 }
 
-@media (max-width: 1099px) and (min-width: 681px) {
+@media (max-width: 767px) and (min-width: 481px) {
   .seo-footer-grid {
     grid-template-columns: repeat(2, 1fr);
   }
-  .seo-footer-editorial-card {
-    grid-column: span 2;
+}
+
+@media (max-width: 480px) {
+  .seo-footer-grid {
+    grid-template-columns: 1fr;
   }
+}
+
+/* SEO Editorial Card in Footer (Full-Width Showcase) */
+.seo-footer-editorial-card {
+  width: 100%;
+  margin-top: 3rem;
+  background: var(--card-bg, rgba(255, 255, 255, 0.7));
+  border: 1px solid var(--card-border, rgba(0, 0, 0, 0.08));
+  border-radius: 20px;
+  padding: 2rem 2.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  box-shadow: var(--card-shadow, 0 4px 20px -5px rgba(0, 0, 0, 0.04));
+  box-sizing: border-box;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+[data-theme="dark"] .seo-footer-editorial-card,
+html.dark .seo-footer-editorial-card {
+  background: rgba(255, 255, 255, 0.03);
+  border-color: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 4px 20px -5px rgba(0, 0, 0, 0.4);
 }
 
 @media (max-width: 680px) {
   .seo-footer-editorial-card {
-    grid-column: span 1;
-    padding: 1.25rem 1.15rem;
+    padding: 1.4rem 1.25rem;
+    margin-top: 2rem;
   }
 }
 
@@ -706,28 +717,28 @@ body {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  color: #2563eb;
+  color: #0284c7;
 }
 
-@media (prefers-color-scheme: dark) {
-  .seo-editorial-header {
-    color: #60a5fa;
-  }
+[data-theme="dark"] .seo-editorial-header,
+html.dark .seo-editorial-header {
+  color: #38bdf8;
 }
 
 .seo-editorial-title {
-  font-size: 0.95rem;
+  font-size: 1.15rem;
   font-weight: 600;
   color: var(--text-main);
   margin: 0;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.015em;
 }
 
 .seo-editorial-lead {
-  font-size: 0.82rem;
-  line-height: 1.55;
+  font-size: 0.92rem;
+  line-height: 1.65;
   color: var(--text-muted);
   margin: 0;
+  max-width: 100%;
 }
 
 .seo-editorial-lead strong {
@@ -736,18 +747,33 @@ body {
 }
 
 .seo-editorial-features {
-  display: flex;
-  flex-direction: column;
-  gap: 0.45rem;
-  padding-top: 0.15rem;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.5rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--card-border, rgba(255, 255, 255, 0.08));
+}
+
+@media (max-width: 1024px) {
+  .seo-editorial-features {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.25rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .seo-editorial-features {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
 }
 
 .seo-editorial-feature-item {
   display: flex;
   align-items: flex-start;
-  gap: 0.5rem;
-  font-size: 0.78rem;
-  line-height: 1.45;
+  gap: 0.6rem;
+  font-size: 0.85rem;
+  line-height: 1.5;
   color: var(--text-muted);
 }
 
@@ -758,7 +784,7 @@ body {
 .seo-editorial-feature-item .feature-item-icon {
   color: #10b981;
   flex-shrink: 0;
-  margin-top: 2px;
+  margin-top: 3px;
 }
 
 .seo-editorial-tags {
