@@ -121,51 +121,23 @@ export default function LegalView({ initialSlug = 'terms', onBack }) {
       </div>
 
       {/* Corporate Verification Banner */}
-      <div style={{
-        background: 'linear-gradient(135deg, rgba(56, 189, 248, 0.08) 0%, rgba(30, 41, 59, 0.5) 100%)',
-        border: '1px solid rgba(56, 189, 248, 0.25)',
-        borderRadius: '16px',
-        padding: '1.5rem 1.75rem',
-        marginBottom: '2.5rem',
-        display: 'flex',
-        flexWrap: 'wrap',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        gap: '1.25rem'
-      }}>
+      <div className="legal-corporate-banner">
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          <div style={{
-            width: '44px',
-            height: '44px',
-            borderRadius: '12px',
-            background: 'rgba(56, 189, 248, 0.15)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            color: '#38bdf8',
-            flexShrink: 0
-          }}>
+          <div className="legal-icon-box">
             <Building2 size={24} />
           </div>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
-              <span style={{ fontWeight: 700, fontSize: '1.1rem', color: '#f8fafc' }}>
+              <span className="legal-company-title">
                 {COMPANY_INFO.legalName}
               </span>
-              <span style={{
-                fontSize: '0.75rem',
-                padding: '0.15rem 0.5rem',
-                borderRadius: '999px',
-                background: 'rgba(16, 185, 129, 0.15)',
-                color: '#10b981',
-                border: '1px solid rgba(16, 185, 129, 0.3)',
-                fontWeight: 600
-              }}>
-                Verified Legal Entity
+              <span className="legal-verified-badge">
+                <CheckCircle2 size={12} />
+                <span>Verified Legal Entity</span>
               </span>
             </div>
-            <p style={{ margin: '0.25rem 0 0 0', fontSize: '0.85rem', color: '#94a3b8' }}>
-              Tax Identification No (VKN): <strong style={{ color: '#f1f5f9' }}>{COMPANY_INFO.vkn}</strong> &bull; {COMPANY_INFO.address}
+            <p className="legal-meta-text">
+              Tax Identification No (VKN): <strong>{COMPANY_INFO.vkn}</strong> &bull; {COMPANY_INFO.address}
             </p>
           </div>
         </div>
@@ -173,19 +145,7 @@ export default function LegalView({ initialSlug = 'terms', onBack }) {
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
           <a
             href={`mailto:${COMPANY_INFO.legalEmail}`}
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '0.4rem',
-              padding: '0.45rem 0.95rem',
-              borderRadius: '8px',
-              background: 'rgba(56, 189, 248, 0.15)',
-              color: '#38bdf8',
-              border: '1px solid rgba(56, 189, 248, 0.3)',
-              fontSize: '0.85rem',
-              textDecoration: 'none',
-              fontWeight: 500
-            }}
+            className="legal-email-btn"
           >
             <Mail size={14} />
             <span>{COMPANY_INFO.legalEmail}</span>
@@ -223,21 +183,7 @@ export default function LegalView({ initialSlug = 'terms', onBack }) {
           <button
             type="button"
             onClick={() => handleTabChange('terms')}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.75rem',
-              padding: '0.75rem 1rem',
-              borderRadius: '10px',
-              border: activeSlug === 'terms' ? '1px solid #38bdf8' : '1px solid var(--card-border, rgba(255,255,255,0.08))',
-              background: activeSlug === 'terms' ? 'rgba(56, 189, 248, 0.12)' : 'var(--card-bg, rgba(255,255,255,0.02))',
-              color: activeSlug === 'terms' ? '#38bdf8' : 'var(--text-main, #f1f5f9)',
-              fontWeight: activeSlug === 'terms' ? 600 : 400,
-              fontSize: '0.9rem',
-              cursor: 'pointer',
-              textAlign: 'left',
-              transition: 'all 0.15s ease'
-            }}
+            className={`legal-tab-btn ${activeSlug === 'terms' ? 'active' : ''}`}
           >
             <FileText size={18} />
             <span>Terms of Service</span>
@@ -246,21 +192,7 @@ export default function LegalView({ initialSlug = 'terms', onBack }) {
           <button
             type="button"
             onClick={() => handleTabChange('privacy')}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.75rem',
-              padding: '0.75rem 1rem',
-              borderRadius: '10px',
-              border: activeSlug === 'privacy' ? '1px solid #38bdf8' : '1px solid var(--card-border, rgba(255,255,255,0.08))',
-              background: activeSlug === 'privacy' ? 'rgba(56, 189, 248, 0.12)' : 'var(--card-bg, rgba(255,255,255,0.02))',
-              color: activeSlug === 'privacy' ? '#38bdf8' : 'var(--text-main, #f1f5f9)',
-              fontWeight: activeSlug === 'privacy' ? 600 : 400,
-              fontSize: '0.9rem',
-              cursor: 'pointer',
-              textAlign: 'left',
-              transition: 'all 0.15s ease'
-            }}
+            className={`legal-tab-btn ${activeSlug === 'privacy' ? 'active' : ''}`}
           >
             <ShieldCheck size={18} />
             <span>Privacy Policy (KVKK/GDPR)</span>
@@ -269,21 +201,7 @@ export default function LegalView({ initialSlug = 'terms', onBack }) {
           <button
             type="button"
             onClick={() => handleTabChange('refund')}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.75rem',
-              padding: '0.75rem 1rem',
-              borderRadius: '10px',
-              border: activeSlug === 'refund' ? '1px solid #38bdf8' : '1px solid var(--card-border, rgba(255,255,255,0.08))',
-              background: activeSlug === 'refund' ? 'rgba(56, 189, 248, 0.12)' : 'var(--card-bg, rgba(255,255,255,0.02))',
-              color: activeSlug === 'refund' ? '#38bdf8' : 'var(--text-main, #f1f5f9)',
-              fontWeight: activeSlug === 'refund' ? 600 : 400,
-              fontSize: '0.9rem',
-              cursor: 'pointer',
-              textAlign: 'left',
-              transition: 'all 0.15s ease'
-            }}
+            className={`legal-tab-btn ${activeSlug === 'refund' ? 'active' : ''}`}
           >
             <RotateCcw size={18} />
             <span>Refund &amp; Cancellation</span>
@@ -292,21 +210,7 @@ export default function LegalView({ initialSlug = 'terms', onBack }) {
           <button
             type="button"
             onClick={() => handleTabChange('cookies')}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.75rem',
-              padding: '0.75rem 1rem',
-              borderRadius: '10px',
-              border: activeSlug === 'cookies' ? '1px solid #38bdf8' : '1px solid var(--card-border, rgba(255,255,255,0.08))',
-              background: activeSlug === 'cookies' ? 'rgba(56, 189, 248, 0.12)' : 'var(--card-bg, rgba(255,255,255,0.02))',
-              color: activeSlug === 'cookies' ? '#38bdf8' : 'var(--text-main, #f1f5f9)',
-              fontWeight: activeSlug === 'cookies' ? 600 : 400,
-              fontSize: '0.9rem',
-              cursor: 'pointer',
-              textAlign: 'left',
-              transition: 'all 0.15s ease'
-            }}
+            className={`legal-tab-btn ${activeSlug === 'cookies' ? 'active' : ''}`}
           >
             <Cookie size={18} />
             <span>Cookie Policy</span>
@@ -384,26 +288,20 @@ export default function LegalView({ initialSlug = 'terms', onBack }) {
                 <section
                   key={section.id}
                   id={section.id}
-                  style={{
-                    background: 'var(--card-bg, rgba(255,255,255,0.02))',
-                    border: '1px solid var(--card-border, rgba(255,255,255,0.08))',
-                    borderRadius: '12px',
-                    padding: '1.5rem 1.75rem',
-                    transition: 'border-color 0.2s ease'
-                  }}
+                  className="legal-section-card"
                 >
                   <h2 style={{
                     fontSize: '1.25rem',
                     fontWeight: 700,
                     margin: '0 0 1rem 0',
-                    color: 'var(--text-main, #f8fafc)',
+                    color: 'var(--text-main)',
                     letterSpacing: '-0.01em'
                   }}>
                     {section.heading}
                   </h2>
                   <div style={{
                     fontSize: '0.95rem',
-                    color: 'var(--text-muted, #cbd5e1)',
+                    color: 'var(--text-muted)',
                     lineHeight: 1.7,
                     whiteSpace: 'pre-line'
                   }}>
@@ -412,7 +310,7 @@ export default function LegalView({ initialSlug = 'terms', onBack }) {
                 </section>
               ))
             ) : (
-              <div style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-muted, #94a3b8)' }}>
+              <div style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-muted)' }}>
                 No sections match "{searchQuery}".
               </div>
             )}
@@ -422,16 +320,16 @@ export default function LegalView({ initialSlug = 'terms', onBack }) {
           <footer style={{
             marginTop: '3.5rem',
             paddingTop: '2rem',
-            borderTop: '1px solid var(--card-border, rgba(255,255,255,0.1))',
+            borderTop: '1px solid var(--card-border, rgba(0,0,0,0.08))',
             fontSize: '0.85rem',
-            color: 'var(--text-muted, #94a3b8)',
+            color: 'var(--text-muted)',
             lineHeight: 1.6
           }}>
             <p style={{ margin: '0 0 0.5rem 0' }}>
               <strong>Corporate Legal Representation:</strong> This document is maintained by the Legal Affairs Directorate of {COMPANY_INFO.legalName}. Any localized version provided is for informative convenience; in the event of contractual discrepancies, the official master agreement and Turkish statutory consumer law shall prevail.
             </p>
             <p style={{ margin: 0 }}>
-              Registered in Gaziantep, Türkiye under VKN {COMPANY_INFO.vkn}. For dispute notifications, contact <a href={`mailto:${COMPANY_INFO.legalEmail}`} style={{ color: '#38bdf8' }}>{COMPANY_INFO.legalEmail}</a>.
+              Registered in Gaziantep, Türkiye under VKN {COMPANY_INFO.vkn}. For dispute notifications, contact <a href={`mailto:${COMPANY_INFO.legalEmail}`} style={{ color: 'var(--text-main)', textDecoration: 'underline' }}>{COMPANY_INFO.legalEmail}</a>.
             </p>
           </footer>
         </main>
