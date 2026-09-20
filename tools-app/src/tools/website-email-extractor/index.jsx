@@ -12,12 +12,28 @@ import {
   Layers,
   ArrowRight,
   ExternalLink,
-  RotateCcw,
-  AlertCircle
+  Activity,
+  AlertCircle,
+  Sparkles,
+  RotateCcw
 } from 'lucide-react';
+import { websiteEmailExtractorManifest } from './manifest';
+import { useToolAnalytics } from '../../hooks/useToolAnalytics';
+import { Button, Badge, ToolHeader, AdSlot } from '../../components/ui';
+import ToolSeoDivider from '../../components/ui/ToolSeoDivider';
+import WebsiteEmailExtractorSeo from './components/WebsiteEmailExtractorSeo';
 import './EmailExtractor.css';
 
-export default function WebsiteEmailExtractor() {
+export default function WebsiteEmailExtractor({ onBack, toolMeta }) {
+  const {
+    trackUse,
+    trackCopy,
+    trackDownload,
+    visitorCount,
+    conversionCount,
+    getConversionLabel
+  } = useToolAnalytics(websiteEmailExtractorManifest.slug, toolMeta);
+
   const [targetUrl, setTargetUrl] = useState('');
   const [maxPages, setMaxPages] = useState(25);
   const [maxDepth, setMaxDepth] = useState(2);
@@ -57,6 +73,13 @@ export default function WebsiteEmailExtractor() {
       }
 
       setResults(data);
+      if (trackUse) {
+        trackUse({
+          domain: data.targetDomain,
+          emailsFound: data.stats.totalEmailsFound,
+          pagesCrawled: data.stats.totalPagesCrawled
+        });
+      }
     } catch (err) {
       setError(err.message || 'An unexpected error occurred during site crawling.');
     } finally {
@@ -67,6 +90,7 @@ export default function WebsiteEmailExtractor() {
   const handleCopyEmail = (email, key) => {
     navigator.clipboard.writeText(email);
     setCopiedKey(key);
+    if (trackCopy) trackCopy({ type: 'single-email' });
     setTimeout(() => setCopiedKey(null), 2000);
   };
 
@@ -75,6 +99,7 @@ export default function WebsiteEmailExtractor() {
     const emailList = filteredEmails.map((e) => e.email).join(separator);
     navigator.clipboard.writeText(emailList);
     setBulkCopyStatus(separator === '\n' ? 'newline' : 'comma');
+    if (trackCopy) trackCopy({ type: 'bulk', count: filteredEmails.length });
     setTimeout(() => setBulkCopyStatus(null), 2000);
   };
 
@@ -100,6 +125,8 @@ export default function WebsiteEmailExtractor() {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+
+    if (trackDownload) trackDownload({ format: 'csv', count: filteredEmails.length });
   };
 
   const handleExportJson = () => {
@@ -113,6 +140,8 @@ export default function WebsiteEmailExtractor() {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+
+    if (trackDownload) trackDownload({ format: 'json', count: filteredEmails.length });
   };
 
   const departmentList = useMemo(() => {
@@ -154,26 +183,36 @@ export default function WebsiteEmailExtractor() {
   };
 
   return (
-    <div className="email-extractor-container">
-      {/* Header */}
-      <div className="email-extractor-header">
-        <div className="email-extractor-badge-row">
-          <span className="email-extractor-badge">
-            <ShieldCheck size={14} />
-            Zero AI & Privacy Safe
-          </span>
-          <span className="email-extractor-badge rule-based">
-            <Layers size={14} />
-            Deterministic DOM Engine
-          </span>
-        </div>
-        <h1 className="email-extractor-title">Website Email & Department Extractor</h1>
-        <p className="email-extractor-desc">
-          Recursively crawl any website to discover and organize verified email addresses by department, company unit, and personnel using rule-based DOM hierarchy and regex parsing.
-        </p>
-      </div>
+    <div className="c-tool-page-container wee-page-root">
+      {/* Standardized Cerilas ToolHeader with All Tools back navigation */}
+      <ToolHeader
+        title={websiteEmailExtractorManifest.title}
+        subtitle={websiteEmailExtractorManifest.shortDescription}
+        onBack={onBack}
+        slug={websiteEmailExtractorManifest.slug}
+        badges={
+          <>
+            {visitorCount > 0 && (
+              <Badge variant="blue" icon={<Users size={12} strokeWidth={2} />}>
+                {visitorCount.toLocaleString()} visitors
+              </Badge>
+            )}
+            {conversionCount > 0 && (
+              <Badge variant="brand" icon={<Activity size={12} strokeWidth={2} />}>
+                {conversionCount.toLocaleString()} {getConversionLabel()}
+              </Badge>
+            )}
+            <Badge variant="neutral" icon={<Layers size={12} strokeWidth={2} />}>
+              Deterministic Engine
+            </Badge>
+            <Badge variant="success" icon={<ShieldCheck size={12} strokeWidth={2} />}>
+              Zero AI &amp; Privacy Safe
+            </Badge>
+          </>
+        }
+      />
 
-      {/* Crawl Control Form */}
+      {/* Crawl Control Card */}
       <div className="crawl-card">
         <form onSubmit={handleSubmit}>
           <div className="crawl-input-group">
@@ -182,7 +221,7 @@ export default function WebsiteEmailExtractor() {
               <input
                 type="text"
                 className="crawl-url-input"
-                placeholder="Enter domain or website URL (e.g. example.com, company.org)"
+                placeholder="Enter website URL (e.g. example.com, company.org)"
                 value={targetUrl}
                 onChange={(e) => setTargetUrl(e.target.value)}
                 disabled={isLoading}
@@ -243,7 +282,7 @@ export default function WebsiteEmailExtractor() {
         </form>
       </div>
 
-      {/* Loading Progress State */}
+      {/* Loading Progress Banner */}
       {isLoading && (
         <div className="crawl-progress-banner">
           <div className="crawl-spinner" />
@@ -255,7 +294,7 @@ export default function WebsiteEmailExtractor() {
         </div>
       )}
 
-      {/* Error Banner */}
+      {/* Error Alert */}
       {error && (
         <div
           style={{
@@ -466,30 +505,14 @@ export default function WebsiteEmailExtractor() {
         </>
       )}
 
-      {/* Explanatory Info Card */}
-      <div className="extractor-info-card">
-        <h3 className="extractor-info-title">Deterministic Architecture Without AI</h3>
-        <div className="extractor-info-grid">
-          <div className="extractor-info-item">
-            <h4>RFC 5322 & Mailto Extraction</h4>
-            <p>
-              Scans document trees for explicit <code>mailto:</code> protocols and applies RFC-compliant regular expressions across all rendered text nodes, skipping tracking tags and media binaries.
-            </p>
-          </div>
-          <div className="extractor-info-item">
-            <h4>DOM Tree Heuristic Mapping</h4>
-            <p>
-              Identifies closest parent containers, section headings, and CSS classes to map each contact into its appropriate department (Sales, HR, Engineering, Support, Executive, Legal).
-            </p>
-          </div>
-          <div className="extractor-info-item">
-            <h4>Zero AI & Privacy Isolation</h4>
-            <p>
-              No data is ever dispatched to external language models, third-party vector databases, or training corpora. Contact parsing runs purely through deterministic algorithms.
-            </p>
-          </div>
-        </div>
-      </div>
+      {/* AdSlot */}
+      <AdSlot slot="footer-top" />
+
+      {/* Standard ToolSeoDivider */}
+      <ToolSeoDivider />
+
+      {/* Standard Deep-Dive Technical SEO Component */}
+      <WebsiteEmailExtractorSeo />
     </div>
   );
 }
