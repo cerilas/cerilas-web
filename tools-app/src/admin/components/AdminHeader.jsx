@@ -1,5 +1,5 @@
 import React from 'react';
-import { Menu, Sun, Moon, ExternalLink, ArrowRight, ShieldCheck } from 'lucide-react';
+import { Menu, Sun, Moon, ExternalLink, ArrowRight, ShieldCheck, User, LogOut } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 
 export default function AdminHeader({ 
@@ -7,7 +7,9 @@ export default function AdminHeader({
   onToggleSidebar, 
   liveVisitors = 1,
   selectedToolTitle = null,
-  onBackToTools = null
+  onBackToTools = null,
+  authUser = null,
+  onLogout = null
 }) {
   const { isDark, toggleTheme } = useTheme();
 
@@ -106,6 +108,28 @@ export default function AdminHeader({
           <span className="admin-live-site-text">Live Site</span>
           <ExternalLink size={13} />
         </a>
+
+        {/* Authenticated Admin Profile & Logout */}
+        {authUser && (
+          <div className="admin-user-profile-badge" title={`Oturum: ${authUser.email}`}>
+            <div className="admin-user-avatar">
+              <User size={13} />
+            </div>
+            <span className="admin-user-email">{authUser.email}</span>
+            {onLogout && (
+              <button
+                type="button"
+                className="admin-user-logout-btn"
+                onClick={onLogout}
+                title="Güvenli Çıkış Yap"
+                aria-label="Çıkış Yap"
+              >
+                <LogOut size={13} />
+                <span className="admin-logout-text">Çıkış</span>
+              </button>
+            )}
+          </div>
+        )}
       </div>
     </header>
   );

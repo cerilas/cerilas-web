@@ -165,7 +165,11 @@ export default function ScrapersView() {
     try {
       setRunningScraper(sourceKey);
       setScraperMessage(null);
-      const res = await fetch(`/api/scrapers/${sourceKey}/run`, { method: 'POST' });
+      const token = localStorage.getItem('admin_token');
+      const res = await fetch(`/api/scrapers/${sourceKey}/run`, { 
+        method: 'POST',
+        headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+      });
       const json = await res.json();
 
       if (json.status === 'success') {

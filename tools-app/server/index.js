@@ -16,6 +16,7 @@ import crawlerCheckerRouter from './routes/crawlerChecker.js';
 import llmsTxtRouter from './routes/llmsTxt.js';
 import htmlToMarkdownRouter from './routes/htmlToMarkdown.js';
 import scrapersRouter from './routes/scrapers.js';
+import authRouter from './routes/auth.js';
 import { initScrapersDb } from './migrations/init-scrapers-db.js';
 import { checkAiRateLimit, getClientIp } from './utils/aiRateLimit.js';
 
@@ -39,6 +40,9 @@ if (fs.existsSync(publicPath)) {
 // Explicit static mounts for tool icons
 app.use('/tool-icons', express.static(path.join(distPath, 'tool-icons')));
 app.use('/tool-icons', express.static(path.join(publicPath, 'tool-icons')));
+
+// Mount auth router
+app.use('/api/auth', authRouter);
 
 // Mount webhook tester router
 app.use('/api/webhook-test', webhookTesterRouter);
