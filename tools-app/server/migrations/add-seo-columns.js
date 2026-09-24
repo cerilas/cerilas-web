@@ -15,6 +15,7 @@ export async function migrateSeoColumns() {
     SELECT id, source_key, external_id, title, short_description, funding_amount, funding_raw_amount,
            eligible_applicants, deadline_date, domains, technologies, call_type, slug
     FROM funding_opportunities
+    WHERE slug IS NULL
     ORDER BY id ASC;
   `);
 

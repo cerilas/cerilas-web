@@ -29,7 +29,7 @@ export const CATEGORIES = {
     description: 'Enterprise-grade AI utilities running in your browser. Detect AI text, clean PDFs for RAG vector databases, calculate universal LLM tokens, and check link hallucinations.',
     shortDescription: 'Modern AI and LLM tools built for engineers, prompt engineers, and AI researchers. High precision, privacy-focused with zero server retention.',
     keywords: 'ai tools, ai content detector, token counter universal, pdf to rag cleaner, llms txt generator, ai crawler checker, ai link hallucination checker',
-    toolSlugs: ['ai-content-detector', 'token-counter-universal', 'pdf-rag-cleaner', 'ai-link-hallucination-checker', 'ai-crawler-checker', 'llms-txt', 'html-to-llm-markdown', 'ats-resume-checker']
+    toolSlugs: ['ai-content-detector', 'token-counter-universal', 'pdf-rag-cleaner', 'ai-link-hallucination-checker', 'ai-crawler-checker', 'llms-txt', 'html-to-llm-markdown', 'ats-resume-checker', 'ai-visibility-checker']
   },
   'seo-tools': {
     slug: 'seo-tools',
@@ -40,7 +40,7 @@ export const CATEGORIES = {
     description: 'Modern SEO and web infrastructure utilities. Generate llms.txt files, test AI bot access, inspect meta robots headers, and convert web pages to LLM-ready markdown.',
     shortDescription: 'Technical SEO and generative engine optimization (GEO) tools to prepare your web properties for AI search engines, crawlers, and LLM indexing.',
     keywords: 'seo tools, llms txt generator, ai crawler checker, ai link checker, html to markdown, web tools',
-    toolSlugs: ['llms-txt', 'ai-crawler-checker', 'ai-link-hallucination-checker', 'html-to-llm-markdown', 'website-email-extractor']
+    toolSlugs: ['llms-txt', 'ai-crawler-checker', 'ai-link-hallucination-checker', 'html-to-llm-markdown', 'website-email-extractor', 'ai-visibility-checker']
   },
   'developer-tools': {
     slug: 'developer-tools',
@@ -585,6 +585,43 @@ export const TOOLS_SEO_REGISTRY = {
     rating: '4.9',
     ratingCount: '830',
     keywords: 'ai crawler checker, test gptbot access, claudebot robots txt, perplexitybot blocker, ai seo audit'
+  },
+
+  'ai-visibility-checker': {
+    slug: 'ai-visibility-checker',
+    name: 'AI Visibility Checker',
+    h1: 'AI Visibility Checker – Test Gemini & ChatGPT Citations',
+    category: 'SEO & Web Tools',
+    categorySlug: 'seo-tools',
+    title: 'Free AI Visibility Checker (2026) – Test Gemini & ChatGPT Citations | Cerilas Tools',
+    description: 'Audit if your brand and website are cited in AI search answers (Gemini, ChatGPT, Perplexity). Extracts top 10 real user queries and audits live search grounding citations.',
+    shortDescription: 'Analyze your website content, generate top 10 search queries users ask AI, and audit whether your site is cited by Gemini and Google Search grounding.',
+    howItWorks: 'Scrapes website text without AI to extract clean metadata and content, asks Gemini to generate the top 10 real-world commercial & informational search queries, and tests each query against Gemini with Google Search Grounding to identify live citations, brand mentions, and competitor sources.',
+    formula: 'AI Visibility Score = (Direct Citations × 10 + Brand Mentions × 5) / (Total Queries × 10) × 100%. Graded from A+ (80%+) to F (<20%).',
+    whenToUse: 'Audit your Generative Engine Optimization (GEO) performance, benchmark brand visibility in AI answers, and uncover competitor citations.',
+    example: 'For a clinic or SaaS website, automatically generates 10 high-intent queries (e.g., "pricing in 2026", "best clinic in city") and checks live AI citation status.',
+    relatedTools: ['ai-crawler-checker', 'llms-txt', 'ai-link-hallucination-checker', 'ai-content-detector'],
+    faq: [
+      {
+        q: 'What is an AI Visibility Score and how is it calculated?',
+        a: 'An AI Visibility Score measures the percentage of high-intent user queries where AI search models (Gemini, ChatGPT Search, Perplexity) directly cite your website as an authoritative source or name your brand in synthesized answers.'
+      },
+      {
+        q: 'What is Generative Engine Optimization (GEO)?',
+        a: 'Generative Engine Optimization (GEO) is the practice of optimizing web content so that Large Language Models (LLMs) and conversational search engines retrieve, trust, and cite your domain in AI-generated overviews.'
+      },
+      {
+        q: 'How does Gemini decide which websites to cite in Search Grounding?',
+        a: 'Google Gemini favors pages that demonstrate high information gain, Schema.org structured data, direct answers to conversational questions, and consistent entity consensus across authoritative web platforms.'
+      },
+      {
+        q: 'Why are competitor domains cited instead of my official site?',
+        a: 'AI search engines favor competitor sites or review directories when those domains offer clearer structured data, concise comparisons, transparent pricing tables, or stronger domain entity authority.'
+      }
+    ],
+    rating: '4.9',
+    ratingCount: '840',
+    keywords: 'ai visibility checker, geo audit tool, check if gemini cites my website, chatgpt search citation checker, perplexity citation audit, test ai search citations free, generative engine optimization tool, answer engine optimization audit, brand ai mention tracker, google search grounding test, llm citation rates 2026, schema markup for geo, zero click search defense'
   },
 
   'llms-txt': {

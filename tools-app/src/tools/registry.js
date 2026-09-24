@@ -31,6 +31,7 @@ import { pdfMergerManifest } from './pdf-merger/manifest';
 import { pdfSplitterManifest } from './pdf-splitter/manifest';
 import { euFundingManifest } from './eu-funding-opportunities/manifest';
 import { websiteEmailExtractorManifest } from './website-email-extractor/manifest';
+import { aiVisibilityCheckerManifest } from './ai-visibility-checker/manifest';
 
 /**
  * Enterprise Scalable Tool Registry.
@@ -166,6 +167,10 @@ export const toolsRegistry = {
   [websiteEmailExtractorManifest.slug]: {
     manifest: websiteEmailExtractorManifest,
     component: lazy(() => import('./website-email-extractor'))
+  },
+  [aiVisibilityCheckerManifest.slug]: {
+    manifest: aiVisibilityCheckerManifest,
+    component: lazy(() => import('./ai-visibility-checker'))
   }
 };
 
@@ -198,7 +203,11 @@ const toolAliases = {
   'cascade-funding': 'eu-funding-opportunities',
   'horizon-europe': 'eu-funding-opportunities',
   'eu-grants': 'eu-funding-opportunities',
-  'fstp-grants': 'eu-funding-opportunities'
+  'fstp-grants': 'eu-funding-opportunities',
+  'ai-visibility': 'ai-visibility-checker',
+  'visibility-checker': 'ai-visibility-checker',
+  'ai-search-checker': 'ai-visibility-checker',
+  'ai-citation-checker': 'ai-visibility-checker'
 };
 
 export function getRegisteredTool(slug) {

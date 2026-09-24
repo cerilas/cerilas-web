@@ -18,6 +18,7 @@ import htmlToMarkdownRouter from './routes/htmlToMarkdown.js';
 import scrapersRouter from './routes/scrapers.js';
 import emailExtractorRouter from './routes/emailExtractor.js';
 import authRouter from './routes/auth.js';
+import visibilityCheckerRouter from './routes/visibilityChecker.js';
 import { detectBot } from './utils/botDetector.js';
 import { initScrapersDb } from './migrations/init-scrapers-db.js';
 import { checkAiRateLimit, getClientIp } from './utils/aiRateLimit.js';
@@ -65,7 +66,11 @@ const TOOL_CANONICAL_ALIASES = {
   'fstp-grants': 'eu-funding-opportunities',
   'email-extractor': 'website-email-extractor',
   'website-email-finder': 'website-email-extractor',
-  'site-email-extractor': 'website-email-extractor'
+  'site-email-extractor': 'website-email-extractor',
+  'ai-visibility': 'ai-visibility-checker',
+  'visibility-checker': 'ai-visibility-checker',
+  'ai-search-checker': 'ai-visibility-checker',
+  'ai-citation-checker': 'ai-visibility-checker'
 };
 
 // 301 URL Standardization & Redirect Middleware
@@ -774,6 +779,7 @@ app.use(['/api/tools/ai-crawler-checker', '/api/crawler-checker'], crawlerChecke
 app.use(['/api/tools/llms-txt', '/api/llms-txt'], llmsTxtRouter);
 app.use(['/api/tools/html-to-markdown', '/api/html-to-markdown', '/api/tools/html-to-llm-markdown'], htmlToMarkdownRouter);
 app.use(['/api/tools/website-email-extractor', '/api/email-extractor'], emailExtractorRouter);
+app.use(['/api/tools/ai-visibility-checker', '/api/visibility-checker'], visibilityCheckerRouter);
 
 // Generic AI tool quota check endpoint
 app.get('/api/tools/:slug/ai-quota', async (req, res) => {
