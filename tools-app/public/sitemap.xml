@@ -396,4 +396,29 @@
     <changefreq>daily</changefreq>
     <priority>0.95</priority>
   </url>
+
+  <!-- 21. AI Visibility Checker -->
+  <url>
+    <loc>https://tools.cerilas.com/tool/ai-visibility-checker</loc>
+    <lastmod>2026-09-25</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.99</priority>
+    <image:image>
+      <image:loc>https://tools.cerilas.com/tool-icons/ai-visibility-checker.webp</image:loc>
+      <image:title>Free AI Visibility Checker – Test Gemini &amp; ChatGPT Citations</image:title>
+      <image:caption>Audit if your website is cited in AI search answers across Google Gemini, ChatGPT, and Perplexity with live Google Search Grounding probing.</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://tools.cerilas.com/#/tool/ai-visibility-checker</loc>
+    <lastmod>2026-09-25</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.95</priority>
+  </url>
+  <url>
+    <loc>https://tools.cerilas.com/ai-visibility-checker</loc>
+    <lastmod>2026-09-25</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.98</priority>
+  </url>
 </urlset>

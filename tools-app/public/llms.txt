@@ -18,6 +18,12 @@
 - [JSON Beautifier & Formatter](https://tools.cerilas.com/tool/json-beautifier): Format, beautify, validate, minify, and repair JSON in your browser. Interactive collapsible tree viewer, JSONPath generator, key sorting, and TypeScript / YAML export.
 - [Pomodoro Timer](https://tools.cerilas.com/tool/pomodoro-timer): Minimalist in-browser Pomodoro timer with fluid wave animation, acoustic alert sounds, and customizable focus & break intervals.
 - [YouTube Thumbnail Downloader](https://tools.cerilas.com/tool/youtube-thumbnail-downloader): Download full-resolution 4K, HD (1080p), and WebP thumbnails from any YouTube video or Shorts URL with zero watermarks, instant copy to clipboard, and responsive embed generator.
+- [AI Visibility Checker](https://tools.cerilas.com/tool/ai-visibility-checker): Free AI search visibility and citation checker. Automatically extracts top 10 search queries from your website content and audits live citation grounding across Google Gemini and ChatGPT Search with GEO/AEO scoring.
+- [AI Crawler Checker](https://tools.cerilas.com/tool/ai-crawler-checker): Audit robots.txt directives and HTTP access rules for major AI crawlers (GPTBot, ClaudeBot, PerplexityBot, Google-Extended).
+- [AI Link Hallucination Checker](https://tools.cerilas.com/tool/ai-link-hallucination-checker): Scan LLM outputs for fabricated links, broken citations, and 404 dead-ends with real-time HTTP validation.
+- [LLMs.txt Tools & Validator](https://tools.cerilas.com/tool/llms-txt): Build, parse, and validate /llms.txt and /llms-full.txt files to optimize site content for AI agent consumption and GEO.
+- [Universal Token Counter](https://tools.cerilas.com/tool/token-counter-universal): Multi-model token counter, visualizer, and cost auditor across GPT-4o, Claude 3.7, Gemini 2.0, DeepSeek, and Llama 3.
+- [EU Funding & Cascade Grants](https://tools.cerilas.com/tool/eu-funding-opportunities): Live searchable database of Horizon Europe research calls and Cascade Funding (FSTP) equity-free lump-sum sub-grants.
 
 ## Privacy & Security Guarantees
 - Zero-Upload Architecture: Files never touch Cerilas servers; processing runs inside client WebAssembly and Web Worker threads.
