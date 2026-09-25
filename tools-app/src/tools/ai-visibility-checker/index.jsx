@@ -491,43 +491,43 @@ export default function AiVisibilityChecker({ onBack, toolMeta }) {
               </button>
             ))}
           </div>
+        </form>
 
-          <div className="aivc-hero-guarantees">
-            <div className="aivc-guarantee-item">
-              <div className="aivc-guarantee-icon-wrap aivc-icon-emerald">
-                <ShieldCheck size={17} strokeWidth={2.2} />
-              </div>
-              <div className="aivc-guarantee-text">
-                <span className="aivc-guarantee-title">100% Free Forever</span>
-                <span className="aivc-guarantee-desc">No Sign-up Required</span>
-              </div>
+        <div className="aivc-hero-guarantees">
+          <div className="aivc-guarantee-item">
+            <div className="aivc-guarantee-icon-wrap aivc-icon-emerald">
+              <ShieldCheck size={18} strokeWidth={2.2} />
             </div>
-
-            <div className="aivc-guarantee-divider" />
-
-            <div className="aivc-guarantee-item">
-              <div className="aivc-guarantee-icon-wrap aivc-icon-blue">
-                <Cpu size={17} strokeWidth={2.2} />
-              </div>
-              <div className="aivc-guarantee-text">
-                <span className="aivc-guarantee-title">Advanced AI Infrastructure</span>
-                <span className="aivc-guarantee-desc">State-of-the-Art Architecture</span>
-              </div>
-            </div>
-
-            <div className="aivc-guarantee-divider" />
-
-            <div className="aivc-guarantee-item">
-              <div className="aivc-guarantee-icon-wrap aivc-icon-purple">
-                <Globe size={17} strokeWidth={2.2} />
-              </div>
-              <div className="aivc-guarantee-text">
-                <span className="aivc-guarantee-title">Live Search Grounding</span>
-                <span className="aivc-guarantee-desc">Real-Time Citation Probing</span>
-              </div>
+            <div className="aivc-guarantee-text">
+              <span className="aivc-guarantee-title">100% Free Forever</span>
+              <span className="aivc-guarantee-desc">No Sign-up Required</span>
             </div>
           </div>
-        </form>
+
+          <div className="aivc-guarantee-divider" />
+
+          <div className="aivc-guarantee-item">
+            <div className="aivc-guarantee-icon-wrap aivc-icon-blue">
+              <Cpu size={18} strokeWidth={2.2} />
+            </div>
+            <div className="aivc-guarantee-text">
+              <span className="aivc-guarantee-title">Advanced AI Infrastructure</span>
+              <span className="aivc-guarantee-desc">State-of-the-Art Architecture</span>
+            </div>
+          </div>
+
+          <div className="aivc-guarantee-divider" />
+
+          <div className="aivc-guarantee-item">
+            <div className="aivc-guarantee-icon-wrap aivc-icon-purple">
+              <Globe size={18} strokeWidth={2.2} />
+            </div>
+            <div className="aivc-guarantee-text">
+              <span className="aivc-guarantee-title">Live Search Grounding</span>
+              <span className="aivc-guarantee-desc">Real-Time Citation Probing</span>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* 3. Live Animated Multi-Step Scan Progress */}
