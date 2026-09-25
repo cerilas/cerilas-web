@@ -32,7 +32,168 @@ import { getOrCreateVisitorId } from '../../utils/visitorId';
 import { Button, Badge, ToolHeader, QuotaModal } from '../../components/ui';
 import ToolSeoDivider from '../../components/ui/ToolSeoDivider';
 import AiVisibilityCheckerSeo from './components/AiVisibilityCheckerSeo';
+import AiVisibilityDropdown from './components/AiVisibilityDropdown';
 import './ai-visibility-checker.css';
+
+const MARKET_OPTIONS = [
+  {
+    value: 'auto',
+    flag: '🌐',
+    label: 'Auto-Detect Market',
+    code: 'AUTO',
+    desc: 'Inferred automatically from domain TLD & server'
+  },
+  {
+    value: 'US',
+    flag: '🇺🇸',
+    label: 'United States',
+    code: 'US',
+    desc: 'Google US live search grounding'
+  },
+  {
+    value: 'GB',
+    flag: '🇬🇧',
+    label: 'United Kingdom',
+    code: 'UK',
+    desc: 'Google UK live search index'
+  },
+  {
+    value: 'TR',
+    flag: '🇹🇷',
+    label: 'Turkey (Türkiye)',
+    code: 'TR',
+    desc: 'Google Türkiye localized queries'
+  },
+  {
+    value: 'DE',
+    flag: '🇩🇪',
+    label: 'Germany (Deutschland)',
+    code: 'DE',
+    desc: 'Google Deutschland search index'
+  },
+  {
+    value: 'FR',
+    flag: '🇫🇷',
+    label: 'France',
+    code: 'FR',
+    desc: 'Google France localized results'
+  },
+  {
+    value: 'CA',
+    flag: '🇨🇦',
+    label: 'Canada',
+    code: 'CA',
+    desc: 'Google Canada search index'
+  },
+  {
+    value: 'AU',
+    flag: '🇦🇺',
+    label: 'Australia',
+    code: 'AU',
+    desc: 'Google Australia search index'
+  },
+  {
+    value: 'ES',
+    flag: '🇪🇸',
+    label: 'Spain (España)',
+    code: 'ES',
+    desc: 'Google España search grounding'
+  },
+  {
+    value: 'IT',
+    flag: '🇮🇹',
+    label: 'Italy (Italia)',
+    code: 'IT',
+    desc: 'Google Italia localized search'
+  },
+  {
+    value: 'NL',
+    flag: '🇳🇱',
+    label: 'Netherlands (Nederland)',
+    code: 'NL',
+    desc: 'Google Nederland search index'
+  },
+  {
+    value: 'GLOBAL',
+    flag: '🌍',
+    label: 'Global / Worldwide',
+    code: 'GLOBAL',
+    desc: 'Worldwide unlocalized search index'
+  }
+];
+
+const LANGUAGE_OPTIONS = [
+  {
+    value: 'auto',
+    flag: '⚡',
+    label: 'Auto-Detect Language',
+    code: 'AUTO',
+    desc: 'Extracted from website HTML lang & content'
+  },
+  {
+    value: 'en',
+    flag: '🇺🇸',
+    label: 'English',
+    code: 'EN',
+    desc: 'Global commercial & informational queries'
+  },
+  {
+    value: 'tr',
+    flag: '🇹🇷',
+    label: 'Turkish (Türkçe)',
+    code: 'TR',
+    desc: 'Native Turkish search queries'
+  },
+  {
+    value: 'de',
+    flag: '🇩🇪',
+    label: 'German (Deutsch)',
+    code: 'DE',
+    desc: 'Native German search queries'
+  },
+  {
+    value: 'fr',
+    flag: '🇫🇷',
+    label: 'French (Français)',
+    code: 'FR',
+    desc: 'Native French search queries'
+  },
+  {
+    value: 'es',
+    flag: '🇪🇸',
+    label: 'Spanish (Español)',
+    code: 'ES',
+    desc: 'Native Spanish search queries'
+  },
+  {
+    value: 'it',
+    flag: '🇮🇹',
+    label: 'Italian (Italiano)',
+    code: 'IT',
+    desc: 'Native Italian search queries'
+  },
+  {
+    value: 'nl',
+    flag: '🇳🇱',
+    label: 'Dutch (Nederlands)',
+    code: 'NL',
+    desc: 'Native Dutch search queries'
+  },
+  {
+    value: 'pt',
+    flag: '🇵🇹',
+    label: 'Portuguese (Português)',
+    code: 'PT',
+    desc: 'Native Portuguese search queries'
+  },
+  {
+    value: 'ar',
+    flag: '🇸🇦',
+    label: 'Arabic (العربية)',
+    code: 'AR',
+    desc: 'Native Arabic search queries'
+  }
+];
 
 const SAMPLE_SITES = [
   { name: 'Cerilas Tech', url: 'cerilas.com' },
@@ -433,59 +594,27 @@ export default function AiVisibilityChecker({ onBack, toolMeta }) {
             </Button>
           </div>
 
-          {/* Target Geotargeting & Query Language Selectors */}
+          {/* Target Geotargeting & Query Language Custom Dropdowns */}
           <div className="aivc-targeting-row">
-            <div className="aivc-targeting-group">
-              <label htmlFor="aivc-select-country" className="aivc-targeting-label">
-                <Globe size={13} color="#3b82f6" />
-                <span>Target Market:</span>
-              </label>
-              <select
-                id="aivc-select-country"
-                className="aivc-targeting-select"
-                value={selectedCountry}
-                onChange={(e) => setSelectedCountry(e.target.value)}
-                disabled={isScanning}
-              >
-                <option value="auto">Auto-Detect Market (from Domain)</option>
-                <option value="US">United States (US)</option>
-                <option value="GB">United Kingdom (UK)</option>
-                <option value="TR">Turkey (TR)</option>
-                <option value="DE">Germany (DE)</option>
-                <option value="FR">France (FR)</option>
-                <option value="CA">Canada (CA)</option>
-                <option value="AU">Australia (AU)</option>
-                <option value="ES">Spain (ES)</option>
-                <option value="IT">Italy (IT)</option>
-                <option value="NL">Netherlands (NL)</option>
-                <option value="GLOBAL">Global / International</option>
-              </select>
-            </div>
+            <AiVisibilityDropdown
+              id="aivc-select-country"
+              label="Target Market"
+              icon={<Globe size={13} color="#3b82f6" />}
+              options={MARKET_OPTIONS}
+              value={selectedCountry}
+              onChange={setSelectedCountry}
+              disabled={isScanning}
+            />
 
-            <div className="aivc-targeting-group">
-              <label htmlFor="aivc-select-language" className="aivc-targeting-label">
-                <Languages size={13} color="#8b5cf6" />
-                <span>Query Language:</span>
-              </label>
-              <select
-                id="aivc-select-language"
-                className="aivc-targeting-select"
-                value={selectedLanguage}
-                onChange={(e) => setSelectedLanguage(e.target.value)}
-                disabled={isScanning}
-              >
-                <option value="auto">Auto-Detect Language (from Content)</option>
-                <option value="en">English (en)</option>
-                <option value="tr">Turkish (tr)</option>
-                <option value="de">German (de)</option>
-                <option value="fr">French (fr)</option>
-                <option value="es">Spanish (es)</option>
-                <option value="it">Italian (it)</option>
-                <option value="nl">Dutch (nl)</option>
-                <option value="pt">Portuguese (pt)</option>
-                <option value="ar">Arabic (ar)</option>
-              </select>
-            </div>
+            <AiVisibilityDropdown
+              id="aivc-select-language"
+              label="Query Language"
+              icon={<Languages size={13} color="#8b5cf6" />}
+              options={LANGUAGE_OPTIONS}
+              value={selectedLanguage}
+              onChange={setSelectedLanguage}
+              disabled={isScanning}
+            />
           </div>
 
           <div className="aivc-samples-row">
