@@ -35,6 +35,7 @@ import { Button, Badge, ToolHeader, QuotaModal } from '../../components/ui';
 import ToolSeoDivider from '../../components/ui/ToolSeoDivider';
 import AiVisibilityCheckerSeo from './components/AiVisibilityCheckerSeo';
 import AiVisibilityDropdown from './components/AiVisibilityDropdown';
+import FlagIcon from './components/FlagIcon';
 import './ai-visibility-checker.css';
 
 const MARKET_OPTIONS = [
@@ -51,70 +52,70 @@ const MARKET_OPTIONS = [
   },
   {
     value: 'US',
-    icon: <span className="aivc-avatar-tag">US</span>,
+    icon: <FlagIcon code="US" />,
     label: 'United States',
     code: 'US',
     desc: 'Google US live search grounding'
   },
   {
     value: 'GB',
-    icon: <span className="aivc-avatar-tag">UK</span>,
+    icon: <FlagIcon code="GB" />,
     label: 'United Kingdom',
     code: 'UK',
     desc: 'Google UK live search index'
   },
   {
     value: 'TR',
-    icon: <span className="aivc-avatar-tag">TR</span>,
+    icon: <FlagIcon code="TR" />,
     label: 'Turkey (Türkiye)',
     code: 'TR',
     desc: 'Google Türkiye localized queries'
   },
   {
     value: 'DE',
-    icon: <span className="aivc-avatar-tag">DE</span>,
+    icon: <FlagIcon code="DE" />,
     label: 'Germany (Deutschland)',
     code: 'DE',
     desc: 'Google Deutschland search index'
   },
   {
     value: 'FR',
-    icon: <span className="aivc-avatar-tag">FR</span>,
+    icon: <FlagIcon code="FR" />,
     label: 'France',
     code: 'FR',
     desc: 'Google France localized results'
   },
   {
     value: 'CA',
-    icon: <span className="aivc-avatar-tag">CA</span>,
+    icon: <FlagIcon code="CA" />,
     label: 'Canada',
     code: 'CA',
     desc: 'Google Canada search index'
   },
   {
     value: 'AU',
-    icon: <span className="aivc-avatar-tag">AU</span>,
+    icon: <FlagIcon code="AU" />,
     label: 'Australia',
     code: 'AU',
     desc: 'Google Australia search index'
   },
   {
     value: 'ES',
-    icon: <span className="aivc-avatar-tag">ES</span>,
+    icon: <FlagIcon code="ES" />,
     label: 'Spain (España)',
     code: 'ES',
     desc: 'Google España search grounding'
   },
   {
     value: 'IT',
-    icon: <span className="aivc-avatar-tag">IT</span>,
+    icon: <FlagIcon code="IT" />,
     label: 'Italy (Italia)',
     code: 'IT',
     desc: 'Google Italia localized search'
   },
   {
     value: 'NL',
-    icon: <span className="aivc-avatar-tag">NL</span>,
+    icon: <FlagIcon code="NL" />,
     label: 'Netherlands (Nederland)',
     code: 'NL',
     desc: 'Google Nederland search index'
@@ -146,63 +147,63 @@ const LANGUAGE_OPTIONS = [
   },
   {
     value: 'en',
-    icon: <span className="aivc-avatar-tag lang">EN</span>,
+    icon: <FlagIcon code="US" />,
     label: 'English',
     code: 'EN',
     desc: 'Global commercial & informational queries'
   },
   {
     value: 'tr',
-    icon: <span className="aivc-avatar-tag lang">TR</span>,
+    icon: <FlagIcon code="TR" />,
     label: 'Turkish (Türkçe)',
     code: 'TR',
     desc: 'Native Turkish search queries'
   },
   {
     value: 'de',
-    icon: <span className="aivc-avatar-tag lang">DE</span>,
+    icon: <FlagIcon code="DE" />,
     label: 'German (Deutsch)',
     code: 'DE',
     desc: 'Native German search queries'
   },
   {
     value: 'fr',
-    icon: <span className="aivc-avatar-tag lang">FR</span>,
+    icon: <FlagIcon code="FR" />,
     label: 'French (Français)',
     code: 'FR',
     desc: 'Native French search queries'
   },
   {
     value: 'es',
-    icon: <span className="aivc-avatar-tag lang">ES</span>,
-    label: 'Spanish (Español)',
+    icon: <FlagIcon code="ES" />,
+    label: 'Spain (Español)',
     code: 'ES',
     desc: 'Native Spanish search queries'
   },
   {
     value: 'it',
-    icon: <span className="aivc-avatar-tag lang">IT</span>,
+    icon: <FlagIcon code="IT" />,
     label: 'Italian (Italiano)',
     code: 'IT',
     desc: 'Native Italian search queries'
   },
   {
     value: 'nl',
-    icon: <span className="aivc-avatar-tag lang">NL</span>,
+    icon: <FlagIcon code="NL" />,
     label: 'Dutch (Nederlands)',
     code: 'NL',
     desc: 'Native Dutch search queries'
   },
   {
     value: 'pt',
-    icon: <span className="aivc-avatar-tag lang">PT</span>,
+    icon: <FlagIcon code="PT" />,
     label: 'Portuguese (Português)',
     code: 'PT',
     desc: 'Native Portuguese search queries'
   },
   {
     value: 'ar',
-    icon: <span className="aivc-avatar-tag lang">AR</span>,
+    icon: <FlagIcon code="AR" />,
     label: 'Arabic (العربية)',
     code: 'AR',
     desc: 'Native Arabic search queries'
