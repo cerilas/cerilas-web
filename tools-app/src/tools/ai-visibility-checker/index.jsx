@@ -24,7 +24,9 @@ import {
   Lock,
   Bot,
   Languages,
-  Cpu
+  Cpu,
+  Compass,
+  MapPin
 } from 'lucide-react';
 import { aiVisibilityCheckerManifest } from './manifest';
 import { useToolAnalytics } from '../../hooks/useToolAnalytics';
@@ -38,84 +40,92 @@ import './ai-visibility-checker.css';
 const MARKET_OPTIONS = [
   {
     value: 'auto',
-    flag: '🌐',
+    icon: (
+      <div className="aivc-icon-badge">
+        <Compass size={13} color="#3b82f6" />
+      </div>
+    ),
     label: 'Auto-Detect Market',
     code: 'AUTO',
     desc: 'Inferred automatically from domain TLD & server'
   },
   {
     value: 'US',
-    flag: '🇺🇸',
+    icon: <span className="aivc-avatar-tag">US</span>,
     label: 'United States',
     code: 'US',
     desc: 'Google US live search grounding'
   },
   {
     value: 'GB',
-    flag: '🇬🇧',
+    icon: <span className="aivc-avatar-tag">UK</span>,
     label: 'United Kingdom',
     code: 'UK',
     desc: 'Google UK live search index'
   },
   {
     value: 'TR',
-    flag: '🇹🇷',
+    icon: <span className="aivc-avatar-tag">TR</span>,
     label: 'Turkey (Türkiye)',
     code: 'TR',
     desc: 'Google Türkiye localized queries'
   },
   {
     value: 'DE',
-    flag: '🇩🇪',
+    icon: <span className="aivc-avatar-tag">DE</span>,
     label: 'Germany (Deutschland)',
     code: 'DE',
     desc: 'Google Deutschland search index'
   },
   {
     value: 'FR',
-    flag: '🇫🇷',
+    icon: <span className="aivc-avatar-tag">FR</span>,
     label: 'France',
     code: 'FR',
     desc: 'Google France localized results'
   },
   {
     value: 'CA',
-    flag: '🇨🇦',
+    icon: <span className="aivc-avatar-tag">CA</span>,
     label: 'Canada',
     code: 'CA',
     desc: 'Google Canada search index'
   },
   {
     value: 'AU',
-    flag: '🇦🇺',
+    icon: <span className="aivc-avatar-tag">AU</span>,
     label: 'Australia',
     code: 'AU',
     desc: 'Google Australia search index'
   },
   {
     value: 'ES',
-    flag: '🇪🇸',
+    icon: <span className="aivc-avatar-tag">ES</span>,
     label: 'Spain (España)',
     code: 'ES',
     desc: 'Google España search grounding'
   },
   {
     value: 'IT',
-    flag: '🇮🇹',
+    icon: <span className="aivc-avatar-tag">IT</span>,
     label: 'Italy (Italia)',
     code: 'IT',
     desc: 'Google Italia localized search'
   },
   {
     value: 'NL',
-    flag: '🇳🇱',
+    icon: <span className="aivc-avatar-tag">NL</span>,
     label: 'Netherlands (Nederland)',
     code: 'NL',
     desc: 'Google Nederland search index'
   },
   {
     value: 'GLOBAL',
-    flag: '🌍',
+    icon: (
+      <div className="aivc-icon-badge emerald">
+        <Globe size={13} color="#10b981" />
+      </div>
+    ),
     label: 'Global / Worldwide',
     code: 'GLOBAL',
     desc: 'Worldwide unlocalized search index'
@@ -125,70 +135,74 @@ const MARKET_OPTIONS = [
 const LANGUAGE_OPTIONS = [
   {
     value: 'auto',
-    flag: '⚡',
+    icon: (
+      <div className="aivc-icon-badge purple">
+        <Sparkles size={13} color="#8b5cf6" />
+      </div>
+    ),
     label: 'Auto-Detect Language',
     code: 'AUTO',
     desc: 'Extracted from website HTML lang & content'
   },
   {
     value: 'en',
-    flag: '🇺🇸',
+    icon: <span className="aivc-avatar-tag lang">EN</span>,
     label: 'English',
     code: 'EN',
     desc: 'Global commercial & informational queries'
   },
   {
     value: 'tr',
-    flag: '🇹🇷',
+    icon: <span className="aivc-avatar-tag lang">TR</span>,
     label: 'Turkish (Türkçe)',
     code: 'TR',
     desc: 'Native Turkish search queries'
   },
   {
     value: 'de',
-    flag: '🇩🇪',
+    icon: <span className="aivc-avatar-tag lang">DE</span>,
     label: 'German (Deutsch)',
     code: 'DE',
     desc: 'Native German search queries'
   },
   {
     value: 'fr',
-    flag: '🇫🇷',
+    icon: <span className="aivc-avatar-tag lang">FR</span>,
     label: 'French (Français)',
     code: 'FR',
     desc: 'Native French search queries'
   },
   {
     value: 'es',
-    flag: '🇪🇸',
+    icon: <span className="aivc-avatar-tag lang">ES</span>,
     label: 'Spanish (Español)',
     code: 'ES',
     desc: 'Native Spanish search queries'
   },
   {
     value: 'it',
-    flag: '🇮🇹',
+    icon: <span className="aivc-avatar-tag lang">IT</span>,
     label: 'Italian (Italiano)',
     code: 'IT',
     desc: 'Native Italian search queries'
   },
   {
     value: 'nl',
-    flag: '🇳🇱',
+    icon: <span className="aivc-avatar-tag lang">NL</span>,
     label: 'Dutch (Nederlands)',
     code: 'NL',
     desc: 'Native Dutch search queries'
   },
   {
     value: 'pt',
-    flag: '🇵🇹',
+    icon: <span className="aivc-avatar-tag lang">PT</span>,
     label: 'Portuguese (Português)',
     code: 'PT',
     desc: 'Native Portuguese search queries'
   },
   {
     value: 'ar',
-    flag: '🇸🇦',
+    icon: <span className="aivc-avatar-tag lang">AR</span>,
     label: 'Arabic (العربية)',
     code: 'AR',
     desc: 'Native Arabic search queries'

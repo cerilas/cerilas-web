@@ -102,9 +102,9 @@ export default function AiVisibilityDropdown({
         disabled={disabled}
       >
         <div className="aivc-dropdown-trigger-content">
-          <span className="aivc-dropdown-flag" aria-hidden="true">
-            {selectedOption?.flag || '🌐'}
-          </span>
+          <div className="aivc-dropdown-icon-slot" aria-hidden="true">
+            {selectedOption?.icon}
+          </div>
           <div className="aivc-dropdown-trigger-texts">
             <span className="aivc-dropdown-trigger-title">{selectedOption?.label}</span>
           </div>
@@ -143,9 +143,9 @@ export default function AiVisibilityDropdown({
                   aria-selected={isSelected}
                 >
                   <div className="aivc-dropdown-item-left">
-                    <span className="aivc-dropdown-item-flag" aria-hidden="true">
-                      {opt.flag}
-                    </span>
+                    <div className="aivc-dropdown-item-icon-slot" aria-hidden="true">
+                      {opt.icon}
+                    </div>
                     <div className="aivc-dropdown-item-texts">
                       <div className="aivc-dropdown-item-title-row">
                         <span className="aivc-dropdown-item-label">{opt.label}</span>
