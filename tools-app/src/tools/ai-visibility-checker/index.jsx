@@ -23,7 +23,8 @@ import {
   Clock,
   Lock,
   Bot,
-  Languages
+  Languages,
+  Cpu
 } from 'lucide-react';
 import { aiVisibilityCheckerManifest } from './manifest';
 import { useToolAnalytics } from '../../hooks/useToolAnalytics';
@@ -43,7 +44,7 @@ const SAMPLE_SITES = [
 const SCAN_STEPS = [
   'Connecting to target website and downloading raw HTML...',
   'Extracting title, meta tags, and body content without AI...',
-  'Generating top 10 realistic user search queries with Gemini 3.8 Flash...',
+  'Generating top 10 realistic user search queries with advanced AI models...',
   'Querying Google Search Grounding for each prompt against live web data...',
   'Calculating citation rates, brand mentions, and competitor rankings...'
 ];
@@ -340,10 +341,10 @@ export default function AiVisibilityChecker({ onBack, toolMeta }) {
               </Badge>
             </div>
             <Badge variant="neutral" icon={<Sparkles size={12} strokeWidth={2} />}>
-              Gemini 3.6 Flash
+              Advanced AI Infrastructure
             </Badge>
             <Badge variant="success" icon={<ShieldCheck size={12} strokeWidth={2} />}>
-              Google Search Grounding
+              Live Search Grounding
             </Badge>
           </>
         }
@@ -492,17 +493,39 @@ export default function AiVisibilityChecker({ onBack, toolMeta }) {
           </div>
 
           <div className="aivc-hero-guarantees">
-            <span>
-              <CheckCircle2 size={13} color="#10b981" /> 100% Free
-            </span>
-            <span>•</span>
-            <span>
-              <CheckCircle2 size={13} color="#10b981" /> Powered by Gemini 3.8 Flash
-            </span>
-            <span>•</span>
-            <span>
-              <CheckCircle2 size={13} color="#10b981" /> Live Google Search Grounding Probes
-            </span>
+            <div className="aivc-guarantee-item">
+              <div className="aivc-guarantee-icon-wrap aivc-icon-emerald">
+                <ShieldCheck size={17} strokeWidth={2.2} />
+              </div>
+              <div className="aivc-guarantee-text">
+                <span className="aivc-guarantee-title">100% Free Forever</span>
+                <span className="aivc-guarantee-desc">No Sign-up Required</span>
+              </div>
+            </div>
+
+            <div className="aivc-guarantee-divider" />
+
+            <div className="aivc-guarantee-item">
+              <div className="aivc-guarantee-icon-wrap aivc-icon-blue">
+                <Cpu size={17} strokeWidth={2.2} />
+              </div>
+              <div className="aivc-guarantee-text">
+                <span className="aivc-guarantee-title">Advanced AI Infrastructure</span>
+                <span className="aivc-guarantee-desc">State-of-the-Art Architecture</span>
+              </div>
+            </div>
+
+            <div className="aivc-guarantee-divider" />
+
+            <div className="aivc-guarantee-item">
+              <div className="aivc-guarantee-icon-wrap aivc-icon-purple">
+                <Globe size={17} strokeWidth={2.2} />
+              </div>
+              <div className="aivc-guarantee-text">
+                <span className="aivc-guarantee-title">Live Search Grounding</span>
+                <span className="aivc-guarantee-desc">Real-Time Citation Probing</span>
+              </div>
+            </div>
           </div>
         </form>
       </div>

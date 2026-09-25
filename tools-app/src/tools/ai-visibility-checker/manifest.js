@@ -9,12 +9,12 @@ export const aiVisibilityCheckerManifest = {
   targetUrl: '#/tool/ai-visibility-checker',
   features: [
     'Automated Content Scraping (Zero-AI Initial Extraction): Fetches title, meta tags, key headings, and main body text securely',
-    'Top 10 High-Intent Search Query Extraction: Uses Gemini to generate realistic commercial, informational, and local queries users ask AI',
-    'Live Google Search Grounding Probe: Queries Gemini API with live search tools enabled to audit real citation chunks',
+    'Top 10 High-Intent Search Query Extraction: Leverages advanced frontier AI models to model realistic commercial, informational, and local queries users ask AI search engines',
+    'Live Search Grounding Probe: Queries advanced frontier AI with real-time web search grounding to audit real citation chunks',
     'Citation & Mention Detection: Differentiates between direct web backlinks, brand mentions, and missed queries',
     'Competitor Citation Mapping: Identifies which third-party domains and competitors are cited by AI instead of your site',
     'AI Visibility Score & Grade (A+ to F): Instant quantitative GEO (Generative Engine Optimization) score',
-    'Built-in Google Gemini 3.8 Flash Engine: Automated server-side search grounding with zero manual API setup required',
+    'Powered by Advanced AI Infrastructure: Automated server-side frontier AI search grounding with zero manual API setup required',
     'Actionable AEO Recommendations: Concrete steps to optimize schema markup, Q&A architecture, and digital entity authority'
   ],
   seo: {

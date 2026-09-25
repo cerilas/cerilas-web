@@ -596,7 +596,7 @@ export const TOOLS_SEO_REGISTRY = {
     title: 'Free AI Visibility Checker (2026) – Test Gemini & ChatGPT Citations | Cerilas Tools',
     description: 'Audit if your brand and website are cited in AI search answers (Gemini, ChatGPT, Perplexity). Extracts top 10 real user queries and audits live search grounding citations.',
     shortDescription: 'Analyze your website content, generate top 10 search queries users ask AI, and audit whether your site is cited by Gemini and Google Search grounding.',
-    howItWorks: 'Scrapes website text without AI to extract clean metadata and content, asks Gemini to generate the top 10 real-world commercial & informational search queries, and tests each query against Gemini with Google Search Grounding to identify live citations, brand mentions, and competitor sources.',
+    howItWorks: 'Scrapes website text without AI to extract clean metadata and content, utilizes advanced frontier AI infrastructure to model the top 10 real-world commercial & informational search queries, and tests each query against state-of-the-art AI search grounding engines to identify live citations, brand mentions, and competitor sources.',
     formula: 'AI Visibility Score = (Direct Citations × 10 + Brand Mentions × 5) / (Total Queries × 10) × 100%. Graded from A+ (80%+) to F (<20%).',
     whenToUse: 'Audit your Generative Engine Optimization (GEO) performance, benchmark brand visibility in AI answers, and uncover competitor citations.',
     example: 'For a clinic or SaaS website, automatically generates 10 high-intent queries (e.g., "pricing in 2026", "best clinic in city") and checks live AI citation status.',

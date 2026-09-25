@@ -474,7 +474,7 @@ router.post('/analyze', async (req, res) => {
     if (!apiKey) {
       return res.status(500).json({
         success: false,
-        error: 'Gemini API key is not configured on the server.'
+        error: 'AI search engine API is not configured on the server.'
       });
     }
 
@@ -913,7 +913,7 @@ router.post('/analyze-stream', async (req, res) => {
     const apiKey = (userApiKey || '').trim() || process.env.GEMINI_API_KEY;
     console.log('[AI Visibility Stream] API key present?', !!apiKey);
     if (!apiKey) {
-      sendEvent('error', { error: 'Gemini API key is not configured on the server.' });
+      sendEvent('error', { error: 'AI search engine API is not configured on the server.' });
       return res.end();
     }
 
@@ -935,7 +935,7 @@ router.post('/analyze-stream', async (req, res) => {
 
     sendEvent('step', {
       stepIndex: 2,
-      title: 'Generating top 10 realistic user search queries with Gemini 3.8 Flash...'
+      title: 'Generating top 10 realistic user search queries with advanced AI models...'
     });
 
     const queryGenerationPrompt = `

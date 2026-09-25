@@ -48,8 +48,8 @@ const FAQ_ITEMS = [
     a: 'Schema.org JSON-LD markup (such as Organization, Product, FAQPage, MedicalBusiness, and Article) acts as an unambiguous translation layer for AI crawlers. It explicitly defines entities, attributes, relationships, pricing, and FAQs, eliminating ambiguities and dramatically increasing the probability that an LLM will select your page as a ground-truth citation source.'
   },
   {
-    q: 'Can I test my website without providing a Gemini API key or registering an account?',
-    a: 'Yes. Cerilas AI Visibility Checker is 100% free and requires zero registration or API key input. Raw website metadata extraction and live Google Gemini 3.8 Flash search grounding calls are handled securely server-side without user friction.'
+    q: 'Can I test my website without providing an API key or registering an account?',
+    a: 'Yes. Cerilas AI Visibility Checker is 100% free and requires zero registration or API key input. Raw website metadata extraction and live search grounding calls powered by advanced frontier AI infrastructure are handled securely server-side without user friction.'
   },
   {
     q: 'What is Answer Engine Optimization (AEO) and how does it relate to GEO?',
@@ -97,7 +97,7 @@ export default function AiVisibilityCheckerSeo() {
       },
       featureList: [
         'Automated zero-AI website content scraping (title, meta, headings, clean body)',
-        'Top 10 high-intent search query modeling powered by Gemini 3.8 Flash',
+        'Top 10 high-intent search query modeling powered by advanced frontier AI infrastructure',
         'Live Google Search Grounding citation verification',
         'Direct citation backlink detection vs. brand-only mention attribution',
         'Quantitative AI Visibility Score & Grade (A+ to F)',
@@ -124,7 +124,7 @@ export default function AiVisibilityCheckerSeo() {
         {
           '@type': 'HowToStep',
           name: 'Probe Live Search Grounding',
-          text: 'Each query is executed against Gemini 3.8 Flash with live Google Search Grounding to evaluate retrieval-augmented generation (RAG) source chunks.'
+          text: 'Each query is executed against advanced frontier AI search grounding models with live web retrieval to evaluate retrieval-augmented generation (RAG) source chunks.'
         },
         {
           '@type': 'HowToStep',
