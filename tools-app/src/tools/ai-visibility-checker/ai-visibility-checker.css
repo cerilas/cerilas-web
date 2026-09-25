@@ -787,6 +787,7 @@ html.dark .aivc-input-field::placeholder {
 
 /* Progress Animation Card */
 .aivc-progress-card {
+  scroll-margin-top: 85px;
   background: var(--card-bg);
   border: 1px solid var(--card-border);
   border-radius: 18px;

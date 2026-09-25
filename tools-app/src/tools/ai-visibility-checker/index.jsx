@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Eye,
   Search,
@@ -272,6 +272,23 @@ export default function AiVisibilityChecker({ onBack, toolMeta }) {
   const [activeFilter, setActiveFilter] = useState('all'); // 'all' | 'cited' | 'mentioned' | 'not_cited'
   const [expandedQueries, setExpandedQueries] = useState({});
   const [copiedJson, setCopiedJson] = useState(false);
+
+  // Ref and Auto-Scroll for Progress Card
+  const progressCardRef = useRef(null);
+
+  useEffect(() => {
+    if (isScanning) {
+      const timer = setTimeout(() => {
+        if (progressCardRef.current) {
+          progressCardRef.current.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start'
+          });
+        }
+      }, 60);
+      return () => clearTimeout(timer);
+    }
+  }, [isScanning]);
 
   // Fetch initial AI quota on mount
   useEffect(() => {
@@ -717,7 +734,7 @@ export default function AiVisibilityChecker({ onBack, toolMeta }) {
 
       {/* 3. Live Animated Multi-Step Scan Progress */}
       {isScanning && (
-        <div className="aivc-progress-card">
+        <div ref={progressCardRef} className="aivc-progress-card">
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.6rem' }}>
             <Clock size={18} className="spin" />
             <strong style={{ fontSize: '1.05rem', color: 'var(--text-main)' }}>
