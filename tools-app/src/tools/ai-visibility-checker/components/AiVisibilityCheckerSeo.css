@@ -412,7 +412,341 @@
   line-height: 1.5;
 }
 
+/* ==========================================================================
+   Interactive GEO Readiness Scorecard
+   ========================================================================== */
+.aivc-scorecard-box {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 20px;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+}
+
+.aivc-scorecard-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.aivc-scorecard-title-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.aivc-scorecard-title-wrap h3 {
+  font-size: 1.25rem;
+  font-weight: 800;
+  margin: 0;
+  color: var(--text-main);
+  letter-spacing: -0.015em;
+}
+
+.aivc-scorecard-title-wrap p {
+  font-size: 0.88rem;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.aivc-score-display {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+  padding: 0.6rem 1.25rem;
+  border-radius: 14px;
+  background: rgba(59, 130, 246, 0.08);
+  border: 1px solid rgba(59, 130, 246, 0.25);
+}
+
+.aivc-score-number {
+  font-size: 1.75rem;
+  font-weight: 900;
+  color: #3b82f6;
+  font-feature-settings: 'tnum';
+}
+
+.aivc-score-max {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.aivc-progress-track {
+  width: 100%;
+  height: 8px;
+  background: rgba(150, 150, 150, 0.15);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.aivc-progress-fill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.35s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.3s ease;
+}
+
+.aivc-checklist-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 0.9rem;
+}
+
+.aivc-checklist-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.85rem;
+  padding: 1rem 1.15rem;
+  background: rgba(150, 150, 150, 0.04);
+  border: 1px solid var(--card-border);
+  border-radius: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.aivc-checklist-card:hover {
+  background: rgba(150, 150, 150, 0.08);
+  border-color: rgba(59, 130, 246, 0.3);
+}
+
+.aivc-checklist-card.checked {
+  background: rgba(16, 185, 129, 0.06);
+  border-color: rgba(16, 185, 129, 0.3);
+}
+
+.aivc-checkbox-icon {
+  margin-top: 0.15rem;
+  flex-shrink: 0;
+  color: var(--text-muted);
+  transition: color 0.15s ease;
+}
+
+.aivc-checklist-card.checked .aivc-checkbox-icon {
+  color: #10b981;
+}
+
+.aivc-checklist-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 0;
+}
+
+.aivc-checklist-title {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--text-main);
+  letter-spacing: -0.01em;
+}
+
+.aivc-checklist-desc {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  line-height: 1.45;
+  margin: 0;
+}
+
+.aivc-score-recommendation {
+  padding: 1rem 1.25rem;
+  border-radius: 12px;
+  font-size: 0.88rem;
+  line-height: 1.55;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.aivc-score-recommendation.tier-high {
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  color: #10b981;
+}
+
+.aivc-score-recommendation.tier-med {
+  background: rgba(59, 130, 246, 0.1);
+  border: 1px solid rgba(59, 130, 246, 0.25);
+  color: #3b82f6;
+}
+
+.aivc-score-recommendation.tier-low {
+  background: rgba(245, 158, 11, 0.1);
+  border: 1px solid rgba(245, 158, 11, 0.25);
+  color: #f59e0b;
+}
+
+/* ==========================================================================
+   Before vs. After GEO Case Study
+   ========================================================================== */
+.aivc-case-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+.aivc-case-card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 18px;
+  padding: 1.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.15rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.aivc-case-card.before {
+  border-left: 4px solid #ef4444;
+}
+
+.aivc-case-card.after {
+  border-left: 4px solid #10b981;
+}
+
+.aivc-case-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.25rem 0.65rem;
+  border-radius: 999px;
+  width: fit-content;
+}
+
+.aivc-case-card.before .aivc-case-badge {
+  background: rgba(239, 68, 68, 0.12);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.25);
+}
+
+.aivc-case-card.after .aivc-case-badge {
+  background: rgba(16, 185, 129, 0.12);
+  color: #10b981;
+  border: 1px solid rgba(16, 185, 129, 0.25);
+}
+
+.aivc-case-title {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--text-main);
+  margin: 0;
+  letter-spacing: -0.015em;
+}
+
+.aivc-case-desc {
+  font-size: 0.88rem;
+  color: var(--text-muted);
+  line-height: 1.6;
+  margin: 0;
+}
+
+.aivc-case-metrics {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--card-border);
+}
+
+.aivc-case-metric-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.84rem;
+}
+
+.aivc-metric-label {
+  color: var(--text-muted);
+}
+
+.aivc-metric-val {
+  font-weight: 700;
+  font-feature-settings: 'tnum';
+}
+
+.aivc-metric-val.bad {
+  color: #ef4444;
+}
+
+.aivc-metric-val.good {
+  color: #10b981;
+}
+
+/* ==========================================================================
+   Code Snippet Preview
+   ========================================================================== */
+.aivc-code-container {
+  background: #0d1117;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+:root[data-theme='light'] .aivc-code-container {
+  background: #1e293b;
+}
+
+.aivc-code-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1.25rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  font-size: 0.78rem;
+  color: #94a3b8;
+  font-family: monospace;
+}
+
+.aivc-code-copy {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #f8fafc;
+  padding: 0.25rem 0.65rem;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.aivc-code-copy:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.aivc-code-body {
+  padding: 1.25rem;
+  margin: 0;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.82rem;
+  color: #e2e8f0;
+  line-height: 1.6;
+  overflow-x: auto;
+}
+
 /* Responsive adjustments */
+@media (max-width: 860px) {
+  .aivc-case-grid {
+    grid-template-columns: 1fr;
+  }
+  .aivc-checklist-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 @media (max-width: 768px) {
   .aivc-seo-wrapper {
     margin-top: 2rem;

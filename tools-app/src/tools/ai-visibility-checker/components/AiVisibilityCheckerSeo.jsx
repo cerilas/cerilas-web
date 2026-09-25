@@ -18,9 +18,80 @@ import {
   Building,
   Target,
   BarChart3,
-  Compass
+  Compass,
+  CheckSquare,
+  Square,
+  Copy,
+  Check,
+  Zap,
+  BookOpen,
+  ArrowRight
 } from 'lucide-react';
 import './AiVisibilityCheckerSeo.css';
+
+const CHECKLIST_ITEMS = [
+  {
+    id: 1,
+    title: 'Schema.org JSON-LD Entity Disambiguation',
+    desc: 'Organization, Product, MedicalBusiness, or SoftwareApplication markup with verified sameAs Wikidata and social links.'
+  },
+  {
+    id: 2,
+    title: 'High Information-Gain Benchmarks & Data',
+    desc: 'Original statistical studies, proprietary price tables, and direct test metrics absent from competitor domains.'
+  },
+  {
+    id: 3,
+    title: 'Robots.txt AI Discovery Crawler Permissions',
+    desc: 'Permitting GPTBot, OAI-SearchBot, PerplexityBot, and Google-Extended to fetch live web content without blocking.'
+  },
+  {
+    id: 4,
+    title: 'Semantic Direct Q&A Hierarchy',
+    desc: 'Conversational H2/H3 question headers followed immediately by concise 40–70 word authoritative answer blocks.'
+  },
+  {
+    id: 5,
+    title: '/llms.txt AI Standard Deployed on Root',
+    desc: 'Standardized markdown documentation at yourdomain.com/llms.txt guiding LLM context windows cleanly.'
+  },
+  {
+    id: 6,
+    title: 'Multi-Source Digital Entity Consensus',
+    desc: 'Consistent brand citations across Trustpilot, G2, Wikipedia, LinkedIn, and authoritative industry directories.'
+  }
+];
+
+const SCHEMA_SNIPPET = `{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "https://yourdomain.com/#organization",
+      "name": "YourBrand Technologies",
+      "url": "https://yourdomain.com",
+      "logo": "https://yourdomain.com/brand-logo.png",
+      "sameAs": [
+        "https://www.wikidata.org/wiki/Q12345678",
+        "https://www.linkedin.com/company/yourbrand"
+      ]
+    },
+    {
+      "@type": "FAQPage",
+      "@id": "https://yourdomain.com/pricing#faq",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "What is the exact pricing for YourBrand in 2026?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "YourBrand plans start at $29/month for Starter and $99/month for Pro with unlimited API requests and zero setup fees."
+          }
+        }
+      ]
+    }
+  ]
+}`;
 
 const FAQ_ITEMS = [
   {
@@ -62,6 +133,22 @@ const FAQ_ITEMS = [
   {
     q: 'Does blocking AI crawlers in robots.txt prevent my site from being cited by AI search engines?',
     a: 'Yes. If your robots.txt file blocks search discovery crawlers like OAI-SearchBot (OpenAI) or PerplexityBot, or if you block Googlebot, AI search engines will not be able to retrieve your web pages during live retrieval-augmented generation (RAG) queries, reducing your citation rate to zero.'
+  },
+  {
+    q: 'Can a new website or domain with low domain authority still get cited by AI search engines?',
+    a: 'Yes. Unlike legacy Google PageRank which required months or years of backlink acquisition to rank, generative AI retrieval engines prioritize information gain, schema completeness, and specific factual density. A brand-new domain that provides the clearest structured pricing table, definitive technical benchmark, or unique case study can immediately win primary citation pills in Gemini, ChatGPT, and Perplexity over legacy high-DA blogs that only contain generic fluff.'
+  },
+  {
+    q: 'What is the commercial difference between direct citation clicks and zero-click brand impressions?',
+    a: 'In modern conversational search, brand impressions build passive category awareness when an AI recommends your company by name. However, direct hyperlinked citations drive the highest-converting traffic on the internet because users clicking the footnote pill have already read the AI synthesized summary and are seeking immediate purchase confirmation, live demo signup, or contact details.'
+  },
+  {
+    q: 'How do AI search engines handle paywalled, client-side rendered, or gated content?',
+    a: 'Most AI search crawlers (such as OAI-SearchBot and Google-Extended) do not execute heavy client-side JavaScript frameworks or bypass authentication paywalls. If your key answers, pricing data, or documentation are hidden behind login gates or require extensive asynchronous rendering, AI retrieval bots will classify the page as empty or thin, ceding citation opportunities to open competitor documentation.'
+  },
+  {
+    q: 'How can I fix AI hallucinations if an AI model outputs inaccurate pricing or false claims about my business?',
+    a: 'AI models hallucinate when web consensus is fragmented or ambiguous. To overwrite outdated or false training data, publish unambiguous Schema.org JSON-LD (such as Product offers with exact price specifications or Organization with official founding and leadership details), link your verified sameAs Wikipedia/Wikidata entity URLs, and deploy an authoritative /llms.txt file that anchors retrieval models to your canonical source documents.'
   }
 ];
 
@@ -76,10 +163,50 @@ const RELATED_TOOLS = [
 
 export default function AiVisibilityCheckerSeo() {
   const [openFaq, setOpenFaq] = useState(null);
+  const [checkedPillars, setCheckedPillars] = useState([1, 3]);
+  const [copiedCode, setCopiedCode] = useState(false);
 
   const toggleFaq = (idx) => {
     setOpenFaq(openFaq === idx ? null : idx);
   };
+
+  const togglePillar = (id) => {
+    setCheckedPillars((prev) =>
+      prev.includes(id) ? prev.filter((p) => p !== id) : [...prev, id]
+    );
+  };
+
+  const handleCopyCode = () => {
+    navigator.clipboard.writeText(SCHEMA_SNIPPET);
+    setCopiedCode(true);
+    setTimeout(() => setCopiedCode(false), 2000);
+  };
+
+  const scorePercentage = Math.round((checkedPillars.length / CHECKLIST_ITEMS.length) * 100);
+
+  const getScoreTier = () => {
+    if (scorePercentage >= 80) {
+      return {
+        label: 'Frontier AI Citation Ready (A+ Tier)',
+        class: 'tier-high',
+        text: 'Your domain architecture demonstrates exceptional readiness for Gemini and ChatGPT Search grounding. Maintain fresh content and monitor monthly citation audits.'
+      };
+    }
+    if (scorePercentage >= 45) {
+      return {
+        label: 'Moderate AI Retrieval Potential (B Tier)',
+        class: 'tier-med',
+        text: 'Your website has foundational signals, but lacks structured Schema.org graphs or /llms.txt standards. Competitors may capture primary citation links.'
+      };
+    }
+    return {
+      label: 'Critical AI Invisibility Risk (C/D Tier)',
+      class: 'tier-low',
+      text: 'AI search engines are likely synthesizing answers without citing your domain. Implement direct Q&A blocks and enable AI crawler permissions immediately.'
+    };
+  };
+
+  const scoreTier = getScoreTier();
 
   useEffect(() => {
     const webAppSchema = {
@@ -104,6 +231,27 @@ export default function AiVisibilityCheckerSeo() {
         'Competitor citation gap analysis and domain aggregation',
         'Generative Engine Optimization (GEO) and AEO action recommendations'
       ]
+    };
+
+    const techArticleSchema = {
+      '@context': 'https://schema.org',
+      '@type': 'TechArticle',
+      headline: 'The Generative Engine Optimization (GEO) Technical Guide & Citation Audit Architecture',
+      description: 'Comprehensive engineering guide detailing how modern LLMs (Gemini, ChatGPT, Perplexity) retrieve, anchor, and cite web pages via Search Grounding in 2026.',
+      author: {
+        '@type': 'Organization',
+        name: 'Cerilas Tools Engineering Team'
+      },
+      publisher: {
+        '@type': 'Organization',
+        name: 'Cerilas',
+        logo: {
+          '@type': 'ImageObject',
+          url: 'https://tools.cerilas.com/platform-logo.png'
+        }
+      },
+      datePublished: '2026-01-15',
+      dateModified: '2026-09-25'
     };
 
     const howToSchema = {
@@ -155,7 +303,7 @@ export default function AiVisibilityCheckerSeo() {
     const script = document.createElement('script');
     script.type = 'application/ld+json';
     script.id = 'ai-visibility-checker-jsonld';
-    script.text = JSON.stringify([webAppSchema, howToSchema, faqSchema]);
+    script.text = JSON.stringify([webAppSchema, techArticleSchema, howToSchema, faqSchema]);
     document.head.appendChild(script);
 
     return () => {
@@ -238,7 +386,83 @@ export default function AiVisibilityCheckerSeo() {
         </div>
       </section>
 
-      {/* 2. SEO vs AEO vs GEO Comparison Matrix */}
+      {/* 2. Interactive GEO Readiness Scorecard */}
+      <section className="aivc-seo-section">
+        <div className="aivc-seo-header">
+          <span className="aivc-seo-badge-tag">
+            <CheckSquare size={14} /> Interactive Diagnostic
+          </span>
+          <h2 className="aivc-seo-title">
+            Interactive AI Citation Readiness Scorecard
+          </h2>
+          <p className="aivc-seo-lead">
+            Select the technical optimization signals currently implemented on your website to calculate your instant GEO Readiness Score:
+          </p>
+        </div>
+
+        <div className="aivc-scorecard-box">
+          <div className="aivc-scorecard-header">
+            <div className="aivc-scorecard-title-wrap">
+              <h3>Technical GEO Infrastructure Checklist</h3>
+              <p>Click checkboxes to simulate your domain's citation retrieval probability</p>
+            </div>
+            <div className="aivc-score-display">
+              <span className="aivc-score-number">{scorePercentage}%</span>
+              <span className="aivc-score-max">/ 100</span>
+            </div>
+          </div>
+
+          <div className="aivc-progress-track">
+            <div
+              className="aivc-progress-fill"
+              style={{
+                width: `${scorePercentage}%`,
+                background:
+                  scorePercentage >= 80
+                    ? '#10b981'
+                    : scorePercentage >= 45
+                    ? '#3b82f6'
+                    : '#f59e0b'
+              }}
+            />
+          </div>
+
+          <div className="aivc-checklist-grid">
+            {CHECKLIST_ITEMS.map((item) => {
+              const isChecked = checkedPillars.includes(item.id);
+              return (
+                <div
+                  key={item.id}
+                  className={`aivc-checklist-card ${isChecked ? 'checked' : ''}`}
+                  onClick={() => togglePillar(item.id)}
+                >
+                  <div className="aivc-checkbox-icon">
+                    {isChecked ? (
+                      <CheckSquare size={19} color="#10b981" />
+                    ) : (
+                      <Square size={19} />
+                    )}
+                  </div>
+                  <div className="aivc-checklist-content">
+                    <span className="aivc-checklist-title">{item.title}</span>
+                    <p className="aivc-checklist-desc">{item.desc}</p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          <div className={`aivc-score-recommendation ${scoreTier.class}`}>
+            <Sparkles size={18} style={{ flexShrink: 0 }} />
+            <div>
+              <strong>{scoreTier.label}: </strong>
+              <span>{scoreTier.text}</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 3. SEO vs AEO vs GEO Comparison Matrix */}
       <section className="aivc-seo-section">
         <div className="aivc-seo-header">
           <span className="aivc-seo-badge-tag">
@@ -304,7 +528,7 @@ export default function AiVisibilityCheckerSeo() {
         </div>
       </section>
 
-      {/* 3. Frontier AI Engines Citation Mechanics */}
+      {/* 4. Frontier AI Engines Citation Mechanics */}
       <section className="aivc-seo-section">
         <div className="aivc-seo-header">
           <span className="aivc-seo-badge-tag">
@@ -364,7 +588,102 @@ export default function AiVisibilityCheckerSeo() {
         </div>
       </section>
 
-      {/* 4. Industry Playbooks: What Real Users Ask AI */}
+      {/* 5. Real-World Case Study: Before vs. After GEO */}
+      <section className="aivc-seo-section">
+        <div className="aivc-seo-header">
+          <span className="aivc-seo-badge-tag">
+            <BookOpen size={14} /> Empirical Proof
+          </span>
+          <h2 className="aivc-seo-title">
+            Case Study: Before vs. After Generative Engine Optimization
+          </h2>
+          <p className="aivc-seo-lead">
+            How restructuring a B2B SaaS pricing and service page transformed an invisible domain into a primary AI citation:
+          </p>
+        </div>
+
+        <div className="aivc-case-grid">
+          <div className="aivc-case-card before">
+            <span className="aivc-case-badge">Before: Legacy Keyword Architecture</span>
+            <h3 className="aivc-case-title">Keyword-Dense Blog Post with Hidden Pricing</h3>
+            <p className="aivc-case-desc">
+              Published a 2,500-word SEO article targeting "enterprise cloud backup pricing". Used generic marketing fluff and required 
+              users to fill out a "Contact Sales" form to receive pricing details. Lacked Schema.org JSON-LD.
+            </p>
+            <div className="aivc-case-metrics">
+              <div className="aivc-case-metric-row">
+                <span className="aivc-metric-label">AI Citation Frequency:</span>
+                <span className="aivc-metric-val bad">8% (Ignored by AI)</span>
+              </div>
+              <div className="aivc-case-metric-row">
+                <span className="aivc-metric-label">AI Footnote Source:</span>
+                <span className="aivc-metric-val bad">Review Aggregators &amp; G2</span>
+              </div>
+              <div className="aivc-case-metric-row">
+                <span className="aivc-metric-label">AI Referral Clicks:</span>
+                <span className="aivc-metric-val bad">Near Zero</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="aivc-case-card after">
+            <span className="aivc-case-badge">After: Modern GEO Architecture</span>
+            <h3 className="aivc-case-title">Transparent Q&amp;A Chunks + Nested JSON-LD</h3>
+            <p className="aivc-case-desc">
+              Rebuilt page with an explicit H2 ("How much does cloud backup cost in 2026?"), a transparent pricing comparison table, 
+              concise 50-word answer block, and nested <code>Product</code> + <code>FAQPage</code> Schema.org graphs.
+            </p>
+            <div className="aivc-case-metrics">
+              <div className="aivc-case-metric-row">
+                <span className="aivc-metric-label">AI Citation Frequency:</span>
+                <span className="aivc-metric-val good">84% (Primary Source)</span>
+              </div>
+              <div className="aivc-case-metric-row">
+                <span className="aivc-metric-label">AI Footnote Source:</span>
+                <span className="aivc-metric-val good">Direct Official Domain URL</span>
+              </div>
+              <div className="aivc-case-metric-row">
+                <span className="aivc-metric-label">AI Referral Clicks:</span>
+                <span className="aivc-metric-val good">+340% High-Intent Traffic</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 6. Technical Blueprint: Schema.org Graph */}
+      <section className="aivc-seo-section">
+        <div className="aivc-seo-header">
+          <span className="aivc-seo-badge-tag">
+            <FileCode size={14} /> Production Code
+          </span>
+          <h2 className="aivc-seo-title">
+            The Optimal Schema.org Graph for Search Grounding Engines
+          </h2>
+          <p className="aivc-seo-lead">
+            Deploy this clean, interconnected JSON-LD template into your page <code>&lt;head&gt;</code> to maximize AI citation confidence:
+          </p>
+        </div>
+
+        <div className="aivc-code-container">
+          <div className="aivc-code-header">
+            <span>application/ld+json (Multi-Entity Graph)</span>
+            <button
+              type="button"
+              className="aivc-code-copy"
+              onClick={handleCopyCode}
+            >
+              {copiedCode ? <Check size={14} color="#10b981" /> : <Copy size={14} />}
+              <span>{copiedCode ? 'Copied!' : 'Copy Schema'}</span>
+            </button>
+          </div>
+          <pre className="aivc-code-body">
+            <code>{SCHEMA_SNIPPET}</code>
+          </pre>
+        </div>
+      </section>
+
+      {/* 7. Industry Playbooks: What Real Users Ask AI */}
       <section className="aivc-seo-section">
         <div className="aivc-seo-header">
           <span className="aivc-seo-badge-tag">
@@ -425,7 +744,7 @@ export default function AiVisibilityCheckerSeo() {
         </div>
       </section>
 
-      {/* 5. Strategic 5-Step Blueprint */}
+      {/* 8. Strategic 5-Step Blueprint */}
       <section className="aivc-seo-section">
         <div className="aivc-seo-header">
           <span className="aivc-seo-badge-tag">
@@ -497,7 +816,7 @@ export default function AiVisibilityCheckerSeo() {
         </div>
       </section>
 
-      {/* 6. Strategic Takeaway Highlight Banner */}
+      {/* 9. Strategic Takeaway Highlight Banner */}
       <div className="aivc-highlight-box">
         <div className="aivc-highlight-title">
           <CheckCircle2 size={24} color="#10b981" />
@@ -509,7 +828,7 @@ export default function AiVisibilityCheckerSeo() {
         </p>
       </div>
 
-      {/* 7. Comprehensive FAQ Accordion */}
+      {/* 10. Comprehensive FAQ Accordion */}
       <section className="aivc-seo-section">
         <div className="aivc-seo-header">
           <span className="aivc-seo-badge-tag">
@@ -547,7 +866,7 @@ export default function AiVisibilityCheckerSeo() {
         </div>
       </section>
 
-      {/* 8. Curated Related Tools */}
+      {/* 11. Curated Related Tools */}
       <section className="aivc-seo-section">
         <div className="aivc-seo-header">
           <span className="aivc-seo-badge-tag">

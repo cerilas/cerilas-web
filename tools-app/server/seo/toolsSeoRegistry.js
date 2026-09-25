@@ -617,6 +617,22 @@ export const TOOLS_SEO_REGISTRY = {
       {
         q: 'Why are competitor domains cited instead of my official site?',
         a: 'AI search engines favor competitor sites or review directories when those domains offer clearer structured data, concise comparisons, transparent pricing tables, or stronger domain entity authority.'
+      },
+      {
+        q: 'Can a new website with low domain authority still get cited by AI search engines?',
+        a: 'Yes. Generative AI retrieval engines prioritize information gain, schema completeness, and specific factual density. A brand-new domain with transparent pricing tables and unique case studies can immediately win primary citation pills in Gemini, ChatGPT, and Perplexity over legacy high-DA blogs that contain generic fluff.'
+      },
+      {
+        q: 'What is the commercial difference between direct citation clicks and zero-click brand impressions?',
+        a: 'Brand impressions build passive category awareness, but direct hyperlinked citations drive the highest-converting traffic on the web because users clicking the footnote pill have already read the AI synthesized summary and are seeking immediate purchase confirmation or demo signup.'
+      },
+      {
+        q: 'How do AI search engines handle paywalled or gated content?',
+        a: 'Most AI search crawlers (such as OAI-SearchBot and Google-Extended) do not execute heavy client-side JavaScript or bypass authentication gates. If key answers or pricing are hidden behind login gates, AI bots classify the page as empty, ceding citation opportunities to open competitor documentation.'
+      },
+      {
+        q: 'How can I fix AI hallucinations if an AI model outputs inaccurate pricing about my business?',
+        a: 'Publish unambiguous Schema.org JSON-LD (such as Product offers with exact price specifications or Organization details), link verified sameAs Wikipedia/Wikidata entity URLs, and deploy an authoritative /llms.txt file to anchor retrieval models to your canonical source documents.'
       }
     ],
     rating: '4.9',
