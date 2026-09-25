@@ -111,77 +111,55 @@
   margin: 0 auto;
 }
 
-/* Hero Search Input Wrapper with Prominent Focus & Ambient Halo Glow */
+/* Hero Search Input Wrapper - High-Contrast, Crystal Clear Text */
 .aivc-input-wrapper {
-  position: relative;
   display: flex;
   align-items: center;
-  background: var(--hover-bg, #ffffff);
-  border: 1.5px solid rgba(59, 130, 246, 0.35);
+  background: #ffffff;
+  border: 2px solid rgba(59, 130, 246, 0.45);
   border-radius: 16px;
   padding: 0.5rem 0.6rem 0.5rem 1.15rem;
   min-height: 58px;
-  box-shadow: 0 4px 20px -2px rgba(59, 130, 246, 0.12), 0 2px 8px rgba(0, 0, 0, 0.04);
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-/* Ambient glow ring behind the input */
-.aivc-input-wrapper::before {
-  content: '';
-  position: absolute;
-  inset: -1px;
-  border-radius: 17px;
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.45), rgba(139, 92, 246, 0.3), rgba(16, 185, 129, 0.25));
-  z-index: -1;
-  opacity: 0.35;
-  filter: blur(8px);
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-  pointer-events: none;
-}
-
-.aivc-input-wrapper:hover {
-  border-color: rgba(59, 130, 246, 0.6);
-  box-shadow: 0 6px 28px -2px rgba(59, 130, 246, 0.2), 0 2px 8px rgba(0, 0, 0, 0.06);
-}
-
-.aivc-input-wrapper:hover::before {
-  opacity: 0.7;
-  filter: blur(12px);
-}
-
-.aivc-input-wrapper:focus-within {
-  border-color: #3b82f6;
-  background: #ffffff;
-  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.22), 0 10px 36px -4px rgba(59, 130, 246, 0.32);
-  transform: translateY(-1px);
+  box-shadow: 0 4px 20px -2px rgba(59, 130, 246, 0.15), 0 2px 6px rgba(0, 0, 0, 0.04);
+  transition: all 0.2s ease;
 }
 
 [data-theme="dark"] .aivc-input-wrapper,
 html.dark .aivc-input-wrapper {
-  background: rgba(22, 22, 26, 0.95);
+  background: #18181b;
   border-color: rgba(59, 130, 246, 0.4);
-  box-shadow: 0 4px 24px -2px rgba(59, 130, 246, 0.2), 0 2px 8px rgba(0, 0, 0, 0.4);
-}
-
-[data-theme="dark"] .aivc-input-wrapper:focus-within,
-html.dark .aivc-input-wrapper:focus-within {
-  background: rgba(26, 26, 32, 0.98);
+  box-shadow: 0 4px 24px -2px rgba(59, 130, 246, 0.18), 0 2px 6px rgba(0, 0, 0, 0.4);
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]):not(.light) .aivc-input-wrapper {
-    background: rgba(22, 22, 26, 0.95);
+    background: #18181b;
     border-color: rgba(59, 130, 246, 0.4);
-    box-shadow: 0 4px 24px -2px rgba(59, 130, 246, 0.2), 0 2px 8px rgba(0, 0, 0, 0.4);
-  }
-  :root:not([data-theme="light"]):not(.light) .aivc-input-wrapper:focus-within {
-    background: rgba(26, 26, 32, 0.98);
+    box-shadow: 0 4px 24px -2px rgba(59, 130, 246, 0.18), 0 2px 6px rgba(0, 0, 0, 0.4);
   }
 }
 
-.aivc-input-wrapper:focus-within::before {
-  opacity: 0.95;
-  filter: blur(14px);
+.aivc-input-wrapper:hover {
+  border-color: #3b82f6;
+  box-shadow: 0 6px 24px -2px rgba(59, 130, 246, 0.22);
+}
+
+.aivc-input-wrapper:focus-within {
+  border-color: #2563eb;
+  background: #ffffff;
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2), 0 8px 28px -2px rgba(59, 130, 246, 0.25);
+  transform: translateY(-1px);
+}
+
+[data-theme="dark"] .aivc-input-wrapper:focus-within,
+html.dark .aivc-input-wrapper:focus-within {
+  background: #18181b;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]):not(.light) .aivc-input-wrapper:focus-within {
+    background: #18181b;
+  }
 }
 
 .aivc-input-icon {
@@ -192,7 +170,7 @@ html.dark .aivc-input-wrapper:focus-within {
 }
 
 .aivc-input-wrapper:focus-within .aivc-input-icon {
-  transform: scale(1.12);
+  transform: scale(1.1);
   color: #2563eb;
 }
 
@@ -202,16 +180,40 @@ html.dark .aivc-input-wrapper:focus-within {
   border: none;
   font-size: 1.08rem;
   font-weight: 500;
-  color: var(--text-main);
+  color: #0f172a;
   outline: none;
   font-family: inherit;
   min-width: 0;
 }
 
+[data-theme="dark"] .aivc-input-field,
+html.dark .aivc-input-field {
+  color: #f8fafc;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]):not(.light) .aivc-input-field {
+    color: #f8fafc;
+  }
+}
+
 .aivc-input-field::placeholder {
-  color: var(--text-muted);
-  opacity: 0.75;
+  color: #64748b;
+  opacity: 0.85;
   font-size: 1.02rem;
+}
+
+[data-theme="dark"] .aivc-input-field::placeholder,
+html.dark .aivc-input-field::placeholder {
+  color: #94a3b8;
+  opacity: 0.85;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]):not(.light) .aivc-input-field::placeholder {
+    color: #94a3b8;
+    opacity: 0.85;
+  }
 }
 
 /* Targeting (Market Country & Language) Custom Dropdowns */
