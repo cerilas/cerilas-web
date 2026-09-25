@@ -318,7 +318,7 @@ export default function AiVisibilityCheckerSeo() {
       <section className="aivc-seo-section">
         <div className="aivc-seo-header">
           <span className="aivc-seo-badge-tag">
-            <Sparkles size={14} /> Definitive Technical Guide
+            <Eye size={14} /> Free AI Search Visibility &amp; Citations Audit
           </span>
           <h2 className="aivc-seo-title">
             The Generative Engine Optimization (GEO) Revolution in 2026

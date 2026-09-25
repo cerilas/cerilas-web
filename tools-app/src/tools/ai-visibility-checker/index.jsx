@@ -571,9 +571,35 @@ export default function AiVisibilityChecker({ onBack, toolMeta }) {
       <div className="aivc-hero-card">
         <div className="aivc-hero-header">
           <span className="aivc-hero-eyebrow">
-            <Eye size={14} /> Free AI Search Visibility & Citations Audit
+            <Eye size={14} /> Free AI Search Visibility &amp; Citations Audit
           </span>
-          <h2 className="aivc-hero-title">Is your website cited by AI search engines?</h2>
+
+          <h2 className="aivc-hero-title">
+            Is your website cited by{' '}
+            <span className="aivc-inline-logos-stack" aria-label="AI search">
+              <span className="sr-only">AI search </span>
+              <span className="aivc-inline-logo-bubble" title="Google Gemini">
+                <img src="/AI-logos/gemini-color.svg" alt="Google Gemini" width={22} height={22} loading="eager" />
+              </span>
+              <span className="aivc-inline-logo-bubble" title="ChatGPT Search">
+                <img src="/AI-logos/chatgpt-black.svg" alt="ChatGPT Search" width={20} height={20} loading="eager" />
+              </span>
+              <span className="aivc-inline-logo-bubble" title="Perplexity AI">
+                <img src="/AI-logos/perplexity-color.svg" alt="Perplexity AI" width={20} height={20} loading="eager" />
+              </span>
+              <span className="aivc-inline-logo-bubble" title="Claude (Anthropic)">
+                <img src="/AI-logos/claude-color.svg" alt="Claude" width={20} height={20} loading="eager" />
+              </span>
+              <span className="aivc-inline-logo-bubble" title="Grok (xAI)">
+                <img src="/AI-logos/grok-black.svg" alt="Grok" width={18} height={18} loading="eager" />
+              </span>
+              <span className="aivc-inline-logo-bubble" title="Google Search Grounding">
+                <img src="/AI-logos/google-color.svg" alt="Google Grounding" width={20} height={20} loading="eager" />
+              </span>
+            </span>{' '}
+            engines?
+          </h2>
+
           <p className="aivc-hero-subtitle">
             Audit how Gemini, ChatGPT Search, and Perplexity quote your brand. Automatically extracts the top 10 search queries from your content and evaluates live web citation grounding.
           </p>
