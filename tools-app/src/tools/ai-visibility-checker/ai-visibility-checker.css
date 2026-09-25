@@ -955,6 +955,62 @@
   line-height: 1.55;
 }
 
+/* Direct Citation Hit Badge & Short Hyperlink */
+.aivc-direct-citation-hit {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  font-size: 0.82rem;
+  color: #10b981;
+  background: rgba(16, 185, 129, 0.08);
+  border: 1px solid rgba(16, 185, 129, 0.22);
+  border-radius: 8px;
+  padding: 0.45rem 0.75rem;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.aivc-citation-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.aivc-citation-pill-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  border-radius: 6px;
+  padding: 0.22rem 0.55rem;
+  color: #10b981;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.78rem;
+  max-width: 100%;
+  box-sizing: border-box;
+  transition: all 0.15s ease;
+}
+
+.aivc-citation-pill-link:hover {
+  background: rgba(16, 185, 129, 0.25);
+  border-color: #10b981;
+  color: #059669;
+}
+
+.aivc-citation-pill-url {
+  max-width: 260px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: inline-block;
+  vertical-align: middle;
+}
+
 .aivc-sources-title {
   font-size: 0.8rem;
   font-weight: 600;
@@ -980,6 +1036,15 @@
   color: var(--text-muted);
   text-decoration: none;
   transition: all 0.15s ease;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.aivc-source-pill span {
+  max-width: 220px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .aivc-source-pill:hover {
@@ -1161,5 +1226,20 @@
   .aivc-banner-actions button {
     flex: 1;
     min-width: 120px;
+  }
+  .aivc-direct-citation-hit {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.35rem;
+    padding: 0.4rem 0.6rem;
+  }
+  .aivc-citation-pill-link {
+    max-width: 100%;
+  }
+  .aivc-citation-pill-url {
+    max-width: 190px;
+  }
+  .aivc-source-pill span {
+    max-width: 140px;
   }
 }

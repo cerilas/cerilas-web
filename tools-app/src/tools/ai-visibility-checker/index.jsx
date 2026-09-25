@@ -49,6 +49,20 @@ const SCAN_STEPS = [
   'Calculating citation rates, brand mentions, and competitor rankings...'
 ];
 
+const formatShortCitationUrl = (rawUrl) => {
+  if (!rawUrl) return 'View Cited Page';
+  try {
+    const parsed = new URL(rawUrl);
+    const domain = parsed.hostname.replace(/^www\./, '');
+    const path = parsed.pathname !== '/' && parsed.pathname ? parsed.pathname : '';
+    if (!path) return domain;
+    const cleanPath = path.length > 20 ? `${path.slice(0, 16)}…` : path;
+    return `${domain}${cleanPath}`;
+  } catch {
+    return 'View Cited Source';
+  }
+};
+
 export default function AiVisibilityChecker({ onBack, toolMeta }) {
   const {
     trackUse,
@@ -717,11 +731,11 @@ export default function AiVisibilityChecker({ onBack, toolMeta }) {
                   AI Visibility: Grade {auditData.report?.visibilityGrade || 'N/A'}
                 </h3>
                 <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>
-                  Citation and brand inclusion across 10 high-intent queries tested against Gemini AI.
+                  Citation and brand inclusion across 10 high-intent queries tested against frontier AI search engines.
                 </span>
               </div>
               <p className="aivc-score-disclaimer">
-                Evaluates live Google Search Grounding citations and source hyperlinks referenced in Gemini responses.
+                Evaluates live Google Search Grounding citations and source hyperlinks referenced in frontier AI responses.
               </p>
             </div>
 
@@ -737,7 +751,7 @@ export default function AiVisibilityChecker({ onBack, toolMeta }) {
                   {auditData.report?.citedCount || 0} <span className="aivc-kpi-sub">/ 10</span>
                 </div>
                 <div className="aivc-kpi-desc">
-                  Gemini provided a direct clickable citation backlink to your website.
+                  Frontier AI search provided a direct clickable citation backlink to your website.
                 </div>
               </div>
 
@@ -868,26 +882,33 @@ export default function AiVisibilityChecker({ onBack, toolMeta }) {
                           </div>
                         )}
 
-                        {/* Gemini Answer Excerpt */}
+                        {/* Frontier AI Answer Excerpt */}
                         <div className="aivc-answer-box">
                           <strong style={{ display: 'block', marginBottom: '0.35rem', color: 'var(--text-main)', fontSize: '0.82rem' }}>
-                            Gemini AI Answer Summary:
+                            Frontier AI Answer Summary:
                           </strong>
                           {item.aiAnswer}
                         </div>
 
                         {/* Direct Citation Hit */}
                         {item.targetDomainCited && (
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.82rem', color: '#10b981' }}>
-                            <Link2 size={15} />
-                            <span>Direct Citation Backlink:</span>
+                          <div className="aivc-direct-citation-hit">
+                            <div className="aivc-citation-label">
+                              <Link2 size={14} />
+                              <span>Direct Citation Link:</span>
+                            </div>
                             <a
                               href={item.targetDomainCited}
                               target="_blank"
                               rel="noopener noreferrer"
-                              style={{ color: '#10b981', textDecoration: 'underline', fontWeight: 600 }}
+                              className="aivc-citation-pill-link"
+                              title={`Open cited link: ${item.targetDomainCited}`}
                             >
-                              {item.targetDomainCited}
+                              <Globe size={12} />
+                              <span className="aivc-citation-pill-url">
+                                {formatShortCitationUrl(item.targetDomainCited)}
+                              </span>
+                              <ExternalLink size={11} />
                             </a>
                           </div>
                         )}
@@ -896,7 +917,7 @@ export default function AiVisibilityChecker({ onBack, toolMeta }) {
                         {item.citedSources && item.citedSources.length > 0 && (
                           <div>
                             <span className="aivc-sources-title" style={{ display: 'block', marginBottom: '0.4rem' }}>
-                              Sources Cited by Gemini for this Query:
+                              Sources Cited by AI Search for this Query:
                             </span>
                             <div className="aivc-sources-list">
                               {item.citedSources.map((src, sIdx) => {
@@ -935,7 +956,7 @@ export default function AiVisibilityChecker({ onBack, toolMeta }) {
                 Top Cited Competitors &amp; Directories
               </span>
               <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', margin: 0 }}>
-                Third-party domains and competitors most frequently referenced by Gemini when answering queries in your niche:
+                Third-party domains and competitors most frequently referenced by AI search engines when answering queries in your niche:
               </p>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                 {auditData.report?.topCompetitors?.length > 0 ? (
