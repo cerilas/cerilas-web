@@ -587,17 +587,18 @@ export default function AiVisibilityChecker({ onBack, toolMeta }) {
           }}
         >
           <div className="aivc-input-wrapper">
-            <Globe className="aivc-input-icon" size={18} />
+            <Globe className="aivc-input-icon" size={20} />
             <input
               type="text"
               className="aivc-input-field"
-              placeholder="https://yourwebsite.com"
+              placeholder="https://yourwebsite.com (e.g., cerilas.com)"
               value={inputUrl}
               onChange={(e) => setInputUrl(e.target.value)}
               disabled={isScanning}
               spellCheck="false"
               autoCapitalize="none"
               autoCorrect="off"
+              aria-label="Website URL to audit for AI citations"
             />
             <Button
               type="submit"
