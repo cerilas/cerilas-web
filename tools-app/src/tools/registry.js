@@ -32,6 +32,7 @@ import { pdfSplitterManifest } from './pdf-splitter/manifest';
 import { euFundingManifest } from './eu-funding-opportunities/manifest';
 import { websiteEmailExtractorManifest } from './website-email-extractor/manifest';
 import { aiVisibilityCheckerManifest } from './ai-visibility-checker/manifest';
+import { googleMarketingMcpManifest } from './google-marketing-mcp/manifest';
 
 /**
  * Enterprise Scalable Tool Registry.
@@ -40,62 +41,53 @@ import { aiVisibilityCheckerManifest } from './ai-visibility-checker/manifest';
  * When scaled to 1,000+ tools, each tool is isolated into its own async chunk.
  */
 export const toolsRegistry = {
-  [qrGeneratorManifest.slug]: {
-    manifest: qrGeneratorManifest,
-    component: lazy(() => import('./qr-generator'))
+  // AI & Advanced Research Tools
+  [googleMarketingMcpManifest.slug]: {
+    manifest: googleMarketingMcpManifest,
+    component: lazy(() => import('./google-marketing-mcp'))
   },
-  [imageCompressorManifest.slug]: {
-    manifest: imageCompressorManifest,
-    component: lazy(() => import('./image-compressor'))
+  [aiVisibilityCheckerManifest.slug]: {
+    manifest: aiVisibilityCheckerManifest,
+    component: lazy(() => import('./ai-visibility-checker'))
   },
-  [pomodoroManifest.slug]: {
-    manifest: pomodoroManifest,
-    component: lazy(() => import('./pomodoro-timer'))
+  [aiCrawlerCheckerManifest.slug]: {
+    manifest: aiCrawlerCheckerManifest,
+    component: lazy(() => import('./ai-crawler-checker'))
   },
-  [pdfCompressorManifest.slug]: {
-    manifest: pdfCompressorManifest,
-    component: lazy(() => import('./pdf-compressor'))
+  [aiLinkHallucinationCheckerManifest.slug]: {
+    manifest: aiLinkHallucinationCheckerManifest,
+    component: lazy(() => import('./ai-link-hallucination-checker'))
   },
-  [atsResumeCheckerManifest.slug]: {
-    manifest: atsResumeCheckerManifest,
-    component: lazy(() => import('./ats-resume-checker'))
-  },
-  [backgroundRemoverManifest.slug]: {
-    manifest: backgroundRemoverManifest,
-    component: lazy(() => import('./background-remover'))
-  },
-  [pdfRagCleanerManifest.slug]: {
-    manifest: pdfRagCleanerManifest,
-    component: lazy(() => import('./pdf-rag-cleaner'))
+  [llmsTxtManifest.slug]: {
+    manifest: llmsTxtManifest,
+    component: lazy(() => import('./llms-txt-tools'))
   },
   [aiContentDetectorManifest.slug]: {
     manifest: aiContentDetectorManifest,
     component: lazy(() => import('./ai-content-detector'))
   },
-  [pdfEditorManifest.slug]: {
-    manifest: pdfEditorManifest,
-    component: lazy(() => import('./pdf-editor'))
+  [htmlToMarkdownManifest.slug]: {
+    manifest: htmlToMarkdownManifest,
+    component: lazy(() => import('./html-to-llm-markdown'))
   },
-  [videoCompressorManifest.slug]: {
-    manifest: videoCompressorManifest,
-    component: lazy(() => import('./video-compressor'))
+  [tokenCounterUniversalManifest.slug]: {
+    manifest: tokenCounterUniversalManifest,
+    component: lazy(() => import('./token-counter-universal'))
   },
-  [webhookTesterManifest.slug]: {
-    manifest: webhookTesterManifest,
-    component: lazy(() => import('./webhook-tester'))
+  [pdfRagCleanerManifest.slug]: {
+    manifest: pdfRagCleanerManifest,
+    component: lazy(() => import('./pdf-rag-cleaner'))
   },
-  [jsonBeautifierManifest.slug]: {
-    manifest: jsonBeautifierManifest,
-    component: lazy(() => import('./json-beautifier'))
+  [atsResumeCheckerManifest.slug]: {
+    manifest: atsResumeCheckerManifest,
+    component: lazy(() => import('./ats-resume-checker'))
   },
-  [emailSignatureGeneratorManifest.slug]: {
-    manifest: emailSignatureGeneratorManifest,
-    component: lazy(() => import('./email-signature-generator'))
+  [euFundingManifest.slug]: {
+    manifest: euFundingManifest,
+    component: lazy(() => import('./eu-funding-opportunities'))
   },
-  [youtubeThumbnailDownloaderManifest.slug]: {
-    manifest: youtubeThumbnailDownloaderManifest,
-    component: lazy(() => import('./youtube-thumbnail-downloader'))
-  },
+  
+  // Business, SaaS & Data Calculators
   [startupRunwayCalculatorManifest.slug]: {
     manifest: startupRunwayCalculatorManifest,
     component: lazy(() => import('./startup-runway-calculator'))
@@ -124,26 +116,6 @@ export const toolsRegistry = {
     manifest: ltvCacCalculatorManifest,
     component: lazy(() => import('./ltv-cac-calculator'))
   },
-  [aiLinkHallucinationCheckerManifest.slug]: {
-    manifest: aiLinkHallucinationCheckerManifest,
-    component: lazy(() => import('./ai-link-hallucination-checker'))
-  },
-  [aiCrawlerCheckerManifest.slug]: {
-    manifest: aiCrawlerCheckerManifest,
-    component: lazy(() => import('./ai-crawler-checker'))
-  },
-  [llmsTxtManifest.slug]: {
-    manifest: llmsTxtManifest,
-    component: lazy(() => import('./llms-txt-tools'))
-  },
-  [htmlToMarkdownManifest.slug]: {
-    manifest: htmlToMarkdownManifest,
-    component: lazy(() => import('./html-to-llm-markdown'))
-  },
-  [tokenCounterUniversalManifest.slug]: {
-    manifest: tokenCounterUniversalManifest,
-    component: lazy(() => import('./token-counter-universal'))
-  },
   [trlCalculatorManifest.slug]: {
     manifest: trlCalculatorManifest,
     component: lazy(() => import('./trl-calculator'))
@@ -152,6 +124,60 @@ export const toolsRegistry = {
     manifest: sampleSizeCalculatorManifest,
     component: lazy(() => import('./sample-size-calculator'))
   },
+
+  // Extractors & Generators
+  [websiteEmailExtractorManifest.slug]: {
+    manifest: websiteEmailExtractorManifest,
+    component: lazy(() => import('./website-email-extractor'))
+  },
+  [emailSignatureGeneratorManifest.slug]: {
+    manifest: emailSignatureGeneratorManifest,
+    component: lazy(() => import('./email-signature-generator'))
+  },
+  [backgroundRemoverManifest.slug]: {
+    manifest: backgroundRemoverManifest,
+    component: lazy(() => import('./background-remover'))
+  },
+  [youtubeThumbnailDownloaderManifest.slug]: {
+    manifest: youtubeThumbnailDownloaderManifest,
+    component: lazy(() => import('./youtube-thumbnail-downloader'))
+  },
+
+  // Developer Utilities
+  [webhookTesterManifest.slug]: {
+    manifest: webhookTesterManifest,
+    component: lazy(() => import('./webhook-tester'))
+  },
+  [jsonBeautifierManifest.slug]: {
+    manifest: jsonBeautifierManifest,
+    component: lazy(() => import('./json-beautifier'))
+  },
+
+  // Essentials (PDF, Media, Basic)
+  [imageCompressorManifest.slug]: {
+    manifest: imageCompressorManifest,
+    component: lazy(() => import('./image-compressor'))
+  },
+  [videoCompressorManifest.slug]: {
+    manifest: videoCompressorManifest,
+    component: lazy(() => import('./video-compressor'))
+  },
+  [qrGeneratorManifest.slug]: {
+    manifest: qrGeneratorManifest,
+    component: lazy(() => import('./qr-generator'))
+  },
+  [pomodoroManifest.slug]: {
+    manifest: pomodoroManifest,
+    component: lazy(() => import('./pomodoro-timer'))
+  },
+  [pdfCompressorManifest.slug]: {
+    manifest: pdfCompressorManifest,
+    component: lazy(() => import('./pdf-compressor'))
+  },
+  [pdfEditorManifest.slug]: {
+    manifest: pdfEditorManifest,
+    component: lazy(() => import('./pdf-editor'))
+  },
   [pdfMergerManifest.slug]: {
     manifest: pdfMergerManifest,
     component: lazy(() => import('./pdf-merger'))
@@ -159,18 +185,6 @@ export const toolsRegistry = {
   [pdfSplitterManifest.slug]: {
     manifest: pdfSplitterManifest,
     component: lazy(() => import('./pdf-splitter'))
-  },
-  [euFundingManifest.slug]: {
-    manifest: euFundingManifest,
-    component: lazy(() => import('./eu-funding-opportunities'))
-  },
-  [websiteEmailExtractorManifest.slug]: {
-    manifest: websiteEmailExtractorManifest,
-    component: lazy(() => import('./website-email-extractor'))
-  },
-  [aiVisibilityCheckerManifest.slug]: {
-    manifest: aiVisibilityCheckerManifest,
-    component: lazy(() => import('./ai-visibility-checker'))
   }
 };
 
@@ -207,7 +221,13 @@ const toolAliases = {
   'ai-visibility': 'ai-visibility-checker',
   'visibility-checker': 'ai-visibility-checker',
   'ai-search-checker': 'ai-visibility-checker',
-  'ai-citation-checker': 'ai-visibility-checker'
+  'ai-citation-checker': 'ai-visibility-checker',
+  'google-mcp': 'google-marketing-mcp',
+  'google-analytics-mcp': 'google-marketing-mcp',
+  'search-console-mcp': 'google-marketing-mcp',
+  'google-ads-mcp': 'google-marketing-mcp',
+  'analytics-mcp': 'google-marketing-mcp',
+  'mcp-server': 'google-marketing-mcp'
 };
 
 export function getRegisteredTool(slug) {

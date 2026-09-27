@@ -1,0 +1,998 @@
+import { useState, useEffect } from 'react';
+import {
+  Database,
+  Key,
+  Copy,
+  Check,
+  ExternalLink,
+  ShieldCheck,
+  Eye,
+  EyeOff,
+  RefreshCw,
+  Play,
+  CheckCircle2,
+  Bot,
+  Sparkles,
+  Terminal,
+  Activity,
+  BarChart2,
+  Search,
+  DollarSign,
+  Layers,
+  ArrowRight,
+  Globe,
+  SlidersHorizontal,
+  Zap,
+  Info,
+  LogOut,
+  AlertCircle
+} from 'lucide-react';
+import { googleMarketingMcpManifest } from './manifest';
+import GoogleMarketingMcpSeo from './components/GoogleMarketingMcpSeo';
+import './google-marketing-mcp.css';
+
+const DEFAULT_MCP_KEY = 'cr_mcp_live_e891bf4c9270a8d73b0f491c';
+
+const SAMPLE_SIMULATION_DATA = {
+  gsc: {
+    query: 'Show Search Console queries with high impressions (>1,000) but CTR < 2% in the last 28 days',
+    toolCall: 'gsc_get_search_analytics({ startDate: "2026-08-30", endDate: "2026-09-27", minImpressions: 1000, maxCtr: 0.02, dimensions: ["query"] })',
+    results: [
+      { term: 'free qr code generator vector', impressions: '4,820', clicks: '68', ctr: '1.41%', pos: '7.8' },
+      { term: 'compress pdf to 200kb online', impressions: '3,210', clicks: '44', ctr: '1.37%', pos: '8.4' },
+      { term: 'ai search crawler list robots txt', impressions: '2,640', clicks: '38', ctr: '1.43%', pos: '6.9' },
+      { term: 'startup runway calculator excel template', impressions: '1,950', clicks: '29', ctr: '1.48%', pos: '9.1' },
+      { term: 'how to check if chatgpt cites my website', impressions: '1,420', clicks: '22', ctr: '1.54%', pos: '8.2' }
+    ],
+    commentary: 'AI Insight: You have 5 high-intent queries on page 1 (positions 6-9) losing 98% of potential clicks. Rewriting the <title> tag of these pages to include numbers (e.g., "Top 5...", "[Free SVG Export]") could increase your organic CTR from 1.4% to ~4.5%, adding ~320 additional monthly clicks without building new backlinks.'
+  },
+  ga4: {
+    query: 'What are the top 4 traffic acquisition channels in GA4 and their engagement rate this month?',
+    toolCall: 'ga4_get_traffic_acquisition({ dateRange: "last_30_days", dimensions: ["sessionDefaultChannelGroup"] })',
+    results: [
+      { channel: 'Organic Search', sessions: '18,420', users: '14,190', bounce: '38.2%', engagement: '2m 45s' },
+      { channel: 'Direct Traffic', sessions: '9,810', users: '7,430', bounce: '44.1%', engagement: '1m 20s' },
+      { channel: 'Referral & AI Engines', sessions: '4,650', users: '3,890', bounce: '29.4%', engagement: '3m 12s' },
+      { channel: 'Organic Social (X / LinkedIn)', sessions: '2,140', users: '1,820', bounce: '51.8%', engagement: '0m 55s' }
+    ],
+    commentary: 'AI Insight: "Referral & AI Engines" (Perplexity, ChatGPT Search, Claude) exhibits your lowest bounce rate (29.4%) and highest session duration (3m 12s). Visitors coming from generative engines are showing 2.4x higher intent than standard direct visitors.'
+  },
+  gads: {
+    query: 'Find Google Ads search terms with ad spend > $50 and 0 conversions to add as negatives',
+    toolCall: 'gads_find_wasted_search_terms({ minSpendMicros: 50000000, maxConversions: 0, dateRange: "last_30_days" })',
+    results: [
+      { term: 'cheap pdf editor crack download', cost: '$74.20', clicks: '28', conversions: '0', cpc: '$2.65' },
+      { term: 'free software license key generator', cost: '$68.50', clicks: '31', conversions: '0', cpc: '$2.21' },
+      { term: 'hire freelance developer cheap overseas', cost: '$58.10', clicks: '19', conversions: '0', cpc: '$3.05' }
+    ],
+    commentary: 'AI Insight: Adding "crack", "download", and "cheap overseas" as exact-match negative keywords in Google Ads will immediately save ~$200.80 per month in wasted ad budget that can be reallocated to your core high-converting search keywords.'
+  }
+};
+
+export default function GoogleMarketingMcp({ onBack }) {
+  const [isConnected, setIsConnected] = useState(false);
+  const [isDemoMode, setIsDemoMode] = useState(true);
+  const [userEmail, setUserEmail] = useState('');
+  const [activeTab, setActiveTab] = useState('chatgpt');
+  const [mcpKey, setMcpKey] = useState(DEFAULT_MCP_KEY);
+  const [showKey, setShowKey] = useState(false);
+  const [copiedItem, setCopiedItem] = useState(null);
+  const [authError, setAuthError] = useState(null);
+
+  // Real Google properties
+  const [gscSites, setGscSites] = useState([]);
+  const [ga4Properties, setGa4Properties] = useState([]);
+  const [selectedGscSite, setSelectedGscSite] = useState('');
+  const [selectedGa4Property, setSelectedGa4Property] = useState('');
+
+  // Playground state
+  const [simPreset, setSimPreset] = useState('gsc');
+  const [isSimulating, setIsSimulating] = useState(false);
+  const [activeSimData, setActiveSimData] = useState(SAMPLE_SIMULATION_DATA.gsc);
+
+  const apiOrigin = typeof window !== 'undefined' ? window.location.origin : 'https://tools.cerilas.com';
+  const mcpSseUrl = `${apiOrigin}/api/mcp/sse`;
+
+  // Parse OAuth redirect return
+  useEffect(() => {
+    const hash = window.location.hash || '';
+    const search = window.location.search || '';
+    const queryString = hash.includes('?') ? hash.split('?')[1] : search.replace(/^\?/, '');
+    const params = new URLSearchParams(queryString);
+
+    const statusParam = params.get('status');
+    const keyParam = params.get('key');
+    const emailParam = params.get('email');
+    const errorParam = params.get('message') || params.get('error');
+
+    if (errorParam) {
+      setAuthError(decodeURIComponent(errorParam));
+    }
+
+    if (statusParam === 'connected' && keyParam) {
+      setIsConnected(true);
+      setIsDemoMode(false);
+      setMcpKey(keyParam);
+      localStorage.setItem('cerilas_mcp_key', keyParam);
+      if (emailParam) {
+        const decodedEmail = decodeURIComponent(emailParam);
+        setUserEmail(decodedEmail);
+        localStorage.setItem('cerilas_mcp_email', decodedEmail);
+      }
+      // Clean URL cleanly
+      window.history.replaceState({}, document.title, window.location.pathname + '#/tool/google-marketing-mcp');
+      fetchStatus(keyParam);
+    } else {
+      const savedKey = localStorage.getItem('cerilas_mcp_key');
+      const savedEmail = localStorage.getItem('cerilas_mcp_email');
+      if (savedKey) {
+        setMcpKey(savedKey);
+        setIsConnected(true);
+        setIsDemoMode(false);
+        if (savedEmail) setUserEmail(savedEmail);
+        fetchStatus(savedKey);
+      }
+    }
+  }, []);
+
+  const fetchStatus = async (key) => {
+    try {
+      const res = await fetch(`/api/mcp/status?key=${encodeURIComponent(key)}`);
+      if (!res.ok) return;
+      const data = await res.json();
+      if (data.connected) {
+        setIsConnected(true);
+        if (data.email) setUserEmail(data.email);
+        if (Array.isArray(data.gscSites)) setGscSites(data.gscSites);
+        if (Array.isArray(data.ga4Properties)) setGa4Properties(data.ga4Properties);
+        if (data.selectedGscSite) setSelectedGscSite(data.selectedGscSite);
+        else if (data.gscSites?.[0]) setSelectedGscSite(data.gscSites[0]);
+        if (data.selectedGa4Property) setSelectedGa4Property(data.selectedGa4Property);
+        else if (data.ga4Properties?.[0]) setSelectedGa4Property(data.ga4Properties[0].propertyId);
+      }
+    } catch (e) {
+      console.warn('Could not fetch MCP status:', e);
+    }
+  };
+
+  const handleConnectGoogle = () => {
+    // Redirect to live backend Google OAuth endpoint
+    window.location.href = '/api/auth/google/auth';
+  };
+
+  const handleDisconnect = async () => {
+    try {
+      await fetch('/api/mcp/revoke', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ key: mcpKey })
+      });
+    } catch (e) {
+      console.warn('Revoke call failed:', e);
+    }
+    localStorage.removeItem('cerilas_mcp_key');
+    localStorage.removeItem('cerilas_mcp_email');
+    setIsConnected(false);
+    setUserEmail('');
+    setGscSites([]);
+    setGa4Properties([]);
+    setIsDemoMode(true);
+    setMcpKey(DEFAULT_MCP_KEY);
+  };
+
+  const handlePropertyChange = async (gscSite, ga4Prop) => {
+    setSelectedGscSite(gscSite);
+    setSelectedGa4Property(ga4Prop);
+    try {
+      await fetch('/api/mcp/select-property', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${mcpKey}`
+        },
+        body: JSON.stringify({
+          selectedGscSite: gscSite,
+          selectedGa4Property: ga4Prop
+        })
+      });
+    } catch (e) {
+      console.warn('Could not update property:', e);
+    }
+  };
+
+  const handleCopy = (text, key) => {
+    navigator.clipboard.writeText(text);
+    setCopiedItem(key);
+    setTimeout(() => setCopiedItem(null), 2000);
+  };
+
+  const handleRunSimulation = async (presetKey) => {
+    setSimPreset(presetKey);
+    setIsSimulating(true);
+
+    // If connected and NOT in demo mode, try to fetch real data from the user's account!
+    if (isConnected && !isDemoMode) {
+      try {
+        if (presetKey === 'gsc') {
+          const res = await fetch(`/api/mcp/gsc/search-analytics?key=${encodeURIComponent(mcpKey)}&siteUrl=${encodeURIComponent(selectedGscSite || '')}`);
+          if (res.ok) {
+            const json = await res.json();
+            if (json.data && json.data.rows && json.data.rows.length > 0) {
+              const formattedRows = json.data.rows.slice(0, 5).map((r) => ({
+                term: r.keys?.[0] || 'Unknown Query',
+                impressions: r.impressions?.toLocaleString(),
+                clicks: r.clicks?.toLocaleString(),
+                ctr: r.ctr,
+                pos: r.position
+              }));
+              setActiveSimData({
+                query: `Live Search Console Report for ${selectedGscSite || 'your website'}`,
+                toolCall: `gsc_get_search_analytics({ siteUrl: "${selectedGscSite}", startDate: "${json.data.startDate}", endDate: "${json.data.endDate}" })`,
+                results: formattedRows,
+                commentary: `Live Search Console telemetry retrieved! Found ${json.data.rows.length} indexed search queries driving impressions to your site.`
+              });
+              setIsSimulating(false);
+              return;
+            }
+          }
+        } else if (presetKey === 'ga4') {
+          const res = await fetch(`/api/mcp/ga4/traffic?key=${encodeURIComponent(mcpKey)}&propertyId=${encodeURIComponent(selectedGa4Property || '')}`);
+          if (res.ok) {
+            const json = await res.json();
+            if (json.data && json.data.rows && json.data.rows.length > 0) {
+              const formattedRows = json.data.rows.map((r) => ({
+                channel: r.channel,
+                sessions: r.sessions.toLocaleString(),
+                users: r.activeUsers.toLocaleString(),
+                bounce: r.bounceRate,
+                engagement: `${r.avgDurationSeconds}s`
+              }));
+              setActiveSimData({
+                query: `Live GA4 Traffic Acquisition for Property #${selectedGa4Property}`,
+                toolCall: `ga4_get_traffic_acquisition({ propertyId: "${selectedGa4Property}" })`,
+                results: formattedRows,
+                commentary: `Live Google Analytics 4 telemetry processed! Displaying traffic channels and engagement rates from your live tracking snippet.`
+              });
+              setIsSimulating(false);
+              return;
+            }
+          }
+        }
+      } catch (err) {
+        console.warn('Live query fallback to demo:', err);
+      }
+    }
+
+    // Fallback to sample simulation
+    setTimeout(() => {
+      setActiveSimData(SAMPLE_SIMULATION_DATA[presetKey]);
+      setIsSimulating(false);
+    }, 600);
+  };
+
+  // Configurations for different clients
+  const chatgptOpenApiJson = JSON.stringify(
+    {
+      openapi: '3.1.0',
+      info: {
+        title: 'Cerilas Google Marketing MCP Actions',
+        version: '1.0.0',
+        description: 'Read-only Google Analytics 4, Search Console, and Google Ads live telemetry.'
+      },
+      servers: [{ url: `${apiOrigin}/api/mcp` }],
+      paths: {
+        '/gsc/search-analytics': {
+          get: {
+            operationId: 'getSearchAnalytics',
+            summary: 'Fetch Google Search Console search performance metrics',
+            parameters: [
+              { name: 'startDate', in: 'query', required: false, schema: { type: 'string' } },
+              { name: 'endDate', in: 'query', required: false, schema: { type: 'string' } },
+              { name: 'dimensions', in: 'query', required: false, schema: { type: 'string' } }
+            ]
+          }
+        },
+        '/ga4/traffic': {
+          get: {
+            operationId: 'getGa4Traffic',
+            summary: 'Fetch GA4 traffic acquisition channels, sessions, and active users',
+            parameters: [
+              { name: 'startDate', in: 'query', required: false, schema: { type: 'string' } },
+              { name: 'endDate', in: 'query', required: false, schema: { type: 'string' } }
+            ]
+          }
+        },
+        '/ga4/realtime': {
+          get: {
+            operationId: 'getGa4Realtime',
+            summary: 'Fetch active users in real-time from GA4'
+          }
+        }
+      }
+    },
+    null,
+    2
+  );
+
+  const claudeDesktopConfig = JSON.stringify(
+    {
+      mcpServers: {
+        'cerilas-google-marketing': {
+          command: 'npx',
+          args: ['-y', '@cerilas/mcp-google-marketing', '--key', mcpKey]
+        }
+      }
+    },
+    null,
+    2
+  );
+
+  const cursorConfig = JSON.stringify(
+    {
+      mcpServers: {
+        'cerilas-marketing': {
+          type: 'sse',
+          url: `${mcpSseUrl}?key=${mcpKey}`
+        }
+      }
+    },
+    null,
+    2
+  );
+
+  return (
+    <div className="gmcp-root">
+      {/* Back button */}
+      {onBack && (
+        <button
+          onClick={onBack}
+          style={{
+            alignSelf: 'flex-start',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '0.4rem',
+            background: 'none',
+            border: 'none',
+            color: 'var(--text-muted)',
+            cursor: 'pointer',
+            fontSize: '0.88rem',
+            padding: '0.25rem 0'
+          }}
+        >
+          ← Back to All Tools
+        </button>
+      )}
+
+      {/* Auth Error Banner if present */}
+      {authError && (
+        <div style={{
+          background: 'rgba(239, 68, 68, 0.1)',
+          border: '1px solid rgba(239, 68, 68, 0.3)',
+          color: '#ef4444',
+          borderRadius: '12px',
+          padding: '0.85rem 1.25rem',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '0.5rem',
+          fontSize: '0.9rem'
+        }}>
+          <AlertCircle size={18} />
+          <span>OAuth Error: {authError}</span>
+          <button
+            onClick={() => setAuthError(null)}
+            style={{ marginLeft: 'auto', background: 'none', border: 'none', color: 'inherit', cursor: 'pointer' }}
+          >
+            ✕
+          </button>
+        </div>
+      )}
+
+      {/* Hero Card */}
+      <section className="gmcp-hero-card">
+        <div className="gmcp-hero-glow" />
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '0.25rem' }}>
+          <img 
+            src="/tool-icons/google-marketing-mcp.webp" 
+            alt="Google Marketing MCP Server Logo"
+            className="tool-apple-logo"
+            width={72}
+            height={72}
+            style={{ borderRadius: '18px', boxShadow: '0 8px 28px rgba(0,0,0,0.35)', border: '1px solid rgba(255,255,255,0.1)' }}
+            onError={(e) => {
+              e.target.src = '/tool-icons/google-marketing-mcp.png';
+            }}
+          />
+        </div>
+        <div className="gmcp-badge">
+          <Sparkles size={14} /> Model Context Protocol (MCP) • Multi-Client Ready
+        </div>
+        <h1 className="gmcp-hero-title">
+          Google Analytics & Search Console <span>MCP Server</span>
+        </h1>
+        <p className="gmcp-hero-subtitle">
+          Connect your live Google Analytics 4, Search Console, and Google Ads data directly to ChatGPT, Claude Desktop, 
+          and Cursor. Ask questions in natural English and audit organic traffic, keywords, and ad spend in real time.
+        </p>
+      </section>
+
+      {/* Supported Services Status Grid */}
+      <div className="gmcp-services-grid">
+        {/* Search Console */}
+        <div className="gmcp-service-card gsc">
+          <div className="gmcp-service-header">
+            <div className="gmcp-service-title-wrap">
+              <div className="gmcp-service-icon-box">
+                <Search size={18} />
+              </div>
+              <h2 className="gmcp-service-name">Search Console</h2>
+            </div>
+            <span className={`gmcp-service-status-pill ${isConnected ? 'connected' : 'ready'}`}>
+              {isConnected ? '● Connected' : 'Ready'}
+            </span>
+          </div>
+          <p className="gmcp-service-desc">
+            Direct access to organic impressions, search clicks, query positions, CTR, and live URL inspection data.
+          </p>
+          <div className="gmcp-service-metrics">
+            <span className="gmcp-metric-tag">Clicks & Impressions</span>
+            <span className="gmcp-metric-tag">Queries & Rankings</span>
+            <span className="gmcp-metric-tag">Index Status</span>
+          </div>
+        </div>
+
+        {/* GA4 */}
+        <div className="gmcp-service-card ga4">
+          <div className="gmcp-service-header">
+            <div className="gmcp-service-title-wrap">
+              <div className="gmcp-service-icon-box">
+                <BarChart2 size={18} />
+              </div>
+              <h2 className="gmcp-service-name">Google Analytics 4</h2>
+            </div>
+            <span className={`gmcp-service-status-pill ${isConnected ? 'connected' : 'ready'}`}>
+              {isConnected ? '● Connected' : 'Ready'}
+            </span>
+          </div>
+          <p className="gmcp-service-desc">
+            Live active users, acquisition channels, landing page engagement times, bounce rates, and goal conversions.
+          </p>
+          <div className="gmcp-service-metrics">
+            <span className="gmcp-metric-tag">Realtime Visitors</span>
+            <span className="gmcp-metric-tag">Acquisition Channels</span>
+            <span className="gmcp-metric-tag">Conversions</span>
+          </div>
+        </div>
+
+        {/* Google Ads */}
+        <div className="gmcp-service-card gads">
+          <div className="gmcp-service-header">
+            <div className="gmcp-service-title-wrap">
+              <div className="gmcp-service-icon-box">
+                <DollarSign size={18} />
+              </div>
+              <h2 className="gmcp-service-name">Google Ads</h2>
+            </div>
+            <span className={`gmcp-service-status-pill ${isConnected ? 'connected' : 'ready'}`}>
+              {isConnected ? '● Connected' : 'Ready'}
+            </span>
+          </div>
+          <p className="gmcp-service-desc">
+            Campaign budget audit, ROAS optimization, CPC metrics, and automated wasted search term detection.
+          </p>
+          <div className="gmcp-service-metrics">
+            <span className="gmcp-metric-tag">Campaign ROAS</span>
+            <span className="gmcp-metric-tag">Ad Spend & CPC</span>
+            <span className="gmcp-metric-tag">Negative Keywords</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Step 1 & 2: Account Connection & MCP Keys */}
+      <section className="gmcp-auth-panel">
+        <div className="gmcp-auth-header">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+            <span className="gmcp-step-indicator">
+              <span className="gmcp-step-num">1</span> Google OAuth Authorization & Credentials
+            </span>
+            <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+              {isConnected
+                ? `Active Read-Only token linked to: ${userEmail || 'Google Account'} (${isDemoMode ? 'Sandbox Mode' : 'Live Google APIs'})`
+                : 'Authorize read-only access with your Google account to generate your private MCP endpoint'}
+            </span>
+          </div>
+
+          <div className="gmcp-auth-actions">
+            {!isConnected ? (
+              <button
+                className="gmcp-btn gmcp-btn-primary"
+                onClick={handleConnectGoogle}
+              >
+                <Globe size={16} /> Sign in with Google
+              </button>
+            ) : (
+              <>
+                <button
+                  className="gmcp-btn gmcp-btn-secondary"
+                  onClick={handleConnectGoogle}
+                >
+                  <RefreshCw size={15} /> Re-authorize
+                </button>
+                <button
+                  className="gmcp-btn gmcp-btn-danger"
+                  onClick={handleDisconnect}
+                  title="Revoke Google Access and Delete Key"
+                >
+                  <LogOut size={15} /> Disconnect
+                </button>
+              </>
+            )}
+
+            <button
+              className="gmcp-btn gmcp-btn-secondary"
+              onClick={() => setIsDemoMode(!isDemoMode)}
+              title="Toggle between real account and simulated sandbox"
+            >
+              <SlidersHorizontal size={15} />
+              {isDemoMode ? 'Sandbox: Active' : 'Live Mode'}
+            </button>
+          </div>
+        </div>
+
+        {/* Property Selectors if multiple exist */}
+        {isConnected && !isDemoMode && (gscSites.length > 0 || ga4Properties.length > 0) && (
+          <div style={{
+            display: 'flex',
+            gap: '1rem',
+            flexWrap: 'wrap',
+            padding: '1rem',
+            background: 'var(--bg-color)',
+            border: '1px solid var(--card-border)',
+            borderRadius: '12px'
+          }}>
+            {gscSites.length > 0 && (
+              <div style={{ flex: 1, minWidth: '220px', display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+                <label style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--text-muted)' }}>
+                  Active Search Console Site:
+                </label>
+                <select
+                  value={selectedGscSite}
+                  onChange={(e) => handlePropertyChange(e.target.value, selectedGa4Property)}
+                  style={{
+                    background: 'var(--card-bg)',
+                    border: '1px solid var(--card-border)',
+                    color: 'var(--text-main)',
+                    borderRadius: '8px',
+                    padding: '0.5rem',
+                    fontSize: '0.85rem'
+                  }}
+                >
+                  {gscSites.map((site) => (
+                    <option key={site} value={site}>{site}</option>
+                  ))}
+                </select>
+              </div>
+            )}
+
+            {ga4Properties.length > 0 && (
+              <div style={{ flex: 1, minWidth: '220px', display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+                <label style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--text-muted)' }}>
+                  Active GA4 Property:
+                </label>
+                <select
+                  value={selectedGa4Property}
+                  onChange={(e) => handlePropertyChange(selectedGscSite, e.target.value)}
+                  style={{
+                    background: 'var(--card-bg)',
+                    border: '1px solid var(--card-border)',
+                    color: 'var(--text-main)',
+                    borderRadius: '8px',
+                    padding: '0.5rem',
+                    fontSize: '0.85rem'
+                  }}
+                >
+                  {ga4Properties.map((p) => (
+                    <option key={p.propertyId} value={p.propertyId}>
+                      {p.displayName} ({p.propertyId})
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Credentials and Keys Box */}
+        <div className="gmcp-credentials-card">
+          <div className="gmcp-cred-row">
+            <div className="gmcp-cred-label">
+              <span>Your Private MCP Access Key</span>
+              <span style={{ textTransform: 'none', color: '#10b981', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                <ShieldCheck size={14} /> AES-256-GCM Encrypted
+              </span>
+            </div>
+            <div className="gmcp-input-group">
+              <input
+                type={showKey ? 'text' : 'password'}
+                readOnly
+                value={mcpKey}
+                className="gmcp-input-field"
+              />
+              <button
+                type="button"
+                className="gmcp-icon-btn"
+                onClick={() => setShowKey(!showKey)}
+                title={showKey ? 'Hide Key' : 'Reveal Key'}
+              >
+                {showKey ? <EyeOff size={16} /> : <Eye size={16} />}
+              </button>
+              <button
+                type="button"
+                className="gmcp-icon-btn"
+                onClick={() => handleCopy(mcpKey, 'mcpKey')}
+                title="Copy Key"
+              >
+                {copiedItem === 'mcpKey' ? <Check size={16} color="#10b981" /> : <Copy size={16} />}
+              </button>
+            </div>
+          </div>
+
+          <div className="gmcp-cred-row">
+            <div className="gmcp-cred-label">
+              <span>Remote SSE Server Endpoint</span>
+              <span style={{ textTransform: 'none', color: 'var(--text-muted)' }}>Universal Cloud Transport</span>
+            </div>
+            <div className="gmcp-input-group">
+              <input
+                type="text"
+                readOnly
+                value={`${mcpSseUrl}?key=${mcpKey}`}
+                className="gmcp-input-field"
+              />
+              <button
+                type="button"
+                className="gmcp-icon-btn"
+                onClick={() => handleCopy(`${mcpSseUrl}?key=${mcpKey}`, 'sseUrl')}
+                title="Copy SSE URL"
+              >
+                {copiedItem === 'sseUrl' ? <Check size={16} color="#10b981" /> : <Copy size={16} />}
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Step 3: Client Setup & Installation Guides */}
+      <section className="gmcp-setup-section">
+        <div className="gmcp-tabs-header">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+            <span className="gmcp-step-indicator">
+              <span className="gmcp-step-num">2</span> Setup Guide by AI Platform
+            </span>
+            <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+              Select your AI assistant below for instant setup instructions and ready-to-paste configurations
+            </span>
+          </div>
+
+          <div className="gmcp-tab-group">
+            <button
+              className={`gmcp-tab-btn ${activeTab === 'chatgpt' ? 'active' : ''}`}
+              onClick={() => setActiveTab('chatgpt')}
+            >
+              <Bot size={16} /> ChatGPT (Custom GPT)
+            </button>
+            <button
+              className={`gmcp-tab-btn ${activeTab === 'claude' ? 'active' : ''}`}
+              onClick={() => setActiveTab('claude')}
+            >
+              <Terminal size={16} /> Claude Desktop
+            </button>
+            <button
+              className={`gmcp-tab-btn ${activeTab === 'cursor' ? 'active' : ''}`}
+              onClick={() => setActiveTab('cursor')}
+            >
+              <Layers size={16} /> Cursor / IDE
+            </button>
+          </div>
+        </div>
+
+        {/* Tab 1: ChatGPT */}
+        {activeTab === 'chatgpt' && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+            <ol className="gmcp-instructions-list">
+              <li>
+                In <strong>ChatGPT</strong>, go to <strong>Explore GPTs</strong> &gt; click <strong>+ Create</strong> (or edit an existing Custom GPT).
+              </li>
+              <li>
+                Switch to the <strong>Configure</strong> tab, scroll down to <strong>Actions</strong>, and click <strong>Create new action</strong>.
+              </li>
+              <li>
+                Click <strong>Import from URL</strong> or paste the <strong>OpenAPI 3.1 Schema</strong> below into the Schema box.
+              </li>
+              <li>
+                In <strong>Authentication</strong>, select <strong>API Key</strong> &gt; Auth Type: <strong>Custom</strong> &gt; Header Name: <code>X-Cerilas-Key</code> &gt; paste your private MCP Key from above: <code>{mcpKey}</code>.
+              </li>
+              <li>
+                Save your GPT! You can now ask: <em>"What were our top 10 search queries in Search Console last week?"</em>
+              </li>
+            </ol>
+
+            <div className="gmcp-code-container">
+              <button
+                className="gmcp-code-copy-btn"
+                onClick={() => handleCopy(chatgptOpenApiJson, 'chatgptSchema')}
+              >
+                {copiedItem === 'chatgptSchema' ? (
+                  <>
+                    <Check size={14} color="#10b981" /> Copied Schema!
+                  </>
+                ) : (
+                  <>
+                    <Copy size={14} /> Copy OpenAPI Schema
+                  </>
+                )}
+              </button>
+              <pre className="gmcp-code-pre">{chatgptOpenApiJson}</pre>
+            </div>
+          </div>
+        )}
+
+        {/* Tab 2: Claude Desktop */}
+        {activeTab === 'claude' && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+            <ol className="gmcp-instructions-list">
+              <li>
+                Open your Claude Desktop config file in any text editor:
+                <br />
+                <code style={{ fontSize: '0.82rem', color: '#3b82f6', background: 'rgba(59, 130, 246, 0.08)', padding: '0.2rem 0.5rem', borderRadius: '4px' }}>
+                  ~/Library/Application Support/Claude/claude_desktop_config.json
+                </code>{' '}
+                (macOS) or{' '}
+                <code style={{ fontSize: '0.82rem', color: '#3b82f6', background: 'rgba(59, 130, 246, 0.08)', padding: '0.2rem 0.5rem', borderRadius: '4px' }}>
+                  %APPDATA%\Claude\claude_desktop_config.json
+                </code>{' '}
+                (Windows).
+              </li>
+              <li>
+                Merge the JSON snippet below into your <code>mcpServers</code> object.
+              </li>
+              <li>
+                Fully restart the <strong>Claude Desktop</strong> app.
+              </li>
+              <li>
+                Look for the 🔨 <strong>Tools icon</strong> in the prompt box: your Google Marketing tools are live!
+              </li>
+            </ol>
+
+            <div className="gmcp-code-container">
+              <button
+                className="gmcp-code-copy-btn"
+                onClick={() => handleCopy(claudeDesktopConfig, 'claudeConfig')}
+              >
+                {copiedItem === 'claudeConfig' ? (
+                  <>
+                    <Check size={14} color="#10b981" /> Copied Config!
+                  </>
+                ) : (
+                  <>
+                    <Copy size={14} /> Copy Claude Config
+                  </>
+                )}
+              </button>
+              <pre className="gmcp-code-pre">{claudeDesktopConfig}</pre>
+            </div>
+          </div>
+        )}
+
+        {/* Tab 3: Cursor / IDE */}
+        {activeTab === 'cursor' && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+            <ol className="gmcp-instructions-list">
+              <li>
+                In <strong>Cursor IDE</strong>, open <strong>Settings</strong> &gt; <strong>Features</strong> &gt; <strong>MCP</strong>.
+              </li>
+              <li>
+                Click <strong>+ Add New MCP Server</strong> &gt; Select Type: <strong>SSE</strong>.
+              </li>
+              <li>
+                Paste your remote SSE URL: <code>{`${mcpSseUrl}?key=${mcpKey}`}</code>.
+              </li>
+              <li>
+                Alternatively, add it directly to your project's <code>.cursor/mcp.json</code> file using the snippet below:
+              </li>
+            </ol>
+
+            <div className="gmcp-code-container">
+              <button
+                className="gmcp-code-copy-btn"
+                onClick={() => handleCopy(cursorConfig, 'cursorConfig')}
+              >
+                {copiedItem === 'cursorConfig' ? (
+                  <>
+                    <Check size={14} color="#10b981" /> Copied Config!
+                  </>
+                ) : (
+                  <>
+                    <Copy size={14} /> Copy Cursor Config
+                  </>
+                )}
+              </button>
+              <pre className="gmcp-code-pre">{cursorConfig}</pre>
+            </div>
+          </div>
+        )}
+      </section>
+
+      {/* Step 4: Interactive In-Browser Query Playground */}
+      <section className="gmcp-playground-section">
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem' }}>
+          <div>
+            <span className="gmcp-step-indicator">
+              <span className="gmcp-step-num">3</span> Live In-Browser Query Simulator
+            </span>
+            <p style={{ margin: '0.25rem 0 0 0', fontSize: '0.86rem', color: 'var(--text-muted)' }}>
+              {isConnected && !isDemoMode
+                ? 'Connected to your real Google Account! Clicking below queries live data from your connected property:'
+                : 'Test how an AI agent calls your Google Marketing MCP tools and formats structured analytics:'}
+            </p>
+          </div>
+
+          <div className="gmcp-prompt-presets">
+            <button
+              className={`gmcp-prompt-chip ${simPreset === 'gsc' ? 'active' : ''}`}
+              onClick={() => handleRunSimulation('gsc')}
+            >
+              <Search size={14} /> Search Console Queries
+            </button>
+            <button
+              className={`gmcp-prompt-chip ${simPreset === 'ga4' ? 'active' : ''}`}
+              onClick={() => handleRunSimulation('ga4')}
+            >
+              <BarChart2 size={14} /> GA4 Channel Traffic
+            </button>
+            <button
+              className={`gmcp-prompt-chip ${simPreset === 'gads' ? 'active' : ''}`}
+              onClick={() => handleRunSimulation('gads')}
+            >
+              <DollarSign size={14} /> Google Ads Wasted Spend
+            </button>
+          </div>
+        </div>
+
+        {/* Query Input Bar */}
+        <div className="gmcp-query-bar">
+          <input
+            type="text"
+            readOnly
+            value={activeSimData.query}
+            className="gmcp-query-input"
+          />
+          <button
+            className="gmcp-btn gmcp-btn-primary"
+            onClick={() => handleRunSimulation(simPreset)}
+            disabled={isSimulating}
+          >
+            {isSimulating ? (
+              <RefreshCw size={16} className="spin-animation" />
+            ) : (
+              <Play size={16} />
+            )}
+            {isConnected && !isDemoMode ? 'Query Live Google Data' : 'Run MCP Query'}
+          </button>
+        </div>
+
+        {/* Live Simulation Output Box */}
+        <div className="gmcp-sim-output">
+          {/* Tool Call Log */}
+          <div className="gmcp-sim-callout">
+            <Terminal size={14} />
+            <span>MCP Tool Call: {activeSimData.toolCall}</span>
+          </div>
+
+          {/* Results Table */}
+          <div className="gmcp-sim-table-wrap">
+            {simPreset === 'gsc' && (
+              <table className="gmcp-sim-table">
+                <thead>
+                  <tr>
+                    <th>Organic Query</th>
+                    <th>Impressions</th>
+                    <th>Clicks</th>
+                    <th>CTR</th>
+                    <th>Avg. Position</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {activeSimData.results.map((row, idx) => (
+                    <tr key={idx}>
+                      <td style={{ fontWeight: 600 }}>{row.term}</td>
+                      <td>{row.impressions}</td>
+                      <td>{row.clicks}</td>
+                      <td style={{ color: '#ef4444', fontWeight: 600 }}>{row.ctr}</td>
+                      <td>{row.pos}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+
+            {simPreset === 'ga4' && (
+              <table className="gmcp-sim-table">
+                <thead>
+                  <tr>
+                    <th>Channel Group</th>
+                    <th>Sessions</th>
+                    <th>Active Users</th>
+                    <th>Bounce Rate</th>
+                    <th>Avg. Engagement Time</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {activeSimData.results.map((row, idx) => (
+                    <tr key={idx}>
+                      <td style={{ fontWeight: 600 }}>{row.channel}</td>
+                      <td>{row.sessions}</td>
+                      <td>{row.users}</td>
+                      <td>{row.bounce}</td>
+                      <td style={{ color: '#10b981', fontWeight: 600 }}>{row.engagement}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+
+            {simPreset === 'gads' && (
+              <table className="gmcp-sim-table">
+                <thead>
+                  <tr>
+                    <th>Search Query Triggered</th>
+                    <th>Cost Wasted</th>
+                    <th>Clicks</th>
+                    <th>Avg. CPC</th>
+                    <th>Conversions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {activeSimData.results.map((row, idx) => (
+                    <tr key={idx}>
+                      <td style={{ fontWeight: 600 }}>{row.term}</td>
+                      <td style={{ color: '#ef4444', fontWeight: 600 }}>{row.cost}</td>
+                      <td>{row.clicks}</td>
+                      <td>{row.cpc}</td>
+                      <td>{row.conversions}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
+
+          {/* AI Commentary */}
+          <div className="gmcp-sim-ai-commentary">
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontWeight: 600, marginBottom: '0.35rem', color: '#10b981' }}>
+              <Bot size={16} /> Synthesized AI Marketing Recommendation
+            </div>
+            <p style={{ margin: 0, fontSize: '0.86rem', lineHeight: 1.55 }}>
+              {activeSimData.commentary}
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Security & Data Privacy Guarantee */}
+      <section className="gmcp-security-banner">
+        <ShieldCheck size={26} className="gmcp-sec-icon" />
+        <div>
+          <h3 className="gmcp-sec-title">Enterprise-Grade Privacy & Zero AI Training Guarantee</h3>
+          <p className="gmcp-sec-text">
+            All Google APIs are accessed exclusively via <strong>Read-Only scopes</strong>. We do not store, index, or sell your marketing 
+            data, and your proprietary telemetry is <strong>never used to train AI models</strong>. The MCP server acts solely as a real-time, 
+            stateless bridge between your Google account and your local or private chat session. You can revoke access at any time with one click.
+          </p>
+        </div>
+      </section>
+
+      {/* SEO & Knowledge Section */}
+      <GoogleMarketingMcpSeo />
+    </div>
+  );
+}

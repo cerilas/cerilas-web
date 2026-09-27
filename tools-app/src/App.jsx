@@ -138,7 +138,10 @@ const ToolCard = ({ tool, onSelect }) => {
             height={46}
             loading="lazy"
             onError={(e) => {
-              if (!e.target.dataset.triedPng) {
+              if (!e.target.dataset.triedSvg) {
+                e.target.dataset.triedSvg = 'true';
+                e.target.src = `/tool-icons/${tool.slug}.svg`;
+              } else if (!e.target.dataset.triedPng) {
                 e.target.dataset.triedPng = 'true';
                 e.target.src = `/tool-icons/${tool.slug}.png`;
               } else {

@@ -21,6 +21,8 @@ import authRouter from './routes/auth.js';
 import visibilityCheckerRouter from './routes/visibilityChecker.js';
 import { detectBot } from './utils/botDetector.js';
 import { initScrapersDb } from './migrations/init-scrapers-db.js';
+import { initMcpDb } from './migrations/init-mcp-db.js';
+import googleMcpRouter from './routes/googleMcp.js';
 import { checkAiRateLimit, getClientIp } from './utils/aiRateLimit.js';
 import { CATEGORIES, TOOLS_SEO_REGISTRY, getAllToolSlugs } from './seo/toolsSeoRegistry.js';
 import { renderToolPageHtml, renderCategoryPageHtml, renderHomePageHtml, renderLegalPageHtml, renderPricingPageHtml } from './seo/ssrRenderer.js';
@@ -205,6 +207,13 @@ app.use('/api/webhook-test', webhookTesterRouter);
 
 // Mount scrapers router (Funding & Matcher Scrapers)
 app.use('/api/scrapers', scrapersRouter);
+
+// Mount Google Marketing MCP router (OAuth, REST Actions & MCP SSE)
+app.use('/api/mcp', googleMcpRouter);
+app.use('/api/auth/google', (req, res, next) => {
+  req.url = req.url.startsWith('/') ? req.url : '/' + req.url;
+  googleMcpRouter(req, res, next);
+});
 
 // Google AdSense ads.txt verification route
 app.get('/ads.txt', (req, res) => {
@@ -1365,6 +1374,9 @@ app.listen(PORT, async () => {
 
     // Initialize Funding & Matcher Scraper tables
     await initScrapersDb();
+
+    // Initialize MCP User Connections tables
+    await initMcpDb();
   } catch (error) {
     console.error('Error initializing database tables:', error);
   }

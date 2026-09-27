@@ -9,7 +9,7 @@ export const translations = {
     },
     catalog: {
       title: "Cerilas' Tools",
-      subtitle: 'Advanced utilities for high-tech research, engineering, and creative development.',
+      subtitle: 'From essential everyday needs to advanced R&D tools for high-tech research, engineering, and creative development.',
       searchPlaceholder: 'Search: QR Code, converter, utility...',
       noResults: 'No tools found matching your query.',
       uses: 'uses',
