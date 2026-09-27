@@ -477,6 +477,15 @@
   background-color: var(--public-accent-soft);
 }
 
+.public-theme-light .bg-cyan-950 {
+  background-color: #ecfeff;
+}
+
+.public-theme-light .border-cyan-800,
+.public-theme-light .border-cyan-800\/60 {
+  border-color: #a5f3fc;
+}
+
 .public-theme-light .public-primary-button {
   border-radius: 0.75rem;
 }

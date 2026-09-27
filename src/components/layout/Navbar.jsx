@@ -32,6 +32,9 @@ export default function Navbar() {
   const navTextClass = useLightNavigation
     ? "text-slate-600 hover:text-slate-950 hover:bg-slate-900/5"
     : "text-gray-300 hover:text-white hover:bg-white/5";
+  const freeBadgeClass = useLightNavigation
+    ? "bg-cyan-50 text-cyan-700 border-cyan-200/90 shadow-[0_1px_2px_rgba(8,145,178,0.06)]"
+    : "bg-cyan-950 text-cyan-400 border-cyan-800/60";
 
   useEffect(() => {
     const handler = () => setScrolled(window.scrollY > 20);
@@ -88,7 +91,7 @@ export default function Navbar() {
                 className={`px-2 xl:px-3 py-2 text-[13px] xl:text-sm font-medium rounded-md transition-colors inline-flex items-center gap-1.5 ${navTextClass}`}
               >
                 <span>Tools</span>
-                <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded leading-none bg-cyan-950 text-cyan-400 border border-cyan-800/60">
+                <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded leading-none border transition-colors ${freeBadgeClass}`}>
                   Free
                 </span>
               </a>
@@ -174,7 +177,7 @@ export default function Navbar() {
                         }`}
                       >
                         <span>Cerilas Tools</span>
-                        <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded leading-none bg-cyan-950 text-cyan-400 border border-cyan-800/60">
+                        <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded leading-none border transition-colors ${freeBadgeClass}`}>
                           Free
                         </span>
                       </a>
@@ -288,7 +291,7 @@ export default function Navbar() {
                 }`}
               >
                 <span>Cerilas Tools</span>
-                <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded leading-none bg-cyan-950 text-cyan-400 border border-cyan-800/60">
+                <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded leading-none border transition-colors ${freeBadgeClass}`}>
                   Free
                 </span>
               </a>
