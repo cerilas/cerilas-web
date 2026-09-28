@@ -6,6 +6,7 @@ import {
   Check,
   ExternalLink,
   ShieldCheck,
+  Lock,
   Eye,
   EyeOff,
   RefreshCw,
@@ -201,7 +202,7 @@ export default function GoogleMarketingMcp({ onBack, toolMeta }) {
   const [showManualSetup, setShowManualSetup] = useState(false);
   const [chatgptMode, setChatgptMode] = useState('mcp'); // 'mcp' (direct MCP plugin) or 'custom-gpt' (actions)
   const [geminiSubTab, setGeminiSubTab] = useState('prompt'); // 'prompt' | 'python' | 'node'
-  const [mcpKey, setMcpKey] = useState(DEFAULT_MCP_KEY);
+  const [mcpKey, setMcpKey] = useState('');
   const [showKey, setShowKey] = useState(false);
   const [copiedItem, setCopiedItem] = useState(null);
   const [authError, setAuthError] = useState(null);
@@ -320,7 +321,7 @@ export default function GoogleMarketingMcp({ onBack, toolMeta }) {
     setGscSites([]);
     setGa4Properties([]);
     setIsDemoMode(true);
-    setMcpKey(DEFAULT_MCP_KEY);
+    setMcpKey('');
   };
 
   const handlePropertyChange = async (gscSite, ga4Prop) => {
@@ -513,12 +514,15 @@ export default function GoogleMarketingMcp({ onBack, toolMeta }) {
     2
   );
 
+  const effectiveKey = (isConnected && mcpKey) ? mcpKey : '<YOUR_PRIVATE_MCP_KEY>';
+  const effectiveSseUrl = `${mcpSseUrl}?key=${effectiveKey}`;
+
   const chatgptMcpConfig = JSON.stringify(
     {
       mcpServers: {
         'cerilas-google-marketing': {
           type: 'sse',
-          url: `${mcpSseUrl}?key=${mcpKey}`
+          url: effectiveSseUrl
         }
       }
     },
@@ -531,7 +535,7 @@ export default function GoogleMarketingMcp({ onBack, toolMeta }) {
       mcpServers: {
         'cerilas-google-marketing': {
           command: 'npx',
-          args: ['-y', '@cerilas/mcp-google-marketing', '--key', mcpKey]
+          args: ['-y', '@cerilas/mcp-google-marketing', '--key', effectiveKey]
         }
       }
     },
@@ -544,7 +548,7 @@ export default function GoogleMarketingMcp({ onBack, toolMeta }) {
       mcpServers: {
         'cerilas-marketing': {
           type: 'sse',
-          url: `${mcpSseUrl}?key=${mcpKey}`
+          url: effectiveSseUrl
         }
       }
     },
@@ -566,8 +570,8 @@ You are an autonomous AI assistant with file system access or API tool capabilit
 Your goal is to automatically configure the Cerilas Google Marketing MCP Server in this environment with ZERO manual steps on my part.
 
 ### MY AUTHENTICATED CREDENTIALS & DEFAULTS:
-- Private Access Key: ${mcpKey}
-- Remote SSE Server URL: ${mcpSseUrl}?key=${mcpKey}
+- Private Access Key: ${effectiveKey}
+- Remote SSE Server URL: ${effectiveSseUrl}
 - Base REST API URL: ${apiOrigin}/api/mcp
 - Primary Default Search Console Property: ${selectedGscSite || 'Auto-detected verified domain'}
 - Primary Default GA4 Property ID: ${selectedGa4Property || 'Auto-detected property ID'}
@@ -594,7 +598,7 @@ ${formattedGa4List}
        "mcpServers": {
          "cerilas-google-marketing": {
            "type": "sse",
-           "url": "${mcpSseUrl}?key=${mcpKey}"
+           "url": "${effectiveSseUrl}"
          }
        }
      }
@@ -602,12 +606,12 @@ ${formattedGa4List}
 
 2. IF YOU ARE A CHAT MODEL (ChatGPT, Claude.ai, Google Gemini, DeepSeek):
    - You do not have local file access, so immediately initialize yourself as my Google Analytics 4 & Search Console AI Analyst using the live endpoints:
-     * List All Search Console Sites: GET ${apiOrigin}/api/mcp/gsc/sites?key=${mcpKey}
-     * List All GA4 Properties: GET ${apiOrigin}/api/mcp/ga4/properties?key=${mcpKey}
-     * Search Console Queries: GET ${apiOrigin}/api/mcp/gsc/search-analytics?key=${mcpKey}&startDate=YYYY-MM-DD&endDate=YYYY-MM-DD&dimensions=query&siteUrl=SITE_URL
-     * GA4 Traffic Channels: GET ${apiOrigin}/api/mcp/ga4/traffic?key=${mcpKey}&startDate=YYYY-MM-DD&endDate=YYYY-MM-DD&propertyId=PROPERTY_ID
-     * GA4 Realtime Users: GET ${apiOrigin}/api/mcp/ga4/realtime?key=${mcpKey}&propertyId=PROPERTY_ID
-     * URL Indexation: GET ${apiOrigin}/api/mcp/gsc/inspect-url?key=${mcpKey}&inspectionUrl=URL
+     * List All Search Console Sites: GET ${apiOrigin}/api/mcp/gsc/sites?key=${effectiveKey}
+     * List All GA4 Properties: GET ${apiOrigin}/api/mcp/ga4/properties?key=${effectiveKey}
+     * Search Console Queries: GET ${apiOrigin}/api/mcp/gsc/search-analytics?key=${effectiveKey}&startDate=YYYY-MM-DD&endDate=YYYY-MM-DD&dimensions=query&siteUrl=SITE_URL
+     * GA4 Traffic Channels: GET ${apiOrigin}/api/mcp/ga4/traffic?key=${effectiveKey}&startDate=YYYY-MM-DD&endDate=YYYY-MM-DD&propertyId=PROPERTY_ID
+     * GA4 Realtime Users: GET ${apiOrigin}/api/mcp/ga4/realtime?key=${effectiveKey}&propertyId=PROPERTY_ID
+     * URL Indexation: GET ${apiOrigin}/api/mcp/gsc/inspect-url?key=${effectiveKey}&inspectionUrl=URL
    - If I ask you to generate a local Python/Node.js script or plugin, generate the complete code pre-configured with my key.
    - Confirm to me: "Cerilas Google Marketing bridge is active! I have access to your default property (${selectedGscSite || 'Primary domain'} / ${selectedGa4Property || 'Primary GA4'}) as well as all other properties in your account. What would you like to inspect first?"
 
@@ -621,7 +625,7 @@ from google.genai import types
 client = genai.Client()
 
 CERILAS_API = "${apiOrigin}/api/mcp"
-MCP_KEY = "${mcpKey}"
+MCP_KEY = "${effectiveKey}"
 
 # 2. Define Tool Functions for Gemini
 def get_search_console_queries(start_date: str = "2026-08-30", end_date: str = "2026-09-27"):
@@ -667,7 +671,7 @@ const ai = new GoogleGenAI();
 
 // 1. Fetch live telemetry from Cerilas MCP bridge
 async function fetchSearchConsole(startDate = '2026-08-30', endDate = '2026-09-27') {
-  const url = \`${apiOrigin}/api/mcp/gsc/search-analytics?key=${mcpKey}&startDate=\${startDate}&endDate=\${endDate}&dimensions=query\`;
+  const url = \`${apiOrigin}/api/mcp/gsc/search-analytics?key=${effectiveKey}&startDate=\${startDate}&endDate=\${endDate}&dimensions=query\`;
   const res = await fetch(url);
   return await res.json();
 }
@@ -677,7 +681,7 @@ const response = await ai.models.generateContent({
   model: 'gemini-2.5-flash',
   contents: 'Analyze our organic Search Console ranking positions and identify quick-win CTR opportunities.',
   config: {
-    systemInstruction: \`You have live access to Cerilas Google Marketing MCP Server at ${apiOrigin}/api/mcp with key: ${mcpKey}\`
+    systemInstruction: \`You have live access to Cerilas Google Marketing MCP Server at ${apiOrigin}/api/mcp with key: ${effectiveKey}\`
   }
 });
 
@@ -1022,30 +1026,46 @@ console.log(response.text);`;
           <div className="gmcp-cred-row">
             <div className="gmcp-cred-label">
               <span>Your Private MCP Access Key</span>
-              <span style={{ textTransform: 'none', color: '#10b981', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-                <ShieldCheck size={14} /> AES-256-GCM Encrypted
-              </span>
+              {isConnected && mcpKey ? (
+                <span style={{ textTransform: 'none', color: '#10b981', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                  <ShieldCheck size={14} /> AES-256-GCM Encrypted
+                </span>
+              ) : (
+                <span style={{ textTransform: 'none', color: '#f59e0b', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                  <Lock size={14} /> Google Sign-in Required
+                </span>
+              )}
             </div>
             <div className="gmcp-input-group">
               <input
                 type={showKey ? 'text' : 'password'}
                 readOnly
-                value={mcpKey}
+                value={isConnected && mcpKey ? mcpKey : ''}
+                placeholder={isConnected ? '' : 'Sign in with Google above to generate your private key'}
                 className="gmcp-input-field"
+                style={{ opacity: (isConnected && mcpKey) ? 1 : 0.75 }}
               />
+              {isConnected && mcpKey && (
+                <button
+                  type="button"
+                  className="gmcp-icon-btn"
+                  onClick={() => setShowKey(!showKey)}
+                  title={showKey ? 'Hide Key' : 'Reveal Key'}
+                >
+                  {showKey ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
+              )}
               <button
                 type="button"
                 className="gmcp-icon-btn"
-                onClick={() => setShowKey(!showKey)}
-                title={showKey ? 'Hide Key' : 'Reveal Key'}
-              >
-                {showKey ? <EyeOff size={16} /> : <Eye size={16} />}
-              </button>
-              <button
-                type="button"
-                className="gmcp-icon-btn"
-                onClick={() => handleCopy(mcpKey, 'mcpKey')}
-                title="Copy Key"
+                onClick={() => {
+                  if (isConnected && mcpKey) {
+                    handleCopy(mcpKey, 'mcpKey');
+                  } else {
+                    handleConnectGoogle();
+                  }
+                }}
+                title={isConnected && mcpKey ? 'Copy Key' : 'Sign in with Google to generate key'}
               >
                 {copiedItem === 'mcpKey' ? <Check size={16} color="#10b981" /> : <Copy size={16} />}
               </button>
@@ -1061,14 +1081,21 @@ console.log(response.text);`;
               <input
                 type="text"
                 readOnly
-                value={`${mcpSseUrl}?key=${mcpKey}`}
+                value={effectiveSseUrl}
                 className="gmcp-input-field"
+                style={{ opacity: (isConnected && mcpKey) ? 1 : 0.75 }}
               />
               <button
                 type="button"
                 className="gmcp-icon-btn"
-                onClick={() => handleCopy(`${mcpSseUrl}?key=${mcpKey}`, 'sseUrl')}
-                title="Copy SSE URL"
+                onClick={() => {
+                  if (isConnected && mcpKey) {
+                    handleCopy(effectiveSseUrl, 'sseUrl');
+                  } else {
+                    handleConnectGoogle();
+                  }
+                }}
+                title={isConnected && mcpKey ? 'Copy SSE URL' : 'Sign in with Google to get active URL'}
               >
                 {copiedItem === 'sseUrl' ? <Check size={16} color="#10b981" /> : <Copy size={16} />}
               </button>
@@ -1272,13 +1299,13 @@ console.log(response.text);`;
                     <input
                       type="text"
                       readOnly
-                      value={`${mcpSseUrl}?key=${mcpKey}`}
+                      value={effectiveSseUrl}
                       className="gmcp-input-field"
                     />
                     <button
                       type="button"
                       className="gmcp-icon-btn"
-                      onClick={() => handleCopy(`${mcpSseUrl}?key=${mcpKey}`, 'chatgptSseUrl')}
+                      onClick={() => handleCopy(effectiveSseUrl, 'chatgptSseUrl')}
                       title="Copy Remote SSE URL"
                     >
                       {copiedItem === 'chatgptSseUrl' ? <Check size={16} color="#10b981" /> : <Copy size={16} />}
@@ -1342,7 +1369,7 @@ console.log(response.text);`;
                     Click <strong>Import from URL</strong> or paste the <strong>OpenAPI 3.1 Schema</strong> below into the Schema box.
                   </li>
                   <li>
-                    In <strong>Authentication</strong>, select <strong>API Key</strong> &gt; Auth Type: <strong>Custom</strong> &gt; Header Name: <code>X-Cerilas-Key</code> &gt; paste your private MCP Key from above: <code>{mcpKey}</code>.
+                    In <strong>Authentication</strong>, select <strong>API Key</strong> &gt; Auth Type: <strong>Custom</strong> &gt; Header Name: <code>X-Cerilas-Key</code> &gt; paste your private MCP Key from above: <code>{effectiveKey}</code>.
                   </li>
                   <li>
                     Save your Custom GPT! You can now ask: <em>"Analyze our Google Search Console clicks and impressions for this month."</em>
@@ -1568,7 +1595,7 @@ console.log(response.text);`;
                 Click <strong>+ Add New MCP Server</strong> &gt; Select Type: <strong>SSE</strong>.
               </li>
               <li>
-                Paste your remote SSE URL: <code>{`${mcpSseUrl}?key=${mcpKey}`}</code>.
+                Paste your remote SSE URL: <code>{effectiveSseUrl}</code>.
               </li>
               <li>
                 Alternatively, add it directly to your project's <code>.cursor/mcp.json</code> file using the snippet below:
