@@ -109,10 +109,10 @@
 .img-settings-panel {
   position: relative;
   z-index: 50;
-  background: var(--bg-card);
+  background: var(--card-bg);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--card-border);
   border-radius: 20px;
   padding: 1.5rem 1.8rem;
   display: grid;
@@ -189,7 +189,7 @@
 
 .img-preset-btn {
   background: rgba(150, 150, 150, 0.08);
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--card-border);
   border-radius: 6px;
   color: var(--text-muted);
   font-size: 0.72rem;
@@ -279,7 +279,7 @@
   border-radius: 999px;
   background: rgba(150, 150, 150, 0.08);
   color: var(--text-muted);
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--card-border);
 }
 
 .img-hidden-input {
@@ -288,10 +288,10 @@
 
 /* Queue Overview & Bulk Actions Bar */
 .img-queue-summary {
-  background: var(--bg-card);
+  background: var(--card-bg);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--card-border);
   border-radius: 20px;
   padding: 1.25rem 1.8rem;
   display: flex;
@@ -364,7 +364,7 @@
 
 .img-btn-clear {
   background: transparent;
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--card-border);
   color: var(--text-muted);
   padding: 0.7rem 1rem;
   border-radius: 12px;
@@ -386,10 +386,10 @@
 }
 
 .img-card {
-  background: var(--bg-card);
+  background: var(--card-bg);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--card-border);
   border-radius: 18px;
   padding: 1.25rem;
   display: flex;
@@ -416,7 +416,7 @@
   border-radius: 12px;
   object-fit: cover;
   background: rgba(150, 150, 150, 0.08);
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--card-border);
   flex-shrink: 0;
 }
 
@@ -509,7 +509,7 @@
   gap: 0.4rem;
   background: rgba(150, 150, 150, 0.08);
   color: var(--text-muted);
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--card-border);
   padding: 0.55rem 0.8rem;
   border-radius: 10px;
   font-size: 0.84rem;
@@ -615,8 +615,8 @@ html.dark .img-modal-content {
   align-items: center;
   justify-content: space-between;
   padding: 1.25rem 1.75rem;
-  border-bottom: 1px solid var(--border-color, rgba(0, 0, 0, 0.08));
-  background: rgba(150, 150, 150, 0.03);
+  border-bottom: 1px solid var(--card-border);
+  background: rgba(150, 150, 150, 0.04);
 }
 
 [data-theme="dark"] .img-modal-header,
@@ -625,6 +625,14 @@ html.dark .img-modal-header,
 html.dark .img-modal-footer {
   background: rgba(255, 255, 255, 0.02);
   border-color: rgba(255, 255, 255, 0.08);
+}
+
+[data-theme="light"] .img-modal-header,
+html.light .img-modal-header,
+[data-theme="light"] .img-modal-footer,
+html.light .img-modal-footer {
+  background: rgba(0, 0, 0, 0.02);
+  border-color: rgba(0, 0, 0, 0.08);
 }
 
 .img-modal-title {
@@ -746,7 +754,7 @@ html.dark .img-modal-footer {
 .img-modal-footer {
   padding: 1rem 1.75rem;
   background: rgba(150, 150, 150, 0.03);
-  border-top: 1px solid var(--border-color);
+  border-top: 1px solid var(--card-border);
   display: flex;
   justify-content: space-between;
   align-items: center;

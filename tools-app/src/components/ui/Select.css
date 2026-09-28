@@ -83,7 +83,7 @@
   left: 0;
   right: 0;
   z-index: 1001;
-  background: rgba(255, 255, 255, 0.98);
+  background: var(--bg-color, #ffffff);
   backdrop-filter: blur(30px);
   -webkit-backdrop-filter: blur(30px);
   border: 1px solid var(--card-border);
@@ -97,10 +97,27 @@
   transform-origin: top center;
 }
 
+[data-theme="light"] .apple-select-dropdown,
+html.light .apple-select-dropdown,
+body.light .apple-select-dropdown {
+  background: #ffffff;
+  border-color: rgba(0, 0, 0, 0.1);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.12), 0 4px 12px rgba(0, 0, 0, 0.04);
+}
+
+[data-theme="dark"] .apple-select-dropdown,
+html.dark .apple-select-dropdown,
+body.dark .apple-select-dropdown {
+  background: #1c1c1e;
+  border-color: rgba(255, 255, 255, 0.14);
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.12);
+}
+
 @media (prefers-color-scheme: dark) {
-  .apple-select-dropdown {
+  :root:not([data-theme="light"]):not(.light) .apple-select-dropdown {
+    background: #1c1c1e;
+    border-color: rgba(255, 255, 255, 0.14);
     box-shadow: 0 20px 48px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.12);
-    background: rgba(30, 30, 34, 0.98);
   }
 }
 
@@ -121,7 +138,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 0.6rem;
-  padding: 0.6rem 0.85rem;
+  padding: 0.65rem 0.85rem;
   border-radius: 9px;
   font-size: 0.88rem;
   color: var(--text-main);
@@ -133,9 +150,30 @@
   background: rgba(150, 150, 150, 0.12);
 }
 
+[data-theme="dark"] .apple-select-option:hover,
+html.dark .apple-select-option:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
 .apple-select-option.selected {
-  font-weight: 500;
-  background: rgba(150, 150, 150, 0.08);
+  font-weight: 600;
+  background: rgba(59, 130, 246, 0.12);
+  color: #3b82f6;
+}
+
+[data-theme="dark"] .apple-select-option.selected,
+html.dark .apple-select-option.selected {
+  background: rgba(59, 130, 246, 0.2);
+  color: #60a5fa;
+}
+
+.apple-select-option.selected .apple-select-check {
+  color: #3b82f6;
+}
+
+[data-theme="dark"] .apple-select-option.selected .apple-select-check,
+html.dark .apple-select-option.selected .apple-select-check {
+  color: #60a5fa;
 }
 
 .apple-select-option-content {

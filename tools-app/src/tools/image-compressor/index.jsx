@@ -49,6 +49,7 @@ export default function ImageCompressorTool({ onBack, toolMeta }) {
     toolMeta
   );
   const fileInputRef = useRef(null);
+  const [localDownloadDelta, setLocalDownloadDelta] = useState(0);
 
   // Compression Global Settings
   const [quality, setQuality] = useState(75);
@@ -270,8 +271,9 @@ export default function ImageCompressorTool({ onBack, toolMeta }) {
   const handleDownloadSingle = (item) => {
     if (!item.compressedBlob) return;
     setLocalDownloadDelta((prev) => prev + 1);
+    const downloadUrl = item.compressedUrl || URL.createObjectURL(item.compressedBlob);
     const a = document.createElement('a');
-    a.href = item.compressedUrl;
+    a.href = downloadUrl;
     a.download = item.filename;
     document.body.appendChild(a);
     a.click();
@@ -299,13 +301,15 @@ export default function ImageCompressorTool({ onBack, toolMeta }) {
 
       const zipBlob = await zip.generateAsync({ type: 'blob' });
       const a = document.createElement('a');
-      a.href = URL.createObjectURL(zipBlob);
+      const zipUrl = URL.createObjectURL(zipBlob);
+      a.href = zipUrl;
       a.download = `cerilas-compressed-images-${Date.now()}.zip`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(zipUrl), 2000);
 
-      setLocalDownloadDelta((prev) => prev + 1);
+      setLocalDownloadDelta((prev) => prev + validItems.length);
       trackAction('download_zip', { count: validItems.length, totalSize: zipBlob.size });
       showToast('ZIP archive downloaded successfully!');
     } catch (err) {
@@ -380,7 +384,7 @@ export default function ImageCompressorTool({ onBack, toolMeta }) {
             )}
             {conversionCount > 0 && (
               <Badge variant="neutral" icon={<Download size={12} strokeWidth={2} />}>
-                {conversionCount.toLocaleString()} {getConversionLabel(language || 'en')}
+                {(conversionCount + localDownloadDelta).toLocaleString()} {getConversionLabel(language || 'en')}
               </Badge>
             )}
           </>

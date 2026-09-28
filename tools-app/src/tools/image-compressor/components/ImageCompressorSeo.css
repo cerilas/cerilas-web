@@ -5,7 +5,7 @@
 .img-seo-root {
   margin-top: 5rem;
   padding-top: 4rem;
-  border-top: 1px solid var(--border-color);
+  border-top: 1px solid var(--card-border);
   display: flex;
   flex-direction: column;
   gap: 4.5rem;
@@ -65,10 +65,10 @@
 .img-comparison-col {
   padding: 2.2rem;
   border-radius: 20px;
-  background: var(--bg-card);
+  background: var(--card-bg);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--card-border);
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
   display: flex;
   flex-direction: column;
@@ -83,7 +83,7 @@
 
 .cerilas-col {
   border-color: rgba(16, 185, 129, 0.3);
-  background: linear-gradient(180deg, rgba(16, 185, 129, 0.03) 0%, var(--bg-card) 100%);
+  background: linear-gradient(180deg, rgba(16, 185, 129, 0.03) 0%, var(--card-bg) 100%);
 }
 
 .img-col-header {
@@ -198,10 +198,10 @@
 }
 
 .img-preset-card {
-  background: var(--bg-card);
+  background: var(--card-bg);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--card-border);
   border-radius: 18px;
   padding: 1.6rem;
   display: flex;
@@ -232,7 +232,7 @@
   align-items: center;
   justify-content: center;
   color: var(--text-main);
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--card-border);
 }
 
 .img-preset-tag {
@@ -289,7 +289,7 @@
   padding: 0.75rem;
   border-radius: 10px;
   background: rgba(150, 150, 150, 0.04);
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--card-border);
   font-size: 0.76rem;
   color: var(--text-muted);
   margin-bottom: 1.25rem;
@@ -310,7 +310,7 @@
   font-size: 0.84rem;
   font-weight: 500;
   background: var(--text-main);
-  color: var(--bg-card);
+  color: var(--bg-color);
   border: none;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -329,10 +329,10 @@
 }
 
 .img-step-card {
-  background: var(--bg-card);
+  background: var(--card-bg);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--card-border);
   border-radius: 18px;
   padding: 1.8rem;
   display: flex;
@@ -374,10 +374,10 @@
 
 /* Format Benchmark Card & Table */
 .img-format-matrix-card {
-  background: var(--bg-card);
+  background: var(--card-bg);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--card-border);
   border-radius: 20px;
   padding: 2rem;
   display: flex;
@@ -388,7 +388,7 @@
 .img-table-wrap {
   overflow-x: auto;
   border-radius: 14px;
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--card-border);
 }
 
 .img-format-table {
@@ -403,13 +403,13 @@
   padding: 0.9rem 1.1rem;
   font-weight: 500;
   color: var(--text-muted);
-  border-bottom: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--card-border);
   white-space: nowrap;
 }
 
 .img-format-table td {
   padding: 0.9rem 1.1rem;
-  border-bottom: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--card-border);
   color: var(--text-main);
   vertical-align: middle;
 }
@@ -438,7 +438,7 @@
 
 .img-formula-box {
   background: rgba(150, 150, 150, 0.04);
-  border: 1px dashed var(--border-color);
+  border: 1px dashed var(--card-border);
   border-radius: 12px;
   padding: 1rem 1.25rem;
   font-size: 0.88rem;
@@ -458,16 +458,16 @@
 }
 
 .img-faq-item {
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--card-border);
   border-radius: 16px;
-  background: var(--bg-card);
+  background: var(--card-bg);
   overflow: hidden;
   transition: border-color 0.2s ease, background 0.2s ease;
 }
 
 .img-faq-item[open] {
   border-color: rgba(59, 130, 246, 0.3);
-  background: linear-gradient(180deg, rgba(59, 130, 246, 0.02) 0%, var(--bg-card) 100%);
+  background: linear-gradient(180deg, rgba(59, 130, 246, 0.02) 0%, var(--card-bg) 100%);
 }
 
 .img-faq-summary {
@@ -541,7 +541,7 @@
   font-weight: 400;
   color: var(--text-muted);
   background: rgba(150, 150, 150, 0.06);
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--card-border);
   padding: 0.3rem 0.7rem;
   border-radius: 999px;
   transition: all 0.2s ease;

@@ -43,6 +43,7 @@ export default function PdfCompressorTool({ onBack, toolMeta }) {
 
   // Compression preset
   const [activePreset, setActivePreset] = useState('balanced');
+  const [localDownloadDelta, setLocalDownloadDelta] = useState(0);
   
   // Files queue
   const [files, setFiles] = useState([]);
