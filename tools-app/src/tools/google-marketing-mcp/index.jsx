@@ -73,7 +73,8 @@ export default function GoogleMarketingMcp({ onBack }) {
   const [isConnected, setIsConnected] = useState(false);
   const [isDemoMode, setIsDemoMode] = useState(true);
   const [userEmail, setUserEmail] = useState('');
-  const [activeTab, setActiveTab] = useState('universal');
+  const [activeTab, setActiveTab] = useState('chatgpt');
+  const [showManualSetup, setShowManualSetup] = useState(false);
   const [chatgptMode, setChatgptMode] = useState('mcp'); // 'mcp' (direct MCP plugin) or 'custom-gpt' (actions)
   const [geminiSubTab, setGeminiSubTab] = useState('prompt'); // 'prompt' | 'python' | 'node'
   const [mcpKey, setMcpKey] = useState(DEFAULT_MCP_KEY);
@@ -355,36 +356,46 @@ export default function GoogleMarketingMcp({ onBack }) {
     2
   );
 
-  const universalAiPrompt = `You are my dedicated Google Marketing & SEO Data Analyst. I have authorized my Google Search Console and Google Analytics 4 accounts via the Cerilas Marketing MCP bridge.
+  const magicAutoSetupPrompt = `SYSTEM ACTION REQUIRED: AUTO-CONFIGURE CERILAS GOOGLE MARKETING MCP SERVER
 
-### My Authenticated Credentials & Endpoints:
+You are an autonomous AI assistant with file system access or API tool capabilities.
+Your goal is to automatically configure the Cerilas Google Marketing MCP Server in this environment with ZERO manual steps on my part.
+
+### MY AUTHENTICATED CREDENTIALS:
 - Private Access Key: ${mcpKey}
+- Remote SSE Server URL: ${mcpSseUrl}?key=${mcpKey}
 - Base REST API URL: ${apiOrigin}/api/mcp
-- Remote SSE Endpoint: ${mcpSseUrl}?key=${mcpKey}
-- Active Search Console Property: ${selectedGscSite || 'Auto-detected domain'}
-- Active GA4 Property ID: ${selectedGa4Property || 'Auto-detected property'}
+- Target Search Console Property: ${selectedGscSite || 'Auto-detected verified domain'}
+- Target GA4 Property ID: ${selectedGa4Property || 'Auto-detected property ID'}
 
-### Available Endpoints & Capabilities:
-1. Google Search Console Query Analytics:
-   Endpoint: GET ${apiOrigin}/api/mcp/gsc/search-analytics?key=${mcpKey}&startDate=YYYY-MM-DD&endDate=YYYY-MM-DD&dimensions=query,page
-   -> Returns: organic clicks, search impressions, CTR, and average SERP ranking position.
+### AUTONOMOUS SETUP INSTRUCTIONS:
 
-2. Google Analytics 4 Traffic Acquisition:
-   Endpoint: GET ${apiOrigin}/api/mcp/ga4/traffic?key=${mcpKey}&startDate=YYYY-MM-DD&endDate=YYYY-MM-DD
-   -> Returns: acquisition channels (Organic Search, AI Referrals, Direct, Social), sessions, active users, bounce rate, and engagement duration.
+1. IF YOU ARE A CODING AGENT WITH FILE/TERMINAL ACCESS (Cursor, Windsurf, Claude Code, Antigravity, Roo Code, Cline):
+   - Immediately auto-detect the configuration file for this IDE or editor:
+     * Cursor: Find or create ~/.cursor/mcp.json (or .cursor/mcp.json in the current workspace).
+     * Windsurf: Find or create ~/.codeium/windsurf/mcp_config.json.
+     * Claude Desktop: Find ~/Library/Application Support/Claude/claude_desktop_config.json (macOS) or %APPDATA%\\Claude\\claude_desktop_config.json (Windows).
+   - Write or merge the following MCP server definition into that file:
+     {
+       "mcpServers": {
+         "cerilas-google-marketing": {
+           "type": "sse",
+           "url": "${mcpSseUrl}?key=${mcpKey}"
+         }
+       }
+     }
+   - Do NOT ask me to edit any files manually. Execute the edit directly, verify it, and confirm to me when finished!
 
-3. Google Analytics 4 Realtime Visitors:
-   Endpoint: GET ${apiOrigin}/api/mcp/ga4/realtime?key=${mcpKey}
-   -> Returns: live active users right now, active pages, and top traffic sources.
+2. IF YOU ARE A CHAT MODEL (ChatGPT, Claude.ai, Google Gemini, DeepSeek):
+   - You do not have local file access, so immediately initialize yourself as my Google Analytics 4 & Search Console AI Analyst using the live endpoints:
+     * Search Console Queries: GET ${apiOrigin}/api/mcp/gsc/search-analytics?key=${mcpKey}&startDate=YYYY-MM-DD&endDate=YYYY-MM-DD&dimensions=query
+     * GA4 Traffic Channels: GET ${apiOrigin}/api/mcp/ga4/traffic?key=${mcpKey}&startDate=YYYY-MM-DD&endDate=YYYY-MM-DD
+     * GA4 Realtime Users: GET ${apiOrigin}/api/mcp/ga4/realtime?key=${mcpKey}
+     * URL Indexation: GET ${apiOrigin}/api/mcp/gsc/inspect-url?key=${mcpKey}&inspectionUrl=URL
+   - If I ask you to generate a local Python/Node.js script or plugin, generate the complete code pre-configured with my key.
+   - Confirm to me: "Cerilas Google Marketing bridge is active! What would you like to inspect first (Search Console queries, GA4 realtime traffic, or low-CTR SEO opportunities)?"
 
-4. Search Console URL Inspection:
-   Endpoint: GET ${apiOrigin}/api/mcp/gsc/inspect-url?key=${mcpKey}&inspectionUrl=https://example.com/target-page
-   -> Returns: Google indexation state, mobile usability, and canonical status.
-
-### Instructions:
-- Whenever I ask questions about organic search traffic, keyword rankings, impressions, CTR, or live GA4 telemetry, query the appropriate endpoint above using my key and provide deep, structured analytical insights.
-- If I want to build a local integration, plugin, or automation script (in Python, Node.js, Gemini Function Calling, LangChain, or custom MCP client), generate the complete working code pre-configured with my key.
-- Acknowledge that you have received my credentials and ask me what marketing question or integration you would like to start with!`;
+Start executing the auto-setup immediately!`;
 
   const geminiPythonCode = `import requests
 from google import genai
@@ -777,123 +788,169 @@ console.log(response.text);`;
         </div>
       </section>
 
-      {/* Step 3: Client Setup & Installation Guides */}
-      <section className="gmcp-setup-section">
-        <div className="gmcp-tabs-header">
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+      {/* Step 2: 1-Click Magic Auto-Installer Prompt */}
+      <section className="gmcp-setup-section" style={{
+        border: '1px solid rgba(59, 130, 246, 0.35)',
+        background: 'linear-gradient(180deg, rgba(59, 130, 246, 0.05) 0%, var(--card-bg) 100%)',
+        position: 'relative'
+      }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
             <span className="gmcp-step-indicator">
-              <span className="gmcp-step-num">2</span> Setup Guide by AI Platform
+              <span className="gmcp-step-num">2</span> 1-Click Auto-Setup Prompt
             </span>
-            <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-              Select your AI assistant below for instant setup instructions and ready-to-paste configurations
+            <span style={{
+              background: 'linear-gradient(135deg, #10b981 0%, #3b82f6 100%)',
+              color: '#ffffff',
+              fontSize: '0.72rem',
+              fontWeight: 700,
+              padding: '0.2rem 0.65rem',
+              borderRadius: '999px',
+              textTransform: 'uppercase',
+              letterSpacing: '0.04em'
+            }}>
+              Zero Manual Configuration
             </span>
           </div>
 
-          <div className="gmcp-tab-group">
-            <button
-              className={`gmcp-tab-btn ${activeTab === 'universal' ? 'active' : ''}`}
-              onClick={() => setActiveTab('universal')}
-            >
-              <Sparkles size={16} /> ⚡ Universal Prompt (All AI)
-            </button>
-            <button
-              className={`gmcp-tab-btn ${activeTab === 'chatgpt' ? 'active' : ''}`}
-              onClick={() => setActiveTab('chatgpt')}
-            >
-              <Bot size={16} /> ChatGPT
-            </button>
-            <button
-              className={`gmcp-tab-btn ${activeTab === 'gemini' ? 'active' : ''}`}
-              onClick={() => setActiveTab('gemini')}
-            >
-              <Sparkles size={16} /> Google Gemini
-            </button>
-            <button
-              className={`gmcp-tab-btn ${activeTab === 'claude' ? 'active' : ''}`}
-              onClick={() => setActiveTab('claude')}
-            >
-              <Terminal size={16} /> Claude Desktop
-            </button>
-            <button
-              className={`gmcp-tab-btn ${activeTab === 'cursor' ? 'active' : ''}`}
-              onClick={() => setActiveTab('cursor')}
-            >
-              <Layers size={16} /> Cursor / IDE
-            </button>
-          </div>
+          <h2 style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--text-main)', margin: '0.2rem 0 0 0' }}>
+            Copy This Prompt &amp; Paste Into Your AI — It Configures Everything Automatically!
+          </h2>
+          <p style={{ margin: 0, fontSize: '0.9rem', color: 'var(--text-muted)', lineHeight: '1.55' }}>
+            No JSON editing, no settings menus. Just copy this prompt and send it to <strong>Cursor, Windsurf, Claude Code, ChatGPT, Google Gemini, or Claude</strong>. 
+            If the AI has file access, it will automatically detect and write the configuration file for your editor. 
+            If it's a chat model, it will immediately connect to your live Google Analytics &amp; Search Console data.
+          </p>
         </div>
 
-        {/* Tab 0: Universal Prompt (All AI Models) */}
-        {activeTab === 'universal' && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-            <div style={{
-              background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.08) 0%, rgba(147, 51, 234, 0.08) 100%)',
-              border: '1px solid rgba(59, 130, 246, 0.25)',
-              borderRadius: '14px',
-              padding: '1.15rem 1.35rem',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '0.65rem'
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 600, fontSize: '0.96rem', color: 'var(--text-main)' }}>
-                <Sparkles size={18} color="#3b82f6" />
-                <span>One Prompt to Connect Any AI (ChatGPT, Gemini, Claude, Cursor, Windsurf)</span>
-              </div>
-              <p style={{ margin: 0, fontSize: '0.88rem', color: 'var(--text-muted)', lineHeight: '1.55' }}>
-                Copy this pre-configured prompt and paste it directly into <strong>any AI chat window</strong> (ChatGPT, Google Gemini, Claude, DeepSeek, or your local IDE agent). The AI will immediately recognize your private credentials, understand the available Google Search Console &amp; GA4 endpoints, and act as your live marketing intelligence agent or help you generate local scripts/plugins!
-              </p>
-            </div>
+        {/* Big Action Button */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap', marginTop: '0.25rem' }}>
+          <button
+            type="button"
+            className="gmcp-btn gmcp-btn-primary"
+            onClick={() => handleCopy(magicAutoSetupPrompt, 'magicAutoPrompt')}
+            style={{
+              padding: '0.85rem 1.6rem',
+              fontSize: '0.98rem',
+              fontWeight: 600,
+              borderRadius: '12px',
+              background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
+              color: '#fff',
+              boxShadow: '0 4px 18px rgba(59, 130, 246, 0.35)',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.6rem'
+            }}
+          >
+            {copiedItem === 'magicAutoPrompt' ? (
+              <>
+                <Check size={18} color="#10b981" /> Copied Magic Prompt to Clipboard!
+              </>
+            ) : (
+              <>
+                <Zap size={18} color="#fbbf24" /> Copy Magic Auto-Setup Prompt
+              </>
+            )}
+          </button>
 
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem' }}>
-              <span style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                Pre-Filled Universal AI Prompt
-              </span>
+          <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>
+            Pre-configured with your private key &amp; active Google properties.
+          </span>
+        </div>
+
+        {/* Prompt Preview Container */}
+        <div className="gmcp-code-container" style={{ marginTop: '0.35rem' }}>
+          <button
+            className="gmcp-code-copy-btn"
+            onClick={() => handleCopy(magicAutoSetupPrompt, 'magicAutoPromptPre')}
+          >
+            {copiedItem === 'magicAutoPromptPre' ? (
+              <>
+                <Check size={14} color="#10b981" /> Copied!
+              </>
+            ) : (
+              <>
+                <Copy size={14} /> Copy Prompt
+              </>
+            )}
+          </button>
+          <pre className="gmcp-code-pre" style={{ maxHeight: '300px', whiteSpace: 'pre-wrap', wordBreak: 'break-word', fontSize: '0.84rem' }}>
+            {magicAutoSetupPrompt}
+          </pre>
+        </div>
+
+        {/* Quick Action Ideas to Ask */}
+        <div style={{
+          background: 'var(--bg-color)',
+          border: '1px solid var(--card-border)',
+          borderRadius: '12px',
+          padding: '1rem 1.25rem',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '0.5rem'
+        }}>
+          <span style={{ fontSize: '0.84rem', fontWeight: 600, color: 'var(--text-main)' }}>
+            💡 What you can ask your AI immediately after pasting:
+          </span>
+          <ul style={{ margin: 0, paddingLeft: '1.25rem', fontSize: '0.85rem', color: 'var(--text-muted)', display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+            <li><em>"Analyze our top 10 search queries in Search Console last week, and which ones have low CTR?"</em></li>
+            <li><em>"How many active visitors are on our site right now, and which landing pages are they reading?"</em></li>
+            <li><em>"Write a complete Python script to automatically fetch my Search Console keywords every morning and save to CSV."</em></li>
+            <li><em>"Create a local MCP plugin or tool definition for this in my project."</em></li>
+          </ul>
+        </div>
+
+        {/* Toggle Manual Settings Button */}
+        <div style={{ borderTop: '1px solid var(--card-border)', paddingTop: '1.25rem', marginTop: '0.5rem' }}>
+          <button
+            type="button"
+            onClick={() => setShowManualSetup(!showManualSetup)}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: 'var(--text-muted)',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              fontSize: '0.88rem',
+              padding: 0
+            }}
+          >
+            <SlidersHorizontal size={15} />
+            <span>{showManualSetup ? 'Hide manual configuration guides ▲' : 'Prefer manual setup? View raw config files (ChatGPT, Gemini, Claude, Cursor) ▾'}</span>
+          </button>
+        </div>
+
+        {/* Manual Setup Tabs (Collapsed by default) */}
+        {showManualSetup && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', marginTop: '0.5rem' }}>
+            <div className="gmcp-tab-group">
               <button
-                type="button"
-                className="gmcp-btn gmcp-btn-primary"
-                onClick={() => handleCopy(universalAiPrompt, 'universalPrompt')}
-                style={{ padding: '0.5rem 1.1rem', fontSize: '0.85rem' }}
+                className={`gmcp-tab-btn ${activeTab === 'chatgpt' ? 'active' : ''}`}
+                onClick={() => setActiveTab('chatgpt')}
               >
-                {copiedItem === 'universalPrompt' ? (
-                  <>
-                    <Check size={15} color="#10b981" /> Copied Universal Prompt!
-                  </>
-                ) : (
-                  <>
-                    <Copy size={15} /> Copy Universal Prompt
-                  </>
-                )}
+                <Bot size={16} /> ChatGPT
+              </button>
+              <button
+                className={`gmcp-tab-btn ${activeTab === 'gemini' ? 'active' : ''}`}
+                onClick={() => setActiveTab('gemini')}
+              >
+                <Sparkles size={16} /> Google Gemini
+              </button>
+              <button
+                className={`gmcp-tab-btn ${activeTab === 'claude' ? 'active' : ''}`}
+                onClick={() => setActiveTab('claude')}
+              >
+                <Terminal size={16} /> Claude Desktop
+              </button>
+              <button
+                className={`gmcp-tab-btn ${activeTab === 'cursor' ? 'active' : ''}`}
+                onClick={() => setActiveTab('cursor')}
+              >
+                <Layers size={16} /> Cursor / IDE
               </button>
             </div>
-
-            <div className="gmcp-code-container">
-              <pre className="gmcp-code-pre" style={{ maxHeight: '340px', whiteSpace: 'pre-wrap', wordBreak: 'break-word', fontSize: '0.84rem' }}>
-                {universalAiPrompt}
-              </pre>
-            </div>
-
-            {/* Quick Action Ideas to Ask */}
-            <div style={{
-              background: 'var(--bg-color)',
-              border: '1px solid var(--card-border)',
-              borderRadius: '12px',
-              padding: '1rem 1.25rem',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '0.6rem'
-            }}>
-              <span style={{ fontSize: '0.84rem', fontWeight: 600, color: 'var(--text-main)' }}>
-                💡 Example questions you can ask immediately after pasting:
-              </span>
-              <ul style={{ margin: 0, paddingLeft: '1.25rem', fontSize: '0.85rem', color: 'var(--text-muted)', display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
-                <li><em>"What were our top 10 search queries in Search Console last week, and which ones have low CTR?"</em></li>
-                <li><em>"How many active visitors are on our site right now, and which landing pages are they reading?"</em></li>
-                <li><em>"Write a complete Python script to automatically fetch my Search Console keywords every morning and save to CSV."</em></li>
-                <li><em>"Create a local MCP plugin or tool definition for this in my project."</em></li>
-              </ul>
-            </div>
-          </div>
-        )}
 
         {/* Tab 1: ChatGPT */}
         {activeTab === 'chatgpt' && (
@@ -1284,6 +1341,8 @@ console.log(response.text);`;
               </button>
               <pre className="gmcp-code-pre">{cursorConfig}</pre>
             </div>
+          </div>
+        )}
           </div>
         )}
       </section>
