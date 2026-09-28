@@ -393,6 +393,7 @@ router.get('/status', async (req, res) => {
     // Fetch verified sites and GA4 properties
     let gscSites = [];
     let ga4Properties = [];
+    let ga4Error = null;
 
     try {
       gscSites = await getSearchConsoleSites(accessToken);
@@ -404,6 +405,7 @@ router.get('/status', async (req, res) => {
       ga4Properties = await getGa4Properties(accessToken);
     } catch (e) {
       console.warn('GA4 fetch error:', e.message);
+      ga4Error = e.message;
     }
 
     res.json({
@@ -412,7 +414,8 @@ router.get('/status', async (req, res) => {
       selectedGscSite: selectedGscSite || (gscSites[0]?.siteUrl || null),
       selectedGa4Property: selectedGa4Property || (ga4Properties[0]?.propertyId || null),
       gscSites: gscSites.map((s) => s.siteUrl),
-      ga4Properties
+      ga4Properties,
+      ga4Error
     });
   } catch (err) {
     res.status(401).json({ connected: false, error: err.message });

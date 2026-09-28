@@ -211,6 +211,13 @@ export default function GoogleMarketingMcp({ onBack, toolMeta }) {
   const [ga4Properties, setGa4Properties] = useState([]);
   const [selectedGscSite, setSelectedGscSite] = useState('');
   const [selectedGa4Property, setSelectedGa4Property] = useState('');
+  const [ga4Error, setGa4Error] = useState(null);
+
+  // Manual/Custom override state
+  const [isCustomGa4, setIsCustomGa4] = useState(false);
+  const [customGa4Input, setCustomGa4Input] = useState('');
+  const [isCustomGsc, setIsCustomGsc] = useState(false);
+  const [customGscInput, setCustomGscInput] = useState('');
 
   // Interactive Demo Sandbox Properties
   const [demoGscSite, setDemoGscSite] = useState('https://cerilas.com');
@@ -277,8 +284,12 @@ export default function GoogleMarketingMcp({ onBack, toolMeta }) {
         if (data.email) setUserEmail(data.email);
         if (Array.isArray(data.gscSites)) setGscSites(data.gscSites);
         if (Array.isArray(data.ga4Properties)) setGa4Properties(data.ga4Properties);
+        if (data.ga4Error) setGa4Error(data.ga4Error);
+        else setGa4Error(null);
+
         if (data.selectedGscSite) setSelectedGscSite(data.selectedGscSite);
         else if (data.gscSites?.[0]) setSelectedGscSite(data.gscSites[0]);
+
         if (data.selectedGa4Property) setSelectedGa4Property(data.selectedGa4Property);
         else if (data.ga4Properties?.[0]) setSelectedGa4Property(data.ga4Properties[0].propertyId);
       }
@@ -856,8 +867,28 @@ console.log(response.text);`;
           </div>
         </div>
 
-        {/* Property Selectors if multiple exist */}
-        {isConnected && !isDemoMode && (gscSites.length > 0 || ga4Properties.length > 0) && (
+        {/* GA4 Admin API Notice if API disabled */}
+        {isConnected && !isDemoMode && ga4Error && (
+          <div className="gmcp-notice-banner" style={{ margin: '0.5rem 0 1rem 0' }}>
+            <AlertCircle size={18} style={{ color: '#f59e0b', flexShrink: 0, marginTop: '2px' }} />
+            <div>
+              <div style={{ fontWeight: 600, color: 'var(--text-main)', marginBottom: '0.2rem' }}>
+                Google Analytics 4 Mülk Listeleme Uyarısı (Admin API)
+              </div>
+              <div style={{ fontSize: '0.84rem', color: 'var(--text-muted)' }}>
+                Google Cloud Console projenizde <strong>Google Analytics Admin API</strong> henüz etkinleştirilmemiş olabilir.{' '}
+                {ga4Error.includes('disabled') || ga4Error.includes('not been used') ? (
+                  <>Mülklerinizin otomatik listelenmesi için <a href="https://console.cloud.google.com/apis/library/analyticsadmin.googleapis.com" target="_blank" rel="noreferrer">Google Cloud Console'dan Analytics Admin API'yi etkinleştirebilir</a> veya aşağıdaki alana doğrudan <strong>GA4 Sayısal Mülk ID'nizi (Property ID)</strong> girebilirsiniz.</>
+                ) : (
+                  <>({ga4Error}) — Aşağıdaki alana doğrudan GA4 Mülk ID'nizi yazarak da rapor çekebilirsiniz.</>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Property Selectors if connected */}
+        {isConnected && !isDemoMode && (
           <div style={{
             display: 'flex',
             gap: '1rem',
@@ -867,11 +898,12 @@ console.log(response.text);`;
             border: '1px solid var(--card-border)',
             borderRadius: '12px'
           }}>
-            {gscSites.length > 0 && (
-              <div style={{ flex: 1, minWidth: '220px', display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
-                <label style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--text-muted)' }}>
-                  Active Search Console Site:
-                </label>
+            {/* Search Console Site */}
+            <div style={{ flex: 1, minWidth: '240px', display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+              <label style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--text-muted)' }}>
+                Active Search Console Site:
+              </label>
+              {gscSites.length > 0 ? (
                 <select
                   value={selectedGscSite}
                   onChange={(e) => {
@@ -893,14 +925,40 @@ console.log(response.text);`;
                     <option key={site} value={site}>{site}</option>
                   ))}
                 </select>
-              </div>
-            )}
+              ) : (
+                <div style={{ display: 'flex', gap: '0.4rem' }}>
+                  <input
+                    type="text"
+                    placeholder="https://yourdomain.com"
+                    value={selectedGscSite}
+                    onChange={(e) => setSelectedGscSite(e.target.value.trim())}
+                    style={{
+                      flex: 1,
+                      background: 'var(--card-bg)',
+                      border: '1px solid var(--card-border)',
+                      color: 'var(--text-main)',
+                      borderRadius: '8px',
+                      padding: '0.5rem',
+                      fontSize: '0.85rem'
+                    }}
+                  />
+                  <Button
+                    variant="secondary"
+                    size="small"
+                    onClick={() => handlePropertyChange(selectedGscSite, selectedGa4Property)}
+                  >
+                    Save
+                  </Button>
+                </div>
+              )}
+            </div>
 
-            {ga4Properties.length > 0 && (
-              <div style={{ flex: 1, minWidth: '220px', display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
-                <label style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--text-muted)' }}>
-                  Active GA4 Property:
-                </label>
+            {/* GA4 Property */}
+            <div style={{ flex: 1, minWidth: '240px', display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+              <label style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--text-muted)' }}>
+                Active GA4 Property:
+              </label>
+              {ga4Properties.length > 0 ? (
                 <select
                   value={selectedGa4Property}
                   onChange={(e) => {
@@ -920,12 +978,42 @@ console.log(response.text);`;
                 >
                   {ga4Properties.map((p) => (
                     <option key={p.propertyId} value={p.propertyId}>
-                      {p.displayName} ({p.propertyId})
+                      {p.accountName ? `${p.accountName} > ` : ''}{p.displayName} ({p.propertyId})
                     </option>
                   ))}
                 </select>
-              </div>
-            )}
+              ) : (
+                <div style={{ display: 'flex', gap: '0.4rem' }}>
+                  <input
+                    type="text"
+                    placeholder="GA4 Property ID (e.g. 382910482)"
+                    value={selectedGa4Property}
+                    onChange={(e) => setSelectedGa4Property(e.target.value.trim())}
+                    style={{
+                      flex: 1,
+                      background: 'var(--card-bg)',
+                      border: '1px solid var(--card-border)',
+                      color: 'var(--text-main)',
+                      borderRadius: '8px',
+                      padding: '0.5rem',
+                      fontSize: '0.85rem'
+                    }}
+                  />
+                  <Button
+                    variant="secondary"
+                    size="small"
+                    onClick={() => {
+                      handlePropertyChange(selectedGscSite, selectedGa4Property);
+                      if (simPreset === 'ga4') {
+                        handleRunSimulation('ga4', selectedGscSite, selectedGa4Property);
+                      }
+                    }}
+                  >
+                    Save
+                  </Button>
+                </div>
+              )}
+            </div>
           </div>
         )}
 
@@ -1565,17 +1653,84 @@ console.log(response.text);`;
 
             <div className="gmcp-sim-select-container">
               {simPreset === 'gsc' && (
-                isConnected && !isDemoMode && gscSites.length > 0 ? (
-                  <select
-                    value={selectedGscSite}
-                    onChange={(e) => handleSimulatorPropertyChange('gsc', e.target.value)}
-                    className="gmcp-sim-select"
-                    aria-label="Select Search Console Property"
-                  >
-                    {gscSites.map((site) => (
-                      <option key={site} value={site}>{site}</option>
-                    ))}
-                  </select>
+                isConnected && !isDemoMode ? (
+                  gscSites.length > 0 ? (
+                    isCustomGsc ? (
+                      <div className="gmcp-sim-custom-input-wrap">
+                        <input
+                          type="text"
+                          placeholder="e.g. https://yourdomain.com"
+                          value={customGscInput}
+                          onChange={(e) => setCustomGscInput(e.target.value.trim())}
+                          className="gmcp-sim-input"
+                        />
+                        <button
+                          type="button"
+                          className="gmcp-sim-btn-sm"
+                          onClick={() => {
+                            if (customGscInput) {
+                              handleSimulatorPropertyChange('gsc', customGscInput);
+                              setIsCustomGsc(false);
+                            }
+                          }}
+                        >
+                          Apply
+                        </button>
+                        <button
+                          type="button"
+                          className="gmcp-sim-btn-sm"
+                          style={{ background: 'transparent', border: '1px solid var(--card-border)', color: 'var(--text-muted)' }}
+                          onClick={() => setIsCustomGsc(false)}
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    ) : (
+                      <select
+                        value={selectedGscSite}
+                        onChange={(e) => {
+                          if (e.target.value === '__custom__') {
+                            setIsCustomGsc(true);
+                          } else {
+                            handleSimulatorPropertyChange('gsc', e.target.value);
+                          }
+                        }}
+                        className="gmcp-sim-select"
+                        aria-label="Select Search Console Property"
+                      >
+                        {gscSites.map((site) => (
+                          <option key={site} value={site}>{site}</option>
+                        ))}
+                        <option value="__custom__">+ Enter Another Site URL...</option>
+                      </select>
+                    )
+                  ) : (
+                    <div className="gmcp-sim-custom-input-wrap">
+                      <input
+                        type="text"
+                        placeholder="Enter Site URL (e.g. https://domain.com)"
+                        value={customGscInput || selectedGscSite || ''}
+                        onChange={(e) => {
+                          const val = e.target.value.trim();
+                          setCustomGscInput(val);
+                          setSelectedGscSite(val);
+                        }}
+                        className="gmcp-sim-input"
+                      />
+                      <button
+                        type="button"
+                        className="gmcp-sim-btn-sm"
+                        onClick={() => {
+                          const site = customGscInput || selectedGscSite;
+                          if (site) {
+                            handleSimulatorPropertyChange('gsc', site);
+                          }
+                        }}
+                      >
+                        Apply
+                      </button>
+                    </div>
+                  )
                 ) : (
                   <select
                     value={demoGscSite}
@@ -1591,19 +1746,86 @@ console.log(response.text);`;
               )}
 
               {simPreset === 'ga4' && (
-                isConnected && !isDemoMode && ga4Properties.length > 0 ? (
-                  <select
-                    value={selectedGa4Property}
-                    onChange={(e) => handleSimulatorPropertyChange('ga4', e.target.value)}
-                    className="gmcp-sim-select"
-                    aria-label="Select GA4 Property"
-                  >
-                    {ga4Properties.map((p) => (
-                      <option key={p.propertyId} value={p.propertyId}>
-                        {p.displayName} (ID: {p.propertyId})
-                      </option>
-                    ))}
-                  </select>
+                isConnected && !isDemoMode ? (
+                  ga4Properties.length > 0 ? (
+                    isCustomGa4 ? (
+                      <div className="gmcp-sim-custom-input-wrap">
+                        <input
+                          type="text"
+                          placeholder="e.g. 382910482"
+                          value={customGa4Input}
+                          onChange={(e) => setCustomGa4Input(e.target.value.trim())}
+                          className="gmcp-sim-input"
+                        />
+                        <button
+                          type="button"
+                          className="gmcp-sim-btn-sm"
+                          onClick={() => {
+                            if (customGa4Input) {
+                              handleSimulatorPropertyChange('ga4', customGa4Input);
+                              setIsCustomGa4(false);
+                            }
+                          }}
+                        >
+                          Apply
+                        </button>
+                        <button
+                          type="button"
+                          className="gmcp-sim-btn-sm"
+                          style={{ background: 'transparent', border: '1px solid var(--card-border)', color: 'var(--text-muted)' }}
+                          onClick={() => setIsCustomGa4(false)}
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    ) : (
+                      <select
+                        value={selectedGa4Property}
+                        onChange={(e) => {
+                          if (e.target.value === '__custom__') {
+                            setIsCustomGa4(true);
+                          } else {
+                            handleSimulatorPropertyChange('ga4', e.target.value);
+                          }
+                        }}
+                        className="gmcp-sim-select"
+                        aria-label="Select GA4 Property"
+                      >
+                        {ga4Properties.map((p) => (
+                          <option key={p.propertyId} value={p.propertyId}>
+                            {p.accountName ? `${p.accountName} > ` : ''}{p.displayName} (ID: {p.propertyId})
+                          </option>
+                        ))}
+                        <option value="__custom__">+ Enter Custom GA4 Property ID...</option>
+                      </select>
+                    )
+                  ) : (
+                    <div className="gmcp-sim-custom-input-wrap">
+                      <input
+                        type="text"
+                        placeholder="Enter GA4 Property ID (e.g. 382910482)"
+                        value={customGa4Input || selectedGa4Property || ''}
+                        onChange={(e) => {
+                          const val = e.target.value.trim();
+                          setCustomGa4Input(val);
+                          setSelectedGa4Property(val);
+                        }}
+                        className="gmcp-sim-input"
+                      />
+                      <button
+                        type="button"
+                        className="gmcp-sim-btn-sm"
+                        onClick={() => {
+                          const id = customGa4Input || selectedGa4Property;
+                          if (id) {
+                            handleSimulatorPropertyChange('ga4', id);
+                          }
+                        }}
+                      >
+                        Apply
+                      </button>
+                    </div>
+                  )
                 ) : (
                   <select
                     value={demoGa4Property}
@@ -1631,7 +1853,11 @@ console.log(response.text);`;
                 </select>
               )}
 
-              <ChevronDown size={14} className="gmcp-sim-select-chevron" />
+              {((simPreset === 'gsc' && (!isConnected || isDemoMode || (gscSites.length > 0 && !isCustomGsc))) ||
+                (simPreset === 'ga4' && (!isConnected || isDemoMode || (ga4Properties.length > 0 && !isCustomGa4))) ||
+                simPreset === 'gads') && (
+                <ChevronDown size={14} className="gmcp-sim-select-chevron" />
+              )}
             </div>
           </div>
 

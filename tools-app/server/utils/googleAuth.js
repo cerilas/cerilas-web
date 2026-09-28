@@ -245,13 +245,24 @@ export async function inspectSearchConsoleUrl(accessToken, siteUrl, inspectionUr
  * Fetches Google Analytics 4 accounts and properties.
  */
 export async function getGa4Properties(accessToken) {
-  const url = 'https://analyticsadmin.googleapis.com/v1beta/accountSummaries';
+  const url = 'https://analyticsadmin.googleapis.com/v1beta/accountSummaries?pageSize=200';
   const response = await fetch(url, {
     headers: { Authorization: `Bearer ${accessToken}` }
   });
 
   if (!response.ok) {
-    return [];
+    const errorText = await response.text();
+    console.error(`[Google Analytics Admin API Error ${response.status}]:`, errorText);
+    let errMsg = `GA4 API error (${response.status})`;
+    try {
+      const parsed = JSON.parse(errorText);
+      if (parsed?.error?.message) {
+        errMsg = parsed.error.message;
+      }
+    } catch (_) {}
+    const err = new Error(errMsg);
+    err.status = response.status;
+    throw err;
   }
 
   const data = await response.json();
@@ -259,9 +270,9 @@ export async function getGa4Properties(accessToken) {
   for (const acc of data.accountSummaries || []) {
     for (const prop of acc.propertySummaries || []) {
       properties.push({
-        propertyId: prop.property.replace('properties/', ''),
-        displayName: prop.displayName,
-        accountName: acc.displayName
+        propertyId: String(prop.property || '').replace('properties/', '').trim(),
+        displayName: prop.displayName || `GA4 Property #${prop.property}`,
+        accountName: acc.displayName || ''
       });
     }
   }
@@ -272,7 +283,8 @@ export async function getGa4Properties(accessToken) {
  * Runs a report against Google Analytics 4 (GA4).
  */
 export async function queryGa4Traffic(accessToken, propertyId, options = {}) {
-  const endpoint = `https://analyticsdata.googleapis.com/v1beta/properties/${propertyId}:runReport`;
+  const cleanPropId = String(propertyId || '').replace('properties/', '').trim();
+  const endpoint = `https://analyticsdata.googleapis.com/v1beta/properties/${cleanPropId}:runReport`;
 
   const startDate = options.startDate || '30daysAgo';
   const endDate = options.endDate || 'yesterday';
@@ -312,14 +324,15 @@ export async function queryGa4Traffic(accessToken, propertyId, options = {}) {
     avgDurationSeconds: Math.round(Number(row.metricValues?.[3]?.value || 0))
   }));
 
-  return { propertyId, startDate, endDate, rows };
+  return { propertyId: cleanPropId, startDate, endDate, rows };
 }
 
 /**
  * Runs real-time visitor query on GA4.
  */
 export async function queryGa4Realtime(accessToken, propertyId) {
-  const endpoint = `https://analyticsdata.googleapis.com/v1beta/properties/${propertyId}:runRealtimeReport`;
+  const cleanPropId = String(propertyId || '').replace('properties/', '').trim();
+  const endpoint = `https://analyticsdata.googleapis.com/v1beta/properties/${cleanPropId}:runRealtimeReport`;
 
   const requestBody = {
     dimensions: [{ name: 'unifiedScreenName' }],
@@ -344,7 +357,7 @@ export async function queryGa4Realtime(accessToken, propertyId) {
   const totalActive = (data.rows || []).reduce((acc, r) => acc + Number(r.metricValues?.[0]?.value || 0), 0);
 
   return {
-    propertyId,
+    propertyId: cleanPropId,
     totalActiveUsers: totalActive,
     activePages: (data.rows || []).slice(0, 10).map((r) => ({
       page: r.dimensionValues?.[0]?.value,
