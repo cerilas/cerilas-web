@@ -21,7 +21,6 @@ import { useToolAnalytics } from '../../hooks/useToolAnalytics';
 import ToolHeader from '../../components/ui/ToolHeader';
 import ToolSeoDivider from '../../components/ui/ToolSeoDivider';
 import Badge from '../../components/ui/Badge';
-import AdSlot from '../../components/ui/AdSlot';
 import LtvCacSeo from './components/LtvCacSeo';
 import '../finance-shared/finance-tools.css';
 
@@ -323,8 +322,6 @@ Generated via https://tools.cerilas.com/#/tool/ltv-cac-calculator`;
       {/* Comprehensive Long-Form SEO & Venture Guide */}
       <LtvCacSeo />
 
-      {/* AdSlot */}
-      <AdSlot format="billboard" slotId="ad-ltv-cac-billboard" />
     </div>
   );
 }

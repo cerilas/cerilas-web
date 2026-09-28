@@ -41,7 +41,6 @@ import SignatureModal from './components/SignatureModal';
 import PdfEditorSeo from './components/PdfEditorSeo';
 import ToolHeader from '../../components/ui/ToolHeader';
 import ToolSeoDivider from '../../components/ui/ToolSeoDivider';
-import AdSlot from '../../components/ui/AdSlot';
 import Badge from '../../components/ui/Badge';
 import Button from '../../components/ui/Button';
 import Modal from '../../components/ui/Modal';

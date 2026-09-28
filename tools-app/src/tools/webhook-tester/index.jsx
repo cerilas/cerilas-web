@@ -20,7 +20,6 @@ import {
 } from 'lucide-react';
 import ToolHeader from '../../components/ui/ToolHeader';
 import Badge from '../../components/ui/Badge';
-import AdSlot from '../../components/ui/AdSlot';
 import Button from '../../components/ui/Button';
 import ToolSeoDivider from '../../components/ui/ToolSeoDivider';
 import WebhookTesterSeo from './components/WebhookTesterSeo';

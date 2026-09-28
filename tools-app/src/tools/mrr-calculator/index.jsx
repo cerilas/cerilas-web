@@ -23,7 +23,6 @@ import { useToolAnalytics } from '../../hooks/useToolAnalytics';
 import ToolHeader from '../../components/ui/ToolHeader';
 import ToolSeoDivider from '../../components/ui/ToolSeoDivider';
 import Badge from '../../components/ui/Badge';
-import AdSlot from '../../components/ui/AdSlot';
 import MrrSeo from './components/MrrSeo';
 import '../finance-shared/finance-tools.css';
 
@@ -353,8 +352,6 @@ Generated via https://tools.cerilas.com/#/tool/mrr-calculator`;
       {/* Comprehensive Long-Form SEO & Venture Guide */}
       <MrrSeo />
 
-      {/* AdSlot */}
-      <AdSlot format="billboard" slotId="ad-mrr-billboard" />
     </div>
   );
 }

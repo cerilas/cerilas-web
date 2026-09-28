@@ -20,7 +20,6 @@ import { useToolAnalytics } from '../../hooks/useToolAnalytics';
 import ToolHeader from '../../components/ui/ToolHeader';
 import ToolSeoDivider from '../../components/ui/ToolSeoDivider';
 import Badge from '../../components/ui/Badge';
-import AdSlot from '../../components/ui/AdSlot';
 import ChurnSeo from './components/ChurnSeo';
 import '../finance-shared/finance-tools.css';
 
@@ -382,8 +381,6 @@ Generated via https://tools.cerilas.com/#/tool/churn-calculator`;
       {/* Comprehensive Long-Form SEO & Venture Guide */}
       <ChurnSeo />
 
-      {/* AdSlot */}
-      <AdSlot format="billboard" slotId="ad-churn-billboard" />
     </div>
   );
 }

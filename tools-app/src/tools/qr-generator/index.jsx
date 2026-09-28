@@ -29,7 +29,6 @@ import ToolHeader from '../../components/ui/ToolHeader';
 import ToolSeoDivider from '../../components/ui/ToolSeoDivider';
 import Badge from '../../components/ui/Badge';
 import QrSeoSection from './components/QrSeoSection';
-import AdSlot from '../../components/ui/AdSlot';
 import './qr-generator.css';
 
 const COLOR_PRESETS = [
@@ -604,7 +603,6 @@ export default function QrGeneratorTool({ onBack, toolMeta }) {
       <QrSeoSection onApplyPreset={handleApplyPreset} />
 
       {/* Google AdSense Slot: Bottom 970x250 / 728x90 Pre-Footer Banner */}
-      <AdSlot format="billboard" slotId="ad-qr-bottom-billboard" />
     </div>
   );
 }

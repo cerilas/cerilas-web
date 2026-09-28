@@ -28,7 +28,6 @@ import {
   COMPRESSION_PRESETS 
 } from './compressor';
 import PdfCompressorSeo from './components/PdfCompressorSeo';
-import AdSlot from '../../components/ui/AdSlot';
 import ToolHeader from '../../components/ui/ToolHeader';
 import ToolSeoDivider from '../../components/ui/ToolSeoDivider';
 import Badge from '../../components/ui/Badge';
@@ -567,8 +566,6 @@ export default function PdfCompressorTool({ onBack, toolMeta }) {
         </div>
       )}
 
-      {/* Mid Leaderboard AdSlot */}
-      <AdSlot format="leaderboard" slotId="ad-pdf-mid-leaderboard" />
 
       {/* SEO, GEO & Knowledge Base Architecture (Partitioned below the fold) */}
       <ToolSeoDivider label="PDF Compression Formats, Security & FAQs" />
@@ -577,8 +574,6 @@ export default function PdfCompressorTool({ onBack, toolMeta }) {
         window.scrollTo({ top: 0, behavior: 'smooth' });
       }} />
 
-      {/* Bottom Billboard AdSlot */}
-      <AdSlot format="billboard" slotId="ad-pdf-bottom-billboard" />
     </div>
   );
 }

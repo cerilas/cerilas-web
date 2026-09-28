@@ -29,7 +29,7 @@ import {
   SAMPLE_PRESETS 
 } from './tokenEngine';
 import { useToolAnalytics } from '../../hooks/useToolAnalytics';
-import { Badge, ToolHeader, AdSlot } from '../../components/ui';
+import { Badge, ToolHeader } from '../../components/ui';
 import ToolSeoDivider from '../../components/ui/ToolSeoDivider';
 import TokenCounterSeo from './components/TokenCounterSeo';
 import './token-counter.css';
@@ -773,7 +773,6 @@ export default function TokenCounterUniversal({ onBack, toolMeta }) {
         </div>
       </div>
 
-      <AdSlot slot="footer-top" />
 
       <ToolSeoDivider />
 

@@ -17,7 +17,6 @@ import {
   formatBytes 
 } from './compressor';
 import Select from '../../components/ui/Select';
-import AdSlot from '../../components/ui/AdSlot';
 import ToolHeader from '../../components/ui/ToolHeader';
 import ToolSeoDivider from '../../components/ui/ToolSeoDivider';
 import Badge from '../../components/ui/Badge';
@@ -668,7 +667,6 @@ export default function ImageCompressorTool({ onBack, toolMeta }) {
       )}
 
       {/* Mid-Content Google AdSense Slot */}
-      <AdSlot format="leaderboard" slotId="ad-img-mid-leaderboard" />
 
       {/* Interactive Before/After Split Comparison Modal */}
       {comparingItem && (
@@ -779,8 +777,6 @@ export default function ImageCompressorTool({ onBack, toolMeta }) {
         }}
       />
 
-      {/* Bottom Billboard AdSlot */}
-      <AdSlot format="billboard" slotId="ad-img-bottom-billboard" />
     </div>
   );
 }

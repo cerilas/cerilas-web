@@ -24,7 +24,7 @@ import {
 } from 'lucide-react';
 import { atsResumeCheckerManifest } from './manifest';
 import { useToolAnalytics } from '../../hooks/useToolAnalytics';
-import { Button, Badge, Card, ToolHeader, AdSlot, QuotaModal } from '../../components/ui';
+import { Button, Badge, Card, ToolHeader, QuotaModal } from '../../components/ui';
 import ToolSeoDivider from '../../components/ui/ToolSeoDivider';
 import { extractTextFromPdf } from './pdfParser';
 import { getOrCreateVisitorId } from '../../utils/visitorId';
@@ -691,7 +691,6 @@ ${result.suggestions?.map((s, i) => `${i + 1}. ${s}`).join('\n') || 'None'}
       <AtsResumeCheckerSeo />
 
       {/* Bottom Billboard Ad */}
-      <AdSlot format="billboard" slotId="ad-ats-bottom-billboard" />
     </div>
   );
 }

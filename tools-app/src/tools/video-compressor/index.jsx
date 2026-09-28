@@ -20,7 +20,6 @@ import {
 import ToolHeader from '../../components/ui/ToolHeader';
 import Button from '../../components/ui/Button';
 import Badge from '../../components/ui/Badge';
-import AdSlot from '../../components/ui/AdSlot';
 import ToolSeoDivider from '../../components/ui/ToolSeoDivider';
 import VideoCompressorSeo from './components/VideoCompressorSeo';
 import { videoCompressorManifest } from './manifest';

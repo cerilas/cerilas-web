@@ -26,7 +26,7 @@ import {
 } from 'lucide-react';
 import { htmlToMarkdownManifest } from './manifest';
 import { useToolAnalytics } from '../../hooks/useToolAnalytics';
-import { Button, Badge, ToolHeader, AdSlot } from '../../components/ui';
+import { Button, Badge, ToolHeader } from '../../components/ui';
 import ToolSeoDivider from '../../components/ui/ToolSeoDivider';
 import HtmlToMarkdownSeo from './components/HtmlToMarkdownSeo';
 import './html-to-markdown.css';
@@ -732,7 +732,6 @@ export default function HtmlToLlmMarkdown({ onBack, toolMeta }) {
         </div>
       )}
 
-      <AdSlot slot="footer-top" />
 
       <ToolSeoDivider />
 

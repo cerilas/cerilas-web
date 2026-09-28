@@ -30,7 +30,7 @@ import {
 } from './pdfRagParser';
 import { useToolAnalytics } from '../../hooks/useToolAnalytics';
 import { getOrCreateVisitorId } from '../../utils/visitorId';
-import { Button, Badge, Card, ToolHeader, AdSlot, QuotaModal } from '../../components/ui';
+import { Button, Badge, Card, ToolHeader, QuotaModal } from '../../components/ui';
 import ToolSeoDivider from '../../components/ui/ToolSeoDivider';
 import PdfRagCleanerSeo from './components/PdfRagCleanerSeo';
 import './pdf-rag-cleaner.css';
@@ -659,7 +659,6 @@ export default function PdfRagCleaner({ onBack, toolMeta }) {
       )}
 
       {/* Ad slot for monetization */}
-      <AdSlot format="leaderboard" slotId="ad-rag-cleaner-bottom" />
 
       {/* SEO Section with Structured Data and Technical Guide (Partitioned below the fold) */}
       <ToolSeoDivider label="RAG Architecture, Benchmarks & FAQs" />

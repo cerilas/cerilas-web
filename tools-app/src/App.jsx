@@ -33,7 +33,6 @@ import {
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import StatsModal from './components/StatsModal';
-import AdSlot from './components/ui/AdSlot';
 import ErrorBoundary from './components/ErrorBoundary';
 import AdminDashboard from './admin/AdminDashboard';
 import LegalView from './legal/LegalView';
@@ -948,9 +947,6 @@ export default function App() {
                 </div>
               )}
             </main>
-
-            {/* Google AdSense Slot: Bottom Vertical Multiplex */}
-            <AdSlot format="multiplex" slotId="2582171503" />
           </div>
         </div>
         )}

@@ -19,7 +19,7 @@ import {
 } from 'lucide-react';
 import { websiteEmailExtractorManifest } from './manifest';
 import { useToolAnalytics } from '../../hooks/useToolAnalytics';
-import { Button, Badge, ToolHeader, AdSlot } from '../../components/ui';
+import { Button, Badge, ToolHeader } from '../../components/ui';
 import ToolSeoDivider from '../../components/ui/ToolSeoDivider';
 import WebsiteEmailExtractorSeo from './components/WebsiteEmailExtractorSeo';
 import './EmailExtractor.css';
@@ -505,8 +505,6 @@ export default function WebsiteEmailExtractor({ onBack, toolMeta }) {
         </>
       )}
 
-      {/* AdSlot */}
-      <AdSlot slot="footer-top" />
 
       {/* Standard ToolSeoDivider */}
       <ToolSeoDivider />

@@ -33,7 +33,7 @@ import {
   DEMO_SAMPLES
 } from './linkExtractorService';
 import { useToolAnalytics } from '../../hooks/useToolAnalytics';
-import { Button, Badge, Card, ToolHeader, AdSlot } from '../../components/ui';
+import { Button, Badge, Card, ToolHeader } from '../../components/ui';
 import ToolSeoDivider from '../../components/ui/ToolSeoDivider';
 import AiLinkHallucinationSeo from './components/AiLinkHallucinationSeo';
 import './ai-link-hallucination-checker.css';
@@ -671,7 +671,6 @@ export default function AiLinkHallucinationChecker({ onBack, toolMeta }) {
 
       {/* Ad slot */}
       <div style={{ marginTop: '1.5rem' }}>
-        <AdSlot format="horizontal" slotId="4093371757" />
       </div>
 
       {/* Standardized ToolSeoDivider */}

@@ -38,7 +38,7 @@ import {
 } from 'lucide-react';
 import { llmsTxtManifest } from './manifest';
 import { useToolAnalytics } from '../../hooks/useToolAnalytics';
-import { Button, Badge, ToolHeader, AdSlot } from '../../components/ui';
+import { Button, Badge, ToolHeader } from '../../components/ui';
 import ToolSeoDivider from '../../components/ui/ToolSeoDivider';
 import LlmsTxtSeo from './components/LlmsTxtSeo';
 import './llms-txt-tools.css';
@@ -1974,7 +1974,6 @@ export default function LlmsTxtTools({ onBack, toolMeta }) {
 
       {/* 4. Google AdSense Slot */}
       <div style={{ marginTop: '1.5rem' }}>
-        <AdSlot format="horizontal" slotId="4093371757" />
       </div>
 
       {/* 5. Tool SEO Divider & Technical Guide */}

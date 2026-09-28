@@ -20,7 +20,6 @@ import { useToolAnalytics } from '../../hooks/useToolAnalytics';
 import ToolHeader from '../../components/ui/ToolHeader';
 import ToolSeoDivider from '../../components/ui/ToolSeoDivider';
 import Badge from '../../components/ui/Badge';
-import AdSlot from '../../components/ui/AdSlot';
 import LtvSeo from './components/LtvSeo';
 import '../finance-shared/finance-tools.css';
 
@@ -306,8 +305,6 @@ Generated via https://tools.cerilas.com/#/tool/ltv-calculator`;
       {/* Comprehensive Long-Form SEO & Venture Guide */}
       <LtvSeo />
 
-      {/* AdSlot */}
-      <AdSlot format="billboard" slotId="ad-ltv-billboard" />
     </div>
   );
 }

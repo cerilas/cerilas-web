@@ -32,7 +32,7 @@ import {
 } from 'lucide-react';
 import { aiCrawlerCheckerManifest } from './manifest';
 import { useToolAnalytics } from '../../hooks/useToolAnalytics';
-import { Button, Badge, Card, ToolHeader, AdSlot } from '../../components/ui';
+import { Button, Badge, Card, ToolHeader } from '../../components/ui';
 import ToolSeoDivider from '../../components/ui/ToolSeoDivider';
 import AiCrawlerCheckerSeo from './components/AiCrawlerCheckerSeo';
 import './ai-crawler-checker.css';
@@ -1463,7 +1463,6 @@ export default function AiCrawlerChecker({ onBack, toolMeta }) {
 
       {/* 6. Google AdSense Banner Slot */}
       <div style={{ marginTop: '1.5rem' }}>
-        <AdSlot format="horizontal" slotId="4093371757" />
       </div>
 
       {/* 7. Structured SEO Divider and Comprehensive Technical Guide */}

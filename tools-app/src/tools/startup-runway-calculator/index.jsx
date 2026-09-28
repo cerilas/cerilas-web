@@ -23,7 +23,6 @@ import { useToolAnalytics } from '../../hooks/useToolAnalytics';
 import ToolHeader from '../../components/ui/ToolHeader';
 import ToolSeoDivider from '../../components/ui/ToolSeoDivider';
 import Badge from '../../components/ui/Badge';
-import AdSlot from '../../components/ui/AdSlot';
 import StartupRunwaySeo from './components/StartupRunwaySeo';
 import '../finance-shared/finance-tools.css';
 
@@ -408,8 +407,6 @@ Generated via https://tools.cerilas.com/#/tool/startup-runway-calculator`;
       {/* Comprehensive Long-Form SEO & Venture Guide */}
       <StartupRunwaySeo />
 
-      {/* AdSlot */}
-      <AdSlot format="billboard" slotId="ad-runway-billboard" />
     </div>
   );
 }

@@ -23,7 +23,7 @@ import { removeBackground } from '@imgly/background-removal';
 import { backgroundRemoverManifest } from './manifest';
 import { useToolAnalytics } from '../../hooks/useToolAnalytics';
 import { getOrCreateVisitorId } from '../../utils/visitorId';
-import { Button, Badge, Card, ToolHeader, AdSlot, QuotaModal } from '../../components/ui';
+import { Button, Badge, Card, ToolHeader, QuotaModal } from '../../components/ui';
 import ToolSeoDivider from '../../components/ui/ToolSeoDivider';
 import BackgroundRemoverSeo from './components/BackgroundRemoverSeo';
 import './background-remover.css';
@@ -730,7 +730,6 @@ export default function BackgroundRemover({ onBack, toolMeta }) {
       <BackgroundRemoverSeo />
 
       {/* Billboard Ad */}
-      <AdSlot format="billboard" slotId="ad-bg-remover-billboard" />
     </div>
   );
 }

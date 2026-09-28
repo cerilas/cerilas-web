@@ -10,7 +10,6 @@ import {
   Layers,
   Award
 } from 'lucide-react';
-import AdSlot from '../../../components/ui/AdSlot';
 
 export default function YoutubeSeoSection() {
   const [openFaqIndex, setOpenFaqIndex] = useState(0);
@@ -125,14 +124,6 @@ export default function YoutubeSeoSection() {
           </p>
         </div>
       </div>
-
-      {/* Mid-Content AdSense Unit */}
-      <AdSlot
-        slotId="4093371757"
-        format="fluid"
-        layout="in-article"
-        style={{ margin: '2.5rem 0' }}
-      />
 
       {/* Specifications & Creator Guide */}
       <div className="ytd-guide-section">

@@ -27,7 +27,6 @@ import { pomodoroManifest } from './manifest';
 import { SOUND_OPTIONS, playPomodoroSound } from './sounds';
 import PomodoroLiquid from './components/PomodoroLiquid';
 import PomodoroSeo from './components/PomodoroSeo';
-import AdSlot from '../../components/ui/AdSlot';
 import ToolHeader from '../../components/ui/ToolHeader';
 import ToolSeoDivider from '../../components/ui/ToolSeoDivider';
 import Badge from '../../components/ui/Badge';
@@ -1062,15 +1061,11 @@ export default function PomodoroTimerTool({ onBack, toolMeta }) {
         </div>
       </div>
 
-      {/* Mid Leaderboard AdSlot */}
-      <AdSlot format="leaderboard" slotId="ad-pomodoro-mid-leaderboard" />
 
       {/* Comprehensive 100% English SEO, HowTo, FAQs & Schema.org JSON-LD (Partitioned below the fold) */}
       <ToolSeoDivider label="Pomodoro Technique, Scientific Studies & FAQs" />
       <PomodoroSeo onSelectMode={(selectedMode, mins) => switchMode(selectedMode, mins)} />
 
-      {/* Bottom Billboard AdSlot */}
-      <AdSlot format="billboard" slotId="ad-pomodoro-bottom-billboard" />
 
       {/* Full Screen Focus Mode Overlay (Completely removes all disruptive site elements) */}
       {isFullScreen && (

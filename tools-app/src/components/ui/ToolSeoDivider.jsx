@@ -1,12 +1,10 @@
 import React from 'react';
 import { BookOpen } from 'lucide-react';
-import AdSlot from './AdSlot';
 import './ToolHeader.css';
 
 export default function ToolSeoDivider({ 
   label, 
-  title, 
-  showAd = true 
+  title 
 }) {
   const text = label || title || 'Documentation, Guides & Forensic Science';
 
@@ -20,14 +18,6 @@ export default function ToolSeoDivider({
         </span>
         <div className="c-tool-seo-divider-line" />
       </div>
-
-      {showAd && (
-        <AdSlot 
-          format="in-article" 
-          slotId="4093371757" 
-        />
-      )}
     </div>
   );
 }
-

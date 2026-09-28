@@ -34,7 +34,6 @@ import {
 import ToolHeader from '../../components/ui/ToolHeader';
 import Badge from '../../components/ui/Badge';
 import Button from '../../components/ui/Button';
-import AdSlot from '../../components/ui/AdSlot';
 import ToolSeoDivider from '../../components/ui/ToolSeoDivider';
 import EmailSignatureSeo from './components/EmailSignatureSeo';
 import { emailSignatureGeneratorManifest } from './manifest';
