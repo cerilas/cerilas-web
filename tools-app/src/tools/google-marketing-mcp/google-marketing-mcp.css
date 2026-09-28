@@ -518,6 +518,136 @@
   font-weight: 500;
 }
 
+/* Simulator Property Selector Bar */
+.gmcp-sim-property-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+  padding: 0.85rem 1.15rem;
+  background: rgba(150, 150, 150, 0.04);
+  border: 1px solid var(--card-border);
+  border-radius: 14px;
+}
+
+.gmcp-sim-property-info {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  flex-wrap: wrap;
+  flex: 1;
+}
+
+.gmcp-sim-property-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.gmcp-sim-prop-icon {
+  color: #3b82f6;
+  flex-shrink: 0;
+}
+
+.gmcp-sim-select-container {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  min-width: 260px;
+  flex: 1;
+  max-width: 480px;
+}
+
+.gmcp-sim-select {
+  width: 100%;
+  appearance: none;
+  -webkit-appearance: none;
+  background: var(--card-bg);
+  color: var(--text-main);
+  border: 1px solid var(--card-border);
+  border-radius: 9px;
+  padding: 0.48rem 2.2rem 0.48rem 0.85rem;
+  font-size: 0.84rem;
+  font-weight: 500;
+  cursor: pointer;
+  outline: none;
+  transition: all 0.15s ease;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.gmcp-sim-select:hover {
+  border-color: rgba(59, 130, 246, 0.5);
+}
+
+.gmcp-sim-select:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+}
+
+.gmcp-sim-select-chevron {
+  position: absolute;
+  right: 0.75rem;
+  pointer-events: none;
+  color: var(--text-muted);
+}
+
+.gmcp-sim-property-meta {
+  display: flex;
+  align-items: center;
+}
+
+.gmcp-sim-mode-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.76rem;
+  font-weight: 600;
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  letter-spacing: 0.01em;
+}
+
+.gmcp-sim-mode-badge.live {
+  background: rgba(16, 185, 129, 0.1);
+  color: #10b981;
+  border: 1px solid rgba(16, 185, 129, 0.25);
+}
+
+.gmcp-sim-mode-badge.demo {
+  background: rgba(139, 92, 246, 0.1);
+  color: #8b5cf6;
+  border: 1px solid rgba(139, 92, 246, 0.25);
+}
+
+.gmcp-sim-live-pulse {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #10b981;
+  box-shadow: 0 0 6px #10b981;
+  animation: pulse-dot 1.8s infinite;
+}
+
+@keyframes pulse-dot {
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+  }
+  70% {
+    transform: scale(1);
+    box-shadow: 0 0 0 6px rgba(16, 185, 129, 0);
+  }
+  100% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+  }
+}
+
 .gmcp-query-bar {
   display: flex;
   gap: 0.75rem;
@@ -644,5 +774,19 @@
   }
   .gmcp-query-bar {
     flex-direction: column;
+  }
+  .gmcp-sim-property-bar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+  }
+  .gmcp-sim-property-info {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  .gmcp-sim-select-container {
+    max-width: 100%;
+    min-width: 100%;
   }
 }

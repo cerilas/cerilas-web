@@ -78,6 +78,114 @@ const SAMPLE_SIMULATION_DATA = {
   }
 };
 
+const DEMO_GSC_DATA = {
+  'https://cerilas.com': {
+    query: 'Show Search Console queries with high impressions (>1,000) but CTR < 2% for https://cerilas.com',
+    toolCall: 'gsc_get_search_analytics({ siteUrl: "https://cerilas.com", startDate: "2026-08-30", endDate: "2026-09-27", minImpressions: 1000, maxCtr: 0.02, dimensions: ["query"] })',
+    results: [
+      { term: 'free qr code generator vector', impressions: '4,820', clicks: '68', ctr: '1.41%', pos: '7.8' },
+      { term: 'compress pdf to 200kb online', impressions: '3,210', clicks: '44', ctr: '1.37%', pos: '8.4' },
+      { term: 'ai search crawler list robots txt', impressions: '2,640', clicks: '38', ctr: '1.43%', pos: '6.9' },
+      { term: 'startup runway calculator excel template', impressions: '1,950', clicks: '29', ctr: '1.48%', pos: '9.1' },
+      { term: 'how to check if chatgpt cites my website', impressions: '1,420', clicks: '22', ctr: '1.54%', pos: '8.2' }
+    ],
+    commentary: 'AI Insight: You have 5 high-intent queries on page 1 (positions 6-9) losing 98% of potential clicks. Rewriting the <title> tag of these pages to include numbers could increase your organic CTR from 1.4% to ~4.5%, adding ~320 additional monthly clicks without building new backlinks.'
+  },
+  'https://blog.cerilas.com': {
+    query: 'Show top 5 organic search queries driving engineering traffic to https://blog.cerilas.com',
+    toolCall: 'gsc_get_search_analytics({ siteUrl: "https://blog.cerilas.com", startDate: "2026-08-30", endDate: "2026-09-27", dimensions: ["query"], rowLimit: 5 })',
+    results: [
+      { term: 'best mcp servers for cursor ide 2026', impressions: '12,450', clicks: '840', ctr: '6.75%', pos: '3.1' },
+      { term: 'how to connect ga4 to claude desktop', impressions: '8,920', clicks: '512', ctr: '5.74%', pos: '4.2' },
+      { term: 'model context protocol tutorial python', impressions: '6,380', clicks: '390', ctr: '6.11%', pos: '3.8' },
+      { term: 'chatgpt actions vs mcp comparison', impressions: '4,110', clicks: '235', ctr: '5.72%', pos: '5.0' },
+      { term: 'google search console api quota limits', impressions: '3,200', clicks: '160', ctr: '5.00%', pos: '4.7' }
+    ],
+    commentary: 'AI Insight: Blog search visibility is performing strongly with an average 5.8% CTR on developer keywords. "best mcp servers for cursor" holds position 3.1 and drives 38% of all developer conversions to your tools.'
+  },
+  'sc-domain:cerilas.store': {
+    query: 'Show top 5 commercial ecommerce search queries for sc-domain:cerilas.store',
+    toolCall: 'gsc_get_search_analytics({ siteUrl: "sc-domain:cerilas.store", startDate: "2026-08-30", endDate: "2026-09-27", dimensions: ["query"], rowLimit: 5 })',
+    results: [
+      { term: 'minimalist desk setup accessories wood', impressions: '9,840', clicks: '412', ctr: '4.19%', pos: '4.5' },
+      { term: 'ergonomic mechanical keyboard wrist rest walnut', impressions: '7,120', clicks: '320', ctr: '4.49%', pos: '3.9' },
+      { term: 'leather desk mat waterproof extra large', impressions: '5,400', clicks: '210', ctr: '3.89%', pos: '6.2' },
+      { term: 'magnetic cable management clips black', impressions: '4,190', clicks: '185', ctr: '4.42%', pos: '5.1' },
+      { term: 'aluminum monitor riser with drawer', impressions: '3,650', clicks: '142', ctr: '3.89%', pos: '7.0' }
+    ],
+    commentary: 'AI Insight: Product queries for desk accessories show strong commercial purchase intent. The walnut wrist rest has the highest conversion efficiency, ranking at #3.9.'
+  }
+};
+
+const DEMO_GA4_DATA = {
+  '482910482': {
+    query: 'What are the top 4 traffic acquisition channels in GA4 and their engagement rate this month?',
+    toolCall: 'ga4_get_traffic_acquisition({ propertyId: "482910482", dateRange: "last_30_days", dimensions: ["sessionDefaultChannelGroup"] })',
+    results: [
+      { channel: 'Organic Search', sessions: '18,420', users: '14,190', bounce: '38.2%', engagement: '2m 45s' },
+      { channel: 'Direct Traffic', sessions: '9,810', users: '7,430', bounce: '44.1%', engagement: '1m 20s' },
+      { channel: 'Referral & AI Engines', sessions: '4,650', users: '3,890', bounce: '29.4%', engagement: '3m 12s' },
+      { channel: 'Organic Social (X / LinkedIn)', sessions: '2,140', users: '1,820', bounce: '51.8%', engagement: '0m 55s' }
+    ],
+    commentary: 'AI Insight: "Referral & AI Engines" (Perplexity, ChatGPT Search, Claude) exhibits your lowest bounce rate (29.4%) and highest session duration (3m 12s). Visitors coming from generative engines are showing 2.4x higher intent than standard direct visitors.'
+  },
+  '592019482': {
+    query: 'Breakdown of app logins and active SaaS user acquisition channels for GA4 #592019482',
+    toolCall: 'ga4_get_traffic_acquisition({ propertyId: "592019482", dateRange: "last_30_days", dimensions: ["sessionDefaultChannelGroup"] })',
+    results: [
+      { channel: 'Direct (App Login / Web App)', sessions: '34,120', users: '8,450', bounce: '14.2%', engagement: '14m 10s' },
+      { channel: 'Product-Led Referral', sessions: '7,920', users: '5,120', bounce: '22.8%', engagement: '5m 45s' },
+      { channel: 'Organic Search (Docs / Guides)', sessions: '6,410', users: '4,890', bounce: '31.5%', engagement: '4m 02s' },
+      { channel: 'Email Onboarding Flows', sessions: '3,850', users: '2,940', bounce: '18.9%', engagement: '6m 18s' }
+    ],
+    commentary: 'AI Insight: SaaS Cloud product engagement is exceptionally high at 14m 10s per session for returning users. Product-led referral loops are generating 5,120 high-activation signups.'
+  },
+  '392810481': {
+    query: 'Mobile app active users and installation referral channels for GA4 #392810481',
+    toolCall: 'ga4_get_traffic_acquisition({ propertyId: "392810481", dateRange: "last_30_days", dimensions: ["sessionDefaultChannelGroup"] })',
+    results: [
+      { channel: 'Apple App Store Organic', sessions: '12,940', users: '9,810', bounce: '19.4%', engagement: '6m 30s' },
+      { channel: 'Google Play Organic', sessions: '8,420', users: '6,150', bounce: '24.1%', engagement: '5m 12s' },
+      { channel: 'Universal Smart App Banners', sessions: '4,210', users: '3,100', bounce: '21.0%', engagement: '4m 45s' },
+      { channel: 'Deep-Link Push Notifications', sessions: '9,840', users: '7,200', bounce: '12.8%', engagement: '8m 20s' }
+    ],
+    commentary: 'AI Insight: Deep-link push notifications have an industry-leading 12.8% bounce rate and 8m 20s engagement. iOS users demonstrate 28% higher 30-day retention compared to Android cohort.'
+  }
+};
+
+const DEMO_GADS_DATA = {
+  '839-204-1928': {
+    query: 'Find Google Ads search terms with ad spend > $50 and 0 conversions to add as negatives',
+    toolCall: 'gads_find_wasted_search_terms({ customerId: "839-204-1928", minSpendMicros: 50000000, maxConversions: 0, dateRange: "last_30_days" })',
+    results: [
+      { term: 'cheap pdf editor crack download', cost: '$74.20', clicks: '28', conversions: '0', cpc: '$2.65' },
+      { term: 'free software license key generator', cost: '$68.50', clicks: '31', conversions: '0', cpc: '$2.21' },
+      { term: 'hire freelance developer cheap overseas', cost: '$58.10', clicks: '19', conversions: '0', cpc: '$3.05' }
+    ],
+    commentary: 'AI Insight: Adding "crack", "download", and "cheap overseas" as exact-match negative keywords in Google Ads will immediately save ~$200.80 per month in wasted ad budget that can be reallocated to your core high-converting search keywords.'
+  },
+  '192-384-9102': {
+    query: 'Audit Display placements with high impressions and zero lead completions',
+    toolCall: 'gads_find_wasted_placements({ customerId: "192-384-9102", minSpendMicros: 35000000, dateRange: "last_30_days" })',
+    results: [
+      { term: 'mobile-app::com.casualgames.puzzlefree', cost: '$82.40', clicks: '94', conversions: '0', cpc: '$0.88' },
+      { term: 'mobile-app::com.flashlight.utility.torch', cost: '$54.10', clicks: '61', conversions: '0', cpc: '$0.89' },
+      { term: 'kids-channel-placement.youtube.com', cost: '$49.30', clicks: '52', conversions: '0', cpc: '$0.95' }
+    ],
+    commentary: 'AI Insight: Casual gaming apps and flashlight utilities are consuming 41% of Display budget via accidental clicks with 0% conversion. Exclude these placements immediately.'
+  },
+  '481-920-5821': {
+    query: 'Identify international keyword bids with high CPA above target threshold',
+    toolCall: 'gads_audit_cpa_variance({ customerId: "481-920-5821", targetCpa: 45, dateRange: "last_30_days" })',
+    results: [
+      { term: 'enterprise analytics platform de', cost: '$142.00', clicks: '14', conversions: '1', cpc: '$10.14' },
+      { term: 'saas reporting dashboard tool uk', cost: '$98.50', clicks: '18', conversions: '1', cpc: '$5.47' },
+      { term: 'marketing automation ai suite jp', cost: '$89.00', clicks: '11', conversions: '0', cpc: '$8.09' }
+    ],
+    commentary: 'AI Insight: International campaigns in DE and UK show high CPC without localized landing page matching. Lower tCPA cap by 25% or route to localized geo-pages.'
+  }
+};
+
 export default function GoogleMarketingMcp({ onBack, toolMeta }) {
   const {
     trackUse,
@@ -103,6 +211,11 @@ export default function GoogleMarketingMcp({ onBack, toolMeta }) {
   const [ga4Properties, setGa4Properties] = useState([]);
   const [selectedGscSite, setSelectedGscSite] = useState('');
   const [selectedGa4Property, setSelectedGa4Property] = useState('');
+
+  // Interactive Demo Sandbox Properties
+  const [demoGscSite, setDemoGscSite] = useState('https://cerilas.com');
+  const [demoGa4Property, setDemoGa4Property] = useState('482910482');
+  const [demoGadsAccount, setDemoGadsAccount] = useState('839-204-1928');
 
   // Playground state
   const [simPreset, setSimPreset] = useState('gsc');
@@ -225,15 +338,20 @@ export default function GoogleMarketingMcp({ onBack, toolMeta }) {
     setTimeout(() => setCopiedItem(null), 2000);
   };
 
-  const handleRunSimulation = async (presetKey) => {
-    setSimPreset(presetKey);
+  const handleRunSimulation = async (presetKey, overrideGsc, overrideGa4, overrideGads) => {
+    const key = presetKey || simPreset;
+    setSimPreset(key);
     setIsSimulating(true);
+
+    const activeGsc = overrideGsc !== undefined ? overrideGsc : (isConnected && !isDemoMode ? selectedGscSite : demoGscSite);
+    const activeGa4 = overrideGa4 !== undefined ? overrideGa4 : (isConnected && !isDemoMode ? selectedGa4Property : demoGa4Property);
+    const activeGads = overrideGads !== undefined ? overrideGads : demoGadsAccount;
 
     // If connected and NOT in demo mode, try to fetch real data from the user's account!
     if (isConnected && !isDemoMode) {
       try {
-        if (presetKey === 'gsc') {
-          const res = await fetch(`/api/mcp/gsc/search-analytics?key=${encodeURIComponent(mcpKey)}&siteUrl=${encodeURIComponent(selectedGscSite || '')}`);
+        if (key === 'gsc') {
+          const res = await fetch(`/api/mcp/gsc/search-analytics?key=${encodeURIComponent(mcpKey)}&siteUrl=${encodeURIComponent(activeGsc || '')}`);
           if (res.ok) {
             const json = await res.json();
             if (json.data && json.data.rows && json.data.rows.length > 0) {
@@ -245,17 +363,17 @@ export default function GoogleMarketingMcp({ onBack, toolMeta }) {
                 pos: r.position
               }));
               setActiveSimData({
-                query: `Live Search Console Report for ${selectedGscSite || 'your website'}`,
-                toolCall: `gsc_get_search_analytics({ siteUrl: "${selectedGscSite}", startDate: "${json.data.startDate}", endDate: "${json.data.endDate}" })`,
+                query: `Live Search Console Report for ${activeGsc || 'your website'}`,
+                toolCall: `gsc_get_search_analytics({ siteUrl: "${activeGsc}", startDate: "${json.data.startDate}", endDate: "${json.data.endDate}" })`,
                 results: formattedRows,
-                commentary: `Live Search Console telemetry retrieved! Found ${json.data.rows.length} indexed search queries driving impressions to your site.`
+                commentary: `Live Search Console telemetry retrieved! Found ${json.data.rows.length} indexed search queries driving impressions to ${activeGsc}.`
               });
               setIsSimulating(false);
               return;
             }
           }
-        } else if (presetKey === 'ga4') {
-          const res = await fetch(`/api/mcp/ga4/traffic?key=${encodeURIComponent(mcpKey)}&propertyId=${encodeURIComponent(selectedGa4Property || '')}`);
+        } else if (key === 'ga4') {
+          const res = await fetch(`/api/mcp/ga4/traffic?key=${encodeURIComponent(mcpKey)}&propertyId=${encodeURIComponent(activeGa4 || '')}`);
           if (res.ok) {
             const json = await res.json();
             if (json.data && json.data.rows && json.data.rows.length > 0) {
@@ -267,10 +385,10 @@ export default function GoogleMarketingMcp({ onBack, toolMeta }) {
                 engagement: `${r.avgDurationSeconds}s`
               }));
               setActiveSimData({
-                query: `Live GA4 Traffic Acquisition for Property #${selectedGa4Property}`,
-                toolCall: `ga4_get_traffic_acquisition({ propertyId: "${selectedGa4Property}" })`,
+                query: `Live GA4 Traffic Acquisition for Property #${activeGa4}`,
+                toolCall: `ga4_get_traffic_acquisition({ propertyId: "${activeGa4}" })`,
                 results: formattedRows,
-                commentary: `Live Google Analytics 4 telemetry processed! Displaying traffic channels and engagement rates from your live tracking snippet.`
+                commentary: `Live Google Analytics 4 telemetry processed! Displaying traffic channels and engagement rates for GA4 property #${activeGa4}.`
               });
               setIsSimulating(false);
               return;
@@ -282,11 +400,45 @@ export default function GoogleMarketingMcp({ onBack, toolMeta }) {
       }
     }
 
-    // Fallback to sample simulation
+    // Fallback to sample simulation / demo properties
     setTimeout(() => {
-      setActiveSimData(SAMPLE_SIMULATION_DATA[presetKey]);
+      if (key === 'gsc') {
+        const demoData = DEMO_GSC_DATA[activeGsc] || SAMPLE_SIMULATION_DATA.gsc;
+        setActiveSimData(demoData);
+      } else if (key === 'ga4') {
+        const demoData = DEMO_GA4_DATA[activeGa4] || SAMPLE_SIMULATION_DATA.ga4;
+        setActiveSimData(demoData);
+      } else if (key === 'gads') {
+        const demoData = DEMO_GADS_DATA[activeGads] || SAMPLE_SIMULATION_DATA.gads;
+        setActiveSimData(demoData);
+      }
       setIsSimulating(false);
-    }, 600);
+    }, 450);
+  };
+
+  const handleSimulatorPropertyChange = (service, value) => {
+    if (service === 'gsc') {
+      if (isConnected && !isDemoMode) {
+        setSelectedGscSite(value);
+        handlePropertyChange(value, selectedGa4Property);
+        handleRunSimulation('gsc', value, selectedGa4Property);
+      } else {
+        setDemoGscSite(value);
+        handleRunSimulation('gsc', value);
+      }
+    } else if (service === 'ga4') {
+      if (isConnected && !isDemoMode) {
+        setSelectedGa4Property(value);
+        handlePropertyChange(selectedGscSite, value);
+        handleRunSimulation('ga4', selectedGscSite, value);
+      } else {
+        setDemoGa4Property(value);
+        handleRunSimulation('ga4', undefined, value);
+      }
+    } else if (service === 'gads') {
+      setDemoGadsAccount(value);
+      handleRunSimulation('gads', undefined, undefined, value);
+    }
   };
 
   // Configurations for different clients
@@ -722,7 +874,12 @@ console.log(response.text);`;
                 </label>
                 <select
                   value={selectedGscSite}
-                  onChange={(e) => handlePropertyChange(e.target.value, selectedGa4Property)}
+                  onChange={(e) => {
+                    handlePropertyChange(e.target.value, selectedGa4Property);
+                    if (simPreset === 'gsc') {
+                      handleRunSimulation('gsc', e.target.value, selectedGa4Property);
+                    }
+                  }}
                   style={{
                     background: 'var(--card-bg)',
                     border: '1px solid var(--card-border)',
@@ -746,7 +903,12 @@ console.log(response.text);`;
                 </label>
                 <select
                   value={selectedGa4Property}
-                  onChange={(e) => handlePropertyChange(selectedGscSite, e.target.value)}
+                  onChange={(e) => {
+                    handlePropertyChange(selectedGscSite, e.target.value);
+                    if (simPreset === 'ga4') {
+                      handleRunSimulation('ga4', selectedGscSite, e.target.value);
+                    }
+                  }}
                   style={{
                     background: 'var(--card-bg)',
                     border: '1px solid var(--card-border)',
@@ -1364,23 +1526,125 @@ console.log(response.text);`;
 
           <div className="gmcp-prompt-presets">
             <button
+              type="button"
               className={`gmcp-prompt-chip ${simPreset === 'gsc' ? 'active' : ''}`}
               onClick={() => handleRunSimulation('gsc')}
             >
               <Search size={14} /> Search Console Queries
             </button>
             <button
+              type="button"
               className={`gmcp-prompt-chip ${simPreset === 'ga4' ? 'active' : ''}`}
               onClick={() => handleRunSimulation('ga4')}
             >
               <BarChart2 size={14} /> GA4 Channel Traffic
             </button>
             <button
+              type="button"
               className={`gmcp-prompt-chip ${simPreset === 'gads' ? 'active' : ''}`}
               onClick={() => handleRunSimulation('gads')}
             >
               <DollarSign size={14} /> Google Ads Wasted Spend
             </button>
+          </div>
+        </div>
+
+        {/* Live Property & Account Selector Toolbar */}
+        <div className="gmcp-sim-property-bar">
+          <div className="gmcp-sim-property-info">
+            <div className="gmcp-sim-property-label">
+              {simPreset === 'gsc' && <Globe size={15} className="gmcp-sim-prop-icon" />}
+              {simPreset === 'ga4' && <BarChart2 size={15} className="gmcp-sim-prop-icon" />}
+              {simPreset === 'gads' && <DollarSign size={15} className="gmcp-sim-prop-icon" />}
+              <span>
+                {simPreset === 'gsc' && 'Target Search Console Property / Site:'}
+                {simPreset === 'ga4' && 'Target GA4 Analytics Property:'}
+                {simPreset === 'gads' && 'Target Google Ads Account:'}
+              </span>
+            </div>
+
+            <div className="gmcp-sim-select-container">
+              {simPreset === 'gsc' && (
+                isConnected && !isDemoMode && gscSites.length > 0 ? (
+                  <select
+                    value={selectedGscSite}
+                    onChange={(e) => handleSimulatorPropertyChange('gsc', e.target.value)}
+                    className="gmcp-sim-select"
+                    aria-label="Select Search Console Property"
+                  >
+                    {gscSites.map((site) => (
+                      <option key={site} value={site}>{site}</option>
+                    ))}
+                  </select>
+                ) : (
+                  <select
+                    value={demoGscSite}
+                    onChange={(e) => handleSimulatorPropertyChange('gsc', e.target.value)}
+                    className="gmcp-sim-select"
+                    aria-label="Select Demo Search Console Property"
+                  >
+                    <option value="https://cerilas.com">https://cerilas.com (Production Tools)</option>
+                    <option value="https://blog.cerilas.com">https://blog.cerilas.com (Engineering Blog)</option>
+                    <option value="sc-domain:cerilas.store">sc-domain:cerilas.store (Ecommerce Domain)</option>
+                  </select>
+                )
+              )}
+
+              {simPreset === 'ga4' && (
+                isConnected && !isDemoMode && ga4Properties.length > 0 ? (
+                  <select
+                    value={selectedGa4Property}
+                    onChange={(e) => handleSimulatorPropertyChange('ga4', e.target.value)}
+                    className="gmcp-sim-select"
+                    aria-label="Select GA4 Property"
+                  >
+                    {ga4Properties.map((p) => (
+                      <option key={p.propertyId} value={p.propertyId}>
+                        {p.displayName} (ID: {p.propertyId})
+                      </option>
+                    ))}
+                  </select>
+                ) : (
+                  <select
+                    value={demoGa4Property}
+                    onChange={(e) => handleSimulatorPropertyChange('ga4', e.target.value)}
+                    className="gmcp-sim-select"
+                    aria-label="Select Demo GA4 Property"
+                  >
+                    <option value="482910482">Cerilas Web Analytics (GA4 #482910482)</option>
+                    <option value="592019482">Cerilas SaaS Cloud (GA4 #592019482)</option>
+                    <option value="392810481">Cerilas Mobile App iOS/Android (GA4 #392810481)</option>
+                  </select>
+                )
+              )}
+
+              {simPreset === 'gads' && (
+                <select
+                  value={demoGadsAccount}
+                  onChange={(e) => handleSimulatorPropertyChange('gads', e.target.value)}
+                  className="gmcp-sim-select"
+                  aria-label="Select Google Ads Account"
+                >
+                  <option value="839-204-1928">Search & Performance Max (CID: 839-204-1928)</option>
+                  <option value="192-384-9102">Retargeting & Display Network (CID: 192-384-9102)</option>
+                  <option value="481-920-5821">Global Growth Campaigns (CID: 481-920-5821)</option>
+                </select>
+              )}
+
+              <ChevronDown size={14} className="gmcp-sim-select-chevron" />
+            </div>
+          </div>
+
+          <div className="gmcp-sim-property-meta">
+            {isConnected && !isDemoMode ? (
+              <span className="gmcp-sim-mode-badge live" title="Querying live data via Google OAuth">
+                <span className="gmcp-sim-live-pulse" /> Live Google Property
+              </span>
+            ) : (
+              <span className="gmcp-sim-mode-badge demo" title="Interactive demo simulation">
+                <Sparkles size={12} /> Sandbox Property
+              </span>
+            )}
           </div>
         </div>
 
