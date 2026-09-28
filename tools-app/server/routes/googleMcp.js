@@ -189,11 +189,12 @@ export const handleOAuthDiscovery = (req, res) => {
     issuer: origin,
     authorization_endpoint: `${origin}/api/oauth/authorize`,
     token_endpoint: `${origin}/api/oauth/token`,
+    userinfo_endpoint: `${origin}/api/oauth/userinfo`,
     token_endpoint_auth_methods_supported: ['client_secret_post', 'client_secret_basic', 'none'],
     response_types_supported: ['code'],
     grant_types_supported: ['authorization_code', 'refresh_token'],
     code_challenge_methods_supported: ['S256', 'plain'],
-    scopes_supported: ['marketing', 'offline_access']
+    scopes_supported: ['marketing', 'offline_access', 'openid', 'email', 'profile']
   });
 };
 
@@ -344,9 +345,36 @@ export const handleOAuthToken = async (req, res) => {
   }
 };
 
+export const handleOAuthUserinfo = async (req, res) => {
+  const mcpKey = extractMcpKey(req);
+  if (!mcpKey) {
+    return res.status(401).json({ error: 'Unauthorized: Missing MCP key' });
+  }
+
+  try {
+    const user = await pool.query(
+      'SELECT user_email FROM mcp_user_connections WHERE mcp_key = $1',
+      [mcpKey]
+    );
+
+    if (user.rows.length === 0) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    res.json({
+      sub: mcpKey,
+      email: user.rows[0].user_email,
+      email_verified: true
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
 router.get('/oauth/authorize', handleOAuthAuthorize);
 router.post('/oauth/token', handleOAuthToken);
 router.get('/oauth/token', handleOAuthToken);
+router.get('/oauth/userinfo', handleOAuthUserinfo);
 router.get('/.well-known/oauth-authorization-server', handleOAuthDiscovery);
 router.get('/.well-known/openid-configuration', handleOAuthDiscovery);
 
