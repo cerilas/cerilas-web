@@ -279,16 +279,29 @@ export default function GoogleMarketingMcp({ onBack }) {
       openapi: '3.1.0',
       info: {
         title: 'Cerilas Google Marketing MCP Actions',
-        version: '1.0.0',
-        description: 'Read-only Google Analytics 4, Search Console, and Google Ads live telemetry.'
+        version: '1.1.0',
+        description: 'Read-only Google Analytics 4, Search Console, and Google Ads live telemetry with multi-property support.'
       },
       servers: [{ url: `${apiOrigin}/api/mcp` }],
       paths: {
+        '/gsc/sites': {
+          get: {
+            operationId: 'listGscSites',
+            summary: 'List all verified Search Console websites and domains under this account'
+          }
+        },
+        '/ga4/properties': {
+          get: {
+            operationId: 'listGa4Properties',
+            summary: 'List all GA4 properties and accounts accessible under this account'
+          }
+        },
         '/gsc/search-analytics': {
           get: {
             operationId: 'getSearchAnalytics',
             summary: 'Fetch Google Search Console search performance metrics',
             parameters: [
+              { name: 'siteUrl', in: 'query', required: false, schema: { type: 'string' }, description: 'Target Search Console site URL (optional, defaults to primary site)' },
               { name: 'startDate', in: 'query', required: false, schema: { type: 'string' } },
               { name: 'endDate', in: 'query', required: false, schema: { type: 'string' } },
               { name: 'dimensions', in: 'query', required: false, schema: { type: 'string' } }
@@ -300,6 +313,7 @@ export default function GoogleMarketingMcp({ onBack }) {
             operationId: 'getGa4Traffic',
             summary: 'Fetch GA4 traffic acquisition channels, sessions, and active users',
             parameters: [
+              { name: 'propertyId', in: 'query', required: false, schema: { type: 'string' }, description: 'Target GA4 numeric property ID (optional, defaults to primary property)' },
               { name: 'startDate', in: 'query', required: false, schema: { type: 'string' } },
               { name: 'endDate', in: 'query', required: false, schema: { type: 'string' } }
             ]
@@ -308,7 +322,10 @@ export default function GoogleMarketingMcp({ onBack }) {
         '/ga4/realtime': {
           get: {
             operationId: 'getGa4Realtime',
-            summary: 'Fetch active users in real-time from GA4'
+            summary: 'Fetch active users in real-time from GA4',
+            parameters: [
+              { name: 'propertyId', in: 'query', required: false, schema: { type: 'string' }, description: 'Target GA4 numeric property ID (optional, defaults to primary property)' }
+            ]
           }
         }
       }
@@ -356,25 +373,43 @@ export default function GoogleMarketingMcp({ onBack }) {
     2
   );
 
+  const formattedGa4List = ga4Properties.length > 0
+    ? ga4Properties.map((p) => `  * ${p.displayName} (Property ID: ${p.propertyId}, Account: ${p.accountName})`).join('\n')
+    : '  * Auto-detected primary property';
+
+  const formattedGscList = gscSites.length > 0
+    ? gscSites.map((s) => `  * ${s}`).join('\n')
+    : '  * Auto-detected primary domain';
+
   const magicAutoSetupPrompt = `SYSTEM ACTION REQUIRED: AUTO-CONFIGURE CERILAS GOOGLE MARKETING MCP SERVER
 
 You are an autonomous AI assistant with file system access or API tool capabilities.
 Your goal is to automatically configure the Cerilas Google Marketing MCP Server in this environment with ZERO manual steps on my part.
 
-### MY AUTHENTICATED CREDENTIALS:
+### MY AUTHENTICATED CREDENTIALS & DEFAULTS:
 - Private Access Key: ${mcpKey}
 - Remote SSE Server URL: ${mcpSseUrl}?key=${mcpKey}
 - Base REST API URL: ${apiOrigin}/api/mcp
-- Target Search Console Property: ${selectedGscSite || 'Auto-detected verified domain'}
-- Target GA4 Property ID: ${selectedGa4Property || 'Auto-detected property ID'}
+- Primary Default Search Console Property: ${selectedGscSite || 'Auto-detected verified domain'}
+- Primary Default GA4 Property ID: ${selectedGa4Property || 'Auto-detected property ID'}
+
+### ALL ACCESSIBLE PROPERTIES UNDER MY GOOGLE ACCOUNT:
+Google Search Console Sites:
+${formattedGscList}
+
+Google Analytics 4 Properties:
+${formattedGa4List}
+
+(Note for AI: If I do not specify a website or property in my question, default to my Primary Default property. If I ask about a specific site or property from the list above, use its corresponding siteUrl or propertyId!)
 
 ### AUTONOMOUS SETUP INSTRUCTIONS:
 
-1. IF YOU ARE A CODING AGENT WITH FILE/TERMINAL ACCESS (Cursor, Windsurf, Claude Code, Antigravity, Roo Code, Cline):
+1. IF YOU ARE A CODING AGENT WITH FILE/TERMINAL ACCESS (Cursor, Windsurf, Claude Code, Antigravity, Roo Code, Cline, VS Code):
    - Immediately auto-detect the configuration file for this IDE or editor:
      * Cursor: Find or create ~/.cursor/mcp.json (or .cursor/mcp.json in the current workspace).
      * Windsurf: Find or create ~/.codeium/windsurf/mcp_config.json.
      * Claude Desktop: Find ~/Library/Application Support/Claude/claude_desktop_config.json (macOS) or %APPDATA%\\Claude\\claude_desktop_config.json (Windows).
+     * Claude Code / Antigravity / Cline: Add to the local MCP configuration.
    - Write or merge the following MCP server definition into that file:
      {
        "mcpServers": {
@@ -388,12 +423,14 @@ Your goal is to automatically configure the Cerilas Google Marketing MCP Server 
 
 2. IF YOU ARE A CHAT MODEL (ChatGPT, Claude.ai, Google Gemini, DeepSeek):
    - You do not have local file access, so immediately initialize yourself as my Google Analytics 4 & Search Console AI Analyst using the live endpoints:
-     * Search Console Queries: GET ${apiOrigin}/api/mcp/gsc/search-analytics?key=${mcpKey}&startDate=YYYY-MM-DD&endDate=YYYY-MM-DD&dimensions=query
-     * GA4 Traffic Channels: GET ${apiOrigin}/api/mcp/ga4/traffic?key=${mcpKey}&startDate=YYYY-MM-DD&endDate=YYYY-MM-DD
-     * GA4 Realtime Users: GET ${apiOrigin}/api/mcp/ga4/realtime?key=${mcpKey}
+     * List All Search Console Sites: GET ${apiOrigin}/api/mcp/gsc/sites?key=${mcpKey}
+     * List All GA4 Properties: GET ${apiOrigin}/api/mcp/ga4/properties?key=${mcpKey}
+     * Search Console Queries: GET ${apiOrigin}/api/mcp/gsc/search-analytics?key=${mcpKey}&startDate=YYYY-MM-DD&endDate=YYYY-MM-DD&dimensions=query&siteUrl=SITE_URL
+     * GA4 Traffic Channels: GET ${apiOrigin}/api/mcp/ga4/traffic?key=${mcpKey}&startDate=YYYY-MM-DD&endDate=YYYY-MM-DD&propertyId=PROPERTY_ID
+     * GA4 Realtime Users: GET ${apiOrigin}/api/mcp/ga4/realtime?key=${mcpKey}&propertyId=PROPERTY_ID
      * URL Indexation: GET ${apiOrigin}/api/mcp/gsc/inspect-url?key=${mcpKey}&inspectionUrl=URL
    - If I ask you to generate a local Python/Node.js script or plugin, generate the complete code pre-configured with my key.
-   - Confirm to me: "Cerilas Google Marketing bridge is active! What would you like to inspect first (Search Console queries, GA4 realtime traffic, or low-CTR SEO opportunities)?"
+   - Confirm to me: "Cerilas Google Marketing bridge is active! I have access to your default property (${selectedGscSite || 'Primary domain'} / ${selectedGa4Property || 'Primary GA4'}) as well as all other properties in your account. What would you like to inspect first?"
 
 Start executing the auto-setup immediately!`;
 

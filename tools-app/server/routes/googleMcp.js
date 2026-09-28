@@ -566,6 +566,38 @@ router.get('/ga4/realtime', async (req, res) => {
   }
 });
 
+/**
+ * List all accessible Google Search Console sites.
+ */
+router.get('/gsc/sites', async (req, res) => {
+  const mcpKey = extractMcpKey(req);
+  if (!mcpKey) return res.status(401).json({ error: 'Unauthorized: Valid MCP Key required' });
+
+  try {
+    const { accessToken } = await getValidAccessToken(mcpKey);
+    const sites = await getSearchConsoleSites(accessToken);
+    res.json({ status: 'success', data: sites });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/**
+ * List all accessible Google Analytics 4 accounts and properties.
+ */
+router.get('/ga4/properties', async (req, res) => {
+  const mcpKey = extractMcpKey(req);
+  if (!mcpKey) return res.status(401).json({ error: 'Unauthorized: Valid MCP Key required' });
+
+  try {
+    const { accessToken } = await getValidAccessToken(mcpKey);
+    const properties = await getGa4Properties(accessToken);
+    res.json({ status: 'success', data: properties });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 /* ==========================================================================
    Model Context Protocol (MCP) Server-Sent Events (SSE) Stream
    (For Claude Desktop, Cursor, Windsurf, Antigravity)
@@ -638,11 +670,28 @@ router.post('/messages', async (req, res) => {
         result: {
           tools: [
             {
+              name: 'gsc_list_sites',
+              description: 'List all verified Google Search Console websites and domains accessible with this authenticated Google account.',
+              inputSchema: {
+                type: 'object',
+                properties: {}
+              }
+            },
+            {
+              name: 'ga4_list_properties',
+              description: 'List all Google Analytics 4 accounts and properties accessible with this authenticated Google account, including their property IDs, names, and account names.',
+              inputSchema: {
+                type: 'object',
+                properties: {}
+              }
+            },
+            {
               name: 'gsc_get_search_analytics',
               description: 'Fetch organic search queries, clicks, impressions, CTR, and average position from Google Search Console.',
               inputSchema: {
                 type: 'object',
                 properties: {
+                  siteUrl: { type: 'string', description: 'Optional Search Console site URL (e.g. sc-domain:example.com or https://example.com). Defaults to your selected primary site if omitted.' },
                   startDate: { type: 'string', description: 'Start date in YYYY-MM-DD format (defaults to 28 days ago)' },
                   endDate: { type: 'string', description: 'End date in YYYY-MM-DD format (defaults to yesterday)' },
                   rowLimit: { type: 'number', description: 'Number of rows to return (max 100)' },
@@ -656,7 +705,8 @@ router.post('/messages', async (req, res) => {
               inputSchema: {
                 type: 'object',
                 properties: {
-                  url: { type: 'string', description: 'The absolute URL to inspect' }
+                  url: { type: 'string', description: 'The absolute URL to inspect' },
+                  siteUrl: { type: 'string', description: 'Optional Search Console site URL. Defaults to your selected primary site if omitted.' }
                 },
                 required: ['url']
               }
@@ -667,6 +717,7 @@ router.post('/messages', async (req, res) => {
               inputSchema: {
                 type: 'object',
                 properties: {
+                  propertyId: { type: 'string', description: 'Optional GA4 Property ID (numeric ID). Defaults to your selected primary property if omitted.' },
                   startDate: { type: 'string', description: 'Start date (e.g. 30daysAgo, 7daysAgo, or YYYY-MM-DD)' },
                   endDate: { type: 'string', description: 'End date (e.g. yesterday, today, or YYYY-MM-DD)' }
                 }
@@ -677,7 +728,9 @@ router.post('/messages', async (req, res) => {
               description: 'Get real-time active user counts and currently viewed pages right now in Google Analytics 4.',
               inputSchema: {
                 type: 'object',
-                properties: {}
+                properties: {
+                  propertyId: { type: 'string', description: 'Optional GA4 Property ID. Defaults to your selected primary property if omitted.' }
+                }
               }
             }
           ]
@@ -694,7 +747,13 @@ router.post('/messages', async (req, res) => {
 
       let textOutput = '';
 
-      if (toolName === 'gsc_get_search_analytics') {
+      if (toolName === 'gsc_list_sites') {
+        const sites = await getSearchConsoleSites(accessToken);
+        textOutput = JSON.stringify(sites, null, 2);
+      } else if (toolName === 'ga4_list_properties') {
+        const props = await getGa4Properties(accessToken);
+        textOutput = JSON.stringify(props, null, 2);
+      } else if (toolName === 'gsc_get_search_analytics') {
         const siteUrl = toolArgs.siteUrl || selectedGscSite;
         if (!siteUrl) throw new Error('No Search Console site configured');
         const resData = await querySearchConsole(accessToken, siteUrl, toolArgs);
