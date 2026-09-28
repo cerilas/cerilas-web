@@ -534,7 +534,7 @@ export default function PersonaMenu({ onSelectTool, onNavigateHome }) {
 
             {/* Bottom Footer */}
             <div className="persona-footer">
-              <span style={{ color: 'var(--text-muted)' }}>
+              <span className="persona-footer-text">
                 Curated by Cerilas High Tech
               </span>
               <button
