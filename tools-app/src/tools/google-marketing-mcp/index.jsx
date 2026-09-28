@@ -73,8 +73,9 @@ export default function GoogleMarketingMcp({ onBack }) {
   const [isConnected, setIsConnected] = useState(false);
   const [isDemoMode, setIsDemoMode] = useState(true);
   const [userEmail, setUserEmail] = useState('');
-  const [activeTab, setActiveTab] = useState('chatgpt');
+  const [activeTab, setActiveTab] = useState('universal');
   const [chatgptMode, setChatgptMode] = useState('mcp'); // 'mcp' (direct MCP plugin) or 'custom-gpt' (actions)
+  const [geminiSubTab, setGeminiSubTab] = useState('prompt'); // 'prompt' | 'python' | 'node'
   const [mcpKey, setMcpKey] = useState(DEFAULT_MCP_KEY);
   const [showKey, setShowKey] = useState(false);
   const [copiedItem, setCopiedItem] = useState(null);
@@ -353,6 +354,107 @@ export default function GoogleMarketingMcp({ onBack }) {
     null,
     2
   );
+
+  const universalAiPrompt = `You are my dedicated Google Marketing & SEO Data Analyst. I have authorized my Google Search Console and Google Analytics 4 accounts via the Cerilas Marketing MCP bridge.
+
+### My Authenticated Credentials & Endpoints:
+- Private Access Key: ${mcpKey}
+- Base REST API URL: ${apiOrigin}/api/mcp
+- Remote SSE Endpoint: ${mcpSseUrl}?key=${mcpKey}
+- Active Search Console Property: ${selectedGscSite || 'Auto-detected domain'}
+- Active GA4 Property ID: ${selectedGa4Property || 'Auto-detected property'}
+
+### Available Endpoints & Capabilities:
+1. Google Search Console Query Analytics:
+   Endpoint: GET ${apiOrigin}/api/mcp/gsc/search-analytics?key=${mcpKey}&startDate=YYYY-MM-DD&endDate=YYYY-MM-DD&dimensions=query,page
+   -> Returns: organic clicks, search impressions, CTR, and average SERP ranking position.
+
+2. Google Analytics 4 Traffic Acquisition:
+   Endpoint: GET ${apiOrigin}/api/mcp/ga4/traffic?key=${mcpKey}&startDate=YYYY-MM-DD&endDate=YYYY-MM-DD
+   -> Returns: acquisition channels (Organic Search, AI Referrals, Direct, Social), sessions, active users, bounce rate, and engagement duration.
+
+3. Google Analytics 4 Realtime Visitors:
+   Endpoint: GET ${apiOrigin}/api/mcp/ga4/realtime?key=${mcpKey}
+   -> Returns: live active users right now, active pages, and top traffic sources.
+
+4. Search Console URL Inspection:
+   Endpoint: GET ${apiOrigin}/api/mcp/gsc/inspect-url?key=${mcpKey}&inspectionUrl=https://example.com/target-page
+   -> Returns: Google indexation state, mobile usability, and canonical status.
+
+### Instructions:
+- Whenever I ask questions about organic search traffic, keyword rankings, impressions, CTR, or live GA4 telemetry, query the appropriate endpoint above using my key and provide deep, structured analytical insights.
+- If I want to build a local integration, plugin, or automation script (in Python, Node.js, Gemini Function Calling, LangChain, or custom MCP client), generate the complete working code pre-configured with my key.
+- Acknowledge that you have received my credentials and ask me what marketing question or integration you would like to start with!`;
+
+  const geminiPythonCode = `import requests
+from google import genai
+from google.genai import types
+
+# 1. Initialize Gemini Client (Gemini 2.5 Flash / Pro)
+client = genai.Client()
+
+CERILAS_API = "${apiOrigin}/api/mcp"
+MCP_KEY = "${mcpKey}"
+
+# 2. Define Tool Functions for Gemini
+def get_search_console_queries(start_date: str = "2026-08-30", end_date: str = "2026-09-27"):
+    """Fetches Google Search Console clicks, impressions, CTR and keyword rankings."""
+    res = requests.get(f"{CERILAS_API}/gsc/search-analytics", params={
+        "key": MCP_KEY,
+        "startDate": start_date,
+        "endDate": end_date,
+        "dimensions": "query"
+    })
+    return res.json()
+
+def get_ga4_traffic(start_date: str = "2026-08-30", end_date: str = "2026-09-27"):
+    """Fetches GA4 traffic acquisition channels, sessions, active users, and engagement."""
+    res = requests.get(f"{CERILAS_API}/ga4/traffic", params={
+        "key": MCP_KEY,
+        "startDate": start_date,
+        "endDate": end_date
+    })
+    return res.json()
+
+def get_ga4_realtime():
+    """Fetches live active visitors on the website right now."""
+    res = requests.get(f"{CERILAS_API}/ga4/realtime", params={"key": MCP_KEY})
+    return res.json()
+
+# 3. Ask Gemini a question with automated Tool Calling
+response = client.models.generate_content(
+    model="gemini-2.5-flash",
+    contents="Check our GA4 realtime users right now and summarize our top Search Console queries.",
+    config=types.GenerateContentConfig(
+        tools=[get_search_console_queries, get_ga4_traffic, get_ga4_realtime],
+        system_instruction="You are a data-driven marketing analyst with live access to Google Analytics 4 and Search Console."
+    )
+)
+
+print(response.text)`;
+
+  const geminiNodeCode = `import { GoogleGenAI } from '@google/genai';
+
+// Initialize Gemini Client
+const ai = new GoogleGenAI();
+
+// 1. Fetch live telemetry from Cerilas MCP bridge
+async function fetchSearchConsole(startDate = '2026-08-30', endDate = '2026-09-27') {
+  const url = \`${apiOrigin}/api/mcp/gsc/search-analytics?key=${mcpKey}&startDate=\${startDate}&endDate=\${endDate}&dimensions=query\`;
+  const res = await fetch(url);
+  return await res.json();
+}
+
+// 2. Query Gemini with live context
+const response = await ai.models.generateContent({
+  model: 'gemini-2.5-flash',
+  contents: 'Analyze our organic Search Console ranking positions and identify quick-win CTR opportunities.',
+  config: {
+    systemInstruction: \`You have live access to Cerilas Google Marketing MCP Server at ${apiOrigin}/api/mcp with key: ${mcpKey}\`
+  }
+});
+
+console.log(response.text);`;
 
   return (
     <div className="gmcp-root">
@@ -689,10 +791,22 @@ export default function GoogleMarketingMcp({ onBack }) {
 
           <div className="gmcp-tab-group">
             <button
+              className={`gmcp-tab-btn ${activeTab === 'universal' ? 'active' : ''}`}
+              onClick={() => setActiveTab('universal')}
+            >
+              <Sparkles size={16} /> ⚡ Universal Prompt (All AI)
+            </button>
+            <button
               className={`gmcp-tab-btn ${activeTab === 'chatgpt' ? 'active' : ''}`}
               onClick={() => setActiveTab('chatgpt')}
             >
               <Bot size={16} /> ChatGPT
+            </button>
+            <button
+              className={`gmcp-tab-btn ${activeTab === 'gemini' ? 'active' : ''}`}
+              onClick={() => setActiveTab('gemini')}
+            >
+              <Sparkles size={16} /> Google Gemini
             </button>
             <button
               className={`gmcp-tab-btn ${activeTab === 'claude' ? 'active' : ''}`}
@@ -708,6 +822,78 @@ export default function GoogleMarketingMcp({ onBack }) {
             </button>
           </div>
         </div>
+
+        {/* Tab 0: Universal Prompt (All AI Models) */}
+        {activeTab === 'universal' && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+            <div style={{
+              background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.08) 0%, rgba(147, 51, 234, 0.08) 100%)',
+              border: '1px solid rgba(59, 130, 246, 0.25)',
+              borderRadius: '14px',
+              padding: '1.15rem 1.35rem',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '0.65rem'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 600, fontSize: '0.96rem', color: 'var(--text-main)' }}>
+                <Sparkles size={18} color="#3b82f6" />
+                <span>One Prompt to Connect Any AI (ChatGPT, Gemini, Claude, Cursor, Windsurf)</span>
+              </div>
+              <p style={{ margin: 0, fontSize: '0.88rem', color: 'var(--text-muted)', lineHeight: '1.55' }}>
+                Copy this pre-configured prompt and paste it directly into <strong>any AI chat window</strong> (ChatGPT, Google Gemini, Claude, DeepSeek, or your local IDE agent). The AI will immediately recognize your private credentials, understand the available Google Search Console &amp; GA4 endpoints, and act as your live marketing intelligence agent or help you generate local scripts/plugins!
+              </p>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem' }}>
+              <span style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                Pre-Filled Universal AI Prompt
+              </span>
+              <button
+                type="button"
+                className="gmcp-btn gmcp-btn-primary"
+                onClick={() => handleCopy(universalAiPrompt, 'universalPrompt')}
+                style={{ padding: '0.5rem 1.1rem', fontSize: '0.85rem' }}
+              >
+                {copiedItem === 'universalPrompt' ? (
+                  <>
+                    <Check size={15} color="#10b981" /> Copied Universal Prompt!
+                  </>
+                ) : (
+                  <>
+                    <Copy size={15} /> Copy Universal Prompt
+                  </>
+                )}
+              </button>
+            </div>
+
+            <div className="gmcp-code-container">
+              <pre className="gmcp-code-pre" style={{ maxHeight: '340px', whiteSpace: 'pre-wrap', wordBreak: 'break-word', fontSize: '0.84rem' }}>
+                {universalAiPrompt}
+              </pre>
+            </div>
+
+            {/* Quick Action Ideas to Ask */}
+            <div style={{
+              background: 'var(--bg-color)',
+              border: '1px solid var(--card-border)',
+              borderRadius: '12px',
+              padding: '1rem 1.25rem',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '0.6rem'
+            }}>
+              <span style={{ fontSize: '0.84rem', fontWeight: 600, color: 'var(--text-main)' }}>
+                💡 Example questions you can ask immediately after pasting:
+              </span>
+              <ul style={{ margin: 0, paddingLeft: '1.25rem', fontSize: '0.85rem', color: 'var(--text-muted)', display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+                <li><em>"What were our top 10 search queries in Search Console last week, and which ones have low CTR?"</em></li>
+                <li><em>"How many active visitors are on our site right now, and which landing pages are they reading?"</em></li>
+                <li><em>"Write a complete Python script to automatically fetch my Search Console keywords every morning and save to CSV."</em></li>
+                <li><em>"Create a local MCP plugin or tool definition for this in my project."</em></li>
+              </ul>
+            </div>
+          </div>
+        )}
 
         {/* Tab 1: ChatGPT */}
         {activeTab === 'chatgpt' && (
@@ -877,7 +1063,146 @@ export default function GoogleMarketingMcp({ onBack }) {
           </div>
         )}
 
-        {/* Tab 2: Claude Desktop */}
+        {/* Tab 2: Google Gemini (AI Studio & SDKs) */}
+        {activeTab === 'gemini' && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem' }}>
+              <div className="gmcp-subtab-container">
+                <button
+                  type="button"
+                  className={`gmcp-subtab-btn ${geminiSubTab === 'prompt' ? 'active' : ''}`}
+                  onClick={() => setGeminiSubTab('prompt')}
+                >
+                  <Sparkles size={14} color={geminiSubTab === 'prompt' ? '#3b82f6' : 'currentColor'} />
+                  Gemini Web / AI Studio Prompt
+                </button>
+                <button
+                  type="button"
+                  className={`gmcp-subtab-btn ${geminiSubTab === 'python' ? 'active' : ''}`}
+                  onClick={() => setGeminiSubTab('python')}
+                >
+                  <Terminal size={14} />
+                  Python SDK (google-genai)
+                </button>
+                <button
+                  type="button"
+                  className={`gmcp-subtab-btn ${geminiSubTab === 'node' ? 'active' : ''}`}
+                  onClick={() => setGeminiSubTab('node')}
+                >
+                  <Layers size={14} />
+                  Node.js SDK (@google/genai)
+                </button>
+              </div>
+
+              <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                Gemini 2.5 Flash / Pro Tool Calling
+              </span>
+            </div>
+
+            {geminiSubTab === 'prompt' && (
+              <>
+                <ol className="gmcp-instructions-list">
+                  <li>
+                    Open <strong>Google Gemini</strong> (gemini.google.com) or <strong>Google AI Studio</strong>.
+                  </li>
+                  <li>
+                    Paste the prompt below into the system instructions or your initial conversation prompt.
+                  </li>
+                  <li>
+                    Gemini will use its built-in Python code execution or web browsing tools to fetch and analyze your Google Analytics &amp; Search Console data live!
+                  </li>
+                </ol>
+
+                <div className="gmcp-code-container">
+                  <button
+                    className="gmcp-code-copy-btn"
+                    onClick={() => handleCopy(universalAiPrompt, 'geminiPrompt')}
+                  >
+                    {copiedItem === 'geminiPrompt' ? (
+                      <>
+                        <Check size={14} color="#10b981" /> Copied Gemini Prompt!
+                      </>
+                    ) : (
+                      <>
+                        <Copy size={14} /> Copy Gemini Prompt
+                      </>
+                    )}
+                  </button>
+                  <pre className="gmcp-code-pre" style={{ maxHeight: '300px', whiteSpace: 'pre-wrap', wordBreak: 'break-word', fontSize: '0.84rem' }}>
+                    {universalAiPrompt}
+                  </pre>
+                </div>
+              </>
+            )}
+
+            {geminiSubTab === 'python' && (
+              <>
+                <ol className="gmcp-instructions-list">
+                  <li>
+                    Install the official Google GenAI SDK: <code>pip install google-genai requests</code>
+                  </li>
+                  <li>
+                    Set your Gemini API key in your environment: <code>export GEMINI_API_KEY="your-api-key"</code>
+                  </li>
+                  <li>
+                    Run the ready-to-use Python script below to enable Gemini Function Calling with your live Search Console and GA4 properties:
+                  </li>
+                </ol>
+
+                <div className="gmcp-code-container">
+                  <button
+                    className="gmcp-code-copy-btn"
+                    onClick={() => handleCopy(geminiPythonCode, 'geminiPython')}
+                  >
+                    {copiedItem === 'geminiPython' ? (
+                      <>
+                        <Check size={14} color="#10b981" /> Copied Python Code!
+                      </>
+                    ) : (
+                      <>
+                        <Copy size={14} /> Copy Python Code
+                      </>
+                    )}
+                  </button>
+                  <pre className="gmcp-code-pre" style={{ maxHeight: '340px' }}>{geminiPythonCode}</pre>
+                </div>
+              </>
+            )}
+
+            {geminiSubTab === 'node' && (
+              <>
+                <ol className="gmcp-instructions-list">
+                  <li>
+                    Install the official Google GenAI JavaScript package: <code>npm install @google/genai</code>
+                  </li>
+                  <li>
+                    Use the pre-configured TypeScript / JavaScript snippet below to connect Gemini models to your marketing data:
+                  </li>
+                </ol>
+
+                <div className="gmcp-code-container">
+                  <button
+                    className="gmcp-code-copy-btn"
+                    onClick={() => handleCopy(geminiNodeCode, 'geminiNode')}
+                  >
+                    {copiedItem === 'geminiNode' ? (
+                      <>
+                        <Check size={14} color="#10b981" /> Copied Node.js Code!
+                      </>
+                    ) : (
+                      <>
+                        <Copy size={14} /> Copy Node.js Code
+                      </>
+                    )}
+                  </button>
+                  <pre className="gmcp-code-pre" style={{ maxHeight: '300px' }}>{geminiNodeCode}</pre>
+                </div>
+              </>
+            )}
+          </div>
+        )}
+
+        {/* Tab 3: Claude Desktop */}
         {activeTab === 'claude' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
             <ol className="gmcp-instructions-list">
