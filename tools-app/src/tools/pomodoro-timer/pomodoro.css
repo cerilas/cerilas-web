@@ -535,14 +535,37 @@
 .pom-settings-panel {
   width: 100%;
   max-width: 460px;
-  background: rgba(150, 150, 150, 0.05);
-  border: 1px solid var(--border-color);
+  background: var(--card-bg, #ffffff);
+  border: 1px solid var(--card-border, rgba(0, 0, 0, 0.08));
   border-radius: 18px;
   padding: 1.25rem 1.4rem;
   display: flex;
   flex-direction: column;
   gap: 1rem;
   animation: pomFadeSlide 0.2s ease-out;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+}
+
+[data-theme="light"] .pom-settings-panel,
+html.light .pom-settings-panel {
+  background: #ffffff;
+  border-color: rgba(0, 0, 0, 0.08);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+}
+
+[data-theme="dark"] .pom-settings-panel,
+html.dark .pom-settings-panel {
+  background: #18181b;
+  border-color: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]):not(.light) .pom-settings-panel {
+    background: #18181b;
+    border-color: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+  }
 }
 
 @keyframes pomFadeSlide {
@@ -632,8 +655,15 @@
   box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35);
 }
 
+[data-theme="dark"] .pom-sound-play-btn,
+html.dark .pom-sound-play-btn {
+  background: rgba(56, 189, 248, 0.16);
+  color: #38bdf8;
+  border-color: rgba(56, 189, 248, 0.38);
+}
+
 @media (prefers-color-scheme: dark) {
-  .pom-sound-play-btn {
+  :root:not([data-theme="light"]):not(.light) .pom-sound-play-btn {
     background: rgba(56, 189, 248, 0.16);
     color: #38bdf8;
     border-color: rgba(56, 189, 248, 0.38);
@@ -652,7 +682,7 @@
 .pom-custom-duration-input {
   width: 60px;
   background: rgba(150, 150, 150, 0.08);
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--card-border, rgba(150, 150, 150, 0.2));
   color: var(--text-main);
   padding: 0.35rem;
   border-radius: 8px;

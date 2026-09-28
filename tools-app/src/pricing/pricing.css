@@ -493,9 +493,9 @@ html.light .pricing-cta-btn.is-coming-soon .pricing-cta-badge {
 .pricing-modal-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.65);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   z-index: 99999;
   display: flex;
   align-items: center;
@@ -504,17 +504,54 @@ html.light .pricing-cta-btn.is-coming-soon .pricing-cta-badge {
   animation: fadeIn 0.2s ease;
 }
 
+[data-theme="dark"] .pricing-modal-backdrop,
+html.dark .pricing-modal-backdrop {
+  background: rgba(0, 0, 0, 0.72);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]):not(.light) .pricing-modal-backdrop {
+    background: rgba(0, 0, 0, 0.72);
+  }
+}
+
 .pricing-modal-card {
-  background: var(--bg-color);
-  border: 1px solid var(--card-border);
+  background: #ffffff;
+  color: #18181b;
+  border: 1px solid rgba(0, 0, 0, 0.08);
   border-radius: 24px;
   padding: 2.5rem;
   max-width: 480px;
   width: 100%;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(0, 0, 0, 0.04);
   position: relative;
   text-align: center;
   animation: scaleUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+[data-theme="light"] .pricing-modal-card,
+html.light .pricing-modal-card {
+  background: #ffffff;
+  color: #18181b;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(0, 0, 0, 0.04);
+}
+
+[data-theme="dark"] .pricing-modal-card,
+html.dark .pricing-modal-card {
+  background: #141416;
+  color: #f4f4f5;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 30px 70px -15px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(255, 255, 255, 0.06);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]):not(.light) .pricing-modal-card {
+    background: #141416;
+    color: #f4f4f5;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0 30px 70px -15px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(255, 255, 255, 0.06);
+  }
 }
 
 .pricing-modal-icon-wrap {
@@ -543,11 +580,33 @@ html.dark .pricing-modal-icon-wrap {
   color: var(--text-main);
 }
 
+[data-theme="dark"] .pricing-modal-title,
+html.dark .pricing-modal-title {
+  color: #ffffff;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]):not(.light) .pricing-modal-title {
+    color: #ffffff;
+  }
+}
+
 .pricing-modal-desc {
   font-size: 0.95rem;
   color: var(--text-muted);
   line-height: 1.6;
   margin: 0 0 1.75rem 0;
+}
+
+[data-theme="dark"] .pricing-modal-desc,
+html.dark .pricing-modal-desc {
+  color: #a1a1aa;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]):not(.light) .pricing-modal-desc {
+    color: #a1a1aa;
+  }
 }
 
 .pricing-modal-actions {

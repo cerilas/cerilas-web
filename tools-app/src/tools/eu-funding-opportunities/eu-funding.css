@@ -648,8 +648,9 @@
 .eu-modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.7);
-  backdrop-filter: blur(6px);
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   z-index: 9999;
   display: flex;
   align-items: center;
@@ -658,8 +659,9 @@
 }
 
 .eu-modal-dialog {
-  background: var(--bg-color, #0f172a);
-  border: 1px solid var(--card-border, rgba(150, 150, 150, 0.25));
+  background: #ffffff;
+  color: #0f172a;
+  border: 1px solid rgba(0, 0, 0, 0.08);
   border-radius: 20px;
   width: 100%;
   max-width: 860px;
@@ -667,8 +669,46 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.2);
   animation: euModalFadeIn 0.2s ease-out;
+}
+
+[data-theme="light"] .eu-modal-overlay,
+html.light .eu-modal-overlay {
+  background: rgba(0, 0, 0, 0.5);
+}
+
+[data-theme="light"] .eu-modal-dialog,
+html.light .eu-modal-dialog {
+  background: #ffffff;
+  color: #0f172a;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.2);
+}
+
+[data-theme="dark"] .eu-modal-overlay,
+html.dark .eu-modal-overlay {
+  background: rgba(0, 0, 0, 0.75);
+}
+
+[data-theme="dark"] .eu-modal-dialog,
+html.dark .eu-modal-dialog {
+  background: #141416;
+  color: #f4f4f5;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 30px 70px -15px rgba(0, 0, 0, 0.85);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]):not(.light) .eu-modal-overlay {
+    background: rgba(0, 0, 0, 0.75);
+  }
+  :root:not([data-theme="light"]):not(.light) .eu-modal-dialog {
+    background: #141416;
+    color: #f4f4f5;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0 30px 70px -15px rgba(0, 0, 0, 0.85);
+  }
 }
 
 @keyframes euModalFadeIn {
@@ -684,11 +724,27 @@
 
 .eu-modal-header {
   padding: 1.5rem;
-  border-bottom: 1px solid rgba(150, 150, 150, 0.15);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
   gap: 1rem;
+}
+
+[data-theme="light"] .eu-modal-header,
+html.light .eu-modal-header {
+  border-bottom-color: rgba(0, 0, 0, 0.06);
+}
+
+[data-theme="dark"] .eu-modal-header,
+html.dark .eu-modal-header {
+  border-bottom-color: rgba(255, 255, 255, 0.08);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]):not(.light) .eu-modal-header {
+    border-bottom-color: rgba(255, 255, 255, 0.08);
+  }
 }
 
 .eu-modal-header-left {
@@ -737,6 +793,32 @@
   color: var(--text-main);
 }
 
+[data-theme="light"] .eu-modal-close-btn,
+html.light .eu-modal-close-btn {
+  color: var(--text-muted);
+}
+
+[data-theme="dark"] .eu-modal-close-btn,
+html.dark .eu-modal-close-btn {
+  color: #a1a1aa;
+}
+
+[data-theme="dark"] .eu-modal-close-btn:hover,
+html.dark .eu-modal-close-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]):not(.light) .eu-modal-close-btn {
+    color: #a1a1aa;
+  }
+  :root:not([data-theme="light"]):not(.light) .eu-modal-close-btn:hover {
+    background: rgba(255, 255, 255, 0.15);
+    color: #ffffff;
+  }
+}
+
 .eu-modal-body {
   padding: 1.5rem;
   overflow-y: auto;
@@ -772,13 +854,32 @@
 
 .eu-modal-footer {
   padding: 1.25rem 1.5rem;
-  border-top: 1px solid rgba(150, 150, 150, 0.15);
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
   flex-wrap: wrap;
-  background: rgba(150, 150, 150, 0.03);
+  background: rgba(0, 0, 0, 0.02);
+}
+
+[data-theme="light"] .eu-modal-footer,
+html.light .eu-modal-footer {
+  border-top-color: rgba(0, 0, 0, 0.06);
+  background: rgba(0, 0, 0, 0.02);
+}
+
+[data-theme="dark"] .eu-modal-footer,
+html.dark .eu-modal-footer {
+  border-top-color: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]):not(.light) .eu-modal-footer {
+    border-top-color: rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.02);
+  }
 }
 
 .eu-portal-btn {

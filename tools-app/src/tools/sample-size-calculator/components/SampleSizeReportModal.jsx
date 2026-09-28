@@ -74,7 +74,7 @@ export default function SampleSizeReportModal({
               <Printer size={14} />
               <span>Print / Save PDF</span>
             </button>
-            <button type="button" className="ssc-modal-close" onClick={onClose}>
+            <button type="button" className="ssc-modal-close-btn" onClick={onClose} aria-label="Close modal">
               <X size={18} />
             </button>
           </div>
