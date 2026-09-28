@@ -74,6 +74,7 @@ export default function GoogleMarketingMcp({ onBack }) {
   const [isDemoMode, setIsDemoMode] = useState(true);
   const [userEmail, setUserEmail] = useState('');
   const [activeTab, setActiveTab] = useState('chatgpt');
+  const [chatgptMode, setChatgptMode] = useState('mcp'); // 'mcp' (direct MCP plugin) or 'custom-gpt' (actions)
   const [mcpKey, setMcpKey] = useState(DEFAULT_MCP_KEY);
   const [showKey, setShowKey] = useState(false);
   const [copiedItem, setCopiedItem] = useState(null);
@@ -307,6 +308,19 @@ export default function GoogleMarketingMcp({ onBack }) {
             operationId: 'getGa4Realtime',
             summary: 'Fetch active users in real-time from GA4'
           }
+        }
+      }
+    },
+    null,
+    2
+  );
+
+  const chatgptMcpConfig = JSON.stringify(
+    {
+      mcpServers: {
+        'cerilas-google-marketing': {
+          type: 'sse',
+          url: `${mcpSseUrl}?key=${mcpKey}`
         }
       }
     },
@@ -678,7 +692,7 @@ export default function GoogleMarketingMcp({ onBack }) {
               className={`gmcp-tab-btn ${activeTab === 'chatgpt' ? 'active' : ''}`}
               onClick={() => setActiveTab('chatgpt')}
             >
-              <Bot size={16} /> ChatGPT (Custom GPT)
+              <Bot size={16} /> ChatGPT
             </button>
             <button
               className={`gmcp-tab-btn ${activeTab === 'claude' ? 'active' : ''}`}
@@ -698,41 +712,168 @@ export default function GoogleMarketingMcp({ onBack }) {
         {/* Tab 1: ChatGPT */}
         {activeTab === 'chatgpt' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-            <ol className="gmcp-instructions-list">
-              <li>
-                In <strong>ChatGPT</strong>, go to <strong>Explore GPTs</strong> &gt; click <strong>+ Create</strong> (or edit an existing Custom GPT).
-              </li>
-              <li>
-                Switch to the <strong>Configure</strong> tab, scroll down to <strong>Actions</strong>, and click <strong>Create new action</strong>.
-              </li>
-              <li>
-                Click <strong>Import from URL</strong> or paste the <strong>OpenAPI 3.1 Schema</strong> below into the Schema box.
-              </li>
-              <li>
-                In <strong>Authentication</strong>, select <strong>API Key</strong> &gt; Auth Type: <strong>Custom</strong> &gt; Header Name: <code>X-Cerilas-Key</code> &gt; paste your private MCP Key from above: <code>{mcpKey}</code>.
-              </li>
-              <li>
-                Save your GPT! You can now ask: <em>"What were our top 10 search queries in Search Console last week?"</em>
-              </li>
-            </ol>
+            {/* Mode Switcher */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem' }}>
+              <div className="gmcp-subtab-container">
+                <button
+                  type="button"
+                  className={`gmcp-subtab-btn ${chatgptMode === 'mcp' ? 'active' : ''}`}
+                  onClick={() => setChatgptMode('mcp')}
+                >
+                  <Zap size={14} color={chatgptMode === 'mcp' ? '#3b82f6' : 'currentColor'} />
+                  Direct MCP Server / Plugin (New &amp; Recommended)
+                </button>
+                <button
+                  type="button"
+                  className={`gmcp-subtab-btn ${chatgptMode === 'custom-gpt' ? 'active' : ''}`}
+                  onClick={() => setChatgptMode('custom-gpt')}
+                >
+                  <Bot size={14} />
+                  Custom GPT (OpenAPI Actions)
+                </button>
+              </div>
 
-            <div className="gmcp-code-container">
-              <button
-                className="gmcp-code-copy-btn"
-                onClick={() => handleCopy(chatgptOpenApiJson, 'chatgptSchema')}
-              >
-                {copiedItem === 'chatgptSchema' ? (
-                  <>
-                    <Check size={14} color="#10b981" /> Copied Schema!
-                  </>
-                ) : (
-                  <>
-                    <Copy size={14} /> Copy OpenAPI Schema
-                  </>
-                )}
-              </button>
-              <pre className="gmcp-code-pre">{chatgptOpenApiJson}</pre>
+              <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                {chatgptMode === 'mcp'
+                  ? '⚡ Native Model Context Protocol support in ChatGPT'
+                  : '🧩 For GPT Store custom assistants'}
+              </span>
             </div>
+
+            {chatgptMode === 'mcp' ? (
+              <>
+                <div style={{
+                  background: 'rgba(59, 130, 246, 0.07)',
+                  border: '1px solid rgba(59, 130, 246, 0.25)',
+                  borderRadius: '12px',
+                  padding: '0.9rem 1.15rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.75rem',
+                  fontSize: '0.88rem',
+                  color: 'var(--text-main)'
+                }}>
+                  <Sparkles size={18} color="#3b82f6" style={{ flexShrink: 0 }} />
+                  <div>
+                    <strong>Native ChatGPT MCP Support:</strong> ChatGPT now natively supports custom Model Context Protocol (MCP) servers via Server-Sent Events (SSE). No complex OpenAPI schemas or GPT Builder forms required—simply connect your Cerilas remote SSE endpoint!
+                  </div>
+                </div>
+
+                <ol className="gmcp-instructions-list">
+                  <li>
+                    Open <strong>ChatGPT</strong> (Desktop App for macOS/Windows or Web with Developer / Connected Apps enabled).
+                  </li>
+                  <li>
+                    Navigate to <strong>Settings</strong> (<code>Cmd + ,</code> on Mac or click your profile menu &gt; <em>Settings</em>) &gt; <strong>Connected Apps</strong> / <strong>Developer</strong> &gt; <strong>MCP Servers</strong> (or <em>Workspaces &gt; Custom Connectors</em>).
+                  </li>
+                  <li>
+                    Click <strong>+ Add MCP Server</strong> (or <em>Add Custom Connector</em>).
+                  </li>
+                  <li>
+                    Configure the server connection:
+                    <ul style={{ margin: '0.45rem 0 0.45rem 1.25rem', fontSize: '0.88rem', color: 'var(--text-muted)', lineHeight: '1.6' }}>
+                      <li><strong>Server Name:</strong> <code>Cerilas Google Marketing</code></li>
+                      <li><strong>Server Type / Protocol:</strong> <code>SSE (Server-Sent Events)</code></li>
+                      <li><strong>Remote Server URL:</strong> Copy your live authenticated endpoint below:</li>
+                    </ul>
+                  </li>
+                </ol>
+
+                <div className="gmcp-cred-row" style={{ marginTop: '-0.35rem' }}>
+                  <div className="gmcp-input-group">
+                    <input
+                      type="text"
+                      readOnly
+                      value={`${mcpSseUrl}?key=${mcpKey}`}
+                      className="gmcp-input-field"
+                    />
+                    <button
+                      type="button"
+                      className="gmcp-icon-btn"
+                      onClick={() => handleCopy(`${mcpSseUrl}?key=${mcpKey}`, 'chatgptSseUrl')}
+                      title="Copy Remote SSE URL"
+                    >
+                      {copiedItem === 'chatgptSseUrl' ? <Check size={16} color="#10b981" /> : <Copy size={16} />}
+                    </button>
+                  </div>
+                </div>
+
+                <div style={{ marginTop: '0.25rem' }}>
+                  <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.45rem' }}>
+                    Or if configuring via ChatGPT's JSON configuration file (<code>mcp.json</code>):
+                  </span>
+                  <div className="gmcp-code-container">
+                    <button
+                      className="gmcp-code-copy-btn"
+                      onClick={() => handleCopy(chatgptMcpConfig, 'chatgptMcpConfig')}
+                    >
+                      {copiedItem === 'chatgptMcpConfig' ? (
+                        <>
+                          <Check size={14} color="#10b981" /> Copied Config!
+                        </>
+                      ) : (
+                        <>
+                          <Copy size={14} /> Copy JSON Config
+                        </>
+                      )}
+                    </button>
+                    <pre className="gmcp-code-pre">{chatgptMcpConfig}</pre>
+                  </div>
+                </div>
+
+                <div style={{
+                  fontSize: '0.86rem',
+                  color: 'var(--text-muted)',
+                  background: 'var(--bg-color)',
+                  padding: '0.85rem 1.15rem',
+                  borderRadius: '12px',
+                  border: '1px solid var(--card-border)',
+                  lineHeight: '1.5'
+                }}>
+                  💡 <strong>How to query:</strong> Once connected, ChatGPT will automatically see your tools (<code>gsc_get_search_analytics</code>, <code>ga4_get_traffic_acquisition</code>, <code>ga4_get_realtime</code>). Just ask: 
+                  <em> "What were our top 10 Search Console search queries last week?"</em> or 
+                  <em> "Check our GA4 realtime active visitors right now."</em>
+                </div>
+              </>
+            ) : (
+              <>
+                <ol className="gmcp-instructions-list">
+                  <li>
+                    In <strong>ChatGPT</strong>, go to <strong>Explore GPTs</strong> &gt; click <strong>+ Create</strong> (or edit an existing Custom GPT).
+                  </li>
+                  <li>
+                    Switch to the <strong>Configure</strong> tab, scroll down to <strong>Actions</strong>, and click <strong>Create new action</strong>.
+                  </li>
+                  <li>
+                    Click <strong>Import from URL</strong> or paste the <strong>OpenAPI 3.1 Schema</strong> below into the Schema box.
+                  </li>
+                  <li>
+                    In <strong>Authentication</strong>, select <strong>API Key</strong> &gt; Auth Type: <strong>Custom</strong> &gt; Header Name: <code>X-Cerilas-Key</code> &gt; paste your private MCP Key from above: <code>{mcpKey}</code>.
+                  </li>
+                  <li>
+                    Save your Custom GPT! You can now ask: <em>"Analyze our Google Search Console clicks and impressions for this month."</em>
+                  </li>
+                </ol>
+
+                <div className="gmcp-code-container">
+                  <button
+                    className="gmcp-code-copy-btn"
+                    onClick={() => handleCopy(chatgptOpenApiJson, 'chatgptSchema')}
+                  >
+                    {copiedItem === 'chatgptSchema' ? (
+                      <>
+                        <Check size={14} color="#10b981" /> Copied Schema!
+                      </>
+                    ) : (
+                      <>
+                        <Copy size={14} /> Copy OpenAPI Schema
+                      </>
+                    )}
+                  </button>
+                  <pre className="gmcp-code-pre">{chatgptOpenApiJson}</pre>
+                </div>
+              </>
+            )}
           </div>
         )}
 

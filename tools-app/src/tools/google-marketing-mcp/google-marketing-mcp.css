@@ -404,6 +404,44 @@
   font-weight: 600;
 }
 
+/* Sub-tab Pill Switcher */
+.gmcp-subtab-container {
+  display: inline-flex;
+  background: var(--bg-color);
+  padding: 4px;
+  border-radius: 12px;
+  border: 1px solid var(--card-border);
+  gap: 4px;
+  width: fit-content;
+}
+
+.gmcp-subtab-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.45rem 0.95rem;
+  font-size: 0.82rem;
+  font-weight: 500;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.gmcp-subtab-btn:hover {
+  color: var(--text-main);
+}
+
+.gmcp-subtab-btn.active {
+  background: var(--card-bg);
+  color: var(--text-main);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12);
+  font-weight: 600;
+  border: 1px solid var(--card-border);
+}
+
 .gmcp-instructions-list {
   display: flex;
   flex-direction: column;

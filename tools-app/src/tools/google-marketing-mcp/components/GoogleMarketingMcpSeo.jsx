@@ -38,8 +38,8 @@ const FAQ_ITEMS = [
     a: 'Open your Claude Desktop configuration file (located at ~/Library/Application Support/Claude/claude_desktop_config.json on macOS or %APPDATA%\\Claude\\claude_desktop_config.json on Windows). Add the "cerilas-google-marketing" entry under "mcpServers" using either the remote SSE URL or our official npx package. Restart Claude Desktop and the tools icon will appear in the prompt bar.'
   },
   {
-    q: 'How does it work with ChatGPT (OpenAI GPTs & Custom Actions)?',
-    a: 'ChatGPT connects via its native "Custom Actions" feature. In ChatGPT, navigate to Explore GPTs > Create a GPT > Configure > Actions, paste our provided OpenAPI 3.1 specification, and select API Key authentication. ChatGPT will then be able to call Google Analytics and Search Console tools directly during conversations.'
+    q: 'How does it work with ChatGPT (OpenAI MCP & Custom Actions)?',
+    a: 'ChatGPT supports Cerilas Google Marketing through two methods: 1) Native MCP Server: In ChatGPT Settings > Connected Apps / Developer Mode > Add MCP Server, select Server-Sent Events (SSE) and paste your personal remote endpoint. ChatGPT will automatically discover your Search Console and GA4 tools. 2) Custom GPTs: You can also import our OpenAPI 3.1 specification under GPT Builder > Actions to publish a dedicated marketing GPT in the GPT Store.'
   },
   {
     q: 'Is my proprietary marketing data used to train AI models?',
@@ -128,7 +128,7 @@ export default function GoogleMarketingMcpSeo() {
         },
         {
           '@type': 'HowTo',
-          'name': 'How to Connect Google Analytics to Claude Desktop via MCP',
+          'name': 'How to Connect Google Analytics & Search Console to ChatGPT and Claude via MCP',
           'step': [
             {
               '@type': 'HowToStep',
@@ -137,8 +137,8 @@ export default function GoogleMarketingMcpSeo() {
             },
             {
               '@type': 'HowToStep',
-              'name': 'Copy MCP Configuration',
-              'text': 'Copy the JSON snippet for Claude Desktop or the OpenAPI specification for ChatGPT.'
+              'name': 'Add MCP Server to ChatGPT or Claude',
+              'text': 'In ChatGPT Settings > Connected Apps > Add MCP Server (SSE) or Claude Desktop config file, connect your Cerilas remote endpoint.'
             },
             {
               '@type': 'HowToStep',

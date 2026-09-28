@@ -9,7 +9,7 @@ export const googleMarketingMcpManifest = {
   targetUrl: '#/tool/google-marketing-mcp',
   features: [
     'Universal Model Context Protocol (MCP) Bridge: Seamless connection to Claude Desktop, Cursor, Windsurf, Antigravity, and custom agentic runtimes',
-    'ChatGPT Custom Actions & GPTs Ready: Includes complete, 1-click OpenAPI 3.1 specification for immediate GPT builder integration',
+    'ChatGPT Native MCP & Custom Actions: Connect via ChatGPT Developer / Connected Apps (SSE) or import the OpenAPI 3.1 schema for GPT Store assistants',
     'Google Search Console Real-Time Telemetry: Inspect query clicks, impressions, CTR, average position, and URL indexing status without exporting CSVs',
     'Google Analytics 4 (GA4) Query Engine: Access real-time active users, acquisition channels, page conversions, and engagement metrics via conversational AI',
     'Google Ads Intelligence: Audit wasted search term budgets, campaign ROAS, cost-per-click (CPC), and keyword performance inside your chat prompt',
