@@ -176,6 +176,8 @@ const handleCallback = async (req, res) => {
 
 router.get('/callback', handleCallback);
 router.get('/google/callback', handleCallback);
+router.get('/google/auth/callback', handleCallback);
+router.get('/auth/callback', handleCallback);
 
 /**
  * OAuth 2.0 Authorization Server Discovery (RFC 8414 & OpenID Connect).
