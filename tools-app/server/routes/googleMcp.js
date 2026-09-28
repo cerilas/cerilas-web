@@ -127,7 +127,46 @@ const handleCallback = async (req, res) => {
       );
     }
 
-    // Redirect to frontend with key and email
+    // Check if flow was initiated by ChatGPT OAuth
+    if (state && String(state).startsWith('cerilas_oauth_')) {
+      const stateId = String(state).replace('cerilas_oauth_', '');
+      const stateQuery = await pool.query(
+        'SELECT * FROM mcp_oauth_states WHERE state_id = $1 AND expires_at > NOW()',
+        [stateId]
+      );
+
+      if (stateQuery.rows.length > 0) {
+        const oauthState = stateQuery.rows[0];
+        const authCode = `cr_code_${crypto.randomBytes(24).toString('hex')}`;
+        const codeExpiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+
+        await pool.query(
+          `INSERT INTO mcp_oauth_codes 
+           (code, mcp_key, client_id, redirect_uri, code_challenge, code_challenge_method, expires_at)
+           VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+          [
+            authCode,
+            mcpKey,
+            oauthState.client_id,
+            oauthState.redirect_uri,
+            oauthState.code_challenge,
+            oauthState.code_challenge_method,
+            codeExpiresAt
+          ]
+        );
+
+        await pool.query('DELETE FROM mcp_oauth_states WHERE state_id = $1', [stateId]);
+
+        const targetUrl = new URL(oauthState.redirect_uri);
+        targetUrl.searchParams.set('code', authCode);
+        if (oauthState.chatgpt_state) {
+          targetUrl.searchParams.set('state', oauthState.chatgpt_state);
+        }
+        return res.redirect(targetUrl.toString());
+      }
+    }
+
+    // Default: Redirect to frontend with key and email
     res.redirect(`${redirectBase}?status=connected&key=${mcpKey}&email=${encodeURIComponent(email)}`);
   } catch (err) {
     console.error('Google OAuth callback processing error:', err);
@@ -137,6 +176,179 @@ const handleCallback = async (req, res) => {
 
 router.get('/callback', handleCallback);
 router.get('/google/callback', handleCallback);
+
+/**
+ * OAuth 2.0 Authorization Server Discovery (RFC 8414 & OpenID Connect).
+ */
+export const handleOAuthDiscovery = (req, res) => {
+  const host = req.get('host') || 'tools.cerilas.com';
+  const proto = req.get('x-forwarded-proto') || req.protocol || 'https';
+  const origin = `${proto}://${host}`;
+
+  res.json({
+    issuer: origin,
+    authorization_endpoint: `${origin}/api/oauth/authorize`,
+    token_endpoint: `${origin}/api/oauth/token`,
+    token_endpoint_auth_methods_supported: ['client_secret_post', 'client_secret_basic', 'none'],
+    response_types_supported: ['code'],
+    grant_types_supported: ['authorization_code', 'refresh_token'],
+    code_challenge_methods_supported: ['S256', 'plain'],
+    scopes_supported: ['marketing', 'offline_access']
+  });
+};
+
+/**
+ * OAuth 2.0 Authorize Endpoint.
+ * ChatGPT redirects user here to begin authentication.
+ */
+export const handleOAuthAuthorize = async (req, res) => {
+  try {
+    const {
+      response_type,
+      client_id,
+      redirect_uri,
+      state: chatgpt_state,
+      code_challenge,
+      code_challenge_method,
+      scope
+    } = req.query;
+
+    if (!redirect_uri) {
+      return res.status(400).send('Missing redirect_uri in OAuth authorize request');
+    }
+
+    const stateId = crypto.randomBytes(20).toString('hex');
+    const expiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 mins
+
+    await pool.query(
+      `INSERT INTO mcp_oauth_states 
+       (state_id, client_id, redirect_uri, chatgpt_state, code_challenge, code_challenge_method, scope, expires_at)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+      [
+        stateId,
+        client_id || 'chatgpt',
+        redirect_uri,
+        chatgpt_state || '',
+        code_challenge || null,
+        code_challenge_method || null,
+        scope || 'marketing',
+        expiresAt
+      ]
+    );
+
+    // Redirect user to Google OAuth with our stateId
+    const googleAuthUrl = getGoogleAuthUrl(`cerilas_oauth_${stateId}`);
+    return res.redirect(googleAuthUrl);
+  } catch (err) {
+    console.error('OAuth authorization endpoint error:', err);
+    return res.status(500).send('OAuth authorization initialization error: ' + err.message);
+  }
+};
+
+/**
+ * OAuth 2.0 Token Endpoint.
+ * ChatGPT backend calls this to exchange authorization code for access token.
+ */
+export const handleOAuthToken = async (req, res) => {
+  try {
+    const body = req.body || {};
+    const query = req.query || {};
+    const grantType = body.grant_type || query.grant_type;
+    const code = body.code || query.code;
+    const codeVerifier = body.code_verifier || query.code_verifier;
+    const refreshToken = body.refresh_token || query.refresh_token;
+
+    if (grantType === 'refresh_token') {
+      if (!refreshToken) {
+        return res.status(400).json({ error: 'invalid_request', error_description: 'Missing refresh_token' });
+      }
+
+      const user = await pool.query(
+        'SELECT mcp_key FROM mcp_user_connections WHERE mcp_key = $1',
+        [refreshToken]
+      );
+
+      if (user.rows.length === 0) {
+        return res.status(400).json({ error: 'invalid_grant', error_description: 'Invalid refresh_token' });
+      }
+
+      return res.json({
+        access_token: refreshToken,
+        token_type: 'Bearer',
+        expires_in: 31536000,
+        refresh_token: refreshToken,
+        scope: 'marketing'
+      });
+    }
+
+    if (grantType === 'authorization_code') {
+      if (!code) {
+        return res.status(400).json({ error: 'invalid_request', error_description: 'Missing authorization code' });
+      }
+
+      const codeQuery = await pool.query(
+        'SELECT * FROM mcp_oauth_codes WHERE code = $1',
+        [code]
+      );
+
+      if (codeQuery.rows.length === 0) {
+        return res.status(400).json({ error: 'invalid_grant', error_description: 'Authorization code not found or expired' });
+      }
+
+      const authCode = codeQuery.rows[0];
+
+      if (authCode.used) {
+        return res.status(400).json({ error: 'invalid_grant', error_description: 'Authorization code has already been used' });
+      }
+
+      if (new Date(authCode.expires_at) < new Date()) {
+        return res.status(400).json({ error: 'invalid_grant', error_description: 'Authorization code has expired' });
+      }
+
+      // Validate PKCE if challenge exists
+      if (authCode.code_challenge) {
+        if (!codeVerifier) {
+          return res.status(400).json({ error: 'invalid_grant', error_description: 'Missing code_verifier for PKCE validation' });
+        }
+        let calculated;
+        if (authCode.code_challenge_method === 'S256') {
+          calculated = crypto.createHash('sha256').update(codeVerifier).digest('base64url');
+        } else {
+          calculated = codeVerifier;
+        }
+
+        if (calculated !== authCode.code_challenge) {
+          return res.status(400).json({ error: 'invalid_grant', error_description: 'Invalid PKCE code_verifier' });
+        }
+      }
+
+      // Mark code as used
+      await pool.query('UPDATE mcp_oauth_codes SET used = TRUE WHERE code = $1', [code]);
+
+      return res.json({
+        access_token: authCode.mcp_key,
+        token_type: 'Bearer',
+        expires_in: 31536000,
+        refresh_token: authCode.mcp_key,
+        scope: 'marketing'
+      });
+    }
+
+    return res.status(400).json({
+      error: 'unsupported_grant_type',
+      error_description: 'Supported grant_type: authorization_code, refresh_token'
+    });
+  } catch (err) {
+    console.error('OAuth token endpoint error:', err);
+    return res.status(500).json({ error: 'server_error', error_description: err.message });
+  }
+};
+
+router.get('/oauth/authorize', handleOAuthAuthorize);
+router.post('/oauth/token', handleOAuthToken);
+router.get('/oauth/token', handleOAuthToken);
+router.get('/.well-known/oauth-authorization-server', handleOAuthDiscovery);
+router.get('/.well-known/openid-configuration', handleOAuthDiscovery);
 
 /**
  * Checks the connection status and lists available Google properties.

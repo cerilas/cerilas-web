@@ -37,6 +37,7 @@ const PORT = process.env.PORT || 3002;
 
 app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 // Tool aliases dictionary for 301 canonical redirects
 const TOOL_CANONICAL_ALIASES = {
@@ -210,6 +211,14 @@ app.use('/api/scrapers', scrapersRouter);
 
 // Mount Google Marketing MCP router (OAuth, REST Actions & MCP SSE)
 app.use('/api/mcp', googleMcpRouter);
+app.use('/api/oauth', (req, res, next) => {
+  req.url = '/oauth' + (req.url.startsWith('/') ? req.url : '/' + req.url);
+  googleMcpRouter(req, res, next);
+});
+app.use('/.well-known', (req, res, next) => {
+  req.url = '/.well-known' + (req.url.startsWith('/') ? req.url : '/' + req.url);
+  googleMcpRouter(req, res, next);
+});
 app.use('/api/auth/google', (req, res, next) => {
   req.url = req.url.startsWith('/') ? req.url : '/' + req.url;
   googleMcpRouter(req, res, next);
