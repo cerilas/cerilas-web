@@ -19,11 +19,29 @@ export const youtubeThumbnailDownloaderManifest = {
     'Zero Registration & No Limits: Completely free and unlimited downloads forever'
   ],
   seo: {
-    title: 'Free YouTube Thumbnail Downloader (4K, 1080p HD, Shorts & WebP) | Cerilas Tools',
-    description: 'Download YouTube video and Shorts thumbnails in maximum 4K (1920x1080), High Definition (1280x720), and WebP resolution for free. No watermark, instant one-click download, and responsive HTML embed generator.',
-    keywords: 'youtube thumbnail downloader, download youtube thumbnail 4k, youtube video thumbnail download, youtube shorts thumbnail download, hd youtube thumbnail grabber, get youtube cover image 1080p, youtube thumbnail saver, maxresdefault downloader, copy youtube thumbnail',
-    ogImage: 'https://tools.cerilas.com/og-image.svg',
-    ogImageAlt: 'Cerilas Free YouTube Thumbnail & Media Downloader in 4K HD',
-    breadcrumbsName: 'YouTube Thumbnail Downloader'
+    title: "Free YouTube Thumbnail Downloader (4K & HD) | Cerilas Tools",
+    description: "Download YouTube video and Shorts thumbnails in maximum 4K Ultra-HD, 1080p, and WebP for free. Instant one-click download with zero watermarks and no login.",
+    keywords: "youtube thumbnail downloader, download youtube thumbnail 4k, youtube shorts thumbnail download, hd youtube thumbnail grabber, maxresdefault downloader, get youtube thumbnail",
+    ogImage: 'https://tools.cerilas.com/tool-icons/youtube-thumbnail-downloader.webp',
+    ogImageAlt: "Free YouTube Thumbnail Downloader (4K & HD) | Cerilas Tools",
+    breadcrumbsName: "YouTube Thumbnail Downloader",
+    faq: [
+        {
+            "q": "What image resolutions can I download for YouTube thumbnails?",
+            "a": "You can download Maximum Resolution 4K/HD (1920x1080 or 1280x720), Standard Definition (640x480), and High Quality (480x360)."
+        },
+        {
+            "q": "Can I download thumbnails from YouTube Shorts and live streams?",
+            "a": "Yes. Paste any standard YouTube URL, YouTube Shorts link, or youtu.be shortlink to fetch the corresponding thumbnail immediately."
+        },
+        {
+            "q": "Are the downloaded thumbnail images watermarked?",
+            "a": "No. The image files are downloaded directly from the official content delivery network with zero added watermarks or compression."
+        },
+        {
+            "q": "Is it legal to download and inspect YouTube video thumbnails?",
+            "a": "Yes, downloading public thumbnails for fair use, research, and design reference is standard practice."
+        }
+    ]
   }
 };

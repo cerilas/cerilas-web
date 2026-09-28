@@ -17,11 +17,29 @@ export const pdfSplitterManifest = {
     'Zero File Limits: No registration required, no daily caps, and no watermark added'
   ],
   seo: {
-    title: 'Split PDF Online Free – Extract Pages & Split into Custom Ranges | Cerilas Tools',
-    description: 'Split PDF files online for free with 100% in-browser privacy. Extract specific pages, divide into custom page ranges, or separate every page into individual PDF files with zero server uploads.',
-    keywords: 'split pdf, split pdf online free, extract pages from pdf, separate pdf pages, split pdf into multiple files, split pdf custom page ranges, extract pdf pages in browser, divide pdf without watermark, free pdf splitter no upload, private pdf cutter',
-    ogImage: 'https://tools.cerilas.com/tool-icons/pdf-splitter.png',
-    ogImageAlt: 'Cerilas Free In-Browser PDF Splitter',
-    breadcrumbsName: 'Split PDF Online'
+    title: "Free PDF Splitter – Extract & Split PDF Pages | Cerilas Tools",
+    description: "Split PDF files into individual pages or custom page ranges for free. Preview pages visually and export individual PDFs or a ZIP archive with 100% privacy.",
+    keywords: "pdf splitter, split pdf online free, extract pdf pages, separate pdf files, split pdf into single pages, private pdf splitter, pdf page extractor",
+    ogImage: 'https://tools.cerilas.com/tool-icons/pdf-splitter.webp',
+    ogImageAlt: "Free PDF Splitter – Extract & Split PDF Pages | Cerilas Tools",
+    breadcrumbsName: "PDF Splitter",
+    faq: [
+        {
+            "q": "Can I extract custom non-consecutive page ranges (e.g. 1, 4-6, 12)?",
+            "a": "Yes. You can enter comma-separated ranges or simply click individual page thumbnails in the visual workspace to select pages for extraction."
+        },
+        {
+            "q": "Can I split every page into its own individual PDF file?",
+            "a": "Yes. Choose \"Split All Pages\" to generate individual single-page PDFs packaged inside a convenient downloadable ZIP file."
+        },
+        {
+            "q": "Does extracting pages reduce visual quality or font sharpness?",
+            "a": "No. The underlying vector graphics, embedded typography, and original resolutions remain identical to the source document."
+        },
+        {
+            "q": "Is my document uploaded to a remote server during the split process?",
+            "a": "No. The entire extraction and file generation process takes place locally inside your browser memory with complete privacy."
+        }
+    ]
   }
 };

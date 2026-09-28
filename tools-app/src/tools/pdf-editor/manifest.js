@@ -44,11 +44,29 @@ export const pdfEditorManifest = {
   seo_title: 'Free Online PDF Editor (2026) – Edit Text, Add Signature, Redact & Organize Pages | Cerilas Tools',
   seo_description: 'Edit PDF documents online for free with 100% client-side privacy. Add text, draw digital signatures, redact sensitive info, rotate, reorder, and delete pages. No file uploads, no signup, no watermark.',
   seo: {
-    title: 'Free Online PDF Editor (2026) – Edit Text, Add Signature, Redact & Organize Pages | Cerilas Tools',
-    description: 'Edit PDF documents online for free with 100% client-side privacy. Add text, draw digital signatures, redact sensitive info, rotate, reorder, and delete pages. No file uploads, no signup, no watermark.',
-    keywords: 'pdf editor, free pdf editor online, edit pdf without adobe acrobat, add signature to pdf free, sign pdf online, redact pdf, blackout pdf online, rotate pdf pages, reorder pdf pages, delete pages from pdf, organize pdf pages, fill pdf forms free, highlight pdf online, client side pdf editor, secure pdf editor hipaa gdpr, sejda alternative free, smallpdf alternative free, add text to pdf free, pdf stamp maker online, no watermark pdf editor',
-    ogImage: 'https://tools.cerilas.com/og-image.svg',
-    ogImageAlt: 'Cerilas Free Online PDF Editor',
-    breadcrumbsName: 'PDF Editor'
+    title: "Free Online PDF Editor – Edit Text & Sign PDF | Cerilas Tools",
+    description: "Edit PDF documents in your browser. Add text, draw signatures, insert images, redact sensitive info, and reorder pages without uploading files to servers.",
+    keywords: "pdf editor, edit pdf online, sign pdf free, redact pdf, annotate pdf, fill pdf form, in browser pdf editor, private pdf editing",
+    ogImage: 'https://tools.cerilas.com/tool-icons/pdf-editor.webp',
+    ogImageAlt: "Free Online PDF Editor – Edit Text & Sign PDF | Cerilas Tools",
+    breadcrumbsName: "PDF Editor",
+    faq: [
+        {
+            "q": "Can I add a legally valid electronic signature to contracts?",
+            "a": "Yes. You can draw your signature, type it, or upload a signature image. The resulting PDF embeds your signature vectors according to standard electronic document practices."
+        },
+        {
+            "q": "Are my uploaded contracts or PDF forms stored on your servers?",
+            "a": "Zero files are stored. The editor runs entirely on your local machine using client-side JavaScript. Your documents never touch our backend."
+        },
+        {
+            "q": "Can I permanently redact sensitive personal information?",
+            "a": "Yes. The redaction tool burns opaque rectangles over text and images, preventing highlight recovery or underlying text selection."
+        },
+        {
+            "q": "Does this PDF editor require account registration or software install?",
+            "a": "No. There is no sign-up, no software installation, and no trial period. Open the page and edit documents immediately."
+        }
+    ]
   }
 };

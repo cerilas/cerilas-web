@@ -32,11 +32,29 @@ export const emailSignatureGeneratorManifest = {
     'professional email signature'
   ],
   seo: {
-    title: 'Free Email Signature Generator (2026) | Gmail, Outlook & Apple Mail Ready | Cerilas Tools',
-    description: 'Create a professional HTML email signature in seconds for free. Upload company logos, add job titles, social profiles, custom fields, and disclaimer text with 100% in-browser privacy.',
-    keywords: 'email signature generator, free email signature, html signature maker, gmail email signature, outlook signature, apple mail signature, signature with company logo, professional email signature template, business email signature',
-    ogImage: 'https://tools.cerilas.com/og-image.svg',
-    ogImageAlt: 'Cerilas Free Online Email Signature Generator',
-    canonical: 'https://tools.cerilas.com/#/tool/email-signature-generator'
+    title: "Professional HTML Email Signature Generator | Cerilas Tools",
+    description: "Create sleek, professional HTML email signatures with company logos, social icons, and disclaimers. 100% compatible with Gmail, Outlook, and Apple Mail.",
+    keywords: "email signature generator, html email signature, free email signature, gmail signature template, outlook email signature, apple mail signature, professional signature maker",
+    ogImage: 'https://tools.cerilas.com/tool-icons/email-signature-generator.webp',
+    ogImageAlt: "Professional HTML Email Signature Generator | Cerilas Tools",
+    breadcrumbsName: "Email Signature Generator",
+    faq: [
+        {
+            "q": "How do I install my generated HTML signature into Gmail or Outlook?",
+            "a": "Click \"Copy Signature\", open your email client's settings (Gmail or Outlook), and paste directly into the signature box. All formatting and images transfer instantly."
+        },
+        {
+            "q": "Will my signature logo and social icons display properly on mobile devices?",
+            "a": "Yes. The generated code uses responsive table layouts and inline CSS that automatically adapt cleanly across iPhone, Android, and tablet screens."
+        },
+        {
+            "q": "Can I add custom legal disclaimers or meeting scheduling links?",
+            "a": "Yes. Include Calendly or Cal.com booking buttons, promotional banners, and mandatory corporate confidentiality disclaimers."
+        },
+        {
+            "q": "Is this email signature generator free without forced branding watermarks?",
+            "a": "Yes, 100% free with zero watermarks or promotional footer links added to your emails."
+        }
+    ]
   }
 };

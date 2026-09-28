@@ -18,11 +18,29 @@ export const websiteEmailExtractorManifest = {
     'SSRF & Privacy Protected: Zero server data storage, strict private subnet blocking, and 100% compliant deterministic execution'
   ],
   seo: {
-    title: 'Free Website Email & Department Extractor – Crawl Sites & Extract Team Emails | Cerilas Tools',
-    description: 'Recursively crawl any website to extract verified email addresses categorized by department, unit, and team member. Fast, rule-based DOM extraction with zero AI and instant CSV export.',
-    keywords: 'website email extractor, site email crawler, find emails on website, extract emails from domain, email scraper no ai, department email finder, company email extractor, team email finder, website contact scraper, crawl website for emails, free email extractor online, b2b email finder, rfc email regex scraper',
-    ogImage: 'https://tools.cerilas.com/tool-icons/website-email-extractor.png',
-    ogImageAlt: 'Cerilas Free Website Email & Department Extractor',
-    breadcrumbsName: 'Email Extractor'
+    title: "Free Website Email & Department Extractor | Cerilas Tools",
+    description: "Recursively crawl websites to extract and organize verified company emails by department. Deterministic DOM parsing with zero AI hallucinations or limits.",
+    keywords: "website email extractor, site email crawler, find emails on website, extract emails from domain, email scraper no ai, department email finder, company email extractor, lead extractor",
+    ogImage: 'https://tools.cerilas.com/tool-icons/website-email-extractor.webp',
+    ogImageAlt: "Free Website Email & Department Extractor | Cerilas Tools",
+    breadcrumbsName: "Website Email & Department Extractor",
+    faq: [
+        {
+            "q": "How does deterministic DOM extraction avoid email hallucination?",
+            "a": "It relies strictly on exact RFC 5322 regular expression matching and mailto: protocol parsing directly from HTML text, guaranteeing 100% verified existence on the target page."
+        },
+        {
+            "q": "Does this crawler respect website rate limits and polite crawling standards?",
+            "a": "Yes. The crawler restricts traversal to same-origin internal links, limits recursion depth, and throttles requests to prevent server strain."
+        },
+        {
+            "q": "Can I export the extracted contact lists to CSV or JSON?",
+            "a": "Yes. You can copy emails as comma-separated lists or download them as structured CSV and JSON files formatted with department tags."
+        },
+        {
+            "q": "Which corporate departments are automatically categorized?",
+            "a": "Executive, Sales, Human Resources, Engineering, Customer Support, Legal, and Press/Media based on page context and role prefix patterns."
+        }
+    ]
   }
 };

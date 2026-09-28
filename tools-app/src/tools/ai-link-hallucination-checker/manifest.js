@@ -18,11 +18,29 @@ export const aiLinkHallucinationCheckerManifest = {
     '100% Privacy Focused: Text parsing and link checks are sanitized without storing your sensitive document contents'
   ],
   seo: {
-    title: 'Free AI Link Hallucination Checker (2026) – Detect Fake & 404 URLs in AI Text | Cerilas Tools',
-    description: 'Free AI Link Hallucination Checker. Verify ChatGPT, Claude, and Gemini text for hallucinated URLs, fake domain names, and 404 broken citations with instant DNS/HTTP diagnostics and 1-click text sanitizer.',
-    keywords: 'ai link hallucination checker, ai hallucination checker, fake url detector, detect hallucinated links in chatgpt, broken link checker ai, check if ai links are real, slopsquatting detector, ai citation checker, chatgpt made up link checker, llm hallucination detector, free link checker for articles, seo 404 detector ai text, claude fake links, deepseek url verification',
-    ogImage: 'https://tools.cerilas.com/og-image.svg',
-    ogImageAlt: 'Cerilas Free AI Link Hallucination Checker & URL Verification Suite',
-    breadcrumbsName: 'AI Link Hallucination Checker'
+    title: "AI Link Hallucination Checker & URL Verifier | Cerilas Tools",
+    description: "Audit AI-generated articles for hallucinated, fake, or broken URLs. Verify HTTP status codes, DNS records, and redirect chains before publishing content.",
+    keywords: "ai link hallucination checker, broken link checker, verify ai links, detect fake urls, check llm citations, ai seo link audit, hallucinated url detector",
+    ogImage: 'https://tools.cerilas.com/tool-icons/ai-link-hallucination-checker.webp',
+    ogImageAlt: "AI Link Hallucination Checker & URL Verifier | Cerilas Tools",
+    breadcrumbsName: "AI Link Hallucination Checker",
+    faq: [
+        {
+            "q": "Why do LLMs frequently hallucinate fake URLs and citations?",
+            "a": "LLMs generate text probabilistically based on pattern matching rather than live web lookups, frequently inventing plausible-sounding domain names and article slugs that do not exist."
+        },
+        {
+            "q": "How does publishing hallucinated links damage website SEO?",
+            "a": "Linking to broken 404 pages or dead domains signals poor editorial quality to Google's Helpful Content algorithm, eroding domain authority and user trust."
+        },
+        {
+            "q": "Which HTTP status codes and redirect chains are inspected?",
+            "a": "The tool verifies 200 OK statuses, traces 301/302 redirect loops to final destinations, and flags 403 Forbidden, 404 Not Found, and 500 server errors."
+        },
+        {
+            "q": "Can I verify links from ChatGPT, Claude, and Gemini outputs?",
+            "a": "Yes. Paste raw text, Markdown, or HTML from any AI assistant or chatbot to audit all embedded references."
+        }
+    ]
   }
 };

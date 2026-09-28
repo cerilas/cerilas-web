@@ -18,11 +18,29 @@ export const aiCrawlerCheckerManifest = {
     'Privacy-First & Fast: Zero tracking of proprietary website content, instant server-side diagnostics with SSRF security'
   ],
   seo: {
-    title: 'AI Crawler Checker – Check ChatGPT, Claude & Perplexity Access | Cerilas Tools',
-    description: 'Check whether ChatGPT, Claude, Perplexity and other AI crawlers can access your website. Analyze robots.txt, AI crawler permissions, sitemap and indexability for free.',
-    keywords: 'ai crawler checker, chatgpt crawler checker, robots.txt ai checker, oai-searchbot allowed, perplexitybot robots.txt, claudebot vs claude-searchbot, check if chatgpt can crawl my site, gptbot allow or disallow, google-extended robots.txt, ai search accessibility score, llms.txt checker, ai seo audit free, cerilas tools',
-    ogImage: 'https://tools.cerilas.com/tool-icons/ai-crawler-checker.png',
-    ogImageAlt: 'Cerilas Free AI Crawler Checker & robots.txt Verification Suite',
-    breadcrumbsName: 'AI Crawler Checker'
+    title: "Free AI Crawler Checker – Test GPTBot & ClaudeBot | Cerilas Tools",
+    description: "Audit robots.txt and HTTP headers for AI bot accessibility. Verify whether GPTBot, ClaudeBot, PerplexityBot, and Google-Extended are blocked or permitted.",
+    keywords: "ai crawler checker, test gptbot access, claudebot robots txt, perplexitybot blocker, ai seo audit, robots txt ai bots, generative engine optimization",
+    ogImage: 'https://tools.cerilas.com/tool-icons/ai-crawler-checker.webp',
+    ogImageAlt: "Free AI Crawler Checker – Test GPTBot & ClaudeBot | Cerilas Tools",
+    breadcrumbsName: "AI Crawler Checker",
+    faq: [
+        {
+            "q": "Which AI crawlers should I allow if I want citations in AI search engines?",
+            "a": "Allow search grounding bots like ChatGPT-User, PerplexityBot, and Claude-Web. Blocking them completely removes your website from AI search answer citations."
+        },
+        {
+            "q": "What is the difference between GPTBot and ChatGPT-User?",
+            "a": "GPTBot crawls the web to train future OpenAI foundation models. ChatGPT-User executes live on-demand browsing when a user submits a query in ChatGPT."
+        },
+        {
+            "q": "How does Google-Extended differ from standard Googlebot?",
+            "a": "Googlebot crawls for standard Google Search indexing. Google-Extended specifically controls whether your content is used to train Gemini models without hurting Google Search rankings."
+        },
+        {
+            "q": "Can this tool generate corrected robots.txt rules for my website?",
+            "a": "Yes. The tool provides ready-to-paste robots.txt snippets tailored to your preference for search citations versus training protection."
+        }
+    ]
   }
 };

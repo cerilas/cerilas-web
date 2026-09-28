@@ -18,11 +18,29 @@ export const ltvCalculatorManifest = {
   ],
   conversionLabel: 'Calculations',
   seo: {
-    title: 'Customer Lifetime Value (LTV) Calculator | Cerilas Tools',
-    description: 'Free SaaS LTV Calculator. Calculate Customer Lifetime Value from ARPU, Gross Margin %, and Monthly Churn with discounted cohort modeling.',
-    keywords: 'ltv calculator, customer lifetime value calculator, calculate ltv saas, arpu churn ltv formula, clv calculator, discounted ltv, customer lifespan months, b2b unit economics',
-    ogImage: 'https://tools.cerilas.com/og-image.svg',
-    ogImageAlt: 'Cerilas Customer Lifetime Value LTV Calculator',
-    breadcrumbsName: 'LTV Calculator'
+    title: "Free LTV Calculator – Customer Lifetime Value | Cerilas Tools",
+    description: "Calculate Customer Lifetime Value (LTV / CLTV) with ARPU, churn rates, and gross margins. Benchmark unit economics and plan sustainable customer acquisition.",
+    keywords: "ltv calculator, customer lifetime value, cltv calculator, saas ltv calculation, arpu ltv, customer lifespan calculator, unit economics calculator",
+    ogImage: 'https://tools.cerilas.com/tool-icons/ltv-calculator.webp',
+    ogImageAlt: "Free LTV Calculator – Customer Lifetime Value | Cerilas Tools",
+    breadcrumbsName: "Customer Lifetime Value (LTV) Calculator",
+    faq: [
+        {
+            "q": "What is the standard formula for calculating SaaS Customer Lifetime Value?",
+            "a": "LTV = (ARPU × Gross Margin %) / Customer Churn Rate. It calculates the cumulative gross profit expected from a single customer over their lifespan."
+        },
+        {
+            "q": "Why must Gross Margin Percentage be included in LTV calculations?",
+            "a": "Using pure revenue instead of gross profit artificially inflates LTV, leading founders to overspend on acquisition and burn cash on unprofitable users."
+        },
+        {
+            "q": "What is the difference between customer lifespan and churn rate?",
+            "a": "Customer Lifespan is the mathematical inverse of Churn Rate (1 / Churn). If monthly churn is 5%, average customer lifespan is 20 months."
+        },
+        {
+            "q": "How can SaaS companies effectively increase their Customer Lifetime Value?",
+            "a": "By reducing churn through better onboarding, expanding account revenue with tier upgrades and add-ons, and increasing gross profit margins."
+        }
+    ]
   }
 };

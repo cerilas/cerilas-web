@@ -24,7 +24,7 @@ import { initScrapersDb } from './migrations/init-scrapers-db.js';
 import { initMcpDb } from './migrations/init-mcp-db.js';
 import googleMcpRouter from './routes/googleMcp.js';
 import { checkAiRateLimit, getClientIp } from './utils/aiRateLimit.js';
-import { CATEGORIES, TOOLS_SEO_REGISTRY, getAllToolSlugs } from './seo/toolsSeoRegistry.js';
+import { CATEGORIES, TOOLS_SEO_REGISTRY, getAllToolSlugs, TOOL_CANONICAL_ALIASES } from './seo/toolsSeoRegistry.js';
 import { renderToolPageHtml, renderCategoryPageHtml, renderHomePageHtml, renderLegalPageHtml, renderPricingPageHtml } from './seo/ssrRenderer.js';
 
 dotenv.config();
@@ -38,43 +38,6 @@ const PORT = process.env.PORT || 3002;
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
-// Tool aliases dictionary for 301 canonical redirects
-const TOOL_CANONICAL_ALIASES = {
-  'llms-txt-generator': 'llms-txt',
-  'llms-txt-checker': 'llms-txt',
-  'llms-txt-validator': 'llms-txt',
-  'html-to-markdown': 'html-to-llm-markdown',
-  'token-counter': 'token-counter-universal',
-  'token-calculator': 'token-counter-universal',
-  'universal-token-counter': 'token-counter-universal',
-  'technology-readiness-level': 'trl-calculator',
-  'trl-assessment': 'trl-calculator',
-  'trl-scale': 'trl-calculator',
-  'sample-size': 'sample-size-calculator',
-  'sample-size-calculation': 'sample-size-calculator',
-  'power-analysis-calculator': 'sample-size-calculator',
-  'survey-sample-size': 'sample-size-calculator',
-  'ab-test-sample-size': 'sample-size-calculator',
-  'pdf-combine': 'pdf-merger',
-  'combine-pdf': 'pdf-merger',
-  'merge-pdf': 'pdf-merger',
-  'split-pdf': 'pdf-splitter',
-  'pdf-extract-pages': 'pdf-splitter',
-  'pdf-separator': 'pdf-splitter',
-  'eu-funding': 'eu-funding-opportunities',
-  'cascade-funding': 'eu-funding-opportunities',
-  'horizon-europe': 'eu-funding-opportunities',
-  'eu-grants': 'eu-funding-opportunities',
-  'fstp-grants': 'eu-funding-opportunities',
-  'email-extractor': 'website-email-extractor',
-  'website-email-finder': 'website-email-extractor',
-  'site-email-extractor': 'website-email-extractor',
-  'ai-visibility': 'ai-visibility-checker',
-  'visibility-checker': 'ai-visibility-checker',
-  'ai-search-checker': 'ai-visibility-checker',
-  'ai-citation-checker': 'ai-visibility-checker'
-};
 
 // 301 URL Standardization & Redirect Middleware
 app.use((req, res, next) => {

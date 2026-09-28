@@ -18,11 +18,29 @@ export const cacCalculatorManifest = {
   ],
   conversionLabel: 'Calculations',
   seo: {
-    title: 'CAC Calculator - Customer Acquisition Cost & Blended CAC | Cerilas Tools',
-    description: 'Free SaaS CAC Calculator. Calculate Customer Acquisition Cost, compare Paid vs Blended CAC, track marketing payroll and ad spend efficiency with SaaS benchmarks.',
-    keywords: 'cac calculator, customer acquisition cost calculator, blended cac vs paid cac, calculate cac saas, marketing cost per customer, sales and marketing spend efficiency, b2b saas cac formula',
-    ogImage: 'https://tools.cerilas.com/og-image.svg',
-    ogImageAlt: 'Cerilas Customer Acquisition Cost CAC Calculator',
-    breadcrumbsName: 'CAC Calculator'
+    title: "Free CAC Calculator – Customer Acquisition Cost | Cerilas Tools",
+    description: "Calculate Customer Acquisition Cost (CAC) and payback period in months across marketing and sales spend. Benchmark unit economics against industry standards.",
+    keywords: "cac calculator, customer acquisition cost, cac payback period, marketing cac, unit economics calculator, blended cac vs paid cac, saas acquisition cost",
+    ogImage: 'https://tools.cerilas.com/tool-icons/cac-calculator.webp',
+    ogImageAlt: "Free CAC Calculator – Customer Acquisition Cost | Cerilas Tools",
+    breadcrumbsName: "CAC Calculator",
+    faq: [
+        {
+            "q": "What expenses should be included in Total Customer Acquisition Cost?",
+            "a": "Include paid advertising spend, marketing and sales team salaries, commissions, agency retainers, and sales software tooling (CRM, outreach, analytics)."
+        },
+        {
+            "q": "What is the ideal CAC Payback Period for venture-backed SaaS startups?",
+            "a": "A payback period under 12 months is considered healthy. For enterprise sales, 12 to 18 months is acceptable, while over 24 months creates severe cash drag."
+        },
+        {
+            "q": "What is the difference between Blended CAC and Paid CAC?",
+            "a": "Paid CAC divides spend solely by customers acquired through paid channels. Blended CAC divides total sales/marketing spend across all acquired customers including organic."
+        },
+        {
+            "q": "How does improving CAC payback affect company runway?",
+            "a": "Faster payback recycles customer cash flow back into marketing and hiring months earlier, dramatically extending startup cash runway."
+        }
+    ]
   }
 };

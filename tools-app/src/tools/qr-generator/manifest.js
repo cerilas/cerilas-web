@@ -14,11 +14,29 @@ export const qrGeneratorManifest = {
     'Error Correction Level (L/M/Q/H) & Margin Adjustments'
   ],
   seo: {
-    title: 'Free QR Code Generator That Never Expires (No Sign-Up) | 100% Free Unlimited Scans',
-    description: '100% free permanent QR code generator that never expires. Zero sign-up, no subscriptions, unlimited lifetime scans. Download print-ready vector SVG and 2048px Ultra-HD PNG for URLs, Wi-Fi, vCard, Google reviews, and AI art.',
-    keywords: 'free qr code generator that never expires, qr code generator without subscription, free dynamic qr code generator no sign up, 100% free qr code generator unlimited scans, vector svg qr code generator for print, static qr code generator without expiration, wifi qr code generator guest network wpa3, vcard qr code generator apple wallet',
-    ogImage: 'https://tools.cerilas.com/og-image.svg',
-    ogImageAlt: 'Cerilas Free QR Code Generator - Never Expires',
-    breadcrumbsName: 'Free QR Code Generator'
+    title: "Free QR Code Generator That Never Expires | Cerilas Tools",
+    description: "Free permanent QR code generator with no expiration and unlimited lifetime scans. Download print-ready vector SVG and HD PNG for URLs, Wi-Fi, and vCards.",
+    keywords: "free qr code generator, qr code generator no sign up, permanent qr code, vector svg qr code, wifi qr code generator, vcard qr code, commercial qr code",
+    ogImage: 'https://tools.cerilas.com/tool-icons/qr-code-generator.webp',
+    ogImageAlt: "Free QR Code Generator That Never Expires | Cerilas Tools",
+    breadcrumbsName: "QR Code Generator",
+    faq: [
+        {
+            "q": "Will my generated QR code ever expire or require payment later?",
+            "a": "No. Unlike predatory services that route scans through expiring redirect URLs, our tool generates pure static QR codes where destination data is encoded directly into the pattern. They work forever."
+        },
+        {
+            "q": "Can I use the generated QR codes for commercial print products?",
+            "a": "Yes. Download the vector SVG format for infinite lossless scaling at any print resolution (300+ DPI billboards, product packaging, book covers, restaurant menus)."
+        },
+        {
+            "q": "Is my input data stored on your servers?",
+            "a": "Zero data is sent to any server. All encoding and rendering takes place inside your local browser memory for complete personal and corporate privacy."
+        },
+        {
+            "q": "What is the difference between static and dynamic QR codes?",
+            "a": "Static QR codes embed information directly into the matrix, requiring no servers, no subscriptions, and never expiring. Dynamic codes route through a third-party server that can be shut down or billed monthly."
+        }
+    ]
   }
 };

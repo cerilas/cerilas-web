@@ -19,11 +19,29 @@ export const htmlToMarkdownManifest = {
     '100% Free & SSRF-Safe: Unlimited conversions with strict IP security and zero sign-up required'
   ],
   seo: {
-    title: 'Free HTML to LLM Markdown Converter (2026) – Clean Web Scraping for AI, ChatGPT, Claude & RAG | Cerilas Tools',
-    description: 'Convert messy webpages and raw HTML into clean, token-efficient Markdown. Strip ads, navbars, and cookie banners to optimize context window tokens for ChatGPT, Claude, and RAG vector databases with zero sign-up.',
-    keywords: 'html to markdown, html to llm markdown, webpage to markdown, web scraping to markdown, html to markdown converter, jina reader alternative, turndown online, clean html for llm, html to markdown rag, token efficient markdown, html to gfm markdown, extract article markdown, free html markdown api, html to markdown claude, html to markdown chatgpt, website to markdown converter, scrape url to markdown free, readability to markdown, langchain web loader alternative, llamaindex html to markdown',
-    ogImage: 'https://tools.cerilas.com/tool-icons/html-to-llm-markdown.png',
-    ogImageAlt: 'Cerilas Free HTML to LLM Markdown Converter',
-    breadcrumbsName: 'HTML to Markdown'
+    title: "HTML to Clean Markdown Converter for LLM & RAG | Cerilas Tools",
+    description: "Convert raw HTML, web pages, and articles into clean, noise-free Markdown. Strips scripts, ads, and navbars to produce high-token-efficiency LLM context.",
+    keywords: "html to markdown, convert html to md, clean markdown for llm, html to llm markdown, strip html for rag, html to text ai prompt, reduce token cost",
+    ogImage: 'https://tools.cerilas.com/tool-icons/html-to-llm-markdown.webp',
+    ogImageAlt: "HTML to Clean Markdown Converter for LLM & RAG | Cerilas Tools",
+    breadcrumbsName: "HTML to LLM Markdown",
+    faq: [
+        {
+            "q": "Does this converter preserve Markdown tables and syntax-highlighted code blocks?",
+            "a": "Yes. HTML tables are converted into clean GitHub-flavored Markdown tables, and pre/code tags retain their language identifiers."
+        },
+        {
+            "q": "Why should web scraping HTML be converted to Markdown for LLMs?",
+            "a": "HTML contains bloated tags, classes, and scripts that waste precious token context windows and confuse LLM attention mechanisms. Markdown is clean and high-signal."
+        },
+        {
+            "q": "Does it remove cookie banners, navigation menus, and advertisement blocks?",
+            "a": "Yes. The extraction algorithm isolates the primary article container and discards navigation chrome, footers, and advertisement containers."
+        },
+        {
+            "q": "Can I copy or download the converted Markdown file directly?",
+            "a": "Yes. You can copy the clean Markdown with one click or download it as a .md file ready for your knowledge base or RAG vector database."
+        }
+    ]
   }
 };

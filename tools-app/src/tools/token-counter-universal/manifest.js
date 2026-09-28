@@ -18,11 +18,29 @@ export const tokenCounterUniversalManifest = {
     'Zero Server Uploads: 100% client-side privacy-first execution with zero sign-up required'
   ],
   seo: {
-    title: 'Free Universal Token Counter (2026) – GPT-6 Astra, Gemini 3.8 Flash, Claude 3.7, DeepSeek & Llama | Cerilas Tools',
-    description: 'Calculate tokens, context window capacity, and API costs for text and documents (PDF, Code, TXT) across GPT-6 Astra, Gemini 3.8 Flash, Claude 3.7, Gemini 3.1 Pro, DeepSeek-V3, Grok 3, and Llama 3. Interactive color-coded visualizer.',
-    keywords: 'token counter, universal token counter, gemini 3.8 flash token counter, gemini 3.8 token counter, gpt-6 astra token counter, gpt-6 token counter, openai token counter, gpt-4o token counter, claude token counter, claude 3.7 token counter, gemini token counter, deepseek token counter, grok 3 token counter, llama 3 token counter, pdf token counter, code token counter, tiktoken online, free token counter, context window calculator, llm cost calculator, token visualizer, token to word converter, o200k tokenizer online, cl100k tokenizer',
-    ogImage: 'https://tools.cerilas.com/tool-icons/token-counter-universal.png',
-    ogImageAlt: 'Cerilas Free Universal Token Counter',
-    breadcrumbsName: 'Token Counter'
+    title: "Universal Token Counter – GPT, Claude & Gemini | Cerilas Tools",
+    description: "Count tokens across OpenAI GPT-4o, Claude 3.7, Gemini 2.5, and DeepSeek. Calculate API pricing per prompt, estimate context limits, and upload documents.",
+    keywords: "token counter, universal token counter, count tokens gpt-4o, claude 3.7 tokens, gemini token counter, llm api pricing calculator, bpe tokenizer online",
+    ogImage: 'https://tools.cerilas.com/tool-icons/token-counter-universal.webp',
+    ogImageAlt: "Universal Token Counter – GPT, Claude & Gemini | Cerilas Tools",
+    breadcrumbsName: "Universal Token Counter",
+    faq: [
+        {
+            "q": "Why do token counts differ between OpenAI, Anthropic, and Google models?",
+            "a": "Each AI provider trains its own tokenizer vocabulary (BPE, SentencePiece, or Unigram). Words, code indentation, and multilingual characters segment into different token counts."
+        },
+        {
+            "q": "What is the practical difference between character count, words, and tokens?",
+            "a": "In English, 1 token averages approximately 4 characters or 0.75 words. For code, JSON, and non-Latin alphabets, token density can be significantly higher."
+        },
+        {
+            "q": "Can I calculate API costs for large batch jobs or fine-tuning?",
+            "a": "Yes. The calculator updates live API pricing per million tokens across GPT-4o, Claude 3.7 Sonnet, Gemini 2.5 Pro, and DeepSeek-V3."
+        },
+        {
+            "q": "Can I upload files to count tokens without pasting text?",
+            "a": "Yes. Upload TXT, MD, JSON, CSV, or PDF documents to inspect token counts and costs instantly."
+        }
+    ]
   }
 };

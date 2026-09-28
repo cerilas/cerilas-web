@@ -189,6 +189,8 @@ export const toolsRegistry = {
 };
 
 const toolAliases = {
+  'qr-generator': 'qr-code-generator',
+  'qr-code': 'qr-code-generator',
   'email-extractor': 'website-email-extractor',
   'website-email-finder': 'website-email-extractor',
   'site-email-extractor': 'website-email-extractor',

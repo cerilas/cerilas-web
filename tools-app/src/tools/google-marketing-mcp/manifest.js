@@ -19,11 +19,37 @@ export const googleMarketingMcpManifest = {
     'Interactive In-Browser Query Playground: Test real-time MCP prompts and view live simulated tool calls and structured analytical reports'
   ],
   seo: {
-    title: 'Connect Your ChatGPT to Google Analytics & Search Console (2026 MCP) | Cerilas Tools',
-    description: 'Connect your ChatGPT, Claude Desktop, or Cursor to Google Analytics 4 (GA4) & Search Console in 60 seconds. Ask ChatGPT questions about real-time traffic, SEO keywords, and conversions using 100% read-only OAuth.',
-    keywords: 'connect your chatgpt to google analytics, connect chatgpt to google analytics, how to connect chatgpt to google analytics, chatgpt google analytics 4 integration, connect chatgpt to google search console, talk to google analytics chatgpt, ask chatgpt about ga4, google analytics mcp server, google search console mcp server, chatgpt custom action google analytics, claude desktop google analytics, cursor mcp ga4, model context protocol marketing, ai seo reporting agent, talk to your website data chatgpt',
-    ogImage: 'https://tools.cerilas.com/og-image.svg',
-    ogImageAlt: 'Connect Your ChatGPT to Google Analytics and Search Console with Cerilas MCP Server',
-    breadcrumbsName: 'Connect ChatGPT to Google Analytics'
+    title: "Connect ChatGPT to Google Analytics & Console | Cerilas Tools",
+    description: "Connect ChatGPT to Google Analytics 4 and Search Console in 60s via MCP. Query real-time traffic, keywords, and conversions with 100% read-only OAuth.",
+    keywords: "connect your chatgpt to google analytics, connect chatgpt to google analytics, chatgpt google analytics 4 integration, connect chatgpt to google search console, google analytics mcp server, model context protocol marketing",
+    ogImage: 'https://tools.cerilas.com/tool-icons/google-marketing-mcp.webp',
+    ogImageAlt: "Connect ChatGPT to Google Analytics & Console | Cerilas Tools",
+    breadcrumbsName: "Connect ChatGPT to Google Analytics & Search Console",
+    faq: [
+        {
+            "q": "How do I connect my ChatGPT to Google Analytics and Search Console?",
+            "a": "Sign in with your Google account on Cerilas Tools, copy the generated MCP prompt, and paste it into ChatGPT, Claude Desktop, or Cursor. The AI connects automatically."
+        },
+        {
+            "q": "Can ChatGPT analyze both GA4 and Search Console together?",
+            "a": "Yes. It cross-references impressions and CTR from Search Console with user sessions and conversion events from Google Analytics 4 in a single conversation."
+        },
+        {
+            "q": "How is this different from uploading CSV exports to ChatGPT?",
+            "a": "Unlike static CSVs, the MCP connection queries live, real-time Google APIs on demand with zero manual file downloading or token limits."
+        },
+        {
+            "q": "Is my Google Analytics data used to train public AI models?",
+            "a": "No. Queries run through your private read-only API credentials and are never retained for model training by Cerilas."
+        },
+        {
+            "q": "Can ChatGPT accidentally edit or delete my analytics data?",
+            "a": "No. The connection utilizes strictly read-only OAuth scopes (analytics.readonly and webmasters.readonly), making accidental modifications impossible."
+        },
+        {
+            "q": "Which AI assistants support Model Context Protocol (MCP)?",
+            "a": "Claude Desktop, Cursor IDE, Windsurf, ChatGPT (via Custom Actions or MCP bridges), and local open-source LLM agents."
+        }
+    ]
   }
 };

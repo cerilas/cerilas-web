@@ -17,11 +17,29 @@ export const euFundingManifest = {
     'Proposal Bookmarks & Export: Pin shortlisted calls to your browser and export grant summaries in Markdown and JSON for research consortium planning'
   ],
   seo: {
-    title: 'EU Funding & Cascade Funding Opportunities (2026) – Live Horizon Europe & FSTP Grants | Cerilas Tools',
-    description: 'Search and filter 660+ open European Commission calls, Horizon Europe grants, EIC sub-grants, and Cascade Funding (FSTP) opportunities. Free directory with deadline trackers and eligibility guides for startups, SMEs, and researchers.',
-    keywords: 'eu funding opportunities, cascade funding, cascade funding open calls, horizon europe calls 2026, fstp grants, financial support to third parties, european commission grants, eic accelerator grants, tubitak horizon europe, eu research grants directory, startup eu grants, sedia portal calls, eu tender opportunities',
-    ogImage: 'https://tools.cerilas.com/tool-icons/eu-funding-opportunities.png',
-    ogImageAlt: 'Cerilas EU Funding and Cascade Funding Opportunities Directory',
-    breadcrumbsName: 'EU & Cascade Funding'
+    title: "EU Funding & Cascade Funding Opportunities 2026 | Cerilas Tools",
+    description: "Search 660+ open European Commission calls, Horizon Europe research grants, and Cascade Funding (FSTP) equity-free lump-sum sub-grants with deadline trackers.",
+    keywords: "eu funding opportunities, cascade funding, horizon europe grants, fstp grants, european commission tenders, startup grants europe, non dilutive funding",
+    ogImage: 'https://tools.cerilas.com/tool-icons/eu-funding-opportunities.webp',
+    ogImageAlt: "EU Funding & Cascade Funding Opportunities 2026 | Cerilas Tools",
+    breadcrumbsName: "EU Funding & Grants Directory",
+    faq: [
+        {
+            "q": "What is Cascade Funding (FSTP) and how does it work?",
+            "a": "Cascade Funding, also known as Financial Support to Third Parties (FSTP), is an EU mechanism where large Horizon Europe projects distribute non-dilutive sub-grants (typically €50k-€150k) to startups and SMEs via simplified 10-page application procedures."
+        },
+        {
+            "q": "Are European Commission and Cascade grants 100% equity-free?",
+            "a": "Yes, European Commission and Cascade Funding grants are 100% equity-free and non-dilutive. Founders and institutions retain full intellectual property and cap table ownership."
+        },
+        {
+            "q": "How frequently is the grant directory updated?",
+            "a": "Our background scrapers refresh European Commission and partner portals daily to capture newly announced deadlines, budget allocations, and amendments."
+        },
+        {
+            "q": "Can startups from Associated Countries (e.g. UK, Turkey, Norway) apply?",
+            "a": "Yes. Entities established in Horizon Europe Associated Countries have the exact same grant eligibility and funding rates as EU Member State applicants."
+        }
+    ]
   }
 };

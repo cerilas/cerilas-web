@@ -18,11 +18,29 @@ export const churnCalculatorManifest = {
   ],
   conversionLabel: 'Calculations',
   seo: {
-    title: 'Churn Calculator - Customer & Revenue Churn Rate, NRR | Cerilas Tools',
-    description: 'Free SaaS Churn Calculator. Calculate Logo Churn Rate, Gross vs Net Revenue Churn, Net Revenue Retention (NRR), and average customer lifetime in months.',
-    keywords: 'churn calculator, customer churn rate, revenue churn calculator, net revenue retention nrr, gross revenue retention grr, calculate churn percentage, negative churn saas, customer retention formula',
-    ogImage: 'https://tools.cerilas.com/og-image.svg',
-    ogImageAlt: 'Cerilas SaaS Churn and NRR Calculator',
-    breadcrumbsName: 'Churn Calculator'
+    title: "Free Churn Rate Calculator – Customer & MRR Churn | Cerilas Tools",
+    description: "Calculate customer churn rate and gross or net revenue churn percentage for SaaS. Benchmark against industry standards to improve subscriber retention rate.",
+    keywords: "churn calculator, churn rate calculator, customer churn rate, revenue churn calculator, saas retention, logo churn, net revenue retention calculator",
+    ogImage: 'https://tools.cerilas.com/tool-icons/churn-calculator.webp',
+    ogImageAlt: "Free Churn Rate Calculator – Customer & MRR Churn | Cerilas Tools",
+    breadcrumbsName: "Churn Rate Calculator",
+    faq: [
+        {
+            "q": "What is the difference between Customer (Logo) Churn and Revenue Churn?",
+            "a": "Customer Churn measures the percentage of accounts lost. Revenue Churn measures the dollar amount of recurring revenue lost, which accounts for tier differences."
+        },
+        {
+            "q": "What is Net Negative Churn and why is it crucial for SaaS scale?",
+            "a": "Net Negative Churn occurs when expansion revenue from existing customers exceeds revenue lost from cancellations, meaning revenue grows even with zero new sales."
+        },
+        {
+            "q": "What is considered a healthy annual churn rate for B2B vs B2C SaaS?",
+            "a": "Enterprise B2B SaaS typically targets 5% to 7% annual churn (<1% monthly). B2C and SMB subscriptions typically experience 3% to 5% monthly churn."
+        },
+        {
+            "q": "How do you accurately convert monthly churn into an annual churn rate?",
+            "a": "Annual Churn = 1 - (1 - Monthly Churn)^12. For example, a 3% monthly churn rate compounds to 30.6% annual churn."
+        }
+    ]
   }
 };

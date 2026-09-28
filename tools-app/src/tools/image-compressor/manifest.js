@@ -17,12 +17,30 @@ export const imageCompressorManifest = {
     'Core Web Vitals LCP Optimization Ready'
   ],
   seo: {
-    title: 'Compress JPEG, Make PNG Smaller in KB & WebP Converter | Cerilas Tools',
-    description: 'Compress JPEG and JPG images online without quality loss. Make PNG smaller in KB while preserving transparent backgrounds. Convert to WebP for Google Core Web Vitals (LCP) with 100% private in-browser compression.',
-    keywords: 'compress jpeg, compress jpg, make png smaller in kb, compress png, reduce jpg file size, compress image to 50kb, compress image to 100kb, photo size reducer in kb, convert image to webp, lossless png compressor, png to webp, jpg to webp, free online image compressor, core web vitals image optimizer',
-    ogImage: 'https://tools.cerilas.com/og-image-compressor.svg',
-    ogImageAlt: 'Cerilas Free Image Compressor – Compress JPEG, Make PNG Smaller in KB, WebP Converter',
-    breadcrumbsName: 'Compress JPEG & PNG Online'
+    title: "Free Image Compressor – Compress WebP, PNG, JPG | Cerilas Tools",
+    description: "Compress JPG, PNG, WebP, AVIF, and SVG images locally in your browser. Reduce file sizes up to 90% with zero quality loss and no server uploads. Instant ZIP.",
+    keywords: "image compressor, compress png, compress jpeg, convert to webp, reduce image size, lossless image compression, in-browser image compressor, web vitals image",
+    ogImage: 'https://tools.cerilas.com/tool-icons/image-compressor.webp',
+    ogImageAlt: "Free Image Compressor – Compress WebP, PNG, JPG | Cerilas Tools",
+    breadcrumbsName: "Image Compressor",
+    faq: [
+        {
+            "q": "Are my images uploaded to any remote server?",
+            "a": "No. All processing happens entirely within your web browser using HTML5 Canvas and WebAssembly. Your photos and graphics never leave your computer."
+        },
+        {
+            "q": "Which image formats are supported for compression?",
+            "a": "JPEG, PNG, WebP, AVIF, and SVG files with individual download or batch multi-file ZIP archive export."
+        },
+        {
+            "q": "Is there a file size or quantity limit on uploads?",
+            "a": "Because compression is local, there are no artificial file size ceilings. You can compress images of any megapixel resolution your browser memory accommodates."
+        },
+        {
+            "q": "How does image compression improve Google SEO and Core Web Vitals?",
+            "a": "Optimized WebP and compressed PNGs load significantly faster on mobile networks, reducing Largest Contentful Paint (LCP) times and boosting Google rankings."
+        }
+    ]
   }
 };
 

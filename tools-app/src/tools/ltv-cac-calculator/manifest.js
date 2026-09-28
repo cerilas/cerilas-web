@@ -18,11 +18,29 @@ export const ltvCacCalculatorManifest = {
   ],
   conversionLabel: 'Calculations',
   seo: {
-    title: 'LTV:CAC Ratio & Payback Period Calculator | Cerilas Tools',
-    description: 'Free SaaS LTV:CAC Calculator. Calculate your LTV to CAC ratio, CAC payback period in months, and evaluate unit economics against top venture capital benchmarks.',
-    keywords: 'ltv cac calculator, ltv to cac ratio, cac payback period calculator, saas unit economics calculator, 3x ltv cac rule, calculate cac payback months, venture capital saas benchmarks',
-    ogImage: 'https://tools.cerilas.com/og-image.svg',
-    ogImageAlt: 'Cerilas LTV to CAC Ratio and Payback Calculator',
-    breadcrumbsName: 'LTV:CAC Calculator'
+    title: "Free LTV:CAC Ratio Calculator – Unit Economics | Cerilas Tools",
+    description: "Evaluate your SaaS unit economics with our free LTV:CAC Ratio Calculator. Benchmark customer lifetime value against acquisition costs for venture readiness.",
+    keywords: "ltv cac calculator, ltv to cac ratio, saas unit economics, ltv cac benchmark, startup valuation metrics, venture capital unit economics, customer roi",
+    ogImage: 'https://tools.cerilas.com/tool-icons/ltv-cac-calculator.webp',
+    ogImageAlt: "Free LTV:CAC Ratio Calculator – Unit Economics | Cerilas Tools",
+    breadcrumbsName: "LTV:CAC Ratio Calculator",
+    faq: [
+        {
+            "q": "What is the golden benchmark for the LTV:CAC ratio in SaaS?",
+            "a": "A 3:1 ratio is widely recognized as the industry sweet spot. It means you generate $3 of gross profit for every $1 invested in acquisition."
+        },
+        {
+            "q": "What does an LTV:CAC ratio below 3:1 indicate?",
+            "a": "A ratio below 3:1 (e.g. 1.5:1) signals that customer acquisition is too expensive or churn is too high, making growth unprofitable and cash-draining."
+        },
+        {
+            "q": "Can an LTV:CAC ratio be too high (e.g. above 5:1)?",
+            "a": "Yes. An LTV:CAC ratio over 5:1 usually means you are under-investing in marketing and sales, leaving market share vulnerable to aggressive competitors."
+        },
+        {
+            "q": "How do venture capital firms evaluate LTV:CAC during Series A and B rounds?",
+            "a": "VCs examine the ratio alongside CAC payback periods to ensure that capital injected into paid acquisition will yield predictable, compounding returns."
+        }
+    ]
   }
 };

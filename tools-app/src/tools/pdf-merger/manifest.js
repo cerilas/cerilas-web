@@ -17,11 +17,29 @@ export const pdfMergerManifest = {
     'Zero File Limits: No daily limits, no file count limits, and no watermark added'
   ],
   seo: {
-    title: 'Merge PDF Online Free – Combine Multiple PDF Files In-Browser | Cerilas Tools',
-    description: 'Combine multiple PDF files into one document in seconds. 100% private, free, and processed entirely in your browser with zero server uploads. Reorder pages, sort files, and preview before merging.',
-    keywords: 'merge pdf, combine pdf files, merge pdf online free, merge multiple pdfs into one, reorder pdf before merge, combine pdf without watermark, private pdf merger in browser, pdf joiner no upload, free pdf combiner, merge scanned pdf documents',
-    ogImage: 'https://tools.cerilas.com/tool-icons/pdf-merger.png',
-    ogImageAlt: 'Cerilas Free In-Browser PDF Merger',
-    breadcrumbsName: 'Merge PDF Online'
+    title: "Free PDF Merger – Combine Multiple PDF Files | Cerilas Tools",
+    description: "Merge multiple PDF files into a single organized document online. Drag and drop reordering, page preview, and 100% private in-browser client-side merging.",
+    keywords: "pdf merger, merge pdf online free, combine pdf files, join pdf pages, combine multiple pdfs, free pdf combiner, private pdf merger",
+    ogImage: 'https://tools.cerilas.com/tool-icons/pdf-merger.webp',
+    ogImageAlt: "Free PDF Merger – Combine Multiple PDF Files | Cerilas Tools",
+    breadcrumbsName: "PDF Merger",
+    faq: [
+        {
+            "q": "How do I rearrange the order of merged PDF documents?",
+            "a": "Simply drag and drop the document cards in your desired sequence before clicking \"Merge PDFs\". The final document will reflect your exact arrangement."
+        },
+        {
+            "q": "Is there a limit on how many PDF files I can combine at once?",
+            "a": "No. You can combine dozens of PDF documents at once without artificial paywalls or limits, bounded only by your browser's memory."
+        },
+        {
+            "q": "Do merged PDF documents lose bookmarks, links, or text clarity?",
+            "a": "No. Vector fonts, clickable hyperlinks, and original page resolutions are preserved with zero loss in document fidelity."
+        },
+        {
+            "q": "Are my confidential documents uploaded to any third-party server?",
+            "a": "No. All concatenation occurs locally on your computer inside the browser runtime. Your files remain 100% private."
+        }
+    ]
   }
 };

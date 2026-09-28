@@ -17,11 +17,29 @@ export const trlCalculatorManifest = {
     '100% Client-Side Privacy: Proprietary IP, formulas, and confidential research data are never transmitted to any server'
   ],
   seo: {
-    title: 'Free TRL Calculator (2026) – Technology Readiness Level Assessment | Cerilas Tools',
-    description: 'Calculate and audit Technology Readiness Levels (TRL 1 to 9) for Horizon Europe, EIC Accelerator, NASA, and TÜBİTAK R&D projects. Free online questionnaire, gap analysis, and grant eligibility matcher.',
-    keywords: 'trl calculator, technology readiness level calculator, horizon europe trl, eic accelerator trl, nasa trl assessment tool, tubitak 1501 trl, software readiness level, srl calculator, deeptech grant trl calculator, r&d readiness score, trl 1 to 9 definitions, research and development assessment',
-    ogImage: 'https://tools.cerilas.com/tool-icons/trl-calculator.png',
-    ogImageAlt: 'Cerilas TRL Calculator for R&D Projects',
-    breadcrumbsName: 'TRL Calculator'
+    title: "Free TRL Calculator (1-9) – Readiness Assessment | Cerilas Tools",
+    description: "Calculate Technology Readiness Level (TRL 1-9) for Horizon Europe, NASA, and DeepTech R&D grants. Includes gap analysis, milestone roadmap, and grant matching.",
+    keywords: "trl calculator, technology readiness level, horizon europe trl, nasa trl assessment, deeptech trl, r&d readiness scale, software readiness level",
+    ogImage: 'https://tools.cerilas.com/tool-icons/trl-calculator.webp',
+    ogImageAlt: "Free TRL Calculator (1-9) – Readiness Assessment | Cerilas Tools",
+    breadcrumbsName: "TRL Calculator",
+    faq: [
+        {
+            "q": "What is the operational difference between TRL 4, TRL 6, and TRL 8?",
+            "a": "TRL 4 represents laboratory component validation. TRL 6 represents a prototype demonstrated in an operational or relevant simulated environment. TRL 8 indicates a completed, qualified system ready for commercial deployment."
+        },
+        {
+            "q": "Which Horizon Europe funding schemes match my assessed TRL?",
+            "a": "EIC Pathfinder targets early breakthrough concepts (TRL 1-4). EIC Transition supports technology maturation (TRL 4-6). EIC Accelerator finances commercial scaleup and deployment (TRL 5-9)."
+        },
+        {
+            "q": "Does this calculator support software and digital innovations (SRL)?",
+            "a": "Yes. It includes specialized software readiness metrics covering algorithm formulation, alpha/beta test benches, continuous integration in staging, and live production deployment."
+        },
+        {
+            "q": "Can I export the TRL diagnostic report for grant evaluators?",
+            "a": "Yes. The calculator generates an executive summary report with audit checklists, milestone gap analyses, and grant recommendations ready for submission."
+        }
+    ]
   }
 };

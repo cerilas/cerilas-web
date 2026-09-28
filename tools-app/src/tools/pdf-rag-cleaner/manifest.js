@@ -18,11 +18,29 @@ export const pdfRagCleanerManifest = {
     'Developer-Ready Export: Download clean .md (Markdown), .json (LangChain / LlamaIndex format), or copy directly to clipboard'
   ],
   seo: {
-    title: 'Free PDF to RAG Cleaner & Markdown Converter (2026) – Clean Chunks for LangChain, LlamaIndex & Vector DBs | Cerilas Tools',
-    description: 'Convert messy PDFs into clean Markdown and structured RAG JSON chunks with metadata for LLM vector embeddings. Strips headers/footers, repairs hyphenation, and estimates tokens 100% in-browser with zero uploads.',
-    keywords: 'pdf to rag cleaner, pdf to rag converter, clean pdf for rag, pdf to markdown rag, pdf chunking for rag, langchain pdf cleaner, llamaindex pdf parser, clean pdf for embeddings, pdf to json chunks, vector database pdf converter, private pdf rag extractor, text embedding 3 small chunker, pinecone pdf chunking, pgvector document ingestion, weaviate pdf loader, chroma vector store pdf, financial 10k pdf rag cleaner, arxiv pdf to markdown rag, parent document retriever pdf, strip headers footers pdf rag, llama parse alternative free, unstructured io alternative free, haystack pdf converter, dify pdf knowledge base, auto gen knowledge ingestion',
-    ogImage: 'https://tools.cerilas.com/og-image.svg',
-    ogImageAlt: 'Cerilas Free PDF to RAG Cleaner & Markdown Converter',
-    breadcrumbsName: 'PDF to RAG Cleaner'
+    title: "PDF to Clean Markdown & RAG Chunks Generator | Cerilas Tools",
+    description: "Convert messy PDFs into clean Markdown and semantic RAG chunks for LangChain, LlamaIndex, and vector databases. Strips headers, footers, and page numbers.",
+    keywords: "pdf to rag cleaner, rag chunking tool, pdf to markdown for llm, clean pdf for vector database, langchain pdf cleaner, llamaindex chunker, embedding preprocessor",
+    ogImage: 'https://tools.cerilas.com/tool-icons/pdf-rag-cleaner.webp',
+    ogImageAlt: "PDF to Clean Markdown & RAG Chunks Generator | Cerilas Tools",
+    breadcrumbsName: "PDF to RAG Cleaner",
+    faq: [
+        {
+            "q": "Why should I clean PDFs before generating vector embeddings for RAG?",
+            "a": "Raw PDFs contain repeated running headers, footers, hyphenated broken words, and page numbers that pollute vector embeddings and cause hallucinations during retrieval."
+        },
+        {
+            "q": "What chunking strategies and token overlaps are available?",
+            "a": "Select from Token-based sliding window (128-1024 tokens), recursive character chunking, or semantic header splitting with customizable token overlap."
+        },
+        {
+            "q": "Which vector databases and frameworks are directly supported?",
+            "a": "Exports clean JSON, JSONL, and Markdown compatible with LangChain, LlamaIndex, Pinecone, Chroma, Qdrant, Weaviate, and Milvus."
+        },
+        {
+            "q": "Does this tool preserve Markdown tables and code snippets?",
+            "a": "Yes. Table structures are extracted and formatted as standard GitHub-flavored Markdown tables, maintaining column relationships for retrieval."
+        }
+    ]
   }
 };

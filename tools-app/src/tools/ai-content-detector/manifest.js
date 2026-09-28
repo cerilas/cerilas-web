@@ -18,11 +18,29 @@ export const aiContentDetectorManifest = {
     'Exportable Audit Report: One-click report download and clipboard copy for academic, editorial, and SEO verification'
   ],
   seo: {
-    title: 'Free AI Content Detector (2026) – Text & PDF Scanner with 0-100% Score & Pros/Cons | Cerilas Tools',
-    description: 'Free AI Content Detector and PDF scanner. Accurately detect ChatGPT-4o, Claude 3.5 Sonnet, Gemini, and DeepSeek text with 0-100% scores, burstiness & perplexity metrics, and itemized Pros & Cons. 100% private in-browser analysis.',
-    keywords: 'ai content detector, free ai detector, chatgpt detector, check if text is ai, free ai detector 0 to 100, turnitin ai detector free, zerogpt alternative, copyleaks alternative free, ai detector for pdf, pdf essay ai checker, claude 3.5 sonnet detector, deepseek ai detector, perplexity and burstiness ai detector, ai vs human text score, detect ai generated text, college essay ai checker, best ai detector for teachers, bypass ai detection checker, private ai detector no sign up, student paper ai scanner, seo content ai detector, gptzero free alternative, ai plagiarism checker free, winston ai alternative',
-    ogImage: 'https://tools.cerilas.com/og-image.svg',
-    ogImageAlt: 'Cerilas Free AI Content Detector & In-Browser PDF Scanner',
-    breadcrumbsName: 'AI Content Detector'
+    title: "Free AI Content Detector & Text Scanner | Cerilas Tools",
+    description: "Scan text and PDF documents to detect AI-generated content from ChatGPT, Claude, and Gemini. View perplexity metrics, burstiness scores, and highlighted lines.",
+    keywords: "ai content detector, detect chatgpt text, free ai detector, ai text scanner, claude detector, perplexity checker, check if text is ai, ai essay checker",
+    ogImage: 'https://tools.cerilas.com/tool-icons/ai-content-detector.webp',
+    ogImageAlt: "Free AI Content Detector & Text Scanner | Cerilas Tools",
+    breadcrumbsName: "AI Content Detector",
+    faq: [
+        {
+            "q": "Can AI content detectors achieve 100% detection accuracy?",
+            "a": "No detector is infallible. Statistical models measure likelihood based on entropy and burstiness, which provides strong indicators but should be paired with human review."
+        },
+        {
+            "q": "Can I upload full multi-page PDF documents for scanning?",
+            "a": "Yes. The detector extracts text across all pages of uploaded PDF documents, providing paragraph-by-paragraph breakdown scores."
+        },
+        {
+            "q": "Does Google penalize AI-generated content in search rankings?",
+            "a": "Google prioritizes helpful, accurate, human-first content (E-E-A-T). Unedited AI content with low information gain and repetitive phrasing often suffers in ranking."
+        },
+        {
+            "q": "What is the difference between perplexity and burstiness?",
+            "a": "Perplexity measures how predictable words are in sequence (LLMs are predictable). Burstiness measures variance in sentence length and structure (humans are varied)."
+        }
+    ]
   }
 };

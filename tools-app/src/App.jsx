@@ -40,6 +40,7 @@ import LegalView from './legal/LegalView';
 import PricingView from './pricing/PricingView';
 import { LEGAL_DOCS } from './legal/legalContent';
 import { toolsRegistry, getAllRegisteredTools, getRegisteredTool } from './tools/registry';
+import { getToolSeo } from './seo/toolsSeoRegistry';
 import { useTranslation } from './i18n';
 import { getConversionCount, getConversionLabel, getShortConversionLabel } from './utils/toolMetrics';
 import './index.css';
@@ -457,6 +458,18 @@ export default function App() {
 
     const activeRegistered = currentSlug ? getRegisteredTool(currentSlug) : null;
     const manifest = activeRegistered?.manifest;
+    const toolSeo = currentSlug ? getToolSeo(currentSlug) : null;
+
+    const cleanupToolJsonLd = () => {
+      const bcScript = document.getElementById('tool-breadcrumbs-jsonld');
+      if (bcScript) bcScript.remove();
+      const oldBc = document.getElementById('qr-breadcrumbs-jsonld');
+      if (oldBc) oldBc.remove();
+      const webAppScript = document.getElementById('tool-webapp-jsonld');
+      if (webAppScript) webAppScript.remove();
+      const faqScript = document.getElementById('tool-faq-jsonld');
+      if (faqScript) faqScript.remove();
+    };
 
     if (isPricing) {
       const pageTitle = 'Pricing & Plans – Cerilas Tools | Transparent Zero-Surprise Pricing';
@@ -484,6 +497,7 @@ export default function App() {
       setMeta('twitter:title', 'name', pageTitle);
       setMeta('twitter:description', 'name', pageDesc);
       setMeta('twitter:image', 'name', ogImgUrl);
+      cleanupToolJsonLd();
       return;
     }
 
@@ -515,20 +529,16 @@ export default function App() {
       setMeta('twitter:url', 'name', pageUrl);
       setMeta('twitter:image', 'name', ogImgUrl);
 
-      const bcScript = document.getElementById('tool-breadcrumbs-jsonld');
-      if (bcScript) bcScript.remove();
-      const oldBc = document.getElementById('qr-breadcrumbs-jsonld');
-      if (oldBc) oldBc.remove();
-    } else if (manifest && manifest.seo) {
-      const seo = manifest.seo;
-      const pageTitle = seo.title || `${manifest.title} | Cerilas Tools`;
-      const pageDesc = seo.description || manifest.shortDescription;
-      const pageKeywords = seo.keywords || '';
-      const pageUrl = window.location.pathname.startsWith('/tool/')
-        ? `https://tools.cerilas.com${window.location.pathname}`
-        : `https://tools.cerilas.com/#/tool/${currentSlug}`;
-      const ogImgUrl = seo.ogImage || 'https://tools.cerilas.com/og-image.svg';
-      const ogImgAlt = seo.ogImageAlt || pageTitle;
+      cleanupToolJsonLd();
+      return;
+    } else if (currentSlug && (toolSeo || manifest)) {
+      const canonicalSlug = toolSeo?.slug || manifest?.slug || currentSlug;
+      const pageTitle = toolSeo?.title || manifest?.seo?.title || `${manifest?.title || 'Tool'} | Cerilas Tools`;
+      const pageDesc = toolSeo?.description || manifest?.seo?.description || manifest?.shortDescription || '';
+      const pageKeywords = toolSeo?.keywords || manifest?.seo?.keywords || '';
+      const pageUrl = `https://tools.cerilas.com/tool/${canonicalSlug}`;
+      const ogImgUrl = `https://tools.cerilas.com/tool-icons/${canonicalSlug}.webp`;
+      const ogImgAlt = toolSeo?.title || pageTitle;
 
       document.title = pageTitle;
       setMeta('description', 'name', pageDesc);
@@ -542,7 +552,7 @@ export default function App() {
       setMeta('og:image', 'property', ogImgUrl);
       setMeta('og:image:width', 'property', '1200');
       setMeta('og:image:height', 'property', '630');
-      setMeta('og:image:type', 'property', 'image/svg+xml');
+      setMeta('og:image:type', 'property', 'image/webp');
       setMeta('og:image:alt', 'property', ogImgAlt);
 
       // Twitter Card
@@ -573,17 +583,75 @@ export default function App() {
           {
             '@type': 'ListItem',
             'position': 2,
-            'name': manifest.category || 'Utilities',
-            'item': 'https://tools.cerilas.com/#/'
+            'name': toolSeo?.category || manifest?.category || 'Utilities',
+            'item': toolSeo?.categorySlug ? `https://tools.cerilas.com/${toolSeo.categorySlug}` : 'https://tools.cerilas.com/'
           },
           {
             '@type': 'ListItem',
             'position': 3,
-            'name': seo.breadcrumbsName || manifest.title,
+            'name': toolSeo?.name || manifest?.title,
             'item': pageUrl
           }
         ]
       });
+
+      // WebApplication Structured Data
+      let webAppScript = document.getElementById('tool-webapp-jsonld');
+      if (!webAppScript) {
+        webAppScript = document.createElement('script');
+        webAppScript.id = 'tool-webapp-jsonld';
+        webAppScript.type = 'application/ld+json';
+        document.head.appendChild(webAppScript);
+      }
+      webAppScript.textContent = JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'WebApplication',
+        name: toolSeo?.name || manifest?.title,
+        headline: toolSeo?.h1 || pageTitle,
+        description: pageDesc,
+        applicationCategory: toolSeo?.category || manifest?.category || 'Utilities',
+        operatingSystem: 'All (Modern Web Browser)',
+        url: pageUrl,
+        browserRequirements: 'Requires JavaScript and HTML5 Canvas / WebAssembly support',
+        offers: {
+          '@type': 'Offer',
+          price: '0',
+          priceCurrency: 'USD',
+          availability: 'https://schema.org/InStock'
+        },
+        aggregateRating: {
+          '@type': 'AggregateRating',
+          ratingValue: toolSeo?.rating || '4.9',
+          ratingCount: toolSeo?.ratingCount || '1000',
+          bestRating: '5',
+          worstRating: '1'
+        }
+      });
+
+      // FAQPage Structured Data
+      let faqScript = document.getElementById('tool-faq-jsonld');
+      if (toolSeo?.faq && toolSeo.faq.length > 0) {
+        if (!faqScript) {
+          faqScript = document.createElement('script');
+          faqScript.id = 'tool-faq-jsonld';
+          faqScript.type = 'application/ld+json';
+          document.head.appendChild(faqScript);
+        }
+        faqScript.textContent = JSON.stringify({
+          '@context': 'https://schema.org',
+          '@type': 'FAQPage',
+          mainEntity: toolSeo.faq.map((item) => ({
+            '@type': 'Question',
+            name: item.q,
+            acceptedAnswer: {
+              '@type': 'Answer',
+              text: item.a
+            }
+          }))
+        });
+      } else if (faqScript) {
+        faqScript.remove();
+      }
     } else {
       const homeTitle = 'Cerilas Tools | Free QR Code Generator & Advanced Utilities';
       const homeDesc = 'Minimalist, privacy-focused web tools and utilities built by Cerilas High Tech.';
@@ -605,10 +673,7 @@ export default function App() {
       setMeta('twitter:url', 'name', homeUrl);
       setMeta('twitter:image', 'name', homeOgImg);
 
-      const bcScript = document.getElementById('tool-breadcrumbs-jsonld');
-      if (bcScript) bcScript.remove();
-      const oldBc = document.getElementById('qr-breadcrumbs-jsonld');
-      if (oldBc) oldBc.remove();
+      cleanupToolJsonLd();
     }
 
     // Google Analytics (GA4) Page View tracking for SPA route transitions
@@ -709,10 +774,10 @@ export default function App() {
     forceScrollToTop();
   };
 
-  // Find active tool configuration from registry
-  const activeRegistered = currentSlug ? toolsRegistry[currentSlug] : null;
+  // Find active tool configuration from registry (supporting aliases)
+  const activeRegistered = currentSlug ? getRegisteredTool(currentSlug) : null;
   const ActiveToolComponent = activeRegistered ? activeRegistered.component : null;
-  const activeToolMeta = tools.find((tItem) => tItem.slug === currentSlug) || activeRegistered?.manifest;
+  const activeToolMeta = tools.find((tItem) => tItem.slug === currentSlug || tItem.slug === activeRegistered?.manifest?.slug) || activeRegistered?.manifest;
 
   // Dynamic categories list
   const categories = Array.from(new Set(['All', 'AI Assisted', ...tools.map((t) => t.category).filter(Boolean)]));
