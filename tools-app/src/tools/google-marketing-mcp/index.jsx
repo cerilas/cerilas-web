@@ -25,9 +25,18 @@ import {
   Zap,
   Info,
   LogOut,
-  AlertCircle
+  AlertCircle,
+  Users,
+  Clock,
+  Wrench,
+  X,
+  ChevronDown,
+  ChevronUp
 } from 'lucide-react';
 import { googleMarketingMcpManifest } from './manifest';
+import { useToolAnalytics } from '../../hooks/useToolAnalytics';
+import { Button, Badge, ToolHeader } from '../../components/ui';
+import ToolSeoDivider from '../../components/ui/ToolSeoDivider';
 import GoogleMarketingMcpSeo from './components/GoogleMarketingMcpSeo';
 import './google-marketing-mcp.css';
 
@@ -69,7 +78,14 @@ const SAMPLE_SIMULATION_DATA = {
   }
 };
 
-export default function GoogleMarketingMcp({ onBack }) {
+export default function GoogleMarketingMcp({ onBack, toolMeta }) {
+  const {
+    trackUse,
+    trackCopy,
+    visitorCount,
+    conversionCount,
+    getConversionLabel
+  } = useToolAnalytics(googleMarketingMcpManifest.slug, toolMeta);
   const [isConnected, setIsConnected] = useState(false);
   const [isDemoMode, setIsDemoMode] = useState(true);
   const [userEmail, setUserEmail] = useState('');
@@ -505,27 +521,34 @@ const response = await ai.models.generateContent({
 console.log(response.text);`;
 
   return (
-    <div className="gmcp-root">
-      {/* Back button */}
-      {onBack && (
-        <button
-          onClick={onBack}
-          style={{
-            alignSelf: 'flex-start',
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '0.4rem',
-            background: 'none',
-            border: 'none',
-            color: 'var(--text-muted)',
-            cursor: 'pointer',
-            fontSize: '0.88rem',
-            padding: '0.25rem 0'
-          }}
-        >
-          ← Back to All Tools
-        </button>
-      )}
+    <div className="c-tool-page-container gmcp-root">
+      {/* 1. Header with Breadcrumbs, Logo, and Visitor / Conversion Statistics */}
+      <ToolHeader
+        title={toolMeta?.title || googleMarketingMcpManifest.title}
+        subtitle={toolMeta?.short_description || googleMarketingMcpManifest.shortDescription}
+        onBack={onBack}
+        slug={googleMarketingMcpManifest.slug}
+        badges={
+          <>
+            {visitorCount > 0 && (
+              <Badge variant="blue" icon={<Users size={12} strokeWidth={2} />}>
+                {visitorCount.toLocaleString()} visitors
+              </Badge>
+            )}
+            {conversionCount > 0 && (
+              <Badge variant="purple" icon={<Activity size={12} strokeWidth={2} />}>
+                {conversionCount.toLocaleString()} {getConversionLabel()}
+              </Badge>
+            )}
+            <Badge variant="neutral" icon={<Bot size={12} strokeWidth={2} />}>
+              MCP Server
+            </Badge>
+            <Badge variant="success" icon={<ShieldCheck size={12} strokeWidth={2} />}>
+              OAuth 2.0 Read-Only
+            </Badge>
+          </>
+        }
+      />
 
       {/* Auth Error Banner if present */}
       {authError && (
@@ -544,40 +567,13 @@ console.log(response.text);`;
           <span>OAuth Error: {authError}</span>
           <button
             onClick={() => setAuthError(null)}
-            style={{ marginLeft: 'auto', background: 'none', border: 'none', color: 'inherit', cursor: 'pointer' }}
+            style={{ marginLeft: 'auto', background: 'none', border: 'none', color: 'inherit', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
+            aria-label="Dismiss error"
           >
-            ✕
+            <X size={16} />
           </button>
         </div>
       )}
-
-      {/* Hero Card */}
-      <section className="gmcp-hero-card">
-        <div className="gmcp-hero-glow" />
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '0.25rem' }}>
-          <img 
-            src="/tool-icons/google-marketing-mcp.webp" 
-            alt="Google Marketing MCP Server Logo"
-            className="tool-apple-logo"
-            width={72}
-            height={72}
-            style={{ borderRadius: '18px', boxShadow: '0 8px 28px rgba(0,0,0,0.35)', border: '1px solid rgba(255,255,255,0.1)' }}
-            onError={(e) => {
-              e.target.src = '/tool-icons/google-marketing-mcp.png';
-            }}
-          />
-        </div>
-        <div className="gmcp-badge">
-          <Sparkles size={14} /> Model Context Protocol (MCP) • Multi-Client Ready
-        </div>
-        <h1 className="gmcp-hero-title">
-          Google Analytics & Search Console <span>MCP Server</span>
-        </h1>
-        <p className="gmcp-hero-subtitle">
-          Connect your live Google Analytics 4, Search Console, and Google Ads data directly to ChatGPT, Claude Desktop, 
-          and Cursor. Ask questions in natural English and audit organic traffic, keywords, and ad spend in real time.
-        </p>
-      </section>
 
       {/* Supported Services Status Grid */}
       <div className="gmcp-services-grid">
@@ -591,15 +587,16 @@ console.log(response.text);`;
               <h2 className="gmcp-service-name">Search Console</h2>
             </div>
             <span className={`gmcp-service-status-pill ${isConnected ? 'connected' : 'ready'}`}>
-              {isConnected ? '● Connected' : 'Ready'}
+              <span className={`gmcp-status-dot ${isConnected ? 'connected' : 'ready'}`} />
+              {isConnected ? 'Connected' : 'Ready'}
             </span>
           </div>
           <p className="gmcp-service-desc">
             Direct access to organic impressions, search clicks, query positions, CTR, and live URL inspection data.
           </p>
           <div className="gmcp-service-metrics">
-            <span className="gmcp-metric-tag">Clicks & Impressions</span>
-            <span className="gmcp-metric-tag">Queries & Rankings</span>
+            <span className="gmcp-metric-tag">Clicks &amp; Impressions</span>
+            <span className="gmcp-metric-tag">Queries &amp; Rankings</span>
             <span className="gmcp-metric-tag">Index Status</span>
           </div>
         </div>
@@ -614,7 +611,8 @@ console.log(response.text);`;
               <h2 className="gmcp-service-name">Google Analytics 4</h2>
             </div>
             <span className={`gmcp-service-status-pill ${isConnected ? 'connected' : 'ready'}`}>
-              {isConnected ? '● Connected' : 'Ready'}
+              <span className={`gmcp-status-dot ${isConnected ? 'connected' : 'ready'}`} />
+              {isConnected ? 'Connected' : 'Ready'}
             </span>
           </div>
           <p className="gmcp-service-desc">
@@ -637,7 +635,8 @@ console.log(response.text);`;
               <h2 className="gmcp-service-name">Google Ads</h2>
             </div>
             <span className={`gmcp-service-status-pill ${isConnected ? 'connected' : 'ready'}`}>
-              {isConnected ? '● Connected' : 'Ready'}
+              <span className={`gmcp-status-dot ${isConnected ? 'connected' : 'ready'}`} />
+              {isConnected ? 'Connected' : 'Ready'}
             </span>
           </div>
           <p className="gmcp-service-desc">
@@ -645,7 +644,7 @@ console.log(response.text);`;
           </p>
           <div className="gmcp-service-metrics">
             <span className="gmcp-metric-tag">Campaign ROAS</span>
-            <span className="gmcp-metric-tag">Ad Spend & CPC</span>
+            <span className="gmcp-metric-tag">Ad Spend &amp; CPC</span>
             <span className="gmcp-metric-tag">Negative Keywords</span>
           </div>
         </div>
@@ -667,38 +666,41 @@ console.log(response.text);`;
 
           <div className="gmcp-auth-actions">
             {!isConnected ? (
-              <button
-                className="gmcp-btn gmcp-btn-primary"
+              <Button
+                variant="primary"
+                icon={<Globe size={16} />}
                 onClick={handleConnectGoogle}
               >
-                <Globe size={16} /> Sign in with Google
-              </button>
+                Sign in with Google
+              </Button>
             ) : (
               <>
-                <button
-                  className="gmcp-btn gmcp-btn-secondary"
+                <Button
+                  variant="secondary"
+                  icon={<RefreshCw size={14} />}
                   onClick={handleConnectGoogle}
                 >
-                  <RefreshCw size={15} /> Re-authorize
-                </button>
-                <button
-                  className="gmcp-btn gmcp-btn-danger"
+                  Re-authorize
+                </Button>
+                <Button
+                  variant="danger"
+                  icon={<LogOut size={14} />}
                   onClick={handleDisconnect}
                   title="Revoke Google Access and Delete Key"
                 >
-                  <LogOut size={15} /> Disconnect
-                </button>
+                  Disconnect
+                </Button>
               </>
             )}
 
-            <button
-              className="gmcp-btn gmcp-btn-secondary"
+            <Button
+              variant="secondary"
+              icon={<SlidersHorizontal size={14} />}
               onClick={() => setIsDemoMode(!isDemoMode)}
               title="Toggle between real account and simulated sandbox"
             >
-              <SlidersHorizontal size={15} />
               {isDemoMode ? 'Sandbox: Active' : 'Live Mode'}
-            </button>
+            </Button>
           </div>
         </div>
 
@@ -709,7 +711,7 @@ console.log(response.text);`;
             gap: '1rem',
             flexWrap: 'wrap',
             padding: '1rem',
-            background: 'var(--bg-color)',
+            background: 'rgba(150, 150, 150, 0.04)',
             border: '1px solid var(--card-border)',
             borderRadius: '12px'
           }}>
@@ -826,28 +828,15 @@ console.log(response.text);`;
       </section>
 
       {/* Step 2: 1-Click Magic Auto-Installer Prompt */}
-      <section className="gmcp-setup-section" style={{
-        border: '1px solid rgba(59, 130, 246, 0.35)',
-        background: 'linear-gradient(180deg, rgba(59, 130, 246, 0.05) 0%, var(--card-bg) 100%)',
-        position: 'relative'
-      }}>
+      <section className="gmcp-setup-section">
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem' }}>
             <span className="gmcp-step-indicator">
               <span className="gmcp-step-num">2</span> 1-Click Auto-Setup Prompt
             </span>
-            <span style={{
-              background: 'linear-gradient(135deg, #10b981 0%, #3b82f6 100%)',
-              color: '#ffffff',
-              fontSize: '0.72rem',
-              fontWeight: 700,
-              padding: '0.2rem 0.65rem',
-              borderRadius: '999px',
-              textTransform: 'uppercase',
-              letterSpacing: '0.04em'
-            }}>
+            <Badge variant="success" icon={<CheckCircle2 size={12} strokeWidth={2} />}>
               Zero Manual Configuration
-            </span>
+            </Badge>
           </div>
 
           <h2 style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--text-main)', margin: '0.2rem 0 0 0' }}>
@@ -862,35 +851,19 @@ console.log(response.text);`;
 
         {/* Big Action Button */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap', marginTop: '0.25rem' }}>
-          <button
-            type="button"
-            className="gmcp-btn gmcp-btn-primary"
-            onClick={() => handleCopy(magicAutoSetupPrompt, 'magicAutoPrompt')}
-            style={{
-              padding: '0.85rem 1.6rem',
-              fontSize: '0.98rem',
-              fontWeight: 600,
-              borderRadius: '12px',
-              background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
-              color: '#fff',
-              boxShadow: '0 4px 18px rgba(59, 130, 246, 0.35)',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '0.6rem'
+          <Button
+            variant="primary"
+            size="lg"
+            icon={copiedItem === 'magicAutoPrompt' ? <Check size={18} /> : <Zap size={18} />}
+            onClick={() => {
+              handleCopy(magicAutoSetupPrompt, 'magicAutoPrompt');
+              trackCopy?.({ type: 'magic_auto_prompt' });
             }}
           >
-            {copiedItem === 'magicAutoPrompt' ? (
-              <>
-                <Check size={18} color="#10b981" /> Copied Magic Prompt to Clipboard!
-              </>
-            ) : (
-              <>
-                <Zap size={18} color="#fbbf24" /> Copy Magic Auto-Setup Prompt
-              </>
-            )}
-          </button>
+            {copiedItem === 'magicAutoPrompt' ? 'Copied Prompt to Clipboard' : 'Copy Auto-Setup Prompt'}
+          </Button>
 
-          <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>
+          <span style={{ fontSize: '0.84rem', color: 'var(--text-muted)' }}>
             Pre-configured with your private key &amp; active Google properties.
           </span>
         </div>
@@ -899,11 +872,14 @@ console.log(response.text);`;
         <div className="gmcp-code-container" style={{ marginTop: '0.35rem' }}>
           <button
             className="gmcp-code-copy-btn"
-            onClick={() => handleCopy(magicAutoSetupPrompt, 'magicAutoPromptPre')}
+            onClick={() => {
+              handleCopy(magicAutoSetupPrompt, 'magicAutoPromptPre');
+              trackCopy?.({ type: 'magic_auto_prompt_pre' });
+            }}
           >
             {copiedItem === 'magicAutoPromptPre' ? (
               <>
-                <Check size={14} color="#10b981" /> Copied!
+                <Check size={14} /> Copied!
               </>
             ) : (
               <>
@@ -911,25 +887,17 @@ console.log(response.text);`;
               </>
             )}
           </button>
-          <pre className="gmcp-code-pre" style={{ maxHeight: '300px', whiteSpace: 'pre-wrap', wordBreak: 'break-word', fontSize: '0.84rem' }}>
+          <pre className="gmcp-code-pre" style={{ maxHeight: '280px', whiteSpace: 'pre-wrap', wordBreak: 'break-word', fontSize: '0.84rem' }}>
             {magicAutoSetupPrompt}
           </pre>
         </div>
 
         {/* Quick Action Ideas to Ask */}
-        <div style={{
-          background: 'var(--bg-color)',
-          border: '1px solid var(--card-border)',
-          borderRadius: '12px',
-          padding: '1rem 1.25rem',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '0.5rem'
-        }}>
-          <span style={{ fontSize: '0.84rem', fontWeight: 600, color: 'var(--text-main)' }}>
-            💡 What you can ask your AI immediately after pasting:
+        <div className="gmcp-ideas-card">
+          <span style={{ fontSize: '0.86rem', fontWeight: 600, color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+            <Sparkles size={16} color="#3b82f6" /> What you can ask your AI immediately after pasting:
           </span>
-          <ul style={{ margin: 0, paddingLeft: '1.25rem', fontSize: '0.85rem', color: 'var(--text-muted)', display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+          <ul className="gmcp-ideas-list">
             <li><em>"Analyze our top 10 search queries in Search Console last week, and which ones have low CTR?"</em></li>
             <li><em>"How many active visitors are on our site right now, and which landing pages are they reading?"</em></li>
             <li><em>"Write a complete Python script to automatically fetch my Search Console keywords every morning and save to CSV."</em></li>
@@ -939,24 +907,14 @@ console.log(response.text);`;
 
         {/* Toggle Manual Settings Button */}
         <div style={{ borderTop: '1px solid var(--card-border)', paddingTop: '1.25rem', marginTop: '0.5rem' }}>
-          <button
-            type="button"
+          <Button
+            variant="ghost"
+            size="sm"
+            icon={showManualSetup ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
             onClick={() => setShowManualSetup(!showManualSetup)}
-            style={{
-              background: 'none',
-              border: 'none',
-              color: 'var(--text-muted)',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              fontSize: '0.88rem',
-              padding: 0
-            }}
           >
-            <SlidersHorizontal size={15} />
-            <span>{showManualSetup ? 'Hide manual configuration guides ▲' : 'Prefer manual setup? View raw config files (ChatGPT, Gemini, Claude, Cursor) ▾'}</span>
-          </button>
+            {showManualSetup ? 'Hide manual configuration guides' : 'Prefer manual setup? View raw config files (ChatGPT, Gemini, Claude, Cursor)'}
+          </Button>
         </div>
 
         {/* Manual Setup Tabs (Collapsed by default) */}
@@ -1001,7 +959,7 @@ console.log(response.text);`;
                   onClick={() => setChatgptMode('mcp')}
                 >
                   <Zap size={14} color={chatgptMode === 'mcp' ? '#3b82f6' : 'currentColor'} />
-                  Direct MCP Server / Plugin (New &amp; Recommended)
+                  Direct MCP Server (Recommended)
                 </button>
                 <button
                   type="button"
@@ -1015,8 +973,8 @@ console.log(response.text);`;
 
               <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
                 {chatgptMode === 'mcp'
-                  ? '⚡ Native Model Context Protocol support in ChatGPT'
-                  : '🧩 For GPT Store custom assistants'}
+                  ? 'Native Model Context Protocol support in ChatGPT'
+                  : 'For GPT Store custom assistants'}
               </span>
             </div>
 
@@ -1104,15 +1062,21 @@ console.log(response.text);`;
                 <div style={{
                   fontSize: '0.86rem',
                   color: 'var(--text-muted)',
-                  background: 'var(--bg-color)',
+                  background: 'rgba(150, 150, 150, 0.04)',
                   padding: '0.85rem 1.15rem',
                   borderRadius: '12px',
                   border: '1px solid var(--card-border)',
-                  lineHeight: '1.5'
+                  lineHeight: '1.5',
+                  display: 'flex',
+                  alignItems: 'flex-start',
+                  gap: '0.5rem'
                 }}>
-                  💡 <strong>How to query:</strong> Once connected, ChatGPT will automatically see your tools (<code>gsc_get_search_analytics</code>, <code>ga4_get_traffic_acquisition</code>, <code>ga4_get_realtime</code>). Just ask: 
-                  <em> "What were our top 10 Search Console search queries last week?"</em> or 
-                  <em> "Check our GA4 realtime active visitors right now."</em>
+                  <Info size={16} color="#3b82f6" style={{ flexShrink: 0, marginTop: '2px' }} />
+                  <div>
+                    <strong>How to query:</strong> Once connected, ChatGPT will automatically see your tools (<code>gsc_get_search_analytics</code>, <code>ga4_get_traffic_acquisition</code>, <code>ga4_get_realtime</code>). Just ask: 
+                    <em> "What were our top 10 Search Console search queries last week?"</em> or 
+                    <em> "Check our GA4 realtime active visitors right now."</em>
+                  </div>
                 </div>
               </>
             ) : (
@@ -1319,7 +1283,7 @@ console.log(response.text);`;
                 Fully restart the <strong>Claude Desktop</strong> app.
               </li>
               <li>
-                Look for the 🔨 <strong>Tools icon</strong> in the prompt box: your Google Marketing tools are live!
+                Look for the <Wrench size={13} style={{ verticalAlign: 'middle', margin: '0 2px' }} /> <strong>Tools icon</strong> in the prompt box: your Google Marketing tools are live!
               </li>
             </ol>
 
@@ -1428,18 +1392,14 @@ console.log(response.text);`;
             value={activeSimData.query}
             className="gmcp-query-input"
           />
-          <button
-            className="gmcp-btn gmcp-btn-primary"
+          <Button
+            variant="primary"
+            icon={isSimulating ? <RefreshCw size={14} className="spin-animation" /> : <Play size={14} />}
             onClick={() => handleRunSimulation(simPreset)}
-            disabled={isSimulating}
+            isLoading={isSimulating}
           >
-            {isSimulating ? (
-              <RefreshCw size={16} className="spin-animation" />
-            ) : (
-              <Play size={16} />
-            )}
             {isConnected && !isDemoMode ? 'Query Live Google Data' : 'Run MCP Query'}
-          </button>
+          </Button>
         </div>
 
         {/* Live Simulation Output Box */}
@@ -1554,6 +1514,7 @@ console.log(response.text);`;
       </section>
 
       {/* SEO & Knowledge Section */}
+      <ToolSeoDivider />
       <GoogleMarketingMcpSeo />
     </div>
   );
