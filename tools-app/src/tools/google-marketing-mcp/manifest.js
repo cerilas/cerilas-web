@@ -1,13 +1,14 @@
 export const googleMarketingMcpManifest = {
   slug: 'google-marketing-mcp',
-  title: 'Google Analytics & Search Console MCP Server',
-  shortDescription: 'Connect Google Analytics 4, Search Console, and Google Ads directly to ChatGPT, Claude Desktop, and Cursor via Model Context Protocol (MCP). Query organic traffic, SEO keywords, and ad spend in plain English.',
+  title: 'Connect ChatGPT to Google Analytics & Search Console (MCP Server)',
+  shortDescription: 'Connect your ChatGPT, Claude Desktop, or Cursor directly to Google Analytics 4 (GA4), Search Console, and Google Ads via Model Context Protocol (MCP). Talk to your traffic, queries, conversions, and ad spend in plain English with 100% read-only OAuth.',
   category: 'AI Assisted',
   iconName: 'Database',
   badge: 'AI / MCP Server',
   isAi: true,
   targetUrl: '#/tool/google-marketing-mcp',
   features: [
+    'Connect Your ChatGPT to Google Analytics & Search Console: Ask ChatGPT questions about real-time traffic, top landing pages, and search queries with 0 CSV exports',
     'Universal Model Context Protocol (MCP) Bridge: Seamless connection to Claude Desktop, Cursor, Windsurf, Antigravity, and custom agentic runtimes',
     'ChatGPT Native MCP & Custom Actions: Connect via ChatGPT Developer / Connected Apps (SSE) or import the OpenAPI 3.1 schema for GPT Store assistants',
     'Google Search Console Real-Time Telemetry: Inspect query clicks, impressions, CTR, average position, and URL indexing status without exporting CSVs',
@@ -18,11 +19,11 @@ export const googleMarketingMcpManifest = {
     'Interactive In-Browser Query Playground: Test real-time MCP prompts and view live simulated tool calls and structured analytical reports'
   ],
   seo: {
-    title: 'Google Analytics & Search Console MCP Server for ChatGPT & Claude | Cerilas Tools',
-    description: 'Free Google Marketing & SEO MCP Server. Connect Google Analytics 4, Search Console, and Google Ads to ChatGPT, Claude Desktop, and Cursor. Ask questions about traffic, keywords, and ROAS in natural language.',
-    keywords: 'google analytics mcp server, google search console mcp, google ads mcp server, chatgpt google analytics integration, claude desktop google search console, cursor mcp google analytics, model context protocol seo, mcp server google marketing, chatgpt custom action google analytics, llm seo data bridge, ask chatgpt about search console keywords, mcp ga4 server, generative ai marketing tools 2026',
+    title: 'Connect Your ChatGPT to Google Analytics & Search Console (2026 MCP) | Cerilas Tools',
+    description: 'Connect your ChatGPT, Claude Desktop, or Cursor to Google Analytics 4 (GA4) & Search Console in 60 seconds. Ask ChatGPT questions about real-time traffic, SEO keywords, and conversions using 100% read-only OAuth.',
+    keywords: 'connect your chatgpt to google analytics, connect chatgpt to google analytics, how to connect chatgpt to google analytics, chatgpt google analytics 4 integration, connect chatgpt to google search console, talk to google analytics chatgpt, ask chatgpt about ga4, google analytics mcp server, google search console mcp server, chatgpt custom action google analytics, claude desktop google analytics, cursor mcp ga4, model context protocol marketing, ai seo reporting agent, talk to your website data chatgpt',
     ogImage: 'https://tools.cerilas.com/og-image.svg',
-    ogImageAlt: 'Cerilas Google Analytics and Search Console MCP Server Suite',
-    breadcrumbsName: 'Google Marketing MCP'
+    ogImageAlt: 'Connect Your ChatGPT to Google Analytics and Search Console with Cerilas MCP Server',
+    breadcrumbsName: 'Connect ChatGPT to Google Analytics'
   }
 };

@@ -29,7 +29,7 @@ export const CATEGORIES = {
     description: 'Enterprise-grade AI utilities running in your browser. Detect AI text, clean PDFs for RAG vector databases, calculate universal LLM tokens, and check link hallucinations.',
     shortDescription: 'Modern AI and LLM tools built for engineers, prompt engineers, and AI researchers. High precision, privacy-focused with zero server retention.',
     keywords: 'ai tools, ai content detector, token counter universal, pdf to rag cleaner, llms txt generator, ai crawler checker, ai link hallucination checker',
-    toolSlugs: ['ai-content-detector', 'token-counter-universal', 'pdf-rag-cleaner', 'ai-link-hallucination-checker', 'ai-crawler-checker', 'llms-txt', 'html-to-llm-markdown', 'ats-resume-checker', 'ai-visibility-checker']
+    toolSlugs: ['ai-content-detector', 'token-counter-universal', 'pdf-rag-cleaner', 'ai-link-hallucination-checker', 'ai-crawler-checker', 'llms-txt', 'html-to-llm-markdown', 'ats-resume-checker', 'ai-visibility-checker', 'google-marketing-mcp']
   },
   'seo-tools': {
     slug: 'seo-tools',
@@ -40,7 +40,7 @@ export const CATEGORIES = {
     description: 'Modern SEO and web infrastructure utilities. Generate llms.txt files, test AI bot access, inspect meta robots headers, and convert web pages to LLM-ready markdown.',
     shortDescription: 'Technical SEO and generative engine optimization (GEO) tools to prepare your web properties for AI search engines, crawlers, and LLM indexing.',
     keywords: 'seo tools, llms txt generator, ai crawler checker, ai link checker, html to markdown, web tools',
-    toolSlugs: ['llms-txt', 'ai-crawler-checker', 'ai-link-hallucination-checker', 'html-to-llm-markdown', 'website-email-extractor', 'ai-visibility-checker']
+    toolSlugs: ['llms-txt', 'ai-crawler-checker', 'ai-link-hallucination-checker', 'html-to-llm-markdown', 'website-email-extractor', 'ai-visibility-checker', 'google-marketing-mcp']
   },
   'developer-tools': {
     slug: 'developer-tools',
@@ -638,6 +638,51 @@ export const TOOLS_SEO_REGISTRY = {
     rating: '4.9',
     ratingCount: '840',
     keywords: 'ai visibility checker, geo audit tool, check if gemini cites my website, chatgpt search citation checker, perplexity citation audit, test ai search citations free, generative engine optimization tool, answer engine optimization audit, brand ai mention tracker, google search grounding test, llm citation rates 2026, schema markup for geo, zero click search defense'
+  },
+
+  'google-marketing-mcp': {
+    slug: 'google-marketing-mcp',
+    name: 'Connect ChatGPT to Google Analytics & Search Console',
+    h1: 'Connect Your ChatGPT to Google Analytics 4 & Search Console (MCP Server)',
+    category: 'AI Tools',
+    categorySlug: 'ai-tools',
+    title: 'Connect Your ChatGPT to Google Analytics & Search Console (2026 MCP) | Cerilas Tools',
+    description: 'Connect your ChatGPT, Claude Desktop, or Cursor to Google Analytics 4 (GA4) & Search Console in 60 seconds. Ask ChatGPT questions about real-time traffic, SEO keywords, and conversions using 100% read-only OAuth.',
+    shortDescription: 'Connect your ChatGPT to Google Analytics 4, Search Console, and Google Ads. Talk to your analytics in plain English with 100% read-only OAuth and zero CSV exports.',
+    howItWorks: 'Connects large language models (ChatGPT, Claude Desktop, Cursor AI) directly to your live Google telemetry through the open Model Context Protocol (MCP) and Google OAuth 2.0. When you ask questions like "Why did organic traffic drop?" or "Find high-impression keywords ranking 4-10", the MCP server executes real-time queries against Google Analytics 4 (GA4), Search Console, and Google Ads APIs in under 400ms.',
+    formula: 'Architecture: LLM Client (ChatGPT / Claude / Cursor) ↔ Model Context Protocol (MCP over SSE or stdio) ↔ Cerilas Stateless Bridge ↔ Google OAuth 2.0 Read-Only API (Google Analytics Data API v1beta + Google Search Console API v3). Data is streamed ephemerally inside client chat sessions with 0 server storage.',
+    whenToUse: 'Use when you want to ask ChatGPT or Claude conversational questions about your website traffic, organic search keywords, e-commerce conversion rates, or Google Ads wasted spend without exporting CSV spreadsheets or maintaining complex BI dashboards.',
+    example: 'Ask ChatGPT: "Analyze Google Search Console: find queries with > 1,000 impressions but CTR below 2% in the last 28 days. Suggest optimized title tags." ChatGPT calls gsc_get_search_analytics and provides an itemized action plan in seconds.',
+    relatedTools: ['ai-visibility-checker', 'ai-crawler-checker', 'html-to-llm-markdown', 'token-counter-universal'],
+    faq: [
+      {
+        q: 'How do I connect my ChatGPT to Google Analytics?',
+        a: 'Authenticate your Google account with read-only permissions on Cerilas Tools, copy the 1-Click Agentic Setup Prompt or your personal remote SSE endpoint, and paste it into ChatGPT (under Settings > Connected Apps > Add MCP Server or inside a Custom GPT with Actions).'
+      },
+      {
+        q: 'Can ChatGPT analyze both Google Analytics 4 and Google Search Console together?',
+        a: 'Yes. The Cerilas MCP server bridges both GA4 and Search Console in a single conversation, letting you correlate pre-click organic queries and rankings from Search Console with post-click engagement and conversions from GA4.'
+      },
+      {
+        q: 'How is this different from uploading CSV files to ChatGPT?',
+        a: 'Uploading CSV files is slow, produces static snapshots, and quickly fills up ChatGPT\'s context window. Connecting via MCP queries live Google reporting APIs in real time, supporting instant date filtering, live visitor tracking, and multiple properties.'
+      },
+      {
+        q: 'Can ChatGPT see multiple GA4 properties or Search Console domains?',
+        a: 'Yes. If your Google Account has access to multiple GA4 properties or verified Search Console sites, the MCP server automatically discovers and supports all of them.'
+      },
+      {
+        q: 'Is my Google Analytics data used to train AI models?',
+        a: 'No. The MCP server operates as an ephemeral, stateless proxy. Your data is queried in real time inside your private chat session and is never logged, persisted, or used to train OpenAI, Anthropic, or third-party AI models.'
+      },
+      {
+        q: 'Can ChatGPT make unwanted edits or delete my Google Analytics data?',
+        a: 'No. All permissions are strictly read-only (analytics.readonly, webmasters.readonly). The MCP server has zero write or delete capabilities.'
+      }
+    ],
+    rating: '4.9',
+    ratingCount: '1640',
+    keywords: 'connect your chatgpt to google analytics, connect chatgpt to google analytics, how to connect chatgpt to google analytics, chatgpt google analytics 4 integration, connect chatgpt to google search console, talk to google analytics chatgpt, ask chatgpt about ga4, google analytics mcp server, google search console mcp, chatgpt custom action google analytics, claude desktop google analytics, cursor mcp ga4, model context protocol marketing, ai seo reporting agent'
   },
 
   'llms-txt': {

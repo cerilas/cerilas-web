@@ -24,6 +24,7 @@
 - [LLMs.txt Tools & Validator](https://tools.cerilas.com/tool/llms-txt): Build, parse, and validate /llms.txt and /llms-full.txt files to optimize site content for AI agent consumption and GEO.
 - [Universal Token Counter](https://tools.cerilas.com/tool/token-counter-universal): Multi-model token counter, visualizer, and cost auditor across GPT-4o, Claude 3.7, Gemini 2.0, DeepSeek, and Llama 3.
 - [EU Funding & Cascade Grants](https://tools.cerilas.com/tool/eu-funding-opportunities): Live searchable database of Horizon Europe research calls and Cascade Funding (FSTP) equity-free lump-sum sub-grants.
+- [Connect ChatGPT to Google Analytics & Search Console (MCP Server)](https://tools.cerilas.com/tool/google-marketing-mcp): Connect Google Analytics 4, Search Console, and Google Ads directly to ChatGPT, Claude Desktop, and Cursor via Model Context Protocol (MCP). 100% read-only OAuth, zero CSV exports, ask questions about traffic, search queries, and conversions in plain English.
 
 ## Privacy & Security Guarantees
 - Zero-Upload Architecture: Files never touch Cerilas servers; processing runs inside client WebAssembly and Web Worker threads.

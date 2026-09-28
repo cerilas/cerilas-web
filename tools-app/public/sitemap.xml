@@ -421,4 +421,29 @@
     <changefreq>weekly</changefreq>
     <priority>0.98</priority>
   </url>
+
+  <!-- 22. Connect ChatGPT to Google Analytics & Search Console (MCP Server) -->
+  <url>
+    <loc>https://tools.cerilas.com/tool/google-marketing-mcp</loc>
+    <lastmod>2026-09-28</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.00</priority>
+    <image:image>
+      <image:loc>https://tools.cerilas.com/tool-icons/google-marketing-mcp.webp</image:loc>
+      <image:title>Connect ChatGPT to Google Analytics &amp; Search Console (MCP Server)</image:title>
+      <image:caption>Connect your ChatGPT, Claude, and Cursor to Google Analytics 4 (GA4) &amp; Search Console in 60 seconds with 100% read-only OAuth.</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://tools.cerilas.com/#/tool/google-marketing-mcp</loc>
+    <lastmod>2026-09-28</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.96</priority>
+  </url>
+  <url>
+    <loc>https://tools.cerilas.com/google-marketing-mcp</loc>
+    <lastmod>2026-09-28</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.98</priority>
+  </url>
 </urlset>
