@@ -115,6 +115,46 @@ router.post('/scan', async (req, res) => {
       return res.status(400).json({ error: check.error });
     }
 
+    const normalizedDomain = check.domain.toLowerCase().replace(/^www\./, '');
+
+    // If user is authenticated, check if this exact domain is already registered for their organization
+    const authHeader = req.headers.authorization;
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      try {
+        const token = authHeader.split(' ')[1];
+        const decoded = jwt.verify(token, JWT_SECRET);
+        const orgRes = await authPool.query(
+          `SELECT organization_id FROM organization_members WHERE user_id = $1 LIMIT 1`,
+          [decoded.id]
+        );
+        if (orgRes.rows.length > 0) {
+          const orgId = orgRes.rows[0].organization_id;
+          const dupRes = await authPool.query(
+            `SELECT w.id, w.name, w.primary_domain 
+             FROM workspaces w
+             WHERE w.organization_id = $1 
+               AND (
+                 LOWER(REGEXP_REPLACE(w.primary_domain, '^www\\.', '', 'i')) = $2
+                 OR EXISTS (
+                   SELECT 1 FROM websites wb 
+                   WHERE wb.workspace_id = w.id 
+                     AND LOWER(REGEXP_REPLACE(wb.domain, '^www\\.', '', 'i')) = $2
+                 )
+               )
+             LIMIT 1`,
+            [orgId, normalizedDomain]
+          );
+          if (dupRes.rows.length > 0) {
+            return res.status(400).json({
+              error: `"${normalizedDomain}" adresi zaten "${dupRes.rows[0].name}" markası altında kayıtlı. Aynı domaini tekrar ekleyemezsiniz (ancak blog.${normalizedDomain} gibi farklı bir subdomain ekleyebilirsiniz).`
+            });
+          }
+        }
+      } catch (tokenErr) {
+        // Token invalid or expired, continue public scan
+      }
+    }
+
     const scanResult = await scanDomain(check.url);
     const brandProfile = await extractBrandProfileWithAi(scanResult);
 
@@ -189,6 +229,31 @@ router.post('/workspaces', requireAuth, async (req, res) => {
     const check = validatePublicUrl(url);
     if (!check.valid) {
       return res.status(400).json({ error: check.error });
+    }
+
+    const normalizedDomain = check.domain.toLowerCase().replace(/^www\./, '');
+
+    // Prevent duplicate domain within the organization (subdomains are allowed, exact domain is rejected)
+    const existingWsRes = await authPool.query(
+      `SELECT w.id, w.name, w.primary_domain 
+       FROM workspaces w
+       WHERE w.organization_id = $1 
+         AND (
+           LOWER(REGEXP_REPLACE(w.primary_domain, '^www\\.', '', 'i')) = $2
+           OR EXISTS (
+             SELECT 1 FROM websites wb 
+             WHERE wb.workspace_id = w.id 
+               AND LOWER(REGEXP_REPLACE(wb.domain, '^www\\.', '', 'i')) = $2
+           )
+         )
+       LIMIT 1`,
+      [org.id, normalizedDomain]
+    );
+
+    if (existingWsRes.rows.length > 0) {
+      return res.status(400).json({
+        error: `"${normalizedDomain}" adresi zaten "${existingWsRes.rows[0].name}" markası altında kayıtlı. Aynı domaini tekrar ekleyemezsiniz (ancak blog.${normalizedDomain} gibi farklı bir subdomain ekleyebilirsiniz).`
+      });
     }
 
     // Generate unique slug
@@ -449,6 +514,11 @@ router.post('/workspaces', requireAuth, async (req, res) => {
     });
   } catch (err) {
     console.error('[Growth Create Workspace Error]:', err);
+    if (err.code === '23505' || err.constraint?.includes('idx_workspaces_org_normalized_domain')) {
+      return res.status(400).json({
+        error: 'Bu web sitesi / domain adresi zaten kayıtlı. Aynı domaini tekrar ekleyemezsiniz (farklı bir subdomain ekleyebilirsiniz).'
+      });
+    }
     res.status(500).json({ error: err.message || 'Çalışma alanı oluşturulamadı.' });
   }
 });
@@ -706,7 +776,7 @@ router.post('/workspaces/:slugOrId/prompts/:promptId/run', requireAuth, async (r
       const promptQuery = `Answer the following question as an objective AI search assistant: "${trackedPrompt.prompt}". Cite real brands, websites, and sources if relevant.`;
       
       const response = await ai.models.generateContent({
-        model: 'gemini-2.5-flash',
+        model: 'gemini-3.8-flash',
         contents: promptQuery
       });
       responseText = response.text || '';
@@ -734,7 +804,7 @@ router.post('/workspaces/:slugOrId/prompts/:promptId/run', requireAuth, async (r
     const runInsert = await authPool.query(
       `INSERT INTO growth_ai_visibility_runs (
         workspace_id, prompt_id, provider, model, response_text, brand_mentioned, citations, checked_at
-      ) VALUES ($1, $2, 'gemini', 'gemini-2.5-flash', $3, $4, $5, NOW())
+      ) VALUES ($1, $2, 'gemini', 'gemini-3.8-flash', $3, $4, $5, NOW())
       RETURNING *`,
       [workspace.id, trackedPrompt.id, responseText, brandMentioned, JSON.stringify(citations)]
     );

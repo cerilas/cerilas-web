@@ -59,6 +59,7 @@ export async function initGrowthDb() {
       );
       CREATE INDEX IF NOT EXISTS idx_workspaces_org ON workspaces(organization_id);
       CREATE INDEX IF NOT EXISTS idx_workspaces_slug ON workspaces(slug);
+      CREATE UNIQUE INDEX IF NOT EXISTS idx_workspaces_org_normalized_domain ON workspaces (organization_id, LOWER(REGEXP_REPLACE(primary_domain, '^www\\.', '', 'i')));
 
       -- 4. Websites
       CREATE TABLE IF NOT EXISTS websites (

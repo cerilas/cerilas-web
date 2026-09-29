@@ -36,9 +36,19 @@ const BUSINESS_MODELS = [
   'Diğer'
 ];
 
+export function normalizeDomain(input) {
+  if (!input || typeof input !== 'string') return '';
+  let str = input.trim().toLowerCase();
+  str = str.replace(/^https?:\/\//i, '');
+  str = str.split('/')[0].split('?')[0].split('#')[0];
+  str = str.split(':')[0];
+  str = str.replace(/^www\./i, '');
+  return str.trim();
+}
+
 export default function GrowthOnboardingModal({ isOpen, onClose }) {
   const { token } = useAuth();
-  const { refreshWorkspaces, switchWorkspace } = useGrowth();
+  const { workspaces, refreshWorkspaces, switchWorkspace } = useGrowth();
 
   const [step, setStep] = useState(1); // 1: URL input, 2: Scanning, 3: Review & Launch
   const [url, setUrl] = useState('');
@@ -62,6 +72,21 @@ export default function GrowthOnboardingModal({ isOpen, onClose }) {
   const [competitorDomain, setCompetitorDomain] = useState('');
   const [creating, setCreating] = useState(false);
 
+  // Realtime duplicate domain validation (subdomains allowed, exact match prohibited)
+  const currentNormalizedDomain = normalizeDomain(url);
+  const matchingExistingWs = currentNormalizedDomain
+    ? workspaces?.find(w => normalizeDomain(w.primary_domain || w.canonical_url) === currentNormalizedDomain)
+    : null;
+  const isDuplicateDomain = Boolean(matchingExistingWs);
+
+  const handleClose = () => {
+    setUrl('');
+    setError('');
+    setStep(1);
+    setScanResult(null);
+    onClose();
+  };
+
   if (!isOpen) return null;
 
   const handleStartScan = async (e) => {
@@ -74,6 +99,19 @@ export default function GrowthOnboardingModal({ isOpen, onClose }) {
     let cleanUrl = url.trim();
     if (!cleanUrl.startsWith('http://') && !cleanUrl.startsWith('https://')) {
       cleanUrl = 'https://' + cleanUrl;
+    }
+
+    const targetDomain = normalizeDomain(cleanUrl);
+    if (!targetDomain) {
+      setError('Lütfen geçerli bir web sitesi adresi girin.');
+      return;
+    }
+
+    // Check if domain is already registered (subdomains allowed, exact match prohibited)
+    const existingWs = workspaces?.find(w => normalizeDomain(w.primary_domain || w.canonical_url) === targetDomain);
+    if (existingWs) {
+      setError(`"${targetDomain}" adresi zaten "${existingWs.name}" markası altında ekli. Aynı domaini tekrar ekleyemezsiniz (ancak blog.${targetDomain} gibi farklı bir subdomain ekleyebilirsiniz).`);
+      return;
     }
 
     setError('');
@@ -112,7 +150,10 @@ export default function GrowthOnboardingModal({ isOpen, onClose }) {
     try {
       const res = await fetch('/api/growth/scan', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+        },
         body: JSON.stringify({ url: cleanUrl })
       });
 
@@ -185,6 +226,13 @@ export default function GrowthOnboardingModal({ isOpen, onClose }) {
       return;
     }
 
+    const targetDomain = normalizeDomain(scanResult?.url || url);
+    const existingWs = workspaces?.find(w => normalizeDomain(w.primary_domain || w.canonical_url) === targetDomain);
+    if (existingWs) {
+      setError(`"${targetDomain}" adresi zaten "${existingWs.name}" markası altında kayıtlı. Aynı domaini tekrar ekleyemezsiniz.`);
+      return;
+    }
+
     setCreating(true);
     setError('');
 
@@ -218,7 +266,7 @@ export default function GrowthOnboardingModal({ isOpen, onClose }) {
       const created = data.data.workspace;
       await refreshWorkspaces(created.slug);
       switchWorkspace(created);
-      onClose();
+      handleClose();
     } catch (err) {
       setError(err.message || 'Kayıt sırasında bir hata oluştu.');
     } finally {
@@ -227,7 +275,7 @@ export default function GrowthOnboardingModal({ isOpen, onClose }) {
   };
 
   return (
-    <div className="growth-modal-backdrop" onClick={onClose} role="dialog" aria-modal="true">
+    <div className="growth-modal-backdrop" onClick={handleClose} role="dialog" aria-modal="true">
       <div 
         className={`growth-modal-container ${step === 3 ? 'growth-modal-wide' : ''}`}
         onClick={(e) => e.stopPropagation()}
@@ -245,7 +293,7 @@ export default function GrowthOnboardingModal({ isOpen, onClose }) {
           <button 
             type="button" 
             className="growth-modal-close-btn" 
-            onClick={onClose}
+            onClick={handleClose}
             aria-label="Kapat"
           >
             <X size={17} />
@@ -297,7 +345,7 @@ export default function GrowthOnboardingModal({ isOpen, onClose }) {
           {step === 1 && (
             <div className="growth-modal-step1">
               <form onSubmit={handleStartScan} className="growth-url-form">
-                <div className="growth-url-bar-wrap">
+                <div className={`growth-url-bar-wrap ${isDuplicateDomain ? 'is-duplicate' : ''}`}>
                   <div className="growth-url-protocol">https://</div>
                   <input
                     type="text"
@@ -306,17 +354,29 @@ export default function GrowthOnboardingModal({ isOpen, onClose }) {
                     className="growth-url-input"
                     placeholder="ornekmarka.com"
                     value={url.replace(/^https?:\/\//i, '')}
-                    onChange={(e) => setUrl(e.target.value)}
+                    onChange={(e) => {
+                      setUrl(e.target.value);
+                      if (error) setError('');
+                    }}
                   />
                   <button 
                     type="submit" 
-                    disabled={scanning || !url.trim()} 
+                    disabled={scanning || !url.trim() || isDuplicateDomain} 
                     className="growth-url-action-btn"
                   >
                     <span>Analiz Et</span>
                     <ArrowRight size={15} />
                   </button>
                 </div>
+
+                {isDuplicateDomain && (
+                  <div className="growth-duplicate-hint">
+                    <AlertCircle size={15} className="text-amber" />
+                    <span>
+                      <strong>{currentNormalizedDomain}</strong> zaten "{matchingExistingWs.name}" markası altında kayıtlı. Aynı domaini tekrar ekleyemezsiniz (ancak <code>blog.{currentNormalizedDomain}</code> gibi bir subdomain ekleyebilirsiniz).
+                    </span>
+                  </div>
+                )}
               </form>
 
               {/* 3 Compact Feature Pills (No paragraphs, strictly simple) */}

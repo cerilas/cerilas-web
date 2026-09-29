@@ -279,6 +279,49 @@
   transform: none;
 }
 
+/* Duplicate Domain Warning */
+.growth-url-bar-wrap.is-duplicate {
+  border-color: rgba(245, 158, 11, 0.55);
+  background: rgba(245, 158, 11, 0.04);
+}
+
+.growth-url-bar-wrap.is-duplicate:focus-within {
+  border-color: #f59e0b;
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2);
+}
+
+.growth-duplicate-hint {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  padding: 0.75rem 1rem;
+  background: rgba(245, 158, 11, 0.08);
+  border: 1px solid rgba(245, 158, 11, 0.28);
+  border-radius: 12px;
+  font-size: 0.82rem;
+  color: #fde68a;
+  line-height: 1.45;
+  animation: growthFadeIn 0.2s ease forwards;
+}
+
+.growth-duplicate-hint strong {
+  color: #fbbf24;
+}
+
+.growth-duplicate-hint code {
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(245, 158, 11, 0.25);
+  padding: 0.15rem 0.4rem;
+  border-radius: 4px;
+  color: #f59e0b;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.78rem;
+}
+
+.text-amber {
+  color: #f59e0b;
+}
+
 /* Feature Pills Row (Simple, clean, no paragraphs) */
 .growth-quick-feature-pills {
   display: flex;

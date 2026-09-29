@@ -333,7 +333,7 @@ Return a strict, valid JSON object with the following fields:
 Only return pure JSON, no markdown codeblocks, no extra explanations.`;
 
     const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
+      model: 'gemini-3.8-flash',
       contents: prompt
     });
 
