@@ -142,7 +142,7 @@ export default function GrowthSettings() {
                 {connectingGoogle ? (
                   <Loader2 size={14} className="auth-spinner" />
                 ) : (
-                  <Sparkles size={14} />
+                  <img src="/growth-covers/google-icon.svg" alt="Google" style={{ width: 14, height: 14 }} />
                 )}
                 <span>Google ile Bağla</span>
               </button>
@@ -168,6 +168,11 @@ export default function GrowthSettings() {
                 onClick={handleConnectGoogle}
                 className="growth-secondary-btn"
               >
+                {connectingGoogle ? (
+                  <Loader2 size={14} className="auth-spinner" />
+                ) : (
+                  <img src="/growth-covers/google-icon.svg" alt="Google" style={{ width: 14, height: 14 }} />
+                )}
                 <span>Google ile Bağla</span>
               </button>
             </div>

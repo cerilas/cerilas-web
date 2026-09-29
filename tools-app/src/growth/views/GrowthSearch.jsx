@@ -16,7 +16,9 @@ import {
   Layers,
   Filter,
   Calendar,
-  AlertCircle
+  AlertCircle,
+  RefreshCw,
+  Activity
 } from 'lucide-react';
 import { useGrowth } from '../GrowthContext';
 import GrowthPageCover from '../components/GrowthPageCover';
@@ -56,8 +58,8 @@ export default function GrowthSearch() {
     <div className="growth-page-container animate-fade">
       {/* Hero Cover Banner */}
       <GrowthPageCover
-        badge="Google Search Console Canlı Veri"
-        badgeIcon={() => <img src="/growth-covers/gsc-badge.svg" alt="GSC" style={{ width: 16, height: 16, objectFit: 'contain' }} />}
+        badge="Google Search Console Canlı Telemetrisi"
+        badgeIcon={Activity}
         title="Google Organik Arama & Sıralama İstihbaratı"
         subtitle="Google arama sonuçlarından gelen gerçek organik sorgular, sayfa 1 fırsatları ve tıklama hacimleri."
         coverImage="/growth-covers/seo-cover.jpg"
@@ -76,7 +78,7 @@ export default function GrowthSearch() {
               onClick={() => setActiveTab('settings')}
               className="growth-secondary-btn"
             >
-              <img src="/growth-covers/gsc-badge.svg" alt="GSC" style={{ width: 14, height: 14 }} />
+              <RefreshCw size={13} />
               <span>GSC Entegrasyonu</span>
             </button>
           </>
@@ -87,12 +89,15 @@ export default function GrowthSearch() {
       {/* Integration Status Callout Banner */}
       <div className="growth-gsc-banner">
         <div className="gsc-banner-left">
-          <div className="gsc-pill-badge" style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-            <img src="/growth-covers/gsc-badge.svg" alt="GSC" style={{ width: 15, height: 15 }} />
-            <span>Search Console Canlı Senkronizasyon Modu</span>
+          <div className="gsc-pill-badge">
+            <span className="gsc-live-dot" />
+            <img src="/growth-covers/gsc-badge.svg" alt="Google Search Console" className="gsc-pill-icon" />
+            <span className="gsc-pill-brand">Google Search Console</span>
+            <span className="gsc-pill-sep">•</span>
+            <span className="gsc-pill-mode">Canlı Senkronizasyon Modu</span>
           </div>
           <p className="gsc-banner-text">
-            Sitenizin gerçek Google Search Console mülkünü bağlayarak tüm sorguları canlı senkronize edebilirsiniz.
+            Sitenizin gerçek Google Search Console mülkünü bağlayarak tüm organik sorguları, tıklamaları ve pozisyonları canlı senkronize edin.
           </p>
         </div>
         <button
@@ -100,6 +105,7 @@ export default function GrowthSearch() {
           onClick={() => setActiveTab('settings')}
           className="growth-primary-btn btn-sm"
         >
+          <RefreshCw size={13} className="gsc-sync-spin-icon" />
           <span>Mülkü Şimdi Bağla</span>
           <ArrowUpRight size={14} />
         </button>
