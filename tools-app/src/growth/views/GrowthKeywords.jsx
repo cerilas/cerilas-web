@@ -14,10 +14,12 @@ import {
   AlertCircle,
   HelpCircle,
   Loader2,
-  Trash2
+  Trash2,
+  X
 } from 'lucide-react';
 import { useGrowth } from '../GrowthContext';
 import { useAuth } from '../../context/AuthContext';
+import GrowthPageCover from '../components/GrowthPageCover';
 
 export default function GrowthKeywords() {
   const { activeWorkspace } = useGrowth();
@@ -151,19 +153,19 @@ export default function GrowthKeywords() {
 
   return (
     <div className="growth-page-container animate-fade">
-      {/* Header */}
-      <div className="growth-page-header">
-        <div>
-          <div className="growth-title-row">
-            <TrendingUp size={22} className="text-primary" />
-            <h1 className="growth-page-title">Anahtar Kelime Fırsatları & Sıralama</h1>
-          </div>
-          <p className="growth-page-subtitle">
-            Google ve AI Search Overview sonuçlarında sitenizin konumlandığı terimler ve sayfa 1'e en yakın büyüme kelimeleri.
-          </p>
-        </div>
-
-        <div className="growth-page-actions">
+      {/* Hero Page Cover */}
+      <GrowthPageCover
+        badge="Arama Hacmi & Kelime Sıralamaları"
+        badgeIcon={TrendingUp}
+        title="Anahtar Kelime Fırsatları & Sıralama"
+        subtitle="Google ve AI Search Overview sonuçlarında sitenizin konumlandığı terimler ve sayfa 1'e en yakın büyüme kelimeleri."
+        coverImage="/growth-covers/seo-cover.jpg"
+        stats={[
+          { label: 'Takip Edilen', value: `${totalKeywords} Terim`, sub: 'Aktif izleme' },
+          { label: 'Sayfa 1 (İlk 10)', value: `${page1Count} Kelime`, sub: 'Yüksek organik trafik' },
+          { label: 'AI Overview', value: `${aiOverviewCount} Sorgu`, sub: 'GEO fırsatı' }
+        ]}
+        actions={
           <button
             type="button"
             className="growth-primary-btn"
@@ -172,8 +174,8 @@ export default function GrowthKeywords() {
             <Plus size={15} />
             <span>Yeni Kelime Ekle</span>
           </button>
-        </div>
-      </div>
+        }
+      />
 
       {/* Top 4 Metrics */}
       <div className="growth-stats-grid four-col">
@@ -361,8 +363,9 @@ export default function GrowthKeywords() {
                 type="button" 
                 className="growth-modal-close" 
                 onClick={() => setIsAddModalOpen(false)}
+                aria-label="Kapat"
               >
-                ✕
+                <X size={18} />
               </button>
             </div>
 

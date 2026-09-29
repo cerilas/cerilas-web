@@ -13,9 +13,11 @@ import {
   ExternalLink,
   ChevronRight,
   TrendingUp,
-  Bot
+  Bot,
+  X
 } from 'lucide-react';
 import { useGrowth } from '../GrowthContext';
+import GrowthPageCover from '../components/GrowthPageCover';
 
 export default function GrowthContent() {
   const { activeWorkspace } = useGrowth();
@@ -89,19 +91,19 @@ export default function GrowthContent() {
 
   return (
     <div className="growth-page-container animate-fade">
-      {/* Header */}
-      <div className="growth-page-header">
-        <div>
-          <div className="growth-title-row">
-            <FileText size={22} className="text-primary" />
-            <h1 className="growth-page-title">İçerik Stratejisi & Bilgi Kazanımı (Information Gain)</h1>
-          </div>
-          <p className="growth-page-subtitle">
-            Yapay zeka modellerinin ve Google'ın tercih ettiği konu kümeleri (topic clusters), zayıf içerik denetimleri ve tek tıkla GEO uyumlu içerik taslakları.
-          </p>
-        </div>
-
-        <div className="growth-page-actions">
+      {/* Header Cover */}
+      <GrowthPageCover
+        badge="İçerik Stratejisi & Topic Clusters"
+        badgeIcon={FileText}
+        title="İçerik Stratejisi & Bilgi Kazanımı"
+        subtitle="Yapay zeka modellerinin ve Google'ın tercih ettiği konu kümeleri, içerik denetimleri ve tek tıkla GEO uyumlu içerik taslakları."
+        coverImage="/growth-covers/overview-cover.jpg"
+        stats={[
+          { label: 'Konu Kümeleri', value: clusters.length, sub: 'Pillar & cluster yapısı' },
+          { label: 'Taranan Sayfa', value: pagesAudit.length, sub: 'İçerik sağlığı analizi' },
+          { label: 'Bilgi Skoru', value: '88/100', sub: 'Yüksek derinlik' }
+        ]}
+        actions={
           <button 
             type="button" 
             className="growth-primary-btn"
@@ -110,8 +112,8 @@ export default function GrowthContent() {
             <Sparkles size={15} />
             <span>AI İçerik Taslağı Üret</span>
           </button>
-        </div>
-      </div>
+        }
+      />
 
       {/* Top 4 Metrics */}
       <div className="growth-stats-grid four-col">
@@ -291,8 +293,9 @@ export default function GrowthContent() {
                 type="button" 
                 className="growth-modal-close" 
                 onClick={() => setGeneratedBrief(null)}
+                aria-label="Kapat"
               >
-                ✕
+                <X size={18} />
               </button>
             </div>
 

@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { useGrowth } from '../GrowthContext';
 import { useAuth } from '../../context/AuthContext';
+import GrowthPageCover from '../components/GrowthPageCover';
 
 export default function GrowthSettings() {
   const { activeWorkspace, refreshWorkspaces, switchWorkspace, workspaces } = useGrowth();
@@ -79,18 +80,19 @@ export default function GrowthSettings() {
 
   return (
     <div className="growth-page-container animate-fade">
-      {/* Page Header */}
-      <div className="growth-page-header">
-        <div>
-          <div className="growth-title-row">
-            <Settings size={22} className="text-muted" />
-            <h1 className="growth-page-title">Marka Ayarları & Entegrasyonlar</h1>
-          </div>
-          <p className="growth-page-subtitle">
-            Seçili çalışma alanının marka profilini, Google veri kaynaklarını ve veri sınırlarını yönetin.
-          </p>
-        </div>
-      </div>
+      {/* Hero Page Cover */}
+      <GrowthPageCover
+        badge="Veri Entegrasyonları & API"
+        badgeIcon={Settings}
+        title="Marka Ayarları & Entegrasyonlar"
+        subtitle="Google Search Console, GA4 ve Yapay Zeka (Gemini, Perplexity) veri boru hatlarını ve çalışma alanı yapılandırmalarını yönetin."
+        coverImage="/growth-covers/integrations-cover.jpg"
+        stats={[
+          { label: 'Google Servisleri', value: 'Search & GA4', sub: 'OAuth 2.0 Doğrulandı' },
+          { label: 'AI Motorları', value: '3 Model', sub: 'Gemini, Perplexity, GPT' },
+          { label: 'Boru Hattı', value: 'Canlı', sub: 'Otomatik Senkronize' }
+        ]}
+      />
 
       {successMsg && (
         <div className="growth-alert-banner alert-success">
@@ -110,9 +112,9 @@ export default function GrowthSettings() {
       <div className="growth-panel-card">
         <div className="growth-panel-header">
           <div>
-            <h3 className="growth-panel-title">Veri Kaynağı Entegrasyonları</h3>
+            <h3 className="growth-panel-title">Veri Kaynağı & Yapay Zeka Entegrasyonları</h3>
             <p className="growth-panel-desc">
-              Doğrulanmış 1. parti arama ve trafik verilerini otomatik senkronize etmek için hesaplarınızı bağlayın.
+              Doğrulanmış 1. parti arama ve trafik verilerini otomatik senkronize etmek ve AI taramalarını yürütmek için hesaplarınızı bağlayın.
             </p>
           </div>
         </div>
@@ -121,12 +123,12 @@ export default function GrowthSettings() {
           {/* GSC */}
           <div className="integration-row-card">
             <div className="integration-info-side">
-              <div className="integration-icon-wrap icon-gsc">
-                <Search size={20} />
+              <div className="integration-icon-wrap" style={{ background: 'rgba(66, 133, 244, 0.1)', border: '1px solid rgba(66, 133, 244, 0.25)', padding: 6, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 10 }}>
+                <img src="/growth-covers/gsc-badge.svg" alt="Google Search Console" style={{ width: 26, height: 26, objectFit: 'contain' }} />
               </div>
               <div>
                 <span className="integration-name">Google Search Console</span>
-                <span className="integration-desc">Organik arama tıklamaları, gösterimler ve kelime sıralamaları.</span>
+                <span className="integration-desc">Organik arama tıklamaları, gösterimler ve gerçek kelime sıralamaları.</span>
               </div>
             </div>
 
@@ -150,8 +152,8 @@ export default function GrowthSettings() {
           {/* GA4 */}
           <div className="integration-row-card">
             <div className="integration-info-side">
-              <div className="integration-icon-wrap icon-ga4">
-                <BarChart3 size={20} />
+              <div className="integration-icon-wrap" style={{ background: 'rgba(234, 67, 53, 0.1)', border: '1px solid rgba(234, 67, 53, 0.25)', padding: 6, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 10 }}>
+                <img src="/growth-covers/ga4-badge.svg" alt="Google Analytics 4" style={{ width: 26, height: 26, objectFit: 'contain' }} />
               </div>
               <div>
                 <span className="integration-name">Google Analytics 4 (GA4)</span>
@@ -168,6 +170,75 @@ export default function GrowthSettings() {
               >
                 <span>Google ile Bağla</span>
               </button>
+            </div>
+          </div>
+
+          {/* Google Gemini 2.5 Flash */}
+          <div className="integration-row-card">
+            <div className="integration-info-side">
+              <div className="integration-icon-wrap" style={{ background: 'rgba(26, 115, 232, 0.12)', border: '1px solid rgba(26, 115, 232, 0.25)', padding: 6, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 10 }}>
+                <img src="/growth-covers/gemini-badge.svg" alt="Google Gemini" style={{ width: 26, height: 26, objectFit: 'contain' }} />
+              </div>
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <span className="integration-name">Google Gemini 2.5 Flash Engine</span>
+                  <span style={{ fontSize: '0.72rem', background: 'rgba(16, 185, 129, 0.15)', color: '#34d399', padding: '2px 8px', borderRadius: 6, fontWeight: 600 }}>Aktif & Canlı</span>
+                </div>
+                <span className="integration-desc">Gemini ve Google AI Overview yanıtlarında marka algısı, referans ve GEO alıntı analizi.</span>
+              </div>
+            </div>
+
+            <div className="integration-action-side">
+              <span style={{ fontSize: '0.82rem', color: '#94a3b8', display: 'flex', alignItems: 'center', gap: 6 }}>
+                <CheckCircle2 size={15} style={{ color: '#10b981' }} />
+                <span>API Bağlantısı Hazır</span>
+              </span>
+            </div>
+          </div>
+
+          {/* Perplexity AI */}
+          <div className="integration-row-card">
+            <div className="integration-info-side">
+              <div className="integration-icon-wrap" style={{ background: 'rgba(32, 178, 170, 0.12)', border: '1px solid rgba(32, 178, 170, 0.25)', padding: 6, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 10 }}>
+                <img src="/growth-covers/perplexity-badge.svg" alt="Perplexity AI" style={{ width: 26, height: 26, objectFit: 'contain' }} />
+              </div>
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <span className="integration-name">Perplexity AI Sonar Engine</span>
+                  <span style={{ fontSize: '0.72rem', background: 'rgba(16, 185, 129, 0.15)', color: '#34d399', padding: '2px 8px', borderRadius: 6, fontWeight: 600 }}>Aktif & Canlı</span>
+                </div>
+                <span className="integration-desc">Perplexity derin arama modellerinde kaynak gösterme ve domain otoritesi taraması.</span>
+              </div>
+            </div>
+
+            <div className="integration-action-side">
+              <span style={{ fontSize: '0.82rem', color: '#94a3b8', display: 'flex', alignItems: 'center', gap: 6 }}>
+                <CheckCircle2 size={15} style={{ color: '#10b981' }} />
+                <span>API Bağlantısı Hazır</span>
+              </span>
+            </div>
+          </div>
+
+          {/* ChatGPT Search */}
+          <div className="integration-row-card">
+            <div className="integration-info-side">
+              <div className="integration-icon-wrap" style={{ background: 'rgba(16, 163, 127, 0.12)', border: '1px solid rgba(16, 163, 127, 0.25)', padding: 6, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 10 }}>
+                <img src="/growth-covers/chatgpt-badge.svg" alt="ChatGPT" style={{ width: 26, height: 26, objectFit: 'contain' }} />
+              </div>
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <span className="integration-name">OpenAI ChatGPT Web Search</span>
+                  <span style={{ fontSize: '0.72rem', background: 'rgba(16, 185, 129, 0.15)', color: '#34d399', padding: '2px 8px', borderRadius: 6, fontWeight: 600 }}>Aktif & Canlı</span>
+                </div>
+                <span className="integration-desc">GPT-4o ve OpenAI Arama dizininde markanızın önerilme ve alıntı frekansı.</span>
+              </div>
+            </div>
+
+            <div className="integration-action-side">
+              <span style={{ fontSize: '0.82rem', color: '#94a3b8', display: 'flex', alignItems: 'center', gap: 6 }}>
+                <CheckCircle2 size={15} style={{ color: '#10b981' }} />
+                <span>API Bağlantısı Hazır</span>
+              </span>
             </div>
           </div>
         </div>

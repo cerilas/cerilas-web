@@ -14,10 +14,12 @@ import {
   XCircle, 
   Loader2,
   ArrowUpRight,
-  Layers
+  Layers,
+  X
 } from 'lucide-react';
 import { useGrowth } from '../GrowthContext';
 import { useAuth } from '../../context/AuthContext';
+import GrowthPageCover from '../components/GrowthPageCover';
 
 export default function GrowthCompetitors() {
   const { activeWorkspace } = useGrowth();
@@ -107,19 +109,19 @@ export default function GrowthCompetitors() {
 
   return (
     <div className="growth-page-container animate-fade">
-      {/* Header */}
-      <div className="growth-page-header">
-        <div>
-          <div className="growth-title-row">
-            <Users2 size={22} className="text-primary" />
-            <h1 className="growth-page-title">Rakip İstihbaratı & Alıntı Boşluğu (GEO Gap)</h1>
-          </div>
-          <p className="growth-page-subtitle">
-            Rakiplerinizin Google arama ve Yapay Zeka (GEO) alıntılanma durumunu izleyin, nerede öne geçtiklerini ve hangi dizinlerde listelendiklerini analiz edin.
-          </p>
-        </div>
-
-        <div className="growth-page-actions">
+      {/* Hero Page Cover */}
+      <GrowthPageCover
+        badge="Rakip İstihbaratı & GEO Analizi"
+        badgeIcon={Users2}
+        title="Rakip İstihbaratı & Alıntı Boşluğu"
+        subtitle="Rakiplerinizin Google arama ve Yapay Zeka (GEO) alıntılanma durumunu izleyin, nerede öne geçtiklerini ve hangi dizinlerde listelendiklerini analiz edin."
+        coverImage="/growth-covers/seo-cover.jpg"
+        stats={[
+          { label: 'Bizim Skorumuz', value: `${ourScore}/100`, sub: 'Büyüme & GEO Gücü' },
+          { label: 'İzlenen Rakip', value: `${competitors.length} Marka`, sub: 'Aktif radar' },
+          { label: 'Alıntı Liderliği', value: ourScore >= 70 ? 'Öndesiniz' : 'Geliştirilmeli', sub: 'Modellerde öne geçme' }
+        ]}
+        actions={
           <button
             type="button"
             className="growth-primary-btn"
@@ -128,8 +130,8 @@ export default function GrowthCompetitors() {
             <Plus size={15} />
             <span>Yeni Rakip Ekle</span>
           </button>
-        </div>
-      </div>
+        }
+      />
 
       {/* Top Comparison Metrics */}
       <div className="growth-stats-grid four-col">
@@ -315,8 +317,9 @@ export default function GrowthCompetitors() {
                 type="button" 
                 className="growth-modal-close" 
                 onClick={() => setIsAddOpen(false)}
+                aria-label="Kapat"
               >
-                ✕
+                <X size={18} />
               </button>
             </div>
 

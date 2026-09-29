@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { useGrowth } from '../GrowthContext';
 import { useAuth } from '../../context/AuthContext';
+import GrowthPageCover from '../components/GrowthPageCover';
 
 export default function GrowthTechnicalAudit() {
   const { activeWorkspace } = useGrowth();
@@ -62,23 +63,25 @@ export default function GrowthTechnicalAudit() {
 
   return (
     <div className="growth-page-container animate-fade">
-      {/* Page Header */}
-      <div className="growth-page-header">
-        <div>
-          <div className="growth-title-row">
-            <Wrench size={22} className="text-warning" />
-            <h1 className="growth-page-title">Teknik Site Denetimi & Hata Raporu</h1>
-          </div>
-          <p className="growth-page-subtitle">
-            Sayfa başlıkları, meta etiketler, H1/H2 hiyerarşisi, Schema.org yapılandırılmış verisi ve dizine eklenebilirlik kontrolleri.
-          </p>
-        </div>
-
-        <button type="button" onClick={fetchAudit} className="growth-secondary-btn">
-          <RefreshCw size={14} />
-          <span>Yeniden Tara</span>
-        </button>
-      </div>
+      {/* Page Hero Cover */}
+      <GrowthPageCover
+        badge="Teknik Altyapı Denetimi"
+        badgeIcon={Wrench}
+        title="Teknik Site Denetimi & Hata Raporu"
+        subtitle="Sayfa başlıkları, meta etiketler, H1/H2 hiyerarşisi, Schema.org yapılandırılmış verisi ve dizine eklenebilirlik kontrolleri."
+        coverImage="/growth-covers/audit-cover.jpg"
+        stats={[
+          { label: 'Toplam Sorun', value: issues.length, sub: 'Taranan anomaliler' },
+          { label: 'Kritik Hata', value: issues.filter(i => i.severity === 'critical').length, sub: 'Acil düzeltilmeli' },
+          { label: 'Taranan Sayfa', value: pages.length, sub: 'İndeks durumu OK' }
+        ]}
+        actions={
+          <button type="button" onClick={fetchAudit} className="growth-secondary-btn">
+            <RefreshCw size={14} />
+            <span>Yeniden Tara</span>
+          </button>
+        }
+      />
 
       {/* Issues Filter Tabs */}
       <div className="growth-audit-filter-bar">
@@ -159,37 +162,39 @@ export default function GrowthTechnicalAudit() {
           </div>
         </div>
 
-        <div className="growth-pages-table">
-          <div className="pages-table-header">
-            <span>Sayfa URL</span>
-            <span>Durum</span>
-            <span>Kelime Sayısı</span>
-            <span>Yapılandırılmış Veri</span>
-          </div>
-
-          {pages.map((pg) => (
-            <div key={pg.id} className="pages-table-row">
-              <div className="page-url-cell">
-                <span className="page-title-text">{pg.title || 'Başlıksız Sayfa'}</span>
-                <span className="page-url-sub">{pg.url}</span>
-              </div>
-              <div className="page-status-cell">
-                <span className="page-status-pill">{pg.status_code || 200} OK</span>
-              </div>
-              <div className="page-words-cell">
-                <span>{pg.word_count || 0} kelime</span>
-              </div>
-              <div className="page-schema-cell">
-                {pg.schema_types && pg.schema_types.length > 0 ? (
-                  pg.schema_types.map((sc, scIdx) => (
-                    <span key={scIdx} className="schema-pill">{sc}</span>
-                  ))
-                ) : (
-                  <span className="text-muted">Şema Yok</span>
-                )}
-              </div>
+        <div className="growth-table-wrap">
+          <div className="growth-pages-table">
+            <div className="pages-table-header">
+              <span>Sayfa URL</span>
+              <span>Durum</span>
+              <span>Kelime Sayısı</span>
+              <span>Yapılandırılmış Veri</span>
             </div>
-          ))}
+
+            {pages.map((pg) => (
+              <div key={pg.id} className="pages-table-row">
+                <div className="page-url-cell">
+                  <span className="page-title-text">{pg.title || 'Başlıksız Sayfa'}</span>
+                  <span className="page-url-sub">{pg.url}</span>
+                </div>
+                <div className="page-status-cell">
+                  <span className="page-status-pill">{pg.status_code || 200} OK</span>
+                </div>
+                <div className="page-words-cell">
+                  <span>{pg.word_count || 0} kelime</span>
+                </div>
+                <div className="page-schema-cell">
+                  {pg.schema_types && pg.schema_types.length > 0 ? (
+                    pg.schema_types.map((sc, scIdx) => (
+                      <span key={scIdx} className="schema-pill">{sc}</span>
+                    ))
+                  ) : (
+                    <span className="text-muted">Şema Yok</span>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </div>

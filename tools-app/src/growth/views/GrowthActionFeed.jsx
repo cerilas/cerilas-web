@@ -20,11 +20,13 @@ import {
   Search,
   CheckCircle,
   XCircle,
+  X,
   HelpCircle,
   Loader2
 } from 'lucide-react';
 import { useGrowth } from '../GrowthContext';
 import { useAuth } from '../../context/AuthContext';
+import GrowthPageCover from '../components/GrowthPageCover';
 
 export default function GrowthActionFeed() {
   const { activeWorkspace, setActiveTab } = useGrowth();
@@ -115,19 +117,19 @@ export default function GrowthActionFeed() {
 
   return (
     <div className="growth-page-container animate-fade">
-      {/* Header */}
-      <div className="growth-page-header">
-        <div>
-          <div className="growth-title-row">
-            <Zap size={22} className="text-primary" />
-            <h1 className="growth-page-title">Öncelikli Aksiyon Listesi (Action Feed)</h1>
-          </div>
-          <p className="growth-page-subtitle">
-            Karmaşık grafikler yerine, sitenizin Google ve Yapay Zeka (GEO) görünürlüğünü doğrudan artıracak önceliklendirilmiş somut büyüme adımları.
-          </p>
-        </div>
-
-        <div className="growth-page-actions">
+      {/* Hero Page Cover */}
+      <GrowthPageCover
+        badge="Öncelikli Aksiyon Motoru"
+        badgeIcon={Zap}
+        title="Öncelikli Aksiyon Listesi"
+        subtitle="Karmaşık grafikler yerine, sitenizin Google ve Yapay Zeka (GEO) görünürlüğünü doğrudan artıracak önceliklendirilmiş somut büyüme adımları."
+        coverImage="/growth-covers/overview-cover.jpg"
+        stats={[
+          { label: 'Toplam Fırsat', value: `${totalCount} Görev`, sub: `${openCount} tanesi beklemede` },
+          { label: 'Hızlı Kazanım', value: `${quickWinsCount} Adım`, sub: 'Düşük efor, yüksek etki' },
+          { label: 'Tamamlanan', value: `${completedCount} Aksiyon`, sub: 'Çözülmüş büyüme adımları' }
+        ]}
+        actions={
           <button 
             type="button" 
             onClick={fetchOpportunities}
@@ -135,8 +137,8 @@ export default function GrowthActionFeed() {
           >
             Listeyi Yenile
           </button>
-        </div>
-      </div>
+        }
+      />
 
       {/* Top Impact Metrics Cards */}
       <div className="growth-stats-grid four-col">
@@ -192,7 +194,8 @@ export default function GrowthActionFeed() {
             className={`filter-chip ${filterCategory === 'quick_wins' ? 'is-active' : ''}`}
             onClick={() => setFilterCategory('quick_wins')}
           >
-            ⚡ Hızlı Kazanımlar ({quickWinsCount})
+            <Zap size={13} />
+            <span>Hızlı Kazanımlar ({quickWinsCount})</span>
           </button>
           <button
             type="button"
@@ -431,7 +434,7 @@ export default function GrowthActionFeed() {
                 className="growth-modal-close" 
                 onClick={() => setActiveGuideOpp(null)}
               >
-                ✕
+                <X size={18} />
               </button>
             </div>
 

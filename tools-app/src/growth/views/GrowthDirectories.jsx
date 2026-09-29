@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { useGrowth } from '../GrowthContext';
 import { useAuth } from '../../context/AuthContext';
+import GrowthPageCover from '../components/GrowthPageCover';
 
 export default function GrowthDirectories() {
   const { activeWorkspace } = useGrowth();
@@ -78,18 +79,19 @@ export default function GrowthDirectories() {
 
   return (
     <div className="growth-page-container animate-fade">
-      {/* Header */}
-      <div className="growth-page-header">
-        <div>
-          <div className="growth-title-row">
-            <Share2 size={22} className="text-primary" />
-            <h1 className="growth-page-title">Yüksek Otoriteli Dizinler & GEO Alıntı Dağıtımı</h1>
-          </div>
-          <p className="growth-page-subtitle">
-            Yapay zeka modelleri (ChatGPT, Gemini, Perplexity) bu güvenilir kaynakları tarayarak markaları öğrenir ve yanıtlarında alıntılar.
-          </p>
-        </div>
-      </div>
+      {/* Hero Page Cover */}
+      <GrowthPageCover
+        badge="GEO Otorite & Dizin Ağı"
+        badgeIcon={Share2}
+        title="Yüksek Otoriteli Dizinler & GEO Alıntı Dağıtımı"
+        subtitle="ChatGPT, Gemini ve Perplexity bu güvenilir kaynakları tarayarak markaları öğrenir ve AI sorgularında kaynak gösterir."
+        coverImage="/growth-covers/geo-cover.jpg"
+        stats={[
+          { label: 'Hedef Platform', value: `${totalCount} Dizin`, sub: 'Yüksek otoriteli' },
+          { label: 'Doğrulanan Profil', value: `${claimedCount} Hesap`, sub: 'Aktif listelenmiş' },
+          { label: 'Otorite Skoru', value: `%${authorityScore}`, sub: 'GEO hazır bulunuşluk' }
+        ]}
+      />
 
       {/* Top 4 Metrics */}
       <div className="growth-stats-grid four-col">

@@ -16,7 +16,7 @@ import GrowthDirectories from './views/GrowthDirectories';
 import GrowthReports from './views/GrowthReports';
 import GrowthSettings from './views/GrowthSettings';
 import { useAuth } from '../context/AuthContext';
-import { Sparkles, ShieldCheck, ArrowRight, Lock, Loader2 } from 'lucide-react';
+import { Sparkles, ShieldCheck, ArrowRight, ArrowLeft, Lock, Loader2 } from 'lucide-react';
 import './GrowthApp.css';
 
 function GrowthInner({ onBackToTools }) {
@@ -103,7 +103,8 @@ function GrowthInner({ onBackToTools }) {
             className="growth-guest-back-link"
             onClick={onBackToTools || (() => { window.location.hash = '#/'; })}
           >
-            ← Cerilas Ücretsiz Araçlara Dön
+            <ArrowLeft size={14} style={{ marginRight: '6px' }} />
+            <span>Cerilas Ücretsiz Araçlara Dön</span>
           </button>
         </div>
       </div>

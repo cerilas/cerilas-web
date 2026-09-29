@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { useGrowth } from '../GrowthContext';
 import { useAuth } from '../../context/AuthContext';
+import GrowthPageCover from '../components/GrowthPageCover';
 
 export default function GrowthReports() {
   const { activeWorkspace } = useGrowth();
@@ -65,38 +66,40 @@ export default function GrowthReports() {
 
   return (
     <div className="growth-page-container animate-fade">
-      {/* Header */}
-      <div className="growth-page-header">
-        <div>
-          <div className="growth-title-row">
-            <FileBarChart size={22} className="text-primary" />
-            <h1 className="growth-page-title">Haftalık & Aylık Yönetici Raporları</h1>
+      {/* Hero Page Cover */}
+      <GrowthPageCover
+        badge="Yönetici & Paydaş Raporları"
+        badgeIcon={FileBarChart}
+        title="Haftalık & Aylık Yönetici Raporları"
+        subtitle="Organik arama ve Yapay Zeka (GEO) görünürlük ilerlemenizi gösteren şeffaf, paylaşıma ve sunuma hazır yönetici özetleri."
+        coverImage="/growth-covers/overview-cover.jpg"
+        stats={[
+          { label: 'Büyüme Skoru', value: `${activeWorkspace?.growth_score || 76}/100`, sub: '+8 puan son 30 gün' },
+          { label: 'Aktif Raporlar', value: `${reports.length || 4} Rapor`, sub: 'Haftalık otomatik' },
+          { label: 'Yapay Zeka Hazırlığı', value: 'Yüksek', sub: 'Sunuma hazır PDF' }
+        ]}
+        actions={
+          <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+            <button
+              type="button"
+              className="growth-secondary-btn"
+              onClick={handleShareLink}
+            >
+              {copiedLink ? <Check size={14} className="text-success" /> : <Share2 size={14} />}
+              <span>{copiedLink ? 'Link Kopyalandı!' : 'Rapor Linkini Paylaş'}</span>
+            </button>
+
+            <button
+              type="button"
+              className="growth-primary-btn"
+              onClick={handlePrint}
+            >
+              <Printer size={15} />
+              <span>PDF Olarak Yazdır / Kaydet</span>
+            </button>
           </div>
-          <p className="growth-page-subtitle">
-            Organik arama ve Yapay Zeka (GEO) görünürlük ilerlemenizi gösteren şeffaf, paylaşıma ve sunuma hazır yönetici özetleri.
-          </p>
-        </div>
-
-        <div className="growth-page-actions">
-          <button
-            type="button"
-            className="growth-secondary-btn"
-            onClick={handleShareLink}
-          >
-            {copiedLink ? <Check size={14} className="text-success" /> : <Share2 size={14} />}
-            <span>{copiedLink ? 'Link Kopyalandı!' : 'Rapor Linkini Paylaş'}</span>
-          </button>
-
-          <button
-            type="button"
-            className="growth-primary-btn"
-            onClick={handlePrint}
-          >
-            <Printer size={15} />
-            <span>PDF Olarak Yazdır / Kaydet</span>
-          </button>
-        </div>
-      </div>
+        }
+      />
 
       {/* Top 4 Metrics Summary */}
       <div className="growth-stats-grid four-col">

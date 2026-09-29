@@ -19,6 +19,7 @@ import {
   AlertCircle
 } from 'lucide-react';
 import { useGrowth } from '../GrowthContext';
+import GrowthPageCover from '../components/GrowthPageCover';
 
 export default function GrowthSearch() {
   const { activeWorkspace, setActiveTab } = useGrowth();
@@ -53,33 +54,34 @@ export default function GrowthSearch() {
 
   return (
     <div className="growth-page-container animate-fade">
-      {/* Page Header */}
-      <div className="growth-page-header">
-        <div>
-          <div className="growth-title-row">
-            <Search size={22} className="text-primary" />
-            <h1 className="growth-page-title">Google Organik Arama Performansı</h1>
-          </div>
-          <p className="growth-page-subtitle">
-            Google'dan gelen gerçek organik sorgular, gösterimler, tıklamalar ve sayfa 1'e en yakın hızlı yükselme fırsatları.
-          </p>
-        </div>
+      {/* Hero Cover Banner */}
+      <GrowthPageCover
+        badge="Google Search Console Canlı Veri"
+        badgeIcon={Search}
+        title="Google Organik Arama & Sıralama İstihbaratı"
+        subtitle="Google arama sonuçlarından gelen gerçek organik sorgular, sayfa 1 fırsatları ve tıklama hacimleri."
+        coverImage="/growth-covers/seo-cover.jpg"
+        stats={[
+          { label: 'Toplam Tıklama', value: '1,075', positive: true, sub: '+%14.2' },
+          { label: 'Ort. Sıralama', value: '5.4', positive: true, sub: '+1.3 sıra' }
+        ]}
+        actions={
+          <>
+            <div className="growth-date-badge">
+              <Calendar size={13} />
+              <span>Son 28 Gün</span>
+            </div>
+            <button 
+              type="button" 
+              onClick={() => setActiveTab('settings')}
+              className="growth-secondary-btn"
+            >
+              GSC Entegrasyonu
+            </button>
+          </>
+        }
+      />
 
-        <div className="growth-page-actions">
-          <div className="growth-date-badge">
-            <Calendar size={13} />
-            <span>Son 28 Gün</span>
-          </div>
-
-          <button 
-            type="button" 
-            onClick={() => setActiveTab('settings')}
-            className="growth-secondary-btn"
-          >
-            GSC Entegrasyonu
-          </button>
-        </div>
-      </div>
 
       {/* Integration Status Callout Banner */}
       <div className="growth-gsc-banner">

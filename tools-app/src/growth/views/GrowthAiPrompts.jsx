@@ -15,10 +15,12 @@ import {
   Share2, 
   Layers,
   Search,
-  MessageSquare
+  MessageSquare,
+  X
 } from 'lucide-react';
 import { useGrowth } from '../GrowthContext';
 import { useAuth } from '../../context/AuthContext';
+import GrowthPageCover from '../components/GrowthPageCover';
 
 export default function GrowthAiPrompts() {
   const { activeWorkspace } = useGrowth();
@@ -116,19 +118,19 @@ export default function GrowthAiPrompts() {
 
   return (
     <div className="growth-page-container animate-fade">
-      {/* Header */}
-      <div className="growth-page-header">
-        <div>
-          <div className="growth-title-row">
-            <Cpu size={22} className="text-primary" />
-            <h1 className="growth-page-title">Takip Edilen GEO Promptları & Simülatör</h1>
-          </div>
-          <p className="growth-page-subtitle">
-            Kullanıcıların ChatGPT, Gemini ve Perplexity'ye sorduğu kritik sektörel soruları takip edin ve markanızın bu yanıtlarda önerilip önerilmediğini canlı test edin.
-          </p>
-        </div>
-
-        <div className="growth-page-actions">
+      {/* Hero Page Cover */}
+      <GrowthPageCover
+        badge="GEO Canlı Yanıt Simülatörü"
+        badgeIcon={Cpu}
+        title="Takip Edilen GEO Promptları & Simülatör"
+        subtitle="Kullanıcıların ChatGPT, Gemini ve Perplexity'ye sorduğu kritik sektörel soruları takip edin ve markanızın bu yanıtlarda önerilip önerilmediğini canlı test edin."
+        coverImage="/growth-covers/geo-cover.jpg"
+        stats={[
+          { label: 'Takip Edilen', value: `${totalPrompts} Soru`, sub: 'Hedef sektörel sorgular' },
+          { label: 'Bahsedilme Oranı', value: `%${mentionRate}`, sub: 'Canlı test sonucu' },
+          { label: 'Test Edilen', value: `${testedCount} Prompt`, sub: 'Aktif sorgulanmış' }
+        ]}
+        actions={
           <button
             type="button"
             className="growth-primary-btn"
@@ -137,8 +139,8 @@ export default function GrowthAiPrompts() {
             <Plus size={15} />
             <span>Yeni Prompt Takibi Ekle</span>
           </button>
-        </div>
-      </div>
+        }
+      />
 
       {/* Top 4 Metrics */}
       <div className="growth-stats-grid four-col">
@@ -202,8 +204,9 @@ export default function GrowthAiPrompts() {
               type="button" 
               className="sim-close-btn"
               onClick={() => setActiveSimulationResult(null)}
+              aria-label="Kapat"
             >
-              ✕
+              <X size={16} />
             </button>
           </div>
 
@@ -345,8 +348,9 @@ export default function GrowthAiPrompts() {
                 type="button" 
                 className="growth-modal-close" 
                 onClick={() => setIsAddOpen(false)}
+                aria-label="Kapat"
               >
-                ✕
+                <X size={18} />
               </button>
             </div>
 

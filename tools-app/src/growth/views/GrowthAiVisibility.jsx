@@ -13,10 +13,12 @@ import {
   Search,
   MessageSquare,
   ShieldCheck,
-  Zap
+  Zap,
+  X
 } from 'lucide-react';
 import { useGrowth } from '../GrowthContext';
 import { useAuth } from '../../context/AuthContext';
+import GrowthPageCover from '../components/GrowthPageCover';
 
 export default function GrowthAiVisibility() {
   const { activeWorkspace } = useGrowth();
@@ -103,19 +105,19 @@ export default function GrowthAiVisibility() {
 
   return (
     <div className="growth-page-container animate-fade">
-      {/* Page Header */}
-      <div className="growth-page-header">
-        <div>
-          <div className="growth-title-row">
-            <Bot size={22} className="text-primary" />
-            <h1 className="growth-page-title">Yapay Zeka (GEO) Görünürlüğü & Alıntı Takibi</h1>
-            <span className="growth-new-tag">Generative Engine Optimization</span>
-          </div>
-          <p className="growth-page-subtitle">
-            Kullanıcıların ChatGPT, Gemini ve Perplexity gibi yapay zeka arama motorlarına sordukları sorularda markanızın ne sıklıkla anıldığını ve alıntılandığını izleyin.
-          </p>
-        </div>
-      </div>
+      {/* Hero Cover Banner */}
+      <GrowthPageCover
+        badge="Generative Engine Optimization (GEO)"
+        badgeIcon={Bot}
+        title="Yapay Zeka (GEO) Görünürlüğü & Alıntı Takibi"
+        subtitle="ChatGPT, Google Gemini ve Perplexity gibi yapay zeka arama motorlarında markanızın anılma ve kaynak gösterilme oranı."
+        coverImage="/growth-covers/geo-cover.jpg"
+        stats={[
+          { label: 'GEO Hazırbulunuşluk', value: '75/100', positive: true, sub: 'Aktif Standartlar' },
+          { label: 'Yapay Zeka Motorları', value: 'Gemini, GPT, Perplexity' }
+        ]}
+      />
+
 
       {/* GEO Readiness Indicators Card */}
       <div className="growth-panel-card">
@@ -196,8 +198,8 @@ export default function GrowthAiVisibility() {
               <Sparkles size={18} className="text-primary" />
               <h4>Canlı Yapay Zeka Test Sonucu (Gemini 2.5)</h4>
             </div>
-            <button type="button" onClick={() => setLastRunResult(null)} className="ai-result-close">
-              &times;
+            <button type="button" onClick={() => setLastRunResult(null)} className="ai-result-close" aria-label="Kapat">
+              <X size={16} />
             </button>
           </div>
 
