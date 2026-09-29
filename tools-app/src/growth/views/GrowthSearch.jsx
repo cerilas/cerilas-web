@@ -19,7 +19,8 @@ import {
   AlertCircle,
   RefreshCw,
   Activity,
-  Loader2
+  Loader2,
+  Settings
 } from 'lucide-react';
 import { useGrowth } from '../GrowthContext';
 import { useAuth } from '../../context/AuthContext';
