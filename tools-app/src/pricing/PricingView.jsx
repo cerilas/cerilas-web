@@ -96,7 +96,7 @@ export default function PricingView({ onBack }) {
               <h2 className="pricing-plan-name">Forever Free</h2>
             </div>
             <p className="pricing-plan-desc">
-              All Tools with limited usage
+              Free tools free forever, Premium tools uses token, limited free allowance.
             </p>
 
             <div className="pricing-price-box">
@@ -114,7 +114,11 @@ export default function PricingView({ onBack }) {
           <ul className="pricing-features-list">
             <li className="pricing-feature-item">
               <Check size={16} className="pricing-check-icon" />
-              <span><strong>All 31+ tools accessible</strong> with standard daily rate limits</span>
+              <span><strong>Free tools free forever:</strong> Unlimited access to all free tools</span>
+            </li>
+            <li className="pricing-feature-item">
+              <Check size={16} className="pricing-check-icon" />
+              <span><strong>Premium tools uses token:</strong> Limited free allowance included</span>
             </li>
             <li className="pricing-feature-item">
               <Check size={16} className="pricing-check-icon" />
@@ -127,10 +131,6 @@ export default function PricingView({ onBack }) {
             <li className="pricing-feature-item">
               <Check size={16} className="pricing-check-icon" />
               <span>Standard client-side processing speeds</span>
-            </li>
-            <li className="pricing-feature-item">
-              <Check size={16} className="pricing-check-icon" />
-              <span>Community documentation and guides</span>
             </li>
           </ul>
 
@@ -154,7 +154,7 @@ export default function PricingView({ onBack }) {
               <h2 className="pricing-plan-name">Pro</h2>
             </div>
             <p className="pricing-plan-desc">
-              Tiny &amp; basic tools are unlimited usage, premium tools x5 more usage than free plan.
+              Free tools free forever, with higher token allowance for premium tools.
             </p>
 
             <div className="pricing-price-box">
@@ -178,11 +178,11 @@ export default function PricingView({ onBack }) {
           <ul className="pricing-features-list">
             <li className="pricing-feature-item">
               <Check size={16} className="pricing-check-icon" />
-              <span><strong>Unlimited usage</strong> on all tiny &amp; basic tools (Calculators, Formatters, Converters, Webhooks, QR, etc.)</span>
+              <span><strong>Free tools free forever:</strong> Unlimited access to all free tools</span>
             </li>
             <li className="pricing-feature-item">
               <Check size={16} className="pricing-check-icon" />
-              <span><strong>x5 more usage</strong> on premium tools than free plan (PDF Editor, ATS Resume, AI Detector, Token Counter, etc.)</span>
+              <span><strong>Premium tools:</strong> Expanded token allowance for heavy usage</span>
             </li>
             <li className="pricing-feature-item">
               <Check size={16} className="pricing-check-icon" />
@@ -217,7 +217,7 @@ export default function PricingView({ onBack }) {
               <h2 className="pricing-plan-name">Unlimited</h2>
             </div>
             <p className="pricing-plan-desc">
-              Unlimited usage all tiny &amp; premium tools
+              Free tools free forever, with maximum token allowance for premium tools.
             </p>
 
             <div className="pricing-price-box">
@@ -241,11 +241,11 @@ export default function PricingView({ onBack }) {
           <ul className="pricing-features-list">
             <li className="pricing-feature-item">
               <Check size={16} className="pricing-check-icon" />
-              <span><strong>Unlimited usage</strong> on all tiny, basic &amp; premium tools</span>
+              <span><strong>Free tools free forever:</strong> Unlimited access to all free tools</span>
             </li>
             <li className="pricing-feature-item">
               <Check size={16} className="pricing-check-icon" />
-              <span><strong>Unlimited AI queries</strong>, ATS resume evaluations &amp; RAG document chunking</span>
+              <span><strong>Premium tools:</strong> Maximum token allowance &amp; highest limits</span>
             </li>
             <li className="pricing-feature-item">
               <Check size={16} className="pricing-check-icon" />
@@ -293,16 +293,16 @@ export default function PricingView({ onBack }) {
             </thead>
             <tbody>
               <tr>
-                <td className="col-feature">Tiny &amp; Basic Tools (Formatters, Encoders, QR, Calculators)</td>
-                <td className="col-plan">Limited Usage</td>
-                <td className="col-plan is-highlight">Unlimited Usage</td>
-                <td className="col-plan">Unlimited Usage</td>
+                <td className="col-feature">Free Tools</td>
+                <td className="col-plan">Free Forever</td>
+                <td className="col-plan is-highlight">Free Forever</td>
+                <td className="col-plan">Free Forever</td>
               </tr>
               <tr>
-                <td className="col-feature">Premium Tools (PDF Editor, ATS Checker, AI Detector, Token Counter)</td>
-                <td className="col-plan">Limited Usage</td>
-                <td className="col-plan is-highlight">x5 More Usage</td>
-                <td className="col-plan">Unlimited Usage</td>
+                <td className="col-feature">Premium Tools (Token-based)</td>
+                <td className="col-plan">Limited Free Allowance</td>
+                <td className="col-plan is-highlight">Expanded Token Allowance</td>
+                <td className="col-plan">Maximum Token Allowance</td>
               </tr>
               <tr>
                 <td className="col-feature">EU Horizon Europe &amp; Cascade Funding Grants</td>

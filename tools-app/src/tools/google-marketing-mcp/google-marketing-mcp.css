@@ -21,6 +21,7 @@
   height: 7px;
   border-radius: 50%;
   display: inline-block;
+  margin-right: 0.4rem;
   flex-shrink: 0;
 }
 

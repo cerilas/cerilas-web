@@ -37,6 +37,9 @@ import ErrorBoundary from './components/ErrorBoundary';
 import AdminDashboard from './admin/AdminDashboard';
 import LegalView from './legal/LegalView';
 import PricingView from './pricing/PricingView';
+import AuthModal from './components/auth/AuthModal';
+import AccountDashboard from './components/account/AccountDashboard';
+import { useAuth } from './context/AuthContext';
 import { LEGAL_DOCS } from './legal/legalContent';
 import { toolsRegistry, getAllRegisteredTools, getRegisteredTool } from './tools/registry';
 import { getToolSeo } from './seo/toolsSeoRegistry';
@@ -262,6 +265,25 @@ export default function App() {
     const h = window.location.hash;
     return p === '/pricing' || p.startsWith('/pricing/') || h === '#/pricing' || h.startsWith('#/pricing/');
   });
+  const { openAuthModal } = useAuth();
+  const [isAccountView, setIsAccountView] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    const p = window.location.pathname;
+    const h = window.location.hash;
+    return p === '/account' || p.startsWith('/account/') ||
+      p === '/profile' || p.startsWith('/profile/') ||
+      p === '/billing' || p.startsWith('/billing/') ||
+      h === '#/account' || h.startsWith('#/account') ||
+      h === '#/profile' || h.startsWith('#/profile') ||
+      h === '#/billing' || h.startsWith('#/billing');
+  });
+  const [accountTab, setAccountTab] = useState(() => {
+    if (typeof window === 'undefined') return 'profile';
+    const h = window.location.hash;
+    if (h.includes('tab=package') || h.includes('tab=plan') || h.includes('package') || h.includes('plan')) return 'package';
+    if (h.includes('billing')) return 'billing';
+    return 'profile';
+  });
 
   const heroBannerRef = useRef(null);
   const heroImgRef = useRef(null);
@@ -328,12 +350,45 @@ export default function App() {
       // 0. Pricing route matching (/pricing, #/pricing)
       if (pathname === '/pricing' || pathname.startsWith('/pricing/') || hash === '#/pricing' || hash.startsWith('#/pricing/')) {
         setIsPricing(true);
+        setIsAccountView(false);
         setCurrentSlug(null);
         setCurrentLegalSlug(null);
         forceScrollToTop();
         return;
       }
       setIsPricing(false);
+
+      // 0.1 Account / User Portal routes (/account, #/account, /profile, #/profile, /billing, #/billing)
+      const isAccount = 
+        pathname === '/account' || pathname.startsWith('/account/') ||
+        pathname === '/profile' || pathname.startsWith('/profile/') ||
+        pathname === '/billing' || pathname.startsWith('/billing/') ||
+        hash === '#/account' || hash.startsWith('#/account') ||
+        hash === '#/profile' || hash.startsWith('#/profile') ||
+        hash === '#/billing' || hash.startsWith('#/billing');
+
+      if (isAccount) {
+        setIsAccountView(true);
+        setIsPricing(false);
+        setCurrentSlug(null);
+        setCurrentLegalSlug(null);
+        if (hash.includes('tab=package') || hash.includes('tab=plan') || hash.includes('package') || hash.includes('plan')) {
+          setAccountTab('package');
+        } else if (hash.includes('tab=billing') || hash.includes('billing')) {
+          setAccountTab('billing');
+        } else {
+          setAccountTab('profile');
+        }
+        forceScrollToTop();
+        return;
+      }
+      setIsAccountView(false);
+
+      if (hash === '#/login' || hash.startsWith('#/login')) {
+        openAuthModal('login');
+      } else if (hash === '#/register' || hash.startsWith('#/register')) {
+        openAuthModal('register');
+      }
 
       // 1. Legal compliance routes matching (/terms, /privacy, /refund, /cookies, /legal/:slug, #/legal/:slug)
       const legalAliasMap = {
@@ -750,6 +805,7 @@ export default function App() {
   const navigateToPricing = () => {
     forceScrollToTop();
     setIsPricing(true);
+    setIsAccountView(false);
     setCurrentLegalSlug(null);
     setCurrentSlug(null);
     window.location.hash = '#/pricing';
@@ -759,6 +815,7 @@ export default function App() {
   const navigateToTool = (slug) => {
     forceScrollToTop();
     setIsPricing(false);
+    setIsAccountView(false);
     setCurrentLegalSlug(null);
     window.location.hash = `#/tool/${slug}`;
     forceScrollToTop();
@@ -767,9 +824,21 @@ export default function App() {
   const navigateToHome = () => {
     forceScrollToTop();
     setIsPricing(false);
+    setIsAccountView(false);
     setCurrentLegalSlug(null);
     setCurrentSlug(null);
     window.location.hash = '#/';
+    forceScrollToTop();
+  };
+
+  const navigateToAccount = (tab = 'package') => {
+    forceScrollToTop();
+    setIsPricing(false);
+    setIsAccountView(true);
+    setAccountTab(tab);
+    setCurrentLegalSlug(null);
+    setCurrentSlug(null);
+    window.location.hash = `#/account?tab=${tab}`;
     forceScrollToTop();
   };
 
@@ -820,6 +889,10 @@ export default function App() {
         {isPricing ? (
           <ErrorBoundary>
             <PricingView onBack={navigateToHome} />
+          </ErrorBoundary>
+        ) : isAccountView ? (
+          <ErrorBoundary>
+            <AccountDashboard initialTab={accountTab} onBack={navigateToHome} />
           </ErrorBoundary>
         ) : currentLegalSlug ? (
           <ErrorBoundary>
@@ -961,6 +1034,8 @@ export default function App() {
         isOpen={isStatsOpen} 
         onClose={() => setIsStatsOpen(false)} 
       />
+
+      <AuthModal />
     </div>
   );
 }
