@@ -39,6 +39,7 @@ import LegalView from './legal/LegalView';
 import PricingView from './pricing/PricingView';
 import AuthModal from './components/auth/AuthModal';
 import AccountDashboard from './components/account/AccountDashboard';
+import GrowthApp from './growth/GrowthApp';
 import { useAuth } from './context/AuthContext';
 import { LEGAL_DOCS } from './legal/legalContent';
 import { toolsRegistry, getAllRegisteredTools, getRegisteredTool } from './tools/registry';
@@ -265,6 +266,12 @@ export default function App() {
     const h = window.location.hash;
     return p === '/pricing' || p.startsWith('/pricing/') || h === '#/pricing' || h.startsWith('#/pricing/');
   });
+  const [isGrowthView, setIsGrowthView] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    const p = window.location.pathname;
+    const h = window.location.hash;
+    return p === '/growth' || p.startsWith('/growth/') || h === '#/growth' || h.startsWith('#/growth');
+  });
   const { openAuthModal } = useAuth();
   const [isAccountView, setIsAccountView] = useState(() => {
     if (typeof window === 'undefined') return false;
@@ -347,9 +354,22 @@ export default function App() {
       }
       setIsAdmin(false);
 
-      // 0. Pricing route matching (/pricing, #/pricing)
+      // 0. Growth route matching (/growth, #/growth)
+      if (pathname === '/growth' || pathname.startsWith('/growth/') || hash === '#/growth' || hash.startsWith('#/growth')) {
+        setIsGrowthView(true);
+        setIsPricing(false);
+        setIsAccountView(false);
+        setCurrentSlug(null);
+        setCurrentLegalSlug(null);
+        forceScrollToTop();
+        return;
+      }
+      setIsGrowthView(false);
+
+      // 0.1 Pricing route matching (/pricing, #/pricing)
       if (pathname === '/pricing' || pathname.startsWith('/pricing/') || hash === '#/pricing' || hash.startsWith('#/pricing/')) {
         setIsPricing(true);
+        setIsGrowthView(false);
         setIsAccountView(false);
         setCurrentSlug(null);
         setCurrentLegalSlug(null);
@@ -369,6 +389,7 @@ export default function App() {
 
       if (isAccount) {
         setIsAccountView(true);
+        setIsGrowthView(false);
         setIsPricing(false);
         setCurrentSlug(null);
         setCurrentLegalSlug(null);
@@ -805,6 +826,7 @@ export default function App() {
   const navigateToPricing = () => {
     forceScrollToTop();
     setIsPricing(true);
+    setIsGrowthView(false);
     setIsAccountView(false);
     setCurrentLegalSlug(null);
     setCurrentSlug(null);
@@ -812,8 +834,20 @@ export default function App() {
     forceScrollToTop();
   };
 
+  const navigateToGrowth = () => {
+    forceScrollToTop();
+    setIsGrowthView(true);
+    setIsPricing(false);
+    setIsAccountView(false);
+    setCurrentLegalSlug(null);
+    setCurrentSlug(null);
+    window.location.hash = '#/growth';
+    forceScrollToTop();
+  };
+
   const navigateToTool = (slug) => {
     forceScrollToTop();
+    setIsGrowthView(false);
     setIsPricing(false);
     setIsAccountView(false);
     setCurrentLegalSlug(null);
@@ -823,6 +857,7 @@ export default function App() {
 
   const navigateToHome = () => {
     forceScrollToTop();
+    setIsGrowthView(false);
     setIsPricing(false);
     setIsAccountView(false);
     setCurrentLegalSlug(null);
@@ -833,6 +868,7 @@ export default function App() {
 
   const navigateToAccount = (tab = 'package') => {
     forceScrollToTop();
+    setIsGrowthView(false);
     setIsPricing(false);
     setIsAccountView(true);
     setAccountTab(tab);
@@ -872,6 +908,15 @@ export default function App() {
     return (
       <ErrorBoundary>
         <AdminDashboard />
+      </ErrorBoundary>
+    );
+  }
+
+  if (isGrowthView) {
+    return (
+      <ErrorBoundary>
+        <GrowthApp onBackToTools={navigateToHome} />
+        <AuthModal />
       </ErrorBoundary>
     );
   }

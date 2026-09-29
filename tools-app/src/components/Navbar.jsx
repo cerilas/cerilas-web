@@ -11,7 +11,8 @@ import {
   LogOut, 
   Crown,
   CheckCircle2,
-  AlertCircle
+  AlertCircle,
+  TrendingUp
 } from 'lucide-react';
 import { useTranslation } from '../i18n';
 import { useTheme } from '../context/ThemeContext';
@@ -115,6 +116,16 @@ export default function Navbar({ activeTool, onNavigateHome, onOpenStats, onSele
         </div>
 
         <div className="nav-links">
+          <a
+            href="#/growth"
+            className="nav-link nav-growth-btn"
+            title="Cerilas Growth — SEO & AI Visibility Platform"
+          >
+            <Sparkles size={14} className="nav-growth-sparkle" />
+            <span className="nav-growth-label">Growth</span>
+            <span className="nav-growth-pill">PREMIUM</span>
+          </a>
+
           <button
             onClick={onOpenStats}
             className="nav-link nav-stats-btn"
@@ -163,8 +174,23 @@ export default function Navbar({ activeTool, onNavigateHome, onOpenStats, onSele
 
                   <div className="nav-dropdown-divider" />
 
-                  {/* 3 Main Portal Links Requested by User */}
+                  {/* Main Portal Links */}
                   <div className="nav-dropdown-items">
+                    <a
+                      href="#/growth"
+                      className="nav-dropdown-item nav-item-growth"
+                      onClick={() => setUserMenuOpen(false)}
+                    >
+                      <TrendingUp size={16} className="nav-item-icon text-primary" />
+                      <div className="nav-item-text-wrap">
+                        <span className="nav-item-title" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          Cerilas Growth
+                          <span className="nav-growth-pill-sm">PREMIUM</span>
+                        </span>
+                        <span className="nav-item-sub">{isTr ? 'Büyüme & AI Arama Paneli' : 'AI Visibility & SEO Suite'}</span>
+                      </div>
+                    </a>
+
                     <button
                       type="button"
                       className="nav-dropdown-item"

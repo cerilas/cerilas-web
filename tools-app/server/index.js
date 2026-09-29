@@ -22,7 +22,9 @@ import visibilityCheckerRouter from './routes/visibilityChecker.js';
 import { detectBot } from './utils/botDetector.js';
 import { initScrapersDb } from './migrations/init-scrapers-db.js';
 import { initMcpDb } from './migrations/init-mcp-db.js';
+import { initGrowthDb } from './migrations/init-growth-db.js';
 import googleMcpRouter from './routes/googleMcp.js';
+import growthRouter from './routes/growth.js';
 import { checkAiRateLimit, getClientIp } from './utils/aiRateLimit.js';
 import { CATEGORIES, TOOLS_SEO_REGISTRY, getAllToolSlugs, TOOL_CANONICAL_ALIASES } from './seo/toolsSeoRegistry.js';
 import { renderToolPageHtml, renderCategoryPageHtml, renderHomePageHtml, renderLegalPageHtml, renderPricingPageHtml } from './seo/ssrRenderer.js';
@@ -165,6 +167,9 @@ app.use('/tool-icons', express.static(path.join(publicPath, 'tool-icons')));
 
 // Mount auth router
 app.use('/api/auth', authRouter);
+
+// Mount Cerilas Growth SaaS router
+app.use('/api/growth', growthRouter);
 
 // Mount webhook tester router
 app.use('/api/webhook-test', webhookTesterRouter);
@@ -1349,6 +1354,9 @@ app.listen(PORT, async () => {
 
     // Initialize MCP User Connections tables
     await initMcpDb();
+
+    // Initialize Cerilas Growth SaaS tables
+    await initGrowthDb();
   } catch (error) {
     console.error('Error initializing database tables:', error);
   }
