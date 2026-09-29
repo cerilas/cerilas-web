@@ -2,6 +2,7 @@ import { Router } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { authPool } from '../db.js';
+import { handleGrowthOAuthCallback } from '../utils/googleGrowthIntegration.js';
 
 const router = Router();
 const JWT_SECRET = process.env.JWT_SECRET || 'cerilas_admin_jwt_secret_2026';
@@ -380,6 +381,79 @@ router.get('/google/callback', async (req, res, next) => {
   // If request state belongs to MCP Marketing tool, pass control to next handler
   if (state && (state === 'cerilas_mcp' || state.startsWith('mcp_'))) {
     return next();
+  }
+
+  // Dedicated handling for Cerilas Growth SaaS Google integrations (GSC & GA4)
+  if (state && state.startsWith('growth_')) {
+    if (error) {
+      return res.send(`
+        <!DOCTYPE html>
+        <html><body>
+        <script>
+          if (window.opener) {
+            window.opener.postMessage({ type: 'GROWTH_GOOGLE_AUTH_ERROR', error: ${JSON.stringify(error)} }, window.location.origin);
+            window.close();
+          } else {
+            window.location.href = '/#/growth?tab=settings&error=' + encodeURIComponent(${JSON.stringify(error)});
+          }
+        </script>
+        </body></html>
+      `);
+    }
+
+    if (!code) {
+      return res.status(400).send('Authorization code missing.');
+    }
+
+    try {
+      const growthResult = await handleGrowthOAuthCallback({ code, state });
+      return res.send(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Google Bağlantısı Başarılı</title>
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        </head>
+        <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; background: #09090b; color: #fff;">
+          <div style="text-align: center; padding: 24px; max-width: 420px; background: #18181b; border: 1px solid #27272a; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+            <div style="width: 44px; height: 44px; margin: 0 auto 12px; background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            </div>
+            <h3 style="margin: 0 0 8px; font-size: 17px; font-weight: 600;">Google Başarıyla Bağlandı</h3>
+            <p style="color: #a1a1aa; font-size: 13px; line-height: 1.5; margin: 0 0 12px;">Search Console ve GA4 mülkleriniz çalışma alanınıza entegre edildi. Bu pencere otomatik kapatılıyor...</p>
+            <div style="font-size: 12px; color: #71717a; font-family: monospace;">${growthResult.email}</div>
+          </div>
+          <script>
+            try {
+              const payload = ${JSON.stringify(growthResult)};
+              if (window.opener) {
+                window.opener.postMessage({ type: 'GROWTH_GOOGLE_AUTH_SUCCESS', ...payload }, window.location.origin);
+                setTimeout(() => window.close(), 600);
+              } else {
+                window.location.href = '/#/growth?tab=settings&connected=google';
+              }
+            } catch (err) {
+              window.close();
+            }
+          </script>
+        </body></html>
+      `);
+    } catch (err) {
+      console.error('[Growth Google OAuth Callback Error]:', err);
+      return res.send(`
+        <!DOCTYPE html>
+        <html><body>
+        <script>
+          if (window.opener) {
+            window.opener.postMessage({ type: 'GROWTH_GOOGLE_AUTH_ERROR', error: ${JSON.stringify(err.message)} }, window.location.origin);
+            window.close();
+          } else {
+            window.location.href = '/#/growth?tab=settings&error=' + encodeURIComponent(${JSON.stringify(err.message)});
+          }
+        </script>
+        </body></html>
+      `);
+    }
   }
 
   if (error) {

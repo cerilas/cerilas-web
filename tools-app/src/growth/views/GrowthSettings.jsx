@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { 
   Settings, 
   Search, 
@@ -10,7 +10,10 @@ import {
   Trash2, 
   Save, 
   Loader2,
-  Sparkles
+  Sparkles,
+  RefreshCw,
+  Unlink,
+  ChevronDown
 } from 'lucide-react';
 import { useGrowth } from '../GrowthContext';
 import { useAuth } from '../../context/AuthContext';
@@ -19,24 +22,52 @@ import { GrowthSettingsSkeleton } from '../components/GrowthSkeleton';
 
 export default function GrowthSettings() {
   const { activeWorkspace, refreshWorkspaces, switchWorkspace, workspaces } = useGrowth();
-  const { token, initiateGoogleAuth } = useAuth();
+  const { token } = useAuth();
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [successMsg, setSuccessMsg] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
   const [connectingGoogle, setConnectingGoogle] = useState(false);
+  const [syncingGsc, setSyncingGsc] = useState(false);
+  const [disconnectingGoogle, setDisconnectingGoogle] = useState(false);
+
+  // Integrations state
+  const [integrations, setIntegrations] = useState({
+    gsc: { connected: false },
+    ga4: { connected: false }
+  });
 
   // Form State
   const [name, setName] = useState(activeWorkspace?.name || '');
   const [industry, setIndustry] = useState(activeWorkspace?.industry || '');
   const [description, setDescription] = useState(activeWorkspace?.brand_description || '');
 
-  React.useEffect(() => {
+  const fetchIntegrations = useCallback(async () => {
+    if (!activeWorkspace?.id || !token) return;
+    try {
+      const res = await fetch(`/api/growth/workspaces/${activeWorkspace.id}/integrations`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (data.success && data.data) {
+        setIntegrations(data.data);
+      }
+    } catch (err) {
+      console.error('Integrations fetch error:', err);
+    }
+  }, [activeWorkspace?.id, token]);
+
+  useEffect(() => {
     setLoading(true);
-    const timer = setTimeout(() => setLoading(false), 200);
-    return () => clearTimeout(timer);
-  }, [activeWorkspace?.id]);
+    setName(activeWorkspace?.name || '');
+    setIndustry(activeWorkspace?.industry || '');
+    setDescription(activeWorkspace?.brand_description || '');
+
+    fetchIntegrations().finally(() => {
+      setLoading(false);
+    });
+  }, [activeWorkspace?.id, fetchIntegrations]);
 
   const handleSaveProfile = async (e) => {
     e.preventDefault();
@@ -45,8 +76,26 @@ export default function GrowthSettings() {
     setErrorMsg('');
 
     try {
-      // In MVP, can update workspace profile
+      const res = await fetch(`/api/growth/workspaces/${activeWorkspace.id}`, {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          name,
+          industry,
+          brand_description: description
+        })
+      });
+
+      if (!res.ok) {
+        const d = await res.json();
+        throw new Error(d.error || 'Ayarlar kaydedilemedi.');
+      }
+
       setSuccessMsg('Çalışma alanı ayarları başarıyla güncellendi.');
+      await refreshWorkspaces();
       setTimeout(() => setSuccessMsg(''), 4000);
     } catch (err) {
       setErrorMsg(err.message || 'Ayarlar kaydedilemedi.');
@@ -56,15 +105,130 @@ export default function GrowthSettings() {
   };
 
   const handleConnectGoogle = async () => {
+    if (!activeWorkspace?.id) return;
     setConnectingGoogle(true);
+    setErrorMsg('');
+    setSuccessMsg('');
+
     try {
-      await initiateGoogleAuth({ mode: 'link' });
-      setSuccessMsg('Google entegrasyonu başarıyla bağlandı!');
+      const res = await fetch(`/api/growth/workspaces/${activeWorkspace.id}/integrations/google/url`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (!res.ok || !data.url) {
+        throw new Error(data.error || 'Google yetkilendirme bağlantısı alınamadı.');
+      }
+
+      const width = 560;
+      const height = 680;
+      const left = window.screenX + Math.max(0, (window.outerWidth - width) / 2);
+      const top = window.screenY + Math.max(0, (window.outerHeight - height) / 2);
+
+      const popup = window.open(
+        data.url,
+        'GoogleIntegrationAuth',
+        `width=${width},height=${height},left=${left},top=${top},scrollbars=yes,resizable=yes`
+      );
+
+      if (!popup) {
+        throw new Error('Açılır pencere tarayıcınız tarafından engellendi. Lütfen izin verin.');
+      }
+
+      const handleMessage = async (event) => {
+        if (event.origin !== window.location.origin) return;
+
+        if (event.data?.type === 'GROWTH_GOOGLE_AUTH_SUCCESS') {
+          window.removeEventListener('message', handleMessage);
+          setSuccessMsg(`Google hesabı (${event.data.email}) başarıyla bağlandı! Mülkler senkronize ediliyor.`);
+          await fetchIntegrations();
+          setConnectingGoogle(false);
+          setTimeout(() => setSuccessMsg(''), 5000);
+        } else if (event.data?.type === 'GROWTH_GOOGLE_AUTH_ERROR') {
+          window.removeEventListener('message', handleMessage);
+          setErrorMsg(`Google yetkilendirme hatası: ${event.data.error || 'Bilinmeyen hata'}`);
+          setConnectingGoogle(false);
+        }
+      };
+
+      window.addEventListener('message', handleMessage);
+
+      const checkClosed = setInterval(() => {
+        if (popup.closed) {
+          clearInterval(checkClosed);
+          window.removeEventListener('message', handleMessage);
+          setConnectingGoogle(false);
+        }
+      }, 1000);
+    } catch (err) {
+      setErrorMsg(err.message || 'Google yetkilendirmesi başlatılamadı.');
+      setConnectingGoogle(false);
+    }
+  };
+
+  const handleSyncGsc = async () => {
+    setSyncingGsc(true);
+    setErrorMsg('');
+    try {
+      const res = await fetch(`/api/growth/workspaces/${activeWorkspace.id}/integrations/google/sync`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Search Console senkronizasyonu başarısız.');
+      setSuccessMsg('Google Search Console verileri ve sıralamalar canlı olarak güncellendi.');
+      await fetchIntegrations();
       setTimeout(() => setSuccessMsg(''), 4000);
     } catch (err) {
-      setErrorMsg(err.message || 'Google yetkilendirmesi başarısız oldu.');
+      setErrorMsg(err.message || 'Senkronizasyon yapılamadı.');
     } finally {
-      setConnectingGoogle(false);
+      setSyncingGsc(false);
+    }
+  };
+
+  const handleSelectProperty = async (type, propertyId, propertyName) => {
+    try {
+      const res = await fetch(`/api/growth/workspaces/${activeWorkspace.id}/integrations/google/select-property`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ type, propertyId, propertyName })
+      });
+      const data = await res.json();
+      if (data.success && data.data) {
+        setIntegrations(data.data);
+        setSuccessMsg(`Aktif mülk "${propertyName || propertyId}" olarak güncellendi.`);
+        setTimeout(() => setSuccessMsg(''), 4000);
+      }
+    } catch (err) {
+      setErrorMsg('Mülk seçilemedi: ' + err.message);
+    }
+  };
+
+  const handleDisconnectGoogle = async () => {
+    if (!window.confirm('Google Search Console ve GA4 bağlantısını kesmek istediğinize emin misiniz? Canlı telemetri verileri kaldırılacaktır.')) {
+      return;
+    }
+
+    setDisconnectingGoogle(true);
+    setErrorMsg('');
+    try {
+      const res = await fetch(`/api/growth/workspaces/${activeWorkspace.id}/integrations/google/disconnect`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (data.success) {
+        setSuccessMsg('Google entegrasyonu bağlantısı başarıyla kaldırıldı.');
+        if (data.data) setIntegrations(data.data);
+        else await fetchIntegrations();
+        setTimeout(() => setSuccessMsg(''), 4000);
+      }
+    } catch (err) {
+      setErrorMsg('Bağlantı kesilemedi: ' + err.message);
+    } finally {
+      setDisconnectingGoogle(false);
     }
   };
 
@@ -90,6 +254,8 @@ export default function GrowthSettings() {
     return <GrowthSettingsSkeleton />;
   }
 
+  const isGoogleConnected = integrations.gsc?.connected || integrations.ga4?.connected;
+
   return (
     <div className="growth-page-container animate-fade">
       {/* Hero Page Cover */}
@@ -100,7 +266,7 @@ export default function GrowthSettings() {
         subtitle="Google Search Console, GA4 ve Yapay Zeka (Gemini, Perplexity) veri boru hatlarını ve çalışma alanı yapılandırmalarını yönetin."
         coverImage="/growth-covers/integrations-cover.jpg"
         stats={[
-          { label: 'Google Servisleri', value: 'Search & GA4', sub: 'OAuth 2.0 Doğrulandı' },
+          { label: 'Google Servisleri', value: isGoogleConnected ? 'Bağlı & Canlı' : 'Bağlantı Bekliyor', sub: isGoogleConnected ? 'Search Console & GA4' : 'OAuth 2.0 Hazır' },
           { label: 'AI Motorları', value: '3 Model', sub: 'Gemini, Perplexity, GPT' },
           { label: 'Boru Hattı', value: 'Canlı', sub: 'Otomatik Senkronize' }
         ]}
@@ -129,64 +295,174 @@ export default function GrowthSettings() {
               Doğrulanmış 1. parti arama ve trafik verilerini otomatik senkronize etmek ve AI taramalarını yürütmek için hesaplarınızı bağlayın.
             </p>
           </div>
+          {isGoogleConnected && (
+            <button
+              type="button"
+              disabled={disconnectingGoogle}
+              onClick={handleDisconnectGoogle}
+              className="growth-secondary-btn btn-sm text-danger"
+              style={{ borderColor: 'rgba(239, 68, 68, 0.3)', color: '#f87171' }}
+            >
+              {disconnectingGoogle ? <Loader2 size={13} className="auth-spinner" /> : <Unlink size={13} />}
+              <span>Google Bağlantısını Kes</span>
+            </button>
+          )}
         </div>
 
         <div className="growth-integrations-stack">
-          {/* GSC */}
+          {/* GSC Row */}
           <div className="integration-row-card">
             <div className="integration-info-side">
               <div className="integration-icon-wrap" style={{ background: 'rgba(66, 133, 244, 0.1)', border: '1px solid rgba(66, 133, 244, 0.25)', padding: 6, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 10 }}>
                 <img src="/growth-covers/gsc-badge.svg" alt="Google Search Console" style={{ width: 26, height: 26, objectFit: 'contain' }} />
               </div>
               <div>
-                <span className="integration-name">Google Search Console</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                  <span className="integration-name">Google Search Console</span>
+                  {integrations.gsc?.connected ? (
+                    <span className="integration-status-badge connected">
+                      <CheckCircle2 size={12} />
+                      <span>Aktif & Canlı</span>
+                    </span>
+                  ) : (
+                    <span className="integration-status-badge unconnected">
+                      Bağlantı Yok
+                    </span>
+                  )}
+                </div>
                 <span className="integration-desc">Organik arama tıklamaları, gösterimler ve gerçek kelime sıralamaları.</span>
+                
+                {integrations.gsc?.connected && (
+                  <div className="integration-meta-line">
+                    <span>{integrations.gsc.email}</span>
+                    <span className="integration-meta-dot">•</span>
+                    <span>Mülk: <strong style={{ color: '#f1f5f9' }}>{integrations.gsc.selectedSite || 'Mülk seçilmedi'}</strong></span>
+                    {integrations.gsc.lastSyncAt && (
+                      <>
+                        <span className="integration-meta-dot">•</span>
+                        <span>Son eşitleme: {new Date(integrations.gsc.lastSyncAt).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}</span>
+                      </>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
 
             <div className="integration-action-side">
-              <button
-                type="button"
-                disabled={connectingGoogle}
-                onClick={handleConnectGoogle}
-                className="growth-secondary-btn"
-              >
-                {connectingGoogle ? (
-                  <Loader2 size={14} className="auth-spinner" />
-                ) : (
-                  <img src="/growth-covers/google-icon.svg" alt="Google" style={{ width: 14, height: 14 }} />
-                )}
-                <span>Google ile Bağla</span>
-              </button>
+              {integrations.gsc?.connected ? (
+                <div className="integration-action-cluster">
+                  {integrations.gsc.availableSites?.length > 1 && (
+                    <select
+                      className="integration-prop-select"
+                      value={integrations.gsc.selectedSite || ''}
+                      onChange={(e) => handleSelectProperty('search_console', e.target.value, e.target.value)}
+                    >
+                      {integrations.gsc.availableSites.map((site) => (
+                        <option key={site.siteUrl} value={site.siteUrl}>
+                          {site.siteUrl}
+                        </option>
+                      ))}
+                    </select>
+                  )}
+                  <button
+                    type="button"
+                    disabled={syncingGsc}
+                    onClick={handleSyncGsc}
+                    className="growth-secondary-btn btn-sm"
+                  >
+                    <RefreshCw size={13} className={syncingGsc ? 'auth-spinner' : ''} />
+                    <span>{syncingGsc ? 'Senkronize Ediliyor...' : 'Şimdi Eşitle'}</span>
+                  </button>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  disabled={connectingGoogle}
+                  onClick={handleConnectGoogle}
+                  className="growth-secondary-btn"
+                >
+                  {connectingGoogle ? (
+                    <Loader2 size={14} className="auth-spinner" />
+                  ) : (
+                    <img src="/growth-covers/google-icon.svg" alt="Google" style={{ width: 14, height: 14 }} />
+                  )}
+                  <span>Google ile Bağla</span>
+                </button>
+              )}
             </div>
           </div>
 
-          {/* GA4 */}
+          {/* GA4 Row */}
           <div className="integration-row-card">
             <div className="integration-info-side">
               <div className="integration-icon-wrap" style={{ background: 'rgba(234, 67, 53, 0.1)', border: '1px solid rgba(234, 67, 53, 0.25)', padding: 6, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 10 }}>
                 <img src="/growth-covers/ga4-badge.svg" alt="Google Analytics 4" style={{ width: 26, height: 26, objectFit: 'contain' }} />
               </div>
               <div>
-                <span className="integration-name">Google Analytics 4 (GA4)</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                  <span className="integration-name">Google Analytics 4 (GA4)</span>
+                  {integrations.ga4?.connected ? (
+                    <span className="integration-status-badge connected">
+                      <CheckCircle2 size={12} />
+                      <span>Aktif & Canlı</span>
+                    </span>
+                  ) : (
+                    <span className="integration-status-badge unconnected">
+                      Bağlantı Yok
+                    </span>
+                  )}
+                </div>
                 <span className="integration-desc">Ziyaretçi trafiği, etkileşim süresi ve dönüşüm metrikleri.</span>
+
+                {integrations.ga4?.connected && (
+                  <div className="integration-meta-line">
+                    <span>{integrations.ga4.email}</span>
+                    <span className="integration-meta-dot">•</span>
+                    <span>Mülk: <strong style={{ color: '#f1f5f9' }}>{integrations.ga4.selectedPropertyName || integrations.ga4.selectedPropertyId || 'Mülk seçilmedi'}</strong></span>
+                  </div>
+                )}
               </div>
             </div>
 
             <div className="integration-action-side">
-              <button
-                type="button"
-                disabled={connectingGoogle}
-                onClick={handleConnectGoogle}
-                className="growth-secondary-btn"
-              >
-                {connectingGoogle ? (
-                  <Loader2 size={14} className="auth-spinner" />
-                ) : (
-                  <img src="/growth-covers/google-icon.svg" alt="Google" style={{ width: 14, height: 14 }} />
-                )}
-                <span>Google ile Bağla</span>
-              </button>
+              {integrations.ga4?.connected ? (
+                <div className="integration-action-cluster">
+                  {integrations.ga4.availableProperties?.length > 1 && (
+                    <select
+                      className="integration-prop-select"
+                      value={integrations.ga4.selectedPropertyId || ''}
+                      onChange={(e) => {
+                        const prop = integrations.ga4.availableProperties.find(p => p.propertyId === e.target.value);
+                        handleSelectProperty('analytics', e.target.value, prop?.displayName || e.target.value);
+                      }}
+                    >
+                      {integrations.ga4.availableProperties.map((prop) => (
+                        <option key={prop.propertyId} value={prop.propertyId}>
+                          {prop.displayName} ({prop.propertyId})
+                        </option>
+                      ))}
+                    </select>
+                  )}
+                  <span style={{ fontSize: '0.8rem', color: '#34d399', display: 'flex', alignItems: 'center', gap: 5 }}>
+                    <CheckCircle2 size={14} />
+                    <span>Bağlı</span>
+                  </span>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  disabled={connectingGoogle}
+                  onClick={handleConnectGoogle}
+                  className="growth-secondary-btn"
+                >
+                  {connectingGoogle ? (
+                    <Loader2 size={14} className="auth-spinner" />
+                  ) : (
+                    <img src="/growth-covers/google-icon.svg" alt="Google" style={{ width: 14, height: 14 }} />
+                  )}
+                  <span>Google ile Bağla</span>
+                </button>
+              )}
             </div>
           </div>
 
@@ -199,7 +475,7 @@ export default function GrowthSettings() {
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                   <span className="integration-name">Google Gemini 2.5 Flash Engine</span>
-                  <span style={{ fontSize: '0.72rem', background: 'rgba(16, 185, 129, 0.15)', color: '#34d399', padding: '2px 8px', borderRadius: 6, fontWeight: 600 }}>Aktif & Canlı</span>
+                  <span className="integration-status-badge connected">Aktif & Canlı</span>
                 </div>
                 <span className="integration-desc">Gemini ve Google AI Overview yanıtlarında marka algısı, referans ve GEO alıntı analizi.</span>
               </div>
@@ -222,7 +498,7 @@ export default function GrowthSettings() {
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                   <span className="integration-name">Perplexity AI Sonar Engine</span>
-                  <span style={{ fontSize: '0.72rem', background: 'rgba(16, 185, 129, 0.15)', color: '#34d399', padding: '2px 8px', borderRadius: 6, fontWeight: 600 }}>Aktif & Canlı</span>
+                  <span className="integration-status-badge connected">Aktif & Canlı</span>
                 </div>
                 <span className="integration-desc">Perplexity derin arama modellerinde kaynak gösterme ve domain otoritesi taraması.</span>
               </div>
@@ -245,7 +521,7 @@ export default function GrowthSettings() {
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                   <span className="integration-name">OpenAI ChatGPT Web Search</span>
-                  <span style={{ fontSize: '0.72rem', background: 'rgba(16, 185, 129, 0.15)', color: '#34d399', padding: '2px 8px', borderRadius: 6, fontWeight: 600 }}>Aktif & Canlı</span>
+                  <span className="integration-status-badge connected">Aktif & Canlı</span>
                 </div>
                 <span className="integration-desc">GPT-4o ve OpenAI Arama dizininde markanızın önerilme ve alıntı frekansı.</span>
               </div>
@@ -268,7 +544,7 @@ export default function GrowthSettings() {
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                   <span className="integration-name">Anthropic Claude 3.5 Engine</span>
-                  <span style={{ fontSize: '0.72rem', background: 'rgba(16, 185, 129, 0.15)', color: '#34d399', padding: '2px 8px', borderRadius: 6, fontWeight: 600 }}>Aktif & Canlı</span>
+                  <span className="integration-status-badge connected">Aktif & Canlı</span>
                 </div>
                 <span className="integration-desc">Claude modelinin kurumsal bağlam ve teknik araştırmalardaki marka referansları.</span>
               </div>

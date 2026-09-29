@@ -3,6 +3,12 @@ import jwt from 'jsonwebtoken';
 import { authPool } from '../db.js';
 import { scanDomain, extractBrandProfileWithAi, validatePublicUrl } from '../utils/growthCrawler.js';
 import { GoogleGenAI } from '@google/genai';
+import {
+  getGrowthGoogleAuthUrl,
+  getGrowthIntegrationsOverview,
+  syncGrowthSearchConsole,
+  disconnectGrowthGoogle
+} from '../utils/googleGrowthIntegration.js';
 
 const router = express.Router();
 const JWT_SECRET = process.env.JWT_SECRET || 'cerilas_admin_jwt_secret_2026';
@@ -1095,6 +1101,223 @@ router.delete('/workspaces/:slugOrId', requireAuth, async (req, res) => {
     });
   } catch (err) {
     res.status(500).json({ error: 'Çalışma alanı silinemedi.' });
+  }
+});
+
+/**
+ * GET /api/growth/workspaces/:slugOrId/integrations
+ * Overview of connected services (GSC, GA4) and available properties
+ */
+router.get('/workspaces/:slugOrId/integrations', requireAuth, async (req, res) => {
+  try {
+    const authData = await resolveAndAuthorizeWorkspace(req, req.params.slugOrId);
+    if (!authData) return res.status(404).json({ error: 'Çalışma alanı bulunamadı.' });
+
+    const integrations = await getGrowthIntegrationsOverview(authData.workspace.id);
+    res.json({ success: true, data: integrations });
+  } catch (err) {
+    console.error('[Get Integrations Error]:', err);
+    res.status(500).json({ error: 'Entegrasyon durumları alınamadı.' });
+  }
+});
+
+/**
+ * GET /api/growth/workspaces/:slugOrId/integrations/google/url
+ * Initiates Google OAuth with GSC and GA4 scopes
+ */
+router.get('/workspaces/:slugOrId/integrations/google/url', requireAuth, async (req, res) => {
+  try {
+    const authData = await resolveAndAuthorizeWorkspace(req, req.params.slugOrId);
+    if (!authData) return res.status(404).json({ error: 'Çalışma alanı bulunamadı.' });
+
+    const url = getGrowthGoogleAuthUrl(authData.workspace.id, req.user.id);
+    res.json({ success: true, url });
+  } catch (err) {
+    console.error('[Google Auth URL Error]:', err);
+    res.status(500).json({ error: err.message || 'Google yetkilendirme linki oluşturulamadı.' });
+  }
+});
+
+/**
+ * POST /api/growth/workspaces/:slugOrId/integrations/google/select-property
+ * Allows user to switch active GSC site or GA4 property
+ */
+router.post('/workspaces/:slugOrId/integrations/google/select-property', requireAuth, async (req, res) => {
+  try {
+    const authData = await resolveAndAuthorizeWorkspace(req, req.params.slugOrId);
+    if (!authData) return res.status(404).json({ error: 'Çalışma alanı bulunamadı.' });
+
+    const { type, propertyId, propertyName } = req.body;
+    if (!type || !propertyId) {
+      return res.status(400).json({ error: 'Mülk tipi ve ID zorunludur.' });
+    }
+
+    const integrationType = type === 'analytics' || type === 'ga4' ? 'analytics' : 'search_console';
+
+    await authPool.query(
+      `UPDATE integration_connections SET
+        external_property_id = $1,
+        external_property_name = $2,
+        updated_at = NOW()
+       WHERE workspace_id = $3 AND provider = 'google' AND integration_type = $4`,
+      [propertyId, propertyName || propertyId, authData.workspace.id, integrationType]
+    );
+
+    if (integrationType === 'search_console') {
+      try {
+        await syncGrowthSearchConsole(authData.workspace.id, null, propertyId);
+      } catch (syncErr) {
+        console.warn('Property switched but sync warning:', syncErr.message);
+      }
+    }
+
+    const updated = await getGrowthIntegrationsOverview(authData.workspace.id);
+    res.json({ success: true, data: updated });
+  } catch (err) {
+    console.error('[Select Property Error]:', err);
+    res.status(500).json({ error: err.message || 'Mülk seçilemedi.' });
+  }
+});
+
+/**
+ * POST /api/growth/workspaces/:slugOrId/integrations/google/sync
+ * Manually trigger fresh sync for Google Search Console
+ */
+router.post('/workspaces/:slugOrId/integrations/google/sync', requireAuth, async (req, res) => {
+  try {
+    const authData = await resolveAndAuthorizeWorkspace(req, req.params.slugOrId);
+    if (!authData) return res.status(404).json({ error: 'Çalışma alanı bulunamadı.' });
+
+    const syncResult = await syncGrowthSearchConsole(authData.workspace.id);
+    const updated = await getGrowthIntegrationsOverview(authData.workspace.id);
+
+    res.json({
+      success: true,
+      data: {
+        sync: syncResult,
+        integrations: updated
+      }
+    });
+  } catch (err) {
+    console.error('[GSC Manual Sync Error]:', err);
+    res.status(500).json({ error: err.message || 'Search Console senkronizasyonu başarısız oldu.' });
+  }
+});
+
+/**
+ * POST /api/growth/workspaces/:slugOrId/integrations/google/disconnect
+ * Disconnects Google integrations (GSC & GA4)
+ */
+router.post('/workspaces/:slugOrId/integrations/google/disconnect', requireAuth, async (req, res) => {
+  try {
+    const authData = await resolveAndAuthorizeWorkspace(req, req.params.slugOrId);
+    if (!authData) return res.status(404).json({ error: 'Çalışma alanı bulunamadı.' });
+
+    await disconnectGrowthGoogle(authData.workspace.id);
+    const updated = await getGrowthIntegrationsOverview(authData.workspace.id);
+
+    res.json({
+      success: true,
+      message: 'Google entegrasyonu başarıyla kaldırıldı.',
+      data: updated
+    });
+  } catch (err) {
+    console.error('[Google Disconnect Error]:', err);
+    res.status(500).json({ error: 'Bağlantı kesilemedi.' });
+  }
+});
+
+/**
+ * GET /api/growth/workspaces/:slugOrId/search-performance
+ * Returns live or cached Google Search Console metrics, queries, and opportunities
+ */
+router.get('/workspaces/:slugOrId/search-performance', requireAuth, async (req, res) => {
+  try {
+    const authData = await resolveAndAuthorizeWorkspace(req, req.params.slugOrId);
+    if (!authData) return res.status(404).json({ error: 'Çalışma alanı bulunamadı.' });
+
+    const workspaceId = authData.workspace.id;
+
+    // Check GSC connection
+    const connRes = await authPool.query(
+      `SELECT * FROM integration_connections 
+       WHERE workspace_id = $1 AND provider = 'google' AND integration_type = 'search_console'`,
+      [workspaceId]
+    );
+
+    const isConnected = connRes.rows.length > 0 && connRes.rows[0].status === 'active';
+    const connection = connRes.rows[0];
+
+    if (!isConnected || !connection?.external_property_id) {
+      return res.json({
+        success: true,
+        connected: false,
+        message: 'Google Search Console mülkü henüz bağlanmadı.',
+        totals: {
+          clicks: 1075,
+          impressions: 18200,
+          ctr: '5.9%',
+          position: '5.4'
+        },
+        topQueries: [],
+        strikingQueries: [],
+        topPages: []
+      });
+    }
+
+    // Try fetching cached performance
+    let perfRes = await authPool.query(
+      `SELECT * FROM growth_search_performance 
+       WHERE workspace_id = $1 AND site_url = $2 AND date_range = '28d'`,
+      [workspaceId, connection.external_property_id]
+    );
+
+    // If never synced, trigger immediate sync
+    if (perfRes.rows.length === 0) {
+      try {
+        await syncGrowthSearchConsole(workspaceId);
+        perfRes = await authPool.query(
+          `SELECT * FROM growth_search_performance 
+           WHERE workspace_id = $1 AND site_url = $2 AND date_range = '28d'`,
+          [workspaceId, connection.external_property_id]
+        );
+      } catch (syncErr) {
+        console.warn('[Search Performance Auto-Sync Warning]:', syncErr.message);
+      }
+    }
+
+    if (perfRes.rows.length > 0) {
+      const p = perfRes.rows[0];
+      return res.json({
+        success: true,
+        connected: true,
+        siteUrl: p.site_url,
+        syncedAt: p.synced_at,
+        totals: {
+          clicks: p.total_clicks || 0,
+          impressions: p.total_impressions || 0,
+          ctr: ((p.average_ctr || 0) * 1).toFixed(2) + '%',
+          position: ((p.average_position || 0) * 1).toFixed(1)
+        },
+        topQueries: p.top_queries || [],
+        strikingQueries: p.striking_queries || [],
+        topPages: p.top_pages || []
+      });
+    }
+
+    return res.json({
+      success: true,
+      connected: true,
+      siteUrl: connection.external_property_id,
+      syncedAt: connection.last_sync_at,
+      totals: { clicks: 0, impressions: 0, ctr: '0%', position: '0' },
+      topQueries: [],
+      strikingQueries: [],
+      topPages: []
+    });
+  } catch (err) {
+    console.error('[Search Performance Error]:', err);
+    res.status(500).json({ error: err.message || 'Arama verileri alınamadı.' });
   }
 });
 
