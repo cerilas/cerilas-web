@@ -139,9 +139,9 @@ export default function GrowthKeywords() {
           ? kw.rank <= 10
           : kw.intent === filterIntent;
 
-    const matchesSearch = searchQuery.trim() === ''
+    const matchesSearch = searchFilter.trim() === ''
       ? true
-      : kw.keyword.toLowerCase().includes(searchQuery.toLowerCase());
+      : kw.keyword.toLowerCase().includes(searchFilter.toLowerCase());
 
     return matchesIntent && matchesSearch;
   });
