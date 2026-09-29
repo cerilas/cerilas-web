@@ -587,7 +587,7 @@ router.get('/workspaces/:slugOrId/overview', requireAuth, async (req, res) => {
 
     // 5. Integrations Status
     const integrationsRes = await authPool.query(
-      `SELECT provider, status, external_property_name, last_sync_at FROM integration_connections WHERE workspace_id = $1`,
+      `SELECT provider, integration_type, status, external_property_name, external_property_id, last_sync_at FROM integration_connections WHERE workspace_id = $1`,
       [workspace.id]
     );
 
@@ -1254,10 +1254,10 @@ router.get('/workspaces/:slugOrId/search-performance', requireAuth, async (req, 
         connected: false,
         message: 'Google Search Console mülkü henüz bağlanmadı.',
         totals: {
-          clicks: 1075,
-          impressions: 18200,
-          ctr: '5.9%',
-          position: '5.4'
+          clicks: 0,
+          impressions: 0,
+          ctr: '0%',
+          position: '0'
         },
         topQueries: [],
         strikingQueries: [],

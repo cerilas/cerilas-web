@@ -92,6 +92,8 @@ export default function GrowthOverview() {
   }
 
   const { growthScore, subscores, opportunities, technicalAudit, aiVisibility } = data;
+  const gscConn = (data?.integrations || []).find(i => i.provider === 'google' && (i.integration_type === 'search_console' || !i.integration_type) && i.status === 'active');
+  const isGscConnected = !!gscConn;
 
   return (
     <div className="growth-overview-container animate-fade">
@@ -140,8 +142,10 @@ export default function GrowthOverview() {
               <span className="subscore-num">{subscores?.technical || 80}</span>
             </div>
             <div className="growth-subscore-item">
-              <span className="subscore-label">SEO</span>
-              <span className="subscore-num">{subscores?.search || 50}</span>
+              <span className="subscore-label">SEO (GSC)</span>
+              <span className="subscore-num" style={{ color: isGscConnected ? undefined : '#71717a' }}>
+                {isGscConnected ? (subscores?.search || 50) : '—'}
+              </span>
             </div>
             <div className="growth-subscore-item">
               <span className="subscore-label">GEO (AI)</span>
@@ -372,20 +376,24 @@ export default function GrowthOverview() {
               </div>
               <div>
                 <h3 className="side-card-title">Google Search Console</h3>
-                <span className="side-card-sub">1. Parti Organik Arama Verisi</span>
+                <span className="side-card-sub">
+                  {isGscConnected ? 'Bağlı & Canlı Telemetri' : '1. Parti Organik Arama Verisi'}
+                </span>
               </div>
             </div>
 
             <p className="side-card-desc">
-              Organik tıklamaları, gösterimleri ve 5-10. sıradaki hızlı fırsatları ortaya çıkarmak için Search Console mülkünüzü bağlayın.
+              {isGscConnected
+                ? `Doğrulanmış mülkünüz (${gscConn.external_property_name || gscConn.external_property_id || 'Aktif'}) bağlı. Organik arama sıralamalarını ve tıklamalarını izleyebilirsiniz.`
+                : 'Organik tıklamaları, gösterimleri ve 5-10. sıradaki sayfa 1 fırsatlarını canlı izlemek için Search Console mülkünüzü bağlayın.'}
             </p>
 
             <button
               type="button"
-              className="growth-primary-btn btn-sm"
-              onClick={() => setActiveTab('settings')}
+              className={isGscConnected ? "growth-secondary-btn btn-sm" : "growth-primary-btn btn-sm"}
+              onClick={() => setActiveTab(isGscConnected ? 'search' : 'settings')}
             >
-              <span>Entegrasyonu Bağla</span>
+              <span>{isGscConnected ? 'Arama Paneline Git' : 'Entegrasyonu Bağla'}</span>
               <ArrowUpRight size={14} />
             </button>
           </div>
