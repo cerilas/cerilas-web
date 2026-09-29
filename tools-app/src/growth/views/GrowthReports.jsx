@@ -127,7 +127,7 @@ export default function GrowthReports() {
         <div className="growth-stat-card highlight-geo">
           <div className="stat-card-header">
             <span className="stat-card-title">GEO Bahsedilme Artışı</span>
-            <Bot size={16} className="stat-card-icon text-primary" />
+            <img src="/AI-logos/gemini-color.svg" alt="GEO" style={{ width: 17, height: 17 }} />
           </div>
           <div className="stat-card-value text-primary">%68</div>
           <div className="stat-card-sub text-primary">Önceki hafta: %54 (+%14)</div>
@@ -156,7 +156,13 @@ export default function GrowthReports() {
 
           <h2 className="report-title">{latestReport.title}</h2>
           <p className="report-subtitle">
-            Bu rapor, {activeWorkspace?.name || 'Markanız'} ({activeWorkspace?.primary_domain}) için Google Arama, Teknik Altyapı ve Yapay Zeka Ajanları (ChatGPT, Perplexity, Gemini) performansını özetler.
+            Bu rapor, {activeWorkspace?.name || 'Markanız'} ({activeWorkspace?.primary_domain}) için Google Arama, Teknik Altyapı ve Yapay Zeka Ajanları performansını özetler:
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, marginLeft: 8, verticalAlign: 'middle' }}>
+              <img src="/AI-logos/gemini-color.svg" alt="Gemini" title="Google Gemini" style={{ width: 15, height: 15 }} />
+              <img src="/AI-logos/chatgpt-black.svg" alt="ChatGPT" title="ChatGPT" style={{ width: 14, height: 14, filter: 'brightness(1.8)' }} />
+              <img src="/AI-logos/perplexity-color.svg" alt="Perplexity" title="Perplexity AI" style={{ width: 14, height: 14 }} />
+              <img src="/AI-logos/claude-color.svg" alt="Claude" title="Claude" style={{ width: 14, height: 14 }} />
+            </span>
           </p>
 
           <div className="report-highlights-grid">

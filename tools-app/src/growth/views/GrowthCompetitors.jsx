@@ -289,12 +289,15 @@ export default function GrowthCompetitors() {
 
                   {/* Citation Gap Callout */}
                   <div className="comp-citation-gap-box">
-                    <div className="gap-box-title">
+                    <div className="gap-box-title" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                       <AlertCircle size={13} className="text-warning" />
-                      <span>Alıntı Boşluğu (Citation Gap):</span>
+                      <span>Alıntı Boşluğu (GEO Gap):</span>
+                      <img src="/AI-logos/gemini-color.svg" alt="Gemini" title="Google Gemini" style={{ width: 13, height: 13 }} />
+                      <img src="/AI-logos/chatgpt-black.svg" alt="ChatGPT" title="ChatGPT" style={{ width: 12, height: 12, filter: 'brightness(1.8)' }} />
+                      <img src="/AI-logos/perplexity-color.svg" alt="Perplexity" title="Perplexity AI" style={{ width: 12, height: 12 }} />
                     </div>
                     <p className="gap-box-desc">
-                      Bu rakip Product Hunt ve G2 profillerinden AI modellerine düzenli alıntı çekerken, markanızın profilinde eksikler tespit edildi.
+                      Bu rakip Product Hunt ve G2 profillerinden Gemini ve ChatGPT modellerine düzenli alıntı çekerken, markanızın profilinde eksikler tespit edildi.
                     </p>
                   </div>
                 </div>

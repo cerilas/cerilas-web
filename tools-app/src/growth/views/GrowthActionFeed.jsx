@@ -202,8 +202,8 @@ export default function GrowthActionFeed() {
             className={`filter-chip ${filterCategory === 'ai_visibility' ? 'is-active' : ''}`}
             onClick={() => setFilterCategory('ai_visibility')}
           >
-            <Bot size={13} />
-            <span>GEO & AI</span>
+            <img src="/AI-logos/gemini-color.svg" alt="GEO" style={{ width: 13, height: 13 }} />
+            <span>GEO &amp; AI</span>
           </button>
           <button
             type="button"
@@ -301,8 +301,11 @@ export default function GrowthActionFeed() {
                   {/* Body Content */}
                   <div className="growth-action-info-col" onClick={() => setExpandedId(isExpanded ? null : opp.id)}>
                     <div className="growth-action-tags-row">
-                      <span className={`opp-cat-pill cat-${opp.category}`}>
-                        {opp.category === 'ai_visibility' ? 'Yapay Zeka (GEO)' : opp.category === 'technical' ? 'Teknik SEO' : 'İçerik Stratejisi'}
+                      <span className={`opp-cat-pill cat-${opp.category}`} style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                        {opp.category === 'ai_visibility' && (
+                          <img src="/AI-logos/gemini-color.svg" alt="AI" style={{ width: 12, height: 12 }} />
+                        )}
+                        <span>{opp.category === 'ai_visibility' ? 'Yapay Zeka (GEO)' : opp.category === 'technical' ? 'Teknik SEO' : 'İçerik Stratejisi'}</span>
                       </span>
                       
                       {opp.effort_score <= 40 && opp.impact_score >= 70 && (

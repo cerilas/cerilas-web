@@ -17,6 +17,7 @@ import {
 import { useGrowth } from '../GrowthContext';
 import { useAuth } from '../../context/AuthContext';
 import GrowthPageCover from '../components/GrowthPageCover';
+import { AiEngineGroup } from '../components/AiEngineBadge';
 
 export default function GrowthDirectories() {
   const { activeWorkspace } = useGrowth();
@@ -84,13 +85,14 @@ export default function GrowthDirectories() {
         badge="GEO Otorite & Dizin Ağı"
         badgeIcon={Share2}
         title="Yüksek Otoriteli Dizinler & GEO Alıntı Dağıtımı"
-        subtitle="ChatGPT, Gemini ve Perplexity bu güvenilir kaynakları tarayarak markaları öğrenir ve AI sorgularında kaynak gösterir."
+        subtitle="ChatGPT, Google Gemini ve Perplexity bu güvenilir kaynakları tarayarak markaları öğrenir ve AI sorgularında kaynak gösterir."
         coverImage="/growth-covers/geo-cover.jpg"
         stats={[
           { label: 'Hedef Platform', value: `${totalCount} Dizin`, sub: 'Yüksek otoriteli' },
           { label: 'Doğrulanan Profil', value: `${claimedCount} Hesap`, sub: 'Aktif listelenmiş' },
           { label: 'Otorite Skoru', value: `%${authorityScore}`, sub: 'GEO hazır bulunuşluk' }
         ]}
+        actions={<AiEngineGroup size={20} />}
       />
 
       {/* Top 4 Metrics */}

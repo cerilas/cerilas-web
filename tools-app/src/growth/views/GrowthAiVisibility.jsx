@@ -19,6 +19,7 @@ import {
 import { useGrowth } from '../GrowthContext';
 import { useAuth } from '../../context/AuthContext';
 import GrowthPageCover from '../components/GrowthPageCover';
+import AiEngineBadge, { AiEngineGroup } from '../components/AiEngineBadge';
 
 export default function GrowthAiVisibility() {
   const { activeWorkspace } = useGrowth();
@@ -110,14 +111,28 @@ export default function GrowthAiVisibility() {
         badge="Generative Engine Optimization (GEO)"
         badgeIcon={Bot}
         title="Yapay Zeka (GEO) Görünürlüğü & Alıntı Takibi"
-        subtitle="ChatGPT, Google Gemini ve Perplexity gibi yapay zeka arama motorlarında markanızın anılma ve kaynak gösterilme oranı."
+        subtitle="Google Gemini, ChatGPT Search ve Perplexity gibi yapay zeka arama motorlarında markanızın anılma ve kaynak gösterilme oranı."
         coverImage="/growth-covers/geo-cover.jpg"
         stats={[
           { label: 'GEO Hazırbulunuşluk', value: '75/100', positive: true, sub: 'Aktif Standartlar' },
-          { label: 'Yapay Zeka Motorları', value: 'Gemini, GPT, Perplexity' }
+          { label: 'AI Motorları', value: '4 Büyük Model', sub: 'Gemini, GPT, Perplexity, Claude' }
         ]}
+        actions={<AiEngineGroup size={22} />}
       />
 
+      {/* AI Engines Active Matrix */}
+      <div className="growth-panel-card" style={{ padding: '0.9rem 1.25rem', marginBottom: '1.25rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem' }}>
+          <span style={{ fontSize: '0.82rem', fontWeight: 600, color: '#94a3b8' }}>Desteklenen ve Taranan Yapay Zeka Motorları:</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
+            <AiEngineBadge engine="gemini" size={17} pill />
+            <AiEngineBadge engine="chatgpt" size={17} pill />
+            <AiEngineBadge engine="perplexity" size={17} pill />
+            <AiEngineBadge engine="claude" size={17} pill />
+            <AiEngineBadge engine="grok" size={15} pill />
+          </div>
+        </div>
+      </div>
 
       {/* GEO Readiness Indicators Card */}
       <div className="growth-panel-card">
@@ -136,7 +151,18 @@ export default function GrowthAiVisibility() {
             <CheckCircle2 size={18} className="text-success" />
             <div>
               <span className="standard-name">Robots.txt AI Bot İzinleri</span>
-              <span className="standard-sub">GPTBot, PerplexityBot ve Google-Extended taranabilir.</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 4, flexWrap: 'wrap' }}>
+                <span className="standard-sub">İzin Verilen Crawler'lar:</span>
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: 'rgba(255,255,255,0.06)', padding: '2px 6px', borderRadius: 4, fontSize: '0.72rem' }}>
+                  <img src="/AI-logos/gemini-color.svg" alt="Google" style={{ width: 12, height: 12 }} /> Google-Extended
+                </span>
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: 'rgba(255,255,255,0.06)', padding: '2px 6px', borderRadius: 4, fontSize: '0.72rem' }}>
+                  <img src="/AI-logos/chatgpt-black.svg" alt="OpenAI" style={{ width: 12, height: 12, filter: 'brightness(2)' }} /> GPTBot
+                </span>
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: 'rgba(255,255,255,0.06)', padding: '2px 6px', borderRadius: 4, fontSize: '0.72rem' }}>
+                  <img src="/AI-logos/perplexity-color.svg" alt="Perplexity" style={{ width: 12, height: 12 }} /> PerplexityBot
+                </span>
+              </div>
             </div>
           </div>
 
@@ -195,8 +221,8 @@ export default function GrowthAiVisibility() {
         <div className="growth-ai-run-result-banner animate-fade">
           <div className="ai-result-header">
             <div className="ai-result-title-row">
-              <Sparkles size={18} className="text-primary" />
-              <h4>Canlı Yapay Zeka Test Sonucu (Gemini 2.5)</h4>
+              <img src="/AI-logos/gemini-color.svg" alt="Google Gemini" style={{ width: 22, height: 22, objectFit: 'contain' }} />
+              <h4>Canlı Yapay Zeka Test Sonucu (Google Gemini)</h4>
             </div>
             <button type="button" onClick={() => setLastRunResult(null)} className="ai-result-close" aria-label="Kapat">
               <X size={16} />
@@ -211,8 +237,11 @@ export default function GrowthAiVisibility() {
               </span>
             </div>
             <div className="ai-stat-box">
-              <span className="ai-stat-label">Model</span>
-              <span className="ai-stat-val text-muted">{lastRunResult.model || 'gemini-2.5-flash'}</span>
+              <span className="ai-stat-label">Test Edilen Motor</span>
+              <span className="ai-stat-val text-muted" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <img src="/AI-logos/gemini-color.svg" alt="Gemini" style={{ width: 16, height: 16 }} />
+                <span>{lastRunResult.model || 'gemini-2.5-flash'}</span>
+              </span>
             </div>
           </div>
 
@@ -284,12 +313,12 @@ export default function GrowthAiVisibility() {
                       {isRunning ? (
                         <>
                           <Loader2 size={14} className="auth-spinner" />
-                          <span>Analiz Ediliyor...</span>
+                          <span>Gemini Sorguluyor...</span>
                         </>
                       ) : (
                         <>
-                          <Play size={13} />
-                          <span>Simülasyonu Çalıştır</span>
+                          <img src="/AI-logos/gemini-color.svg" alt="Gemini" style={{ width: 14, height: 14 }} />
+                          <span>Gemini ile Test Et</span>
                         </>
                       )}
                     </button>

@@ -231,7 +231,7 @@ export default function GrowthKeywords() {
             className={`subnav-pill highlight ${filterIntent === 'ai' ? 'active' : ''}`}
             onClick={() => setFilterIntent('ai')}
           >
-            <Bot size={13} />
+            <img src="/AI-logos/gemini-color.svg" alt="AI Overview" style={{ width: 14, height: 14 }} />
             <span>AI Overview Tetikleyenler ({aiOverviewCount})</span>
           </button>
           <button
@@ -320,9 +320,9 @@ export default function GrowthKeywords() {
                     </td>
                     <td>
                       {kw.aiOverview ? (
-                        <span className="ai-badge-active">
-                          <Bot size={12} />
-                          <span>AI Özetinde</span>
+                        <span className="ai-badge-active" style={{ display: 'inline-flex', alignItems: 'center', gap: 5 }}>
+                          <img src="/AI-logos/gemini-color.svg" alt="Google AI" style={{ width: 13, height: 13 }} />
+                          <span>AI Overview</span>
                         </span>
                       ) : (
                         <span className="ai-badge-inactive">Özet Yok</span>

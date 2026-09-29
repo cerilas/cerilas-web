@@ -21,6 +21,7 @@ import {
 import { useGrowth } from '../GrowthContext';
 import { useAuth } from '../../context/AuthContext';
 import GrowthPageCover from '../components/GrowthPageCover';
+import AiEngineBadge, { AiEngineGroup } from '../components/AiEngineBadge';
 
 export default function GrowthAiPrompts() {
   const { activeWorkspace } = useGrowth();
@@ -174,9 +175,12 @@ export default function GrowthAiPrompts() {
         <div className="growth-stat-card">
           <div className="stat-card-header">
             <span className="stat-card-title">Aktif AI Motoru</span>
-            <Bot size={16} className="stat-card-icon" />
+            <img src="/AI-logos/gemini-color.svg" alt="Gemini" style={{ width: 17, height: 17 }} />
           </div>
-          <div className="stat-card-value font-mono text-base">Gemini 2.5</div>
+          <div className="stat-card-value font-mono text-base" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <img src="/AI-logos/gemini-color.svg" alt="Gemini" style={{ width: 22, height: 22 }} />
+            <span>Gemini 2.5 Flash</span>
+          </div>
           <div className="stat-card-sub text-muted">Google AI Search Grounding</div>
         </div>
       </div>
@@ -197,7 +201,10 @@ export default function GrowthAiPrompts() {
                   <span>Markanız Bu Yanıtta Henüz Listelenmedi</span>
                 </div>
               )}
-              <span className="sim-model-tag">Model: {activeSimulationResult.model || 'Gemini 2.5 Flash'}</span>
+              <span className="sim-model-tag" style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                <img src="/AI-logos/gemini-color.svg" alt="Gemini" style={{ width: 14, height: 14 }} />
+                <span>Model: {activeSimulationResult.model || 'Google Gemini 2.5 Flash'}</span>
+              </span>
             </div>
 
             <button 
@@ -316,12 +323,12 @@ export default function GrowthAiPrompts() {
                           {isRunning ? (
                             <>
                               <Loader2 size={13} className="spin" />
-                              <span>Simüle Ediliyor...</span>
+                              <span>Gemini Taranıyor...</span>
                             </>
                           ) : (
                             <>
-                              <Play size={13} />
-                              <span>Şimdi Test Et</span>
+                              <img src="/AI-logos/gemini-color.svg" alt="Gemini" style={{ width: 13, height: 13 }} />
+                              <span>Gemini ile Test Et</span>
                             </>
                           )}
                         </button>

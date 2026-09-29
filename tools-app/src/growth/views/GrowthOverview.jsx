@@ -325,17 +325,23 @@ export default function GrowthOverview() {
           {/* GEO / AI Visibility Card */}
           <div className="growth-side-card geo-highlight-card">
             <div className="side-card-top">
-              <div className="side-card-icon-wrap icon-ai">
-                <Bot size={18} />
+              <div className="side-card-icon-wrap" style={{ background: 'rgba(26, 115, 232, 0.12)', border: '1px solid rgba(26, 115, 232, 0.25)', padding: 7, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 12 }}>
+                <img src="/AI-logos/gemini-color.svg" alt="Google Gemini" style={{ width: 22, height: 22, objectFit: 'contain' }} />
               </div>
               <div>
                 <h3 className="side-card-title">Yapay Zeka (GEO) Görünürlüğü</h3>
-                <span className="side-card-sub">ChatGPT, Perplexity & Gemini</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 4 }}>
+                  <img src="/AI-logos/gemini-color.svg" alt="Gemini" title="Google Gemini" style={{ width: 14, height: 14 }} />
+                  <img src="/AI-logos/chatgpt-black.svg" alt="ChatGPT" title="ChatGPT" style={{ width: 13, height: 13, filter: 'brightness(1.8)' }} />
+                  <img src="/AI-logos/perplexity-color.svg" alt="Perplexity" title="Perplexity AI" style={{ width: 13, height: 13 }} />
+                  <img src="/AI-logos/claude-color.svg" alt="Claude" title="Claude" style={{ width: 13, height: 13 }} />
+                  <span className="side-card-sub" style={{ marginLeft: 2 }}>Gemini, GPT &amp; Perplexity</span>
+                </div>
               </div>
             </div>
 
             <p className="side-card-desc">
-              Yapay zeka arama motorlarının sitenizden ne sıklıkla alıntı yaptığını ve sektörünüzdeki sorulara verilen yanıtları takip edin.
+              Google Gemini, ChatGPT ve Perplexity modellerinin sitenizden ne sıklıkla alıntı yaptığını ve marka tavsiyelerini izleyin.
             </p>
 
             <div className="side-card-stats-row">
@@ -354,7 +360,10 @@ export default function GrowthOverview() {
               className="side-card-link-btn"
               onClick={() => setActiveTab('ai-visibility')}
             >
-              <span>AI Görünürlük Simülatörünü Aç</span>
+              <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <img src="/AI-logos/gemini-color.svg" alt="Gemini" style={{ width: 14, height: 14 }} />
+                <span>AI Görünürlük Simülatörünü Aç</span>
+              </span>
               <ChevronRight size={14} />
             </button>
           </div>
@@ -362,8 +371,8 @@ export default function GrowthOverview() {
           {/* Google Search Console Connection Card */}
           <div className="growth-side-card gsc-connect-card">
             <div className="side-card-top">
-              <div className="side-card-icon-wrap icon-gsc">
-                <Search size={18} />
+              <div className="side-card-icon-wrap" style={{ background: 'rgba(66, 133, 244, 0.1)', border: '1px solid rgba(66, 133, 244, 0.25)', padding: 7, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 12 }}>
+                <img src="/growth-covers/gsc-badge.svg" alt="Google Search Console" style={{ width: 22, height: 22, objectFit: 'contain' }} />
               </div>
               <div>
                 <h3 className="side-card-title">Google Search Console</h3>

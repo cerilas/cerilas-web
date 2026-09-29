@@ -177,7 +177,7 @@ export default function GrowthSettings() {
           <div className="integration-row-card">
             <div className="integration-info-side">
               <div className="integration-icon-wrap" style={{ background: 'rgba(26, 115, 232, 0.12)', border: '1px solid rgba(26, 115, 232, 0.25)', padding: 6, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 10 }}>
-                <img src="/growth-covers/gemini-badge.svg" alt="Google Gemini" style={{ width: 26, height: 26, objectFit: 'contain' }} />
+                <img src="/AI-logos/gemini-color.svg" alt="Google Gemini" style={{ width: 26, height: 26, objectFit: 'contain' }} />
               </div>
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -200,7 +200,7 @@ export default function GrowthSettings() {
           <div className="integration-row-card">
             <div className="integration-info-side">
               <div className="integration-icon-wrap" style={{ background: 'rgba(32, 178, 170, 0.12)', border: '1px solid rgba(32, 178, 170, 0.25)', padding: 6, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 10 }}>
-                <img src="/growth-covers/perplexity-badge.svg" alt="Perplexity AI" style={{ width: 26, height: 26, objectFit: 'contain' }} />
+                <img src="/AI-logos/perplexity-color.svg" alt="Perplexity AI" style={{ width: 26, height: 26, objectFit: 'contain' }} />
               </div>
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -223,7 +223,7 @@ export default function GrowthSettings() {
           <div className="integration-row-card">
             <div className="integration-info-side">
               <div className="integration-icon-wrap" style={{ background: 'rgba(16, 163, 127, 0.12)', border: '1px solid rgba(16, 163, 127, 0.25)', padding: 6, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 10 }}>
-                <img src="/growth-covers/chatgpt-badge.svg" alt="ChatGPT" style={{ width: 26, height: 26, objectFit: 'contain' }} />
+                <img src="/AI-logos/chatgpt-black.svg" alt="ChatGPT" style={{ width: 26, height: 26, objectFit: 'contain', filter: 'brightness(1.8)' }} />
               </div>
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -231,6 +231,29 @@ export default function GrowthSettings() {
                   <span style={{ fontSize: '0.72rem', background: 'rgba(16, 185, 129, 0.15)', color: '#34d399', padding: '2px 8px', borderRadius: 6, fontWeight: 600 }}>Aktif & Canlı</span>
                 </div>
                 <span className="integration-desc">GPT-4o ve OpenAI Arama dizininde markanızın önerilme ve alıntı frekansı.</span>
+              </div>
+            </div>
+
+            <div className="integration-action-side">
+              <span style={{ fontSize: '0.82rem', color: '#94a3b8', display: 'flex', alignItems: 'center', gap: 6 }}>
+                <CheckCircle2 size={15} style={{ color: '#10b981' }} />
+                <span>API Bağlantısı Hazır</span>
+              </span>
+            </div>
+          </div>
+
+          {/* Claude 3.5 Sonnet */}
+          <div className="integration-row-card">
+            <div className="integration-info-side">
+              <div className="integration-icon-wrap" style={{ background: 'rgba(217, 119, 6, 0.12)', border: '1px solid rgba(217, 119, 6, 0.25)', padding: 6, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 10 }}>
+                <img src="/AI-logos/claude-color.svg" alt="Claude" style={{ width: 26, height: 26, objectFit: 'contain' }} />
+              </div>
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <span className="integration-name">Anthropic Claude 3.5 Engine</span>
+                  <span style={{ fontSize: '0.72rem', background: 'rgba(16, 185, 129, 0.15)', color: '#34d399', padding: '2px 8px', borderRadius: 6, fontWeight: 600 }}>Aktif & Canlı</span>
+                </div>
+                <span className="integration-desc">Claude modelinin kurumsal bağlam ve teknik araştırmalardaki marka referansları.</span>
               </div>
             </div>
 

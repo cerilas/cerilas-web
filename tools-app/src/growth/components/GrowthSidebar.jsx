@@ -30,14 +30,14 @@ const NAV_GROUPS = [
   {
     title: 'ARAMA MOTORU (SEO)',
     items: [
-      { id: 'search', label: 'Arama Performansı (GSC)', icon: Search },
+      { id: 'search', label: 'Arama Performansı (GSC)', icon: Search, iconImg: '/growth-covers/gsc-badge.svg' },
       { id: 'keywords', label: 'Anahtar Kelime Fırsatları', icon: TrendingUp }
     ]
   },
   {
     title: 'YAPAY ZEKA ARAMA (GEO)',
     items: [
-      { id: 'ai-visibility', label: 'AI Görünürlüğü (GEO)', icon: Bot, isNew: true },
+      { id: 'ai-visibility', label: 'AI Görünürlüğü (GEO)', icon: Bot, iconImg: '/AI-logos/gemini-color.svg', isNew: true },
       { id: 'ai-prompts', label: 'Takip Edilen Promptlar', icon: Cpu }
     ]
   },
@@ -83,7 +83,7 @@ export default function GrowthSidebar() {
       {/* Navigation Sections */}
       <div className="growth-sidebar-nav">
         {NAV_GROUPS.map((group, gIdx) => (
-          <div key={gIdx} className="growth-nav-group">
+          <div key={group.title} className="growth-nav-group">
             <span className="growth-group-title">{group.title}</span>
             <div className="growth-group-items">
               {group.items.map((item) => {
@@ -101,7 +101,11 @@ export default function GrowthSidebar() {
                       }
                     }}
                   >
-                    <Icon size={16} className="growth-nav-icon" />
+                    {item.iconImg ? (
+                      <img src={item.iconImg} alt="" style={{ width: 16, height: 16, objectFit: 'contain' }} />
+                    ) : (
+                      <Icon size={16} className="growth-nav-icon" />
+                    )}
                     <span className="growth-nav-label">{item.label}</span>
                     {item.badge && <span className="growth-nav-badge">{item.badge}</span>}
                     {item.isNew && <span className="growth-nav-new-badge">GEO</span>}

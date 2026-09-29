@@ -325,7 +325,12 @@ export default function GrowthContent() {
               </div>
 
               <div className="brief-faq-box">
-                <h4>AI Arama Motorları İçin Hazır FAQ (Schema.org Uyumlu):</h4>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
+                  <img src="/AI-logos/gemini-color.svg" alt="Gemini" style={{ width: 15, height: 15 }} />
+                  <img src="/AI-logos/chatgpt-black.svg" alt="ChatGPT" style={{ width: 14, height: 14, filter: 'brightness(1.8)' }} />
+                  <img src="/AI-logos/perplexity-color.svg" alt="Perplexity" style={{ width: 14, height: 14 }} />
+                  <h4 style={{ margin: 0 }}>AI Arama Motorları İçin Hazır FAQ (Schema.org Uyumlu):</h4>
+                </div>
                 {generatedBrief.faqs.map((faq, idx) => (
                   <div key={idx} className="faq-item">
                     <span className="faq-q">S: {faq.q}</span>

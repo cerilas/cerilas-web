@@ -57,7 +57,7 @@ export default function GrowthSearch() {
       {/* Hero Cover Banner */}
       <GrowthPageCover
         badge="Google Search Console Canlı Veri"
-        badgeIcon={Search}
+        badgeIcon={() => <img src="/growth-covers/gsc-badge.svg" alt="GSC" style={{ width: 16, height: 16, objectFit: 'contain' }} />}
         title="Google Organik Arama & Sıralama İstihbaratı"
         subtitle="Google arama sonuçlarından gelen gerçek organik sorgular, sayfa 1 fırsatları ve tıklama hacimleri."
         coverImage="/growth-covers/seo-cover.jpg"
@@ -76,7 +76,8 @@ export default function GrowthSearch() {
               onClick={() => setActiveTab('settings')}
               className="growth-secondary-btn"
             >
-              GSC Entegrasyonu
+              <img src="/growth-covers/gsc-badge.svg" alt="GSC" style={{ width: 14, height: 14 }} />
+              <span>GSC Entegrasyonu</span>
             </button>
           </>
         }
@@ -86,9 +87,9 @@ export default function GrowthSearch() {
       {/* Integration Status Callout Banner */}
       <div className="growth-gsc-banner">
         <div className="gsc-banner-left">
-          <div className="gsc-pill-badge">
-            <Sparkles size={13} />
-            <span>Search Console Örnekleme &amp; Tahmin Modu</span>
+          <div className="gsc-pill-badge" style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+            <img src="/growth-covers/gsc-badge.svg" alt="GSC" style={{ width: 15, height: 15 }} />
+            <span>Search Console Canlı Senkronizasyon Modu</span>
           </div>
           <p className="gsc-banner-text">
             Sitenizin gerçek Google Search Console mülkünü bağlayarak tüm sorguları canlı senkronize edebilirsiniz.
