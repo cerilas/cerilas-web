@@ -19,6 +19,7 @@ import {
 import { useGrowth } from '../GrowthContext';
 import { useAuth } from '../../context/AuthContext';
 import GrowthPageCover from '../components/GrowthPageCover';
+import { SkeletonBlock } from '../components/GrowthSkeleton';
 
 export default function GrowthReports() {
   const { activeWorkspace } = useGrowth();
@@ -222,11 +223,16 @@ export default function GrowthReports() {
             </thead>
             <tbody>
               {loading ? (
-                <tr>
-                  <td colSpan="6" style={{ textAlign: 'center', padding: '2rem' }}>
-                    <Loader2 size={24} className="spin" style={{ margin: '0 auto' }} />
-                  </td>
-                </tr>
+                Array.from({ length: 4 }).map((_, i) => (
+                  <tr key={i}>
+                    <td><SkeletonBlock width="80%" height="16px" borderRadius="4px" /></td>
+                    <td><SkeletonBlock width="110px" height="14px" borderRadius="4px" /></td>
+                    <td><SkeletonBlock width="70px" height="20px" borderRadius="999px" /></td>
+                    <td><SkeletonBlock width="90px" height="14px" borderRadius="4px" /></td>
+                    <td><SkeletonBlock width="60px" height="16px" borderRadius="4px" /></td>
+                    <td><SkeletonBlock width="75px" height="28px" borderRadius="6px" /></td>
+                  </tr>
+                ))
               ) : reports.map((rep) => (
                 <tr key={rep.id}>
                   <td>

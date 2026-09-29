@@ -17,6 +17,7 @@ import GrowthReports from './views/GrowthReports';
 import GrowthSettings from './views/GrowthSettings';
 import { useAuth } from '../context/AuthContext';
 import { Sparkles, ShieldCheck, ArrowRight, ArrowLeft, Lock, Loader2 } from 'lucide-react';
+import { GrowthOverviewSkeleton } from './components/GrowthSkeleton';
 import './GrowthApp.css';
 
 function GrowthInner({ onBackToTools }) {
@@ -123,10 +124,7 @@ function GrowthInner({ onBackToTools }) {
         {/* Dynamic Main Workspace Content */}
         <main className="growth-main-viewport">
           {loading && !activeWorkspace ? (
-            <div className="growth-loading-view">
-              <Loader2 size={36} className="growth-spinner" />
-              <span>Marka ve çalışma alanları yükleniyor...</span>
-            </div>
+            <GrowthOverviewSkeleton />
           ) : !activeWorkspace ? (
             <div className="growth-no-workspace-view">
               <Sparkles size={40} className="text-primary" />

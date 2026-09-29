@@ -15,6 +15,7 @@ import {
 import { useGrowth } from '../GrowthContext';
 import { useAuth } from '../../context/AuthContext';
 import GrowthPageCover from '../components/GrowthPageCover';
+import { GrowthTechnicalAuditSkeleton } from '../components/GrowthSkeleton';
 
 export default function GrowthTechnicalAudit() {
   const { activeWorkspace } = useGrowth();
@@ -45,12 +46,7 @@ export default function GrowthTechnicalAudit() {
   }, [activeWorkspace?.id, token]);
 
   if (loading) {
-    return (
-      <div className="growth-loading-view">
-        <Loader2 size={32} className="growth-spinner" />
-        <span>Teknik site denetim raporu yükleniyor...</span>
-      </div>
-    );
+    return <GrowthTechnicalAuditSkeleton />;
   }
 
   const issues = data?.issues || [];

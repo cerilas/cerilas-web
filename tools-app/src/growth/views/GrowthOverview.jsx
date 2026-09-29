@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { useGrowth } from '../GrowthContext';
 import { useAuth } from '../../context/AuthContext';
+import { GrowthOverviewSkeleton } from '../components/GrowthSkeleton';
 
 export default function GrowthOverview() {
   const { activeWorkspace, setActiveTab, setIsOnboardingOpen } = useGrowth();
@@ -75,12 +76,7 @@ export default function GrowthOverview() {
   };
 
   if (loading) {
-    return (
-      <div className="growth-loading-view">
-        <Loader2 size={32} className="growth-spinner" />
-        <span>Büyüme metrikleri ve aksiyon haritası yükleniyor...</span>
-      </div>
-    );
+    return <GrowthOverviewSkeleton />;
   }
 
   if (error || !data) {

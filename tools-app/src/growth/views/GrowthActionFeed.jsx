@@ -27,6 +27,7 @@ import {
 import { useGrowth } from '../GrowthContext';
 import { useAuth } from '../../context/AuthContext';
 import GrowthPageCover from '../components/GrowthPageCover';
+import { SkeletonBlock } from '../components/GrowthSkeleton';
 
 export default function GrowthActionFeed() {
   const { activeWorkspace, setActiveTab } = useGrowth();
@@ -252,9 +253,26 @@ export default function GrowthActionFeed() {
       {/* Action Items List */}
       <div className="growth-action-feed-list">
         {loading ? (
-          <div className="growth-loading-view">
-            <Loader2 size={32} className="growth-spinner" />
-            <span>Aksiyonlar önceliklendiriliyor...</span>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            {[1, 2, 3, 4, 5].map(i => (
+              <div key={i} className="growth-skeleton-opp-card">
+                <div className="skeleton-opp-left">
+                  <SkeletonBlock width="42px" height="42px" borderRadius="10px" />
+                  <div className="skeleton-opp-info">
+                    <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                      <SkeletonBlock width="75px" height="18px" borderRadius="999px" />
+                      <SkeletonBlock width="90px" height="18px" borderRadius="999px" />
+                    </div>
+                    <SkeletonBlock width="65%" height="18px" borderRadius="4px" style={{ marginTop: 4 }} />
+                    <SkeletonBlock width="85%" height="14px" borderRadius="4px" />
+                  </div>
+                </div>
+                <div className="skeleton-opp-right">
+                  <SkeletonBlock width="90px" height="32px" borderRadius="8px" />
+                  <SkeletonBlock width="32px" height="32px" borderRadius="8px" />
+                </div>
+              </div>
+            ))}
           </div>
         ) : filtered.length === 0 ? (
           <div className="growth-empty-card">

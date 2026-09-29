@@ -18,14 +18,22 @@ import {
 } from 'lucide-react';
 import { useGrowth } from '../GrowthContext';
 import GrowthPageCover from '../components/GrowthPageCover';
+import { GrowthContentSkeleton } from '../components/GrowthSkeleton';
 
 export default function GrowthContent() {
   const { activeWorkspace } = useGrowth();
 
+  const [loading, setLoading] = useState(true);
   const [activeTabSub, setActiveTabSub] = useState('clusters'); // clusters, audit, brief
   const [selectedBriefTopic, setSelectedBriefTopic] = useState('');
   const [generatedBrief, setGeneratedBrief] = useState(null);
   const [copiedBrief, setCopiedBrief] = useState(false);
+
+  React.useEffect(() => {
+    setLoading(true);
+    const timer = setTimeout(() => setLoading(false), 220);
+    return () => clearTimeout(timer);
+  }, [activeWorkspace?.id]);
 
   // Content Topic Clusters
   const clusters = [
@@ -88,6 +96,10 @@ export default function GrowthContent() {
     setCopiedBrief(true);
     setTimeout(() => setCopiedBrief(false), 2000);
   };
+
+  if (loading) {
+    return <GrowthContentSkeleton />;
+  }
 
   return (
     <div className="growth-page-container animate-fade">

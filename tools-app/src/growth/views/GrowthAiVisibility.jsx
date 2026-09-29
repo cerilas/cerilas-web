@@ -20,6 +20,7 @@ import { useGrowth } from '../GrowthContext';
 import { useAuth } from '../../context/AuthContext';
 import GrowthPageCover from '../components/GrowthPageCover';
 import AiEngineBadge, { AiEngineGroup } from '../components/AiEngineBadge';
+import { SkeletonBlock } from '../components/GrowthSkeleton';
 
 export default function GrowthAiVisibility() {
   const { activeWorkspace } = useGrowth();
@@ -279,9 +280,16 @@ export default function GrowthAiVisibility() {
         </div>
 
         {loading ? (
-          <div className="growth-loading-inline">
-            <Loader2 size={20} className="auth-spinner" />
-            <span>Promptlar yükleniyor...</span>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            {[1, 2, 3].map(i => (
+              <div key={i} className="growth-skeleton-opp-card">
+                <div className="skeleton-opp-info">
+                  <SkeletonBlock width="70%" height="16px" borderRadius="4px" />
+                  <SkeletonBlock width="35%" height="13px" borderRadius="4px" style={{ marginTop: 6 }} />
+                </div>
+                <SkeletonBlock width="110px" height="34px" borderRadius="8px" />
+              </div>
+            ))}
           </div>
         ) : prompts.length === 0 ? (
           <div className="growth-empty-card">

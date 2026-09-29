@@ -15,11 +15,13 @@ import {
 import { useGrowth } from '../GrowthContext';
 import { useAuth } from '../../context/AuthContext';
 import GrowthPageCover from '../components/GrowthPageCover';
+import { GrowthSettingsSkeleton } from '../components/GrowthSkeleton';
 
 export default function GrowthSettings() {
   const { activeWorkspace, refreshWorkspaces, switchWorkspace, workspaces } = useGrowth();
   const { token, initiateGoogleAuth } = useAuth();
 
+  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [successMsg, setSuccessMsg] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
@@ -29,6 +31,12 @@ export default function GrowthSettings() {
   const [name, setName] = useState(activeWorkspace?.name || '');
   const [industry, setIndustry] = useState(activeWorkspace?.industry || '');
   const [description, setDescription] = useState(activeWorkspace?.brand_description || '');
+
+  React.useEffect(() => {
+    setLoading(true);
+    const timer = setTimeout(() => setLoading(false), 200);
+    return () => clearTimeout(timer);
+  }, [activeWorkspace?.id]);
 
   const handleSaveProfile = async (e) => {
     e.preventDefault();
@@ -77,6 +85,10 @@ export default function GrowthSettings() {
       alert('Silme işlemi başarısız: ' + err.message);
     }
   };
+
+  if (loading) {
+    return <GrowthSettingsSkeleton />;
+  }
 
   return (
     <div className="growth-page-container animate-fade">

@@ -22,6 +22,7 @@ import { useGrowth } from '../GrowthContext';
 import { useAuth } from '../../context/AuthContext';
 import GrowthPageCover from '../components/GrowthPageCover';
 import AiEngineBadge, { AiEngineGroup } from '../components/AiEngineBadge';
+import { SkeletonBlock } from '../components/GrowthSkeleton';
 
 export default function GrowthAiPrompts() {
   const { activeWorkspace } = useGrowth();
@@ -270,11 +271,15 @@ export default function GrowthAiPrompts() {
             </thead>
             <tbody>
               {loading ? (
-                <tr>
-                  <td colSpan="5" style={{ textAlign: 'center', padding: '2rem' }}>
-                    <Loader2 size={24} className="spin" style={{ margin: '0 auto' }} />
-                  </td>
-                </tr>
+                Array.from({ length: 4 }).map((_, i) => (
+                  <tr key={i}>
+                    <td><SkeletonBlock width="85%" height="16px" borderRadius="4px" /></td>
+                    <td><SkeletonBlock width="120px" height="14px" borderRadius="4px" /></td>
+                    <td><SkeletonBlock width="80px" height="22px" borderRadius="999px" /></td>
+                    <td><SkeletonBlock width="40px" height="16px" borderRadius="4px" /></td>
+                    <td><SkeletonBlock width="95px" height="28px" borderRadius="6px" /></td>
+                  </tr>
+                ))
               ) : prompts.length === 0 ? (
                 <tr>
                   <td colSpan="5" style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-muted)' }}>

@@ -22,13 +22,21 @@ import {
 } from 'lucide-react';
 import { useGrowth } from '../GrowthContext';
 import GrowthPageCover from '../components/GrowthPageCover';
+import { GrowthSearchSkeleton } from '../components/GrowthSkeleton';
 
 export default function GrowthSearch() {
   const { activeWorkspace, setActiveTab } = useGrowth();
 
+  const [loading, setLoading] = useState(true);
   const [dateRange, setDateRange] = useState('28d');
   const [activeTabSub, setActiveTabSub] = useState('queries'); // queries, striking, pages
   const [searchFilter, setSearchFilter] = useState('');
+
+  useEffect(() => {
+    setLoading(true);
+    const timer = setTimeout(() => setLoading(false), 220);
+    return () => clearTimeout(timer);
+  }, [activeWorkspace?.id, dateRange]);
 
   // Sample verified dataset for brand or demo
   const sampleQueries = [
@@ -53,6 +61,10 @@ export default function GrowthSearch() {
     ? sampleQueries.filter(q => q.isStriking) 
     : sampleQueries
   ).filter(q => q.query.toLowerCase().includes(searchFilter.toLowerCase()));
+
+  if (loading) {
+    return <GrowthSearchSkeleton />;
+  }
 
   return (
     <div className="growth-page-container animate-fade">

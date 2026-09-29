@@ -1,0 +1,272 @@
+/* Growth Skeleton Shimmer System */
+.growth-skeleton-shimmer {
+  background: linear-gradient(
+    90deg, 
+    rgba(255, 255, 255, 0.035) 0%, 
+    rgba(255, 255, 255, 0.085) 50%, 
+    rgba(255, 255, 255, 0.035) 100%
+  );
+  background-size: 200% 100%;
+  animation: growthSkeletonWave 1.6s ease-in-out infinite;
+  display: block;
+}
+
+[data-theme="light"] .growth-skeleton-shimmer,
+html.light .growth-skeleton-shimmer {
+  background: linear-gradient(
+    90deg, 
+    rgba(0, 0, 0, 0.04) 0%, 
+    rgba(0, 0, 0, 0.09) 50%, 
+    rgba(0, 0, 0, 0.04) 100%
+  );
+  background-size: 200% 100%;
+}
+
+@keyframes growthSkeletonWave {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.growth-skeleton-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  width: 100%;
+  animation: growthFadeIn 0.25s ease-out;
+}
+
+/* Skeleton Cover Banner */
+.growth-skeleton-cover {
+  position: relative;
+  min-height: 180px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 20px;
+  padding: 2.25rem 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+  overflow: hidden;
+}
+
+@media (max-width: 900px) {
+  .growth-skeleton-cover {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+.skeleton-cover-left {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  max-width: 580px;
+  width: 100%;
+}
+
+.skeleton-cover-stats {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.skeleton-cover-stat-box {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 14px;
+  padding: 1rem 1.25rem;
+  min-width: 130px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+/* Metrics Grid Skeleton */
+.growth-skeleton-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.25rem;
+  width: 100%;
+}
+
+@media (max-width: 1024px) {
+  .growth-skeleton-metrics-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media (max-width: 640px) {
+  .growth-skeleton-metrics-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.growth-skeleton-metric-card {
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 16px;
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.skeleton-metric-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Generic Skeleton Card */
+.growth-skeleton-card {
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 18px;
+  padding: 1.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.skeleton-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+/* Skeleton Table */
+.growth-skeleton-table {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  width: 100%;
+}
+
+.skeleton-table-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.02);
+  gap: 1rem;
+}
+
+.skeleton-table-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.015);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  gap: 1rem;
+}
+
+/* 2-Column Split Skeleton */
+.growth-skeleton-split-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  width: 100%;
+}
+
+@media (max-width: 900px) {
+  .growth-skeleton-split-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* 3-Column Grid Skeleton */
+.growth-skeleton-3col-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.25rem;
+  width: 100%;
+}
+
+@media (max-width: 1024px) {
+  .growth-skeleton-3col-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Overview Hero Skeleton */
+.growth-skeleton-overview-hero {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 1.75rem;
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 20px;
+  padding: 2.25rem;
+  align-items: center;
+}
+
+@media (max-width: 960px) {
+  .growth-skeleton-overview-hero {
+    grid-template-columns: 1fr;
+  }
+}
+
+.skeleton-hero-left {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.skeleton-hero-pill-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.skeleton-gauge-box {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 16px;
+  padding: 1.75rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  text-align: center;
+}
+
+/* Action Feed Opportunity Card Skeleton */
+.growth-skeleton-opp-card {
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 16px;
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+}
+
+.skeleton-opp-left {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex: 1;
+}
+
+.skeleton-opp-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  flex: 1;
+}
+
+.skeleton-opp-right {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}

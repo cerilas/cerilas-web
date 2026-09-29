@@ -20,6 +20,7 @@ import {
 import { useGrowth } from '../GrowthContext';
 import { useAuth } from '../../context/AuthContext';
 import GrowthPageCover from '../components/GrowthPageCover';
+import { SkeletonBlock } from '../components/GrowthSkeleton';
 
 export default function GrowthKeywords() {
   const { activeWorkspace } = useGrowth();
@@ -279,11 +280,17 @@ export default function GrowthKeywords() {
             </thead>
             <tbody>
               {loading ? (
-                <tr>
-                  <td colSpan="7" style={{ textAlign: 'center', padding: '2rem' }}>
-                    <Loader2 size={24} className="spin" style={{ margin: '0 auto' }} />
-                  </td>
-                </tr>
+                Array.from({ length: 6 }).map((_, i) => (
+                  <tr key={i}>
+                    <td><SkeletonBlock width="80%" height="16px" borderRadius="4px" /></td>
+                    <td><SkeletonBlock width="65px" height="22px" borderRadius="999px" /></td>
+                    <td><SkeletonBlock width="45px" height="16px" borderRadius="4px" /></td>
+                    <td><SkeletonBlock width="60px" height="16px" borderRadius="4px" /></td>
+                    <td><SkeletonBlock width="80px" height="22px" borderRadius="999px" /></td>
+                    <td><SkeletonBlock width="70px" height="8px" borderRadius="999px" /></td>
+                    <td><SkeletonBlock width="90%" height="16px" borderRadius="4px" /></td>
+                  </tr>
+                ))
               ) : filtered.length === 0 ? (
                 <tr>
                   <td colSpan="7" style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-muted)' }}>

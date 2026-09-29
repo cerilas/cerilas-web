@@ -20,6 +20,7 @@ import {
 import { useGrowth } from '../GrowthContext';
 import { useAuth } from '../../context/AuthContext';
 import GrowthPageCover from '../components/GrowthPageCover';
+import { SkeletonBlock } from '../components/GrowthSkeleton';
 
 export default function GrowthCompetitors() {
   const { activeWorkspace } = useGrowth();
@@ -182,9 +183,22 @@ export default function GrowthCompetitors() {
         </div>
 
         {loading ? (
-          <div className="growth-loading-view">
-            <Loader2 size={32} className="growth-spinner" />
-            <span>Rakipler ve pazar verileri yükleniyor...</span>
+          <div className="growth-skeleton-3col-grid">
+            {[1, 2, 3].map(i => (
+              <div key={i} className="growth-skeleton-card">
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <SkeletonBlock width="40px" height="40px" borderRadius="10px" />
+                  <div style={{ flex: 1 }}>
+                    <SkeletonBlock width="130px" height="18px" borderRadius="4px" />
+                    <SkeletonBlock width="90px" height="13px" borderRadius="4px" style={{ marginTop: 4 }} />
+                  </div>
+                </div>
+                <div style={{ display: 'flex', gap: 10, marginTop: 8 }}>
+                  <SkeletonBlock width="50%" height="45px" borderRadius="8px" />
+                  <SkeletonBlock width="50%" height="45px" borderRadius="8px" />
+                </div>
+              </div>
+            ))}
           </div>
         ) : competitors.length === 0 ? (
           <div className="growth-empty-card">

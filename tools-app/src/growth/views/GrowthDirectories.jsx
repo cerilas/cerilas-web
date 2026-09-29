@@ -18,6 +18,7 @@ import { useGrowth } from '../GrowthContext';
 import { useAuth } from '../../context/AuthContext';
 import GrowthPageCover from '../components/GrowthPageCover';
 import { AiEngineGroup } from '../components/AiEngineBadge';
+import { SkeletonBlock } from '../components/GrowthSkeleton';
 
 export default function GrowthDirectories() {
   const { activeWorkspace } = useGrowth();
@@ -170,9 +171,20 @@ export default function GrowthDirectories() {
 
       {/* Directories Grid */}
       {loading ? (
-        <div className="growth-loading-view">
-          <Loader2 size={32} className="growth-spinner" />
-          <span>Otorite dizinleri taranıyor...</span>
+        <div className="growth-skeleton-3col-grid">
+          {[1, 2, 3, 4, 5, 6].map(i => (
+            <div key={i} className="growth-skeleton-card">
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <SkeletonBlock width="42px" height="42px" borderRadius="10px" />
+                <div style={{ flex: 1 }}>
+                  <SkeletonBlock width="130px" height="18px" borderRadius="4px" />
+                  <SkeletonBlock width="80px" height="13px" borderRadius="4px" style={{ marginTop: 4 }} />
+                </div>
+              </div>
+              <SkeletonBlock width="100%" height="34px" borderRadius="6px" />
+              <SkeletonBlock width="100%" height="36px" borderRadius="8px" />
+            </div>
+          ))}
         </div>
       ) : (
         <div className="growth-directories-grid">
