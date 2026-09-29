@@ -1,21 +1,18 @@
 import React from 'react';
 import { 
   LayoutDashboard, 
+  ListTodo, 
   Search, 
-  Bot, 
-  MapPin, 
-  Users2, 
+  TrendingUp, 
+  BrainCircuit, 
+  Terminal, 
+  Radar, 
+  ShieldCheck, 
   FileText, 
-  Wrench, 
-  Share2, 
-  FileBarChart, 
-  Settings,
-  Sparkles,
-  Zap,
-  TrendingUp,
-  Cpu,
-  Layers,
-  ChevronRight
+  Network, 
+  BarChart3, 
+  SlidersHorizontal,
+  Layers
 } from 'lucide-react';
 import { useGrowth } from '../GrowthContext';
 
@@ -24,7 +21,7 @@ const NAV_GROUPS = [
     title: 'GENEL BAKIŞ',
     items: [
       { id: 'overview', label: 'Genel Bakış & Skor', icon: LayoutDashboard },
-      { id: 'action-feed', label: 'Aksiyon Akışı (Öncelikler)', icon: Zap, badge: 'Öncelikli' }
+      { id: 'action-feed', label: 'Aksiyon Akışı (Öncelikler)', icon: ListTodo, badge: 'Öncelikli' }
     ]
   },
   {
@@ -37,29 +34,29 @@ const NAV_GROUPS = [
   {
     title: 'YAPAY ZEKA ARAMA (GEO)',
     items: [
-      { id: 'ai-visibility', label: 'AI Görünürlüğü (GEO)', icon: Bot, isNew: true },
-      { id: 'ai-prompts', label: 'Takip Edilen Promptlar', icon: Cpu }
+      { id: 'ai-visibility', label: 'AI Görünürlüğü (GEO)', icon: BrainCircuit, isNew: true },
+      { id: 'ai-prompts', label: 'Takip Edilen Promptlar', icon: Terminal }
     ]
   },
   {
     title: 'RAKİP VE PAZAR',
     items: [
-      { id: 'competitors', label: 'Rakip İstihbaratı', icon: Users2 }
+      { id: 'competitors', label: 'Rakip İstihbaratı', icon: Radar }
     ]
   },
   {
     title: 'TEKNİK VE İÇERİK',
     items: [
-      { id: 'technical', label: 'Site Denetimi & Hatalar', icon: Wrench },
+      { id: 'technical', label: 'Site Denetimi & Hatalar', icon: ShieldCheck },
       { id: 'content', label: 'İçerik Stratejisi & Fırsatlar', icon: FileText },
-      { id: 'directories', label: 'Dizinler & Dağıtım', icon: Share2 }
+      { id: 'directories', label: 'Dizinler & Dağıtım', icon: Network }
     ]
   },
   {
     title: 'YÖNETİM',
     items: [
-      { id: 'reports', label: 'Haftalık / Aylık Raporlar', icon: FileBarChart },
-      { id: 'settings', label: 'Marka & Entegrasyonlar', icon: Settings }
+      { id: 'reports', label: 'Haftalık / Aylık Raporlar', icon: BarChart3 },
+      { id: 'settings', label: 'Marka & Entegrasyonlar', icon: SlidersHorizontal }
     ]
   }
 ];
@@ -72,7 +69,7 @@ export default function GrowthSidebar() {
       {/* Platform Branding Mini */}
       <div className="growth-sidebar-brand-box">
         <div className="growth-logo-glow-wrap">
-          <Sparkles size={16} className="text-primary" />
+          <Layers size={17} strokeWidth={2} />
         </div>
         <div className="growth-brand-titles">
           <span className="growth-app-title">Cerilas Growth</span>
@@ -82,7 +79,7 @@ export default function GrowthSidebar() {
 
       {/* Navigation Sections */}
       <div className="growth-sidebar-nav">
-        {NAV_GROUPS.map((group, gIdx) => (
+        {NAV_GROUPS.map((group) => (
           <div key={group.title} className="growth-nav-group">
             <span className="growth-group-title">{group.title}</span>
             <div className="growth-group-items">
@@ -101,7 +98,7 @@ export default function GrowthSidebar() {
                       }
                     }}
                   >
-                    <Icon size={16} className="growth-nav-icon" />
+                    <Icon size={16} strokeWidth={1.8} className="growth-nav-icon" />
                     <span className="growth-nav-label">{item.label}</span>
                     {item.badge && <span className="growth-nav-badge">{item.badge}</span>}
                     {item.isNew && <span className="growth-nav-new-badge">GEO</span>}

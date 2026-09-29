@@ -375,15 +375,15 @@ html.light .growth-app-sidebar {
 }
 
 .growth-logo-glow-wrap {
-  width: 34px;
-  height: 34px;
-  border-radius: 10px;
-  background: rgba(99, 102, 241, 0.12);
-  border: 1px solid rgba(99, 102, 241, 0.25);
+  width: 32px;
+  height: 32px;
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 0 20px rgba(99, 102, 241, 0.3);
+  color: #818cf8;
 }
 
 .growth-brand-titles {
