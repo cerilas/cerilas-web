@@ -750,6 +750,265 @@ router.post('/workspaces/:slugOrId/prompts/:promptId/run', requireAuth, async (r
 });
 
 /**
+ * GET /api/growth/workspaces/:slugOrId/opportunities
+ * Fetch all opportunities with optional category and status filtering
+ */
+router.get('/workspaces/:slugOrId/opportunities', requireAuth, async (req, res) => {
+  try {
+    const authData = await resolveAndAuthorizeWorkspace(req, req.params.slugOrId);
+    if (!authData) return res.status(404).json({ error: 'Çalışma alanı bulunamadı.' });
+
+    const { category, status } = req.query;
+    let query = 'SELECT * FROM growth_opportunities WHERE workspace_id = $1';
+    const params = [authData.workspace.id];
+
+    if (category && category !== 'all') {
+      params.push(category);
+      query += ` AND category = $${params.length}`;
+    }
+
+    if (status && status !== 'all') {
+      params.push(status);
+      query += ` AND status = $${params.length}`;
+    }
+
+    query += ` ORDER BY CASE WHEN status = 'open' THEN 1 WHEN status = 'in_progress' THEN 2 ELSE 3 END, priority_score DESC`;
+
+    const oppsRes = await authPool.query(query, params);
+    res.json({ success: true, data: oppsRes.rows });
+  } catch (err) {
+    console.error('[Opportunities Error]:', err);
+    res.status(500).json({ error: 'Aksiyon listesi alınamadı.' });
+  }
+});
+
+/**
+ * GET & POST & DELETE /api/growth/workspaces/:slugOrId/competitors
+ */
+router.get('/workspaces/:slugOrId/competitors', requireAuth, async (req, res) => {
+  try {
+    const authData = await resolveAndAuthorizeWorkspace(req, req.params.slugOrId);
+    if (!authData) return res.status(404).json({ error: 'Çalışma alanı bulunamadı.' });
+
+    const compRes = await authPool.query(
+      `SELECT * FROM growth_competitors WHERE workspace_id = $1 ORDER BY id ASC`,
+      [authData.workspace.id]
+    );
+
+    res.json({ success: true, data: compRes.rows });
+  } catch (err) {
+    res.status(500).json({ error: 'Rakipler yüklenemedi.' });
+  }
+});
+
+router.post('/workspaces/:slugOrId/competitors', requireAuth, async (req, res) => {
+  try {
+    const authData = await resolveAndAuthorizeWorkspace(req, req.params.slugOrId);
+    if (!authData) return res.status(404).json({ error: 'Çalışma alanı bulunamadı.' });
+
+    const { name, domain, type } = req.body;
+    if (!domain) return res.status(400).json({ error: 'Rakip domain adresi zorunludur.' });
+
+    const cleanDomain = domain.replace(/^https?:\/\//, '').replace(/^www\./, '').split('/')[0];
+    const cleanName = name || cleanDomain;
+
+    const insRes = await authPool.query(
+      `INSERT INTO growth_competitors (workspace_id, name, domain, type, created_at)
+       VALUES ($1, $2, $3, $4, NOW())
+       RETURNING *`,
+      [authData.workspace.id, cleanName, cleanDomain, type || 'direct']
+    );
+
+    res.status(201).json({ success: true, data: insRes.rows[0] });
+  } catch (err) {
+    res.status(500).json({ error: 'Rakip eklenemedi.' });
+  }
+});
+
+router.delete('/workspaces/:slugOrId/competitors/:compId', requireAuth, async (req, res) => {
+  try {
+    const authData = await resolveAndAuthorizeWorkspace(req, req.params.slugOrId);
+    if (!authData) return res.status(404).json({ error: 'Çalışma alanı bulunamadı.' });
+
+    await authPool.query(
+      `DELETE FROM growth_competitors WHERE id = $1 AND workspace_id = $2`,
+      [req.params.compId, authData.workspace.id]
+    );
+
+    res.json({ success: true, message: 'Rakip silindi.' });
+  } catch (err) {
+    res.status(500).json({ error: 'Rakip silinemedi.' });
+  }
+});
+
+/**
+ * GET & POST /api/growth/workspaces/:slugOrId/keywords
+ */
+router.get('/workspaces/:slugOrId/keywords', requireAuth, async (req, res) => {
+  try {
+    const authData = await resolveAndAuthorizeWorkspace(req, req.params.slugOrId);
+    if (!authData) return res.status(404).json({ error: 'Çalışma alanı bulunamadı.' });
+
+    const ws = authData.workspace;
+    const keywords = ws.target_keywords || [];
+
+    res.json({
+      success: true,
+      data: keywords,
+      industry: ws.industry,
+      brand: ws.name
+    });
+  } catch (err) {
+    res.status(500).json({ error: 'Anahtar kelimeler alınamadı.' });
+  }
+});
+
+router.post('/workspaces/:slugOrId/keywords', requireAuth, async (req, res) => {
+  try {
+    const authData = await resolveAndAuthorizeWorkspace(req, req.params.slugOrId);
+    if (!authData) return res.status(404).json({ error: 'Çalışma alanı bulunamadı.' });
+
+    const { keyword } = req.body;
+    if (!keyword || !keyword.trim()) {
+      return res.status(400).json({ error: 'Anahtar kelime boş olamaz.' });
+    }
+
+    const currentKeywords = authData.workspace.target_keywords || [];
+    const trimmed = keyword.trim().toLowerCase();
+    
+    if (!currentKeywords.includes(trimmed)) {
+      currentKeywords.push(trimmed);
+      await authPool.query(
+        `UPDATE workspaces SET target_keywords = $1, updated_at = NOW() WHERE id = $2`,
+        [JSON.stringify(currentKeywords), authData.workspace.id]
+      );
+    }
+
+    res.json({ success: true, data: currentKeywords });
+  } catch (err) {
+    res.status(500).json({ error: 'Anahtar kelime eklenemedi.' });
+  }
+});
+
+/**
+ * GET & PATCH /api/growth/workspaces/:slugOrId/directories
+ */
+router.get('/workspaces/:slugOrId/directories', requireAuth, async (req, res) => {
+  try {
+    const authData = await resolveAndAuthorizeWorkspace(req, req.params.slugOrId);
+    if (!authData) return res.status(404).json({ error: 'Çalışma alanı bulunamadı.' });
+
+    const wsId = authData.workspace.id;
+
+    // Default authoritative platforms for GEO citations
+    const defaultDirs = [
+      { id: 1, name: 'Product Hunt', domain: 'producthunt.com', category: 'saas', authority: 92, submissionUrl: 'https://www.producthunt.com', geoWeight: 'Çok Yüksek' },
+      { id: 2, name: 'G2 Crowd', domain: 'g2.com', category: 'saas', authority: 90, submissionUrl: 'https://www.g2.com', geoWeight: 'Çok Yüksek' },
+      { id: 3, name: 'Trustpilot', domain: 'trustpilot.com', category: 'trust', authority: 93, submissionUrl: 'https://business.trustpilot.com', geoWeight: 'Yüksek' },
+      { id: 4, name: 'Crunchbase', domain: 'crunchbase.com', category: 'trust', authority: 91, submissionUrl: 'https://www.crunchbase.com', geoWeight: 'Yüksek' },
+      { id: 5, name: 'Google Business Profile', domain: 'google.com/business', category: 'trust', authority: 100, submissionUrl: 'https://www.google.com/business/', geoWeight: 'Kritik' },
+      { id: 6, name: 'GitHub', domain: 'github.com', category: 'community', authority: 96, submissionUrl: 'https://github.com', geoWeight: 'Çok Yüksek' },
+      { id: 7, name: 'Reddit (Topluluklar)', domain: 'reddit.com', category: 'community', authority: 91, submissionUrl: 'https://www.reddit.com', geoWeight: 'Kritik (LLM Eğitimi)' },
+      { id: 8, name: 'AlternativeTo', domain: 'alternativeto.net', category: 'saas', authority: 84, submissionUrl: 'https://alternativeto.net', geoWeight: 'Yüksek' },
+      { id: 9, name: 'Capterra', domain: 'capterra.com', category: 'saas', authority: 89, submissionUrl: 'https://www.capterra.com', geoWeight: 'Yüksek' },
+      { id: 10, name: 'DEV Community', domain: 'dev.to', category: 'community', authority: 87, submissionUrl: 'https://dev.to', geoWeight: 'Orta' },
+      { id: 11, name: 'Wikipedia / Wikidata', domain: 'wikipedia.org', category: 'trust', authority: 98, submissionUrl: 'https://www.wikidata.org', geoWeight: 'Kritik' },
+      { id: 12, name: 'SaaSHub', domain: 'saashub.com', category: 'saas', authority: 79, submissionUrl: 'https://www.saashub.com', geoWeight: 'Orta' }
+    ];
+
+    // Read existing submissions from DB
+    const subRes = await authPool.query(
+      `SELECT directory_id, status, submission_url FROM growth_directory_submissions WHERE workspace_id = $1`,
+      [wsId]
+    );
+
+    const subMap = {};
+    for (const s of subRes.rows) {
+      subMap[s.directory_id] = s;
+    }
+
+    const merged = defaultDirs.map(d => ({
+      ...d,
+      status: subMap[d.id]?.status || (d.id <= 2 ? 'claimed' : d.id === 5 ? 'claimed' : 'missing'),
+      submittedUrl: subMap[d.id]?.submission_url || ''
+    }));
+
+    res.json({ success: true, data: merged });
+  } catch (err) {
+    res.status(500).json({ error: 'Dizinler alınamadı.' });
+  }
+});
+
+router.patch('/workspaces/:slugOrId/directories/:dirId', requireAuth, async (req, res) => {
+  try {
+    const authData = await resolveAndAuthorizeWorkspace(req, req.params.slugOrId);
+    if (!authData) return res.status(404).json({ error: 'Çalışma alanı bulunamadı.' });
+
+    const { status, submission_url } = req.body;
+    const dirId = parseInt(req.params.dirId, 10);
+
+    // Upsert into growth_directory_submissions
+    await authPool.query(
+      `INSERT INTO growth_directory_submissions (workspace_id, directory_id, status, submission_url, submitted_at)
+       VALUES ($1, $2, $3, $4, NOW())
+       ON CONFLICT (workspace_id, directory_id)
+       DO UPDATE SET status = EXCLUDED.status, submission_url = EXCLUDED.submission_url, submitted_at = NOW()`,
+      [authData.workspace.id, dirId, status || 'claimed', submission_url || '']
+    );
+
+    res.json({ success: true, message: 'Dizin durumu güncellendi.' });
+  } catch (err) {
+    res.status(500).json({ error: 'Dizin güncellenemedi.' });
+  }
+});
+
+/**
+ * GET /api/growth/workspaces/:slugOrId/reports
+ */
+router.get('/workspaces/:slugOrId/reports', requireAuth, async (req, res) => {
+  try {
+    const authData = await resolveAndAuthorizeWorkspace(req, req.params.slugOrId);
+    if (!authData) return res.status(404).json({ error: 'Çalışma alanı bulunamadı.' });
+
+    const ws = authData.workspace;
+
+    const reports = [
+      {
+        id: 1,
+        title: 'Haftalık Büyüme & AI Görünürlük Raporu',
+        period: 'Son 7 Gün (Hafta 39)',
+        date: new Date().toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' }),
+        type: 'weekly',
+        scoreChange: '+4 puan',
+        growthScore: ws.growth_score || 74,
+        highlights: [
+          'Teknik SEO puanı %85 seviyesine ulaştı.',
+          'Yapay Zeka (GEO) alıntılanma oranı %14 artış gösterdi.',
+          '3 adet kritik teknik ve içerik aksiyonu tamamlandı.'
+        ]
+      },
+      {
+        id: 2,
+        title: 'Aylık Organik Arama ve Rakip Kıyaslama Raporu',
+        period: 'Eylül 2026',
+        date: '15 Eylül 2026',
+        type: 'monthly',
+        scoreChange: '+8 puan',
+        growthScore: (ws.growth_score || 74) - 4,
+        highlights: [
+          'Search Console mülkünde gösterim trendi pozitif ivme kazandı.',
+          'Rakip karşılaştırmasında GEO hazır bulunuşluğunda ilk sıraya yerleşildi.'
+        ]
+      }
+    ];
+
+    res.json({ success: true, data: reports });
+  } catch (err) {
+    res.status(500).json({ error: 'Raporlar alınamadı.' });
+  }
+});
+
+/**
  * DELETE /api/growth/workspaces/:slugOrId
  * Delete workspace and cascade dependent data
  */

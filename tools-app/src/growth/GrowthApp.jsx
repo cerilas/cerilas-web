@@ -4,9 +4,16 @@ import GrowthHeader from './components/GrowthHeader';
 import GrowthSidebar from './components/GrowthSidebar';
 import GrowthOnboardingModal from './components/GrowthOnboardingModal';
 import GrowthOverview from './views/GrowthOverview';
+import GrowthActionFeed from './views/GrowthActionFeed';
 import GrowthAiVisibility from './views/GrowthAiVisibility';
+import GrowthAiPrompts from './views/GrowthAiPrompts';
 import GrowthTechnicalAudit from './views/GrowthTechnicalAudit';
 import GrowthSearch from './views/GrowthSearch';
+import GrowthKeywords from './views/GrowthKeywords';
+import GrowthCompetitors from './views/GrowthCompetitors';
+import GrowthContent from './views/GrowthContent';
+import GrowthDirectories from './views/GrowthDirectories';
+import GrowthReports from './views/GrowthReports';
 import GrowthSettings from './views/GrowthSettings';
 import { useAuth } from '../context/AuthContext';
 import { Sparkles, ShieldCheck, ArrowRight, Lock, Loader2 } from 'lucide-react';
@@ -136,17 +143,17 @@ function GrowthInner({ onBackToTools }) {
           ) : (
             <>
               {activeTab === 'overview' && <GrowthOverview />}
-              {activeTab === 'action-feed' && <GrowthOverview />}
-              {activeTab === 'ai-visibility' && <GrowthAiVisibility />}
-              {activeTab === 'ai-prompts' && <GrowthAiVisibility />}
-              {activeTab === 'technical' && <GrowthTechnicalAudit />}
+              {activeTab === 'action-feed' && <GrowthActionFeed />}
               {activeTab === 'search' && <GrowthSearch />}
-              {activeTab === 'keywords' && <GrowthSearch />}
+              {activeTab === 'keywords' && <GrowthKeywords />}
+              {activeTab === 'ai-visibility' && <GrowthAiVisibility />}
+              {activeTab === 'ai-prompts' && <GrowthAiPrompts />}
+              {activeTab === 'competitors' && <GrowthCompetitors />}
+              {activeTab === 'technical' && <GrowthTechnicalAudit />}
+              {activeTab === 'content' && <GrowthContent />}
+              {activeTab === 'directories' && <GrowthDirectories />}
+              {activeTab === 'reports' && <GrowthReports />}
               {activeTab === 'settings' && <GrowthSettings />}
-              {activeTab === 'competitors' && <GrowthSettings />}
-              {activeTab === 'content' && <GrowthOverview />}
-              {activeTab === 'directories' && <GrowthOverview />}
-              {activeTab === 'reports' && <GrowthOverview />}
             </>
           )}
         </main>
