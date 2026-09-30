@@ -948,6 +948,7 @@ export async function syncGrowthAnalytics(workspaceId, explicitAccessToken = nul
     techRes,
     countriesRes,
     citiesRes,
+    countrySourcesRes,
     eventsRes,
     realtimeRes
   ] = await Promise.allSettled([
@@ -1023,7 +1024,7 @@ export async function syncGrowthAnalytics(workspaceId, explicitAccessToken = nul
       dimensions: [{ name: 'country' }],
       metrics: [{ name: 'sessions' }, { name: 'activeUsers' }],
       orderBys: [{ metric: { metricName: 'sessions' }, desc: true }],
-      limit: 25
+      limit: 100
     }),
     // Cities
     runGa4Query({
@@ -1031,7 +1032,15 @@ export async function syncGrowthAnalytics(workspaceId, explicitAccessToken = nul
       dimensions: [{ name: 'city' }, { name: 'country' }],
       metrics: [{ name: 'sessions' }, { name: 'activeUsers' }],
       orderBys: [{ metric: { metricName: 'sessions' }, desc: true }],
-      limit: 25
+      limit: 150
+    }),
+    // Country + Channel/Source breakdown
+    runGa4Query({
+      dateRanges: [{ startDate, endDate }],
+      dimensions: [{ name: 'country' }, { name: 'sessionDefaultChannelGroup' }],
+      metrics: [{ name: 'sessions' }, { name: 'activeUsers' }],
+      orderBys: [{ metric: { metricName: 'sessions' }, desc: true }],
+      limit: 200
     }),
     // Events
     runGa4Query({
@@ -1125,9 +1134,11 @@ export async function syncGrowthAnalytics(workspaceId, explicitAccessToken = nul
     activeUsers: Number(r.metricValues?.[1]?.value || 0)
   }));
 
-  // Parse Countries & Cities
+  // Parse Countries & Cities & Country Sources
   const countryRows = countriesRes.status === 'fulfilled' ? (countriesRes.value.rows || []) : [];
   const cityRows = citiesRes.status === 'fulfilled' ? (citiesRes.value.rows || []) : [];
+  const countrySourceRows = countrySourcesRes.status === 'fulfilled' ? (countrySourcesRes.value.rows || []) : [];
+
   const countries = countryRows.map(r => ({
     country: r.dimensionValues?.[0]?.value || 'Unknown',
     sessions: Number(r.metricValues?.[0]?.value || 0),
@@ -1139,6 +1150,16 @@ export async function syncGrowthAnalytics(workspaceId, explicitAccessToken = nul
     sessions: Number(r.metricValues?.[0]?.value || 0),
     activeUsers: Number(r.metricValues?.[1]?.value || 0)
   }));
+
+  const countrySources = {};
+  countrySourceRows.forEach(r => {
+    const cName = r.dimensionValues?.[0]?.value || 'Unknown';
+    const channel = r.dimensionValues?.[1]?.value || 'Direct';
+    const sess = Number(r.metricValues?.[0]?.value || 0);
+    const users = Number(r.metricValues?.[1]?.value || 0);
+    if (!countrySources[cName]) countrySources[cName] = [];
+    countrySources[cName].push({ channel, sessions: sess, activeUsers: users });
+  });
 
   // Parse Events
   const eventRows = eventsRes.status === 'fulfilled' ? (eventsRes.value.rows || []) : [];
@@ -1219,7 +1240,7 @@ export async function syncGrowthAnalytics(workspaceId, explicitAccessToken = nul
       JSON.stringify(dailyTrend),
       JSON.stringify(devices),
       JSON.stringify(browsers),
-      JSON.stringify({ countries, cities }),
+      JSON.stringify({ countries, cities, countrySources }),
       JSON.stringify(events),
       JSON.stringify(realtime)
     ]
@@ -1256,7 +1277,7 @@ export async function syncGrowthAnalytics(workspaceId, explicitAccessToken = nul
     dailyTrend,
     devices,
     browsers,
-    demographics: { countries, cities },
+    demographics: { countries, cities, countrySources },
     events,
     realtime
   };

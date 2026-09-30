@@ -29,6 +29,7 @@ import { useGrowth } from '../GrowthContext';
 import { useAuth } from '../../context/AuthContext';
 import GrowthPageCover from '../components/GrowthPageCover';
 import { GrowthSearchSkeleton } from '../components/GrowthSkeleton';
+import GrowthWorldMap from '../components/GrowthWorldMap';
 
 const DATE_RANGE_OPTIONS = [
   { id: '1d', label: 'Son 1 Gün', badge: 'Dün' },
@@ -70,6 +71,7 @@ export default function GrowthAnalytics() {
   const [searchFilter, setSearchFilter] = useState('');
   const [activeChartMetric, setActiveChartMetric] = useState('sessions'); // 'sessions' | 'activeUsers' | 'screenPageViews'
   const [hoveredTrendPoint, setHoveredTrendPoint] = useState(null);
+  const [selectedCountry, setSelectedCountry] = useState(null);
 
   // Date Range state
   const [dateRange, setDateRange] = useState('28d');
@@ -1069,54 +1071,15 @@ export default function GrowthAnalytics() {
               </div>
             )}
 
-            {/* 4. DEMOGRAPHICS TAB */}
+            {/* 4. DEMOGRAPHICS TAB: INTERACTIVE WORLD MAP & DRILLDOWN */}
             {activeTabSub === 'demographics' && (
-              <div>
-                <div className="growth-tab-infobar">
-                  <div className="tab-infobar-icon" style={{ background: 'rgba(52, 211, 153, 0.12)', color: '#34d399' }}>
-                    <Globe2 size={20} />
-                  </div>
-                  <div className="tab-infobar-content">
-                    <h4 className="tab-infobar-title">
-                      <span>Coğrafi Konum Dağılımı (Ülkeler & Şehirler)</span>
-                    </h4>
-                    <p className="tab-infobar-desc">
-                      Trafiğinizin dünya ve Türkiye genelindeki coğrafi yoğunluğu. Hedef pazarlarınızdaki büyüme eğilimini izleyin.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="growth-two-col-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1.5rem' }}>
-                  {/* Countries */}
-                  <div className="growth-subcard" style={{ background: 'rgba(255,255,255,0.02)', padding: '1.25rem', borderRadius: 12, border: '1px solid rgba(255,255,255,0.06)' }}>
-                    <h4 style={{ margin: '0 0 1rem', fontSize: '0.95rem', color: '#ffffff' }}>En Çok Ziyaret Alan Ülkeler</h4>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
-                      {(analyticsData.demographics?.countries || []).slice(0, 10).map((cnt, idx) => (
-                        <div key={idx} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.65rem 0.85rem', background: 'rgba(255,255,255,0.03)', borderRadius: 8 }}>
-                          <span style={{ fontWeight: 600, color: '#f1f5f9' }}>{cnt.country}</span>
-                          <span className="font-mono text-primary font-semibold">{cnt.sessions} oturum</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Cities */}
-                  <div className="growth-subcard" style={{ background: 'rgba(255,255,255,0.02)', padding: '1.25rem', borderRadius: 12, border: '1px solid rgba(255,255,255,0.06)' }}>
-                    <h4 style={{ margin: '0 0 1rem', fontSize: '0.95rem', color: '#ffffff' }}>En Çok Ziyaret Alan Şehirler</h4>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
-                      {(analyticsData.demographics?.cities || []).slice(0, 10).map((ct, idx) => (
-                        <div key={idx} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.65rem 0.85rem', background: 'rgba(255,255,255,0.03)', borderRadius: 8 }}>
-                          <div>
-                            <strong style={{ color: '#f1f5f9', fontSize: '0.85rem' }}>{ct.city}</strong>
-                            {ct.country && <span style={{ display: 'block', fontSize: '0.72rem', color: '#94a3b8' }}>{ct.country}</span>}
-                          </div>
-                          <span className="font-mono text-primary font-semibold">{ct.sessions} oturum</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </div>
+              <GrowthWorldMap
+                countries={analyticsData.demographics?.countries || []}
+                cities={analyticsData.demographics?.cities || []}
+                countrySources={analyticsData.demographics?.countrySources || {}}
+                selectedCountry={selectedCountry}
+                onSelectCountry={setSelectedCountry}
+              />
             )}
 
             {/* 5. EVENTS TAB */}

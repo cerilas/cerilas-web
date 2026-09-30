@@ -1520,6 +1520,7 @@ router.get('/workspaces/:slugOrId/analytics-performance', requireAuth, async (re
       const demoData = p.countries || {};
       const countriesList = Array.isArray(demoData) ? demoData : (demoData.countries || []);
       const citiesList = demoData.cities || [];
+      const countrySources = demoData.countrySources || {};
 
       return res.json({
         success: true,
@@ -1549,7 +1550,8 @@ router.get('/workspaces/:slugOrId/analytics-performance', requireAuth, async (re
         browsers: p.browsers || [],
         demographics: {
           countries: countriesList,
-          cities: citiesList
+          cities: citiesList,
+          countrySources
         },
         events: p.events || [],
         realtime: p.realtime || { activeUsers: 0, activePages: [] }
