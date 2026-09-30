@@ -76,6 +76,10 @@ export default function GrowthSearch() {
     });
   }, [activeWorkspace?.id, fetchPerformance]);
 
+  useEffect(() => {
+    setQueryPage(1);
+  }, [searchFilter, activeTabSub]);
+
   const handleManualSync = async () => {
     if (!activeWorkspace?.id || !token) return;
     setSyncing(true);
@@ -152,10 +156,6 @@ export default function GrowthSearch() {
   const topQueries = searchData.topQueries || [];
   const strikingQueries = searchData.strikingQueries || [];
   const topPages = searchData.topPages || [];
-
-  useEffect(() => {
-    setQueryPage(1);
-  }, [searchFilter, activeTabSub]);
 
   const currentQueriesSource = activeTabSub === 'striking' ? strikingQueries : topQueries;
   const filteredQueries = currentQueriesSource.filter(q => 
