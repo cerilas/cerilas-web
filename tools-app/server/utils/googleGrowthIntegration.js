@@ -7,7 +7,8 @@ import {
   querySearchConsole,
   inspectSearchConsoleUrl,
   getGa4Properties,
-  queryGa4Traffic
+  queryGa4Traffic,
+  queryGa4Realtime
 } from './googleAuth.js';
 
 const GOOGLE_AUTH_ENDPOINT = 'https://accounts.google.com/o/oauth2/v2/auth';
@@ -850,5 +851,466 @@ export async function disconnectGrowthGoogle(workspaceId) {
     [workspaceId]
   );
 
+  await authPool.query(
+    `DELETE FROM growth_analytics_performance WHERE workspace_id = $1`,
+    [workspaceId]
+  );
+
   return { success: true };
+}
+
+/**
+ * Synchronizes comprehensive Google Analytics 4 (GA4) data for a given workspace.
+ */
+export async function syncGrowthAnalytics(workspaceId, explicitAccessToken = null, explicitPropertyId = null, options = {}) {
+  // 1. Fetch connection record
+  const connRes = await authPool.query(
+    `SELECT * FROM integration_connections 
+     WHERE workspace_id = $1 AND provider = 'google' AND integration_type = 'analytics'`,
+    [workspaceId]
+  );
+
+  if (connRes.rows.length === 0) {
+    throw new Error('Bu çalışma alanı için Google Analytics 4 entegrasyonu bulunamadı.');
+  }
+
+  const connection = connRes.rows[0];
+  const propertyId = explicitPropertyId || connection.external_property_id;
+
+  if (!propertyId) {
+    throw new Error('Lütfen önce Google Analytics 4 için bir mülk (Property ID) seçin.');
+  }
+
+  const cleanPropId = String(propertyId).replace('properties/', '').trim();
+
+  // 2. Obtain valid access token
+  const accessToken = explicitAccessToken || await getValidGrowthAccessToken(connection);
+
+  // 3. Resolve Date Ranges
+  const dateRange = options.dateRange || '28d';
+  let startDate = options.startDate;
+  let endDate = options.endDate;
+
+  const formatDate = (d) => d.toISOString().split('T')[0];
+
+  if (!startDate || !endDate) {
+    const dEnd = new Date();
+    dEnd.setDate(dEnd.getDate() - 1);
+    endDate = formatDate(dEnd);
+
+    const dStart = new Date();
+    if (dateRange === '1d') {
+      dStart.setDate(dStart.getDate() - 1);
+    } else if (dateRange === '3d') {
+      dStart.setDate(dStart.getDate() - 3);
+    } else if (dateRange === '7d' || dateRange === '1w') {
+      dStart.setDate(dStart.getDate() - 7);
+    } else if (dateRange === '28d' || dateRange === '1m') {
+      dStart.setDate(dStart.getDate() - 28);
+    } else if (dateRange === '3m' || dateRange === '90d') {
+      dStart.setDate(dStart.getDate() - 90);
+    } else if (dateRange === '6m' || dateRange === '180d') {
+      dStart.setDate(dStart.getDate() - 180);
+    } else if (dateRange === 'all' || dateRange === '16m') {
+      dStart.setDate(dStart.getDate() - 365);
+    } else {
+      dStart.setDate(dStart.getDate() - 28);
+    }
+    startDate = formatDate(dStart);
+  }
+
+  const endpoint = `https://analyticsdata.googleapis.com/v1beta/properties/${cleanPropId}:runReport`;
+  const realtimeEndpoint = `https://analyticsdata.googleapis.com/v1beta/properties/${cleanPropId}:runRealtimeReport`;
+
+  const runGa4Query = async (body) => {
+    const res = await fetch(endpoint, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(body)
+    });
+    if (!res.ok) {
+      const err = await res.text();
+      throw new Error(`GA4 API error (${res.status}): ${err}`);
+    }
+    return res.json();
+  };
+
+  // 4. Parallel GA4 Queries
+  const [
+    totalsRes,
+    trendRes,
+    channelsRes,
+    pagesRes,
+    devicesRes,
+    techRes,
+    countriesRes,
+    citiesRes,
+    eventsRes,
+    realtimeRes
+  ] = await Promise.allSettled([
+    // Totals
+    runGa4Query({
+      dateRanges: [{ startDate, endDate }],
+      metrics: [
+        { name: 'activeUsers' },
+        { name: 'totalUsers' },
+        { name: 'newUsers' },
+        { name: 'sessions' },
+        { name: 'screenPageViews' },
+        { name: 'averageSessionDuration' },
+        { name: 'bounceRate' },
+        { name: 'engagementRate' },
+        { name: 'eventCount' }
+      ]
+    }),
+    // Trend
+    runGa4Query({
+      dateRanges: [{ startDate, endDate }],
+      dimensions: [{ name: 'date' }],
+      metrics: [
+        { name: 'sessions' },
+        { name: 'activeUsers' },
+        { name: 'screenPageViews' },
+        { name: 'bounceRate' }
+      ],
+      orderBys: [{ dimension: { dimensionName: 'date' }, desc: false }]
+    }),
+    // Channels
+    runGa4Query({
+      dateRanges: [{ startDate, endDate }],
+      dimensions: [{ name: 'sessionDefaultChannelGroup' }],
+      metrics: [
+        { name: 'sessions' },
+        { name: 'activeUsers' },
+        { name: 'bounceRate' },
+        { name: 'averageSessionDuration' }
+      ],
+      orderBys: [{ metric: { metricName: 'sessions' }, desc: true }]
+    }),
+    // Top Pages
+    runGa4Query({
+      dateRanges: [{ startDate, endDate }],
+      dimensions: [{ name: 'pagePath' }, { name: 'pageTitle' }],
+      metrics: [
+        { name: 'screenPageViews' },
+        { name: 'activeUsers' },
+        { name: 'averageSessionDuration' },
+        { name: 'bounceRate' }
+      ],
+      orderBys: [{ metric: { metricName: 'screenPageViews' }, desc: true }],
+      limit: 50
+    }),
+    // Devices
+    runGa4Query({
+      dateRanges: [{ startDate, endDate }],
+      dimensions: [{ name: 'deviceCategory' }],
+      metrics: [{ name: 'sessions' }, { name: 'activeUsers' }]
+    }),
+    // Tech (Browser & OS)
+    runGa4Query({
+      dateRanges: [{ startDate, endDate }],
+      dimensions: [{ name: 'browser' }, { name: 'operatingSystem' }],
+      metrics: [{ name: 'sessions' }, { name: 'activeUsers' }],
+      orderBys: [{ metric: { metricName: 'sessions' }, desc: true }],
+      limit: 15
+    }),
+    // Countries
+    runGa4Query({
+      dateRanges: [{ startDate, endDate }],
+      dimensions: [{ name: 'country' }],
+      metrics: [{ name: 'sessions' }, { name: 'activeUsers' }],
+      orderBys: [{ metric: { metricName: 'sessions' }, desc: true }],
+      limit: 25
+    }),
+    // Cities
+    runGa4Query({
+      dateRanges: [{ startDate, endDate }],
+      dimensions: [{ name: 'city' }, { name: 'country' }],
+      metrics: [{ name: 'sessions' }, { name: 'activeUsers' }],
+      orderBys: [{ metric: { metricName: 'sessions' }, desc: true }],
+      limit: 25
+    }),
+    // Events
+    runGa4Query({
+      dateRanges: [{ startDate, endDate }],
+      dimensions: [{ name: 'eventName' }],
+      metrics: [{ name: 'eventCount' }, { name: 'totalUsers' }],
+      orderBys: [{ metric: { metricName: 'eventCount' }, desc: true }],
+      limit: 25
+    }),
+    // Realtime
+    fetch(realtimeEndpoint, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        dimensions: [{ name: 'unifiedScreenName' }],
+        metrics: [{ name: 'activeUsers' }]
+      })
+    }).then(async r => (r.ok ? r.json() : { rows: [] })).catch(() => ({ rows: [] }))
+  ]);
+
+  if (totalsRes.status !== 'fulfilled') {
+    console.error('[GA4 Query Totals Error]:', totalsRes.reason);
+    throw totalsRes.reason;
+  }
+
+  const totalsRaw = totalsRes.value?.rows?.[0]?.metricValues || [];
+  const activeUsers = Number(totalsRaw[0]?.value || 0);
+  const totalUsers = Number(totalsRaw[1]?.value || 0);
+  const newUsers = Number(totalsRaw[2]?.value || 0);
+  const sessions = Number(totalsRaw[3]?.value || 0);
+  const screenPageViews = Number(totalsRaw[4]?.value || 0);
+  const avgDuration = Number(totalsRaw[5]?.value || 0);
+  const bounceRate = Number(totalsRaw[6]?.value || 0);
+  const engagementRate = Number(totalsRaw[7]?.value || 0);
+  const eventCount = Number(totalsRaw[8]?.value || 0);
+
+  // Parse Trend
+  const trendRows = trendRes.status === 'fulfilled' ? (trendRes.value.rows || []) : [];
+  const dailyTrend = trendRows.map(r => {
+    const rawDate = r.dimensionValues?.[0]?.value || '';
+    const formatted = rawDate.length === 8 
+      ? `${rawDate.slice(0, 4)}-${rawDate.slice(4, 6)}-${rawDate.slice(6, 8)}`
+      : rawDate;
+    return {
+      date: formatted,
+      sessions: Number(r.metricValues?.[0]?.value || 0),
+      activeUsers: Number(r.metricValues?.[1]?.value || 0),
+      screenPageViews: Number(r.metricValues?.[2]?.value || 0),
+      bounceRate: ((Number(r.metricValues?.[3]?.value || 0)) * 100).toFixed(1) + '%'
+    };
+  });
+
+  // Parse Channels
+  const channelRows = channelsRes.status === 'fulfilled' ? (channelsRes.value.rows || []) : [];
+  const trafficChannels = channelRows.map(r => ({
+    channel: r.dimensionValues?.[0]?.value || 'Other',
+    sessions: Number(r.metricValues?.[0]?.value || 0),
+    activeUsers: Number(r.metricValues?.[1]?.value || 0),
+    bounceRate: ((Number(r.metricValues?.[2]?.value || 0)) * 100).toFixed(1) + '%',
+    avgDurationSeconds: Math.round(Number(r.metricValues?.[3]?.value || 0))
+  }));
+
+  // Parse Top Pages
+  const pageRows = pagesRes.status === 'fulfilled' ? (pagesRes.value.rows || []) : [];
+  const topPages = pageRows.map(r => ({
+    pagePath: r.dimensionValues?.[0]?.value || '/',
+    pageTitle: r.dimensionValues?.[1]?.value || '',
+    views: Number(r.metricValues?.[0]?.value || 0),
+    activeUsers: Number(r.metricValues?.[1]?.value || 0),
+    avgDurationSeconds: Math.round(Number(r.metricValues?.[2]?.value || 0)),
+    bounceRate: ((Number(r.metricValues?.[3]?.value || 0)) * 100).toFixed(1) + '%'
+  }));
+
+  // Parse Devices
+  const devRows = devicesRes.status === 'fulfilled' ? (devicesRes.value.rows || []) : [];
+  const devices = devRows.map(r => ({
+    category: (r.dimensionValues?.[0]?.value || 'desktop').toLowerCase(),
+    sessions: Number(r.metricValues?.[0]?.value || 0),
+    activeUsers: Number(r.metricValues?.[1]?.value || 0)
+  }));
+
+  // Parse Tech (Browsers & OS)
+  const techRows = techRes.status === 'fulfilled' ? (techRes.value.rows || []) : [];
+  const browsers = techRows.map(r => ({
+    browser: r.dimensionValues?.[0]?.value || 'Unknown',
+    os: r.dimensionValues?.[1]?.value || 'Unknown',
+    sessions: Number(r.metricValues?.[0]?.value || 0),
+    activeUsers: Number(r.metricValues?.[1]?.value || 0)
+  }));
+
+  // Parse Countries & Cities
+  const countryRows = countriesRes.status === 'fulfilled' ? (countriesRes.value.rows || []) : [];
+  const cityRows = citiesRes.status === 'fulfilled' ? (citiesRes.value.rows || []) : [];
+  const countries = countryRows.map(r => ({
+    country: r.dimensionValues?.[0]?.value || 'Unknown',
+    sessions: Number(r.metricValues?.[0]?.value || 0),
+    activeUsers: Number(r.metricValues?.[1]?.value || 0)
+  }));
+  const cities = cityRows.map(r => ({
+    city: r.dimensionValues?.[0]?.value || 'Unknown',
+    country: r.dimensionValues?.[1]?.value || '',
+    sessions: Number(r.metricValues?.[0]?.value || 0),
+    activeUsers: Number(r.metricValues?.[1]?.value || 0)
+  }));
+
+  // Parse Events
+  const eventRows = eventsRes.status === 'fulfilled' ? (eventsRes.value.rows || []) : [];
+  const events = eventRows.map(r => ({
+    eventName: r.dimensionValues?.[0]?.value || '',
+    eventCount: Number(r.metricValues?.[0]?.value || 0),
+    totalUsers: Number(r.metricValues?.[1]?.value || 0)
+  }));
+
+  // Parse Realtime
+  const rtData = realtimeRes.status === 'fulfilled' ? realtimeRes.value : { rows: [] };
+  const rtTotalUsers = (rtData.rows || []).reduce((acc, r) => acc + Number(r.metricValues?.[0]?.value || 0), 0);
+  const rtActivePages = (rtData.rows || []).map(r => ({
+    screenName: r.dimensionValues?.[0]?.value || '/',
+    activeUsers: Number(r.metricValues?.[0]?.value || 0)
+  }));
+
+  const realtime = {
+    activeUsers: rtTotalUsers,
+    activePages: rtActivePages,
+    updatedAt: new Date().toISOString()
+  };
+
+  // Upsert into growth_analytics_performance
+  await authPool.query(
+    `INSERT INTO growth_analytics_performance (
+      workspace_id, property_id, date_range, start_date, end_date,
+      total_users, active_users, new_users, sessions, screen_page_views,
+      average_session_duration, bounce_rate, engagement_rate, event_count,
+      traffic_channels, top_pages, daily_trend, devices, browsers,
+      countries, events, realtime, synced_at
+    ) VALUES (
+      $1, $2, $3, $4, $5,
+      $6, $7, $8, $9, $10,
+      $11, $12, $13, $14,
+      $15, $16, $17, $18, $19,
+      $20, $21, $22, NOW()
+    )
+    ON CONFLICT (workspace_id, property_id, date_range)
+    DO UPDATE SET
+      start_date = EXCLUDED.start_date,
+      end_date = EXCLUDED.end_date,
+      total_users = EXCLUDED.total_users,
+      active_users = EXCLUDED.active_users,
+      new_users = EXCLUDED.new_users,
+      sessions = EXCLUDED.sessions,
+      screen_page_views = EXCLUDED.screen_page_views,
+      average_session_duration = EXCLUDED.average_session_duration,
+      bounce_rate = EXCLUDED.bounce_rate,
+      engagement_rate = EXCLUDED.engagement_rate,
+      event_count = EXCLUDED.event_count,
+      traffic_channels = EXCLUDED.traffic_channels,
+      top_pages = EXCLUDED.top_pages,
+      daily_trend = EXCLUDED.daily_trend,
+      devices = EXCLUDED.devices,
+      browsers = EXCLUDED.browsers,
+      countries = EXCLUDED.countries,
+      events = EXCLUDED.events,
+      realtime = EXCLUDED.realtime,
+      synced_at = NOW()`,
+    [
+      workspaceId,
+      cleanPropId,
+      dateRange,
+      startDate,
+      endDate,
+      totalUsers,
+      activeUsers,
+      newUsers,
+      sessions,
+      screenPageViews,
+      avgDuration,
+      bounceRate * 100,
+      engagementRate * 100,
+      eventCount,
+      JSON.stringify(trafficChannels),
+      JSON.stringify(topPages),
+      JSON.stringify(dailyTrend),
+      JSON.stringify(devices),
+      JSON.stringify(browsers),
+      JSON.stringify({ countries, cities }),
+      JSON.stringify(events),
+      JSON.stringify(realtime)
+    ]
+  );
+
+  // Update connection sync status
+  await authPool.query(
+    `UPDATE integration_connections 
+     SET last_sync_at = NOW(), last_sync_status = 'success', last_error = NULL, updated_at = NOW()
+     WHERE id = $1`,
+    [connection.id]
+  );
+
+  return {
+    propertyId: cleanPropId,
+    propertyName: connection.external_property_name || cleanPropId,
+    dateRange,
+    startDate,
+    endDate,
+    syncedAt: new Date().toISOString(),
+    totals: {
+      totalUsers,
+      activeUsers,
+      newUsers,
+      sessions,
+      screenPageViews,
+      averageSessionDuration: avgDuration,
+      bounceRate: (bounceRate * 100).toFixed(1) + '%',
+      engagementRate: (engagementRate * 100).toFixed(1) + '%',
+      eventCount
+    },
+    trafficChannels,
+    topPages,
+    dailyTrend,
+    devices,
+    browsers,
+    demographics: { countries, cities },
+    events,
+    realtime
+  };
+}
+
+/**
+ * Fetches fresh realtime data for Google Analytics 4.
+ */
+export async function getGrowthAnalyticsRealtime(workspaceId) {
+  const connRes = await authPool.query(
+    `SELECT * FROM integration_connections 
+     WHERE workspace_id = $1 AND provider = 'google' AND integration_type = 'analytics'`,
+    [workspaceId]
+  );
+
+  if (connRes.rows.length === 0 || connRes.rows[0].status !== 'active') {
+    return { activeUsers: 0, activePages: [] };
+  }
+
+  const connection = connRes.rows[0];
+  const propertyId = connection.external_property_id;
+  if (!propertyId) return { activeUsers: 0, activePages: [] };
+
+  const cleanPropId = String(propertyId).replace('properties/', '').trim();
+  const accessToken = await getValidGrowthAccessToken(connection);
+  const realtimeEndpoint = `https://analyticsdata.googleapis.com/v1beta/properties/${cleanPropId}:runRealtimeReport`;
+
+  const res = await fetch(realtimeEndpoint, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      dimensions: [{ name: 'unifiedScreenName' }],
+      metrics: [{ name: 'activeUsers' }]
+    })
+  });
+
+  if (!res.ok) {
+    return { activeUsers: 0, activePages: [] };
+  }
+
+  const data = await res.json();
+  const totalActive = (data.rows || []).reduce((acc, r) => acc + Number(r.metricValues?.[0]?.value || 0), 0);
+  const activePages = (data.rows || []).map(r => ({
+    screenName: r.dimensionValues?.[0]?.value || '/',
+    activeUsers: Number(r.metricValues?.[0]?.value || 0)
+  }));
+
+  return {
+    propertyId: cleanPropId,
+    activeUsers: totalActive,
+    activePages,
+    updatedAt: new Date().toISOString()
+  };
 }

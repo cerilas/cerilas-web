@@ -7,6 +7,8 @@ import {
   getGrowthGoogleAuthUrl,
   getGrowthIntegrationsOverview,
   syncGrowthSearchConsole,
+  syncGrowthAnalytics,
+  getGrowthAnalyticsRealtime,
   disconnectGrowthGoogle,
   getValidGrowthAccessToken
 } from '../utils/googleGrowthIntegration.js';
@@ -1422,6 +1424,211 @@ router.post('/workspaces/:slugOrId/inspect-url', requireAuth, async (req, res) =
   } catch (err) {
     console.error('[GSC Inspect URL Error]:', err);
     res.status(500).json({ error: err.message || 'URL denetimi başarısız oldu.' });
+  }
+});
+
+/**
+ * GET /api/growth/workspaces/:slugOrId/analytics-performance
+ * Retrieves full Google Analytics 4 performance metrics and dimensions.
+ */
+router.get('/workspaces/:slugOrId/analytics-performance', requireAuth, async (req, res) => {
+  try {
+    const authData = await resolveAndAuthorizeWorkspace(req, req.params.slugOrId);
+    if (!authData) return res.status(404).json({ error: 'Çalışma alanı bulunamadı.' });
+
+    const workspaceId = authData.workspace.id;
+
+    // Check if GA4 is connected
+    const connRes = await authPool.query(
+      `SELECT * FROM integration_connections 
+       WHERE workspace_id = $1 AND provider = 'google' AND integration_type = 'analytics'`,
+      [workspaceId]
+    );
+
+    if (connRes.rows.length === 0 || connRes.rows[0].status !== 'active') {
+      return res.json({
+        success: true,
+        connected: false,
+        message: 'Google Analytics 4 mülkü henüz bağlanmadı.',
+        totals: {
+          totalUsers: 0,
+          activeUsers: 0,
+          newUsers: 0,
+          sessions: 0,
+          screenPageViews: 0,
+          averageSessionDuration: 0,
+          bounceRate: '0%',
+          engagementRate: '0%',
+          eventCount: 0
+        },
+        trafficChannels: [],
+        topPages: [],
+        dailyTrend: [],
+        devices: [],
+        browsers: [],
+        demographics: { countries: [], cities: [] },
+        events: [],
+        realtime: { activeUsers: 0, activePages: [] }
+      });
+    }
+
+    const connection = connRes.rows[0];
+    const propertyId = req.query.propertyId || connection.external_property_id;
+    const cleanPropId = String(propertyId || '').replace('properties/', '').trim();
+    const rangeParam = req.query.range || req.query.dateRange || '28d';
+    const customStart = req.query.startDate || null;
+    const customEnd = req.query.endDate || null;
+    const targetRangeKey = rangeParam === 'custom' ? 'custom' : rangeParam;
+    const forceSync = req.query.sync === 'true';
+
+    // Fetch cached analytics performance
+    let perfRes = await authPool.query(
+      `SELECT * FROM growth_analytics_performance 
+       WHERE workspace_id = $1 AND property_id = $2 AND date_range = $3`,
+      [workspaceId, cleanPropId, targetRangeKey]
+    );
+
+    let shouldSync = forceSync || perfRes.rows.length === 0;
+    if (targetRangeKey === 'custom' && perfRes.rows.length > 0 && customStart && customEnd) {
+      const p = perfRes.rows[0];
+      const pStart = p.start_date ? new Date(p.start_date).toISOString().split('T')[0] : '';
+      const pEnd = p.end_date ? new Date(p.end_date).toISOString().split('T')[0] : '';
+      if (pStart !== customStart || pEnd !== customEnd) {
+        shouldSync = true;
+      }
+    }
+
+    if (shouldSync) {
+      try {
+        await syncGrowthAnalytics(workspaceId, null, cleanPropId, {
+          dateRange: targetRangeKey,
+          startDate: customStart,
+          endDate: customEnd
+        });
+        perfRes = await authPool.query(
+          `SELECT * FROM growth_analytics_performance 
+           WHERE workspace_id = $1 AND property_id = $2 AND date_range = $3`,
+          [workspaceId, cleanPropId, targetRangeKey]
+        );
+      } catch (syncErr) {
+        console.warn('[Analytics Performance Auto-Sync Warning]:', syncErr.message);
+      }
+    }
+
+    if (perfRes.rows.length > 0) {
+      const p = perfRes.rows[0];
+      const demoData = p.countries || {};
+      const countriesList = Array.isArray(demoData) ? demoData : (demoData.countries || []);
+      const citiesList = demoData.cities || [];
+
+      return res.json({
+        success: true,
+        connected: true,
+        propertyId: p.property_id,
+        propertyName: connection.external_property_name || p.property_id,
+        availableProperties: connection.metadata?.availableProperties || [],
+        dateRange: p.date_range,
+        startDate: p.start_date,
+        endDate: p.end_date,
+        syncedAt: p.synced_at,
+        totals: {
+          totalUsers: p.total_users || 0,
+          activeUsers: p.active_users || 0,
+          newUsers: p.new_users || 0,
+          sessions: p.sessions || 0,
+          screenPageViews: p.screen_page_views || 0,
+          averageSessionDuration: Number(p.average_session_duration || 0),
+          bounceRate: ((p.bounce_rate || 0) * 1).toFixed(1) + '%',
+          engagementRate: ((p.engagement_rate || 0) * 1).toFixed(1) + '%',
+          eventCount: p.event_count || 0
+        },
+        trafficChannels: p.traffic_channels || [],
+        topPages: p.top_pages || [],
+        dailyTrend: p.daily_trend || [],
+        devices: p.devices || [],
+        browsers: p.browsers || [],
+        demographics: {
+          countries: countriesList,
+          cities: citiesList
+        },
+        events: p.events || [],
+        realtime: p.realtime || { activeUsers: 0, activePages: [] }
+      });
+    }
+
+    return res.json({
+      success: true,
+      connected: true,
+      propertyId: connection.external_property_id,
+      propertyName: connection.external_property_name || connection.external_property_id,
+      availableProperties: connection.metadata?.availableProperties || [],
+      syncedAt: connection.last_sync_at,
+      totals: {
+        totalUsers: 0,
+        activeUsers: 0,
+        newUsers: 0,
+        sessions: 0,
+        screenPageViews: 0,
+        averageSessionDuration: 0,
+        bounceRate: '0%',
+        engagementRate: '0%',
+        eventCount: 0
+      },
+      trafficChannels: [],
+      topPages: [],
+      dailyTrend: [],
+      devices: [],
+      browsers: [],
+      demographics: { countries: [], cities: [] },
+      events: [],
+      realtime: { activeUsers: 0, activePages: [] }
+    });
+  } catch (err) {
+    console.error('[Analytics Performance Route Error]:', err);
+    res.status(500).json({ error: err.message || 'Analytics verileri alınamadı.' });
+  }
+});
+
+/**
+ * GET /api/growth/workspaces/:slugOrId/analytics-realtime
+ * Runs live real-time visitor report on demand.
+ */
+router.get('/workspaces/:slugOrId/analytics-realtime', requireAuth, async (req, res) => {
+  try {
+    const authData = await resolveAndAuthorizeWorkspace(req, req.params.slugOrId);
+    if (!authData) return res.status(404).json({ error: 'Çalışma alanı bulunamadı.' });
+
+    const workspaceId = authData.workspace.id;
+    const realtime = await getGrowthAnalyticsRealtime(workspaceId);
+    return res.json({ success: true, realtime });
+  } catch (err) {
+    console.error('[GA4 Realtime Error]:', err);
+    res.status(500).json({ error: err.message || 'Canlı veriler alınamadı.' });
+  }
+});
+
+/**
+ * POST /api/growth/workspaces/:slugOrId/sync-analytics
+ * Triggers manual re-sync for GA4.
+ */
+router.post('/workspaces/:slugOrId/sync-analytics', requireAuth, async (req, res) => {
+  try {
+    const authData = await resolveAndAuthorizeWorkspace(req, req.params.slugOrId);
+    if (!authData) return res.status(404).json({ error: 'Çalışma alanı bulunamadı.' });
+
+    const workspaceId = authData.workspace.id;
+    const { dateRange, startDate, endDate, propertyId } = req.body || {};
+
+    const synced = await syncGrowthAnalytics(workspaceId, null, propertyId, {
+      dateRange,
+      startDate,
+      endDate
+    });
+
+    return res.json({ success: true, data: synced });
+  } catch (err) {
+    console.error('[GA4 Manual Sync Error]:', err);
+    res.status(500).json({ error: err.message || 'Senkronizasyon başarısız oldu.' });
   }
 });
 

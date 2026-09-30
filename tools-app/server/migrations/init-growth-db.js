@@ -319,6 +319,37 @@ export async function initGrowthDb() {
         UNIQUE(workspace_id, site_url, date_range)
       );
       CREATE INDEX IF NOT EXISTS idx_growth_search_perf_ws ON growth_search_performance(workspace_id, site_url);
+
+      -- 18. Google Analytics 4 (GA4) Performance & Telemetry
+      CREATE TABLE IF NOT EXISTS growth_analytics_performance (
+        id SERIAL PRIMARY KEY,
+        workspace_id INT REFERENCES workspaces(id) ON DELETE CASCADE,
+        property_id VARCHAR(255) NOT NULL,
+        date_range VARCHAR(50) DEFAULT '28d',
+        start_date DATE,
+        end_date DATE,
+        total_users INT DEFAULT 0,
+        active_users INT DEFAULT 0,
+        new_users INT DEFAULT 0,
+        sessions INT DEFAULT 0,
+        screen_page_views INT DEFAULT 0,
+        average_session_duration NUMERIC(10,2) DEFAULT 0,
+        bounce_rate NUMERIC(5,2) DEFAULT 0,
+        engagement_rate NUMERIC(5,2) DEFAULT 0,
+        event_count INT DEFAULT 0,
+        traffic_channels JSONB DEFAULT '[]'::jsonb,
+        top_pages JSONB DEFAULT '[]'::jsonb,
+        daily_trend JSONB DEFAULT '[]'::jsonb,
+        devices JSONB DEFAULT '[]'::jsonb,
+        browsers JSONB DEFAULT '[]'::jsonb,
+        operating_systems JSONB DEFAULT '[]'::jsonb,
+        countries JSONB DEFAULT '[]'::jsonb,
+        events JSONB DEFAULT '[]'::jsonb,
+        realtime JSONB DEFAULT '{}'::jsonb,
+        synced_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        UNIQUE(workspace_id, property_id, date_range)
+      );
+      CREATE INDEX IF NOT EXISTS idx_growth_analytics_perf_ws ON growth_analytics_performance(workspace_id, property_id);
     `;
 
     await authPool.query(migrationQuery);

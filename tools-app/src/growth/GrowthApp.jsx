@@ -9,6 +9,7 @@ import GrowthAiVisibility from './views/GrowthAiVisibility';
 import GrowthAiPrompts from './views/GrowthAiPrompts';
 import GrowthTechnicalAudit from './views/GrowthTechnicalAudit';
 import GrowthSearch from './views/GrowthSearch';
+import GrowthAnalytics from './views/GrowthAnalytics';
 import GrowthKeywords from './views/GrowthKeywords';
 import GrowthCompetitors from './views/GrowthCompetitors';
 import GrowthContent from './views/GrowthContent';
@@ -122,6 +123,7 @@ function GrowthInner({ onBackToTools }) {
               {activeTab === 'overview' && <GrowthOverview />}
               {activeTab === 'action-feed' && <GrowthActionFeed />}
               {activeTab === 'search' && <GrowthSearch />}
+              {activeTab === 'analytics' && <GrowthAnalytics />}
               {activeTab === 'keywords' && <GrowthKeywords />}
               {activeTab === 'ai-visibility' && <GrowthAiVisibility />}
               {activeTab === 'ai-prompts' && <GrowthAiPrompts />}

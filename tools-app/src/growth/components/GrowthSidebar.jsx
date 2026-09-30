@@ -13,7 +13,8 @@ import {
   BarChart3, 
   SlidersHorizontal,
   Layers,
-  Sparkles
+  Sparkles,
+  Activity
 } from 'lucide-react';
 import { useGrowth } from '../GrowthContext';
 
@@ -27,9 +28,10 @@ const NAV_GROUPS = [
     ]
   },
   {
-    title: 'ARAMA MOTORU (SEO)',
+    title: 'ARAMA & TRAFİK',
     items: [
       { id: 'search', label: 'Arama Performansı (GSC)', icon: Search },
+      { id: 'analytics', label: 'Web Analitiği (GA4)', icon: Activity, isNew: true },
       { id: 'keywords', label: 'Anahtar Kelime Fırsatları', icon: TrendingUp }
     ]
   },
