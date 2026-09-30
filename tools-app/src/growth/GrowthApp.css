@@ -2029,6 +2029,53 @@ html.light .growth-app-sidebar {
   color: #cbd5e1;
 }
 
+.th-info-tooltip-trigger {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 0.35rem;
+  color: #94a3b8;
+  cursor: help;
+  transition: color 0.15s ease;
+  vertical-align: middle;
+}
+
+.th-info-tooltip-trigger:hover {
+  color: #38bdf8;
+}
+
+.growth-table-toolbar-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.growth-col-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #94a3b8;
+  font-size: 0.78rem;
+  font-weight: 500;
+  padding: 0.45rem 0.75rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.growth-col-toggle-btn:hover {
+  background: rgba(255, 255, 255, 0.09);
+  color: #ffffff;
+}
+
+.growth-col-toggle-btn.active {
+  background: rgba(245, 158, 11, 0.12);
+  border-color: rgba(245, 158, 11, 0.35);
+  color: #fbbf24;
+}
+
 /* Pagination Bar */
 .growth-table-pagination {
   display: flex;

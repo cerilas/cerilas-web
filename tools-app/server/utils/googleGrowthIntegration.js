@@ -492,23 +492,43 @@ export async function syncGrowthSearchConsole(workspaceId, explicitAccessToken =
   const weightedPositionSum = rows.reduce((acc, r) => acc + (Number(r.position) || 0) * (Number(r.impressions) || 0), 0);
   const avgPosition = totalImpressions > 0 ? (weightedPositionSum / totalImpressions).toFixed(1) : '0.0';
 
-  // Process striking distance queries (positions 4 to 15)
+  // Process striking distance queries (positions 4 to 15, minimum 30 impressions for statistical validity)
   const topQueries = rows.map(r => {
     const pos = Number(r.position) || 0;
-    const isStriking = pos >= 4.0 && pos <= 15.0;
+    const imp = Number(r.impressions) || 0;
+    const clk = Number(r.clicks) || 0;
+    const ctrVal = Number(r.ctr) || 0;
+
+    // Dayanak: Google organik SERP benchmarkında ilk 3 sıranın ortalama TO'su %14'tür (Advanced Web Ranking).
+    // 4.0 - 15.0 arası sıralamada olup en az 30 gösterim alan kelimeler gerçek vuruş mesafesindedir.
+    const isStriking = pos >= 4.0 && pos <= 15.0 && imp >= 30;
     let potential = null;
+    let potentialHint = null;
+
     if (isStriking) {
-      const extra = Math.round((Number(r.impressions) || 0) * 0.12);
-      potential = `+${Math.max(extra, 30)} tık/ay`;
+      const benchmarkTop3Clicks = Math.round(imp * 0.14);
+      const gain = Math.max(0, benchmarkTop3Clicks - clk);
+      if (gain >= 3) {
+        potential = `+${gain} tık`;
+        if (ctrVal < 0.02 && pos <= 10.0) {
+          potentialHint = 'Düşük TO: Başlık (title) & snippet optimize et';
+        } else if (pos > 10.0) {
+          potentialHint = '2. Sayfa: İçerik güncellemesiyle 1. sayfaya taşı';
+        } else {
+          potentialHint = 'İlk 3 fırsatı: İç link ver & içeriği zenginleştir';
+        }
+      }
     }
+
     return {
       query: r.keys?.[0] || '',
-      clicks: Number(r.clicks) || 0,
-      impressions: Number(r.impressions) || 0,
-      ctr: r.ctr || '0%',
+      clicks: clk,
+      impressions: imp,
+      ctr: r.ctr ? `${(Number(r.ctr) * 100).toFixed(1)}%` : '0%',
       position: Number(pos).toFixed(1),
       isStriking,
-      potential
+      potential,
+      potentialHint
     };
   });
 

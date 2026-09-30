@@ -54,6 +54,52 @@ const DATE_RANGE_OPTIONS = [
   { id: 'custom', label: 'Özel Tarih Aralığı...', badge: 'Özel Seçim' }
 ];
 
+// Gerçek SEO Vuruş Mesafesi (Striking Distance) ve Ekstra Trafik Potansiyeli Hesaplaması
+export const computeQueryOpportunity = (item) => {
+  const pos = parseFloat(item?.position) || 0;
+  const imp = Number(item?.impressions) || 0;
+  const clk = Number(item?.clicks) || 0;
+  const ctrVal = parseFloat(String(item?.ctr || '0').replace('%', '')) || 0;
+
+  // Dayanak: Google organik SERP benchmarklarında ilk 3 sıranın ortalama TO'su %14'tür (Advanced Web Ranking).
+  // 1. Sıralama 4.0 ile 15.0 arasında olmalıdır (sayfa 1 sonu / sayfa 2 başı).
+  // 2. İstatistiksel geçerlilik için en az 30 gösterim bulunmalıdır (1-2 gösterimlik kelimelere hayali tahmin yapılamaz).
+  if (pos < 4.0 || pos > 15.0 || imp < 30) {
+    return {
+      isOpportunity: false,
+      potentialClicks: 0,
+      potentialBadge: null,
+      actionHint: imp < 30 ? 'Yetersiz hacim (<30 gösterim)' : 'Stabil sıralama'
+    };
+  }
+
+  const expectedTop3Clicks = Math.round(imp * 0.14);
+  const gain = Math.max(0, expectedTop3Clicks - clk);
+
+  if (gain < 3) {
+    return {
+      isOpportunity: false,
+      potentialClicks: 0,
+      potentialBadge: null,
+      actionHint: 'TO Zirvede / Stabil'
+    };
+  }
+
+  let actionHint = 'İlk 3 fırsatı: Sayfaya iç link ver & içeriği zenginleştir';
+  if (ctrVal < 2.0 && pos <= 10.0) {
+    actionHint = 'Düşük TO: Başlık (title) ve meta açıklamasını çekici yap';
+  } else if (pos > 10.0) {
+    actionHint = '2. Sayfa: Kapsamlı içerik güncellemesi ile 1. sayfaya taşı';
+  }
+
+  return {
+    isOpportunity: true,
+    potentialClicks: gain,
+    potentialBadge: `+${gain} tık potansiyeli`,
+    actionHint
+  };
+};
+
 export default function GrowthSearch() {
   const { activeWorkspace, setActiveTab } = useGrowth();
   const { token } = useAuth();
@@ -63,6 +109,7 @@ export default function GrowthSearch() {
   const [connectingGoogle, setConnectingGoogle] = useState(false);
   const [activeTabSub, setActiveTabSub] = useState('queries'); // queries, striking, pages, cannibalization, breakdown, health
   const [searchFilter, setSearchFilter] = useState('');
+  const [showOpportunityCol, setShowOpportunityCol] = useState(true);
   const [querySortField, setQuerySortField] = useState('clicks');
   const [querySortDirection, setQuerySortDirection] = useState('desc');
   const [queryPage, setQueryPage] = useState(1);
@@ -331,7 +378,18 @@ export default function GrowthSearch() {
   const brandSplit = searchData.brandSplit || { brandClicks: 0, brandImpressions: 0, nonBrandClicks: 0, nonBrandImpressions: 0, brandClicksShare: 0 };
   const urlInspection = searchData.urlInspection || null;
 
-  const currentQueriesSource = activeTabSub === 'striking' ? strikingQueries : topQueries;
+  // Gerçek SEO Vuruş Mesafesi (Striking Distance) filtresi: 4-15. sıra ve 30+ gösterim
+  const computedStrikingQueries = useMemo(() => {
+    return topQueries.filter(q => {
+      const opp = computeQueryOpportunity(q);
+      return opp.isOpportunity;
+    }).sort((a, b) => (Number(b.impressions) || 0) - (Number(a.impressions) || 0));
+  }, [topQueries]);
+
+  const currentQueriesSource = activeTabSub === 'striking' 
+    ? (computedStrikingQueries.length > 0 ? computedStrikingQueries : strikingQueries.filter(q => (Number(q.impressions) || 0) >= 30))
+    : topQueries;
+
   const filteredQueries = currentQueriesSource.filter(q => 
     (q.query || '').toLowerCase().includes(searchFilter.toLowerCase())
   );
@@ -351,7 +409,9 @@ export default function GrowthSearch() {
     } else if (querySortField === 'position') {
       cmp = (parseFloat(a.position) || 0) - (parseFloat(b.position) || 0);
     } else if (querySortField === 'potential') {
-      cmp = (a.potential || '').localeCompare(b.potential || '', 'tr');
+      const oppA = computeQueryOpportunity(a);
+      const oppB = computeQueryOpportunity(b);
+      cmp = oppA.potentialClicks - oppB.potentialClicks;
     }
     return querySortDirection === 'asc' ? cmp : -cmp;
   });
@@ -887,10 +947,10 @@ export default function GrowthSearch() {
                 type="button"
                 className={`subnav-pill highlight ${activeTabSub === 'striking' ? 'active' : ''}`}
                 onClick={() => setActiveTabSub('striking')}
-                title="Google'da 4-15. sırada olan, ilk 3'e taşınması en kolay yüksek fırsatlı kelimeler"
+                title="Google'da 4-15. sırada ve 30+ gösterime sahip, ilk 3'e taşınması en kolay yüksek fırsatlı kelimeler"
               >
                 <Zap size={13} />
-                <span>Sayfa 1 Fırsatları ({strikingQueries.length})</span>
+                <span>Sayfa 1 Fırsatları ({computedStrikingQueries.length})</span>
               </button>
               <button
                 type="button"
@@ -930,15 +990,26 @@ export default function GrowthSearch() {
             </div>
 
             {['queries', 'striking'].includes(activeTabSub) && (
-              <div className="growth-search-input-wrap">
-                <Search size={14} className="search-input-icon" />
-                <input
-                  type="text"
-                  placeholder="Sorgu filtrele..."
-                  value={searchFilter}
-                  onChange={(e) => setSearchFilter(e.target.value)}
-                  className="growth-search-input"
-                />
+              <div className="growth-table-toolbar-row">
+                <div className="growth-search-input-wrap">
+                  <Search size={14} className="search-input-icon" />
+                  <input
+                    type="text"
+                    placeholder="Sorgu filtrele..."
+                    value={searchFilter}
+                    onChange={(e) => setSearchFilter(e.target.value)}
+                    className="growth-search-input"
+                  />
+                </div>
+                <button
+                  type="button"
+                  className={`growth-col-toggle-btn ${showOpportunityCol ? 'active' : ''}`}
+                  onClick={() => setShowOpportunityCol(prev => !prev)}
+                  title="SEO tahmini tık ve aksiyon önerisi sütununu göster veya tamamen gizle"
+                >
+                  <Zap size={12} />
+                  <span>{showOpportunityCol ? 'Fırsat Sütunu Açık' : 'Yalnızca Temel GSC'}</span>
+                </button>
               </div>
             )}
           </div>
@@ -1416,51 +1487,64 @@ export default function GrowthSearch() {
                               {renderSortIcon('position')}
                             </span>
                           </th>
-                          <th 
-                            className="growth-th-sortable"
-                            onClick={() => handleQuerySort('potential')}
-                          >
-                            <span className="th-sort-inner">
-                              <span>Fırsat / Eylem</span>
-                              {renderSortIcon('potential')}
-                            </span>
-                          </th>
+                          {showOpportunityCol && (
+                            <th 
+                              className="growth-th-sortable"
+                              onClick={() => handleQuerySort('potential')}
+                            >
+                              <span className="th-sort-inner">
+                                <span>Fırsat / Eylem</span>
+                                <span 
+                                  className="th-info-tooltip-trigger" 
+                                  title="Dayanak: Google SERP benchmarkına göre ilk 3 sıradaki sonuçlar ortalama %14 TO alır. 4-15. sıralardaki ve 30+ gösterimli sorguların ilk 3'e yükselmesi durumunda sağlayabileceği tahmini ek tıklamadır. Hacmi düşük (<30) sorgularda tahmin yapılmaz."
+                                >
+                                  <HelpCircle size={12} />
+                                </span>
+                                {renderSortIcon('potential')}
+                              </span>
+                            </th>
+                          )}
                         </tr>
                       </thead>
                       <tbody>
-                        {displayedQueries.map((item, idx) => (
-                          <tr key={idx}>
-                            <td>
-                              <div className="query-cell">
-                                <span className="query-name">{item.query}</span>
-                                {item.isStriking && (
-                                  <span className="striking-pill">
-                                    <Zap size={10} />
-                                    <span>Hızlı Yükselme</span>
-                                  </span>
-                                )}
-                              </div>
-                            </td>
-                            <td className="font-semibold text-primary">{Number(item.clicks).toLocaleString()}</td>
-                            <td>{Number(item.impressions).toLocaleString()}</td>
-                            <td><span className="ctr-badge">{item.ctr}</span></td>
-                            <td>
-                              <span className={`rank-pill rank-${Math.max(1, Math.min(10, Math.floor(Number(item.position) || 1)))}`}>
-                                #{item.position}
-                              </span>
-                            </td>
-                            <td>
-                              {item.potential ? (
-                                <div className="potential-cell">
-                                  <span className="potential-badge">{item.potential}</span>
-                                  <span className="potential-hint">Başlığı optimize et</span>
+                        {displayedQueries.map((item, idx) => {
+                          const opp = computeQueryOpportunity(item);
+                          return (
+                            <tr key={idx}>
+                              <td>
+                                <div className="query-cell">
+                                  <span className="query-name">{item.query}</span>
+                                  {opp.isOpportunity && (
+                                    <span className="striking-pill" title="4-15. sırada ve 30+ gösterime sahip vuruş mesafesindeki kelime">
+                                      <Zap size={10} />
+                                      <span>Vuruş Mesafesi</span>
+                                    </span>
+                                  )}
                                 </div>
-                              ) : (
-                                <span className="text-muted text-xs">Stabil sıralama</span>
+                              </td>
+                              <td className="font-semibold text-primary">{Number(item.clicks).toLocaleString()}</td>
+                              <td>{Number(item.impressions).toLocaleString()}</td>
+                              <td><span className="ctr-badge">{item.ctr}</span></td>
+                              <td>
+                                <span className={`rank-pill rank-${Math.max(1, Math.min(10, Math.floor(Number(item.position) || 1)))}`}>
+                                  #{item.position}
+                                </span>
+                              </td>
+                              {showOpportunityCol && (
+                                <td>
+                                  {opp.potentialBadge ? (
+                                    <div className="potential-cell">
+                                      <span className="potential-badge">{opp.potentialBadge}</span>
+                                      <span className="potential-hint">{opp.actionHint}</span>
+                                    </div>
+                                  ) : (
+                                    <span className="text-muted text-xs">{opp.actionHint}</span>
+                                  )}
+                                </td>
                               )}
-                            </td>
-                          </tr>
-                        ))}
+                            </tr>
+                          );
+                        })}
                       </tbody>
                     </table>
                   )}
