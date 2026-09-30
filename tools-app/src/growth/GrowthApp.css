@@ -3311,6 +3311,197 @@ html.light .growth-app-sidebar {
   color: var(--text-muted, #a1a1aa);
 }
 
+/* Interactive Date Range Picker Dropdown */
+.growth-date-picker-wrap {
+  position: relative;
+  display: inline-block;
+}
+
+.growth-date-trigger-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.48rem 0.9rem;
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  font-size: 0.825rem;
+  font-weight: 500;
+  color: #f1f5f9;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.growth-date-trigger-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(56, 189, 248, 0.5);
+  color: #ffffff;
+}
+
+.growth-date-trigger-btn.is-open {
+  background: rgba(56, 189, 248, 0.12);
+  border-color: #38bdf8;
+  color: #ffffff;
+}
+
+.growth-date-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 290px;
+  background: rgba(15, 23, 42, 0.96);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 12px;
+  box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.7), 0 0 1px 1px rgba(255, 255, 255, 0.05);
+  padding: 0.55rem;
+  z-index: 100;
+  animation: dateDropdownFadeIn 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes dateDropdownFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.growth-date-dropdown-header {
+  padding: 0.4rem 0.6rem 0.5rem 0.6rem;
+  font-size: 0.725rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #94a3b8;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  margin-bottom: 0.4rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.growth-date-options-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.growth-date-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0.52rem 0.65rem;
+  border-radius: 8px;
+  background: transparent;
+  border: none;
+  color: #cbd5e1;
+  font-size: 0.815rem;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.growth-date-option:hover {
+  background: rgba(255, 255, 255, 0.07);
+  color: #ffffff;
+}
+
+.growth-date-option.active {
+  background: rgba(56, 189, 248, 0.12);
+  color: #38bdf8;
+  font-weight: 600;
+}
+
+.date-option-left {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.date-option-badge {
+  font-size: 0.7rem;
+  color: #94a3b8;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 0.12rem 0.45rem;
+  border-radius: 4px;
+}
+
+.growth-date-custom-panel {
+  margin-top: 0.45rem;
+  padding: 0.75rem 0.5rem 0.35rem 0.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.custom-date-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.custom-date-label {
+  font-size: 0.72rem;
+  color: #94a3b8;
+  font-weight: 500;
+}
+
+.custom-date-input {
+  width: 100%;
+  padding: 0.45rem 0.6rem;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: #ffffff;
+  font-size: 0.8rem;
+  font-family: inherit;
+  color-scheme: dark;
+  transition: border-color 0.2s ease;
+}
+
+.custom-date-input:focus {
+  outline: none;
+  border-color: #38bdf8;
+  box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.2);
+}
+
+.custom-date-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.25rem;
+}
+
+.custom-date-apply-btn {
+  flex: 1;
+  padding: 0.45rem 0.75rem;
+  border-radius: 6px;
+  background: #0284c7;
+  border: 1px solid #38bdf8;
+  color: #ffffff;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.custom-date-apply-btn:hover {
+  background: #0369a1;
+}
+
+.custom-date-apply-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 /* Panel Cards & Headers */
 .growth-panel-card {
   background: rgba(18, 18, 24, 0.75);

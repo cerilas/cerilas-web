@@ -388,7 +388,7 @@ const DEVICE_MAP = {
 /**
  * Synchronizes real Search Console data for a given workspace.
  */
-export async function syncGrowthSearchConsole(workspaceId, explicitAccessToken = null, explicitSiteUrl = null) {
+export async function syncGrowthSearchConsole(workspaceId, explicitAccessToken = null, explicitSiteUrl = null, options = {}) {
   // 1. Fetch connection record
   const connRes = await authPool.query(
     `SELECT * FROM integration_connections 
@@ -410,7 +410,44 @@ export async function syncGrowthSearchConsole(workspaceId, explicitAccessToken =
   // 2. Obtain valid access token
   const accessToken = explicitAccessToken || await getValidGrowthAccessToken(connection);
 
-  // 3. Parallel GSC Queries (Queries, Pages, Trend, Devices, Countries, Cannibalization, Images)
+  // 3. Resolve Date Ranges
+  const dateRange = options.dateRange || '28d';
+  let startDate = options.startDate;
+  let endDate = options.endDate;
+
+  const formatDate = (d) => d.toISOString().split('T')[0];
+
+  if (!startDate || !endDate) {
+    const dEnd = new Date();
+    dEnd.setDate(dEnd.getDate() - 1);
+    endDate = formatDate(dEnd);
+
+    const dStart = new Date();
+    if (dateRange === '1d') {
+      dStart.setDate(dStart.getDate() - 1);
+    } else if (dateRange === '3d') {
+      dStart.setDate(dStart.getDate() - 3);
+    } else if (dateRange === '7d' || dateRange === '1w') {
+      dStart.setDate(dStart.getDate() - 7);
+    } else if (dateRange === '28d' || dateRange === '1m') {
+      dStart.setDate(dStart.getDate() - 28);
+    } else if (dateRange === '3m' || dateRange === '90d') {
+      dStart.setDate(dStart.getDate() - 90);
+    } else if (dateRange === '6m' || dateRange === '180d') {
+      dStart.setDate(dStart.getDate() - 180);
+    } else if (dateRange === 'all' || dateRange === '16m') {
+      // Google Search Console maximum historical retention is 16 months (~480 days)
+      dStart.setDate(dStart.getDate() - 485);
+    } else {
+      dStart.setDate(dStart.getDate() - 28);
+    }
+    startDate = formatDate(dStart);
+  }
+
+  const queryOptions = { startDate, endDate };
+  const trendLimit = dateRange === 'all' ? 520 : dateRange === '6m' ? 220 : dateRange === '3m' ? 120 : 60;
+
+  // 4. Parallel GSC Queries (Queries, Pages, Trend, Devices, Countries, Cannibalization, Images)
   const [
     queryRes,
     pageRes,
@@ -420,13 +457,13 @@ export async function syncGrowthSearchConsole(workspaceId, explicitAccessToken =
     cannibalRes,
     imageRes
   ] = await Promise.allSettled([
-    querySearchConsole(accessToken, siteUrl, { dimensions: ['query'], rowLimit: 300 }),
-    querySearchConsole(accessToken, siteUrl, { dimensions: ['page'], rowLimit: 100 }),
-    querySearchConsole(accessToken, siteUrl, { dimensions: ['date'], rowLimit: 60 }),
-    querySearchConsole(accessToken, siteUrl, { dimensions: ['device'] }),
-    querySearchConsole(accessToken, siteUrl, { dimensions: ['country'], rowLimit: 30 }),
-    querySearchConsole(accessToken, siteUrl, { dimensions: ['query', 'page'], rowLimit: 500 }),
-    querySearchConsole(accessToken, siteUrl, { type: 'image', rowLimit: 10 })
+    querySearchConsole(accessToken, siteUrl, { ...queryOptions, dimensions: ['query'], rowLimit: 300 }),
+    querySearchConsole(accessToken, siteUrl, { ...queryOptions, dimensions: ['page'], rowLimit: 100 }),
+    querySearchConsole(accessToken, siteUrl, { ...queryOptions, dimensions: ['date'], rowLimit: trendLimit }),
+    querySearchConsole(accessToken, siteUrl, { ...queryOptions, dimensions: ['device'] }),
+    querySearchConsole(accessToken, siteUrl, { ...queryOptions, dimensions: ['country'], rowLimit: 30 }),
+    querySearchConsole(accessToken, siteUrl, { ...queryOptions, dimensions: ['query', 'page'], rowLimit: 500 }),
+    querySearchConsole(accessToken, siteUrl, { ...queryOptions, type: 'image', rowLimit: 10 })
   ]);
 
   if (queryRes.status !== 'fulfilled') {
@@ -663,14 +700,16 @@ export async function syncGrowthSearchConsole(workspaceId, explicitAccessToken =
   // Upsert into growth_search_performance
   await authPool.query(
     `INSERT INTO growth_search_performance (
-      workspace_id, site_url, date_range,
+      workspace_id, site_url, date_range, start_date, end_date,
       total_clicks, total_impressions, average_ctr, average_position,
       top_queries, striking_queries, top_pages,
       daily_trend, devices, countries, cannibalization, search_types, brand_split, url_inspection,
       synced_at
-    ) VALUES ($1, $2, '28d', $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, NOW())
+    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, NOW())
     ON CONFLICT (workspace_id, site_url, date_range)
     DO UPDATE SET
+      start_date = EXCLUDED.start_date,
+      end_date = EXCLUDED.end_date,
       total_clicks = EXCLUDED.total_clicks,
       total_impressions = EXCLUDED.total_impressions,
       average_ctr = EXCLUDED.average_ctr,
@@ -689,6 +728,9 @@ export async function syncGrowthSearchConsole(workspaceId, explicitAccessToken =
     [
       workspaceId,
       siteUrl,
+      dateRange,
+      startDate,
+      endDate,
       totalClicks,
       totalImpressions,
       parseFloat(avgCtr),
@@ -720,6 +762,9 @@ export async function syncGrowthSearchConsole(workspaceId, explicitAccessToken =
   return {
     success: true,
     siteUrl,
+    dateRange,
+    startDate,
+    endDate,
     totalClicks,
     totalImpressions,
     averageCtr: `${avgCtr}%`,

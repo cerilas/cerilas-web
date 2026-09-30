@@ -1190,7 +1190,12 @@ router.post('/workspaces/:slugOrId/integrations/google/sync', requireAuth, async
     const authData = await resolveAndAuthorizeWorkspace(req, req.params.slugOrId);
     if (!authData) return res.status(404).json({ error: 'Çalışma alanı bulunamadı.' });
 
-    const syncResult = await syncGrowthSearchConsole(authData.workspace.id);
+    const { dateRange, startDate, endDate } = req.body || {};
+    const syncResult = await syncGrowthSearchConsole(authData.workspace.id, null, null, {
+      dateRange: dateRange || '28d',
+      startDate,
+      endDate
+    });
     const updated = await getGrowthIntegrationsOverview(authData.workspace.id);
 
     res.json({
@@ -1274,21 +1279,41 @@ router.get('/workspaces/:slugOrId/search-performance', requireAuth, async (req, 
       });
     }
 
+    const rangeParam = req.query.range || req.query.dateRange || '28d';
+    const customStart = req.query.startDate || null;
+    const customEnd = req.query.endDate || null;
+    const targetRangeKey = rangeParam === 'custom' ? 'custom' : rangeParam;
+
     // Try fetching cached performance
     let perfRes = await authPool.query(
       `SELECT * FROM growth_search_performance 
-       WHERE workspace_id = $1 AND site_url = $2 AND date_range = '28d'`,
-      [workspaceId, connection.external_property_id]
+       WHERE workspace_id = $1 AND site_url = $2 AND date_range = $3`,
+      [workspaceId, connection.external_property_id, targetRangeKey]
     );
 
-    // If never synced, trigger immediate sync
-    if (perfRes.rows.length === 0) {
+    // If custom range requested, check if the start_date and end_date match
+    let shouldSync = perfRes.rows.length === 0;
+    if (targetRangeKey === 'custom' && perfRes.rows.length > 0 && customStart && customEnd) {
+      const p = perfRes.rows[0];
+      const pStart = p.start_date ? new Date(p.start_date).toISOString().split('T')[0] : '';
+      const pEnd = p.end_date ? new Date(p.end_date).toISOString().split('T')[0] : '';
+      if (pStart !== customStart || pEnd !== customEnd) {
+        shouldSync = true;
+      }
+    }
+
+    // If never synced or custom date changed, trigger sync
+    if (shouldSync) {
       try {
-        await syncGrowthSearchConsole(workspaceId);
+        await syncGrowthSearchConsole(workspaceId, null, connection.external_property_id, {
+          dateRange: targetRangeKey,
+          startDate: customStart,
+          endDate: customEnd
+        });
         perfRes = await authPool.query(
           `SELECT * FROM growth_search_performance 
-           WHERE workspace_id = $1 AND site_url = $2 AND date_range = '28d'`,
-          [workspaceId, connection.external_property_id]
+           WHERE workspace_id = $1 AND site_url = $2 AND date_range = $3`,
+          [workspaceId, connection.external_property_id, targetRangeKey]
         );
       } catch (syncErr) {
         console.warn('[Search Performance Auto-Sync Warning]:', syncErr.message);
@@ -1301,6 +1326,9 @@ router.get('/workspaces/:slugOrId/search-performance', requireAuth, async (req, 
         success: true,
         connected: true,
         siteUrl: p.site_url,
+        dateRange: p.date_range,
+        startDate: p.start_date,
+        endDate: p.end_date,
         syncedAt: p.synced_at,
         totals: {
           clicks: p.total_clicks || 0,

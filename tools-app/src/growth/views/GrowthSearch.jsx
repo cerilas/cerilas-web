@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { 
   Search, 
   TrendingUp, 
@@ -15,6 +15,8 @@ import {
   ArrowUpDown,
   ChevronLeft,
   ChevronRight,
+  ChevronDown,
+  Clock,
   ExternalLink, 
   Layers, 
   Filter, 
@@ -40,6 +42,17 @@ import { useGrowth } from '../GrowthContext';
 import { useAuth } from '../../context/AuthContext';
 import GrowthPageCover from '../components/GrowthPageCover';
 import { GrowthSearchSkeleton } from '../components/GrowthSkeleton';
+
+const DATE_RANGE_OPTIONS = [
+  { id: '1d', label: 'Son 1 Gün', badge: 'Dün' },
+  { id: '3d', label: 'Son 3 Gün', badge: '72 saat' },
+  { id: '7d', label: 'Son 1 Hafta', badge: '7 gün' },
+  { id: '28d', label: 'Son 1 Ay', badge: '28 gün' },
+  { id: '3m', label: 'Son 3 Ay', badge: '90 gün' },
+  { id: '6m', label: 'Son 6 Ay', badge: '180 gün' },
+  { id: 'all', label: 'Tüm Zamanlar', badge: '16 Ay (Maks.)' },
+  { id: 'custom', label: 'Özel Tarih Aralığı...', badge: 'Özel Seçim' }
+];
 
 export default function GrowthSearch() {
   const { activeWorkspace, setActiveTab } = useGrowth();
@@ -79,15 +92,57 @@ export default function GrowthSearch() {
   const [inspectResult, setInspectResult] = useState(null);
   const [inspectError, setInspectError] = useState('');
 
-  const fetchPerformance = useCallback(async () => {
+  // Date Range State
+  const [dateRange, setDateRange] = useState('28d');
+  const [customStartDate, setCustomStartDate] = useState('');
+  const [customEndDate, setCustomEndDate] = useState('');
+  const [isDateMenuOpen, setIsDateMenuOpen] = useState(false);
+  const [rangeSyncing, setRangeSyncing] = useState(false);
+  const dateDropdownRef = useRef(null);
+
+  // Close date menu on click outside
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (dateDropdownRef.current && !dateDropdownRef.current.contains(e.target)) {
+        setIsDateMenuOpen(false);
+      }
+    };
+    if (isDateMenuOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isDateMenuOpen]);
+
+  const currentRangeLabel = useMemo(() => {
+    if (dateRange === 'custom') {
+      if (customStartDate && customEndDate) {
+        return `${customStartDate} → ${customEndDate}`;
+      }
+      return 'Özel Tarih Aralığı';
+    }
+    const found = DATE_RANGE_OPTIONS.find(o => o.id === dateRange);
+    return found ? found.label : 'Son 28 Gün';
+  }, [dateRange, customStartDate, customEndDate]);
+
+  const fetchPerformance = useCallback(async (targetRange = dateRange, cStart = customStartDate, cEnd = customEndDate) => {
     if (!activeWorkspace?.id || !token) return;
     try {
-      const res = await fetch(`/api/growth/workspaces/${activeWorkspace.id}/search-performance`, {
+      setRangeSyncing(true);
+      let url = `/api/growth/workspaces/${activeWorkspace.id}/search-performance?range=${encodeURIComponent(targetRange)}`;
+      if (targetRange === 'custom' && cStart && cEnd) {
+        url += `&startDate=${encodeURIComponent(cStart)}&endDate=${encodeURIComponent(cEnd)}`;
+      }
+      const res = await fetch(url, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await res.json();
       if (data.success) {
         setSearchData(data);
+        if (data.dateRange) setDateRange(data.dateRange.startsWith('custom') ? 'custom' : data.dateRange);
+        if (data.startDate && !cStart) setCustomStartDate(data.startDate.split('T')[0]);
+        if (data.endDate && !cEnd) setCustomEndDate(data.endDate.split('T')[0]);
         if (data.siteUrl && !inspectInputUrl) {
           const defaultInspect = data.siteUrl.startsWith('sc-domain:')
             ? 'https://' + data.siteUrl.replace('sc-domain:', '')
@@ -97,8 +152,10 @@ export default function GrowthSearch() {
       }
     } catch (err) {
       console.error('Search performance fetch error:', err);
+    } finally {
+      setRangeSyncing(false);
     }
-  }, [activeWorkspace?.id, token]);
+  }, [activeWorkspace?.id, token, dateRange, customStartDate, customEndDate, inspectInputUrl]);
 
   useEffect(() => {
     setLoading(true);
@@ -111,17 +168,48 @@ export default function GrowthSearch() {
     setQueryPage(1);
   }, [searchFilter, activeTabSub]);
 
+  const handleSelectRange = (optId) => {
+    if (optId === 'custom') {
+      setDateRange('custom');
+      if (!customStartDate || !customEndDate) {
+        const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+        const twoWeeksAgo = new Date(Date.now() - 14 * 86400000).toISOString().split('T')[0];
+        setCustomStartDate(twoWeeksAgo);
+        setCustomEndDate(yesterday);
+      }
+      return;
+    }
+    setDateRange(optId);
+    setIsDateMenuOpen(false);
+    fetchPerformance(optId);
+  };
+
+  const handleApplyCustomDate = (e) => {
+    e.preventDefault();
+    if (!customStartDate || !customEndDate) return;
+    setIsDateMenuOpen(false);
+    fetchPerformance('custom', customStartDate, customEndDate);
+  };
+
   const handleManualSync = async () => {
     if (!activeWorkspace?.id || !token) return;
     setSyncing(true);
     try {
       const res = await fetch(`/api/growth/workspaces/${activeWorkspace.id}/integrations/google/sync`, {
         method: 'POST',
-        headers: { 'Authorization': `Bearer ${token}` }
+        headers: { 
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          dateRange,
+          startDate: dateRange === 'custom' ? customStartDate : undefined,
+          endDate: dateRange === 'custom' ? customEndDate : undefined
+        })
       });
       const data = await res.json();
       if (data.success) {
-        await fetchPerformance();
+        await fetchPerformance(dateRange, customStartDate, customEndDate);
       }
     } catch (err) {
       console.error('Sync failed:', err);
@@ -365,9 +453,90 @@ export default function GrowthSearch() {
         ]}
         actions={
           <>
-            <div className="growth-date-badge">
-              <Calendar size={13} />
-              <span>Son 28 Gün</span>
+            <div className="growth-date-picker-wrap" ref={dateDropdownRef}>
+              <button
+                type="button"
+                className={`growth-date-trigger-btn ${isDateMenuOpen ? 'is-open' : ''}`}
+                onClick={() => setIsDateMenuOpen(!isDateMenuOpen)}
+                title="Google Search Console veri tarih aralığını değiştirin"
+              >
+                {rangeSyncing ? (
+                  <Loader2 size={13} className="auth-spinner text-primary" />
+                ) : (
+                  <Calendar size={13} className="text-primary" />
+                )}
+                <span>{currentRangeLabel}</span>
+                <ChevronDown size={13} style={{ transform: isDateMenuOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s ease', opacity: 0.7 }} />
+              </button>
+
+              {isDateMenuOpen && (
+                <div className="growth-date-dropdown">
+                  <div className="growth-date-dropdown-header">
+                    <span>Zaman Aralığı</span>
+                    {rangeSyncing && <Loader2 size={12} className="auth-spinner text-primary" />}
+                  </div>
+
+                  <div className="growth-date-options-list">
+                    {DATE_RANGE_OPTIONS.map(opt => {
+                      const isActive = dateRange === opt.id;
+                      return (
+                        <button
+                          key={opt.id}
+                          type="button"
+                          className={`growth-date-option ${isActive ? 'active' : ''}`}
+                          onClick={() => handleSelectRange(opt.id)}
+                        >
+                          <div className="date-option-left">
+                            <Clock size={13} style={{ opacity: isActive ? 1 : 0.45 }} />
+                            <span>{opt.label}</span>
+                          </div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                            <span className="date-option-badge">{opt.badge}</span>
+                            {isActive && <Check size={14} color="#38bdf8" />}
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  {dateRange === 'custom' && (
+                    <form onSubmit={handleApplyCustomDate} className="growth-date-custom-panel">
+                      <div className="custom-date-row">
+                        <label className="custom-date-label">Başlangıç Tarihi</label>
+                        <input
+                          type="date"
+                          value={customStartDate}
+                          max={customEndDate || new Date(Date.now() - 86400000).toISOString().split('T')[0]}
+                          onChange={(e) => setCustomStartDate(e.target.value)}
+                          className="custom-date-input"
+                          required
+                        />
+                      </div>
+                      <div className="custom-date-row">
+                        <label className="custom-date-label">Bitiş Tarihi</label>
+                        <input
+                          type="date"
+                          value={customEndDate}
+                          min={customStartDate}
+                          max={new Date(Date.now() - 86400000).toISOString().split('T')[0]}
+                          onChange={(e) => setCustomEndDate(e.target.value)}
+                          className="custom-date-input"
+                          required
+                        />
+                      </div>
+                      <div className="custom-date-actions">
+                        <button
+                          type="submit"
+                          disabled={!customStartDate || !customEndDate || rangeSyncing}
+                          className="custom-date-apply-btn"
+                        >
+                          {rangeSyncing ? 'Yükleniyor...' : 'Aralığı Uygula'}
+                        </button>
+                      </div>
+                    </form>
+                  )}
+                </div>
+              )}
             </div>
             {isConnected ? (
               <button 
@@ -550,7 +719,7 @@ export default function GrowthSearch() {
               <div className="growth-chart-header">
                 <div className="growth-chart-title-wrap">
                   <Activity size={16} className="text-primary" />
-                  <span className="growth-chart-title">Son 28 Günlük Performans & Trend Zaman Serisi</span>
+                  <span className="growth-chart-title">{currentRangeLabel} Performans & Trend Zaman Serisi</span>
                 </div>
 
                 <div className="growth-chart-legend">
@@ -1197,7 +1366,7 @@ export default function GrowthSearch() {
                       <Search size={32} style={{ margin: '0 auto 12px', opacity: 0.5 }} />
                       <p style={{ margin: 0, fontSize: '0.95rem' }}>
                         {topQueries.length === 0 
-                          ? `Bağlı mülkünüz (${searchData.siteUrl}) için Google dizininde son 28 günde arama verisi henüz oluşmamış.` 
+                          ? `Bağlı mülkünüz (${searchData.siteUrl}) için Google dizininde seçili dönemde (${currentRangeLabel}) arama verisi henüz oluşmamış.` 
                           : 'Filtreye uygun arama sorgusu bulunamadı.'}
                       </p>
                     </div>
