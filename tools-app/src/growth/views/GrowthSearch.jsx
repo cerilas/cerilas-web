@@ -713,6 +713,7 @@ export default function GrowthSearch() {
                 type="button"
                 className={`subnav-pill ${activeTabSub === 'queries' ? 'active' : ''}`}
                 onClick={() => setActiveTabSub('queries')}
+                title="Google'da sitenizi getiren tüm gerçek organik arama ifadeleri, tıklama ve sıralamaları"
               >
                 Organik Sorgular ({topQueries.length})
               </button>
@@ -720,6 +721,7 @@ export default function GrowthSearch() {
                 type="button"
                 className={`subnav-pill highlight ${activeTabSub === 'striking' ? 'active' : ''}`}
                 onClick={() => setActiveTabSub('striking')}
+                title="Google'da 4-15. sırada olan, ilk 3'e taşınması en kolay yüksek fırsatlı kelimeler"
               >
                 <Zap size={13} />
                 <span>Sayfa 1 Fırsatları ({strikingQueries.length})</span>
@@ -728,6 +730,7 @@ export default function GrowthSearch() {
                 type="button"
                 className={`subnav-pill ${activeTabSub === 'pages' ? 'active' : ''}`}
                 onClick={() => setActiveTabSub('pages')}
+                title="Organik aramalardan sitenize en çok tıklama ve gösterim kazandıran açılış sayfalarınız"
               >
                 Popüler Sayfalar ({topPages.length})
               </button>
@@ -735,6 +738,7 @@ export default function GrowthSearch() {
                 type="button"
                 className={`subnav-pill ${activeTabSub === 'cannibalization' ? 'active' : ''}`}
                 onClick={() => setActiveTabSub('cannibalization')}
+                title="Aynı arama kelimesinde birbiriyle yarışıp sıralamayı bölen sayfaların tespiti"
               >
                 <AlertTriangle size={13} color={cannibalization.length > 0 ? '#f59e0b' : '#94a3b8'} />
                 <span>Cannibalization ({cannibalization.length})</span>
@@ -743,6 +747,7 @@ export default function GrowthSearch() {
                 type="button"
                 className={`subnav-pill ${activeTabSub === 'breakdown' ? 'active' : ''}`}
                 onClick={() => setActiveTabSub('breakdown')}
+                title="Kullanıcıların masaüstü/mobil oranı ve arama yaptıkları ülkelerin coğrafi dökümü"
               >
                 <Globe2 size={13} />
                 <span>Cihaz & Ülke</span>
@@ -751,6 +756,7 @@ export default function GrowthSearch() {
                 type="button"
                 className={`subnav-pill ${activeTabSub === 'health' ? 'active' : ''}`}
                 onClick={() => setActiveTabSub('health')}
+                title="Googlebot'un son tarama tarihi, dizin durumu ve canlı URL denetim aracı"
               >
                 <ShieldCheck size={13} />
                 <span>Googlebot Dizin Sağlığı</span>
@@ -775,55 +781,87 @@ export default function GrowthSearch() {
           <div className="growth-panel-card">
             {/* 1. PAGES TAB */}
             {activeTabSub === 'pages' && (
-              <div className="growth-table-wrap">
-                {topPages.length === 0 ? (
-                  <div style={{ textAlign: 'center', padding: '40px 20px', color: '#94a3b8' }}>
-                    <Search size={32} style={{ margin: '0 auto 12px', opacity: 0.5 }} />
-                    <p style={{ margin: 0, fontSize: '0.95rem' }}>Bu mülk için henüz tıklanan sayfa verisi bulunamadı.</p>
+              <div>
+                <div className="growth-tab-infobar">
+                  <div className="tab-infobar-icon" style={{ background: 'rgba(129, 140, 248, 0.12)', color: '#818cf8' }}>
+                    <Layers size={20} />
                   </div>
-                ) : (
-                  <table className="growth-table">
-                    <thead>
-                      <tr>
-                        <th>Sayfa URL</th>
-                        <th>Toplam Tıklama</th>
-                        <th>Gösterim</th>
-                        <th>Tıklama Oranı (CTR)</th>
-                        <th>En Başarılı Sorgu</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {topPages.map((page, pIdx) => (
-                        <tr key={pIdx}>
-                          <td className="font-mono">
-                            <a href={page.url} target="_blank" rel="noopener noreferrer" className="growth-table-link">
-                              <span>{page.url}</span>
-                              <ExternalLink size={12} />
-                            </a>
-                          </td>
-                          <td className="font-semibold text-primary">{Number(page.clicks).toLocaleString()}</td>
-                          <td>{Number(page.impressions).toLocaleString()}</td>
-                          <td><span className="ctr-badge">{page.ctr}</span></td>
-                          <td><span className="query-tag">{page.topQuery || '-'}</span></td>
+                  <div className="tab-infobar-content">
+                    <h4 className="tab-infobar-title">
+                      <span>En Çok Tıklanan Açılış Sayfaları (Top Landing Pages)</span>
+                      <span className="tab-badge-tag">{topPages.length} sayfa</span>
+                    </h4>
+                    <p className="tab-infobar-desc">
+                      Google organik arama sonuçlarından sitenize en çok ziyaretçi ve gösterim kazandıran açılış sayfalarınızın listesidir. Kullanıcıların markanızla ilk kez karşılaştığı ana giriş kapılarını temsil eder.
+                    </p>
+                    <div className="tab-infobar-action">
+                      <Target size={13} color="#818cf8" />
+                      <span><strong>Önerilen Aksiyon:</strong> En çok trafik alan sayfalarınıza dönüşüm odaklı CTA (lead magnet, kayıt formu veya buton) ekleyerek organik trafiği müşteriye dönüştürün.</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="growth-table-wrap">
+                  {topPages.length === 0 ? (
+                    <div style={{ textAlign: 'center', padding: '40px 20px', color: '#94a3b8' }}>
+                      <Search size={32} style={{ margin: '0 auto 12px', opacity: 0.5 }} />
+                      <p style={{ margin: 0, fontSize: '0.95rem' }}>Bu mülk için henüz tıklanan sayfa verisi bulunamadı.</p>
+                    </div>
+                  ) : (
+                    <table className="growth-table">
+                      <thead>
+                        <tr>
+                          <th>Sayfa URL</th>
+                          <th>Toplam Tıklama</th>
+                          <th>Gösterim</th>
+                          <th>Tıklama Oranı (CTR)</th>
+                          <th>En Başarılı Sorgu</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                )}
+                      </thead>
+                      <tbody>
+                        {topPages.map((page, pIdx) => (
+                          <tr key={pIdx}>
+                            <td className="font-mono">
+                              <a href={page.url} target="_blank" rel="noopener noreferrer" className="growth-table-link">
+                                <span>{page.url}</span>
+                                <ExternalLink size={12} />
+                              </a>
+                            </td>
+                            <td className="font-semibold text-primary">{Number(page.clicks).toLocaleString()}</td>
+                            <td>{Number(page.impressions).toLocaleString()}</td>
+                            <td><span className="ctr-badge">{page.ctr}</span></td>
+                            <td><span className="query-tag">{page.topQuery || '-'}</span></td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  )}
+                </div>
               </div>
             )}
 
             {/* 2. KEYWORD CANNIBALIZATION TAB */}
             {activeTabSub === 'cannibalization' && (
               <div>
-                <div style={{ padding: '1rem 1.25rem', borderBottom: '1px solid rgba(255,255,255,0.08)', background: 'rgba(245, 158, 11, 0.04)' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', marginBottom: '4px' }}>
-                    <AlertTriangle size={16} color="#f59e0b" />
-                    <strong style={{ color: '#fbbf24', fontSize: '0.9rem' }}>Keyword Cannibalization (Anahtar Kelime Yamyamlığı)</strong>
+                <div className="growth-tab-infobar">
+                  <div className="tab-infobar-icon" style={{ background: 'rgba(239, 68, 68, 0.12)', color: '#f87171' }}>
+                    <AlertTriangle size={20} />
                   </div>
-                  <p style={{ margin: 0, fontSize: '0.8rem', color: '#94a3b8', lineHeight: 1.5 }}>
-                    Aynı arama sorgusu için sitenizdeki birden fazla URL'nin Google arama sonuçlarında gösterim paylaşması ve sıralama gücünüzün bölünmesi durumudur.
-                  </p>
+                  <div className="tab-infobar-content">
+                    <h4 className="tab-infobar-title">
+                      <span>Keyword Cannibalization (Anahtar Kelime Yamyamlığı)</span>
+                      <span className="tab-badge-tag" style={{ background: cannibalization.length > 0 ? 'rgba(239, 68, 68, 0.2)' : 'rgba(16, 185, 129, 0.2)', color: cannibalization.length > 0 ? '#f87171' : '#10b981' }}>
+                        {cannibalization.length === 0 ? 'Temiz Dizin Mimarisi' : `${cannibalization.length} Çatışma`}
+                      </span>
+                    </h4>
+                    <p className="tab-infobar-desc">
+                      Aynı arama sorgusu için sitenizdeki birden fazla URL'nin Google arama sonuçlarında gösterim paylaşması ve sıralama gücünüzün bölünmesi durumudur. Tek bir sayfayla ilk 3 sırada çıkabilecekken, iki sayfanız da 8. ve 14. sıralara gerileyerek potansiyel tıklamaların %80'ini kaybedebilir.
+                    </p>
+                    <div className="tab-infobar-action">
+                      <AlertCircle size={13} color="#f87171" />
+                      <span><strong>Önerilen Aksiyon:</strong> Zayıf sayfadan güçlü sayfaya <code>rel="canonical"</code> etiketi tanımlayın ya da iki sayfayı tek kapsamlı içerikte birleştirip 301 yönlendirmesi yapın.</span>
+                    </div>
+                  </div>
                 </div>
 
                 <div className="growth-table-wrap">
@@ -831,7 +869,7 @@ export default function GrowthSearch() {
                     <div style={{ textAlign: 'center', padding: '48px 20px', color: '#94a3b8' }}>
                       <CheckCircle2 size={36} color="#10b981" style={{ margin: '0 auto 12px' }} />
                       <h4 style={{ color: '#ffffff', margin: '0 0 6px 0', fontSize: '1rem' }}>Keyword Cannibalization Tespit Edilmedi</h4>
-                      <p style={{ margin: 0, fontSize: '0.85rem' }}>Arama sonuçlarında aynı sorgu için birbiriyle yarışan veya sıralama bölen URL bulunmuyor. Temiz dizin mimarisi!</p>
+                      <p style={{ margin: 0, fontSize: '0.85rem' }}>Arama sonuçlarında aynı sorgu için birbiriyle yarışan veya sıralama bölen URL bulunmuyor. Dizin mimariniz oldukça temiz ve optimize.</p>
                     </div>
                   ) : (
                     <table className="growth-table">
@@ -884,76 +922,97 @@ export default function GrowthSearch() {
 
             {/* 3. DEVICE & COUNTRY BREAKDOWN TAB */}
             {activeTabSub === 'breakdown' && (
-              <div style={{ padding: '1.25rem' }}>
-                <div className="gsc-breakdown-grid">
-                  {/* Left: Devices */}
-                  <div>
-                    <h4 style={{ fontSize: '0.95rem', fontWeight: 600, color: '#ffffff', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                      <Smartphone size={16} color="#38bdf8" />
-                      <span>Cihaz Kırılımı (Desktop vs Mobile)</span>
-                    </h4>
-
-                    {devices.length === 0 ? (
-                      <p style={{ color: '#94a3b8', fontSize: '0.85rem' }}>Cihaz verisi henüz senkronize edilmedi.</p>
-                    ) : (
-                      devices.map((dev, dIdx) => (
-                        <div key={dIdx} className="gsc-device-card">
-                          <div className="device-left">
-                            <div className="device-icon-box">
-                              {dev.device === 'MOBILE' ? <Smartphone size={18} /> : dev.device === 'TABLET' ? <Tablet size={18} /> : <Monitor size={18} />}
-                            </div>
-                            <div>
-                              <div className="device-name">{dev.label}</div>
-                              <div className="device-sub">{Number(dev.impressions).toLocaleString()} Gösterim • Ort. Sıra #{dev.position}</div>
-                            </div>
-                          </div>
-                          <div className="device-stats">
-                            <div className="device-clicks">{Number(dev.clicks).toLocaleString()} tık (%{dev.share})</div>
-                            <div className="device-ctr">CTR: {dev.ctr}</div>
-                          </div>
-                        </div>
-                      ))
-                    )}
+              <div>
+                <div className="growth-tab-infobar">
+                  <div className="tab-infobar-icon" style={{ background: 'rgba(16, 185, 129, 0.12)', color: '#10b981' }}>
+                    <Globe2 size={20} />
                   </div>
-
-                  {/* Right: Countries */}
-                  <div>
-                    <h4 style={{ fontSize: '0.95rem', fontWeight: 600, color: '#ffffff', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                      <Globe2 size={16} color="#818cf8" />
-                      <span>Coğrafi Dağılım & Ülkeler ({countries.length})</span>
+                  <div className="tab-infobar-content">
+                    <h4 className="tab-infobar-title">
+                      <span>Kullanıcı Cihazı ve Coğrafi Konum Dağılımı (Devices & Countries)</span>
+                      <span className="tab-badge-tag">Masaüstü, Mobil & Global Kırılım</span>
                     </h4>
+                    <p className="tab-infobar-desc">
+                      Organik arama ziyaretçilerinizin hangi cihazları (Masaüstü, Mobil, Tablet) kullandığını ve hangi ülkelerden arama yaptıklarını gösterir. Cihazlara göre tıklama oranı (CTR) ve sıralama farklılıklarını analiz etmenizi sağlar.
+                    </p>
+                    <div className="tab-infobar-action">
+                      <Smartphone size={13} color="#10b981" />
+                      <span><strong>Önerilen Aksiyon:</strong> Mobil oranınız yüksekse mobil sayfa hızına ve dokunmatik kullanılabilirliğe odaklanın; yurt dışından gösterim alıyorsanız o dillerde yerelleştirilmiş içerikler açın.</span>
+                    </div>
+                  </div>
+                </div>
 
-                    {countries.length === 0 ? (
-                      <p style={{ color: '#94a3b8', fontSize: '0.85rem' }}>Ülke verisi henüz senkronize edilmedi.</p>
-                    ) : (
-                      <div className="growth-table-wrap" style={{ maxHeight: 360, overflowY: 'auto' }}>
-                        <table className="growth-table">
-                          <thead>
-                            <tr>
-                              <th>Ülke</th>
-                              <th>Tıklama</th>
-                              <th>Gösterim</th>
-                              <th>CTR</th>
-                              <th>Pay</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {countries.slice(0, 15).map((c, cIdx) => (
-                              <tr key={cIdx}>
-                                <td>
-                                  <span style={{ marginRight: '6px' }}>{c.flag}</span>
-                                  <span className="font-semibold text-white">{c.name}</span>
-                                </td>
-                                <td className="font-semibold text-primary">{Number(c.clicks).toLocaleString()}</td>
-                                <td>{Number(c.impressions).toLocaleString()}</td>
-                                <td><span className="ctr-badge">{c.ctr}</span></td>
-                                <td><span className="text-muted text-xs">%{c.share}</span></td>
+                <div style={{ padding: '1.25rem' }}>
+                  <div className="gsc-breakdown-grid">
+                    {/* Left: Devices */}
+                    <div>
+                      <h4 style={{ fontSize: '0.95rem', fontWeight: 600, color: '#ffffff', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <Smartphone size={16} color="#38bdf8" />
+                        <span>Cihaz Kırılımı (Desktop vs Mobile)</span>
+                      </h4>
+
+                      {devices.length === 0 ? (
+                        <p style={{ color: '#94a3b8', fontSize: '0.85rem' }}>Cihaz verisi henüz senkronize edilmedi.</p>
+                      ) : (
+                        devices.map((dev, dIdx) => (
+                          <div key={dIdx} className="gsc-device-card">
+                            <div className="device-left">
+                              <div className="device-icon-box">
+                                {dev.device === 'MOBILE' ? <Smartphone size={18} /> : dev.device === 'TABLET' ? <Tablet size={18} /> : <Monitor size={18} />}
+                              </div>
+                              <div>
+                                <div className="device-name">{dev.label}</div>
+                                <div className="device-sub">{Number(dev.impressions).toLocaleString()} Gösterim • Ort. Sıra #{dev.position}</div>
+                              </div>
+                            </div>
+                            <div className="device-stats">
+                              <div className="device-clicks">{Number(dev.clicks).toLocaleString()} tık (%{dev.share})</div>
+                              <div className="device-ctr">CTR: {dev.ctr}</div>
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
+
+                    {/* Right: Countries */}
+                    <div>
+                      <h4 style={{ fontSize: '0.95rem', fontWeight: 600, color: '#ffffff', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <Globe2 size={16} color="#818cf8" />
+                        <span>Coğrafi Dağılım & Ülkeler ({countries.length})</span>
+                      </h4>
+
+                      {countries.length === 0 ? (
+                        <p style={{ color: '#94a3b8', fontSize: '0.85rem' }}>Ülke verisi henüz senkronize edilmedi.</p>
+                      ) : (
+                        <div className="growth-table-wrap" style={{ maxHeight: 360, overflowY: 'auto' }}>
+                          <table className="growth-table">
+                            <thead>
+                              <tr>
+                                <th>Ülke</th>
+                                <th>Tıklama</th>
+                                <th>Gösterim</th>
+                                <th>CTR</th>
+                                <th>Pay</th>
                               </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
-                    )}
+                            </thead>
+                            <tbody>
+                              {countries.slice(0, 15).map((c, cIdx) => (
+                                <tr key={cIdx}>
+                                  <td>
+                                    <span style={{ marginRight: '6px' }}>{c.flag}</span>
+                                    <span className="font-semibold text-white">{c.name}</span>
+                                  </td>
+                                  <td className="font-semibold text-primary">{Number(c.clicks).toLocaleString()}</td>
+                                  <td>{Number(c.impressions).toLocaleString()}</td>
+                                  <td><span className="ctr-badge">{c.ctr}</span></td>
+                                  <td><span className="text-muted text-xs">%{c.share}</span></td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -961,14 +1020,34 @@ export default function GrowthSearch() {
 
             {/* 4. GOOGLEBOT HEALTH & URL INSPECTION TAB */}
             {activeTabSub === 'health' && (
-              <div style={{ padding: '1.25rem' }}>
-                <h4 style={{ fontSize: '0.95rem', fontWeight: 600, color: '#ffffff', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <ShieldCheck size={18} color="#10b981" />
-                  <span>Googlebot Dizin Sağlığı & Canlı URL Denetimi</span>
-                </h4>
-                <p style={{ color: '#94a3b8', fontSize: '0.825rem', marginBottom: '1.25rem', lineHeight: 1.5 }}>
-                  Resmi Google URL Inspection API ile doğrulanmış mülkünüzün veya dilediğiniz herhangi bir alt sayfasının Googlebot tarama durumunu canlı test edin.
-                </p>
+              <div>
+                <div className="growth-tab-infobar">
+                  <div className="tab-infobar-icon" style={{ background: 'rgba(14, 165, 233, 0.12)', color: '#38bdf8' }}>
+                    <ShieldCheck size={20} />
+                  </div>
+                  <div className="tab-infobar-content">
+                    <h4 className="tab-infobar-title">
+                      <span>Googlebot Dizin Sağlığı & Canlı URL Denetimi (URL Inspection)</span>
+                      <span className="tab-badge-tag">Resmi Google URL Inspection API</span>
+                    </h4>
+                    <p className="tab-infobar-desc">
+                      Google'ın sitenizi en son ne zaman taradığını, robots.txt engelinin olup olmadığını, sayfanın Google dizininde yer alıp almadığını ve seçilen kanonik URL'nin sizin beyanınızla uyuşup uyuşmadığını doğrular.
+                    </p>
+                    <div className="tab-infobar-action">
+                      <CheckCircle2 size={13} color="#38bdf8" />
+                      <span><strong>Önerilen Aksiyon:</strong> Yeni yayınladığınız blog veya ürün sayfalarının linkini arama kutusuna yazarak Google tarafından taranıp dizine alınıp alınmadığını anında canlı test edin.</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div style={{ padding: '1.25rem' }}>
+                  <h4 style={{ fontSize: '0.95rem', fontWeight: 600, color: '#ffffff', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <Search size={16} color="#38bdf8" />
+                    <span>Canlı URL Test Aracı (On-Demand Inspection)</span>
+                  </h4>
+                  <p style={{ color: '#94a3b8', fontSize: '0.825rem', marginBottom: '1.25rem', lineHeight: 1.5 }}>
+                    Mülkünüz altındaki herhangi bir sayfa linkini aşağıya girerek Google Search Console'un anlık tarama kaydını sorgulayın.
+                  </p>
 
                 {/* Live Inspect Form */}
                 <form onSubmit={handleLiveInspect} className="gsc-inspect-box">
@@ -1066,11 +1145,52 @@ export default function GrowthSearch() {
                   );
                 })()}
               </div>
-            )}
+            </div>
+          )}
 
             {/* 5. QUERIES / STRIKING TABS */}
             {['queries', 'striking'].includes(activeTabSub) && (
               <>
+                {activeTabSub === 'queries' ? (
+                  <div className="growth-tab-infobar">
+                    <div className="tab-infobar-icon" style={{ background: 'rgba(56, 189, 248, 0.12)', color: '#38bdf8' }}>
+                      <Search size={20} />
+                    </div>
+                    <div className="tab-infobar-content">
+                      <h4 className="tab-infobar-title">
+                        <span>Tüm Organik Sorgular (Keyword Queries)</span>
+                        <span className="tab-badge-tag">{topQueries.length} anahtar kelime</span>
+                      </h4>
+                      <p className="tab-infobar-desc">
+                        Kullanıcıların Google'da arama yaparak sitenizi gördüğü veya tıkladığı gerçek arama terimleridir. Tıklama, gösterim, tıklama oranı (CTR) ve ortalama Google sıralamanızı gösterir.
+                      </p>
+                      <div className="tab-infobar-action">
+                        <Sparkles size={13} color="#38bdf8" />
+                        <span><strong>Önerilen Aksiyon:</strong> Gösterimi yüksek fakat tıklama oranı (CTR) düşük sorgularda meta başlık ve açıklamalarınızı güncelleyerek tıklamaları artırın.</span>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="growth-tab-infobar">
+                    <div className="tab-infobar-icon" style={{ background: 'rgba(245, 158, 11, 0.12)', color: '#f59e0b' }}>
+                      <Zap size={20} />
+                    </div>
+                    <div className="tab-infobar-content">
+                      <h4 className="tab-infobar-title">
+                        <span>Sayfa 1'e En Yakın Fırsatlar (Striking Distance Queries)</span>
+                        <span className="tab-badge-tag" style={{ background: 'rgba(245, 158, 11, 0.15)', color: '#fbbf24' }}>Pozisyon 4.0 - 15.0</span>
+                      </h4>
+                      <p className="tab-infobar-desc">
+                        Google arama sonuçlarında 4 ile 15. sıra arasında yer alan (1. sayfanın ortası veya 2. sayfanın başı) kelimelerdir. Zaten yüksek gösterim alan bu kelimeler, ilk 3 sıraya taşındığında organik trafiğinizi en hızlı katlayacak fırsatlardır.
+                      </p>
+                      <div className="tab-infobar-action">
+                        <Flame size={13} color="#f59e0b" />
+                        <span><strong>Önerilen Aksiyon:</strong> Bu kelimelerin yönlendiği sayfalara site içi iç bağlantılar (internal links) verin ve içeriği zenginleştirerek ilk 3'e taşıyın.</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 <div className="growth-table-wrap">
                   {filteredQueries.length === 0 ? (
                     <div style={{ textAlign: 'center', padding: '40px 20px', color: '#94a3b8' }}>
