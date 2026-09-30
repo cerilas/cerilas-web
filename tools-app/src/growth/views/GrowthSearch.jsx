@@ -55,7 +55,7 @@ const DATE_RANGE_OPTIONS = [
 ];
 
 // Gerçek SEO Vuruş Mesafesi (Striking Distance) ve Ekstra Trafik Potansiyeli Hesaplaması
-export const computeQueryOpportunity = (item) => {
+const computeQueryOpportunity = (item) => {
   const pos = parseFloat(item?.position) || 0;
   const imp = Number(item?.impressions) || 0;
   const clk = Number(item?.clicks) || 0;
