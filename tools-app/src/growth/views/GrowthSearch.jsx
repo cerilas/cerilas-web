@@ -538,15 +538,32 @@ export default function GrowthSearch() {
                 </div>
               )}
             </div>
+
+            {isConnected && (
+              <div 
+                className="growth-gsc-compact-status" 
+                title={`Google Search Console mülkü: ${searchData.siteUrl}${searchData.syncedAt ? ` • Son veri eşitleme: ${new Date(searchData.syncedAt).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}` : ''}`}
+              >
+                <span className="gsc-live-dot" />
+                <span className="gsc-compact-site">{searchData.siteUrl}</span>
+                {searchData.syncedAt && (
+                  <span className="gsc-compact-time">
+                    {new Date(searchData.syncedAt).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}
+                  </span>
+                )}
+              </div>
+            )}
+
             {isConnected ? (
               <button 
                 type="button" 
                 disabled={syncing}
                 onClick={handleManualSync}
                 className="growth-secondary-btn"
+                title="Google Search Console verilerini anlık yenile"
               >
                 <RefreshCw size={13} className={syncing ? 'auth-spinner' : ''} />
-                <span>{syncing ? 'Eşitleniyor...' : 'Verileri Yenile'}</span>
+                <span>{syncing ? 'Eşitleniyor...' : 'Yenile'}</span>
               </button>
             ) : (
               <button 
@@ -562,42 +579,22 @@ export default function GrowthSearch() {
         }
       />
 
-      {/* Integration Status Callout Banner */}
-      <div className="growth-gsc-banner">
-        <div className="gsc-banner-left">
-          <div className="gsc-pill-badge">
-            <span className="gsc-live-dot" style={{ background: isConnected ? '#10b981' : '#f59e0b' }} />
-            <img src="/growth-covers/gsc-badge.svg" alt="Google Search Console" className="gsc-pill-icon" />
-            <span className="gsc-pill-brand">Google Search Console</span>
-            <span className="gsc-pill-sep">•</span>
-            <span className="gsc-pill-mode">
-              {isConnected ? `Bağlı (${searchData.siteUrl})` : 'Bağlantı Yapılmadı'}
-            </span>
+      {/* Integration Status Banner (Only shown if Google Search Console is NOT connected) */}
+      {!isConnected && (
+        <div className="growth-gsc-banner">
+          <div className="gsc-banner-left">
+            <div className="gsc-pill-badge">
+              <span className="gsc-live-dot" style={{ background: '#f59e0b' }} />
+              <img src="/growth-covers/gsc-badge.svg" alt="Google Search Console" className="gsc-pill-icon" />
+              <span className="gsc-pill-brand">Google Search Console</span>
+              <span className="gsc-pill-sep">•</span>
+              <span className="gsc-pill-mode">Bağlantı Yapılmadı</span>
+            </div>
+            <p className="gsc-banner-text">
+              Organik arama tıklamaları, gösterimler ve gerçek sıralamalar yalnızca doğrulanmış Google Search Console mülkünüz bağlandığında görüntülenir. Şu anda bu çalışma alanı için bağlı bir mülk bulunmamaktadır.
+            </p>
           </div>
-          <p className="gsc-banner-text">
-            {isConnected ? (
-              <>
-                Doğrulanmış mülkünüz başarıyla senkronize edildi. {searchData.syncedAt && (
-                  <span>Son veri eşitleme: <strong>{new Date(searchData.syncedAt).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}</strong>.</span>
-                )}
-              </>
-            ) : (
-              'Organik arama tıklamaları, gösterimler ve gerçek sıralamalar yalnızca doğrulanmış Google Search Console mülkünüz bağlandığında görüntülenir. Şu anda bu çalışma alanı için bağlı bir mülk bulunmamaktadır.'
-            )}
-          </p>
-        </div>
 
-        {isConnected ? (
-          <button
-            type="button"
-            disabled={syncing}
-            onClick={handleManualSync}
-            className="growth-secondary-btn btn-sm"
-          >
-            <RefreshCw size={13} className={syncing ? 'auth-spinner' : ''} />
-            <span>{syncing ? 'Eşitleniyor...' : 'Canlı Veriyi Eşitle'}</span>
-          </button>
-        ) : (
           <button
             type="button"
             disabled={connectingGoogle}
@@ -612,8 +609,8 @@ export default function GrowthSearch() {
             <span>{connectingGoogle ? 'Bağlanıyor...' : 'Mülkü Şimdi Bağla'}</span>
             <ArrowUpRight size={14} />
           </button>
-        )}
-      </div>
+        </div>
+      )}
 
       {/* 4 Core Search Metrics Cards */}
       <div className="growth-stats-grid four-col">

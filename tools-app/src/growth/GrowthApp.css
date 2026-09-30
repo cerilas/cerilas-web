@@ -1821,7 +1821,35 @@ html.light .growth-app-sidebar {
 
 /* ==========================================================================
    SEARCH & KEYWORDS STYLES
-   ========================================================================== */
+.growth-gsc-compact-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.45rem 0.8rem;
+  border-radius: 9px;
+  background: rgba(16, 185, 129, 0.08);
+  border: 1px solid rgba(16, 185, 129, 0.22);
+  font-size: 0.8rem;
+  color: #e2e8f0;
+  white-space: nowrap;
+}
+
+.growth-gsc-compact-status .gsc-compact-site {
+  font-weight: 600;
+  color: #ffffff;
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.growth-gsc-compact-status .gsc-compact-time {
+  font-size: 0.73rem;
+  color: #94a3b8;
+  padding-left: 0.45rem;
+  border-left: 1px solid rgba(255, 255, 255, 0.14);
+}
+
 .growth-gsc-banner {
   display: flex;
   align-items: center;
