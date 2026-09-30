@@ -379,12 +379,9 @@ export default function GrowthSearch() {
   const urlInspection = searchData.urlInspection || null;
 
   // Gerçek SEO Vuruş Mesafesi (Striking Distance) filtresi: 4-15. sıra ve 30+ gösterim
-  const computedStrikingQueries = useMemo(() => {
-    return topQueries.filter(q => {
-      const opp = computeQueryOpportunity(q);
-      return opp.isOpportunity;
-    }).sort((a, b) => (Number(b.impressions) || 0) - (Number(a.impressions) || 0));
-  }, [topQueries]);
+  const computedStrikingQueries = topQueries
+    .filter(q => computeQueryOpportunity(q).isOpportunity)
+    .sort((a, b) => (Number(b.impressions) || 0) - (Number(a.impressions) || 0));
 
   const currentQueriesSource = activeTabSub === 'striking' 
     ? (computedStrikingQueries.length > 0 ? computedStrikingQueries : strikingQueries.filter(q => (Number(q.impressions) || 0) >= 30))
