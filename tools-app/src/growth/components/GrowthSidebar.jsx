@@ -12,7 +12,8 @@ import {
   Network, 
   BarChart3, 
   SlidersHorizontal,
-  Layers
+  Layers,
+  Sparkles
 } from 'lucide-react';
 import { useGrowth } from '../GrowthContext';
 
@@ -21,6 +22,7 @@ const NAV_GROUPS = [
     title: 'GENEL BAKIŞ',
     items: [
       { id: 'overview', label: 'Genel Bakış & Skor', icon: LayoutDashboard },
+      { id: 'landing', label: 'Hızlı Domain Analizi', icon: Sparkles, badge: 'Insight' },
       { id: 'action-feed', label: 'Aksiyon Akışı (Öncelikler)', icon: ListTodo, badge: 'Öncelikli' }
     ]
   },

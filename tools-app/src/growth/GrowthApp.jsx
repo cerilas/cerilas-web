@@ -18,6 +18,7 @@ import GrowthSettings from './views/GrowthSettings';
 import { useAuth } from '../context/AuthContext';
 import { Sparkles, ShieldCheck, ArrowRight, ArrowLeft, Lock, Loader2 } from 'lucide-react';
 import { GrowthOverviewSkeleton } from './components/GrowthSkeleton';
+import GrowthLandingPage from './components/GrowthLandingPage';
 import './GrowthApp.css';
 
 function GrowthInner({ onBackToTools }) {
@@ -28,9 +29,11 @@ function GrowthInner({ onBackToTools }) {
     loading, 
     isOnboardingOpen, 
     setIsOnboardingOpen,
-    workspaces
+    workspaces,
+    refreshWorkspaces,
+    switchWorkspace
   } = useGrowth();
-  const { isAuthenticated, openAuthModal } = useAuth();
+  const { isAuthenticated, openAuthModal, token } = useAuth();
 
   // Handle URL hash changes like #/growth/myslug/ai-visibility
   useEffect(() => {
@@ -48,68 +51,56 @@ function GrowthInner({ onBackToTools }) {
     return () => window.removeEventListener('hashchange', handleHash);
   }, [setActiveTab]);
 
-  // If user is not signed in
+  // Auto-provision pending scan if user just authenticated with a pending scan from landing
+  useEffect(() => {
+    if (isAuthenticated && token) {
+      try {
+        const pending = sessionStorage.getItem('cerilas_pending_growth_scan');
+        if (pending) {
+          const { scanResult, brandProfile } = JSON.parse(pending);
+          if (scanResult && brandProfile) {
+            sessionStorage.removeItem('cerilas_pending_growth_scan');
+            fetch('/api/growth/workspaces', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+              },
+              body: JSON.stringify({
+                name: brandProfile.brandName || scanResult.domain,
+                url: scanResult.url,
+                industry: brandProfile.industry || 'Technology & Digital Services',
+                business_model: brandProfile.businessModel || 'B2B',
+                description: brandProfile.description || scanResult.meta?.metaDescription || '',
+                target_audience: brandProfile.targetAudience || '',
+                primary_keywords: brandProfile.primaryKeywords || [],
+                competitors: brandProfile.suggestedCompetitors || [],
+                initial_scan: scanResult
+              })
+            })
+            .then(res => res.json())
+            .then(data => {
+              if (data?.data) {
+                refreshWorkspaces(data.data.slug);
+                switchWorkspace(data.data);
+                setActiveTab('overview');
+              }
+            })
+            .catch(e => console.warn('Auto-provision workspace error:', e));
+          }
+        }
+      } catch (e) {}
+    }
+  }, [isAuthenticated, token, refreshWorkspaces, switchWorkspace, setActiveTab]);
+
+  // If user is not signed in, show the premier landing page with instant domain audit
   if (!isAuthenticated) {
-    return (
-      <div className="growth-guest-gate-page">
-        <div className="growth-guest-content animate-fade">
-          <div className="growth-guest-badge">
-            <Sparkles size={14} className="text-primary" />
-            <span>Cerilas Growth • Premium Intelligence</span>
-          </div>
+    return <GrowthLandingPage onBackToTools={onBackToTools} />;
+  }
 
-          <h1 className="growth-guest-title">
-            Yapay Zeka Destekli Büyüme & Arama İstihbaratı
-          </h1>
-
-          <p className="growth-guest-desc">
-            Markanızın Google ve ChatGPT/Perplexity/Gemini (GEO) aramalarındaki görünürlüğünü takip edin, teknik hataları düzeltin ve öncelikli aksiyonlarla organik trafiğinizi katlayın.
-          </p>
-
-          <div className="growth-guest-features">
-            <div className="guest-feat-card">
-              <h4>Aksiyon Haritası (Action Feed)</h4>
-              <p>Rastgele grafikler yerine önceliklendirilmiş somut büyüme fırsatları.</p>
-            </div>
-            <div className="guest-feat-card">
-              <h4>Yapay Zeka (GEO) Takibi</h4>
-              <p>LLM modellerinin markanızı nasıl yanıtladığını ve alıntıladığını izleyin.</p>
-            </div>
-            <div className="guest-feat-card">
-              <h4>Çoklu Marka & Çalışma Alanı</h4>
-              <p>Tüm web sitelerinizi tek merkezden bağımsız marka panelleriyle yönetin.</p>
-            </div>
-          </div>
-
-          <div className="growth-guest-cta-row">
-            <button
-              type="button"
-              className="growth-primary-btn btn-lg"
-              onClick={() => openAuthModal('register')}
-            >
-              <span>Ücretsiz Deneyin & Sitenizi Ekleyin</span>
-              <ArrowRight size={16} />
-            </button>
-            <button
-              type="button"
-              className="growth-secondary-btn btn-lg"
-              onClick={() => openAuthModal('login')}
-            >
-              <span>Giriş Yap</span>
-            </button>
-          </div>
-
-          <button
-            type="button"
-            className="growth-guest-back-link"
-            onClick={onBackToTools || (() => { window.location.hash = '#/'; })}
-          >
-            <ArrowLeft size={14} style={{ marginRight: '6px' }} />
-            <span>Cerilas Ücretsiz Araçlara Dön</span>
-          </button>
-        </div>
-      </div>
-    );
+  // If user is signed in, but has no workspace yet and isn't loading, show the landing page so they can immediately audit & add their first domain
+  if (!loading && !activeWorkspace && (!workspaces || workspaces.length === 0)) {
+    return <GrowthLandingPage onBackToTools={onBackToTools} />;
   }
 
   return (
@@ -125,22 +116,9 @@ function GrowthInner({ onBackToTools }) {
         <main className="growth-main-viewport">
           {loading && !activeWorkspace ? (
             <GrowthOverviewSkeleton />
-          ) : !activeWorkspace ? (
-            <div className="growth-no-workspace-view">
-              <Sparkles size={40} className="text-primary" />
-              <h2>Henüz Bir Marka Eklenmedi</h2>
-              <p>Sitenizin arama performansını ve AI görünürlüğünü takip etmek için ilk web sitenizi ekleyin.</p>
-              <button
-                type="button"
-                className="growth-primary-btn"
-                onClick={() => setIsOnboardingOpen(true)}
-              >
-                <span>İlk Markanızı Ekleyin</span>
-                <ArrowRight size={16} />
-              </button>
-            </div>
           ) : (
             <>
+              {activeTab === 'landing' && <GrowthLandingPage onBackToTools={onBackToTools} />}
               {activeTab === 'overview' && <GrowthOverview />}
               {activeTab === 'action-feed' && <GrowthActionFeed />}
               {activeTab === 'search' && <GrowthSearch />}

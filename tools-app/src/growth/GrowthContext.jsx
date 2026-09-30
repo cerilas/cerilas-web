@@ -56,7 +56,6 @@ export function GrowthProvider({ children }) {
         } catch (e) {}
       } else {
         setActiveWorkspace(null);
-        setIsOnboardingOpen(true);
       }
 
       return list;
