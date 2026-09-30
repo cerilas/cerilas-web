@@ -5,6 +5,7 @@ import {
   getGoogleUserEmail,
   getSearchConsoleSites,
   querySearchConsole,
+  inspectSearchConsoleUrl,
   getGa4Properties,
   queryGa4Traffic
 } from './googleAuth.js';
@@ -342,6 +343,48 @@ export async function handleGrowthOAuthCallback({ code, state }) {
   };
 }
 
+const COUNTRY_MAP = {
+  tur: { name: 'Türkiye', flag: '🇹🇷' },
+  usa: { name: 'Amerika Birleşik Devletleri', flag: '🇺🇸' },
+  deu: { name: 'Almanya', flag: '🇩🇪' },
+  gbr: { name: 'Birleşik Krallık', flag: '🇬🇧' },
+  fra: { name: 'Fransa', flag: '🇫🇷' },
+  nld: { name: 'Hollanda', flag: '🇳🇱' },
+  aze: { name: 'Azerbaycan', flag: '🇦🇿' },
+  ita: { name: 'İtalya', flag: '🇮🇹' },
+  esp: { name: 'İspanya', flag: '🇪🇸' },
+  rus: { name: 'Rusya', flag: '🇷🇺' },
+  can: { name: 'Kanada', flag: '🇨🇦' },
+  aus: { name: 'Avustralya', flag: '🇦🇺' },
+  ind: { name: 'Hindistan', flag: '🇮🇳' },
+  bra: { name: 'Brezilya', flag: '🇧🇷' },
+  bel: { name: 'Belçika', flag: '🇧🇪' },
+  che: { name: 'İsviçre', flag: '🇨🇭' },
+  aut: { name: 'Avusturya', flag: '🇦🇹' },
+  swe: { name: 'İsveç', flag: '🇸🇪' },
+  nor: { name: 'Norveç', flag: '🇳🇴' },
+  dnk: { name: 'Danimarka', flag: '🇩🇰' },
+  pol: { name: 'Polonya', flag: '🇵🇱' },
+  ukr: { name: 'Ukrayna', flag: '🇺🇦' },
+  grc: { name: 'Yunanistan', flag: '🇬🇷' },
+  sau: { name: 'Suudi Arabistan', flag: '🇸🇦' },
+  are: { name: 'Birleşik Arap Emirlikleri', flag: '🇦🇪' },
+  qat: { name: 'Katar', flag: '🇶🇦' },
+  irn: { name: 'İran', flag: '🇮🇷' },
+  irq: { name: 'Irak', flag: '🇮🇶' },
+  kaz: { name: 'Kazakistan', flag: '🇰🇿' },
+  uzb: { name: 'Özbekistan', flag: '🇺🇿' },
+  chn: { name: 'Çin', flag: '🇨🇳' },
+  jpn: { name: 'Japonya', flag: '🇯🇵' },
+  kor: { name: 'Güney Kore', flag: '🇰🇷' }
+};
+
+const DEVICE_MAP = {
+  DESKTOP: 'Masaüstü',
+  MOBILE: 'Mobil',
+  TABLET: 'Tablet'
+};
+
 /**
  * Synchronizes real Search Console data for a given workspace.
  */
@@ -367,33 +410,41 @@ export async function syncGrowthSearchConsole(workspaceId, explicitAccessToken =
   // 2. Obtain valid access token
   const accessToken = explicitAccessToken || await getValidGrowthAccessToken(connection);
 
-  // 3. Query Google Search Console queries (last 28 days)
-  let queryData;
-  let pageData;
+  // 3. Parallel GSC Queries (Queries, Pages, Trend, Devices, Countries, Cannibalization, Images)
+  const [
+    queryRes,
+    pageRes,
+    trendRes,
+    deviceRes,
+    countryRes,
+    cannibalRes,
+    imageRes
+  ] = await Promise.allSettled([
+    querySearchConsole(accessToken, siteUrl, { dimensions: ['query'], rowLimit: 300 }),
+    querySearchConsole(accessToken, siteUrl, { dimensions: ['page'], rowLimit: 100 }),
+    querySearchConsole(accessToken, siteUrl, { dimensions: ['date'], rowLimit: 60 }),
+    querySearchConsole(accessToken, siteUrl, { dimensions: ['device'] }),
+    querySearchConsole(accessToken, siteUrl, { dimensions: ['country'], rowLimit: 30 }),
+    querySearchConsole(accessToken, siteUrl, { dimensions: ['query', 'page'], rowLimit: 500 }),
+    querySearchConsole(accessToken, siteUrl, { type: 'image', rowLimit: 10 })
+  ]);
 
-  try {
-    queryData = await querySearchConsole(accessToken, siteUrl, {
-      dimensions: ['query'],
-      rowLimit: 100
-    });
-  } catch (err) {
-    console.error(`[GSC Query Failed for ${siteUrl}]:`, err.message);
+  if (queryRes.status !== 'fulfilled') {
+    console.error(`[GSC Query Failed for ${siteUrl}]:`, queryRes.reason?.message);
     await authPool.query(
       `UPDATE integration_connections SET last_sync_status = 'error', last_error = $1, updated_at = NOW() WHERE id = $2`,
-      [err.message, connection.id]
+      [queryRes.reason?.message || 'GSC Query failed', connection.id]
     );
-    throw err;
+    throw queryRes.reason;
   }
 
-  try {
-    pageData = await querySearchConsole(accessToken, siteUrl, {
-      dimensions: ['page'],
-      rowLimit: 50
-    });
-  } catch (err) {
-    console.warn(`[GSC Pages Query Warning for ${siteUrl}]:`, err.message);
-    pageData = { rows: [] };
-  }
+  const queryData = queryRes.value || { rows: [] };
+  const pageData = pageRes.status === 'fulfilled' ? pageRes.value : { rows: [] };
+  const trendData = trendRes.status === 'fulfilled' ? trendRes.value : { rows: [] };
+  const deviceData = deviceRes.status === 'fulfilled' ? deviceRes.value : { rows: [] };
+  const countryData = countryRes.status === 'fulfilled' ? countryRes.value : { rows: [] };
+  const cannibalData = cannibalRes.status === 'fulfilled' ? cannibalRes.value : { rows: [] };
+  const imageData = imageRes.status === 'fulfilled' ? imageRes.value : { rows: [] };
 
   const rows = queryData.rows || [];
   const pageRows = pageData.rows || [];
@@ -435,13 +486,189 @@ export async function syncGrowthSearchConsole(workspaceId, explicitAccessToken =
     topQuery: ''
   }));
 
+  // Process daily trend
+  const dailyTrend = (trendData.rows || [])
+    .map(r => ({
+      date: r.keys?.[0] || '',
+      clicks: Number(r.clicks) || 0,
+      impressions: Number(r.impressions) || 0,
+      ctr: r.ctr || '0%',
+      position: Number(r.position || 0).toFixed(1)
+    }))
+    .sort((a, b) => (a.date > b.date ? 1 : -1));
+
+  // Process devices breakdown
+  const totalDeviceClicks = (deviceData.rows || []).reduce((acc, r) => acc + (Number(r.clicks) || 0), 0);
+  const devices = (deviceData.rows || []).map(r => {
+    const rawKey = (r.keys?.[0] || '').toUpperCase();
+    const clx = Number(r.clicks) || 0;
+    const imp = Number(r.impressions) || 0;
+    const share = totalDeviceClicks > 0 ? Math.round((clx / totalDeviceClicks) * 100) : 0;
+    return {
+      device: rawKey,
+      label: DEVICE_MAP[rawKey] || rawKey,
+      clicks: clx,
+      impressions: imp,
+      ctr: r.ctr || '0%',
+      position: Number(r.position || 0).toFixed(1),
+      share
+    };
+  }).sort((a, b) => b.clicks - a.clicks);
+
+  // Process countries breakdown
+  const totalCountryClicks = (countryData.rows || []).reduce((acc, r) => acc + (Number(r.clicks) || 0), 0);
+  const countries = (countryData.rows || []).map(r => {
+    const code = (r.keys?.[0] || '').toLowerCase();
+    const info = COUNTRY_MAP[code] || { name: code.toUpperCase(), flag: '🌐' };
+    const clx = Number(r.clicks) || 0;
+    const imp = Number(r.impressions) || 0;
+    const share = totalCountryClicks > 0 ? Math.round((clx / totalCountryClicks) * 100) : 0;
+    return {
+      code,
+      name: info.name,
+      flag: info.flag,
+      clicks: clx,
+      impressions: imp,
+      ctr: r.ctr || '0%',
+      position: Number(r.position || 0).toFixed(1),
+      share
+    };
+  }).sort((a, b) => b.clicks - a.clicks);
+
+  // Process Keyword Cannibalization
+  const queryPagesMap = {};
+  for (const r of (cannibalData.rows || [])) {
+    const q = r.keys?.[0];
+    const p = r.keys?.[1];
+    if (!q || !p) continue;
+    if (!queryPagesMap[q]) queryPagesMap[q] = [];
+    queryPagesMap[q].push({
+      url: p,
+      clicks: Number(r.clicks) || 0,
+      impressions: Number(r.impressions) || 0,
+      ctr: r.ctr || '0%',
+      position: Number(r.position || 0).toFixed(1)
+    });
+  }
+
+  const cannibalization = [];
+  for (const [query, pList] of Object.entries(queryPagesMap)) {
+    if (pList.length >= 2) {
+      const totalImp = pList.reduce((a, b) => a + b.impressions, 0);
+      const totalClx = pList.reduce((a, b) => a + b.clicks, 0);
+      if (totalImp >= 10) {
+        pList.sort((a, b) => b.impressions - a.impressions);
+        const topShare = Math.round((pList[0].impressions / totalImp) * 100);
+        const severity = topShare < 70 ? 'Yüksek' : 'Orta';
+        cannibalization.push({
+          query,
+          totalImpressions: totalImp,
+          totalClicks: totalClx,
+          pageCount: pList.length,
+          pages: pList.slice(0, 4),
+          severity,
+          topShare
+        });
+      }
+    }
+  }
+  cannibalization.sort((a, b) => b.totalImpressions - a.totalImpressions);
+
+  // Process Brand vs Non-Brand Split
+  const wsRes = await authPool.query(`SELECT name FROM workspaces WHERE id = $1`, [workspaceId]);
+  const wsName = wsRes.rows[0]?.name || '';
+  const brandKeywords = [];
+  if (wsName) {
+    wsName.toLowerCase().split(/\s+/).forEach(w => {
+      if (w.length >= 3) brandKeywords.push(w);
+    });
+  }
+  try {
+    const rawHost = siteUrl.replace(/^https?:\/\//, '').replace(/^sc-domain:/, '').split('/')[0];
+    const hostPart = rawHost.split('.')[0];
+    if (hostPart && hostPart.length >= 3 && !['www', 'app', 'dev', 'api'].includes(hostPart)) {
+      brandKeywords.push(hostPart.toLowerCase());
+    }
+  } catch (e) {}
+
+  let brandClicks = 0;
+  let brandImpressions = 0;
+  let nonBrandClicks = 0;
+  let nonBrandImpressions = 0;
+  let brandCount = 0;
+  let nonBrandCount = 0;
+
+  for (const q of topQueries) {
+    const lower = q.query.toLowerCase();
+    const isBrand = brandKeywords.some(b => lower.includes(b));
+    if (isBrand) {
+      brandClicks += q.clicks;
+      brandImpressions += q.impressions;
+      brandCount++;
+    } else {
+      nonBrandClicks += q.clicks;
+      nonBrandImpressions += q.impressions;
+      nonBrandCount++;
+    }
+  }
+
+  const brandSplit = {
+    brandClicks,
+    brandImpressions,
+    nonBrandClicks,
+    nonBrandImpressions,
+    brandCtr: brandImpressions > 0 ? ((brandClicks / brandImpressions) * 100).toFixed(2) + '%' : '0.00%',
+    nonBrandCtr: nonBrandImpressions > 0 ? ((nonBrandClicks / nonBrandImpressions) * 100).toFixed(2) + '%' : '0.00%',
+    brandClicksShare: totalClicks > 0 ? Math.round((brandClicks / totalClicks) * 100) : 0,
+    brandCount,
+    nonBrandCount
+  };
+
+  // Process Search Types (Web vs Image)
+  const imgRows = imageData.rows || [];
+  const imageClicks = imgRows.reduce((a, b) => a + (Number(b.clicks) || 0), 0);
+  const imageImpressions = imgRows.reduce((a, b) => a + (Number(b.impressions) || 0), 0);
+
+  const searchTypes = {
+    web: { clicks: totalClicks, impressions: totalImpressions, ctr: avgCtr + '%' },
+    image: { clicks: imageClicks, impressions: imageImpressions, ctr: imageImpressions > 0 ? ((imageClicks / imageImpressions) * 100).toFixed(2) + '%' : '0.00%' }
+  };
+
+  // Process URL Inspection for Primary Website URL
+  let urlInspection = null;
+  try {
+    let inspectTarget = siteUrl;
+    if (inspectTarget.startsWith('sc-domain:')) {
+      inspectTarget = 'https://' + inspectTarget.replace('sc-domain:', '');
+    }
+    const inspectRes = await inspectSearchConsoleUrl(accessToken, siteUrl, inspectTarget);
+    if (inspectRes?.inspectionResult?.indexStatusResult) {
+      const idx = inspectRes.inspectionResult.indexStatusResult;
+      urlInspection = {
+        verdict: idx.verdict || 'PASS',
+        coverageState: idx.coverageState || 'Dizine Eklendi',
+        lastCrawlTime: idx.lastCrawlTime || null,
+        crawledAs: idx.crawledAs || 'GOOGLEBOT_SMARTPHONE',
+        googleCanonical: idx.googleCanonical || inspectTarget,
+        userCanonical: idx.userCanonical || inspectTarget,
+        robotsTxtState: idx.robotsTxtState || 'ALLOWED',
+        indexingState: idx.indexingState || 'INDEXING_ALLOWED',
+        pageFetchState: idx.pageFetchState || 'SUCCESSFUL'
+      };
+    }
+  } catch (inspectErr) {
+    console.warn(`[GSC URL Inspection skipped for ${siteUrl}]:`, inspectErr.message);
+  }
+
   // Upsert into growth_search_performance
   await authPool.query(
     `INSERT INTO growth_search_performance (
       workspace_id, site_url, date_range,
       total_clicks, total_impressions, average_ctr, average_position,
-      top_queries, striking_queries, top_pages, synced_at
-    ) VALUES ($1, $2, '28d', $3, $4, $5, $6, $7, $8, $9, NOW())
+      top_queries, striking_queries, top_pages,
+      daily_trend, devices, countries, cannibalization, search_types, brand_split, url_inspection,
+      synced_at
+    ) VALUES ($1, $2, '28d', $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, NOW())
     ON CONFLICT (workspace_id, site_url, date_range)
     DO UPDATE SET
       total_clicks = EXCLUDED.total_clicks,
@@ -451,6 +678,13 @@ export async function syncGrowthSearchConsole(workspaceId, explicitAccessToken =
       top_queries = EXCLUDED.top_queries,
       striking_queries = EXCLUDED.striking_queries,
       top_pages = EXCLUDED.top_pages,
+      daily_trend = EXCLUDED.daily_trend,
+      devices = EXCLUDED.devices,
+      countries = EXCLUDED.countries,
+      cannibalization = EXCLUDED.cannibalization,
+      search_types = EXCLUDED.search_types,
+      brand_split = EXCLUDED.brand_split,
+      url_inspection = EXCLUDED.url_inspection,
       synced_at = NOW()`,
     [
       workspaceId,
@@ -461,7 +695,14 @@ export async function syncGrowthSearchConsole(workspaceId, explicitAccessToken =
       parseFloat(avgPosition),
       JSON.stringify(topQueries),
       JSON.stringify(strikingQueries),
-      JSON.stringify(topPages)
+      JSON.stringify(topPages),
+      JSON.stringify(dailyTrend),
+      JSON.stringify(devices),
+      JSON.stringify(countries),
+      JSON.stringify(cannibalization),
+      JSON.stringify(searchTypes),
+      JSON.stringify(brandSplit),
+      JSON.stringify(urlInspection)
     ]
   );
 

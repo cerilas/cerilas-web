@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { 
   Search, 
   TrendingUp, 
@@ -23,7 +23,18 @@ import {
   RefreshCw, 
   Activity, 
   Loader2, 
-  Settings 
+  Settings,
+  Smartphone,
+  Monitor,
+  Tablet,
+  Globe2,
+  ShieldCheck,
+  AlertTriangle,
+  Image as ImageIcon,
+  Flame,
+  Check,
+  HelpCircle,
+  Radio
 } from 'lucide-react';
 import { useGrowth } from '../GrowthContext';
 import { useAuth } from '../../context/AuthContext';
@@ -37,7 +48,7 @@ export default function GrowthSearch() {
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
   const [connectingGoogle, setConnectingGoogle] = useState(false);
-  const [activeTabSub, setActiveTabSub] = useState('queries'); // queries, striking, pages
+  const [activeTabSub, setActiveTabSub] = useState('queries'); // queries, striking, pages, cannibalization, breakdown, health
   const [searchFilter, setSearchFilter] = useState('');
   const [querySortField, setQuerySortField] = useState('clicks');
   const [querySortDirection, setQuerySortDirection] = useState('desc');
@@ -51,8 +62,22 @@ export default function GrowthSearch() {
     totals: { clicks: 0, impressions: 0, ctr: '0%', position: '0' },
     topQueries: [],
     strikingQueries: [],
-    topPages: []
+    topPages: [],
+    dailyTrend: [],
+    devices: [],
+    countries: [],
+    cannibalization: [],
+    searchTypes: { web: { clicks: 0, impressions: 0, ctr: '0%' }, image: { clicks: 0, impressions: 0 } },
+    brandSplit: { brandClicks: 0, brandImpressions: 0, nonBrandClicks: 0, nonBrandImpressions: 0, brandClicksShare: 0 },
+    urlInspection: null
   });
+
+  const [activeChartMetric, setActiveChartMetric] = useState('clicks'); // 'clicks' | 'impressions'
+  const [hoveredTrendPoint, setHoveredTrendPoint] = useState(null);
+  const [inspectInputUrl, setInspectInputUrl] = useState('');
+  const [inspecting, setInspecting] = useState(false);
+  const [inspectResult, setInspectResult] = useState(null);
+  const [inspectError, setInspectError] = useState('');
 
   const fetchPerformance = useCallback(async () => {
     if (!activeWorkspace?.id || !token) return;
@@ -63,6 +88,12 @@ export default function GrowthSearch() {
       const data = await res.json();
       if (data.success) {
         setSearchData(data);
+        if (data.siteUrl && !inspectInputUrl) {
+          const defaultInspect = data.siteUrl.startsWith('sc-domain:')
+            ? 'https://' + data.siteUrl.replace('sc-domain:', '')
+            : data.siteUrl;
+          setInspectInputUrl(defaultInspect);
+        }
       }
     } catch (err) {
       console.error('Search performance fetch error:', err);
@@ -147,20 +178,32 @@ export default function GrowthSearch() {
     }
   };
 
-  if (loading) {
-    return <GrowthSearchSkeleton />;
-  }
-
-  const isConnected = !!searchData.connected;
-  const totals = searchData.totals || { clicks: 0, impressions: 0, ctr: '0%', position: '0' };
-  const topQueries = searchData.topQueries || [];
-  const strikingQueries = searchData.strikingQueries || [];
-  const topPages = searchData.topPages || [];
-
-  const currentQueriesSource = activeTabSub === 'striking' ? strikingQueries : topQueries;
-  const filteredQueries = currentQueriesSource.filter(q => 
-    (q.query || '').toLowerCase().includes(searchFilter.toLowerCase())
-  );
+  const handleLiveInspect = async (e) => {
+    if (e) e.preventDefault();
+    if (!inspectInputUrl.trim() || !activeWorkspace?.id || !token) return;
+    setInspecting(true);
+    setInspectError('');
+    setInspectResult(null);
+    try {
+      const res = await fetch(`/api/growth/workspaces/${activeWorkspace.id}/inspect-url`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ url: inspectInputUrl.trim() })
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || 'URL denetimi başarısız oldu.');
+      }
+      setInspectResult(data.inspection);
+    } catch (err) {
+      setInspectError(err.message || 'Denetim sırasında bir hata oluştu.');
+    } finally {
+      setInspecting(false);
+    }
+  };
 
   const handleQuerySort = (field) => {
     if (querySortField === field) {
@@ -182,6 +225,28 @@ export default function GrowthSearch() {
       <ArrowDown size={12} className="sort-icon is-active" />
     );
   };
+
+  if (loading) {
+    return <GrowthSearchSkeleton />;
+  }
+
+  const isConnected = !!searchData.connected;
+  const totals = searchData.totals || { clicks: 0, impressions: 0, ctr: '0%', position: '0' };
+  const topQueries = searchData.topQueries || [];
+  const strikingQueries = searchData.strikingQueries || [];
+  const topPages = searchData.topPages || [];
+  const dailyTrend = searchData.dailyTrend || [];
+  const devices = searchData.devices || [];
+  const countries = searchData.countries || [];
+  const cannibalization = searchData.cannibalization || [];
+  const searchTypes = searchData.searchTypes || { web: { clicks: totals.clicks || 0, impressions: totals.impressions || 0, ctr: '0%' }, image: { clicks: 0, impressions: 0 } };
+  const brandSplit = searchData.brandSplit || { brandClicks: 0, brandImpressions: 0, nonBrandClicks: 0, nonBrandImpressions: 0, brandClicksShare: 0 };
+  const urlInspection = searchData.urlInspection || null;
+
+  const currentQueriesSource = activeTabSub === 'striking' ? strikingQueries : topQueries;
+  const filteredQueries = currentQueriesSource.filter(q => 
+    (q.query || '').toLowerCase().includes(searchFilter.toLowerCase())
+  );
 
   const sortedQueries = [...filteredQueries].sort((a, b) => {
     let cmp = 0;
@@ -226,24 +291,12 @@ export default function GrowthSearch() {
     }
 
     const pages = [1];
-    if (currPage > 3) {
-      pages.push('dots1');
-    }
-
+    if (currPage > 3) pages.push('dots1');
     const start = Math.max(2, currPage - 1);
     const end = Math.min(totalPgs - 1, currPage + 1);
-
-    for (let i = start; i <= end; i++) {
-      pages.push(i);
-    }
-
-    if (currPage < totalPgs - 2) {
-      pages.push('dots2');
-    }
-
-    if (totalPgs > 1) {
-      pages.push(totalPgs);
-    }
+    for (let i = start; i <= end; i++) pages.push(i);
+    if (currPage < totalPgs - 2) pages.push('dots2');
+    if (totalPgs > 1) pages.push(totalPgs);
 
     return pages.map(item => {
       if (typeof item === 'string') {
@@ -261,6 +314,29 @@ export default function GrowthSearch() {
       );
     });
   };
+
+  // SVG Trend Chart Geometry Calculations
+  const chartW = 900;
+  const chartH = 180;
+  const padX = 40;
+  const padY = 25;
+  const innerW = chartW - padX * 2;
+  const innerH = chartH - padY * 2;
+
+  const maxVal = Math.max(...dailyTrend.map(d => Number(d[activeChartMetric]) || 0), 10);
+  const chartPoints = dailyTrend.map((d, idx) => {
+    const x = padX + (idx / Math.max(1, dailyTrend.length - 1)) * innerW;
+    const y = chartH - padY - ((Number(d[activeChartMetric]) || 0) / maxVal) * innerH;
+    return { x, y, data: d };
+  });
+
+  const pathLine = chartPoints.length > 0
+    ? chartPoints.reduce((acc, p, idx) => `${acc} ${idx === 0 ? 'M' : 'L'} ${p.x.toFixed(1)} ${p.y.toFixed(1)}`, '')
+    : '';
+
+  const pathArea = chartPoints.length > 0
+    ? `${pathLine} L ${chartPoints[chartPoints.length - 1].x.toFixed(1)} ${chartH - padY} L ${chartPoints[0].x.toFixed(1)} ${chartH - padY} Z`
+    : '';
 
   return (
     <div className="growth-page-container animate-fade">
@@ -425,7 +501,7 @@ export default function GrowthSearch() {
         </div>
       </div>
 
-      {/* Main Content: If Unconnected show Zero-Data Connect Card; If Connected show real tables */}
+      {/* Main Content: If Unconnected show Zero-Data Connect Card; If Connected show real tables & charts */}
       {!isConnected ? (
         <div className="growth-panel-card" style={{ padding: '64px 24px', textAlign: 'center' }}>
           <div style={{
@@ -447,7 +523,7 @@ export default function GrowthSearch() {
           </h3>
 
           <p style={{ maxWidth: 520, margin: '0 auto 24px', color: '#94a3b8', fontSize: '0.88rem', lineHeight: 1.6 }}>
-            Bu markaya ait organik anahtar kelimeler, tıklama hacimleri ve sayfa 1 fırsatları yalnızca doğrulanmış resmi Google Search Console mülkünüz bağlandığında görüntülenir. Hiçbir simüle veya tahmini veri gösterilmez.
+            Bu markaya ait organik anahtar kelimeler, tıklama hacimleri, zaman serisi grafikleri ve Googlebot denetimleri yalnızca doğrulanmış resmi Google Search Console mülkünüz bağlandığında görüntülenir.
           </p>
 
           <button
@@ -468,7 +544,169 @@ export default function GrowthSearch() {
         </div>
       ) : (
         <>
-          {/* Tabs Row & Search Filter */}
+          {/* Daily Trend Interactive SVG Chart */}
+          {dailyTrend.length > 0 && (
+            <div className="growth-chart-card">
+              <div className="growth-chart-header">
+                <div className="growth-chart-title-wrap">
+                  <Activity size={16} className="text-primary" />
+                  <span className="growth-chart-title">Son 28 Günlük Performans & Trend Zaman Serisi</span>
+                </div>
+
+                <div className="growth-chart-legend">
+                  <div 
+                    className="chart-legend-item"
+                    onClick={() => setActiveChartMetric('clicks')}
+                    style={{ opacity: activeChartMetric === 'clicks' ? 1 : 0.45 }}
+                  >
+                    <span className="legend-dot clicks" />
+                    <span>Tıklamalar ({activeChartMetric === 'clicks' ? 'Seçili' : 'Görüntüle'})</span>
+                  </div>
+                  <div 
+                    className="chart-legend-item"
+                    onClick={() => setActiveChartMetric('impressions')}
+                    style={{ opacity: activeChartMetric === 'impressions' ? 1 : 0.45 }}
+                  >
+                    <span className="legend-dot impressions" />
+                    <span>Gösterimler ({activeChartMetric === 'impressions' ? 'Seçili' : 'Görüntüle'})</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="growth-chart-svg-container">
+                <svg viewBox={`0 0 ${chartW} ${chartH}`} className="growth-chart-svg" preserveAspectRatio="none">
+                  <defs>
+                    <linearGradient id="chartGradClicks" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#38bdf8" stopOpacity="0.35" />
+                      <stop offset="100%" stopColor="#38bdf8" stopOpacity="0.0" />
+                    </linearGradient>
+                    <linearGradient id="chartGradImpressions" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#818cf8" stopOpacity="0.35" />
+                      <stop offset="100%" stopColor="#818cf8" stopOpacity="0.0" />
+                    </linearGradient>
+                  </defs>
+
+                  {/* Horizontal Guideline */}
+                  <line x1={padX} y1={padY} x2={chartW - padX} y2={padY} className="chart-grid-line" />
+                  <line x1={padX} y1={chartH / 2} x2={chartW - padX} y2={chartH / 2} className="chart-grid-line" />
+                  <line x1={padX} y1={chartH - padY} x2={chartW - padX} y2={chartH - padY} className="chart-grid-line" />
+
+                  {/* Gradient Area Fill */}
+                  <path 
+                    d={pathArea} 
+                    fill={activeChartMetric === 'clicks' ? "url(#chartGradClicks)" : "url(#chartGradImpressions)"} 
+                  />
+
+                  {/* Main Line */}
+                  <path 
+                    d={pathLine} 
+                    fill="none" 
+                    stroke={activeChartMetric === 'clicks' ? "#38bdf8" : "#818cf8"} 
+                    strokeWidth="2.5" 
+                    strokeLinecap="round" 
+                    strokeLinejoin="round" 
+                  />
+
+                  {/* Interactive Points */}
+                  {chartPoints.map((pt, i) => (
+                    <g key={i}>
+                      <circle
+                        cx={pt.x}
+                        cy={pt.y}
+                        r="3"
+                        fill="#0f172a"
+                        stroke={activeChartMetric === 'clicks' ? "#38bdf8" : "#818cf8"}
+                        strokeWidth="2"
+                        style={{ cursor: 'pointer' }}
+                        onMouseEnter={() => setHoveredTrendPoint(pt)}
+                        onMouseLeave={() => setHoveredTrendPoint(null)}
+                      />
+                    </g>
+                  ))}
+                </svg>
+
+                {hoveredTrendPoint && (
+                  <div 
+                    className="chart-tooltip"
+                    style={{
+                      left: `${(hoveredTrendPoint.x / chartW) * 100}%`,
+                      top: `${(hoveredTrendPoint.y / chartH) * 100}%`
+                    }}
+                  >
+                    <div style={{ fontWeight: 600, color: '#38bdf8', marginBottom: '2px' }}>
+                      {hoveredTrendPoint.data.date}
+                    </div>
+                    <div>Tıklama: <strong>{hoveredTrendPoint.data.clicks}</strong></div>
+                    <div>Gösterim: <strong>{hoveredTrendPoint.data.impressions}</strong></div>
+                    <div>CTR: <strong>{hoveredTrendPoint.data.ctr}</strong></div>
+                    <div>Ort. Sıra: <strong>#{hoveredTrendPoint.data.position}</strong></div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Brand vs Non-Brand & Search Appearance Overview Cards */}
+          <div className="gsc-meta-grid">
+            {/* Brand vs Non-Brand Split */}
+            <div className="gsc-meta-card">
+              <div className="meta-card-head">
+                <span className="meta-card-title">
+                  <Target size={15} color="#38bdf8" />
+                  <span>Marka (Brand) vs Jenerik Arama</span>
+                </span>
+                <span className="ctr-badge">%{brandSplit.brandClicksShare || 0} Marka</span>
+              </div>
+
+              <div className="meta-split-bar">
+                <div 
+                  className="meta-split-fill brand" 
+                  style={{ width: `${Math.min(100, Math.max(5, brandSplit.brandClicksShare || 0))}%` }} 
+                  title={`Marka Aramaları: %${brandSplit.brandClicksShare || 0}`}
+                />
+                <div 
+                  className="meta-split-fill non-brand" 
+                  style={{ width: `${Math.max(0, 100 - (brandSplit.brandClicksShare || 0))}%` }} 
+                  title={`Jenerik SEO Keşif: %${100 - (brandSplit.brandClicksShare || 0)}`}
+                />
+              </div>
+
+              <div className="meta-split-stats">
+                <div className="meta-stat-block">
+                  <span className="meta-stat-num">{Number(brandSplit.brandClicks || 0).toLocaleString()} tık</span>
+                  <span className="meta-stat-label">Doğrudan Marka Sorguları</span>
+                </div>
+                <div className="meta-stat-block" style={{ textAlign: 'right' }}>
+                  <span className="meta-stat-num">{Number(brandSplit.nonBrandClicks || 0).toLocaleString()} tık</span>
+                  <span className="meta-stat-label">Organik Jenerik Keşif</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Search Types (Web vs Image) */}
+            <div className="gsc-meta-card">
+              <div className="meta-card-head">
+                <span className="meta-card-title">
+                  <ImageIcon size={15} color="#818cf8" />
+                  <span>Arama Türleri (Search Appearance)</span>
+                </span>
+                <span className="ctr-badge">Google Web & Görseller</span>
+              </div>
+
+              <div className="meta-split-stats" style={{ marginTop: 'auto' }}>
+                <div className="meta-stat-block">
+                  <span className="meta-stat-num">{Number(searchTypes.web?.clicks || totals.clicks || 0).toLocaleString()} tık</span>
+                  <span className="meta-stat-label">Google Web Araması</span>
+                </div>
+                <div className="meta-stat-block" style={{ textAlign: 'right' }}>
+                  <span className="meta-stat-num">{Number(searchTypes.image?.clicks || 0).toLocaleString()} tık</span>
+                  <span className="meta-stat-label">Google Görseller Trafiği</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Subnav Navigation Bar */}
           <div className="growth-subnav-bar">
             <div className="growth-subnav-pills">
               <button
@@ -476,7 +714,7 @@ export default function GrowthSearch() {
                 className={`subnav-pill ${activeTabSub === 'queries' ? 'active' : ''}`}
                 onClick={() => setActiveTabSub('queries')}
               >
-                Tüm Organik Sorgular ({topQueries.length})
+                Organik Sorgular ({topQueries.length})
               </button>
               <button
                 type="button"
@@ -484,32 +722,59 @@ export default function GrowthSearch() {
                 onClick={() => setActiveTabSub('striking')}
               >
                 <Zap size={13} />
-                <span>Sayfa 1'e En Yakın Fırsatlar ({strikingQueries.length})</span>
+                <span>Sayfa 1 Fırsatları ({strikingQueries.length})</span>
               </button>
               <button
                 type="button"
                 className={`subnav-pill ${activeTabSub === 'pages' ? 'active' : ''}`}
                 onClick={() => setActiveTabSub('pages')}
               >
-                En Çok Tıklanan Sayfalar ({topPages.length})
+                Popüler Sayfalar ({topPages.length})
+              </button>
+              <button
+                type="button"
+                className={`subnav-pill ${activeTabSub === 'cannibalization' ? 'active' : ''}`}
+                onClick={() => setActiveTabSub('cannibalization')}
+              >
+                <AlertTriangle size={13} color={cannibalization.length > 0 ? '#f59e0b' : '#94a3b8'} />
+                <span>Cannibalization ({cannibalization.length})</span>
+              </button>
+              <button
+                type="button"
+                className={`subnav-pill ${activeTabSub === 'breakdown' ? 'active' : ''}`}
+                onClick={() => setActiveTabSub('breakdown')}
+              >
+                <Globe2 size={13} />
+                <span>Cihaz & Ülke</span>
+              </button>
+              <button
+                type="button"
+                className={`subnav-pill ${activeTabSub === 'health' ? 'active' : ''}`}
+                onClick={() => setActiveTabSub('health')}
+              >
+                <ShieldCheck size={13} />
+                <span>Googlebot Dizin Sağlığı</span>
               </button>
             </div>
 
-            <div className="growth-search-input-wrap">
-              <Search size={14} className="search-input-icon" />
-              <input
-                type="text"
-                placeholder="Sorgu filtrele..."
-                value={searchFilter}
-                onChange={(e) => setSearchFilter(e.target.value)}
-                className="growth-search-input"
-              />
-            </div>
+            {['queries', 'striking'].includes(activeTabSub) && (
+              <div className="growth-search-input-wrap">
+                <Search size={14} className="search-input-icon" />
+                <input
+                  type="text"
+                  placeholder="Sorgu filtrele..."
+                  value={searchFilter}
+                  onChange={(e) => setSearchFilter(e.target.value)}
+                  className="growth-search-input"
+                />
+              </div>
+            )}
           </div>
 
-          {/* Real Data Table */}
+          {/* Dynamic Tab Panes */}
           <div className="growth-panel-card">
-            {activeTabSub === 'pages' ? (
+            {/* 1. PAGES TAB */}
+            {activeTabSub === 'pages' && (
               <div className="growth-table-wrap">
                 {topPages.length === 0 ? (
                   <div style={{ textAlign: 'center', padding: '40px 20px', color: '#94a3b8' }}>
@@ -536,8 +801,8 @@ export default function GrowthSearch() {
                               <ExternalLink size={12} />
                             </a>
                           </td>
-                          <td className="font-semibold text-primary">{page.clicks}</td>
-                          <td>{page.impressions}</td>
+                          <td className="font-semibold text-primary">{Number(page.clicks).toLocaleString()}</td>
+                          <td>{Number(page.impressions).toLocaleString()}</td>
                           <td><span className="ctr-badge">{page.ctr}</span></td>
                           <td><span className="query-tag">{page.topQuery || '-'}</span></td>
                         </tr>
@@ -546,7 +811,265 @@ export default function GrowthSearch() {
                   </table>
                 )}
               </div>
-            ) : (
+            )}
+
+            {/* 2. KEYWORD CANNIBALIZATION TAB */}
+            {activeTabSub === 'cannibalization' && (
+              <div>
+                <div style={{ padding: '1rem 1.25rem', borderBottom: '1px solid rgba(255,255,255,0.08)', background: 'rgba(245, 158, 11, 0.04)' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', marginBottom: '4px' }}>
+                    <AlertTriangle size={16} color="#f59e0b" />
+                    <strong style={{ color: '#fbbf24', fontSize: '0.9rem' }}>Keyword Cannibalization (Anahtar Kelime Yamyamlığı)</strong>
+                  </div>
+                  <p style={{ margin: 0, fontSize: '0.8rem', color: '#94a3b8', lineHeight: 1.5 }}>
+                    Aynı arama sorgusu için sitenizdeki birden fazla URL'nin Google arama sonuçlarında gösterim paylaşması ve sıralama gücünüzün bölünmesi durumudur.
+                  </p>
+                </div>
+
+                <div className="growth-table-wrap">
+                  {cannibalization.length === 0 ? (
+                    <div style={{ textAlign: 'center', padding: '48px 20px', color: '#94a3b8' }}>
+                      <CheckCircle2 size={36} color="#10b981" style={{ margin: '0 auto 12px' }} />
+                      <h4 style={{ color: '#ffffff', margin: '0 0 6px 0', fontSize: '1rem' }}>Keyword Cannibalization Tespit Edilmedi</h4>
+                      <p style={{ margin: 0, fontSize: '0.85rem' }}>Arama sonuçlarında aynı sorgu için birbiriyle yarışan veya sıralama bölen URL bulunmuyor. Temiz dizin mimarisi!</p>
+                    </div>
+                  ) : (
+                    <table className="growth-table">
+                      <thead>
+                        <tr>
+                          <th>Arama Sorgusu</th>
+                          <th>Tehdit / Risk</th>
+                          <th>Toplam Gösterim</th>
+                          <th>Tıklama</th>
+                          <th>Çatışan URL'ler ve Gösterim Dağılımı</th>
+                          <th>Önerilen Eylem</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {cannibalization.map((item, cIdx) => (
+                          <tr key={cIdx}>
+                            <td className="font-semibold text-white">{item.query}</td>
+                            <td>
+                              <span className={`cannibal-risk-pill ${item.severity === 'Yüksek' ? 'high' : 'medium'}`}>
+                                {item.severity} Risk
+                              </span>
+                            </td>
+                            <td>{Number(item.totalImpressions).toLocaleString()}</td>
+                            <td className="font-semibold text-primary">{Number(item.totalClicks).toLocaleString()}</td>
+                            <td>
+                              <div className="cannibal-pages-list">
+                                {item.pages.map((p, pI) => (
+                                  <div key={pI} className="cannibal-page-item">
+                                    <span className="cannibal-page-url" title={p.url}>{p.url}</span>
+                                    <span className="cannibal-page-share">
+                                      {item.totalImpressions > 0 ? Math.round((p.impressions / item.totalImpressions) * 100) : 0}% ({p.impressions} gör.)
+                                    </span>
+                                  </div>
+                                ))}
+                              </div>
+                            </td>
+                            <td>
+                              <span className="text-muted text-xs">
+                                {item.severity === 'Yüksek' ? 'Kanonik veya 301 yönlendirmesiyle birleştirin' : 'İç bağlantılarla ana sayfayı güçlendirin'}
+                              </span>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* 3. DEVICE & COUNTRY BREAKDOWN TAB */}
+            {activeTabSub === 'breakdown' && (
+              <div style={{ padding: '1.25rem' }}>
+                <div className="gsc-breakdown-grid">
+                  {/* Left: Devices */}
+                  <div>
+                    <h4 style={{ fontSize: '0.95rem', fontWeight: 600, color: '#ffffff', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <Smartphone size={16} color="#38bdf8" />
+                      <span>Cihaz Kırılımı (Desktop vs Mobile)</span>
+                    </h4>
+
+                    {devices.length === 0 ? (
+                      <p style={{ color: '#94a3b8', fontSize: '0.85rem' }}>Cihaz verisi henüz senkronize edilmedi.</p>
+                    ) : (
+                      devices.map((dev, dIdx) => (
+                        <div key={dIdx} className="gsc-device-card">
+                          <div className="device-left">
+                            <div className="device-icon-box">
+                              {dev.device === 'MOBILE' ? <Smartphone size={18} /> : dev.device === 'TABLET' ? <Tablet size={18} /> : <Monitor size={18} />}
+                            </div>
+                            <div>
+                              <div className="device-name">{dev.label}</div>
+                              <div className="device-sub">{Number(dev.impressions).toLocaleString()} Gösterim • Ort. Sıra #{dev.position}</div>
+                            </div>
+                          </div>
+                          <div className="device-stats">
+                            <div className="device-clicks">{Number(dev.clicks).toLocaleString()} tık (%{dev.share})</div>
+                            <div className="device-ctr">CTR: {dev.ctr}</div>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+
+                  {/* Right: Countries */}
+                  <div>
+                    <h4 style={{ fontSize: '0.95rem', fontWeight: 600, color: '#ffffff', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <Globe2 size={16} color="#818cf8" />
+                      <span>Coğrafi Dağılım & Ülkeler ({countries.length})</span>
+                    </h4>
+
+                    {countries.length === 0 ? (
+                      <p style={{ color: '#94a3b8', fontSize: '0.85rem' }}>Ülke verisi henüz senkronize edilmedi.</p>
+                    ) : (
+                      <div className="growth-table-wrap" style={{ maxHeight: 360, overflowY: 'auto' }}>
+                        <table className="growth-table">
+                          <thead>
+                            <tr>
+                              <th>Ülke</th>
+                              <th>Tıklama</th>
+                              <th>Gösterim</th>
+                              <th>CTR</th>
+                              <th>Pay</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {countries.slice(0, 15).map((c, cIdx) => (
+                              <tr key={cIdx}>
+                                <td>
+                                  <span style={{ marginRight: '6px' }}>{c.flag}</span>
+                                  <span className="font-semibold text-white">{c.name}</span>
+                                </td>
+                                <td className="font-semibold text-primary">{Number(c.clicks).toLocaleString()}</td>
+                                <td>{Number(c.impressions).toLocaleString()}</td>
+                                <td><span className="ctr-badge">{c.ctr}</span></td>
+                                <td><span className="text-muted text-xs">%{c.share}</span></td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* 4. GOOGLEBOT HEALTH & URL INSPECTION TAB */}
+            {activeTabSub === 'health' && (
+              <div style={{ padding: '1.25rem' }}>
+                <h4 style={{ fontSize: '0.95rem', fontWeight: 600, color: '#ffffff', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <ShieldCheck size={18} color="#10b981" />
+                  <span>Googlebot Dizin Sağlığı & Canlı URL Denetimi</span>
+                </h4>
+                <p style={{ color: '#94a3b8', fontSize: '0.825rem', marginBottom: '1.25rem', lineHeight: 1.5 }}>
+                  Resmi Google URL Inspection API ile doğrulanmış mülkünüzün veya dilediğiniz herhangi bir alt sayfasının Googlebot tarama durumunu canlı test edin.
+                </p>
+
+                {/* Live Inspect Form */}
+                <form onSubmit={handleLiveInspect} className="gsc-inspect-box">
+                  <input
+                    type="url"
+                    placeholder="https://siteniz.com/sayfa-veya-blog-yazisi"
+                    value={inspectInputUrl}
+                    onChange={(e) => setInspectInputUrl(e.target.value)}
+                    className="gsc-inspect-input"
+                  />
+                  <button
+                    type="submit"
+                    disabled={inspecting}
+                    className="growth-primary-btn"
+                  >
+                    {inspecting ? (
+                      <Loader2 size={14} className="auth-spinner" />
+                    ) : (
+                      <Search size={14} />
+                    )}
+                    <span>{inspecting ? 'Google Denetliyor...' : 'Canlı Denetle'}</span>
+                  </button>
+                </form>
+
+                {inspectError && (
+                  <div style={{ padding: '0.75rem 1rem', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.25)', borderRadius: '8px', color: '#f87171', fontSize: '0.825rem', marginBottom: '1rem' }}>
+                    {inspectError}
+                  </div>
+                )}
+
+                {/* Inspect Results Display (Either from interactive test or synced property) */}
+                {(() => {
+                  const targetInspection = inspectResult || urlInspection;
+                  if (!targetInspection) {
+                    return (
+                      <div style={{ textAlign: 'center', padding: '30px 10px', color: '#94a3b8' }}>
+                        <p style={{ margin: 0, fontSize: '0.875rem' }}>Yukarıdaki kutucuğa bir URL girip canlı denetleme başlatabilirsiniz.</p>
+                      </div>
+                    );
+                  }
+
+                  const isPass = targetInspection.verdict === 'PASS';
+
+                  return (
+                    <div className="gsc-health-grid">
+                      <div className="gsc-health-item">
+                        <span className="health-item-label">Google Dizin Durumu</span>
+                        <div className="health-item-value" style={{ color: isPass ? '#10b981' : '#f59e0b' }}>
+                          <CheckCircle2 size={16} />
+                          <span>{targetInspection.coverageState || (isPass ? 'Dizine Eklendi' : 'İnceleniyor')}</span>
+                        </div>
+                      </div>
+
+                      <div className="gsc-health-item">
+                        <span className="health-item-label">Son Googlebot Taraması</span>
+                        <div className="health-item-value">
+                          <span>{targetInspection.lastCrawlTime ? new Date(targetInspection.lastCrawlTime).toLocaleString('tr-TR') : 'Kayıt bulunamadı'}</span>
+                        </div>
+                      </div>
+
+                      <div className="gsc-health-item">
+                        <span className="health-item-label">Tarayan Googlebot Türü</span>
+                        <div className="health-item-value">
+                          <Smartphone size={15} color="#38bdf8" />
+                          <span>{targetInspection.crawledAs === 'GOOGLEBOT_SMARTPHONE' ? 'Googlebot Smartphone (Mobil)' : targetInspection.crawledAs}</span>
+                        </div>
+                      </div>
+
+                      <div className="gsc-health-item">
+                        <span className="health-item-label">Robots.txt İzni</span>
+                        <div className="health-item-value" style={{ color: '#10b981' }}>
+                          <Check size={16} />
+                          <span>{targetInspection.robotsTxtState || 'ALLOWED'} (Taramaya Açık)</span>
+                        </div>
+                      </div>
+
+                      <div className="gsc-health-item">
+                        <span className="health-item-label">Google'ın Seçtiği Kanonik URL</span>
+                        <div className="health-item-value font-mono" style={{ fontSize: '0.78rem', color: '#94a3b8' }}>
+                          <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                            {targetInspection.googleCanonical || '-'}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="gsc-health-item">
+                        <span className="health-item-label">Kullanıcı Beyanı Kanonik</span>
+                        <div className="health-item-value font-mono" style={{ fontSize: '0.78rem', color: '#94a3b8' }}>
+                          <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                            {targetInspection.userCanonical || '-'}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })()}
+              </div>
+            )}
+
+            {/* 5. QUERIES / STRIKING TABS */}
+            {['queries', 'striking'].includes(activeTabSub) && (
               <>
                 <div className="growth-table-wrap">
                   {filteredQueries.length === 0 ? (
@@ -632,8 +1155,8 @@ export default function GrowthSearch() {
                                 )}
                               </div>
                             </td>
-                            <td className="font-semibold text-primary">{item.clicks}</td>
-                            <td>{item.impressions}</td>
+                            <td className="font-semibold text-primary">{Number(item.clicks).toLocaleString()}</td>
+                            <td>{Number(item.impressions).toLocaleString()}</td>
                             <td><span className="ctr-badge">{item.ctr}</span></td>
                             <td>
                               <span className={`rank-pill rank-${Math.max(1, Math.min(10, Math.floor(Number(item.position) || 1)))}`}>

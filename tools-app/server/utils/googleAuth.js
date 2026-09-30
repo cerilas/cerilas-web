@@ -177,14 +177,14 @@ export async function querySearchConsole(accessToken, siteUrl, options = {}) {
   const startDate = options.startDate || getPastDateIso(28);
   const endDate = options.endDate || getPastDateIso(1);
   const dimensions = options.dimensions || ['query'];
-  const rowLimit = Math.min(Number(options.rowLimit) || 50, 500);
+  const rowLimit = Math.min(Number(options.rowLimit) || 100, 5000);
 
   const requestBody = {
     startDate,
     endDate,
     dimensions,
     rowLimit,
-    type: 'web'
+    type: options.type || 'web'
   };
 
   const response = await fetch(endpoint, {

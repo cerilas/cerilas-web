@@ -7,8 +7,10 @@ import {
   getGrowthGoogleAuthUrl,
   getGrowthIntegrationsOverview,
   syncGrowthSearchConsole,
-  disconnectGrowthGoogle
+  disconnectGrowthGoogle,
+  getValidGrowthAccessToken
 } from '../utils/googleGrowthIntegration.js';
+import { inspectSearchConsoleUrl } from '../utils/googleAuth.js';
 
 const router = express.Router();
 const JWT_SECRET = process.env.JWT_SECRET || 'cerilas_admin_jwt_secret_2026';
@@ -1261,7 +1263,14 @@ router.get('/workspaces/:slugOrId/search-performance', requireAuth, async (req, 
         },
         topQueries: [],
         strikingQueries: [],
-        topPages: []
+        topPages: [],
+        dailyTrend: [],
+        devices: [],
+        countries: [],
+        cannibalization: [],
+        searchTypes: { web: { clicks: 0, impressions: 0, ctr: '0%' }, image: { clicks: 0, impressions: 0 } },
+        brandSplit: { brandClicks: 0, brandImpressions: 0, nonBrandClicks: 0, nonBrandImpressions: 0, brandClicksShare: 0 },
+        urlInspection: null
       });
     }
 
@@ -1301,7 +1310,14 @@ router.get('/workspaces/:slugOrId/search-performance', requireAuth, async (req, 
         },
         topQueries: p.top_queries || [],
         strikingQueries: p.striking_queries || [],
-        topPages: p.top_pages || []
+        topPages: p.top_pages || [],
+        dailyTrend: p.daily_trend || [],
+        devices: p.devices || [],
+        countries: p.countries || [],
+        cannibalization: p.cannibalization || [],
+        searchTypes: p.search_types || { web: { clicks: p.total_clicks || 0, impressions: p.total_impressions || 0, ctr: '0%' } },
+        brandSplit: p.brand_split || {},
+        urlInspection: p.url_inspection || null
       });
     }
 
@@ -1313,11 +1329,71 @@ router.get('/workspaces/:slugOrId/search-performance', requireAuth, async (req, 
       totals: { clicks: 0, impressions: 0, ctr: '0%', position: '0' },
       topQueries: [],
       strikingQueries: [],
-      topPages: []
+      topPages: [],
+      dailyTrend: [],
+      devices: [],
+      countries: [],
+      cannibalization: [],
+      searchTypes: { web: { clicks: 0, impressions: 0, ctr: '0%' } },
+      brandSplit: {},
+      urlInspection: null
     });
   } catch (err) {
     console.error('[Search Performance Error]:', err);
     res.status(500).json({ error: err.message || 'Arama verileri alınamadı.' });
+  }
+});
+
+/**
+ * POST /api/growth/workspaces/:slugOrId/inspect-url
+ * Runs live URL inspection on demand for any URL under the connected GSC property
+ */
+router.post('/workspaces/:slugOrId/inspect-url', requireAuth, async (req, res) => {
+  try {
+    const authData = await resolveAndAuthorizeWorkspace(req, req.params.slugOrId);
+    if (!authData) return res.status(404).json({ error: 'Çalışma alanı bulunamadı.' });
+
+    const { url } = req.body;
+    if (!url || typeof url !== 'string') {
+      return res.status(400).json({ error: 'Lütfen geçerli bir URL belirtin.' });
+    }
+
+    const workspaceId = authData.workspace.id;
+    const connRes = await authPool.query(
+      `SELECT * FROM integration_connections 
+       WHERE workspace_id = $1 AND provider = 'google' AND integration_type = 'search_console'`,
+      [workspaceId]
+    );
+
+    if (connRes.rows.length === 0 || connRes.rows[0].status !== 'active') {
+      return res.status(400).json({ error: 'Google Search Console mülkü bağlı değil.' });
+    }
+
+    const connection = connRes.rows[0];
+    const siteUrl = connection.external_property_id;
+    const accessToken = await getValidGrowthAccessToken(connection);
+
+    const inspectData = await inspectSearchConsoleUrl(accessToken, siteUrl, url.trim());
+    const idx = inspectData?.inspectionResult?.indexStatusResult || {};
+
+    return res.json({
+      success: true,
+      inspection: {
+        url: url.trim(),
+        verdict: idx.verdict || 'NEUTRAL',
+        coverageState: idx.coverageState || 'Bilinmiyor',
+        lastCrawlTime: idx.lastCrawlTime || null,
+        crawledAs: idx.crawledAs || 'GOOGLEBOT_SMARTPHONE',
+        googleCanonical: idx.googleCanonical || url.trim(),
+        userCanonical: idx.userCanonical || url.trim(),
+        robotsTxtState: idx.robotsTxtState || 'ALLOWED',
+        indexingState: idx.indexingState || 'INDEXING_ALLOWED',
+        pageFetchState: idx.pageFetchState || 'SUCCESSFUL'
+      }
+    });
+  } catch (err) {
+    console.error('[GSC Inspect URL Error]:', err);
+    res.status(500).json({ error: err.message || 'URL denetimi başarısız oldu.' });
   }
 });
 

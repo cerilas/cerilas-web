@@ -292,6 +292,33 @@ export async function initGrowthDb() {
         created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
       );
       CREATE INDEX IF NOT EXISTS idx_growth_reports_workspace ON growth_reports(workspace_id);
+
+      -- 17. Search Console Live Performance & Intelligence
+      CREATE TABLE IF NOT EXISTS growth_search_performance (
+        id SERIAL PRIMARY KEY,
+        workspace_id INT REFERENCES workspaces(id) ON DELETE CASCADE,
+        site_url VARCHAR(255) NOT NULL,
+        date_range VARCHAR(50) DEFAULT '28d',
+        start_date DATE,
+        end_date DATE,
+        total_clicks INT DEFAULT 0,
+        total_impressions INT DEFAULT 0,
+        average_ctr NUMERIC(5,2) DEFAULT 0,
+        average_position NUMERIC(5,2) DEFAULT 0,
+        top_queries JSONB DEFAULT '[]'::jsonb,
+        striking_queries JSONB DEFAULT '[]'::jsonb,
+        top_pages JSONB DEFAULT '[]'::jsonb,
+        daily_trend JSONB DEFAULT '[]'::jsonb,
+        devices JSONB DEFAULT '[]'::jsonb,
+        countries JSONB DEFAULT '[]'::jsonb,
+        cannibalization JSONB DEFAULT '[]'::jsonb,
+        search_types JSONB DEFAULT '{}'::jsonb,
+        brand_split JSONB DEFAULT '{}'::jsonb,
+        url_inspection JSONB DEFAULT '{}'::jsonb,
+        synced_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        UNIQUE(workspace_id, site_url, date_range)
+      );
+      CREATE INDEX IF NOT EXISTS idx_growth_search_perf_ws ON growth_search_performance(workspace_id, site_url);
     `;
 
     await authPool.query(migrationQuery);
