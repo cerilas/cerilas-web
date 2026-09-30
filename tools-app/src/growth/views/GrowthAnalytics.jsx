@@ -347,7 +347,7 @@ export default function GrowthAnalytics() {
     : '';
 
   return (
-    <div className="growth-search-view animate-fade-in">
+    <div className="growth-page-container animate-fade">
       {/* 1. HERO COVER BANNER */}
       <GrowthPageCover
         badge="Google Analytics 4 (GA4)"
@@ -356,83 +356,113 @@ export default function GrowthAnalytics() {
         subtitle="Gerçek zamanlı kullanıcı akışları, etkileşim süreleri, trafik kaynakları ve dönüşüm hunisi ölçümleri."
         coverImage="/growth-covers/integrations-cover.jpg"
         actions={
-          <div className="growth-date-picker-wrap" ref={dateDropdownRef}>
-            <button
-              type="button"
-              className="growth-date-trigger-btn"
-              onClick={() => setIsDateMenuOpen(prev => !prev)}
-            >
-              <Calendar size={14} className="text-primary" />
-              <span>{currentRangeLabel}</span>
-              <ChevronDown size={14} className={`date-chevron ${isDateMenuOpen ? 'open' : ''}`} />
-            </button>
+          <>
+            <div className="growth-date-picker-wrap" ref={dateDropdownRef}>
+              <button
+                type="button"
+                className={`growth-date-trigger-btn ${isDateMenuOpen ? 'is-open' : ''}`}
+                onClick={() => setIsDateMenuOpen(prev => !prev)}
+                title="Google Analytics veri tarih aralığını değiştirin"
+              >
+                {syncing ? (
+                  <Loader2 size={13} className="auth-spinner text-primary" />
+                ) : (
+                  <Calendar size={13} className="text-primary" />
+                )}
+                <span>{currentRangeLabel}</span>
+                <ChevronDown size={13} style={{ transform: isDateMenuOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s ease', opacity: 0.7 }} />
+              </button>
 
-            {isDateMenuOpen && (
-              <div className="growth-date-dropdown animate-scale-up">
-                <div className="date-dropdown-header">
-                  <span className="date-dropdown-title">Zaman Aralığı Seçin</span>
-                </div>
-                <div className="date-options-list">
-                  {DATE_RANGE_OPTIONS.map((opt) => {
-                    const isSelected = dateRange === opt.id;
-                    return (
-                      <button
-                        key={opt.id}
-                        type="button"
-                        className={`date-option-item ${isSelected ? 'active' : ''}`}
-                        onClick={() => handleSelectDateRange(opt.id)}
-                      >
-                        <div className="date-option-labels">
-                          <span className="date-label-main">{opt.label}</span>
-                          <span className="date-badge-pill">{opt.badge}</span>
-                        </div>
-                        {isSelected && <Check size={14} className="text-primary" />}
-                      </button>
-                    );
-                  })}
-                </div>
+              {isDateMenuOpen && (
+                <div className="growth-date-dropdown">
+                  <div className="growth-date-dropdown-header">
+                    <span>Zaman Aralığı</span>
+                    {syncing && <Loader2 size={12} className="auth-spinner text-primary" />}
+                  </div>
+                  <div className="growth-date-options-list">
+                    {DATE_RANGE_OPTIONS.map((opt) => {
+                      const isSelected = dateRange === opt.id;
+                      return (
+                        <button
+                          key={opt.id}
+                          type="button"
+                          className={`growth-date-option ${isSelected ? 'active' : ''}`}
+                          onClick={() => handleSelectDateRange(opt.id)}
+                        >
+                          <div className="date-option-left">
+                            <Clock size={13} style={{ opacity: isSelected ? 1 : 0.45 }} />
+                            <span>{opt.label}</span>
+                          </div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                            <span className="date-option-badge">{opt.badge}</span>
+                            {isSelected && <Check size={14} color="#38bdf8" />}
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
 
-                {dateRange === 'custom' && (
-                  <form onSubmit={handleApplyCustomDate} className="custom-date-box">
-                    <div className="custom-date-row">
-                      <label>Başlangıç:</label>
-                      <input
-                        type="date"
-                        value={customStartDate}
-                        onChange={(e) => setCustomStartDate(e.target.value)}
-                        required
-                        className="custom-date-input"
-                      />
-                    </div>
-                    <div className="custom-date-row">
-                      <label>Bitiş:</label>
-                      <input
-                        type="date"
-                        value={customEndDate}
-                        onChange={(e) => setCustomEndDate(e.target.value)}
-                        required
-                        className="custom-date-input"
-                      />
-                    </div>
-                    <button type="submit" className="custom-date-submit-btn">
-                      Uygula ve Getir
-                    </button>
-                  </form>
+                  {dateRange === 'custom' && (
+                    <form onSubmit={handleApplyCustomDate} className="growth-date-custom-panel">
+                      <div className="custom-date-row">
+                        <label className="custom-date-label">Başlangıç Tarihi</label>
+                        <input
+                          type="date"
+                          value={customStartDate}
+                          onChange={(e) => setCustomStartDate(e.target.value)}
+                          required
+                          className="custom-date-input"
+                        />
+                      </div>
+                      <div className="custom-date-row">
+                        <label className="custom-date-label">Bitiş Tarihi</label>
+                        <input
+                          type="date"
+                          value={customEndDate}
+                          min={customStartDate}
+                          onChange={(e) => setCustomEndDate(e.target.value)}
+                          required
+                          className="custom-date-input"
+                        />
+                      </div>
+                      <div className="custom-date-actions">
+                        <button type="submit" className="custom-date-apply-btn">
+                          Aralığı Uygula
+                        </button>
+                      </div>
+                    </form>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {isConnected && (
+              <div 
+                className="growth-gsc-compact-status" 
+                style={{ background: 'rgba(56, 189, 248, 0.08)', borderColor: 'rgba(56, 189, 248, 0.25)' }}
+                title={`Google Analytics 4 Mülkü: ${analyticsData.propertyId || 'GA4 Bağlı'}`}
+              >
+                <span className="gsc-live-dot" style={{ background: '#38bdf8', boxShadow: '0 0 8px rgba(56, 189, 248, 0.6)' }} />
+                <span className="gsc-compact-site">{analyticsData.propertyId ? `Mülk: ${analyticsData.propertyId}` : 'GA4 Bağlı'}</span>
+                {analyticsData.syncedAt && (
+                  <span className="gsc-compact-time">
+                    {new Date(analyticsData.syncedAt).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}
+                  </span>
                 )}
               </div>
             )}
 
             <button
               type="button"
-              className="growth-btn growth-btn-secondary"
+              className="growth-secondary-btn"
               onClick={handleManualSync}
               disabled={syncing || !isConnected}
               title="Google Analytics 4'ten en güncel verileri çek"
             >
-              <RefreshCw size={13} className={syncing ? 'animate-spin text-primary' : ''} />
-              <span>{syncing ? 'Eşitleniyor...' : 'Şimdi Eşitle'}</span>
+              <RefreshCw size={13} className={syncing ? 'auth-spinner text-primary' : ''} />
+              <span>{syncing ? 'Eşitleniyor...' : 'Yenile'}</span>
             </button>
-          </div>
+          </>
         }
       />
 
@@ -508,141 +538,131 @@ export default function GrowthAnalytics() {
           {/* 2. TOP METRIC KPI CARDS */}
           <div className="growth-stats-grid">
             <div className="growth-stat-card">
-              <div className="stat-card-top">
-                <span className="stat-card-label">Toplam & Aktif Kullanıcı</span>
-                <div className="stat-icon-wrap" style={{ background: 'rgba(56, 189, 248, 0.12)', color: '#38bdf8' }}>
-                  <Users size={18} />
-                </div>
+              <div className="stat-card-header">
+                <span className="stat-card-title">Toplam & Aktif Kullanıcı</span>
+                <Users size={16} className="stat-card-icon text-primary" />
               </div>
               <div className="stat-card-value font-mono">
                 {Number(totals.activeUsers || 0).toLocaleString()}
               </div>
               <div className="stat-card-sub text-muted">
-                Toplam: <strong>{Number(totals.totalUsers || 0).toLocaleString()}</strong> tekil ziyaretçi
+                <span>Toplam: <strong>{Number(totals.totalUsers || 0).toLocaleString()}</strong> tekil ziyaretçi</span>
               </div>
             </div>
 
             <div className="growth-stat-card">
-              <div className="stat-card-top">
-                <span className="stat-card-label">Toplam Oturum (Sessions)</span>
-                <div className="stat-icon-wrap" style={{ background: 'rgba(129, 140, 248, 0.12)', color: '#818cf8' }}>
-                  <Activity size={18} />
-                </div>
+              <div className="stat-card-header">
+                <span className="stat-card-title">Toplam Oturum (Sessions)</span>
+                <Activity size={16} className="stat-card-icon" />
               </div>
               <div className="stat-card-value font-mono text-primary">
                 {Number(totals.sessions || 0).toLocaleString()}
               </div>
               <div className="stat-card-sub text-muted">
-                Oturum başına <strong>{pagesPerSession}</strong> sayfa
+                <span>Oturum başına <strong>{pagesPerSession}</strong> sayfa</span>
               </div>
             </div>
 
             <div className="growth-stat-card">
-              <div className="stat-card-top">
-                <span className="stat-card-label">Sayfa Görüntüleme (Views)</span>
-                <div className="stat-icon-wrap" style={{ background: 'rgba(244, 114, 182, 0.12)', color: '#f472b6' }}>
-                  <Eye size={18} />
-                </div>
+              <div className="stat-card-header">
+                <span className="stat-card-title">Sayfa Görüntüleme (Views)</span>
+                <Eye size={16} className="stat-card-icon" />
               </div>
               <div className="stat-card-value font-mono">
                 {Number(totals.screenPageViews || 0).toLocaleString()}
               </div>
               <div className="stat-card-sub text-muted">
-                Seçili dönemdeki toplam okuma
+                <span>Seçili dönemdeki toplam okuma</span>
               </div>
             </div>
 
             <div className="growth-stat-card">
-              <div className="stat-card-top">
-                <span className="stat-card-label">Ort. Oturum Süresi</span>
-                <div className="stat-icon-wrap" style={{ background: 'rgba(52, 211, 153, 0.12)', color: '#34d399' }}>
-                  <Clock size={18} />
-                </div>
+              <div className="stat-card-header">
+                <span className="stat-card-title">Ort. Oturum Süresi</span>
+                <Clock size={16} className="stat-card-icon" />
               </div>
               <div className="stat-card-value font-mono text-success">
                 {formatDuration(totals.averageSessionDuration)}
               </div>
               <div className="stat-card-sub text-muted">
-                Ortalama aktif etkileşim
+                <span>Ortalama aktif etkileşim</span>
               </div>
             </div>
 
             <div className="growth-stat-card">
-              <div className="stat-card-top">
-                <span className="stat-card-label">Hemen Çıkma (Bounce Rate)</span>
-                <div className="stat-icon-wrap" style={{ background: 'rgba(251, 191, 36, 0.12)', color: '#fbbf24' }}>
-                  <TrendingDown size={18} />
-                </div>
+              <div className="stat-card-header">
+                <span className="stat-card-title">Hemen Çıkma (Bounce Rate)</span>
+                <TrendingDown size={16} className="stat-card-icon text-warning" />
               </div>
               <div className="stat-card-value font-mono text-warning">
                 {totals.bounceRate || '0%'}
               </div>
               <div className="stat-card-sub text-muted">
-                Etkileşim Oranı: <strong>{totals.engagementRate || '0%'}</strong>
+                <span>Etkileşim Oranı: <strong>{totals.engagementRate || '0%'}</strong></span>
               </div>
             </div>
 
             <div className="growth-stat-card">
-              <div className="stat-card-top">
-                <span className="stat-card-label">Yeni Ziyaretçi Payı</span>
-                <div className="stat-icon-wrap" style={{ background: 'rgba(168, 85, 247, 0.12)', color: '#c084fc' }}>
-                  <UserPlus size={18} />
-                </div>
+              <div className="stat-card-header">
+                <span className="stat-card-title">Yeni Ziyaretçi Payı</span>
+                <UserPlus size={16} className="stat-card-icon" />
               </div>
               <div className="stat-card-value font-mono">
                 %{newUsersPercent}
               </div>
               <div className="stat-card-sub text-muted">
-                <strong>{Number(totals.newUsers || 0).toLocaleString()}</strong> yeni kullanıcı
+                <span><strong>{Number(totals.newUsers || 0).toLocaleString()}</strong> yeni kullanıcı</span>
               </div>
             </div>
           </div>
 
           {/* 3. INTERACTIVE TIMELINE CHART */}
-          <div className="growth-panel-card">
+          <div className="growth-chart-card">
             <div className="growth-chart-header">
-              <div>
-                <h3 className="panel-title">Trafik ve Etkileşim Eğilimi</h3>
-                <span className="panel-subtitle">
-                  {currentRangeLabel} boyunca gerçekleşen günlük metrik dağılımı
-                </span>
+              <div className="growth-chart-title-wrap">
+                <Activity size={16} className="text-primary" />
+                <span className="growth-chart-title">{currentRangeLabel} Trafik ve Etkileşim Eğilimi</span>
               </div>
-              <div className="chart-metric-toggle">
-                <button
-                  type="button"
-                  className={`metric-toggle-btn ${activeChartMetric === 'sessions' ? 'active' : ''}`}
+
+              <div className="growth-chart-legend">
+                <div
+                  className="chart-legend-item"
                   onClick={() => setActiveChartMetric('sessions')}
+                  style={{ opacity: activeChartMetric === 'sessions' ? 1 : 0.45 }}
                 >
-                  Oturumlar
-                </button>
-                <button
-                  type="button"
-                  className={`metric-toggle-btn ${activeChartMetric === 'activeUsers' ? 'active' : ''}`}
+                  <span className="legend-dot clicks" />
+                  <span>Oturumlar</span>
+                </div>
+                <div
+                  className="chart-legend-item"
                   onClick={() => setActiveChartMetric('activeUsers')}
+                  style={{ opacity: activeChartMetric === 'activeUsers' ? 1 : 0.45 }}
                 >
-                  Kullanıcılar
-                </button>
-                <button
-                  type="button"
-                  className={`metric-toggle-btn ${activeChartMetric === 'screenPageViews' ? 'active' : ''}`}
+                  <span className="legend-dot impressions" />
+                  <span>Kullanıcılar</span>
+                </div>
+                <div
+                  className="chart-legend-item"
                   onClick={() => setActiveChartMetric('screenPageViews')}
+                  style={{ opacity: activeChartMetric === 'screenPageViews' ? 1 : 0.45 }}
                 >
-                  Sayfa Görüntüleme
-                </button>
+                  <span className="legend-dot" style={{ background: '#f472b6', boxShadow: '0 0 8px rgba(244, 114, 182, 0.6)' }} />
+                  <span>Sayfa Görüntüleme</span>
+                </div>
               </div>
             </div>
 
-            <div className="trend-svg-container">
+            <div className="growth-chart-svg-container">
               {dailyTrend.length === 0 ? (
                 <div style={{ textAlign: 'center', padding: '60px 20px', color: '#94a3b8' }}>
                   <Activity size={36} style={{ margin: '0 auto 12px', opacity: 0.4 }} />
                   <p>Seçili dönem için günlük zaman serisi verisi bulunamadı.</p>
                 </div>
               ) : (
-                <div className="svg-wrapper" style={{ position: 'relative' }}>
+                <div style={{ position: 'relative', width: '100%', height: '100%' }}>
                   <svg
                     viewBox={`0 0 ${chartWidth} ${chartHeight}`}
-                    className="trend-line-svg"
+                    className="growth-chart-svg"
                     preserveAspectRatio="none"
                   >
                     <defs>
@@ -663,16 +683,13 @@ export default function GrowthAnalytics() {
                             y1={y}
                             x2={chartWidth - paddingX}
                             y2={y}
-                            stroke="rgba(255, 255, 255, 0.06)"
-                            strokeDasharray="4 4"
+                            className="chart-grid-line"
                           />
                           <text
                             x={paddingX - 8}
                             y={y + 4}
                             textAnchor="end"
-                            fill="rgba(255, 255, 255, 0.35)"
-                            fontSize="10"
-                            fontFamily="monospace"
+                            className="chart-axis-label"
                           >
                             {labelVal}
                           </text>
@@ -701,11 +718,11 @@ export default function GrowthAnalytics() {
                           key={pIdx}
                           cx={pt.x}
                           cy={pt.y}
-                          r={isHovered ? 6 : 3.5}
-                          fill={isHovered ? '#ffffff' : '#38bdf8'}
-                          stroke={isHovered ? '#0284c7' : '#0f172a'}
-                          strokeWidth={isHovered ? 3 : 2}
-                          className="trend-circle-point"
+                          r={isHovered ? 5.5 : 3.5}
+                          fill={isHovered ? '#ffffff' : '#0f172a'}
+                          stroke="#38bdf8"
+                          strokeWidth={isHovered ? 2.5 : 2}
+                          style={{ cursor: 'pointer' }}
                           onMouseEnter={() => setHoveredTrendPoint({ idx: pIdx, ...pt })}
                           onMouseLeave={() => setHoveredTrendPoint(null)}
                         />
@@ -716,18 +733,22 @@ export default function GrowthAnalytics() {
                   {/* Hover Floating Tooltip */}
                   {hoveredTrendPoint && (
                     <div
-                      className="trend-chart-tooltip"
+                      className="chart-tooltip"
                       style={{
                         left: `${(hoveredTrendPoint.x / chartWidth) * 100}%`,
                         top: `${(hoveredTrendPoint.y / chartHeight) * 100}%`
                       }}
                     >
-                      <div className="tooltip-date">{hoveredTrendPoint.data.date}</div>
-                      <div className="tooltip-row">
-                        <span>{activeChartMetric === 'sessions' ? 'Oturum' : activeChartMetric === 'activeUsers' ? 'Kullanıcı' : 'Görüntüleme'}:</span>
+                      <div style={{ fontWeight: 600, color: '#38bdf8', marginBottom: '2px' }}>
+                        {hoveredTrendPoint.data.date}
+                      </div>
+                      <div>
+                        {activeChartMetric === 'sessions' ? 'Oturum' : activeChartMetric === 'activeUsers' ? 'Kullanıcı' : 'Görüntüleme'}:{' '}
                         <strong>{Number(hoveredTrendPoint.val).toLocaleString()}</strong>
                       </div>
-                      <div className="tooltip-sub">Hemen Çıkma: {hoveredTrendPoint.data.bounceRate}</div>
+                      <div style={{ color: '#94a3b8', fontSize: '0.72rem', marginTop: '2px' }}>
+                        Hemen Çıkma: {hoveredTrendPoint.data.bounceRate}
+                      </div>
                     </div>
                   )}
                 </div>
@@ -736,7 +757,7 @@ export default function GrowthAnalytics() {
           </div>
 
           {/* 4. COMPREHENSIVE SUB-NAVIGATION TABS */}
-          <div className="growth-subnav-row">
+          <div className="growth-subnav-bar">
             <div className="growth-subnav-pills">
               <button
                 type="button"
@@ -796,7 +817,7 @@ export default function GrowthAnalytics() {
 
               <button
                 type="button"
-                className="growth-btn growth-btn-secondary"
+                className="growth-secondary-btn"
                 onClick={handleExportCsv}
                 title="Mevcut tabloyu CSV olarak indir"
               >
@@ -807,7 +828,7 @@ export default function GrowthAnalytics() {
           </div>
 
           {/* 5. TAB CONTENT PANES */}
-          <div className="growth-panel-card">
+          <div className="growth-panel-card table-panel-card">
             {/* 1. CHANNELS TAB */}
             {activeTabSub === 'channels' && (
               <div>

@@ -494,20 +494,6 @@ export default function GrowthSearch() {
           ? `Google Search Console (${searchData.siteUrl}) mülkünüzden canlı senkronize edilen gerçek sorgu, tık ve sayfa 1 fırsatları.` 
           : "Google arama sonuçlarından gelen gerçek organik sorgular, sayfa 1 fırsatları ve tıklama hacimleri."}
         coverImage="/growth-covers/seo-cover.jpg"
-        stats={[
-          { 
-            label: 'Toplam Tıklama', 
-            value: isConnected ? Number(totals.clicks || 0).toLocaleString('tr-TR') : '—', 
-            positive: isConnected, 
-            sub: isConnected ? 'Canlı GSC Verisi' : 'Google Bağlantısı Gerekli' 
-          },
-          { 
-            label: 'Ort. Sıralama', 
-            value: isConnected ? String(totals.position || '0.0') : '—', 
-            positive: isConnected, 
-            sub: isConnected ? 'Ağırlıklı Ortalama' : 'Google Bağlantısı Gerekli' 
-          }
-        ]}
         actions={
           <>
             <div className="growth-date-picker-wrap" ref={dateDropdownRef}>
@@ -1012,7 +998,7 @@ export default function GrowthSearch() {
           </div>
 
           {/* Dynamic Tab Panes */}
-          <div className="growth-panel-card">
+          <div className="growth-panel-card table-panel-card">
             {/* 1. PAGES TAB */}
             {activeTabSub === 'pages' && (
               <div>
