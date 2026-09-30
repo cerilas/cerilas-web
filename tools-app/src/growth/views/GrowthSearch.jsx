@@ -12,6 +12,9 @@ import {
   Target, 
   ArrowUp, 
   ArrowDown, 
+  ArrowUpDown,
+  ChevronLeft,
+  ChevronRight,
   ExternalLink, 
   Layers, 
   Filter, 
@@ -36,6 +39,10 @@ export default function GrowthSearch() {
   const [connectingGoogle, setConnectingGoogle] = useState(false);
   const [activeTabSub, setActiveTabSub] = useState('queries'); // queries, striking, pages
   const [searchFilter, setSearchFilter] = useState('');
+  const [querySortField, setQuerySortField] = useState('clicks');
+  const [querySortDirection, setQuerySortDirection] = useState('desc');
+  const [queryPage, setQueryPage] = useState(1);
+  const [queryPageSize, setQueryPageSize] = useState(50);
 
   const [searchData, setSearchData] = useState({
     connected: false,
@@ -146,10 +153,114 @@ export default function GrowthSearch() {
   const strikingQueries = searchData.strikingQueries || [];
   const topPages = searchData.topPages || [];
 
+  useEffect(() => {
+    setQueryPage(1);
+  }, [searchFilter, activeTabSub]);
+
   const currentQueriesSource = activeTabSub === 'striking' ? strikingQueries : topQueries;
   const filteredQueries = currentQueriesSource.filter(q => 
     (q.query || '').toLowerCase().includes(searchFilter.toLowerCase())
   );
+
+  const handleQuerySort = (field) => {
+    if (querySortField === field) {
+      setQuerySortDirection(prev => (prev === 'asc' ? 'desc' : 'asc'));
+    } else {
+      setQuerySortField(field);
+      setQuerySortDirection(field === 'position' || field === 'query' ? 'asc' : 'desc');
+    }
+    setQueryPage(1);
+  };
+
+  const renderSortIcon = (field) => {
+    if (querySortField !== field) {
+      return <ArrowUpDown size={12} className="sort-icon is-idle" />;
+    }
+    return querySortDirection === 'asc' ? (
+      <ArrowUp size={12} className="sort-icon is-active" />
+    ) : (
+      <ArrowDown size={12} className="sort-icon is-active" />
+    );
+  };
+
+  const sortedQueries = [...filteredQueries].sort((a, b) => {
+    let cmp = 0;
+    if (querySortField === 'query') {
+      cmp = (a.query || '').localeCompare(b.query || '', 'tr', { sensitivity: 'base' });
+    } else if (querySortField === 'clicks') {
+      cmp = (Number(a.clicks) || 0) - (Number(b.clicks) || 0);
+    } else if (querySortField === 'impressions') {
+      cmp = (Number(a.impressions) || 0) - (Number(b.impressions) || 0);
+    } else if (querySortField === 'ctr') {
+      const ctrA = parseFloat(String(a.ctr || '0').replace('%', '')) || 0;
+      const ctrB = parseFloat(String(b.ctr || '0').replace('%', '')) || 0;
+      cmp = ctrA - ctrB;
+    } else if (querySortField === 'position') {
+      cmp = (parseFloat(a.position) || 0) - (parseFloat(b.position) || 0);
+    } else if (querySortField === 'potential') {
+      cmp = (a.potential || '').localeCompare(b.potential || '', 'tr');
+    }
+    return querySortDirection === 'asc' ? cmp : -cmp;
+  });
+
+  const shouldPaginate = sortedQueries.length >= 50;
+  const totalPages = shouldPaginate ? Math.max(1, Math.ceil(sortedQueries.length / queryPageSize)) : 1;
+  const currentPage = Math.min(Math.max(queryPage, 1), totalPages);
+  const startIndex = (currentPage - 1) * queryPageSize;
+  const displayedQueries = shouldPaginate
+    ? sortedQueries.slice(startIndex, startIndex + queryPageSize)
+    : sortedQueries;
+
+  const renderPaginationPages = (currPage, totalPgs, onSelect) => {
+    if (totalPgs <= 7) {
+      return Array.from({ length: totalPgs }, (_, i) => i + 1).map(p => (
+        <button
+          key={p}
+          type="button"
+          className={`pagination-page-btn ${p === currPage ? 'is-active' : ''}`}
+          onClick={() => onSelect(p)}
+        >
+          {p}
+        </button>
+      ));
+    }
+
+    const pages = [1];
+    if (currPage > 3) {
+      pages.push('dots1');
+    }
+
+    const start = Math.max(2, currPage - 1);
+    const end = Math.min(totalPgs - 1, currPage + 1);
+
+    for (let i = start; i <= end; i++) {
+      pages.push(i);
+    }
+
+    if (currPage < totalPgs - 2) {
+      pages.push('dots2');
+    }
+
+    if (totalPgs > 1) {
+      pages.push(totalPgs);
+    }
+
+    return pages.map(item => {
+      if (typeof item === 'string') {
+        return <span key={item} className="pagination-ellipsis">…</span>;
+      }
+      return (
+        <button
+          key={item}
+          type="button"
+          className={`pagination-page-btn ${item === currPage ? 'is-active' : ''}`}
+          onClick={() => onSelect(item)}
+        >
+          {item}
+        </button>
+      );
+    });
+  };
 
   return (
     <div className="growth-page-container animate-fade">
@@ -436,66 +547,168 @@ export default function GrowthSearch() {
                 )}
               </div>
             ) : (
-              <div className="growth-table-wrap">
-                {filteredQueries.length === 0 ? (
-                  <div style={{ textAlign: 'center', padding: '40px 20px', color: '#94a3b8' }}>
-                    <Search size={32} style={{ margin: '0 auto 12px', opacity: 0.5 }} />
-                    <p style={{ margin: 0, fontSize: '0.95rem' }}>
-                      {topQueries.length === 0 
-                        ? `Bağlı mülkünüz (${searchData.siteUrl}) için Google dizininde son 28 günde arama verisi henüz oluşmamış.` 
-                        : 'Filtreye uygun arama sorgusu bulunamadı.'}
-                    </p>
-                  </div>
-                ) : (
-                  <table className="growth-table">
-                    <thead>
-                      <tr>
-                        <th>Arama Sorgusu (Keyword Query)</th>
-                        <th>Tıklama</th>
-                        <th>Gösterim</th>
-                        <th>Tıklama Oranı (CTR)</th>
-                        <th>Ort. Sıralama</th>
-                        <th>Fırsat / Eylem</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {filteredQueries.map((item, idx) => (
-                        <tr key={idx}>
-                          <td>
-                            <div className="query-cell">
-                              <span className="query-name">{item.query}</span>
-                              {item.isStriking && (
-                                <span className="striking-pill">
-                                  <Zap size={10} />
-                                  <span>Hızlı Yükselme</span>
-                                </span>
-                              )}
-                            </div>
-                          </td>
-                          <td className="font-semibold text-primary">{item.clicks}</td>
-                          <td>{item.impressions}</td>
-                          <td><span className="ctr-badge">{item.ctr}</span></td>
-                          <td>
-                            <span className={`rank-pill rank-${Math.max(1, Math.min(10, Math.floor(Number(item.position) || 1)))}`}>
-                              #{item.position}
+              <>
+                <div className="growth-table-wrap">
+                  {filteredQueries.length === 0 ? (
+                    <div style={{ textAlign: 'center', padding: '40px 20px', color: '#94a3b8' }}>
+                      <Search size={32} style={{ margin: '0 auto 12px', opacity: 0.5 }} />
+                      <p style={{ margin: 0, fontSize: '0.95rem' }}>
+                        {topQueries.length === 0 
+                          ? `Bağlı mülkünüz (${searchData.siteUrl}) için Google dizininde son 28 günde arama verisi henüz oluşmamış.` 
+                          : 'Filtreye uygun arama sorgusu bulunamadı.'}
+                      </p>
+                    </div>
+                  ) : (
+                    <table className="growth-table">
+                      <thead>
+                        <tr>
+                          <th 
+                            className="growth-th-sortable"
+                            onClick={() => handleQuerySort('query')}
+                          >
+                            <span className="th-sort-inner">
+                              <span>Arama Sorgusu (Keyword Query)</span>
+                              {renderSortIcon('query')}
                             </span>
-                          </td>
-                          <td>
-                            {item.potential ? (
-                              <div className="potential-cell">
-                                <span className="potential-badge">{item.potential}</span>
-                                <span className="potential-hint">Başlığı optimize et</span>
-                              </div>
-                            ) : (
-                              <span className="text-muted text-xs">Stabil sıralama</span>
-                            )}
-                          </td>
+                          </th>
+                          <th 
+                            className="growth-th-sortable"
+                            onClick={() => handleQuerySort('clicks')}
+                          >
+                            <span className="th-sort-inner">
+                              <span>Tıklama</span>
+                              {renderSortIcon('clicks')}
+                            </span>
+                          </th>
+                          <th 
+                            className="growth-th-sortable"
+                            onClick={() => handleQuerySort('impressions')}
+                          >
+                            <span className="th-sort-inner">
+                              <span>Gösterim</span>
+                              {renderSortIcon('impressions')}
+                            </span>
+                          </th>
+                          <th 
+                            className="growth-th-sortable"
+                            onClick={() => handleQuerySort('ctr')}
+                          >
+                            <span className="th-sort-inner">
+                              <span>Tıklama Oranı (CTR)</span>
+                              {renderSortIcon('ctr')}
+                            </span>
+                          </th>
+                          <th 
+                            className="growth-th-sortable"
+                            onClick={() => handleQuerySort('position')}
+                          >
+                            <span className="th-sort-inner">
+                              <span>Ort. Sıralama</span>
+                              {renderSortIcon('position')}
+                            </span>
+                          </th>
+                          <th 
+                            className="growth-th-sortable"
+                            onClick={() => handleQuerySort('potential')}
+                          >
+                            <span className="th-sort-inner">
+                              <span>Fırsat / Eylem</span>
+                              {renderSortIcon('potential')}
+                            </span>
+                          </th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                      </thead>
+                      <tbody>
+                        {displayedQueries.map((item, idx) => (
+                          <tr key={idx}>
+                            <td>
+                              <div className="query-cell">
+                                <span className="query-name">{item.query}</span>
+                                {item.isStriking && (
+                                  <span className="striking-pill">
+                                    <Zap size={10} />
+                                    <span>Hızlı Yükselme</span>
+                                  </span>
+                                )}
+                              </div>
+                            </td>
+                            <td className="font-semibold text-primary">{item.clicks}</td>
+                            <td>{item.impressions}</td>
+                            <td><span className="ctr-badge">{item.ctr}</span></td>
+                            <td>
+                              <span className={`rank-pill rank-${Math.max(1, Math.min(10, Math.floor(Number(item.position) || 1)))}`}>
+                                #{item.position}
+                              </span>
+                            </td>
+                            <td>
+                              {item.potential ? (
+                                <div className="potential-cell">
+                                  <span className="potential-badge">{item.potential}</span>
+                                  <span className="potential-hint">Başlığı optimize et</span>
+                                </div>
+                              ) : (
+                                <span className="text-muted text-xs">Stabil sıralama</span>
+                              )}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  )}
+                </div>
+
+                {shouldPaginate && filteredQueries.length > 0 && (
+                  <div className="growth-table-pagination">
+                    <div className="pagination-info">
+                      Toplam <strong>{sortedQueries.length}</strong> sorgudan <strong>{startIndex + 1}</strong> - <strong>{Math.min(startIndex + queryPageSize, sortedQueries.length)}</strong> arası gösteriliyor
+                    </div>
+                    <div className="pagination-controls">
+                      <div className="pagination-page-size">
+                        <span>Sayfa başına:</span>
+                        <select 
+                          value={queryPageSize} 
+                          onChange={(e) => {
+                            setQueryPageSize(Number(e.target.value));
+                            setQueryPage(1);
+                          }}
+                          className="pagination-select"
+                        >
+                          <option value={25}>25</option>
+                          <option value={50}>50</option>
+                          <option value={100}>100</option>
+                        </select>
+                      </div>
+                      <div className="pagination-nav">
+                        <button 
+                          type="button" 
+                          className="pagination-btn"
+                          disabled={currentPage <= 1}
+                          onClick={() => setQueryPage(p => Math.max(1, p - 1))}
+                          aria-label="Önceki Sayfa"
+                        >
+                          <ChevronLeft size={14} />
+                          <span>Önceki</span>
+                        </button>
+
+                        <div className="pagination-pages-list">
+                          {renderPaginationPages(currentPage, totalPages, (p) => setQueryPage(p))}
+                        </div>
+
+                        <button 
+                          type="button" 
+                          className="pagination-btn"
+                          disabled={currentPage >= totalPages}
+                          onClick={() => setQueryPage(p => Math.min(totalPages, p + 1))}
+                          aria-label="Sonraki Sayfa"
+                        >
+                          <span>Sonraki</span>
+                          <ChevronRight size={14} />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
                 )}
-              </div>
+              </>
             )}
           </div>
         </>
