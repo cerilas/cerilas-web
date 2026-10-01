@@ -406,10 +406,6 @@ export default function GrowthAnalytics() {
     document.body.removeChild(link);
   };
 
-  if (loading && !analyticsData.connected) {
-    return <GrowthSearchSkeleton />;
-  }
-
   const totals = analyticsData.totals || {};
   const isConnected = !!analyticsData.connected;
   const totalSessions = Number(totals.sessions) || 0;
@@ -478,6 +474,11 @@ export default function GrowthAnalytics() {
       setHoveredTrendPoint({ idx: closestIdx, ...chartPoints[closestIdx] });
     }
   }, [chartPoints, chartWidth, paddingX]);
+
+  // Render skeleton loader ONLY after all hooks are unconditionally declared
+  if (loading && !analyticsData.connected) {
+    return <GrowthSearchSkeleton />;
+  }
 
   return (
     <div className="growth-page-container animate-fade">
