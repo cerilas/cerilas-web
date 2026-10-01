@@ -23,7 +23,8 @@ import {
   Radio,
   ExternalLink,
   SlidersHorizontal,
-  FileText
+  FileText,
+  Loader2
 } from 'lucide-react';
 import { useGrowth } from '../GrowthContext';
 import { useAuth } from '../../context/AuthContext';
@@ -51,6 +52,14 @@ const CHANNEL_COLORS = {
   'Email': '#a78bfa',
   'Cross-network': '#fb923c',
   'Unassigned': '#94a3b8'
+};
+
+const formatDuration = (seconds) => {
+  const s = Math.round(Number(seconds) || 0);
+  if (s < 60) return `${s}sn`;
+  const m = Math.floor(s / 60);
+  const rem = s % 60;
+  return `${m}dk ${rem < 10 ? '0' : ''}${rem}sn`;
 };
 
 const METRIC_CONFIG = {
