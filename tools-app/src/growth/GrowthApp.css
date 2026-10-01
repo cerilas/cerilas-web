@@ -5275,18 +5275,21 @@ html.light .growth-stat-card {
 
 .growth-chart-svg-container {
   width: 100%;
-  height: 220px;
+  height: 250px;
   position: relative;
+  cursor: crosshair;
+  user-select: none;
 }
 
 .growth-chart-svg {
   width: 100%;
   height: 100%;
   overflow: visible;
+  display: block;
 }
 
 .chart-grid-line {
-  stroke: rgba(255, 255, 255, 0.05);
+  stroke: rgba(255, 255, 255, 0.06);
   stroke-dasharray: 4 4;
 }
 
@@ -5296,20 +5299,128 @@ html.light .growth-stat-card {
   font-family: ui-monospace, monospace;
 }
 
+.chart-axis-label-x {
+  fill: #94a3b8;
+  font-size: 10px;
+  font-family: ui-monospace, monospace;
+  font-weight: 500;
+}
+
+/* HTML Circular Points Layer - 100% round on all screens */
+.chart-points-html-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.chart-static-dot {
+  position: absolute;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  border-style: solid;
+  border-width: 2px;
+  transform: translate(-50%, -50%);
+  transition: transform 0.18s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.18s ease, background-color 0.18s ease;
+  pointer-events: none;
+}
+
+.chart-static-dot.is-active {
+  width: 9px;
+  height: 9px;
+  transform: translate(-50%, -50%) scale(1.35);
+  z-index: 10;
+}
+
+/* Enhanced Chart Tooltip */
 .chart-tooltip {
   position: absolute;
   pointer-events: none;
-  background: rgba(15, 23, 42, 0.95);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
-  border-radius: 8px;
-  padding: 0.5rem 0.75rem;
-  font-size: 0.75rem;
-  color: #ffffff;
-  transform: translate(-50%, -115%);
+  background: rgba(10, 15, 29, 0.95);
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.7), 0 0 20px rgba(56, 189, 248, 0.15);
+  border-radius: 12px;
+  padding: 0.75rem 0.95rem;
+  min-width: 200px;
+  transform: translate(-50%, -122%);
   white-space: nowrap;
-  z-index: 20;
-  backdrop-filter: blur(10px);
+  z-index: 30;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  animation: chartTooltipIn 0.15s ease-out;
+}
+
+@keyframes chartTooltipIn {
+  from { opacity: 0; transform: translate(-50%, -115%) scale(0.96); }
+  to { opacity: 1; transform: translate(-50%, -122%) scale(1); }
+}
+
+.chart-tooltip-header {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.75rem;
+  color: #94a3b8;
+  margin-bottom: 0.5rem;
+  padding-bottom: 0.4rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  font-weight: 500;
+}
+
+.chart-tooltip-main-val {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  margin-bottom: 0.6rem;
+}
+
+.tooltip-color-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  box-shadow: 0 0 8px currentColor;
+}
+
+.tooltip-metric-name {
+  color: #e2e8f0;
+  font-weight: 500;
+}
+
+.tooltip-metric-number {
+  font-size: 1.1rem;
+  font-family: ui-monospace, monospace;
+  font-weight: 700;
+  margin-left: auto;
+}
+
+.chart-tooltip-sub-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(55px, 1fr));
+  gap: 0.5rem;
+  padding-top: 0.45rem;
+  border-top: 1px dashed rgba(255, 255, 255, 0.08);
+}
+
+.tooltip-sub-item {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.sub-item-lbl {
+  font-size: 0.65rem;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.sub-item-val {
+  font-size: 0.75rem;
+  color: #f1f5f9;
+  font-weight: 600;
 }
 
 /* Brand vs Non-Brand & Search Appearance Overview Grid */

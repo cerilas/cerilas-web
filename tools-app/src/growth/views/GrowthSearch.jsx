@@ -100,6 +100,33 @@ const computeQueryOpportunity = (item) => {
   };
 };
 
+function generateSmoothCurve(pts, minY, maxY) {
+  if (!pts || pts.length === 0) return '';
+  if (pts.length === 1) return `M ${pts[0].x.toFixed(1)} ${pts[0].y.toFixed(1)}`;
+  if (pts.length === 2) return `M ${pts[0].x.toFixed(1)} ${pts[0].y.toFixed(1)} L ${pts[1].x.toFixed(1)} ${pts[1].y.toFixed(1)}`;
+
+  let d = `M ${pts[0].x.toFixed(1)} ${pts[0].y.toFixed(1)}`;
+  for (let i = 0; i < pts.length - 1; i++) {
+    const p0 = pts[i === 0 ? 0 : i - 1];
+    const p1 = pts[i];
+    const p2 = pts[i + 1];
+    const p3 = pts[i + 2] || p2;
+
+    let cp1x = p1.x + (p2.x - p0.x) / 6;
+    let cp1y = p1.y + (p2.y - p0.y) / 6;
+    let cp2x = p2.x - (p3.x - p1.x) / 6;
+    let cp2y = p2.y - (p3.y - p1.y) / 6;
+
+    if (minY !== undefined && maxY !== undefined) {
+      cp1y = Math.max(minY, Math.min(maxY, cp1y));
+      cp2y = Math.max(minY, Math.min(maxY, cp2y));
+    }
+
+    d += ` C ${cp1x.toFixed(1)} ${cp1y.toFixed(1)}, ${cp2x.toFixed(1)} ${cp2y.toFixed(1)}, ${p2.x.toFixed(1)} ${p2.y.toFixed(1)}`;
+  }
+  return d;
+}
+
 export default function GrowthSearch() {
   const { activeWorkspace, setActiveTab } = useGrowth();
   const { token } = useAuth();
@@ -472,13 +499,16 @@ export default function GrowthSearch() {
   const chartPoints = dailyTrend.map((d, idx) => {
     const x = padX + (idx / Math.max(1, dailyTrend.length - 1)) * innerW;
     const y = chartH - padY - ((Number(d[activeChartMetric]) || 0) / maxVal) * innerH;
-    return { x, y, data: d };
+    return { 
+      x, 
+      y, 
+      xPercent: (x / chartW) * 100,
+      yPercent: (y / chartH) * 100,
+      data: d 
+    };
   });
 
-  const pathLine = chartPoints.length > 0
-    ? chartPoints.reduce((acc, p, idx) => `${acc} ${idx === 0 ? 'M' : 'L'} ${p.x.toFixed(1)} ${p.y.toFixed(1)}`, '')
-    : '';
-
+  const pathLine = generateSmoothCurve(chartPoints, padY, chartH - padY);
   const pathArea = chartPoints.length > 0
     ? `${pathLine} L ${chartPoints[chartPoints.length - 1].x.toFixed(1)} ${chartH - padY} L ${chartPoints[0].x.toFixed(1)} ${chartH - padY} Z`
     : '';
@@ -816,23 +846,32 @@ export default function GrowthSearch() {
                     strokeLinejoin="round" 
                   />
 
-                  {/* Interactive Points */}
-                  {chartPoints.map((pt, i) => (
-                    <g key={i}>
-                      <circle
-                        cx={pt.x}
-                        cy={pt.y}
-                        r="3"
-                        fill="#0f172a"
-                        stroke={activeChartMetric === 'clicks' ? "#38bdf8" : "#818cf8"}
-                        strokeWidth="2"
-                        style={{ cursor: 'pointer' }}
-                        onMouseEnter={() => setHoveredTrendPoint(pt)}
-                        onMouseLeave={() => setHoveredTrendPoint(null)}
-                      />
-                    </g>
-                  ))}
-                </svg>
+                  </svg>
+
+                  {/* Circular Points Layer - rendered in pure HTML so they are always 100% round and crisp */}
+                  <div className="chart-points-html-overlay">
+                    {chartPoints.map((pt, i) => {
+                      const isHovered = hoveredTrendPoint && hoveredTrendPoint.data?.date === pt.data?.date;
+                      const showDot = chartPoints.length <= 35 || isHovered;
+                      if (!showDot) return null;
+
+                      return (
+                        <div
+                          key={i}
+                          className={`chart-static-dot ${isHovered ? 'is-active' : ''}`}
+                          style={{
+                            left: `${pt.xPercent.toFixed(2)}%`,
+                            top: `${pt.yPercent.toFixed(2)}%`,
+                            borderColor: activeChartMetric === 'clicks' ? '#38bdf8' : '#818cf8',
+                            backgroundColor: isHovered ? '#ffffff' : '#080d1a',
+                            boxShadow: isHovered
+                              ? `0 0 0 3px #080d1a, 0 0 0 6px ${activeChartMetric === 'clicks' ? '#38bdf8' : '#818cf8'}, 0 0 16px rgba(56, 189, 248, 0.45)`
+                              : `0 0 4px rgba(56, 189, 248, 0.35)`
+                          }}
+                        />
+                      );
+                    })}
+                  </div>
 
                 {hoveredTrendPoint && (
                   <div 
