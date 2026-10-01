@@ -7,6 +7,7 @@ import {
   CheckCircle2, 
   AlertCircle, 
   Globe, 
+  Languages,
   ExternalLink, 
   Loader2, 
   FileText,
@@ -21,6 +22,9 @@ import { useAuth } from '../../context/AuthContext';
 import GrowthPageCover from '../components/GrowthPageCover';
 import AiEngineBadge, { AiEngineGroup } from '../components/AiEngineBadge';
 import { SkeletonBlock } from '../components/GrowthSkeleton';
+import AiVisibilityDropdown from '../../tools/ai-visibility-checker/components/AiVisibilityDropdown';
+import FlagIcon from '../../tools/ai-visibility-checker/components/FlagIcon';
+import { MARKET_OPTIONS, LANGUAGE_OPTIONS, getMarketOption, getLanguageOption } from '../../tools/ai-visibility-checker/options';
 
 export default function GrowthAiVisibility() {
   const { activeWorkspace } = useGrowth();
@@ -31,6 +35,8 @@ export default function GrowthAiVisibility() {
   const [error, setError] = useState('');
   const [newPromptText, setNewPromptText] = useState('');
   const [newPromptTopic, setNewPromptTopic] = useState('');
+  const [selectedCountry, setSelectedCountry] = useState('TR');
+  const [selectedLanguage, setSelectedLanguage] = useState('tr');
   const [addingPrompt, setAddingPrompt] = useState(false);
   const [runningPromptId, setRunningPromptId] = useState(null);
   const [lastRunResult, setLastRunResult] = useState(null);
@@ -70,7 +76,9 @@ export default function GrowthAiVisibility() {
         },
         body: JSON.stringify({
           prompt: newPromptText.trim(),
-          topic: newPromptTopic.trim() || 'Genel'
+          topic: newPromptTopic.trim() || 'Genel',
+          country: selectedCountry || 'TR',
+          language: selectedLanguage || 'tr'
         })
       });
       if (res.ok) {
@@ -189,7 +197,7 @@ export default function GrowthAiVisibility() {
       <div className="growth-panel-card">
         <h3 className="growth-panel-title">Yeni Arama Sorusu (Prompt) Takip Et</h3>
         <p className="growth-panel-desc">
-          Müşterilerinizin sektörünüz hakkında yapay zekaya sorabileceği kritik soruları ekleyin.
+          Müşterilerinizin sektörünüz ve markanız hakkında yapay zekaya sorabileceği kritik soruları hedef pazar ve dilde takip edin.
         </p>
 
         <form onSubmit={handleAddPrompt} className="growth-prompt-add-form">
@@ -209,10 +217,37 @@ export default function GrowthAiVisibility() {
               value={newPromptTopic}
               onChange={(e) => setNewPromptTopic(e.target.value)}
             />
-            <button type="submit" disabled={addingPrompt || !newPromptText.trim()} className="growth-primary-btn">
-              {addingPrompt ? <Loader2 size={15} className="auth-spinner" /> : <Plus size={15} />}
-              <span>Prompt Ekle</span>
-            </button>
+          </div>
+
+          <div className="growth-prompt-targeting-row">
+            <div className="prompt-targeting-item">
+              <AiVisibilityDropdown
+                id="growth-prompt-country"
+                label="Hedef Pazar / Ülke"
+                icon={<Globe size={13} color="#3b82f6" />}
+                options={MARKET_OPTIONS}
+                value={selectedCountry}
+                onChange={setSelectedCountry}
+                disabled={addingPrompt}
+              />
+            </div>
+            <div className="prompt-targeting-item">
+              <AiVisibilityDropdown
+                id="growth-prompt-language"
+                label="Sorgu Dili"
+                icon={<Languages size={13} color="#8b5cf6" />}
+                options={LANGUAGE_OPTIONS}
+                value={selectedLanguage}
+                onChange={setSelectedLanguage}
+                disabled={addingPrompt}
+              />
+            </div>
+            <div className="prompt-submit-action">
+              <button type="submit" disabled={addingPrompt || !newPromptText.trim()} className="growth-primary-btn prompt-add-submit-btn">
+                {addingPrompt ? <Loader2 size={15} className="auth-spinner" /> : <Plus size={15} />}
+                <span>Prompt Takip Et</span>
+              </button>
+            </div>
           </div>
         </form>
       </div>
@@ -301,13 +336,29 @@ export default function GrowthAiVisibility() {
           <div className="growth-prompts-table">
             {prompts.map((p) => {
               const isRunning = runningPromptId === p.id;
+              const marketOpt = getMarketOption(p.country || 'TR');
+              const langOpt = getLanguageOption(p.language || 'tr');
+
               return (
                 <div key={p.id} className="prompt-table-row">
                   <div className="prompt-info-col">
                     <span className="prompt-text">"{p.prompt}"</span>
                     <div className="prompt-meta-row">
-                      <span className="prompt-topic-tag">{p.topic}</span>
+                      <span className="prompt-topic-tag">{p.topic || 'Genel'}</span>
+                      <span className="prompt-meta-badge" title={`Hedef Ülke: ${marketOpt.label}`}>
+                        {marketOpt.icon}
+                        <span>{marketOpt.code || p.country || 'TR'}</span>
+                      </span>
+                      <span className="prompt-meta-badge lang" title={`Sorgu Dili: ${langOpt.label}`}>
+                        <Languages size={12} color="#8b5cf6" />
+                        <span>{langOpt.code || (p.language || 'TR').toUpperCase()}</span>
+                      </span>
                       <span className="prompt-runs-tag">{p.run_count || 0} Test Yapıldı</span>
+                      {p.last_brand_mentioned !== null && p.last_brand_mentioned !== undefined && (
+                        <span className={`prompt-mention-status-tag ${p.last_brand_mentioned ? 'mentioned' : 'not-mentioned'}`}>
+                          {p.last_brand_mentioned ? '✓ Marka Önerildi' : '✕ Listede Yok'}
+                        </span>
+                      )}
                     </div>
                   </div>
 

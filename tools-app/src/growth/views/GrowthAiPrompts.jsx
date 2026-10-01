@@ -16,6 +16,8 @@ import {
   Layers,
   Search,
   MessageSquare,
+  Globe,
+  Languages,
   X
 } from 'lucide-react';
 import { useGrowth } from '../GrowthContext';
@@ -23,6 +25,9 @@ import { useAuth } from '../../context/AuthContext';
 import GrowthPageCover from '../components/GrowthPageCover';
 import AiEngineBadge, { AiEngineGroup } from '../components/AiEngineBadge';
 import { SkeletonBlock } from '../components/GrowthSkeleton';
+import AiVisibilityDropdown from '../../tools/ai-visibility-checker/components/AiVisibilityDropdown';
+import FlagIcon from '../../tools/ai-visibility-checker/components/FlagIcon';
+import { MARKET_OPTIONS, LANGUAGE_OPTIONS, getMarketOption, getLanguageOption } from '../../tools/ai-visibility-checker/options';
 
 export default function GrowthAiPrompts() {
   const { activeWorkspace } = useGrowth();
@@ -37,6 +42,8 @@ export default function GrowthAiPrompts() {
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [newPromptText, setNewPromptText] = useState('');
   const [newPromptTopic, setNewPromptTopic] = useState('Genel Marka ve Sektör Bilinirliği');
+  const [selectedCountry, setSelectedCountry] = useState('TR');
+  const [selectedLanguage, setSelectedLanguage] = useState('tr');
   const [addingPrompt, setAddingPrompt] = useState(false);
 
   const fetchPrompts = async () => {
@@ -98,7 +105,9 @@ export default function GrowthAiPrompts() {
         },
         body: JSON.stringify({
           prompt: newPromptText.trim(),
-          topic: newPromptTopic.trim()
+          topic: newPromptTopic.trim(),
+          country: selectedCountry || 'TR',
+          language: selectedLanguage || 'tr'
         })
       });
       if (res.ok) {
@@ -292,11 +301,26 @@ export default function GrowthAiPrompts() {
                   const hasRun = p.run_count > 0;
                   const isMentioned = p.last_brand_mentioned;
 
-                  return (
-                    <tr key={p.id}>
-                      <td style={{ maxWidth: '400px' }}>
-                        <span className="font-medium text-main">"{p.prompt}"</span>
-                      </td>
+                    const marketOpt = getMarketOption(p.country || 'TR');
+                    const langOpt = getLanguageOption(p.language || 'tr');
+
+                    return (
+                      <tr key={p.id}>
+                        <td style={{ maxWidth: '400px' }}>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                            <span className="font-medium text-main">"{p.prompt}"</span>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', flexWrap: 'wrap' }}>
+                              <span className="prompt-meta-badge" title={`Hedef Pazar: ${marketOpt.label}`}>
+                                {marketOpt.icon}
+                                <span>{marketOpt.code || p.country || 'TR'}</span>
+                              </span>
+                              <span className="prompt-meta-badge lang" title={`Sorgu Dili: ${langOpt.label}`}>
+                                <Languages size={11} color="#8b5cf6" />
+                                <span>{langOpt.code || (p.language || 'TR').toUpperCase()}</span>
+                              </span>
+                            </div>
+                          </div>
+                        </td>
                       <td>
                         <span className="query-tag">{p.topic || 'Genel'}</span>
                       </td>
@@ -384,7 +408,7 @@ export default function GrowthAiPrompts() {
                   </span>
                 </div>
 
-                <div className="form-group">
+                <div className="form-group" style={{ marginBottom: '1.25rem' }}>
                   <label className="growth-input-label">Konu / Kategori:</label>
                   <input
                     type="text"
@@ -393,6 +417,31 @@ export default function GrowthAiPrompts() {
                     onChange={(e) => setNewPromptTopic(e.target.value)}
                     className="growth-text-input"
                   />
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))', gap: '1rem', marginTop: '1rem' }}>
+                  <div>
+                    <AiVisibilityDropdown
+                      id="modal-prompt-country"
+                      label="Hedef Pazar / Ülke"
+                      icon={<Globe size={13} color="#3b82f6" />}
+                      options={MARKET_OPTIONS}
+                      value={selectedCountry}
+                      onChange={setSelectedCountry}
+                      disabled={addingPrompt}
+                    />
+                  </div>
+                  <div>
+                    <AiVisibilityDropdown
+                      id="modal-prompt-language"
+                      label="Sorgu Dili"
+                      icon={<Languages size={13} color="#8b5cf6" />}
+                      options={LANGUAGE_OPTIONS}
+                      value={selectedLanguage}
+                      onChange={setSelectedLanguage}
+                      disabled={addingPrompt}
+                    />
+                  </div>
                 </div>
               </div>
 

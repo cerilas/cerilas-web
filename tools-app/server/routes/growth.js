@@ -734,16 +734,19 @@ router.post('/workspaces/:slugOrId/prompts', requireAuth, async (req, res) => {
     const authData = await resolveAndAuthorizeWorkspace(req, req.params.slugOrId);
     if (!authData) return res.status(404).json({ error: 'Çalışma alanı bulunamadı.' });
 
-    const { prompt, topic } = req.body;
+    const { prompt, topic, country, language } = req.body;
     if (!prompt || !prompt.trim()) {
       return res.status(400).json({ error: 'Lütfen takip edilecek soruyu (prompt) yazın.' });
     }
 
+    const targetCountry = country ? String(country).toUpperCase().trim() : 'TR';
+    const targetLanguage = language ? String(language).toLowerCase().trim() : 'tr';
+
     const insertRes = await authPool.query(
-      `INSERT INTO growth_tracked_prompts (workspace_id, prompt, topic, created_at)
-       VALUES ($1, $2, $3, NOW())
+      `INSERT INTO growth_tracked_prompts (workspace_id, prompt, topic, country, language, created_at)
+       VALUES ($1, $2, $3, $4, $5, NOW())
        RETURNING *`,
-      [authData.workspace.id, prompt.trim(), topic?.trim() || 'Genel']
+      [authData.workspace.id, prompt.trim(), topic?.trim() || 'Genel', targetCountry, targetLanguage]
     );
 
     res.status(201).json({
@@ -751,6 +754,7 @@ router.post('/workspaces/:slugOrId/prompts', requireAuth, async (req, res) => {
       data: insertRes.rows[0]
     });
   } catch (err) {
+    console.error('[Add Tracked Prompt Error]:', err);
     res.status(500).json({ error: 'Prompt eklenemedi.' });
   }
 });
@@ -775,6 +779,8 @@ router.post('/workspaces/:slugOrId/prompts/:promptId/run', requireAuth, async (r
     }
 
     const trackedPrompt = promptRes.rows[0];
+    const targetCountry = (trackedPrompt.country || 'TR').toUpperCase();
+    const targetLanguage = (trackedPrompt.language || 'tr').toLowerCase();
     const apiKey = process.env.GEMINI_API_KEY;
 
     let responseText = '';
@@ -783,12 +789,30 @@ router.post('/workspaces/:slugOrId/prompts/:promptId/run', requireAuth, async (r
 
     if (apiKey) {
       const ai = new GoogleGenAI({ apiKey });
-      const promptQuery = `Answer the following question as an objective AI search assistant: "${trackedPrompt.prompt}". Cite real brands, websites, and sources if relevant.`;
+      const promptQuery = `Location Context: User search query originating from target market (${targetCountry}).
+Query Language: ${targetLanguage}.
+Answer the following question as an objective AI search assistant tailored for users in ${targetCountry}:
+"${trackedPrompt.prompt}"
+
+Cite real brands, websites, and sources if relevant.`;
       
-      const response = await ai.models.generateContent({
-        model: 'gemini-3.8-flash',
-        contents: promptQuery
-      });
+      let response;
+      try {
+        response = await ai.models.generateContent({
+          model: 'gemini-2.5-flash',
+          contents: promptQuery,
+          config: {
+            tools: [{ googleSearch: {} }]
+          }
+        });
+      } catch (toolErr) {
+        console.warn('[Gemini Grounding fallback]:', toolErr.message);
+        response = await ai.models.generateContent({
+          model: 'gemini-2.5-flash',
+          contents: promptQuery
+        });
+      }
+
       responseText = response.text || '';
 
       const brandKeywords = [
@@ -799,22 +823,51 @@ router.post('/workspaces/:slugOrId/prompts/:promptId/run', requireAuth, async (r
       const lowerResponse = responseText.toLowerCase();
       brandMentioned = brandKeywords.some(bk => lowerResponse.includes(bk));
 
-      // Extract URLs from response
+      // Extract sources from Google Grounding metadata
+      const candidate = response?.candidates?.[0];
+      const chunks = candidate?.groundingMetadata?.groundingChunks || [];
+      for (const chunk of chunks) {
+        if (chunk.web && chunk.web.uri) {
+          try {
+            const parsedUrl = new URL(chunk.web.uri);
+            const domain = parsedUrl.hostname.replace(/^www\./, '');
+            if (!citations.some(c => c.domain === domain)) {
+              citations.push({
+                url: chunk.web.uri,
+                domain: domain,
+                title: chunk.web.title || domain
+              });
+            }
+          } catch {}
+        }
+      }
+
+      // Extract URLs from response text
       const urlRegex = /(https?:\/\/[^\s<>"']+)/gi;
       const foundUrls = responseText.match(urlRegex) || [];
-      citations = foundUrls.slice(0, 5).map(u => ({
-        url: u,
-        domain: new URL(u).hostname.replace(/^www\./, '')
-      }));
+      for (const u of foundUrls) {
+        try {
+          const parsedUrl = new URL(u);
+          const domain = parsedUrl.hostname.replace(/^www\./, '');
+          if (!citations.some(c => c.domain === domain)) {
+            citations.push({
+              url: u,
+              domain: domain,
+              title: domain
+            });
+          }
+        } catch {}
+      }
+      citations = citations.slice(0, 8);
     } else {
-      responseText = `Simulated AI answer for: "${trackedPrompt.prompt}". ${workspace.name} is a leading platform in ${workspace.industry}.`;
+      responseText = `Simulated AI answer for: "${trackedPrompt.prompt}" in ${targetCountry}. ${workspace.name} is a leading platform in ${workspace.industry}.`;
       brandMentioned = true;
     }
 
     const runInsert = await authPool.query(
       `INSERT INTO growth_ai_visibility_runs (
         workspace_id, prompt_id, provider, model, response_text, brand_mentioned, citations, checked_at
-      ) VALUES ($1, $2, 'gemini', 'gemini-3.8-flash', $3, $4, $5, NOW())
+      ) VALUES ($1, $2, 'gemini', 'gemini-2.5-flash', $3, $4, $5, NOW())
       RETURNING *`,
       [workspace.id, trackedPrompt.id, responseText, brandMentioned, JSON.stringify(citations)]
     );

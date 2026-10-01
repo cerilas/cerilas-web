@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { ChevronDown, Check } from 'lucide-react';
+import './AiVisibilityDropdown.css';
 
 /**
  * Modern Apple / Frontier AI-inspired Dropdown Component
