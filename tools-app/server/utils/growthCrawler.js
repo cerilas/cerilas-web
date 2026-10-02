@@ -367,3 +367,288 @@ Only return pure JSON, no markdown codeblocks, no extra explanations.`;
     };
   }
 }
+
+/**
+ * Live, real-time audit of AI Search Readiness (GEO Standards)
+ * Tests Robots.txt for AI bots, /llms.txt standard, and Schema.org Entity/Organization JSON-LD
+ */
+export async function auditGeoReadiness(rawDomain) {
+  if (!rawDomain) throw new Error('Alan adı belirtilmedi.');
+
+  let domain = String(rawDomain).trim().toLowerCase();
+  domain = domain.replace(/^https?:\/\//, '').replace(/\/.*$/, '');
+  const baseUrl = `https://${domain}`;
+
+  // 1. Robots.txt AI Bot Crawlers
+  let robotsTxtFound = false;
+  let robotsContent = '';
+  let robotsUrl = `${baseUrl}/robots.txt`;
+
+  try {
+    const res = await fetch(robotsUrl, {
+      signal: AbortSignal.timeout(6000),
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (compatible; CerilasGrowthBot/1.0; +https://tools.cerilas.com/growth)'
+      }
+    });
+    if (res.ok) {
+      robotsTxtFound = true;
+      robotsContent = await res.text();
+    }
+  } catch (err) {
+    try {
+      const httpRes = await fetch(`http://${domain}/robots.txt`, {
+        signal: AbortSignal.timeout(4000)
+      });
+      if (httpRes.ok) {
+        robotsTxtFound = true;
+        robotsContent = await httpRes.text();
+        robotsUrl = `http://${domain}/robots.txt`;
+      }
+    } catch {}
+  }
+
+  const aiBotDefinitions = [
+    { id: 'google-extended', name: 'Google-Extended', token: 'google-extended', company: 'Google Gemini & Vertex', logo: '/AI-logos/gemini-color.svg' },
+    { id: 'gptbot', name: 'GPTBot', token: 'gptbot', company: 'OpenAI ChatGPT', logo: '/AI-logos/chatgpt-black.svg' },
+    { id: 'perplexity', name: 'PerplexityBot', token: 'perplexitybot', company: 'Perplexity AI', logo: '/AI-logos/perplexity-color.svg' },
+    { id: 'claudebot', name: 'ClaudeBot', token: 'claudebot', company: 'Anthropic Claude', logo: '/AI-logos/claude-color.svg' }
+  ];
+
+  let robotsParsed = { records: [] };
+  if (robotsTxtFound && robotsContent) {
+    const lines = robotsContent.split(/\r?\n/);
+    let currentUas = [];
+    let currentRules = [];
+
+    const flush = () => {
+      if (currentUas.length > 0) {
+        robotsParsed.records.push({
+          userAgents: currentUas.map(u => u.toLowerCase().trim()),
+          rules: currentRules
+        });
+      }
+      currentUas = [];
+      currentRules = [];
+    };
+
+    for (let line of lines) {
+      const hash = line.indexOf('#');
+      if (hash !== -1) line = line.substring(0, hash);
+      line = line.trim();
+      if (!line) continue;
+
+      const colon = line.indexOf(':');
+      if (colon === -1) continue;
+
+      const key = line.substring(0, colon).trim().toLowerCase();
+      const val = line.substring(colon + 1).trim();
+
+      if (key === 'user-agent') {
+        if (currentRules.length > 0) flush();
+        currentUas.push(val);
+      } else if (key === 'allow') {
+        currentRules.push({ type: 'allow', path: val });
+      } else if (key === 'disallow') {
+        currentRules.push({ type: 'disallow', path: val });
+      }
+    }
+    flush();
+  }
+
+  const checkBotAccess = (token) => {
+    if (!robotsTxtFound) return { allowed: true, status: 'no_robots_file', rule: null };
+
+    const specificRecord = robotsParsed.records.find(r => r.userAgents.includes(token.toLowerCase()));
+    if (specificRecord) {
+      const rootDisallow = specificRecord.rules.find(r => r.type === 'disallow' && (r.path === '/' || r.path === '/*'));
+      const rootAllow = specificRecord.rules.find(r => r.type === 'allow' && (r.path === '/' || r.path === '/*'));
+      if (rootDisallow && !rootAllow) return { allowed: false, status: 'explicit_disallowed', rule: 'Disallow: /' };
+      if (rootAllow) return { allowed: true, status: 'explicit_allowed', rule: 'Allow: /' };
+      const emptyDisallow = specificRecord.rules.find(r => r.type === 'disallow' && r.path === '');
+      if (emptyDisallow) return { allowed: true, status: 'explicit_allowed', rule: 'Disallow: (Boş)' };
+      return { allowed: true, status: 'partial_allowed', rule: null };
+    }
+
+    const starRecord = robotsParsed.records.find(r => r.userAgents.includes('*'));
+    if (starRecord) {
+      const rootDisallow = starRecord.rules.find(r => r.type === 'disallow' && (r.path === '/' || r.path === '/*'));
+      const rootAllow = starRecord.rules.find(r => r.type === 'allow' && (r.path === '/' || r.path === '/*'));
+      if (rootDisallow && !rootAllow) return { allowed: false, status: 'wildcard_disallowed', rule: 'User-agent: * Disallow: /' };
+      return { allowed: true, status: 'wildcard_allowed', rule: 'User-agent: *' };
+    }
+
+    return { allowed: true, status: 'default_allowed', rule: null };
+  };
+
+  const crawlerStatuses = aiBotDefinitions.map(bot => {
+    const access = checkBotAccess(bot.token);
+    return {
+      ...bot,
+      allowed: access.allowed,
+      ruleText: access.rule,
+      status: access.status
+    };
+  });
+
+  const allAiAllowed = crawlerStatuses.every(c => c.allowed);
+  const anyAiBlocked = crawlerStatuses.some(c => !c.allowed);
+
+  // 2. /llms.txt Standard
+  let llmsTxtFound = false;
+  let llmsTxtUrl = `${baseUrl}/llms.txt`;
+  let llmsTxtSnippet = '';
+  let llmsTxtSize = 0;
+
+  try {
+    const llmsRes = await fetch(llmsTxtUrl, {
+      signal: AbortSignal.timeout(6000),
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (compatible; CerilasGrowthBot/1.0; +https://tools.cerilas.com/growth)'
+      }
+    });
+    if (llmsRes.ok) {
+      const text = await llmsRes.text();
+      const isHtml = /^\s*<!doctype html|<html/i.test(text);
+      if (!isHtml && text.trim().length > 15) {
+        llmsTxtFound = true;
+        llmsTxtSize = text.length;
+        llmsTxtSnippet = text.trim().slice(0, 300);
+      }
+    }
+  } catch {}
+
+  // 3. Homepage Schema.org Organization & Entity Extraction
+  let schemaFound = false;
+  let hasOrganizationSchema = false;
+  let schemaTypes = [];
+  let pageTitle = '';
+  let metaDescription = '';
+  let wordCount = 0;
+  let hasEntityLogo = false;
+  let sameAsLinks = [];
+
+  try {
+    const pageRes = await fetch(baseUrl, {
+      signal: AbortSignal.timeout(8000),
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (compatible; CerilasGrowthBot/1.0; +https://tools.cerilas.com/growth)',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
+      }
+    });
+
+    if (pageRes.ok) {
+      const html = await pageRes.text();
+
+      const titleMatch = html.match(/<title[^>]*>([^<]+)<\/title>/i);
+      if (titleMatch) pageTitle = titleMatch[1].trim();
+
+      const descMatch = html.match(/<meta[^>]*name=["']description["'][^>]*content=["']([^"']*)["']/i) ||
+                        html.match(/<meta[^>]*content=["']([^"']*)["'][^>]*name=["']description["']/i);
+      if (descMatch) metaDescription = descMatch[1].trim();
+
+      const textOnly = html
+        .replace(/<script[\s\S]*?<\/script>/gi, ' ')
+        .replace(/<style[\s\S]*?<\/style>/gi, ' ')
+        .replace(/<[^>]+>/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+      wordCount = textOnly.split(' ').filter(w => w.length > 1).length;
+
+      const jsonLdMatches = [...html.matchAll(/<script[^>]*type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi)];
+      for (const m of jsonLdMatches) {
+        try {
+          const parsed = JSON.parse(m[1]);
+          const checkItem = (item) => {
+            if (!item) return;
+            const type = item['@type'];
+            if (type) {
+              if (Array.isArray(type)) schemaTypes.push(...type);
+              else schemaTypes.push(type);
+
+              const lowerType = String(type).toLowerCase();
+              if (lowerType.includes('organization') || lowerType.includes('corporation') || lowerType.includes('localbusiness')) {
+                hasOrganizationSchema = true;
+                if (item.logo) hasEntityLogo = true;
+                if (Array.isArray(item.sameAs)) sameAsLinks.push(...item.sameAs);
+                else if (item.sameAs) sameAsLinks.push(item.sameAs);
+              }
+            }
+          };
+
+          if (Array.isArray(parsed)) {
+            parsed.forEach(checkItem);
+          } else if (parsed['@graph'] && Array.isArray(parsed['@graph'])) {
+            parsed['@graph'].forEach(checkItem);
+          } else {
+            checkItem(parsed);
+          }
+        } catch {}
+      }
+      schemaTypes = [...new Set(schemaTypes)];
+      schemaFound = schemaTypes.length > 0;
+    }
+  } catch (err) {
+    console.warn('[GEO HTML Scan Warning]:', err.message);
+  }
+
+  // 4. Calculate Real GEO Readiness Score (0 - 100)
+  let geoScore = 0;
+
+  // Robots.txt & AI Crawlers: up to 35 pts
+  if (robotsTxtFound) geoScore += 5;
+  crawlerStatuses.forEach(c => {
+    if (c.allowed) {
+      if (c.id === 'google-extended') geoScore += 8;
+      else if (c.id === 'gptbot') geoScore += 10;
+      else if (c.id === 'perplexity') geoScore += 7;
+      else if (c.id === 'claudebot') geoScore += 5;
+    }
+  });
+
+  // /llms.txt Standard: 25 pts
+  if (llmsTxtFound) geoScore += 25;
+
+  // Schema & Knowledge Graph: up to 25 pts
+  if (hasOrganizationSchema) geoScore += 15;
+  if (schemaTypes.length > 1) geoScore += 5;
+  if (hasEntityLogo || sameAsLinks.length > 0) geoScore += 5;
+
+  // AI Content Baseline: up to 15 pts
+  if (pageTitle) geoScore += 5;
+  if (metaDescription) geoScore += 5;
+  if (wordCount >= 250) geoScore += 5;
+
+  geoScore = Math.max(15, Math.min(100, geoScore));
+
+  return {
+    domain,
+    geoScore,
+    auditedAt: new Date().toISOString(),
+    robots: {
+      found: robotsTxtFound,
+      url: robotsUrl,
+      crawlers: crawlerStatuses,
+      allAllowed: allAiAllowed,
+      anyBlocked: anyAiBlocked
+    },
+    llmsTxt: {
+      found: llmsTxtFound,
+      url: llmsTxtUrl,
+      sizeBytes: llmsTxtSize,
+      snippet: llmsTxtSnippet
+    },
+    schema: {
+      found: schemaFound,
+      hasOrganization: hasOrganizationSchema,
+      types: schemaTypes,
+      hasEntityLogo,
+      sameAsCount: sameAsLinks.length
+    },
+    content: {
+      pageTitle,
+      hasMetaDescription: !!metaDescription,
+      wordCount
+    }
+  };
+}

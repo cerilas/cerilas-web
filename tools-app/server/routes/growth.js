@@ -1,8 +1,8 @@
 import express from 'express';
 import jwt from 'jsonwebtoken';
 import { authPool } from '../db.js';
-import { scanDomain, extractBrandProfileWithAi, validatePublicUrl } from '../utils/growthCrawler.js';
 import { GoogleGenAI } from '@google/genai';
+import { scanDomain, extractBrandProfileWithAi, validatePublicUrl, auditGeoReadiness } from '../utils/growthCrawler.js';
 import {
   getGrowthGoogleAuthUrl,
   getGrowthIntegrationsOverview,
@@ -879,6 +879,147 @@ Cite real brands, websites, and sources if relevant.`;
   } catch (err) {
     console.error('[AI Visibility Run Error]:', err);
     res.status(500).json({ error: err.message || 'AI görünürlük simülasyonu çalıştırılamadı.' });
+  }
+});
+
+/**
+ * GET /api/growth/workspaces/:slugOrId/geo-readiness
+ * Fetch latest GEO readiness audit for workspace domain, or trigger one if never audited
+ */
+router.get('/workspaces/:slugOrId/geo-readiness', requireAuth, async (req, res) => {
+  try {
+    const authData = await resolveAndAuthorizeWorkspace(req, req.params.slugOrId);
+    if (!authData) return res.status(404).json({ error: 'Çalışma alanı bulunamadı.' });
+
+    const { workspace } = authData;
+    const targetDomain = workspace.primary_domain;
+
+    if (!targetDomain) {
+      return res.json({
+        success: true,
+        data: null,
+        message: 'Çalışma alanına ait bir birincil alan adı (domain) tanımlı değil.'
+      });
+    }
+
+    // Check last saved audit
+    const lastAuditRes = await authPool.query(
+      `SELECT * FROM growth_geo_readiness_audits 
+       WHERE workspace_id = $1 
+       ORDER BY id DESC LIMIT 1`,
+      [workspace.id]
+    );
+
+    if (lastAuditRes.rows.length > 0) {
+      const row = lastAuditRes.rows[0];
+      return res.json({
+        success: true,
+        data: {
+          id: row.id,
+          domain: row.domain,
+          geoScore: row.geo_score,
+          auditedAt: row.audited_at,
+          robots: row.robots_ai_status || {},
+          llmsTxt: {
+            found: row.llms_txt_found,
+            url: row.llms_txt_url,
+            ...(row.details?.llmsTxt || {})
+          },
+          schema: {
+            found: row.schema_org_found,
+            hasOrganization: row.schema_org_found,
+            types: row.schema_types || [],
+            ...(row.details?.schema || {})
+          },
+          content: row.details?.content || {}
+        }
+      });
+    }
+
+    // If no previous audit exists, perform live audit now
+    const auditData = await auditGeoReadiness(targetDomain);
+
+    await authPool.query(
+      `INSERT INTO growth_geo_readiness_audits (
+        workspace_id, domain, geo_score, robots_txt_found, robots_ai_status,
+        llms_txt_found, llms_txt_url, schema_org_found, schema_types, details, audited_at
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, NOW())`,
+      [
+        workspace.id,
+        auditData.domain,
+        auditData.geoScore,
+        auditData.robots.found,
+        JSON.stringify(auditData.robots),
+        auditData.llmsTxt.found,
+        auditData.llmsTxt.url,
+        auditData.schema.hasOrganization,
+        JSON.stringify(auditData.schema.types),
+        JSON.stringify({
+          schema: auditData.schema,
+          llmsTxt: auditData.llmsTxt,
+          content: auditData.content
+        })
+      ]
+    );
+
+    res.json({
+      success: true,
+      data: auditData
+    });
+  } catch (err) {
+    console.error('[GET GEO Readiness Error]:', err);
+    res.status(500).json({ error: err.message || 'GEO hazırbulunuşluk verisi alınamadı.' });
+  }
+});
+
+/**
+ * POST /api/growth/workspaces/:slugOrId/geo-readiness/scan
+ * Force a live real-time re-scan of GEO readiness standards
+ */
+router.post('/workspaces/:slugOrId/geo-readiness/scan', requireAuth, async (req, res) => {
+  try {
+    const authData = await resolveAndAuthorizeWorkspace(req, req.params.slugOrId);
+    if (!authData) return res.status(404).json({ error: 'Çalışma alanı bulunamadı.' });
+
+    const { workspace } = authData;
+    const targetDomain = workspace.primary_domain;
+
+    if (!targetDomain) {
+      return res.status(400).json({ error: 'Bu çalışma alanına ait bir alan adı (domain) bulunamadı.' });
+    }
+
+    const auditData = await auditGeoReadiness(targetDomain);
+
+    await authPool.query(
+      `INSERT INTO growth_geo_readiness_audits (
+        workspace_id, domain, geo_score, robots_txt_found, robots_ai_status,
+        llms_txt_found, llms_txt_url, schema_org_found, schema_types, details, audited_at
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, NOW())`,
+      [
+        workspace.id,
+        auditData.domain,
+        auditData.geoScore,
+        auditData.robots.found,
+        JSON.stringify(auditData.robots),
+        auditData.llmsTxt.found,
+        auditData.llmsTxt.url,
+        auditData.schema.hasOrganization,
+        JSON.stringify(auditData.schema.types),
+        JSON.stringify({
+          schema: auditData.schema,
+          llmsTxt: auditData.llmsTxt,
+          content: auditData.content
+        })
+      ]
+    );
+
+    res.json({
+      success: true,
+      data: auditData
+    });
+  } catch (err) {
+    console.error('[POST GEO Readiness Scan Error]:', err);
+    res.status(500).json({ error: err.message || 'Canlı GEO taraması yapılamadı.' });
   }
 });
 

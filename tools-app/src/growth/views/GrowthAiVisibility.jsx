@@ -7,7 +7,7 @@ import {
   CheckCircle2, 
   AlertCircle, 
   Globe, 
-  Languages,
+  Languages, 
   ExternalLink, 
   Loader2, 
   FileText,
@@ -15,6 +15,10 @@ import {
   MessageSquare,
   ShieldCheck,
   Zap,
+  RefreshCw,
+  Clock,
+  Check,
+  ArrowUpRight,
   X
 } from 'lucide-react';
 import { useGrowth } from '../GrowthContext';
@@ -25,6 +29,22 @@ import { SkeletonBlock } from '../components/GrowthSkeleton';
 import AiVisibilityDropdown from '../../tools/ai-visibility-checker/components/AiVisibilityDropdown';
 import FlagIcon from '../../tools/ai-visibility-checker/components/FlagIcon';
 import { MARKET_OPTIONS, LANGUAGE_OPTIONS, getMarketOption, getLanguageOption } from '../../tools/ai-visibility-checker/options';
+
+function formatRelativeTime(dateStr) {
+  if (!dateStr) return '';
+  try {
+    const diffMs = Date.now() - new Date(dateStr).getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    if (diffMins < 1) return 'Az önce';
+    if (diffMins < 60) return `${diffMins} dk önce`;
+    const diffHours = Math.floor(diffMins / 60);
+    if (diffHours < 24) return `${diffHours} sa önce`;
+    const diffDays = Math.floor(diffHours / 24);
+    return `${diffDays} gün önce`;
+  } catch {
+    return '';
+  }
+}
 
 export default function GrowthAiVisibility() {
   const { activeWorkspace } = useGrowth();
@@ -40,6 +60,12 @@ export default function GrowthAiVisibility() {
   const [addingPrompt, setAddingPrompt] = useState(false);
   const [runningPromptId, setRunningPromptId] = useState(null);
   const [lastRunResult, setLastRunResult] = useState(null);
+
+  // Live Real-Time GEO Readiness Audit
+  const [geoReadiness, setGeoReadiness] = useState(null);
+  const [loadingGeoReadiness, setLoadingGeoReadiness] = useState(true);
+  const [scanningGeoReadiness, setScanningGeoReadiness] = useState(false);
+  const [geoError, setGeoError] = useState(null);
 
   const fetchPrompts = async () => {
     if (!activeWorkspace?.id || !token) return;
@@ -58,9 +84,39 @@ export default function GrowthAiVisibility() {
     }
   };
 
+  const fetchGeoReadiness = async (forceRescan = false) => {
+    if (!activeWorkspace?.id || !token || !activeWorkspace?.primary_domain) {
+      setLoadingGeoReadiness(false);
+      return;
+    }
+    if (forceRescan) setScanningGeoReadiness(true);
+    else setLoadingGeoReadiness(true);
+    setGeoError(null);
+
+    try {
+      const endpoint = forceRescan
+        ? `/api/growth/workspaces/${activeWorkspace.id}/geo-readiness/scan`
+        : `/api/growth/workspaces/${activeWorkspace.id}/geo-readiness`;
+      const res = await fetch(endpoint, {
+        method: forceRescan ? 'POST' : 'GET',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'GEO analizi alınamadı.');
+      setGeoReadiness(data.data);
+    } catch (err) {
+      console.error('Fetch GEO readiness error:', err);
+      setGeoError(err.message);
+    } finally {
+      setLoadingGeoReadiness(false);
+      setScanningGeoReadiness(false);
+    }
+  };
+
   useEffect(() => {
     fetchPrompts();
-  }, [activeWorkspace?.id, token]);
+    fetchGeoReadiness(false);
+  }, [activeWorkspace?.id, activeWorkspace?.primary_domain, token]);
 
   const handleAddPrompt = async (e) => {
     e.preventDefault();
@@ -123,7 +179,12 @@ export default function GrowthAiVisibility() {
         subtitle="Google Gemini, ChatGPT Search ve Perplexity gibi yapay zeka arama motorlarında markanızın anılma ve kaynak gösterilme oranı."
         coverImage="/growth-covers/geo-cover.jpg"
         stats={[
-          { label: 'GEO Hazırbulunuşluk', value: '75/100', positive: true, sub: 'Aktif Standartlar' },
+          { 
+            label: 'GEO Hazırbulunuşluk', 
+            value: geoReadiness ? `${geoReadiness.geoScore}/100` : loadingGeoReadiness ? 'Taranıyor...' : 'Belirlenmedi', 
+            positive: (geoReadiness?.geoScore || 0) >= 70, 
+            sub: geoReadiness ? 'Canlı Standartlar' : 'Analiz Ediliyor' 
+          },
           { label: 'AI Motorları', value: '4 Büyük Model', sub: 'Gemini, GPT, Perplexity, Claude' }
         ]}
         actions={<AiEngineGroup size={22} />}
@@ -144,53 +205,172 @@ export default function GrowthAiVisibility() {
       </div>
 
       {/* GEO Readiness Indicators Card */}
-      <div className="growth-panel-card">
+      <div className="growth-panel-card geo-readiness-panel">
         <div className="growth-panel-header">
           <div>
-            <h3 className="growth-panel-title">Yapay Zeka Arama Hazırbulunuşluk Standartları</h3>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+              <h3 className="growth-panel-title">Yapay Zeka Arama Hazırbulunuşluk Standartları</h3>
+              {geoReadiness?.auditedAt && (
+                <span className="geo-audit-time-pill" title={new Date(geoReadiness.auditedAt).toLocaleString('tr-TR')}>
+                  <Clock size={12} />
+                  <span>Son Test: {formatRelativeTime(geoReadiness.auditedAt)}</span>
+                </span>
+              )}
+            </div>
             <p className="growth-panel-desc">
               AI crawler botlarının sitenizi anlamlandırması ve güvenilir bir kaynak olarak alıntılaması için gereken temel yapılar.
             </p>
           </div>
-          <span className="growth-score-badge">GEO Skoru: 75/100</span>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <button
+              type="button"
+              className="growth-secondary-btn geo-rescan-btn"
+              onClick={() => fetchGeoReadiness(true)}
+              disabled={scanningGeoReadiness || loadingGeoReadiness || !activeWorkspace?.primary_domain}
+              title="Canlı robots.txt, /llms.txt ve Schema.org testini tekrar çalıştır"
+            >
+              <RefreshCw size={13} className={scanningGeoReadiness ? 'spin' : ''} />
+              <span>{scanningGeoReadiness ? 'Canlı Taranıyor...' : 'Canlı Test Et'}</span>
+            </button>
+
+            {loadingGeoReadiness && !geoReadiness ? (
+              <span className="growth-score-badge loading">Hesaplanıyor...</span>
+            ) : geoReadiness ? (
+              <span className={`growth-score-badge ${geoReadiness.geoScore >= 80 ? 'good' : geoReadiness.geoScore >= 50 ? 'warning' : 'danger'}`}>
+                GEO Skoru: {geoReadiness.geoScore}/100
+              </span>
+            ) : (
+              <span className="growth-score-badge warning">Test Bekleniyor</span>
+            )}
+          </div>
         </div>
 
-        <div className="growth-geo-standards-grid">
-          <div className="geo-standard-item is-verified">
-            <CheckCircle2 size={18} className="text-success" />
+        {!activeWorkspace?.primary_domain ? (
+          <div className="geo-no-domain-alert">
+            <AlertCircle size={18} className="text-warning" />
             <div>
-              <span className="standard-name">Robots.txt AI Bot İzinleri</span>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 4, flexWrap: 'wrap' }}>
-                <span className="standard-sub">İzin Verilen Crawler'lar:</span>
-                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: 'rgba(255,255,255,0.06)', padding: '2px 6px', borderRadius: 4, fontSize: '0.72rem' }}>
-                  <img src="/AI-logos/gemini-color.svg" alt="Google" style={{ width: 12, height: 12 }} /> Google-Extended
+              <strong>Birincil Alan Adı Tanımlanmamış</strong>
+              <p>Yapay zeka hazırbulunuşluk analizi için lütfen Ayarlar'dan web sitenizin alan adını ekleyin.</p>
+            </div>
+          </div>
+        ) : loadingGeoReadiness && !geoReadiness ? (
+          <div className="growth-geo-standards-grid">
+            {[1, 2, 3].map(i => (
+              <div key={i} className="geo-standard-item loading" style={{ opacity: 0.7 }}>
+                <SkeletonBlock width="20px" height="20px" borderRadius="50%" />
+                <div style={{ flex: 1 }}>
+                  <SkeletonBlock width="55%" height="16px" borderRadius="4px" />
+                  <SkeletonBlock width="85%" height="13px" borderRadius="4px" style={{ marginTop: 6 }} />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : geoReadiness ? (
+          <div className="growth-geo-standards-grid">
+            {/* 1. Robots.txt AI Bot Permissions */}
+            <div className={`geo-standard-item ${geoReadiness.robots?.allAllowed ? 'is-verified' : geoReadiness.robots?.anyBlocked ? 'is-blocked' : 'is-warning'}`}>
+              {geoReadiness.robots?.allAllowed ? (
+                <CheckCircle2 size={20} className="text-success" />
+              ) : (
+                <AlertCircle size={20} className="text-warning" />
+              )}
+              <div style={{ flex: 1 }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 6 }}>
+                  <span className="standard-name">Robots.txt AI Bot İzinleri</span>
+                  <span className={`geo-status-tag ${geoReadiness.robots?.allAllowed ? 'success' : geoReadiness.robots?.anyBlocked ? 'danger' : 'warning'}`}>
+                    {geoReadiness.robots?.allAllowed ? 'Tüm AI Botlarına Açık' : geoReadiness.robots?.anyBlocked ? 'Bazı Botlar Engelli' : 'Kısmi İzin'}
+                  </span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 6, flexWrap: 'wrap' }}>
+                  <span className="standard-sub">Taranan Botlar:</span>
+                  {(geoReadiness.robots?.crawlers || []).map((bot) => (
+                    <span
+                      key={bot.id}
+                      className={`geo-bot-chip ${bot.allowed ? 'allowed' : 'blocked'}`}
+                      title={`${bot.name} (${bot.company}): ${bot.allowed ? 'İzinli (' + (bot.ruleText || 'Erişilebilir') + ')' : 'Engelli'}`}
+                    >
+                      {bot.logo && (
+                        <img src={bot.logo} alt={bot.name} style={{ width: 12, height: 12, objectFit: 'contain' }} />
+                      )}
+                      <span>{bot.name}</span>
+                      {bot.allowed ? (
+                        <Check size={11} className="text-success" />
+                      ) : (
+                        <X size={11} className="text-danger" />
+                      )}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* 2. /llms.txt Standard */}
+            <div className={`geo-standard-item ${geoReadiness.llmsTxt?.found ? 'is-verified' : 'is-missing'}`}>
+              {geoReadiness.llmsTxt?.found ? (
+                <CheckCircle2 size={20} className="text-success" />
+              ) : (
+                <AlertCircle size={20} className="text-warning" />
+              )}
+              <div style={{ flex: 1 }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 6 }}>
+                  <span className="standard-name">/llms.txt Standardı</span>
+                  {geoReadiness.llmsTxt?.found ? (
+                    <span className="geo-status-tag success">Doğrulandı ({geoReadiness.llmsTxt.sizeBytes ? `${Math.round(geoReadiness.llmsTxt.sizeBytes / 1024 * 10) / 10} KB` : 'Aktif'})</span>
+                  ) : (
+                    <span className="geo-status-tag warning">Bulunamadı (404)</span>
+                  )}
+                </div>
+                <span className="standard-sub" style={{ marginTop: 4, display: 'block' }}>
+                  {geoReadiness.llmsTxt?.found ? (
+                    <>
+                      Yapay zeka modelleri için yapılandırılmış özet dosyası aktif.{' '}
+                      <a href={geoReadiness.llmsTxt.url} target="_blank" rel="noopener noreferrer" className="geo-inline-link">
+                        Dosyayı Görüntüle <ExternalLink size={10} />
+                      </a>
+                    </>
+                  ) : (
+                    <>
+                      Yapay zeka modellerinin markanızı doğru anlaması için kök dizinde <code>/llms.txt</code> dosyası bulunamadı.{' '}
+                      <a href="#/tool/llms-txt-tools" className="geo-inline-link">
+                        llms.txt Oluşturucu ile Hazırla <ArrowUpRight size={10} />
+                      </a>
+                    </>
+                  )}
                 </span>
-                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: 'rgba(255,255,255,0.06)', padding: '2px 6px', borderRadius: 4, fontSize: '0.72rem' }}>
-                  <img src="/AI-logos/chatgpt-black.svg" alt="OpenAI" style={{ width: 12, height: 12, filter: 'brightness(2)' }} /> GPTBot
-                </span>
-                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: 'rgba(255,255,255,0.06)', padding: '2px 6px', borderRadius: 4, fontSize: '0.72rem' }}>
-                  <img src="/AI-logos/perplexity-color.svg" alt="Perplexity" style={{ width: 12, height: 12 }} /> PerplexityBot
+              </div>
+            </div>
+
+            {/* 3. Organization & Entity Schema */}
+            <div className={`geo-standard-item ${geoReadiness.schema?.hasOrganization ? 'is-verified' : 'is-missing'}`}>
+              {geoReadiness.schema?.hasOrganization ? (
+                <CheckCircle2 size={20} className="text-success" />
+              ) : (
+                <AlertCircle size={20} className="text-warning" />
+              )}
+              <div style={{ flex: 1 }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 6 }}>
+                  <span className="standard-name">Organization Şeması</span>
+                  <span className={`geo-status-tag ${geoReadiness.schema?.hasOrganization ? 'success' : 'warning'}`}>
+                    {geoReadiness.schema?.hasOrganization ? 'Varlık Tanımlı' : 'Şema Eksik'}
+                  </span>
+                </div>
+                <span className="standard-sub" style={{ marginTop: 4, display: 'block' }}>
+                  {geoReadiness.schema?.hasOrganization ? (
+                    <>
+                      Varlık (Entity) tanımlaması ve Knowledge Graph desteği doğrulandı.{' '}
+                      {geoReadiness.schema.types?.length > 0 && (
+                        <span style={{ opacity: 0.8 }}>(Türler: {geoReadiness.schema.types.join(', ')})</span>
+                      )}
+                    </>
+                  ) : (
+                    'Sitede Organization JSON-LD şeması bulunamadı. Yapay zeka motorlarının markanızı bir varlık olarak tanıması için JSON-LD şeması ekleyin.'
+                  )}
                 </span>
               </div>
             </div>
           </div>
-
-          <div className="geo-standard-item">
-            <AlertCircle size={18} className="text-warning" />
-            <div>
-              <span className="standard-name">/llms.txt Standardı</span>
-              <span className="standard-sub">Yapay zeka modelleri için yapılandırılmış özet dosyası.</span>
-            </div>
-          </div>
-
-          <div className="geo-standard-item is-verified">
-            <CheckCircle2 size={18} className="text-success" />
-            <div>
-              <span className="standard-name">Organization Şeması</span>
-              <span className="standard-sub">Varlık (Entity) tanımlaması ve Knowledge Graph desteği.</span>
-            </div>
-          </div>
-        </div>
+        ) : null}
       </div>
 
       {/* Add New Tracked Prompt */}
