@@ -99,6 +99,7 @@ export default function GrowthAiVisibility() {
   const [batchResultsMap, setBatchResultsMap] = useState({});
   const abortScanRef = useRef(false);
   const progressCardRef = useRef(null);
+  const reportPanelRef = useRef(null);
 
   // Historical Batch Reports State
   const [reportsList, setReportsList] = useState([]);
@@ -423,6 +424,9 @@ export default function GrowthAiVisibility() {
         if (saveRes.ok && saveData.data) {
           setActiveReport(saveData.data);
           fetchReportsList();
+          setTimeout(() => {
+            reportPanelRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }, 350);
         } else {
           setActiveReport({ ...reportPayload, created_at: new Date().toISOString() });
         }
@@ -662,23 +666,29 @@ export default function GrowthAiVisibility() {
 
       {/* 2. AI Visibility Summary Report (Minik Rapor) */}
       {activeReport && !isBatchScanning && (
-        <div className="ai-report-panel animate-fade">
+        <div ref={reportPanelRef} className="ai-report-panel animate-fade">
           <div className="ai-report-topbar">
             <div className="ai-report-top-left">
               <div className="ai-report-badge-row">
                 <span className="growth-badge blue">
                   <BarChart3 size={12} /> AI Görünürlük &amp; Alıntı Raporu
                 </span>
-                <span style={{ fontSize: '0.78rem', color: '#94a3b8', display: 'flex', alignItems: 'center', gap: 4 }}>
-                  <Calendar size={12} />
+                <span style={{ fontSize: '0.82rem', fontWeight: 600, color: '#38bdf8', display: 'flex', alignItems: 'center', gap: 5 }}>
+                  <Calendar size={13} />
                   <span>{formatFullDate(activeReport.created_at)}</span>
+                  <span style={{ color: '#94a3b8', fontWeight: 400 }}>({formatRelativeTime(activeReport.created_at)})</span>
                 </span>
                 <span className="growth-badge neutral">
                   <img src="/AI-logos/gemini-color.svg" alt="Gemini" style={{ width: 12, height: 12 }} />
                   <span>{activeReport.model || 'gemini-3.8-flash'}</span>
                 </span>
               </div>
-              <h3 className="ai-report-heading">Genel Yapay Zeka Arama Performansı</h3>
+              <h3 className="ai-report-heading">
+                {formatFullDate(activeReport.created_at)} Tarihli Toplu Tarama Raporu
+              </h3>
+              <p style={{ margin: 0, fontSize: '0.82rem', color: '#94a3b8' }}>
+                Toplam {activeReport.total_prompts} adet takip edilen arama sorusunun taranmasıyla oluşturulan zaman damgalı performans özeti.
+              </p>
             </div>
 
             <div className="ai-report-top-right">
@@ -909,6 +919,103 @@ export default function GrowthAiVisibility() {
         </div>
       )}
 
+      {/* 3. Historical AI Reports Timeline & Archive (Zamana Göre Kayıtlı Raporlar) */}
+      {reportsList.length > 0 && !isBatchScanning && (
+        <div id="ai-reports-history-section" className="growth-panel-card ai-reports-history-panel animate-fade">
+          <div className="growth-panel-header">
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: 4 }}>
+                <span className="growth-badge purple">
+                  <History size={12} /> Zaman Çizelgesi &amp; Rapor Arşivi
+                </span>
+                <span style={{ fontSize: '0.78rem', color: '#94a3b8' }}>
+                  Toplam {reportsList.length} Zaman Damgalı Tarama Kaydı
+                </span>
+              </div>
+              <h3 className="growth-panel-title">Zamana Göre Kayıtlı AI Görünürlük Raporları</h3>
+              <p className="growth-panel-desc">
+                Tüm promptlarınızın her taranması zaman damgalı tek bir rapor (snapshot) olarak kaydedilir. Herhangi bir rapora tıklayarak o tarihteki AI görünürlük durumunu inceleyebilirsiniz.
+              </p>
+            </div>
+          </div>
+
+          <div className="ai-reports-history-grid">
+            {reportsList.map((rep) => {
+              const isSelected = activeReport?.id === rep.id;
+              const repScore = Number(rep.visibility_score) || 0;
+              const scoreClass = repScore >= 70 ? '' : repScore >= 40 ? 'warning' : 'danger';
+
+              return (
+                <div
+                  key={rep.id}
+                  onClick={() => {
+                    handleLoadReport(rep.id);
+                    reportPanelRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  }}
+                  className={`ai-history-report-card ${isSelected ? 'active' : ''}`}
+                  title="Bu tarihteki rapor detaylarını incele"
+                >
+                  <div className="ai-history-card-top">
+                    <div className="ai-history-date-box">
+                      <span className="ai-history-date-full">
+                        <Calendar size={13} color="#3b82f6" />
+                        <span>{formatFullDate(rep.created_at)}</span>
+                      </span>
+                      <span className="ai-history-date-rel">
+                        <Clock size={11} style={{ display: 'inline', marginRight: 3, verticalAlign: 'text-bottom' }} />
+                        {formatRelativeTime(rep.created_at)}
+                      </span>
+                    </div>
+
+                    <div className={`ai-history-score-badge ${scoreClass}`}>
+                      <span>%{repScore} GEO</span>
+                    </div>
+                  </div>
+
+                  <div className="ai-history-stats-row">
+                    <div className="ai-history-stat-item">
+                      <span className="ai-history-stat-label">Taranan</span>
+                      <span className="ai-history-stat-val">{rep.total_prompts} Prompt</span>
+                    </div>
+                    <div className="ai-history-stat-item">
+                      <span className="ai-history-stat-label">Marka</span>
+                      <span className="ai-history-stat-val" style={{ color: rep.mentioned_count > 0 ? '#34d399' : '#f87171' }}>
+                        {rep.mentioned_count} Anıldı
+                      </span>
+                    </div>
+                    <div className="ai-history-stat-item">
+                      <span className="ai-history-stat-label">Alıntı</span>
+                      <span className="ai-history-stat-val" style={{ color: rep.cited_count > 0 ? '#34d399' : '#94a3b8' }}>
+                        {rep.cited_count} Site
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="ai-history-card-footer">
+                    <button
+                      type="button"
+                      className="ai-history-view-btn"
+                    >
+                      <span>{isSelected ? '✓ Şu An İnceleniyor' : 'Raporu İncele'}</span>
+                      <ArrowUpRight size={13} />
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={(e) => handleDeleteReport(rep.id, e)}
+                      className="ai-history-delete-btn"
+                      title="Bu raporu arşivden sil"
+                    >
+                      <Trash2 size={13} />
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
       {/* Individual Prompt Test Drawer (Single Run Result) */}
       {lastRunResult && !isBatchScanning && (
         <div className="growth-ai-run-result-banner animate-fade">
@@ -1092,7 +1199,7 @@ export default function GrowthAiVisibility() {
           <div>
             <h3 className="growth-panel-title">Takip Edilen Promptlar ({prompts.length} / 10)</h3>
             <p className="growth-panel-desc">
-              Düzenli aralıklarla test edilen arama sorguları ve en son anılma durumu.
+              Düzenli aralıklarla test edilen arama sorguları. Tümünü sırayla tarayarak zaman damgalı tek bir snapshot raporu oluşturabilirsiniz.
             </p>
           </div>
 
@@ -1122,6 +1229,7 @@ export default function GrowthAiVisibility() {
               onClick={handleStartBatchScan}
               className="growth-primary-btn"
               style={{ padding: '0.45rem 0.95rem', fontSize: '0.82rem' }}
+              title="Tüm promptları sırayla test eder ve zaman damgalı tek bir rapor oluşturup kaydeder"
             >
               {isBatchScanning ? (
                 <>
@@ -1131,7 +1239,7 @@ export default function GrowthAiVisibility() {
               ) : (
                 <>
                   <Zap size={14} />
-                  <span>Tümünü Sırayla Tara ({prompts.length})</span>
+                  <span>Tümünü Sırayla Tara (1 Rapor Oluştur)</span>
                 </>
               )}
             </button>
