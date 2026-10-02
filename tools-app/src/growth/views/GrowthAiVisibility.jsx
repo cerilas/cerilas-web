@@ -40,6 +40,7 @@ import { useAuth } from '../../context/AuthContext';
 import GrowthPageCover from '../components/GrowthPageCover';
 import AiEngineBadge, { AiEngineGroup } from '../components/AiEngineBadge';
 import { SkeletonBlock } from '../components/GrowthSkeleton';
+import GoogleBusinessProfileCard from '../components/GoogleBusinessProfileCard';
 import AiVisibilityDropdown from '../../tools/ai-visibility-checker/components/AiVisibilityDropdown';
 import FlagIcon from '../../tools/ai-visibility-checker/components/FlagIcon';
 import { MARKET_OPTIONS, LANGUAGE_OPTIONS, getMarketOption, getLanguageOption } from '../../tools/ai-visibility-checker/options';
@@ -1048,6 +1049,9 @@ export default function GrowthAiVisibility() {
           )}
         </div>
       )}
+
+      {/* Google Business Profile & Local Reviews Radar */}
+      <GoogleBusinessProfileCard />
 
       {/* Add New Tracked Prompt Card */}
       <div className="growth-panel-card growth-add-prompt-card">

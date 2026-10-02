@@ -13,6 +13,11 @@ import {
   getValidGrowthAccessToken
 } from '../utils/googleGrowthIntegration.js';
 import { inspectSearchConsoleUrl } from '../utils/googleAuth.js';
+import {
+  searchGoogleBusiness,
+  getDetailedBusinessProfile,
+  generateGoogleReviewReply
+} from '../utils/googleBusinessService.js';
 
 const router = express.Router();
 const JWT_SECRET = process.env.JWT_SECRET || 'cerilas_admin_jwt_secret_2026';
@@ -2001,6 +2006,257 @@ router.post('/workspaces/:slugOrId/sync-analytics', requireAuth, async (req, res
   } catch (err) {
     console.error('[GA4 Manual Sync Error]:', err);
     res.status(500).json({ error: err.message || 'Senkronizasyon başarısız oldu.' });
+  }
+});
+
+/**
+ * ----------------------------------------------------
+ * Google Business Profile & Local Reviews Endpoints
+ * ----------------------------------------------------
+ */
+
+/**
+ * GET /api/growth/workspaces/:slugOrId/google-business
+ * Get saved Google Business Profile for workspace
+ */
+router.get('/workspaces/:slugOrId/google-business', requireAuth, async (req, res) => {
+  try {
+    const authData = await resolveAndAuthorizeWorkspace(req, req.params.slugOrId);
+    if (!authData) return res.status(404).json({ error: 'Çalışma alanı bulunamadı.' });
+
+    const workspace = authData.workspace;
+    const profileRes = await authPool.query(
+      'SELECT * FROM growth_business_profiles WHERE workspace_id = $1',
+      [workspace.id]
+    );
+
+    if (profileRes.rows.length === 0) {
+      return res.json({ connected: false, profile: null });
+    }
+
+    return res.json({ connected: true, profile: profileRes.rows[0] });
+  } catch (err) {
+    console.error('[Google Business Get Error]:', err);
+    res.status(500).json({ error: 'Google İşletme Profili getirilemedi.' });
+  }
+});
+
+/**
+ * POST /api/growth/workspaces/:slugOrId/google-business/search
+ * Search for business on Google Maps / Places
+ */
+router.post('/workspaces/:slugOrId/google-business/search', requireAuth, async (req, res) => {
+  try {
+    const authData = await resolveAndAuthorizeWorkspace(req, req.params.slugOrId);
+    if (!authData) return res.status(404).json({ error: 'Çalışma alanı bulunamadı.' });
+
+    const workspace = authData.workspace;
+    const query = req.body?.query || workspace.name;
+
+    const places = await searchGoogleBusiness(query, {
+      country: workspace.country || 'TR',
+      language: workspace.language || 'tr'
+    });
+
+    return res.json({ places });
+  } catch (err) {
+    console.error('[Google Business Search Error]:', err);
+    res.status(500).json({ error: 'Arama yapılırken hata oluştu.' });
+  }
+});
+
+/**
+ * POST /api/growth/workspaces/:slugOrId/google-business/connect
+ * Connect and analyze a Google Business Profile
+ */
+router.post('/workspaces/:slugOrId/google-business/connect', requireAuth, async (req, res) => {
+  try {
+    const authData = await resolveAndAuthorizeWorkspace(req, req.params.slugOrId);
+    if (!authData) return res.status(404).json({ error: 'Çalışma alanı bulunamadı.' });
+
+    const workspace = authData.workspace;
+    const { placeId, businessName } = req.body || {};
+
+    const targetName = businessName || workspace.name;
+    const detailed = await getDetailedBusinessProfile(placeId, targetName, {
+      country: workspace.country || 'TR',
+      language: workspace.language || 'tr'
+    });
+
+    const upsertRes = await authPool.query(
+      `INSERT INTO growth_business_profiles (
+        workspace_id, place_id, business_name, formatted_address, google_maps_url,
+        website_url, phone_number, rating, total_reviews, low_rating_count,
+        unanswered_low_count, rating_breakdown, reviews, low_star_reviews,
+        ai_summary, ai_sentiment_score, ai_recommendation_risk, is_connected, last_synced_at, updated_at
+      ) VALUES (
+        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, true, NOW(), NOW()
+      )
+      ON CONFLICT (workspace_id) DO UPDATE SET
+        place_id = EXCLUDED.place_id,
+        business_name = EXCLUDED.business_name,
+        formatted_address = EXCLUDED.formatted_address,
+        google_maps_url = EXCLUDED.google_maps_url,
+        website_url = EXCLUDED.website_url,
+        phone_number = EXCLUDED.phone_number,
+        rating = EXCLUDED.rating,
+        total_reviews = EXCLUDED.total_reviews,
+        low_rating_count = EXCLUDED.low_rating_count,
+        unanswered_low_count = EXCLUDED.unanswered_low_count,
+        rating_breakdown = EXCLUDED.rating_breakdown,
+        reviews = EXCLUDED.reviews,
+        low_star_reviews = EXCLUDED.low_star_reviews,
+        ai_summary = EXCLUDED.ai_summary,
+        ai_sentiment_score = EXCLUDED.ai_sentiment_score,
+        ai_recommendation_risk = EXCLUDED.ai_recommendation_risk,
+        is_connected = true,
+        last_synced_at = NOW(),
+        updated_at = NOW()
+      RETURNING *`,
+      [
+        workspace.id,
+        detailed.place_id || placeId || '',
+        detailed.business_name,
+        detailed.formatted_address,
+        detailed.google_maps_url,
+        detailed.website_url,
+        detailed.phone_number,
+        detailed.rating,
+        detailed.total_reviews,
+        detailed.low_rating_count,
+        detailed.unanswered_low_count,
+        JSON.stringify(detailed.rating_breakdown || {}),
+        JSON.stringify(detailed.reviews || []),
+        JSON.stringify(detailed.low_star_reviews || []),
+        JSON.stringify(detailed.ai_summary || {}),
+        Math.round((detailed.rating / 5) * 100),
+        detailed.ai_recommendation_risk || 'Düşük Risk'
+      ]
+    );
+
+    return res.json({ success: true, profile: upsertRes.rows[0] });
+  } catch (err) {
+    console.error('[Google Business Connect Error]:', err);
+    res.status(500).json({ error: err.message || 'İşletme profili bağlanamadı.' });
+  }
+});
+
+/**
+ * POST /api/growth/workspaces/:slugOrId/google-business/sync
+ * Sync / refresh reviews and AI analysis
+ */
+router.post('/workspaces/:slugOrId/google-business/sync', requireAuth, async (req, res) => {
+  try {
+    const authData = await resolveAndAuthorizeWorkspace(req, req.params.slugOrId);
+    if (!authData) return res.status(404).json({ error: 'Çalışma alanı bulunamadı.' });
+
+    const workspace = authData.workspace;
+    const existing = await authPool.query(
+      'SELECT * FROM growth_business_profiles WHERE workspace_id = $1',
+      [workspace.id]
+    );
+
+    if (existing.rows.length === 0) {
+      return res.status(404).json({ error: 'Bağlı bir Google İşletme Profili bulunamadı.' });
+    }
+
+    const current = existing.rows[0];
+    const detailed = await getDetailedBusinessProfile(current.place_id, current.business_name, {
+      country: workspace.country || 'TR',
+      language: workspace.language || 'tr'
+    });
+
+    const updateRes = await authPool.query(
+      `UPDATE growth_business_profiles SET
+        formatted_address = $1,
+        google_maps_url = $2,
+        website_url = $3,
+        phone_number = $4,
+        rating = $5,
+        total_reviews = $6,
+        low_rating_count = $7,
+        unanswered_low_count = $8,
+        rating_breakdown = $9,
+        reviews = $10,
+        low_star_reviews = $11,
+        ai_summary = $12,
+        ai_sentiment_score = $13,
+        ai_recommendation_risk = $14,
+        last_synced_at = NOW(),
+        updated_at = NOW()
+      WHERE workspace_id = $15
+      RETURNING *`,
+      [
+        detailed.formatted_address,
+        detailed.google_maps_url,
+        detailed.website_url,
+        detailed.phone_number,
+        detailed.rating,
+        detailed.total_reviews,
+        detailed.low_rating_count,
+        detailed.unanswered_low_count,
+        JSON.stringify(detailed.rating_breakdown || {}),
+        JSON.stringify(detailed.reviews || []),
+        JSON.stringify(detailed.low_star_reviews || []),
+        JSON.stringify(detailed.ai_summary || {}),
+        Math.round((detailed.rating / 5) * 100),
+        detailed.ai_recommendation_risk || 'Düşük Risk',
+        workspace.id
+      ]
+    );
+
+    return res.json({ success: true, profile: updateRes.rows[0] });
+  } catch (err) {
+    console.error('[Google Business Sync Error]:', err);
+    res.status(500).json({ error: 'Yorumlar güncellenirken hata oluştu.' });
+  }
+});
+
+/**
+ * POST /api/growth/workspaces/:slugOrId/google-business/generate-reply
+ * Generate professional AI recovery response for low-star review
+ */
+router.post('/workspaces/:slugOrId/google-business/generate-reply', requireAuth, async (req, res) => {
+  try {
+    const authData = await resolveAndAuthorizeWorkspace(req, req.params.slugOrId);
+    if (!authData) return res.status(404).json({ error: 'Çalışma alanı bulunamadı.' });
+
+    const workspace = authData.workspace;
+    const { reviewerName, rating, reviewText, issueTheme, businessName } = req.body || {};
+
+    const reply = await generateGoogleReviewReply({
+      businessName: businessName || workspace.name,
+      reviewerName,
+      rating,
+      reviewText,
+      issueTheme
+    });
+
+    return res.json({ reply });
+  } catch (err) {
+    console.error('[Generate Review Reply Error]:', err);
+    res.status(500).json({ error: 'AI yanıtı üretilirken hata oluştu.' });
+  }
+});
+
+/**
+ * DELETE /api/growth/workspaces/:slugOrId/google-business
+ * Disconnect Google Business Profile from workspace
+ */
+router.delete('/workspaces/:slugOrId/google-business', requireAuth, async (req, res) => {
+  try {
+    const authData = await resolveAndAuthorizeWorkspace(req, req.params.slugOrId);
+    if (!authData) return res.status(404).json({ error: 'Çalışma alanı bulunamadı.' });
+
+    await authPool.query(
+      'DELETE FROM growth_business_profiles WHERE workspace_id = $1',
+      [authData.workspace.id]
+    );
+
+    return res.json({ success: true });
+  } catch (err) {
+    console.error('[Delete Google Business Error]:', err);
+    res.status(500).json({ error: 'Bağlantı kaldırılamadı.' });
   }
 });
 

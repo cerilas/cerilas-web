@@ -365,6 +365,34 @@ export async function initGrowthDb() {
         UNIQUE(workspace_id, property_id, date_range)
       );
       CREATE INDEX IF NOT EXISTS idx_growth_analytics_perf_ws ON growth_analytics_performance(workspace_id, property_id);
+
+      -- 19. Google Business Profile & Local GEO Reviews
+      CREATE TABLE IF NOT EXISTS growth_business_profiles (
+        id SERIAL PRIMARY KEY,
+        workspace_id INT REFERENCES workspaces(id) ON DELETE CASCADE,
+        place_id VARCHAR(255),
+        business_name VARCHAR(255) NOT NULL,
+        formatted_address TEXT,
+        google_maps_url TEXT,
+        website_url TEXT,
+        phone_number VARCHAR(100),
+        rating NUMERIC(3,2) DEFAULT 0,
+        total_reviews INT DEFAULT 0,
+        low_rating_count INT DEFAULT 0,
+        unanswered_low_count INT DEFAULT 0,
+        rating_breakdown JSONB DEFAULT '{"1": 0, "2": 0, "3": 0, "4": 0, "5": 0}'::jsonb,
+        reviews JSONB DEFAULT '[]'::jsonb,
+        low_star_reviews JSONB DEFAULT '[]'::jsonb,
+        ai_summary JSONB DEFAULT '{}'::jsonb,
+        ai_sentiment_score INT DEFAULT 0,
+        ai_recommendation_risk VARCHAR(50) DEFAULT 'low',
+        is_connected BOOLEAN DEFAULT true,
+        last_synced_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        UNIQUE(workspace_id)
+      );
+      CREATE INDEX IF NOT EXISTS idx_growth_gbp_workspace ON growth_business_profiles(workspace_id);
     `;
 
     await authPool.query(migrationQuery);
