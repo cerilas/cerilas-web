@@ -735,26 +735,32 @@ export default function GrowthAiVisibility() {
         <div ref={reportPanelRef} className="ai-report-panel animate-fade">
           <div className="ai-report-topbar">
             <div className="ai-report-top-left">
-              <div className="ai-report-badge-row">
-                <span className="growth-badge blue">
-                  <BarChart3 size={12} /> AI Görünürlük &amp; Alıntı Raporu
-                </span>
-                <span style={{ fontSize: '0.82rem', fontWeight: 600, color: '#38bdf8', display: 'flex', alignItems: 'center', gap: 5 }}>
-                  <Calendar size={13} />
-                  <span>{formatFullDate(activeReport.created_at)}</span>
-                  <span style={{ color: '#94a3b8', fontWeight: 400 }}>({formatRelativeTime(activeReport.created_at)})</span>
-                </span>
-                <span className="growth-badge neutral">
-                  <img src="/AI-logos/gemini-color.svg" alt="Gemini" style={{ width: 12, height: 12 }} />
-                  <span>{activeReport.model || 'gemini-3.8-flash'}</span>
-                </span>
+              <div className="ai-report-header-title-row">
+                <div className="ai-report-icon-box">
+                  <BarChart3 size={18} />
+                </div>
+                <div>
+                  <h3 className="ai-report-heading">
+                    AI Görünürlük &amp; Alıntı Raporu
+                  </h3>
+                  <div className="ai-report-meta-row">
+                    <span className="ai-report-meta-item highlight">
+                      <Calendar size={12} />
+                      <span>{formatFullDate(activeReport.created_at)}</span>
+                      <span className="ai-report-meta-sub">({formatRelativeTime(activeReport.created_at)})</span>
+                    </span>
+                    <span className="ai-report-meta-dot">•</span>
+                    <span className="ai-report-meta-item">
+                      <img src="/AI-logos/gemini-color.svg" alt="Gemini" style={{ width: 13, height: 13 }} />
+                      <span>{activeReport.model || 'gemini-3.8-flash'}</span>
+                    </span>
+                    <span className="ai-report-meta-dot">•</span>
+                    <span className="ai-report-meta-item">
+                      <span>{activeReport.total_prompts} Prompt Analizi</span>
+                    </span>
+                  </div>
+                </div>
               </div>
-              <h3 className="ai-report-heading">
-                {formatFullDate(activeReport.created_at)} Tarihli Toplu Tarama Raporu
-              </h3>
-              <p style={{ margin: 0, fontSize: '0.82rem', color: '#94a3b8' }}>
-                Toplam {activeReport.total_prompts} adet takip edilen arama sorusunun taranmasıyla oluşturulan zaman damgalı performans özeti.
-              </p>
             </div>
 
             <div className="ai-report-top-right">
