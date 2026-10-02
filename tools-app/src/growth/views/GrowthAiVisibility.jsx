@@ -919,102 +919,6 @@ export default function GrowthAiVisibility() {
         </div>
       )}
 
-      {/* 3. Historical AI Reports Timeline & Archive (Zamana Göre Kayıtlı Raporlar) */}
-      {reportsList.length > 0 && !isBatchScanning && (
-        <div id="ai-reports-history-section" className="growth-panel-card ai-reports-history-panel animate-fade">
-          <div className="growth-panel-header">
-            <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: 4 }}>
-                <span className="growth-badge purple">
-                  <History size={12} /> Zaman Çizelgesi &amp; Rapor Arşivi
-                </span>
-                <span style={{ fontSize: '0.78rem', color: '#94a3b8' }}>
-                  Toplam {reportsList.length} Zaman Damgalı Tarama Kaydı
-                </span>
-              </div>
-              <h3 className="growth-panel-title">Zamana Göre Kayıtlı AI Görünürlük Raporları</h3>
-              <p className="growth-panel-desc">
-                Tüm promptlarınızın her taranması zaman damgalı tek bir rapor (snapshot) olarak kaydedilir. Herhangi bir rapora tıklayarak o tarihteki AI görünürlük durumunu inceleyebilirsiniz.
-              </p>
-            </div>
-          </div>
-
-          <div className="ai-reports-history-grid">
-            {reportsList.map((rep) => {
-              const isSelected = activeReport?.id === rep.id;
-              const repScore = Number(rep.visibility_score) || 0;
-              const scoreClass = repScore >= 70 ? '' : repScore >= 40 ? 'warning' : 'danger';
-
-              return (
-                <div
-                  key={rep.id}
-                  onClick={() => {
-                    handleLoadReport(rep.id);
-                    reportPanelRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                  }}
-                  className={`ai-history-report-card ${isSelected ? 'active' : ''}`}
-                  title="Bu tarihteki rapor detaylarını incele"
-                >
-                  <div className="ai-history-card-top">
-                    <div className="ai-history-date-box">
-                      <span className="ai-history-date-full">
-                        <Calendar size={13} color="#3b82f6" />
-                        <span>{formatFullDate(rep.created_at)}</span>
-                      </span>
-                      <span className="ai-history-date-rel">
-                        <Clock size={11} style={{ display: 'inline', marginRight: 3, verticalAlign: 'text-bottom' }} />
-                        {formatRelativeTime(rep.created_at)}
-                      </span>
-                    </div>
-
-                    <div className={`ai-history-score-badge ${scoreClass}`}>
-                      <span>%{repScore} GEO</span>
-                    </div>
-                  </div>
-
-                  <div className="ai-history-stats-row">
-                    <div className="ai-history-stat-item">
-                      <span className="ai-history-stat-label">Taranan</span>
-                      <span className="ai-history-stat-val">{rep.total_prompts} Prompt</span>
-                    </div>
-                    <div className="ai-history-stat-item">
-                      <span className="ai-history-stat-label">Marka</span>
-                      <span className="ai-history-stat-val" style={{ color: rep.mentioned_count > 0 ? '#34d399' : '#f87171' }}>
-                        {rep.mentioned_count} Anıldı
-                      </span>
-                    </div>
-                    <div className="ai-history-stat-item">
-                      <span className="ai-history-stat-label">Alıntı</span>
-                      <span className="ai-history-stat-val" style={{ color: rep.cited_count > 0 ? '#34d399' : '#94a3b8' }}>
-                        {rep.cited_count} Site
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="ai-history-card-footer">
-                    <button
-                      type="button"
-                      className="ai-history-view-btn"
-                    >
-                      <span>{isSelected ? '✓ Şu An İnceleniyor' : 'Raporu İncele'}</span>
-                      <ArrowUpRight size={13} />
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={(e) => handleDeleteReport(rep.id, e)}
-                      className="ai-history-delete-btn"
-                      title="Bu raporu arşivden sil"
-                    >
-                      <Trash2 size={13} />
-                    </button>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
 
       {/* Individual Prompt Test Drawer (Single Run Result) */}
       {lastRunResult && !isBatchScanning && (
@@ -1320,6 +1224,103 @@ export default function GrowthAiVisibility() {
           </div>
         )}
       </div>
+
+      {/* 3. Historical AI Reports Timeline & Archive (Zamana Göre Kayıtlı Raporlar - En Altta) */}
+      {reportsList.length > 0 && !isBatchScanning && (
+        <div id="ai-reports-history-section" className="growth-panel-card ai-reports-history-panel animate-fade">
+          <div className="growth-panel-header">
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: 4 }}>
+                <span className="growth-badge purple">
+                  <History size={12} /> Zaman Çizelgesi &amp; Rapor Arşivi
+                </span>
+                <span style={{ fontSize: '0.78rem', color: '#94a3b8' }}>
+                  Toplam {reportsList.length} Zaman Damgalı Tarama Kaydı
+                </span>
+              </div>
+              <h3 className="growth-panel-title">Zamana Göre Kayıtlı AI Görünürlük Raporları</h3>
+              <p className="growth-panel-desc">
+                Tüm promptlarınızın her taranması zaman damgalı tek bir rapor (snapshot) olarak kaydedilir. Herhangi bir rapora tıklayarak o tarihteki AI görünürlük durumunu inceleyebilirsiniz.
+              </p>
+            </div>
+          </div>
+
+          <div className="ai-reports-history-grid">
+            {reportsList.map((rep) => {
+              const isSelected = activeReport?.id === rep.id;
+              const repScore = Number(rep.visibility_score) || 0;
+              const scoreClass = repScore >= 70 ? '' : repScore >= 40 ? 'warning' : 'danger';
+
+              return (
+                <div
+                  key={rep.id}
+                  onClick={() => {
+                    handleLoadReport(rep.id);
+                    reportPanelRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  }}
+                  className={`ai-history-report-card ${isSelected ? 'active' : ''}`}
+                  title="Bu tarihteki rapor detaylarını incele"
+                >
+                  <div className="ai-history-card-top">
+                    <div className="ai-history-date-box">
+                      <span className="ai-history-date-full">
+                        <Calendar size={13} color="#3b82f6" />
+                        <span>{formatFullDate(rep.created_at)}</span>
+                      </span>
+                      <span className="ai-history-date-rel">
+                        <Clock size={11} style={{ display: 'inline', marginRight: 3, verticalAlign: 'text-bottom' }} />
+                        {formatRelativeTime(rep.created_at)}
+                      </span>
+                    </div>
+
+                    <div className={`ai-history-score-badge ${scoreClass}`}>
+                      <span>%{repScore} GEO</span>
+                    </div>
+                  </div>
+
+                  <div className="ai-history-stats-row">
+                    <div className="ai-history-stat-item">
+                      <span className="ai-history-stat-label">Taranan</span>
+                      <span className="ai-history-stat-val">{rep.total_prompts} Prompt</span>
+                    </div>
+                    <div className="ai-history-stat-item">
+                      <span className="ai-history-stat-label">Marka</span>
+                      <span className="ai-history-stat-val" style={{ color: rep.mentioned_count > 0 ? '#34d399' : '#f87171' }}>
+                        {rep.mentioned_count} Anıldı
+                      </span>
+                    </div>
+                    <div className="ai-history-stat-item">
+                      <span className="ai-history-stat-label">Alıntı</span>
+                      <span className="ai-history-stat-val" style={{ color: rep.cited_count > 0 ? '#34d399' : '#94a3b8' }}>
+                        {rep.cited_count} Site
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="ai-history-card-footer">
+                    <button
+                      type="button"
+                      className="ai-history-view-btn"
+                    >
+                      <span>{isSelected ? '✓ Şu An İnceleniyor' : 'Raporu İncele'}</span>
+                      <ArrowUpRight size={13} />
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={(e) => handleDeleteReport(rep.id, e)}
+                      className="ai-history-delete-btn"
+                      title="Bu raporu arşivden sil"
+                    >
+                      <Trash2 size={13} />
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
