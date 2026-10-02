@@ -1051,20 +1051,26 @@ export default function GrowthAiVisibility() {
 
       {/* Add New Tracked Prompt Card */}
       <div className="growth-panel-card growth-add-prompt-card">
-        <div className="growth-panel-header">
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: 6 }}>
-              <span className="growth-badge blue">
-                <Plus size={12} /> Prompt Takip Motoru
-              </span>
-              <span className={`growth-badge ${prompts.length >= 10 ? 'red' : prompts.length >= 8 ? 'yellow' : 'cyan'}`}>
-                {prompts.length >= 10 ? <Lock size={12} /> : null} Takip Limiti: {prompts.length} / 10
-              </span>
+        <div className="growth-panel-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem', marginBottom: '1.25rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            <div className="ai-report-icon-box" style={{ width: 38, height: 38, borderRadius: 10 }}>
+              <Plus size={18} />
             </div>
-            <h3 className="growth-panel-title">Yeni Arama Sorusu (Prompt) Takip Et</h3>
-            <p className="growth-panel-desc">
-              Müşterilerinizin Gemini, ChatGPT ve Perplexity'ye sorduğu kritik sektörel soruları ekleyin, markanızın görünürlüğünü takip edin. (Maksimum 10 soru)
-            </p>
+            <div>
+              <h3 className="growth-panel-title" style={{ margin: 0, fontSize: '1.15rem' }}>
+                Yeni Arama Sorusu (Prompt) Takip Et
+              </h3>
+              <p className="growth-panel-desc" style={{ margin: '0.2rem 0 0 0', fontSize: '0.82rem', color: '#94a3b8' }}>
+                Gemini, ChatGPT ve Perplexity aramalarında markanızın anılma durumunu izleyin.
+              </p>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <span className={`growth-badge ${prompts.length >= 10 ? 'red' : prompts.length >= 8 ? 'yellow' : 'cyan'}`} style={{ padding: '0.35rem 0.75rem', fontSize: '0.8rem', fontWeight: 600 }}>
+              {prompts.length >= 10 ? <Lock size={12} style={{ marginRight: 4 }} /> : null}
+              Takip Limiti: {prompts.length} / 10
+            </span>
           </div>
         </div>
 
@@ -1300,20 +1306,19 @@ export default function GrowthAiVisibility() {
       {/* 3. Historical AI Reports Timeline & Archive (Zamana Göre Kayıtlı Raporlar - En Altta) */}
       {reportsList.length > 0 && !isBatchScanning && (
         <div id="ai-reports-history-section" className="growth-panel-card ai-reports-history-panel animate-fade">
-          <div className="growth-panel-header">
-            <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: 4 }}>
-                <span className="growth-badge purple">
-                  <History size={12} /> Zaman Çizelgesi &amp; Rapor Arşivi
-                </span>
-                <span style={{ fontSize: '0.78rem', color: '#94a3b8' }}>
-                  Toplam {reportsList.length} Zaman Damgalı Tarama Kaydı
-                </span>
+          <div className="growth-panel-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem', marginBottom: '1.25rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+              <div className="ai-report-icon-box" style={{ width: 38, height: 38, borderRadius: 10, background: 'linear-gradient(135deg, rgba(168, 85, 247, 0.22), rgba(59, 130, 246, 0.22))', borderColor: 'rgba(168, 85, 247, 0.35)', color: '#c084fc' }}>
+                <History size={18} />
               </div>
-              <h3 className="growth-panel-title">Zamana Göre Kayıtlı AI Görünürlük Raporları</h3>
-              <p className="growth-panel-desc">
-                Tüm promptlarınızın her taranması zaman damgalı tek bir rapor (snapshot) olarak kaydedilir. Tarihe göre filtreleyebilir ve geçmiş raporları inceleyebilirsiniz.
-              </p>
+              <div>
+                <h3 className="growth-panel-title" style={{ margin: 0, fontSize: '1.15rem' }}>
+                  Zaman Damgalı AI Rapor Arşivi
+                </h3>
+                <p className="growth-panel-desc" style={{ margin: '0.2rem 0 0 0', fontSize: '0.82rem', color: '#94a3b8' }}>
+                  Toplam {reportsList.length} kayıtlı denetim raporu. İncelemek istediğiniz rapora tıklayın.
+                </p>
+              </div>
             </div>
           </div>
 
