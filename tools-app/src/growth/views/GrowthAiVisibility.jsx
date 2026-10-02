@@ -28,7 +28,8 @@ import {
   ChevronUp,
   Trash2,
   StopCircle,
-  Layers
+  Layers,
+  Lock
 } from 'lucide-react';
 import { useGrowth } from '../GrowthContext';
 import { useAuth } from '../../context/AuthContext';
@@ -235,6 +236,11 @@ export default function GrowthAiVisibility() {
     e.preventDefault();
     if (!newPromptText.trim()) return;
 
+    if (prompts.length >= 10) {
+      alert('Maksimum 10 prompt takip limitine ulaştınız. Yeni bir prompt eklemek için lütfen listenizdeki mevcut promptlardan birini silin.');
+      return;
+    }
+
     setAddingPrompt(true);
     try {
       const res = await fetch(`/api/growth/workspaces/${activeWorkspace.id}/prompts`, {
@@ -250,13 +256,16 @@ export default function GrowthAiVisibility() {
           language: selectedLanguage || 'tr'
         })
       });
-      if (res.ok) {
-        setNewPromptText('');
-        setNewPromptTopic('');
-        fetchPrompts();
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Prompt eklenemedi.');
       }
+      setNewPromptText('');
+      setNewPromptTopic('');
+      fetchPrompts();
     } catch (err) {
       console.error('Add prompt error:', err);
+      alert(err.message || 'Prompt eklenirken bir hata oluştu.');
     } finally {
       setAddingPrompt(false);
     }
@@ -1079,19 +1088,43 @@ export default function GrowthAiVisibility() {
       <div className="growth-panel-card growth-add-prompt-card">
         <div className="growth-panel-header">
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: 4 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: 6 }}>
               <span className="growth-badge blue">
                 <Plus size={12} /> Prompt Takip Motoru
+              </span>
+              <span className={`growth-badge ${prompts.length >= 10 ? 'red' : prompts.length >= 8 ? 'yellow' : 'cyan'}`}>
+                {prompts.length >= 10 ? <Lock size={12} /> : null} Takip Limiti: {prompts.length} / 10
               </span>
             </div>
             <h3 className="growth-panel-title">Yeni Arama Sorusu (Prompt) Takip Et</h3>
             <p className="growth-panel-desc">
-              Müşterilerinizin Gemini, ChatGPT ve Perplexity'ye sorduğu kritik sektörel soruları ekleyin, markanızın görünürlüğünü takip edin.
+              Müşterilerinizin Gemini, ChatGPT ve Perplexity'ye sorduğu kritik sektörel soruları ekleyin, markanızın görünürlüğünü takip edin. (Maksimum 10 soru)
             </p>
           </div>
         </div>
 
-        <form onSubmit={handleAddPrompt} className="growth-prompt-form-grid">
+        {prompts.length >= 10 && (
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.65rem',
+            background: 'rgba(239, 68, 68, 0.08)',
+            border: '1px solid rgba(239, 68, 68, 0.25)',
+            borderRadius: '10px',
+            padding: '0.75rem 1rem',
+            marginBottom: '1.25rem',
+            color: '#f87171',
+            fontSize: '0.85rem',
+            lineHeight: 1.4
+          }}>
+            <AlertCircle size={16} style={{ flexShrink: 0, color: '#ef4444' }} />
+            <span>
+              <strong>Limit Doldu:</strong> Çalışma alanınızda en fazla 10 adet prompt takip edebilirsiniz ({prompts.length}/10). Yeni bir prompt eklemek için lütfen aşağıdaki listeden gereksiz olanları silin.
+            </span>
+          </div>
+        )}
+
+        <form onSubmit={handleAddPrompt} className="growth-prompt-form-grid" style={prompts.length >= 10 ? { opacity: 0.7 } : {}}>
           <div className="growth-prompt-inputs-split">
             <div className="growth-field-item flex-3">
               <label className="growth-field-label">
@@ -1100,10 +1133,11 @@ export default function GrowthAiVisibility() {
               </label>
               <input
                 type="text"
-                placeholder="Örn: En iyi B2B SEO ve büyüme platformu hangisi?"
+                placeholder={prompts.length >= 10 ? "Limit doldu (10/10) - Yeni prompt eklemek için mevcutları silin" : "Örn: En iyi B2B SEO ve büyüme platformu hangisi?"}
                 value={newPromptText}
                 onChange={(e) => setNewPromptText(e.target.value)}
                 className="growth-custom-text-input"
+                disabled={addingPrompt || prompts.length >= 10}
                 required
               />
             </div>
@@ -1119,6 +1153,7 @@ export default function GrowthAiVisibility() {
                 value={newPromptTopic}
                 onChange={(e) => setNewPromptTopic(e.target.value)}
                 className="growth-custom-text-input"
+                disabled={addingPrompt || prompts.length >= 10}
               />
             </div>
           </div>
@@ -1132,7 +1167,7 @@ export default function GrowthAiVisibility() {
                 options={MARKET_OPTIONS}
                 value={selectedCountry}
                 onChange={setSelectedCountry}
-                disabled={addingPrompt}
+                disabled={addingPrompt || prompts.length >= 10}
               />
             </div>
 
@@ -1144,18 +1179,25 @@ export default function GrowthAiVisibility() {
                 options={LANGUAGE_OPTIONS}
                 value={selectedLanguage}
                 onChange={setSelectedLanguage}
-                disabled={addingPrompt}
+                disabled={addingPrompt || prompts.length >= 10}
               />
             </div>
 
             <div className="growth-submit-col">
               <button
                 type="submit"
-                disabled={addingPrompt || !newPromptText.trim()}
+                disabled={addingPrompt || !newPromptText.trim() || prompts.length >= 10}
                 className="growth-primary-btn growth-prompt-submit-btn"
+                style={prompts.length >= 10 ? { opacity: 0.5, cursor: 'not-allowed' } : {}}
               >
-                {addingPrompt ? <Loader2 size={15} className="spin" /> : <Plus size={15} />}
-                <span>Prompt Takip Et</span>
+                {addingPrompt ? (
+                  <Loader2 size={15} className="spin" />
+                ) : prompts.length >= 10 ? (
+                  <Lock size={15} />
+                ) : (
+                  <Plus size={15} />
+                )}
+                <span>{prompts.length >= 10 ? 'Limit Doldu (10/10)' : 'Prompt Takip Et'}</span>
               </button>
             </div>
           </div>
@@ -1166,7 +1208,7 @@ export default function GrowthAiVisibility() {
       <div className="growth-panel-card">
         <div className="growth-panel-header">
           <div>
-            <h3 className="growth-panel-title">Takip Edilen Promptlar ({prompts.length})</h3>
+            <h3 className="growth-panel-title">Takip Edilen Promptlar ({prompts.length} / 10)</h3>
             <p className="growth-panel-desc">
               Düzenli aralıklarla test edilen arama sorguları ve en son anılma durumu.
             </p>

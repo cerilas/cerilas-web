@@ -734,6 +734,17 @@ router.post('/workspaces/:slugOrId/prompts', requireAuth, async (req, res) => {
     const authData = await resolveAndAuthorizeWorkspace(req, req.params.slugOrId);
     if (!authData) return res.status(404).json({ error: 'Çalışma alanı bulunamadı.' });
 
+    // Enforce max 10 tracked prompts limit
+    const countRes = await authPool.query(
+      `SELECT COUNT(*)::int as count FROM growth_tracked_prompts WHERE workspace_id = $1`,
+      [authData.workspace.id]
+    );
+    if (parseInt(countRes.rows[0]?.count || 0, 10) >= 10) {
+      return res.status(400).json({
+        error: 'Maksimum 10 prompt takip limitine ulaştınız. Yeni prompt eklemek için lütfen mevcut promptlardan birini silin.'
+      });
+    }
+
     const { prompt, topic, country, language } = req.body;
     if (!prompt || !prompt.trim()) {
       return res.status(400).json({ error: 'Lütfen takip edilecek soruyu (prompt) yazın.' });
