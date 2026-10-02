@@ -14,7 +14,8 @@ import {
   SlidersHorizontal,
   Layers,
   Sparkles,
-  Activity
+  Activity,
+  MapPin
 } from 'lucide-react';
 import { useGrowth } from '../GrowthContext';
 
@@ -38,8 +39,9 @@ const NAV_GROUPS = [
   {
     title: 'YAPAY ZEKA ARAMA (GEO)',
     items: [
-      { id: 'ai-visibility', label: 'AI Görünürlüğü (GEO)', icon: BrainCircuit, isNew: true },
-      { id: 'ai-prompts', label: 'Takip Edilen Promptlar', icon: Terminal }
+      { id: 'ai-visibility', label: 'AI Görünürlüğü (GEO)', icon: BrainCircuit },
+      { id: 'ai-prompts', label: 'Takip Edilen Promptlar', icon: Terminal },
+      { id: 'google-business', label: 'Google İşletme & Yorumlar', icon: MapPin, isNew: true }
     ]
   },
   {
