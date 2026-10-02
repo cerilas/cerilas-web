@@ -568,61 +568,6 @@ export default function GrowthAiVisibility() {
           BATCH SCAN PROGRESS & HISTORICAL REPORT SECTION
           ========================================================================= */}
 
-      {/* Batch Scan Launch Action Bar */}
-      <div className="growth-panel-card" style={{ padding: '1.1rem 1.25rem', marginBottom: '1.25rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem' }}>
-          <div>
-            <h4 style={{ margin: '0 0 2px', fontSize: '0.98rem', fontWeight: 700, color: '#ffffff', display: 'flex', alignItems: 'center', gap: 6 }}>
-              <Sparkles size={16} color="#3b82f6" />
-              <span>Tek Tuşla Toplu AI Görünürlük & Citation Taraması</span>
-            </h4>
-            <p style={{ margin: 0, fontSize: '0.8rem', color: '#94a3b8' }}>
-              Ekli tüm promptları sırasıyla Gemini 3.8 Flash ve Canlı Google Grounding ile test eder, anılma ve kaynak alıntılarını raporlar.
-            </p>
-          </div>
-
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
-            {reportsList.length > 0 && (
-              <div className="ai-report-history-select-wrap">
-                <History size={14} color="#a1a1aa" />
-                <select
-                  className="ai-report-history-select"
-                  value={activeReport?.id || ''}
-                  onChange={(e) => handleLoadReport(e.target.value)}
-                  disabled={isBatchScanning}
-                >
-                  {reportsList.map(r => (
-                    <option key={r.id} value={r.id}>
-                      {formatFullDate(r.created_at)} — %{r.visibility_score} GEO ({r.total_prompts} Prompt)
-                    </option>
-                  ))}
-                </select>
-              </div>
-            )}
-
-            <button
-              type="button"
-              disabled={isBatchScanning || prompts.length === 0}
-              onClick={handleStartBatchScan}
-              className="growth-primary-btn"
-              style={{ padding: '0.55rem 1.15rem' }}
-            >
-              {isBatchScanning ? (
-                <>
-                  <Loader2 size={15} className="spin" />
-                  <span>Taranıyor ({batchProgress.current}/{batchProgress.total})...</span>
-                </>
-              ) : (
-                <>
-                  <Zap size={15} />
-                  <span>Tüm Promptları Sırayla Tara ({prompts.length})</span>
-                </>
-              )}
-            </button>
-          </div>
-        </div>
-      </div>
-
       {/* 1. Live Animated Batch Scan Progress Card */}
       {isBatchScanning && (
         <div ref={progressCardRef} className="ai-batch-scan-card">
@@ -1149,6 +1094,47 @@ export default function GrowthAiVisibility() {
             <p className="growth-panel-desc">
               Düzenli aralıklarla test edilen arama sorguları ve en son anılma durumu.
             </p>
+          </div>
+
+          <div className="growth-panel-actions" style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', flexWrap: 'wrap' }}>
+            {reportsList.length > 0 && (
+              <div className="ai-report-history-select-wrap">
+                <History size={13} color="#a1a1aa" />
+                <select
+                  className="ai-report-history-select"
+                  value={activeReport?.id || ''}
+                  onChange={(e) => handleLoadReport(e.target.value)}
+                  disabled={isBatchScanning}
+                  title="Geçmiş Kayıtlı AI Raporlarını İncele"
+                >
+                  {reportsList.map(r => (
+                    <option key={r.id} value={r.id}>
+                      {formatFullDate(r.created_at)} — %{r.visibility_score} GEO ({r.total_prompts} Prompt)
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+
+            <button
+              type="button"
+              disabled={isBatchScanning || prompts.length === 0}
+              onClick={handleStartBatchScan}
+              className="growth-primary-btn"
+              style={{ padding: '0.45rem 0.95rem', fontSize: '0.82rem' }}
+            >
+              {isBatchScanning ? (
+                <>
+                  <Loader2 size={14} className="spin" />
+                  <span>Taranıyor ({batchProgress.current}/{batchProgress.total})...</span>
+                </>
+              ) : (
+                <>
+                  <Zap size={14} />
+                  <span>Tümünü Sırayla Tara ({prompts.length})</span>
+                </>
+              )}
+            </button>
           </div>
         </div>
 
