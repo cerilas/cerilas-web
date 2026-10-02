@@ -39,6 +39,14 @@ export default function GoogleBusinessProfileCard() {
   const [isConnecting, setIsConnecting] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
 
+  // Manual fallback state
+  const [showManualForm, setShowManualForm] = useState(false);
+  const [manualName, setManualName] = useState('');
+  const [manualUrl, setManualUrl] = useState('');
+  const [manualCity, setManualCity] = useState('');
+  const [manualRating, setManualRating] = useState('4.8');
+  const [manualReviews, setManualReviews] = useState('25');
+
   // Review list state
   const [reviewTab, setReviewTab] = useState('low_star'); // 'low_star', 'unanswered', 'all'
   const [generatingReplyFor, setGeneratingReplyFor] = useState(null);
@@ -81,6 +89,7 @@ export default function GoogleBusinessProfileCard() {
 
     setIsSearching(true);
     setSearchResults([]);
+    setShowManualForm(false);
     try {
       const res = await fetch(`/api/growth/workspaces/${activeWorkspace.id}/google-business/search`, {
         method: 'POST',
@@ -101,7 +110,7 @@ export default function GoogleBusinessProfileCard() {
     }
   };
 
-  // 3. Connect selected business
+  // 3. Connect selected business from search
   const handleConnect = async (place) => {
     setIsConnecting(true);
     try {
@@ -113,7 +122,11 @@ export default function GoogleBusinessProfileCard() {
         },
         body: JSON.stringify({
           placeId: place.place_id,
-          businessName: place.business_name
+          businessName: place.business_name,
+          formattedAddress: place.formatted_address,
+          googleMapsUrl: place.google_maps_url,
+          rating: place.rating,
+          totalReviews: place.user_ratings_total
         })
       });
       const data = await res.json();
@@ -124,6 +137,41 @@ export default function GoogleBusinessProfileCard() {
       }
     } catch (err) {
       console.error('Connect place error:', err);
+    } finally {
+      setIsConnecting(false);
+    }
+  };
+
+  // 3.1 Connect manually entered business profile
+  const handleConnectManual = async (e) => {
+    if (e) e.preventDefault();
+    if (!manualName.trim() || isConnecting) return;
+    setIsConnecting(true);
+    try {
+      const res = await fetch(`/api/growth/workspaces/${activeWorkspace.id}/google-business/connect`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          placeId: `manual_${Date.now()}`,
+          businessName: manualName.trim(),
+          formattedAddress: manualCity.trim() || 'Türkiye',
+          googleMapsUrl: manualUrl.trim() || '',
+          rating: parseFloat(manualRating) || 4.8,
+          totalReviews: parseInt(manualReviews, 10) || 15
+        })
+      });
+      const data = await res.json();
+      if (res.ok && data.profile) {
+        setProfile(data.profile);
+        setIsConnected(true);
+        setShowManualForm(false);
+        setSearchResults([]);
+      }
+    } catch (err) {
+      console.error('Manual connect place error:', err);
     } finally {
       setIsConnecting(false);
     }
@@ -298,10 +346,164 @@ export default function GoogleBusinessProfileCard() {
             </div>
           )}
 
-          {searchResults.length === 0 && searchQuery && !isSearching && (
-            <div style={{ marginTop: '0.85rem', fontSize: '0.78rem', color: '#94a3b8' }}>
-              💡 İşletmeniz bulunamadıysa Google Haritalar'daki tam tabelası adını veya şehir ekleyerek aratabilirsiniz.
+          {/* No results banner with manual connect toggle */}
+          {searchResults.length === 0 && searchQuery && !isSearching && !showManualForm && (
+            <div style={{ marginTop: '1rem', padding: '1rem 1.15rem', background: 'rgba(255, 255, 255, 0.02)', borderRadius: 10, border: '1px dashed var(--border-color, rgba(255, 255, 255, 0.12)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem' }}>
+                <div>
+                  <span style={{ fontSize: '0.84rem', fontWeight: 600, color: 'var(--text-main, #f8fafc)', display: 'block' }}>
+                    "{searchQuery}" için doğrudan harita eşleşmesi bulunamadı
+                  </span>
+                  <span style={{ fontSize: '0.78rem', color: '#94a3b8' }}>
+                    İşletmeniz dijital/online ise veya Google Haritalar linkinizi biliyorsanız bilgileri doğrudan girebilirsiniz.
+                  </span>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setManualName(searchQuery || activeWorkspace?.name || '');
+                    setShowManualForm(true);
+                  }}
+                  className="growth-secondary-btn"
+                  style={{ fontSize: '0.8rem', padding: '0.45rem 0.85rem', gap: 6, color: '#38bdf8', borderColor: 'rgba(59, 130, 246, 0.3)' }}
+                >
+                  <Building2 size={13} />
+                  <span>Bilgileri Manuel Gir</span>
+                </button>
+              </div>
             </div>
+          )}
+
+          {/* Quick toggle if hasn't searched yet */}
+          {!showManualForm && searchResults.length === 0 && !searchQuery && (
+            <div style={{ marginTop: '0.75rem', textAlign: 'right' }}>
+              <button
+                type="button"
+                onClick={() => {
+                  setManualName(activeWorkspace?.name || '');
+                  setShowManualForm(true);
+                }}
+                style={{ background: 'transparent', border: 'none', color: '#38bdf8', fontSize: '0.78rem', cursor: 'pointer', textDecoration: 'underline' }}
+              >
+                Veya işletme profilini doğrudan manuel tanımla →
+              </button>
+            </div>
+          )}
+
+          {/* Manual Profile Entry Form */}
+          {showManualForm && (
+            <form onSubmit={handleConnectManual} className="animate-fade" style={{ marginTop: '1.25rem', padding: '1.25rem', background: 'rgba(255, 255, 255, 0.03)', borderRadius: 12, border: '1px solid var(--border-color, rgba(255, 255, 255, 0.12))' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <Building2 size={16} color="#3b82f6" />
+                  <strong style={{ fontSize: '0.92rem', color: 'var(--text-main, #f8fafc)' }}>
+                    Manuel İşletme Profili Tanımla
+                  </strong>
+                </div>
+                <span className="growth-badge blue" style={{ fontSize: '0.72rem' }}>
+                  Hemen Analiz Et
+                </span>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: '0.85rem', marginBottom: '1.1rem' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#94a3b8', marginBottom: 4 }}>
+                    İşletme / Marka Adı *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={manualName}
+                    onChange={(e) => setManualName(e.target.value)}
+                    placeholder="Örn: Cerilas Web Studio"
+                    className="gbp-search-input"
+                    style={{ paddingLeft: '1rem', height: 40 }}
+                  />
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#94a3b8', marginBottom: 4 }}>
+                    Google Maps Linki veya Web Adresi
+                  </label>
+                  <input
+                    type="text"
+                    value={manualUrl}
+                    onChange={(e) => setManualUrl(e.target.value)}
+                    placeholder="https://maps.app.goo.gl/... veya alan adı"
+                    className="gbp-search-input"
+                    style={{ paddingLeft: '1rem', height: 40 }}
+                  />
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#94a3b8', marginBottom: 4 }}>
+                    Şehir / Bölge
+                  </label>
+                  <input
+                    type="text"
+                    value={manualCity}
+                    onChange={(e) => setManualCity(e.target.value)}
+                    placeholder="Örn: İstanbul, Türkiye"
+                    className="gbp-search-input"
+                    style={{ paddingLeft: '1rem', height: 40 }}
+                  />
+                </div>
+
+                <div style={{ display: 'flex', gap: '0.75rem' }}>
+                  <div style={{ flex: 1 }}>
+                    <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#94a3b8', marginBottom: 4 }}>
+                      Google Puanı
+                    </label>
+                    <input
+                      type="number"
+                      step="0.1"
+                      min="1"
+                      max="5"
+                      value={manualRating}
+                      onChange={(e) => setManualRating(e.target.value)}
+                      className="gbp-search-input"
+                      style={{ paddingLeft: '1rem', height: 40 }}
+                    />
+                  </div>
+
+                  <div style={{ flex: 1 }}>
+                    <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#94a3b8', marginBottom: 4 }}>
+                      Toplam Yorum
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      value={manualReviews}
+                      onChange={(e) => setManualReviews(e.target.value)}
+                      className="gbp-search-input"
+                      style={{ paddingLeft: '1rem', height: 40 }}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
+                <button
+                  type="button"
+                  onClick={() => setShowManualForm(false)}
+                  className="growth-secondary-btn"
+                  style={{ height: 38, fontSize: '0.8rem' }}
+                >
+                  İptal
+                </button>
+
+                <button
+                  type="submit"
+                  disabled={isConnecting || !manualName.trim()}
+                  className="growth-primary-btn"
+                  style={{ height: 38, fontSize: '0.82rem', display: 'inline-flex', alignItems: 'center', gap: 6 }}
+                >
+                  {isConnecting ? <Loader2 size={13} className="animate-spin" /> : <CheckCircle2 size={13} />}
+                  <span>Profili Bağla &amp; Analiz Et</span>
+                </button>
+              </div>
+            </form>
           )}
         </div>
       </div>

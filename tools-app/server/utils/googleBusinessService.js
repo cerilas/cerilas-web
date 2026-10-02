@@ -54,30 +54,40 @@ export async function searchGoogleBusiness(query, options = {}) {
     }
   }
 
-  // 2. Gemini Grounding Search Fallback
+  // 2. Gemini Grounding Search Fallback (Gemini 3.8 Flash with Google Search)
   const geminiKey = process.env.GEMINI_API_KEY;
   if (geminiKey) {
     try {
       const ai = new GoogleGenAI({ apiKey: geminiKey });
-      const prompt = `Search for the official Google Business Profile / Google Maps listing for this business: "${query}".
-Target Market: ${country}.
-Find and extract the exact Google Maps / Business Profile data in JSON format:
+      const prompt = `You are an expert Google Maps and Google Business Profile discovery system.
+Target query or URL: "${query}"
+Target region: ${country} (${language}).
+
+Instructions:
+1. Search Google Maps and Google Search for matching business profiles, branches, storefronts, or official listings.
+2. If the query is a Google Maps link (e.g. goo.gl, maps.google.com, maps.app.goo.gl), resolve the business at that URL.
+3. Return matching businesses with their verified Google Maps data.
+
+Return JSON in this exact structure:
 {
-  "found": true/false,
-  "place_id": "google-place-id-or-generated-slug",
-  "business_name": "Official Business Name on Google Maps",
-  "formatted_address": "City, Country or street address",
-  "rating": 4.5,
-  "user_ratings_total": 85,
-  "google_maps_url": "https://maps.google.com/...",
-  "website_url": "Official website URL",
-  "phone_number": "Phone number if listed",
-  "types": ["store", "point_of_interest"]
+  "places": [
+    {
+      "place_id": "Google Place ID or slug identifier",
+      "business_name": "Official Business Name on Google Maps",
+      "formatted_address": "City, District, Country or street address",
+      "rating": 4.5,
+      "user_ratings_total": 85,
+      "google_maps_url": "https://maps.google.com/...",
+      "website_url": "https://...",
+      "phone_number": "+90...",
+      "types": ["business"]
+    }
+  ]
 }
-If no business profile exists on Google Maps, set "found": false. Return pure JSON only.`;
+If absolutely no matching business profile exists, return {"places": []}. Return pure valid JSON only.`;
 
       const response = await ai.models.generateContent({
-        model: 'gemini-2.5-flash',
+        model: 'gemini-3.8-flash',
         contents: prompt,
         config: {
           tools: [{ googleSearch: {} }]
@@ -85,22 +95,36 @@ If no business profile exists on Google Maps, set "found": false. Return pure JS
       });
 
       const text = response.text || '';
-      const cleanJson = text.replace(/```json/g, '').replace(/```/g, '').trim();
-      const parsed = JSON.parse(cleanJson);
-
-      if (parsed && parsed.found) {
-        return [{
-          place_id: parsed.place_id || `place_${Date.now()}`,
-          business_name: parsed.business_name || query,
-          formatted_address: parsed.formatted_address || '',
-          rating: Number(parsed.rating) || 0,
-          user_ratings_total: Number(parsed.user_ratings_total) || 0,
-          google_maps_url: parsed.google_maps_url || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`,
-          website_url: parsed.website_url || '',
-          phone_number: parsed.phone_number || '',
-          types: parsed.types || ['business'],
-          source: 'gemini_grounding'
-        }];
+      const match = text.match(/\{[\s\S]*\}/);
+      if (match) {
+        const parsed = JSON.parse(match[0]);
+        if (parsed.places && Array.isArray(parsed.places) && parsed.places.length > 0) {
+          return parsed.places.map((p, idx) => ({
+            place_id: p.place_id || `place_${Date.now()}_${idx}`,
+            business_name: p.business_name || query,
+            formatted_address: p.formatted_address || '',
+            rating: Number(p.rating) || 0,
+            user_ratings_total: Number(p.user_ratings_total) || 0,
+            google_maps_url: p.google_maps_url || (query.startsWith('http') ? query : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(p.business_name || query)}`),
+            website_url: p.website_url || '',
+            phone_number: p.phone_number || '',
+            types: p.types || ['business'],
+            source: 'gemini_grounding'
+          }));
+        } else if (parsed.found && parsed.business_name) {
+          return [{
+            place_id: parsed.place_id || `place_${Date.now()}`,
+            business_name: parsed.business_name || query,
+            formatted_address: parsed.formatted_address || '',
+            rating: Number(parsed.rating) || 0,
+            user_ratings_total: Number(parsed.user_ratings_total) || 0,
+            google_maps_url: parsed.google_maps_url || (query.startsWith('http') ? query : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(parsed.business_name || query)}`),
+            website_url: parsed.website_url || '',
+            phone_number: parsed.phone_number || '',
+            types: parsed.types || ['business'],
+            source: 'gemini_grounding'
+          }];
+        }
       }
     } catch (err) {
       console.warn('[Gemini Search Place error]:', err.message);
@@ -116,17 +140,17 @@ If no business profile exists on Google Maps, set "found": false. Return pure JS
 export async function getDetailedBusinessProfile(placeIdentifier, businessName, options = {}) {
   const apiKey = process.env.GOOGLE_MAPS_API_KEY;
   const geminiKey = process.env.GEMINI_API_KEY;
-  const { country = 'TR', language = 'tr' } = options;
+  const { country = 'TR', language = 'tr', manualData = {} } = options;
 
   let baseData = {
-    place_id: placeIdentifier,
+    place_id: placeIdentifier || `place_${Date.now()}`,
     business_name: businessName,
-    formatted_address: '',
-    rating: 0,
-    total_reviews: 0,
-    google_maps_url: '',
-    website_url: '',
-    phone_number: '',
+    formatted_address: manualData.formattedAddress || '',
+    rating: Number(manualData.rating) || 0,
+    total_reviews: Number(manualData.totalReviews) || 0,
+    google_maps_url: manualData.googleMapsUrl || '',
+    website_url: manualData.websiteUrl || '',
+    phone_number: manualData.phoneNumber || '',
     reviews: []
   };
 
@@ -225,7 +249,7 @@ Return a JSON with this exact structure:
 If there are no 1-2 star reviews found, chronic_complaint_themes can be empty and ai_recommendation_risk "Düşük Risk". Return pure JSON only.`;
 
       const response = await ai.models.generateContent({
-        model: 'gemini-2.5-flash',
+        model: 'gemini-3.8-flash',
         contents: prompt,
         config: {
           tools: [{ googleSearch: {} }]
@@ -325,7 +349,7 @@ Kurallar:
 5. Türkçe olarak hazır metin döndür (Başlık vb. koyma, doğrudan yanıta başla).`;
 
   const response = await ai.models.generateContent({
-    model: 'gemini-2.5-flash',
+    model: 'gemini-3.8-flash',
     contents: prompt
   });
 

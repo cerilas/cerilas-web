@@ -2075,12 +2075,18 @@ router.post('/workspaces/:slugOrId/google-business/connect', requireAuth, async 
     if (!authData) return res.status(404).json({ error: 'Çalışma alanı bulunamadı.' });
 
     const workspace = authData.workspace;
-    const { placeId, businessName } = req.body || {};
+    const { placeId, businessName, formattedAddress, googleMapsUrl, rating, totalReviews } = req.body || {};
 
     const targetName = businessName || workspace.name;
     const detailed = await getDetailedBusinessProfile(placeId, targetName, {
       country: workspace.country || 'TR',
-      language: workspace.language || 'tr'
+      language: workspace.language || 'tr',
+      manualData: {
+        formattedAddress,
+        googleMapsUrl,
+        rating: Number(rating) || 0,
+        totalReviews: Number(totalReviews) || 0
+      }
     });
 
     const upsertRes = await authPool.query(
