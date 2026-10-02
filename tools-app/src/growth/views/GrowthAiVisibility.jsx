@@ -27,7 +27,8 @@ import {
   ChevronDown,
   ChevronUp,
   Trash2,
-  StopCircle
+  StopCircle,
+  Layers
 } from 'lucide-react';
 import { useGrowth } from '../GrowthContext';
 import { useAuth } from '../../context/AuthContext';
@@ -529,52 +530,83 @@ export default function GrowthAiVisibility() {
           </div>
         ) : geoReadiness ? (
           <>
-            <div className="geo-score-hero-row">
-              <div className="geo-score-badge-box">
-                <span className="geo-score-number">{geoReadiness.geoScore}</span>
-                <span className="geo-score-scale">/100</span>
-              </div>
-              <div className="geo-score-text-box">
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <h4 style={{ margin: 0, fontSize: '1.05rem', color: '#ffffff' }}>
-                    {geoReadiness.geoScore >= 80 ? 'Yüksek AI Hazırbulunuşluğu' : geoReadiness.geoScore >= 50 ? 'Geliştirilebilir AI Altyapısı' : 'Kritik AI Standartları Eksik'}
-                  </h4>
-                  <span className={`geo-status-pill ${geoReadiness.geoScore >= 70 ? 'good' : 'warning'}`}>
-                    {geoReadiness.geoScore >= 70 ? 'İyi Durumda' : 'Optimizasyon Gerekli'}
-                  </span>
+            {/* Hero Score Showcase Banner */}
+            <div className="geo-score-hero-container">
+              <div className="geo-score-left-wrap">
+                {/* Radial Score Box */}
+                <div className={`geo-score-radial-box ${geoReadiness.geoScore >= 70 ? '' : geoReadiness.geoScore >= 50 ? 'warning' : 'danger'}`}>
+                  <span className="geo-score-radial-num">{geoReadiness.geoScore}</span>
+                  <span className="geo-score-radial-max">/100</span>
                 </div>
-                <p style={{ margin: '4px 0 0', fontSize: '0.82rem', color: '#94a3b8', lineHeight: 1.4 }}>
-                  {geoReadiness.summaryText || 'Alan adınızın taranabilirlik ve alıntılanabilirlik durumu yapay zeka arama motorları için analiz edildi.'}
-                </p>
+
+                <div className="geo-score-text-details">
+                  <div className="geo-score-meta-pills">
+                    {activeWorkspace?.primary_domain && (
+                      <span className="geo-domain-tag">
+                        <Globe size={11} color="#3b82f6" />
+                        <span>{activeWorkspace.primary_domain}</span>
+                      </span>
+                    )}
+                    <span className={`geo-badge-status ${geoReadiness.geoScore >= 70 ? 'good' : 'warning'}`}>
+                      {geoReadiness.geoScore >= 80 ? '✓ Mükemmel AI Erişimi' : geoReadiness.geoScore >= 50 ? '⚡ Geliştirilebilir Altyapı' : '✕ Kritik Eksikler Var'}
+                    </span>
+                  </div>
+                  <h4 className="geo-score-main-title">
+                    {geoReadiness.geoScore >= 80 ? 'Yüksek AI Hazırbulunuşluğu & Taranabilirlik' : 'Yapay Zeka Taranabilirlik Optimizasyonu Gerekli'}
+                  </h4>
+                  <p className="geo-score-main-desc">
+                    {geoReadiness.summaryText || 'Alan adınızın taranabilirlik ve alıntılanabilirlik durumu yapay zeka arama motorları için analiz edildi.'}
+                  </p>
+                </div>
+              </div>
+
+              {/* Quick Summary Chips */}
+              <div className="geo-hero-chips-col">
+                {(geoReadiness.standards || []).map((std, idx) => (
+                  <div key={idx} className="geo-hero-chip">
+                    <span className={`geo-chip-indicator ${std.passed ? 'passed' : 'failed'}`} />
+                    <span>{std.title}: {std.passed ? 'Aktif' : 'Eksik'}</span>
+                  </div>
+                ))}
               </div>
             </div>
 
+            {/* 3 Standards Details Grid */}
             <div className="geo-standards-grid">
-              {(geoReadiness.standards || []).map((std, idx) => (
-                <div key={idx} className={`geo-standard-card ${std.passed ? 'passed' : 'failed'}`}>
-                  <div className="geo-standard-header">
-                    <div className="geo-standard-icon">
-                      {std.passed ? <CheckCircle2 size={16} color="#10b981" /> : <AlertCircle size={16} color="#f59e0b" />}
+              {(geoReadiness.standards || []).map((std, idx) => {
+                const isPassed = std.passed;
+                const IconComponent = std.key === 'robots_ai_crawlers' ? Bot : std.key === 'llms_txt_presence' ? FileText : Layers;
+
+                return (
+                  <div key={idx} className={`geo-standard-card ${isPassed ? 'passed' : 'failed'}`}>
+                    <div className="geo-standard-top-row">
+                      <div className={`geo-standard-icon-wrap ${isPassed ? 'passed' : 'failed'}`}>
+                        <IconComponent size={18} />
+                      </div>
+                      <div className="geo-standard-title-box">
+                        <span className="geo-standard-title-text">{std.title}</span>
+                        <span className="geo-standard-key-text">{std.key}</span>
+                      </div>
                     </div>
-                    <div className="geo-standard-title-wrap">
-                      <span className="geo-standard-title">{std.title}</span>
-                      <span className="geo-standard-key">{std.key}</span>
+
+                    <p className="geo-standard-body-desc">{std.desc}</p>
+
+                    <div className="geo-standard-bottom-bar">
+                      <span className={`geo-standard-status-tag ${isPassed ? 'passed' : 'failed'}`}>
+                        {isPassed ? <Check size={11} strokeWidth={3} /> : <AlertCircle size={11} />}
+                        <span>{isPassed ? 'Standart Karşılandı' : 'Optimizasyon Gerekli'}</span>
+                      </span>
+
+                      {std.link && (
+                        <a href={std.link} target="_blank" rel="noopener noreferrer" className="geo-standard-action-btn">
+                          <span>Canlı Test Et</span>
+                          <ExternalLink size={11} />
+                        </a>
+                      )}
                     </div>
                   </div>
-                  <p className="geo-standard-desc">{std.desc}</p>
-                  <div className="geo-standard-footer">
-                    <span className={`geo-eval-tag ${std.passed ? 'tag-passed' : 'tag-failed'}`}>
-                      {std.passed ? '✓ Karşılandı' : '✕ Eksik'}
-                    </span>
-                    {std.link && (
-                      <a href={std.link} target="_blank" rel="noopener noreferrer" className="geo-inspect-link">
-                        <span>Test Et</span>
-                        <ExternalLink size={11} />
-                      </a>
-                    )}
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </>
         ) : (
