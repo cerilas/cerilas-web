@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   Bot, 
   Sparkles, 
@@ -19,7 +19,15 @@ import {
   Clock,
   Check,
   ArrowUpRight,
-  X
+  X,
+  History,
+  Calendar,
+  TrendingUp,
+  BarChart3,
+  ChevronDown,
+  ChevronUp,
+  Trash2,
+  StopCircle
 } from 'lucide-react';
 import { useGrowth } from '../GrowthContext';
 import { useAuth } from '../../context/AuthContext';
@@ -46,6 +54,22 @@ function formatRelativeTime(dateStr) {
   }
 }
 
+function formatFullDate(dateStr) {
+  if (!dateStr) return '';
+  try {
+    const d = new Date(dateStr);
+    return d.toLocaleDateString('tr-TR', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  } catch {
+    return dateStr;
+  }
+}
+
 export default function GrowthAiVisibility() {
   const { activeWorkspace } = useGrowth();
   const { token } = useAuth();
@@ -67,6 +91,27 @@ export default function GrowthAiVisibility() {
   const [scanningGeoReadiness, setScanningGeoReadiness] = useState(false);
   const [geoError, setGeoError] = useState(null);
 
+  // Batch Scan State
+  const [isBatchScanning, setIsBatchScanning] = useState(false);
+  const [batchProgress, setBatchProgress] = useState({ current: 0, total: 0, activePromptId: null });
+  const [batchResultsMap, setBatchResultsMap] = useState({});
+  const abortScanRef = useRef(false);
+  const progressCardRef = useRef(null);
+
+  // Historical Batch Reports State
+  const [reportsList, setReportsList] = useState([]);
+  const [loadingReports, setLoadingReports] = useState(false);
+  const [activeReport, setActiveReport] = useState(null);
+  const [activeFilter, setActiveFilter] = useState('all'); // 'all' | 'cited' | 'mentioned' | 'not_cited'
+  const [expandedQueries, setExpandedQueries] = useState({});
+
+  const toggleQuery = (id) => {
+    setExpandedQueries(prev => ({
+      ...prev,
+      [id]: !prev[id]
+    }));
+  };
+
   const fetchPrompts = async () => {
     if (!activeWorkspace?.id || !token) return;
     setLoading(true);
@@ -81,6 +126,65 @@ export default function GrowthAiVisibility() {
       setError(err.message);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchReportsList = async () => {
+    if (!activeWorkspace?.id || !token) return;
+    setLoadingReports(true);
+    try {
+      const res = await fetch(`/api/growth/workspaces/${activeWorkspace.id}/ai-reports`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setReportsList(data.data || []);
+        // Auto-load latest report if none selected yet
+        if (!activeReport && data.data && data.data.length > 0) {
+          handleLoadReport(data.data[0].id);
+        }
+      }
+    } catch (err) {
+      console.error('Fetch AI reports list error:', err);
+    } finally {
+      setLoadingReports(false);
+    }
+  };
+
+  const handleLoadReport = async (reportId) => {
+    if (!reportId) {
+      setActiveReport(null);
+      return;
+    }
+    try {
+      const res = await fetch(`/api/growth/workspaces/${activeWorkspace.id}/ai-reports/${reportId}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (res.ok && data.data) {
+        setActiveReport(data.data);
+      }
+    } catch (err) {
+      console.error('Load report error:', err);
+    }
+  };
+
+  const handleDeleteReport = async (reportId, e) => {
+    if (e) e.stopPropagation();
+    if (!confirm('Bu tarama raporunu silmek istediğinize emin misiniz?')) return;
+    try {
+      const res = await fetch(`/api/growth/workspaces/${activeWorkspace.id}/ai-reports/${reportId}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (res.ok) {
+        setReportsList(prev => prev.filter(r => r.id !== reportId));
+        if (activeReport?.id === reportId) {
+          setActiveReport(null);
+        }
+      }
+    } catch (err) {
+      console.error('Delete report error:', err);
     }
   };
 
@@ -115,8 +219,16 @@ export default function GrowthAiVisibility() {
 
   useEffect(() => {
     fetchPrompts();
+    fetchReportsList();
     fetchGeoReadiness(false);
   }, [activeWorkspace?.id, activeWorkspace?.primary_domain, token]);
+
+  // Auto-scroll to batch progress card
+  useEffect(() => {
+    if (isBatchScanning && progressCardRef.current) {
+      progressCardRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }, [isBatchScanning]);
 
   const handleAddPrompt = async (e) => {
     e.preventDefault();
@@ -169,6 +281,164 @@ export default function GrowthAiVisibility() {
     }
   };
 
+  // Start Batch Scan for all prompts
+  const handleStartBatchScan = async () => {
+    if (!prompts || prompts.length === 0 || isBatchScanning) return;
+
+    setIsBatchScanning(true);
+    abortScanRef.current = false;
+    setBatchProgress({ current: 0, total: prompts.length, activePromptId: prompts[0].id });
+    setBatchResultsMap({});
+
+    const collectedResults = [];
+    const primaryDomain = (activeWorkspace.primary_domain || '')
+      .toLowerCase()
+      .replace(/^(https?:\/\/)?(www\.)?/, '')
+      .split('/')[0]
+      .trim();
+
+    for (let i = 0; i < prompts.length; i++) {
+      if (abortScanRef.current) break;
+      const p = prompts[i];
+      setBatchProgress({ current: i, total: prompts.length, activePromptId: p.id });
+
+      try {
+        const res = await fetch(`/api/growth/workspaces/${activeWorkspace.id}/prompts/${p.id}/run`, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await res.json();
+        if (res.ok && data.data) {
+          const itemResult = {
+            promptId: p.id,
+            prompt: p.prompt,
+            topic: p.topic,
+            country: p.country,
+            language: p.language,
+            brandMentioned: Boolean(data.data.brand_mentioned),
+            domainCited: Boolean(data.data.domain_cited),
+            citationsCount: (data.data.citations || []).length,
+            citations: data.data.citations || [],
+            responseText: data.data.response_text || '',
+            model: data.data.model || 'gemini-3.8-flash',
+            checkedAt: data.data.checked_at || new Date().toISOString()
+          };
+          collectedResults.push(itemResult);
+          setBatchResultsMap(prev => ({ ...prev, [p.id]: itemResult }));
+        } else {
+          const errResult = {
+            promptId: p.id,
+            prompt: p.prompt,
+            topic: p.topic,
+            country: p.country,
+            language: p.language,
+            brandMentioned: false,
+            domainCited: false,
+            citationsCount: 0,
+            citations: [],
+            responseText: 'Tarama başarısız: ' + (data.error || 'Bilinmeyen hata'),
+            isError: true
+          };
+          collectedResults.push(errResult);
+          setBatchResultsMap(prev => ({ ...prev, [p.id]: errResult }));
+        }
+      } catch (err) {
+        const errResult = {
+          promptId: p.id,
+          prompt: p.prompt,
+          topic: p.topic,
+          country: p.country,
+          language: p.language,
+          brandMentioned: false,
+          domainCited: false,
+          citationsCount: 0,
+          citations: [],
+          responseText: 'Bağlantı hatası: ' + err.message,
+          isError: true
+        };
+        collectedResults.push(errResult);
+        setBatchResultsMap(prev => ({ ...prev, [p.id]: errResult }));
+      }
+
+      setBatchProgress({ current: i + 1, total: prompts.length, activePromptId: null });
+      // Brief pause between requests for UI clarity & polite pacing
+      await new Promise(r => setTimeout(r, 600));
+    }
+
+    if (!abortScanRef.current && collectedResults.length > 0) {
+      const total = collectedResults.length;
+      const mentionedCount = collectedResults.filter(r => r.brandMentioned).length;
+      const citedCount = collectedResults.filter(r => r.domainCited).length;
+      const score = Math.round(((mentionedCount * 0.5 + citedCount * 0.5) / total) * 100);
+
+      // Aggregate all citations & top domains
+      const domainCounts = {};
+      collectedResults.forEach(r => {
+        (r.citations || []).forEach(c => {
+          if (c.domain) {
+            domainCounts[c.domain] = (domainCounts[c.domain] || 0) + 1;
+          }
+        });
+      });
+      const topSources = Object.entries(domainCounts)
+        .map(([domain, count]) => ({ domain, count }))
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 10);
+
+      const reportPayload = {
+        total_prompts: total,
+        mentioned_count: mentionedCount,
+        cited_count: citedCount,
+        visibility_score: score,
+        model: 'gemini-3.8-flash',
+        summary: {
+          totalCitationsFound: Object.values(domainCounts).reduce((a, b) => a + b, 0),
+          uniqueDomainsCited: Object.keys(domainCounts).length,
+          topSources,
+          primaryDomain
+        },
+        results: collectedResults
+      };
+
+      try {
+        const saveRes = await fetch(`/api/growth/workspaces/${activeWorkspace.id}/ai-reports`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify(reportPayload)
+        });
+        const saveData = await saveRes.json();
+        if (saveRes.ok && saveData.data) {
+          setActiveReport(saveData.data);
+          fetchReportsList();
+        } else {
+          setActiveReport({ ...reportPayload, created_at: new Date().toISOString() });
+        }
+      } catch {
+        setActiveReport({ ...reportPayload, created_at: new Date().toISOString() });
+      }
+    }
+
+    setIsBatchScanning(false);
+    fetchPrompts();
+  };
+
+  const handleCancelBatchScan = () => {
+    abortScanRef.current = true;
+    setIsBatchScanning(false);
+  };
+
+  // Filter report results
+  const reportResults = activeReport?.results || [];
+  const filteredReportResults = reportResults.filter(r => {
+    if (activeFilter === 'cited') return r.domainCited;
+    if (activeFilter === 'mentioned') return r.brandMentioned;
+    if (activeFilter === 'not_cited') return !r.domainCited;
+    return true;
+  });
+
   return (
     <div className="growth-page-container animate-fade">
       {/* Hero Cover Banner */}
@@ -185,7 +455,16 @@ export default function GrowthAiVisibility() {
             positive: (geoReadiness?.geoScore || 0) >= 70, 
             sub: geoReadiness ? 'Canlı Standartlar' : 'Analiz Ediliyor' 
           },
-          { label: 'AI Motorları', value: '4 Büyük Model', sub: 'Gemini, GPT, Perplexity, Claude' }
+          { 
+            label: 'Takip Edilen Prompt', 
+            value: `${prompts.length} Sorgu`, 
+            sub: 'Aktif İzlenen Sorular' 
+          },
+          { 
+            label: 'Kayıtlı Tarama', 
+            value: `${reportsList.length} Rapor`, 
+            sub: 'Tarihsel Rapor Arşivi' 
+          }
         ]}
         actions={<AiEngineGroup size={22} />}
       />
@@ -208,194 +487,582 @@ export default function GrowthAiVisibility() {
       <div className="growth-panel-card geo-readiness-panel">
         <div className="growth-panel-header">
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-              <h3 className="growth-panel-title">Yapay Zeka Arama Hazırbulunuşluk Standartları</h3>
-              {geoReadiness?.auditedAt && (
-                <span className="geo-audit-time-pill" title={new Date(geoReadiness.auditedAt).toLocaleString('tr-TR')}>
-                  <Clock size={12} />
-                  <span>Son Test: {formatRelativeTime(geoReadiness.auditedAt)}</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: 4 }}>
+              <span className="growth-badge purple">
+                <ShieldCheck size={12} /> Canlı Standartlar Denetimi
+              </span>
+              {geoReadiness?.checked_at && (
+                <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>
+                  Son Tarama: {formatRelativeTime(geoReadiness.checked_at)}
                 </span>
               )}
             </div>
+            <h3 className="growth-panel-title">Yapay Zeka Arama Hazırbulunuşluk Standartları</h3>
             <p className="growth-panel-desc">
-              AI crawler botlarının sitenizi anlamlandırması ve güvenilir bir kaynak olarak alıntılaması için gereken temel yapılar.
+              Web sitenizin AI botları tarafından taranabilmesi, indekslenmesi ve yanıt motorlarında alıntılanabilmesi için gereken teknik altyapı.
             </p>
           </div>
-
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <div className="growth-panel-actions">
             <button
               type="button"
-              className="growth-secondary-btn geo-rescan-btn"
               onClick={() => fetchGeoReadiness(true)}
-              disabled={scanningGeoReadiness || loadingGeoReadiness || !activeWorkspace?.primary_domain}
-              title="Canlı robots.txt, /llms.txt ve Schema.org testini tekrar çalıştır"
+              disabled={scanningGeoReadiness || !activeWorkspace?.primary_domain}
+              className="growth-secondary-btn"
+              title="Domaininizin canlı robots.txt, llms.txt ve Schema standartlarını yeniden tara"
             >
-              <RefreshCw size={13} className={scanningGeoReadiness ? 'spin' : ''} />
-              <span>{scanningGeoReadiness ? 'Canlı Taranıyor...' : 'Canlı Test Et'}</span>
+              <RefreshCw size={14} className={scanningGeoReadiness ? 'spin' : ''} />
+              <span>{scanningGeoReadiness ? 'Taranıyor...' : 'Şimdi Yeniden Tara'}</span>
             </button>
-
-            {loadingGeoReadiness && !geoReadiness ? (
-              <span className="growth-score-badge loading">Hesaplanıyor...</span>
-            ) : geoReadiness ? (
-              <span className={`growth-score-badge ${geoReadiness.geoScore >= 80 ? 'good' : geoReadiness.geoScore >= 50 ? 'warning' : 'danger'}`}>
-                GEO Skoru: {geoReadiness.geoScore}/100
-              </span>
-            ) : (
-              <span className="growth-score-badge warning">Test Bekleniyor</span>
-            )}
           </div>
         </div>
 
-        {!activeWorkspace?.primary_domain ? (
-          <div className="geo-no-domain-alert">
-            <AlertCircle size={18} className="text-warning" />
-            <div>
-              <strong>Birincil Alan Adı Tanımlanmamış</strong>
-              <p>Yapay zeka hazırbulunuşluk analizi için lütfen Ayarlar'dan web sitenizin alan adını ekleyin.</p>
-            </div>
+        {geoError && (
+          <div style={{ padding: '0.75rem 1rem', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.25)', borderRadius: 8, color: '#f87171', fontSize: '0.85rem', marginBottom: '1rem' }}>
+            {geoError}
           </div>
-        ) : loadingGeoReadiness && !geoReadiness ? (
-          <div className="growth-geo-standards-grid">
-            {[1, 2, 3].map(i => (
-              <div key={i} className="geo-standard-item loading" style={{ opacity: 0.7 }}>
-                <SkeletonBlock width="20px" height="20px" borderRadius="50%" />
-                <div style={{ flex: 1 }}>
-                  <SkeletonBlock width="55%" height="16px" borderRadius="4px" />
-                  <SkeletonBlock width="85%" height="13px" borderRadius="4px" style={{ marginTop: 6 }} />
-                </div>
-              </div>
-            ))}
+        )}
+
+        {loadingGeoReadiness ? (
+          <div style={{ padding: '2rem 1rem', textAlign: 'center', color: '#94a3b8' }}>
+            <Loader2 size={24} className="spin" style={{ margin: '0 auto 8px' }} />
+            <p style={{ margin: 0, fontSize: '0.85rem' }}>Standartlar ve canlı robots.txt/llms.txt protokolleri inceleniyor...</p>
           </div>
         ) : geoReadiness ? (
-          <div className="growth-geo-standards-grid">
-            {/* 1. Robots.txt AI Bot Permissions */}
-            <div className={`geo-standard-item ${geoReadiness.robots?.allAllowed ? 'is-verified' : geoReadiness.robots?.anyBlocked ? 'is-blocked' : 'is-warning'}`}>
-              {geoReadiness.robots?.allAllowed ? (
-                <CheckCircle2 size={20} className="text-success" />
-              ) : (
-                <AlertCircle size={20} className="text-warning" />
-              )}
-              <div style={{ flex: 1 }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 6 }}>
-                  <span className="standard-name">Robots.txt AI Bot İzinleri</span>
-                  <span className={`geo-status-tag ${geoReadiness.robots?.allAllowed ? 'success' : geoReadiness.robots?.anyBlocked ? 'danger' : 'warning'}`}>
-                    {geoReadiness.robots?.allAllowed ? 'Tüm AI Botlarına Açık' : geoReadiness.robots?.anyBlocked ? 'Bazı Botlar Engelli' : 'Kısmi İzin'}
+          <>
+            <div className="geo-score-hero-row">
+              <div className="geo-score-badge-box">
+                <span className="geo-score-number">{geoReadiness.geoScore}</span>
+                <span className="geo-score-scale">/100</span>
+              </div>
+              <div className="geo-score-text-box">
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <h4 style={{ margin: 0, fontSize: '1.05rem', color: '#ffffff' }}>
+                    {geoReadiness.geoScore >= 80 ? 'Yüksek AI Hazırbulunuşluğu' : geoReadiness.geoScore >= 50 ? 'Geliştirilebilir AI Altyapısı' : 'Kritik AI Standartları Eksik'}
+                  </h4>
+                  <span className={`geo-status-pill ${geoReadiness.geoScore >= 70 ? 'good' : 'warning'}`}>
+                    {geoReadiness.geoScore >= 70 ? 'İyi Durumda' : 'Optimizasyon Gerekli'}
                   </span>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 6, flexWrap: 'wrap' }}>
-                  <span className="standard-sub">Taranan Botlar:</span>
-                  {(geoReadiness.robots?.crawlers || []).map((bot) => (
-                    <span
-                      key={bot.id}
-                      className={`geo-bot-chip ${bot.allowed ? 'allowed' : 'blocked'}`}
-                      title={`${bot.name} (${bot.company}): ${bot.allowed ? 'İzinli (' + (bot.ruleText || 'Erişilebilir') + ')' : 'Engelli'}`}
-                    >
-                      {bot.logo && (
-                        <img src={bot.logo} alt={bot.name} style={{ width: 12, height: 12, objectFit: 'contain' }} />
-                      )}
-                      <span>{bot.name}</span>
-                      {bot.allowed ? (
-                        <Check size={11} className="text-success" />
-                      ) : (
-                        <X size={11} className="text-danger" />
-                      )}
+                <p style={{ margin: '4px 0 0', fontSize: '0.82rem', color: '#94a3b8', lineHeight: 1.4 }}>
+                  {geoReadiness.summaryText || 'Alan adınızın taranabilirlik ve alıntılanabilirlik durumu yapay zeka arama motorları için analiz edildi.'}
+                </p>
+              </div>
+            </div>
+
+            <div className="geo-standards-grid">
+              {(geoReadiness.standards || []).map((std, idx) => (
+                <div key={idx} className={`geo-standard-card ${std.passed ? 'passed' : 'failed'}`}>
+                  <div className="geo-standard-header">
+                    <div className="geo-standard-icon">
+                      {std.passed ? <CheckCircle2 size={16} color="#10b981" /> : <AlertCircle size={16} color="#f59e0b" />}
+                    </div>
+                    <div className="geo-standard-title-wrap">
+                      <span className="geo-standard-title">{std.title}</span>
+                      <span className="geo-standard-key">{std.key}</span>
+                    </div>
+                  </div>
+                  <p className="geo-standard-desc">{std.desc}</p>
+                  <div className="geo-standard-footer">
+                    <span className={`geo-eval-tag ${std.passed ? 'tag-passed' : 'tag-failed'}`}>
+                      {std.passed ? '✓ Karşılandı' : '✕ Eksik'}
                     </span>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* 2. /llms.txt Standard */}
-            <div className={`geo-standard-item ${geoReadiness.llmsTxt?.found ? 'is-verified' : 'is-missing'}`}>
-              {geoReadiness.llmsTxt?.found ? (
-                <CheckCircle2 size={20} className="text-success" />
-              ) : (
-                <AlertCircle size={20} className="text-warning" />
-              )}
-              <div style={{ flex: 1 }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 6 }}>
-                  <span className="standard-name">/llms.txt Standardı</span>
-                  {geoReadiness.llmsTxt?.found ? (
-                    <span className="geo-status-tag success">Doğrulandı ({geoReadiness.llmsTxt.sizeBytes ? `${Math.round(geoReadiness.llmsTxt.sizeBytes / 1024 * 10) / 10} KB` : 'Aktif'})</span>
-                  ) : (
-                    <span className="geo-status-tag warning">Bulunamadı (404)</span>
-                  )}
-                </div>
-                <span className="standard-sub" style={{ marginTop: 4, display: 'block' }}>
-                  {geoReadiness.llmsTxt?.found ? (
-                    <>
-                      Yapay zeka modelleri için yapılandırılmış özet dosyası aktif.{' '}
-                      <a href={geoReadiness.llmsTxt.url} target="_blank" rel="noopener noreferrer" className="geo-inline-link">
-                        Dosyayı Görüntüle <ExternalLink size={10} />
+                    {std.link && (
+                      <a href={std.link} target="_blank" rel="noopener noreferrer" className="geo-inspect-link">
+                        <span>Test Et</span>
+                        <ExternalLink size={11} />
                       </a>
-                    </>
-                  ) : (
-                    <>
-                      Yapay zeka modellerinin markanızı doğru anlaması için kök dizinde <code>/llms.txt</code> dosyası bulunamadı.{' '}
-                      <a href="#/tool/llms-txt-tools" className="geo-inline-link">
-                        llms.txt Oluşturucu ile Hazırla <ArrowUpRight size={10} />
-                      </a>
-                    </>
-                  )}
-                </span>
-              </div>
-            </div>
-
-            {/* 3. Organization & Entity Schema */}
-            <div className={`geo-standard-item ${geoReadiness.schema?.hasOrganization ? 'is-verified' : 'is-missing'}`}>
-              {geoReadiness.schema?.hasOrganization ? (
-                <CheckCircle2 size={20} className="text-success" />
-              ) : (
-                <AlertCircle size={20} className="text-warning" />
-              )}
-              <div style={{ flex: 1 }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 6 }}>
-                  <span className="standard-name">Organization Şeması</span>
-                  <span className={`geo-status-tag ${geoReadiness.schema?.hasOrganization ? 'success' : 'warning'}`}>
-                    {geoReadiness.schema?.hasOrganization ? 'Varlık Tanımlı' : 'Şema Eksik'}
-                  </span>
+                    )}
+                  </div>
                 </div>
-                <span className="standard-sub" style={{ marginTop: 4, display: 'block' }}>
-                  {geoReadiness.schema?.hasOrganization ? (
-                    <>
-                      Varlık (Entity) tanımlaması ve Knowledge Graph desteği doğrulandı.{' '}
-                      {geoReadiness.schema.types?.length > 0 && (
-                        <span style={{ opacity: 0.8 }}>(Türler: {geoReadiness.schema.types.join(', ')})</span>
-                      )}
-                    </>
-                  ) : (
-                    'Sitede Organization JSON-LD şeması bulunamadı. Yapay zeka motorlarının markanızı bir varlık olarak tanıması için JSON-LD şeması ekleyin.'
-                  )}
-                </span>
-              </div>
+              ))}
             </div>
+          </>
+        ) : (
+          <div className="growth-empty-card" style={{ padding: '1.5rem' }}>
+            <Globe size={24} className="text-muted" />
+            <h4>Domain Bilgisi Eksik</h4>
+            <p>Standartların canlı taranabilmesi için ayarlardan web sitenizin ana alan adını kaydedin.</p>
           </div>
-        ) : null}
+        )}
       </div>
 
-      {/* Add New Tracked Prompt */}
-      <div className="growth-panel-card">
-        <h3 className="growth-panel-title">Yeni Arama Sorusu (Prompt) Takip Et</h3>
-        <p className="growth-panel-desc">
-          Müşterilerinizin sektörünüz ve markanız hakkında yapay zekaya sorabileceği kritik soruları hedef pazar ve dilde takip edin.
-        </p>
+      {/* =========================================================================
+          BATCH SCAN PROGRESS & HISTORICAL REPORT SECTION
+          ========================================================================= */}
 
-        <form onSubmit={handleAddPrompt} className="growth-prompt-add-form">
-          <div className="prompt-input-row">
+      {/* Batch Scan Launch Action Bar */}
+      <div className="growth-panel-card" style={{ padding: '1.1rem 1.25rem', marginBottom: '1.25rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem' }}>
+          <div>
+            <h4 style={{ margin: '0 0 2px', fontSize: '0.98rem', fontWeight: 700, color: '#ffffff', display: 'flex', alignItems: 'center', gap: 6 }}>
+              <Sparkles size={16} color="#3b82f6" />
+              <span>Tek Tuşla Toplu AI Görünürlük & Citation Taraması</span>
+            </h4>
+            <p style={{ margin: 0, fontSize: '0.8rem', color: '#94a3b8' }}>
+              Ekli tüm promptları sırasıyla Gemini 3.8 Flash ve Canlı Google Grounding ile test eder, anılma ve kaynak alıntılarını raporlar.
+            </p>
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
+            {reportsList.length > 0 && (
+              <div className="ai-report-history-select-wrap">
+                <History size={14} color="#a1a1aa" />
+                <select
+                  className="ai-report-history-select"
+                  value={activeReport?.id || ''}
+                  onChange={(e) => handleLoadReport(e.target.value)}
+                  disabled={isBatchScanning}
+                >
+                  {reportsList.map(r => (
+                    <option key={r.id} value={r.id}>
+                      {formatFullDate(r.created_at)} — %{r.visibility_score} GEO ({r.total_prompts} Prompt)
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+
+            <button
+              type="button"
+              disabled={isBatchScanning || prompts.length === 0}
+              onClick={handleStartBatchScan}
+              className="growth-primary-btn"
+              style={{ padding: '0.55rem 1.15rem' }}
+            >
+              {isBatchScanning ? (
+                <>
+                  <Loader2 size={15} className="spin" />
+                  <span>Taranıyor ({batchProgress.current}/{batchProgress.total})...</span>
+                </>
+              ) : (
+                <>
+                  <Zap size={15} />
+                  <span>Tüm Promptları Sırayla Tara ({prompts.length})</span>
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* 1. Live Animated Batch Scan Progress Card */}
+      {isBatchScanning && (
+        <div ref={progressCardRef} className="ai-batch-scan-card">
+          <div className="ai-batch-scan-header">
+            <div className="ai-batch-scan-title">
+              <Loader2 size={20} className="spin" color="#3b82f6" />
+              <span>Canlı Yapay Zeka Taraması Devam Ediyor...</span>
+            </div>
+            <div className="ai-batch-scan-actions">
+              <button type="button" onClick={handleCancelBatchScan} className="ai-batch-cancel-btn">
+                <StopCircle size={14} />
+                <span>Taramayı Durdur</span>
+              </button>
+            </div>
+          </div>
+
+          <div className="ai-batch-progress-bar-wrap">
+            <div className="ai-batch-progress-meta">
+              <span>İncelenen Prompt: {batchProgress.current} / {batchProgress.total}</span>
+              <span>%{Math.round((batchProgress.current / (batchProgress.total || 1)) * 100)} Tamamlandı</span>
+            </div>
+            <div className="ai-batch-progress-track">
+              <div 
+                className="ai-batch-progress-fill" 
+                style={{ width: `${Math.round((batchProgress.current / (batchProgress.total || 1)) * 100)}%` }} 
+              />
+            </div>
+          </div>
+
+          <div className="ai-batch-prompts-list">
+            {prompts.map((p, idx) => {
+              const res = batchResultsMap[p.id];
+              const isProbing = batchProgress.activePromptId === p.id;
+              const isDone = !!res;
+
+              return (
+                <div key={p.id} className={`ai-batch-prompt-row ${isProbing ? 'probing' : isDone ? 'done' : ''}`}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', minWidth: 0 }}>
+                    <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#94a3b8', width: 22 }}>#{idx + 1}</span>
+                    <span className="ai-batch-prompt-text">"{p.prompt}"</span>
+                  </div>
+
+                  <div className="ai-batch-status-pills">
+                    {isProbing ? (
+                      <span className="ai-pill probing">
+                        <Loader2 size={12} className="spin" />
+                        <span>Gemini 3.8 Sorgulanıyor...</span>
+                      </span>
+                    ) : isDone ? (
+                      <>
+                        {res.brandMentioned ? (
+                          <span className="ai-pill success">
+                            <Check size={11} strokeWidth={3} />
+                            <span>Marka Anıldı</span>
+                          </span>
+                        ) : (
+                          <span className="ai-pill danger">
+                            <X size={11} strokeWidth={3} />
+                            <span>Anılmadı</span>
+                          </span>
+                        )}
+
+                        {res.domainCited ? (
+                          <span className="ai-pill success">
+                            <Globe size={11} />
+                            <span>Siteniz Alıntılandı</span>
+                          </span>
+                        ) : res.citationsCount > 0 ? (
+                          <span className="ai-pill neutral">
+                            <Globe size={11} />
+                            <span>{res.citationsCount} Dış Kaynak</span>
+                          </span>
+                        ) : (
+                          <span className="ai-pill neutral">
+                            <span>Alıntı Yok</span>
+                          </span>
+                        )}
+                      </>
+                    ) : (
+                      <span className="ai-pill queued">
+                        <Clock size={11} />
+                        <span>Sırada Bekliyor</span>
+                      </span>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* 2. AI Visibility Summary Report (Minik Rapor) */}
+      {activeReport && !isBatchScanning && (
+        <div className="ai-report-panel animate-fade">
+          <div className="ai-report-topbar">
+            <div className="ai-report-top-left">
+              <div className="ai-report-badge-row">
+                <span className="growth-badge blue">
+                  <BarChart3 size={12} /> AI Görünürlük &amp; Alıntı Raporu
+                </span>
+                <span style={{ fontSize: '0.78rem', color: '#94a3b8', display: 'flex', alignItems: 'center', gap: 4 }}>
+                  <Calendar size={12} />
+                  <span>{formatFullDate(activeReport.created_at)}</span>
+                </span>
+                <span className="growth-badge neutral">
+                  <img src="/AI-logos/gemini-color.svg" alt="Gemini" style={{ width: 12, height: 12 }} />
+                  <span>{activeReport.model || 'gemini-3.8-flash'}</span>
+                </span>
+              </div>
+              <h3 className="ai-report-heading">Genel Yapay Zeka Arama Performansı</h3>
+            </div>
+
+            <div className="ai-report-top-right">
+              {reportsList.length > 1 && (
+                <div className="ai-report-history-select-wrap">
+                  <History size={13} color="#94a3b8" />
+                  <select
+                    className="ai-report-history-select"
+                    value={activeReport.id || ''}
+                    onChange={(e) => handleLoadReport(e.target.value)}
+                  >
+                    {reportsList.map(r => (
+                      <option key={r.id} value={r.id}>
+                        {formatFullDate(r.created_at)} (Skor: %{r.visibility_score})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
+              {activeReport.id && (
+                <button
+                  type="button"
+                  onClick={(e) => handleDeleteReport(activeReport.id, e)}
+                  className="growth-secondary-btn"
+                  title="Bu raporu arşivden sil"
+                  style={{ padding: '0.35rem 0.65rem', color: '#f87171' }}
+                >
+                  <Trash2 size={13} />
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* 4 Mini Report Metric Cards */}
+          <div className="ai-report-metrics-grid">
+            <div className="ai-report-metric-card score-card">
+              <span className="ai-report-metric-label">GEO Görünürlük Skoru</span>
+              <div className={`ai-report-metric-val ${activeReport.visibility_score >= 70 ? 'score-high' : activeReport.visibility_score >= 40 ? 'score-mid' : 'score-low'}`}>
+                %{activeReport.visibility_score}
+              </div>
+              <span className="ai-report-metric-sub">
+                {activeReport.visibility_score >= 70 ? 'Yüksek Görünürlük' : activeReport.visibility_score >= 40 ? 'Orta Düzey Varlık' : 'Geliştirilmeli'}
+              </span>
+            </div>
+
+            <div className="ai-report-metric-card">
+              <span className="ai-report-metric-label">Marka Anılma Oranı</span>
+              <div className="ai-report-metric-val">
+                {activeReport.mentioned_count} / {activeReport.total_prompts}
+              </div>
+              <span className="ai-report-metric-sub">
+                %{Math.round(((activeReport.mentioned_count || 0) / (activeReport.total_prompts || 1)) * 100)} Promptta markanız anıldı
+              </span>
+            </div>
+
+            <div className="ai-report-metric-card">
+              <span className="ai-report-metric-label">Siteniz Kaynak Gösterildi</span>
+              <div className="ai-report-metric-val text-success">
+                {activeReport.cited_count} / {activeReport.total_prompts}
+              </div>
+              <span className="ai-report-metric-sub">
+                %{Math.round(((activeReport.cited_count || 0) / (activeReport.total_prompts || 1)) * 100)} Doğrudan URL / Domain alıntısı
+              </span>
+            </div>
+
+            <div className="ai-report-metric-card">
+              <span className="ai-report-metric-label">Toplam Alıntılanan Kaynak</span>
+              <div className="ai-report-metric-val">
+                {activeReport.summary?.totalCitationsFound || 0}
+              </div>
+              <span className="ai-report-metric-sub">
+                {activeReport.summary?.uniqueDomainsCited || 0} Farklı alan adı cite edildi
+              </span>
+            </div>
+          </div>
+
+          {/* Top Sources Pill Breakdown */}
+          {activeReport.summary?.topSources && activeReport.summary.topSources.length > 0 && (
+            <div className="ai-report-sources-box">
+              <div className="ai-report-sources-title">
+                <Globe size={13} color="#3b82f6" />
+                <span>Yapay Zeka Tarafından En Çok Kaynak Gösterilen Alan Adları:</span>
+              </div>
+              <div className="ai-report-sources-pills">
+                {activeReport.summary.topSources.map((s, sIdx) => {
+                  const isUser = activeReport.summary.primaryDomain && s.domain.includes(activeReport.summary.primaryDomain);
+                  return (
+                    <span key={sIdx} className={`ai-source-tag ${isUser ? 'is-user' : ''}`}>
+                      <Globe size={11} />
+                      <span>{s.domain}</span>
+                      <span className="ai-source-count">{s.count} alıntı</span>
+                    </span>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Filter Bar */}
+          <div className="ai-report-filters-bar">
+            <span style={{ fontSize: '0.84rem', fontWeight: 600, color: '#ffffff' }}>
+              İncelenen Promptlar ({filteredReportResults.length} / {reportResults.length})
+            </span>
+
+            <div className="ai-filter-tabs">
+              <button 
+                type="button" 
+                className={`ai-filter-tab ${activeFilter === 'all' ? 'active' : ''}`}
+                onClick={() => setActiveFilter('all')}
+              >
+                Tümü ({reportResults.length})
+              </button>
+              <button 
+                type="button" 
+                className={`ai-filter-tab ${activeFilter === 'cited' ? 'active' : ''}`}
+                onClick={() => setActiveFilter('cited')}
+              >
+                Siteniz Kaynak Gösterilenler ({reportResults.filter(r => r.domainCited).length})
+              </button>
+              <button 
+                type="button" 
+                className={`ai-filter-tab ${activeFilter === 'mentioned' ? 'active' : ''}`}
+                onClick={() => setActiveFilter('mentioned')}
+              >
+                Marka Anılanlar ({reportResults.filter(r => r.brandMentioned).length})
+              </button>
+              <button 
+                type="button" 
+                className={`ai-filter-tab ${activeFilter === 'not_cited' ? 'active' : ''}`}
+                onClick={() => setActiveFilter('not_cited')}
+              >
+                Alıntı Olmayanlar ({reportResults.filter(r => !r.domainCited).length})
+              </button>
+            </div>
+          </div>
+
+          {/* Prompt Breakdown List */}
+          <div className="ai-report-results-list">
+            {filteredReportResults.map((item, idx) => {
+              const isExpanded = !!expandedQueries[item.promptId || idx];
+              const marketOpt = getMarketOption(item.country || 'TR');
+              const langOpt = getLanguageOption(item.language || 'tr');
+
+              return (
+                <div key={item.promptId || idx} className="ai-report-item-card">
+                  <div className="ai-report-item-header">
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', flexWrap: 'wrap' }}>
+                      <span className="ai-report-item-query">"{item.prompt}"</span>
+                      <span className="prompt-topic-tag">{item.topic || 'Genel'}</span>
+                      <span className="prompt-meta-badge" title={`Pazar: ${marketOpt.label}`}>
+                        {marketOpt.icon}
+                        <span>{marketOpt.code || item.country || 'TR'}</span>
+                      </span>
+                      <span className="prompt-meta-badge lang" title={`Dil: ${langOpt.label}`}>
+                        <Languages size={11} color="#8b5cf6" />
+                        <span>{langOpt.code || (item.language || 'TR').toUpperCase()}</span>
+                      </span>
+                    </div>
+
+                    <div className="ai-report-item-badges">
+                      {item.brandMentioned ? (
+                        <span className="ai-pill success">
+                          <Check size={11} strokeWidth={3} />
+                          <span>Marka Anıldı</span>
+                        </span>
+                      ) : (
+                        <span className="ai-pill danger">
+                          <X size={11} strokeWidth={3} />
+                          <span>Anılmadı</span>
+                        </span>
+                      )}
+
+                      {item.domainCited ? (
+                        <span className="ai-pill success">
+                          <Globe size={11} />
+                          <span>Siteniz Alıntılandı</span>
+                        </span>
+                      ) : item.citationsCount > 0 ? (
+                        <span className="ai-pill neutral">
+                          <Globe size={11} />
+                          <span>{item.citationsCount} Dış Alıntı</span>
+                        </span>
+                      ) : (
+                        <span className="ai-pill neutral">
+                          <span>Alıntı Yok</span>
+                        </span>
+                      )}
+
+                      <button
+                        type="button"
+                        onClick={() => toggleQuery(item.promptId || idx)}
+                        className="ai-report-preview-toggle"
+                      >
+                        <span>{isExpanded ? 'Gizle' : 'Yanıtı Gör'}</span>
+                        {isExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                      </button>
+                    </div>
+                  </div>
+
+                  {isExpanded && (
+                    <div className="animate-fade" style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginTop: '0.25rem' }}>
+                      <div className="ai-result-text-box">
+                        <span className="ai-box-sub">Gemini 3.8 Tarafından Üretilen Yanıt:</span>
+                        <p className="ai-response-content">{item.responseText}</p>
+                      </div>
+
+                      {item.citations && item.citations.length > 0 && (
+                        <div className="ai-citations-box">
+                          <span className="ai-box-sub">Alıntılanan Kaynaklar:</span>
+                          <div className="citations-list">
+                            {item.citations.map((c, cIdx) => (
+                              <a key={cIdx} href={c.url} target="_blank" rel="noopener noreferrer" className="citation-pill">
+                                <Globe size={12} />
+                                <span>{c.domain}</span>
+                                <ExternalLink size={10} />
+                              </a>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Individual Prompt Test Drawer (Single Run Result) */}
+      {lastRunResult && !isBatchScanning && (
+        <div className="growth-ai-run-result-banner animate-fade">
+          <div className="ai-result-header">
+            <div className="ai-result-title-row">
+              <img src="/AI-logos/gemini-color.svg" alt="Google Gemini" style={{ width: 22, height: 22, objectFit: 'contain' }} />
+              <h4>Canlı Yapay Zeka Test Sonucu (Google Gemini)</h4>
+            </div>
+            <button type="button" onClick={() => setLastRunResult(null)} className="ai-result-close" aria-label="Kapat">
+              <X size={16} />
+            </button>
+          </div>
+
+          <div className="ai-result-stats-row">
+            <div className="ai-stat-box">
+              <span className="ai-stat-label">Marka Anıldı mı?</span>
+              <span className={`ai-stat-val ${lastRunResult.brand_mentioned ? 'text-success' : 'text-danger'}`}>
+                {lastRunResult.brand_mentioned ? 'EVET, ANILDI' : 'HAYIR'}
+              </span>
+            </div>
+            <div className="ai-stat-box">
+              <span className="ai-stat-label">Siteniz Kaynak Gösterildi mi?</span>
+              <span className={`ai-stat-val ${lastRunResult.domain_cited ? 'text-success' : 'text-danger'}`}>
+                {lastRunResult.domain_cited ? 'EVET, ALINTILANDI' : 'HAYIR'}
+              </span>
+            </div>
+            <div className="ai-stat-box">
+              <span className="ai-stat-label">Test Edilen Motor</span>
+              <span className="ai-stat-val text-muted" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <img src="/AI-logos/gemini-color.svg" alt="Gemini" style={{ width: 16, height: 16 }} />
+                <span>{lastRunResult.model || 'gemini-3.8-flash'}</span>
+              </span>
+            </div>
+          </div>
+
+          <div className="ai-result-text-box">
+            <span className="ai-box-sub">Yapay Zeka Tarafından Üretilen Yanıt:</span>
+            <p className="ai-response-content">{lastRunResult.response_text}</p>
+          </div>
+
+          {lastRunResult.citations && lastRunResult.citations.length > 0 && (
+            <div className="ai-citations-box">
+              <span className="ai-box-sub">Alıntılanan Kaynaklar & Siteler:</span>
+              <div className="citations-list">
+                {lastRunResult.citations.map((c, cIdx) => (
+                  <a key={cIdx} href={c.url} target="_blank" rel="noopener noreferrer" className="citation-pill">
+                    <Globe size={12} />
+                    <span>{c.domain}</span>
+                    <ExternalLink size={10} />
+                  </a>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Add New Tracked Prompt Card */}
+      <div className="growth-panel-card">
+        <div className="growth-panel-header">
+          <div>
+            <h3 className="growth-panel-title">Yeni Arama Sorusu (Prompt) Takip Et</h3>
+            <p className="growth-panel-desc">
+              Kullanıcıların yapay zekaya sorduğu ve markanızın önerilmesini istediğiniz sektörel soruları ekleyin.
+            </p>
+          </div>
+        </div>
+
+        <form onSubmit={handleAddPrompt} className="growth-add-prompt-form">
+          <div className="growth-form-group">
             <input
               type="text"
-              required
-              className="growth-field-input flex-2"
-              placeholder="Örnek: En iyi B2B pazarlama araçları hangileri?"
+              placeholder="Örn: En iyi B2B SEO ve büyüme platformu hangisi?"
               value={newPromptText}
               onChange={(e) => setNewPromptText(e.target.value)}
-            />
-            <input
-              type="text"
-              className="growth-field-input flex-1"
-              placeholder="Kategori (örn. Rakip Karşılaştırma)"
-              value={newPromptTopic}
-              onChange={(e) => setNewPromptTopic(e.target.value)}
+              className="growth-input"
+              required
             />
           </div>
 
@@ -431,57 +1098,6 @@ export default function GrowthAiVisibility() {
           </div>
         </form>
       </div>
-
-      {/* Live AI Visibility Simulation Modal / Result Drawer */}
-      {lastRunResult && (
-        <div className="growth-ai-run-result-banner animate-fade">
-          <div className="ai-result-header">
-            <div className="ai-result-title-row">
-              <img src="/AI-logos/gemini-color.svg" alt="Google Gemini" style={{ width: 22, height: 22, objectFit: 'contain' }} />
-              <h4>Canlı Yapay Zeka Test Sonucu (Google Gemini)</h4>
-            </div>
-            <button type="button" onClick={() => setLastRunResult(null)} className="ai-result-close" aria-label="Kapat">
-              <X size={16} />
-            </button>
-          </div>
-
-          <div className="ai-result-stats-row">
-            <div className="ai-stat-box">
-              <span className="ai-stat-label">Marka Anıldı mı?</span>
-              <span className={`ai-stat-val ${lastRunResult.brand_mentioned ? 'text-success' : 'text-danger'}`}>
-                {lastRunResult.brand_mentioned ? 'EVET, ANILDI' : 'HAYIR'}
-              </span>
-            </div>
-            <div className="ai-stat-box">
-              <span className="ai-stat-label">Test Edilen Motor</span>
-              <span className="ai-stat-val text-muted" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                <img src="/AI-logos/gemini-color.svg" alt="Gemini" style={{ width: 16, height: 16 }} />
-                <span>{lastRunResult.model || 'gemini-3.8-flash'}</span>
-              </span>
-            </div>
-          </div>
-
-          <div className="ai-result-text-box">
-            <span className="ai-box-sub">Yapay Zeka Tarafından Üretilen Yanıt:</span>
-            <p className="ai-response-content">{lastRunResult.response_text}</p>
-          </div>
-
-          {lastRunResult.citations && lastRunResult.citations.length > 0 && (
-            <div className="ai-citations-box">
-              <span className="ai-box-sub">Alıntılanan Kaynaklar & Siteler:</span>
-              <div className="citations-list">
-                {lastRunResult.citations.map((c, cIdx) => (
-                  <a key={cIdx} href={c.url} target="_blank" rel="noopener noreferrer" className="citation-pill">
-                    <Globe size={12} />
-                    <span>{c.domain}</span>
-                    <ExternalLink size={10} />
-                  </a>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-      )}
 
       {/* Tracked Prompts List */}
       <div className="growth-panel-card">
@@ -545,7 +1161,7 @@ export default function GrowthAiVisibility() {
                   <div className="prompt-actions-col">
                     <button
                       type="button"
-                      disabled={isRunning}
+                      disabled={isRunning || isBatchScanning}
                       onClick={() => handleRunPrompt(p.id)}
                       className="growth-run-test-btn"
                     >

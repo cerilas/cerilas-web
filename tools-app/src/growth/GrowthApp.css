@@ -6763,4 +6763,473 @@ html.light .growth-stat-card {
   }
 }
 
+/* ==========================================================================
+   AI Visibility Batch Scan & Historical Reports
+   ========================================================================== */
+
+.ai-batch-scan-card {
+  background: var(--card-bg, #18181b);
+  border: 1px solid rgba(59, 130, 246, 0.4);
+  border-radius: 16px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 10px 30px rgba(59, 130, 246, 0.12);
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  animation: aivcDropdownEntrance 0.25s ease-out;
+}
+
+.ai-batch-scan-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.ai-batch-scan-title {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text-main, #ffffff);
+}
+
+.ai-batch-scan-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.ai-batch-cancel-btn {
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #ef4444;
+  border-radius: 8px;
+  padding: 0.4rem 0.85rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  transition: all 0.15s ease;
+}
+
+.ai-batch-cancel-btn:hover {
+  background: rgba(239, 68, 68, 0.2);
+  border-color: #ef4444;
+}
+
+.ai-batch-progress-bar-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.ai-batch-progress-meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.82rem;
+  color: var(--text-muted, #94a3b8);
+  font-weight: 500;
+}
+
+.ai-batch-progress-track {
+  height: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 9999px;
+  overflow: hidden;
+}
+
+.ai-batch-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #3b82f6, #8b5cf6, #10b981);
+  border-radius: 9999px;
+  transition: width 0.3s ease;
+}
+
+.ai-batch-prompts-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-height: 280px;
+  overflow-y: auto;
+  padding-right: 0.3rem;
+}
+
+.ai-batch-prompt-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.07));
+  border-radius: 10px;
+  padding: 0.6rem 0.85rem;
+  font-size: 0.85rem;
+  transition: all 0.2s ease;
+}
+
+.ai-batch-prompt-row.probing {
+  background: rgba(59, 130, 246, 0.08);
+  border-color: rgba(59, 130, 246, 0.4);
+  box-shadow: 0 0 12px rgba(59, 130, 246, 0.15);
+}
+
+.ai-batch-prompt-row.done {
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+.ai-batch-prompt-text {
+  font-weight: 500;
+  color: var(--text-main, #ffffff);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 480px;
+}
+
+.ai-batch-status-pills {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  flex-shrink: 0;
+}
+
+.ai-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 0.2rem 0.55rem;
+  border-radius: 6px;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.ai-pill.queued {
+  background: rgba(150, 150, 150, 0.1);
+  color: #a1a1aa;
+  border: 1px solid rgba(150, 150, 150, 0.2);
+}
+
+.ai-pill.probing {
+  background: rgba(59, 130, 246, 0.15);
+  color: #60a5fa;
+  border: 1px solid rgba(59, 130, 246, 0.35);
+}
+
+.ai-pill.success {
+  background: rgba(16, 185, 129, 0.15);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.35);
+}
+
+.ai-pill.info {
+  background: rgba(59, 130, 246, 0.15);
+  color: #60a5fa;
+  border: 1px solid rgba(59, 130, 246, 0.35);
+}
+
+.ai-pill.neutral {
+  background: rgba(255, 255, 255, 0.06);
+  color: #a1a1aa;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.ai-pill.danger {
+  background: rgba(239, 68, 68, 0.15);
+  color: #f87171;
+  border: 1px solid rgba(239, 68, 68, 0.35);
+}
+
+/* ==========================================================================
+   AI Summary Report Panel
+   ========================================================================== */
+
+.ai-report-panel {
+  background: var(--card-bg, #18181b);
+  border: 1px solid var(--card-border, rgba(255, 255, 255, 0.1));
+  border-radius: 18px;
+  padding: 1.5rem;
+  margin-bottom: 1.75rem;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.25);
+  display: flex;
+  flex-direction: column;
+  gap: 1.4rem;
+}
+
+.ai-report-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+  border-bottom: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
+  padding-bottom: 1.1rem;
+}
+
+.ai-report-top-left {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.ai-report-badge-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.ai-report-heading {
+  margin: 0;
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: var(--text-main, #ffffff);
+  letter-spacing: -0.02em;
+}
+
+.ai-report-top-right {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.ai-report-history-select-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.12));
+  border-radius: 9px;
+  padding: 0.35rem 0.7rem;
+}
+
+.ai-report-history-select {
+  background: transparent;
+  border: none;
+  color: var(--text-main, #ffffff);
+  font-size: 0.82rem;
+  font-weight: 500;
+  outline: none;
+  cursor: pointer;
+}
+
+.ai-report-history-select option {
+  background: #18181b;
+  color: #ffffff;
+}
+
+.ai-report-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.ai-report-metric-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
+  border-radius: 12px;
+  padding: 1rem 1.2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.ai-report-metric-card.score-card {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.08), rgba(139, 92, 246, 0.08));
+  border-color: rgba(99, 102, 241, 0.3);
+}
+
+.ai-report-metric-label {
+  font-size: 0.74rem;
+  font-weight: 600;
+  color: var(--text-muted, #94a3b8);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.ai-report-metric-val {
+  font-size: 1.85rem;
+  font-weight: 800;
+  color: var(--text-main, #ffffff);
+  line-height: 1.1;
+}
+
+.ai-report-metric-val.score-high {
+  color: #34d399;
+}
+.ai-report-metric-val.score-mid {
+  color: #fbbf24;
+}
+.ai-report-metric-val.score-low {
+  color: #f87171;
+}
+
+.ai-report-metric-sub {
+  font-size: 0.78rem;
+  color: var(--text-muted, #94a3b8);
+}
+
+.ai-report-filters-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  padding-top: 0.25rem;
+}
+
+.ai-filter-tabs {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: rgba(255, 255, 255, 0.04);
+  padding: 0.25rem;
+  border-radius: 10px;
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
+}
+
+.ai-filter-tab {
+  background: transparent;
+  border: none;
+  color: var(--text-muted, #94a3b8);
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 0.35rem 0.75rem;
+  border-radius: 7px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.ai-filter-tab:hover {
+  color: #ffffff;
+}
+
+.ai-filter-tab.active {
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+}
+
+.ai-report-results-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.ai-report-item-card {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.07));
+  border-radius: 12px;
+  padding: 1.1rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  transition: all 0.15s ease;
+}
+
+.ai-report-item-card:hover {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+.ai-report-item-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.ai-report-item-query {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-main, #ffffff);
+}
+
+.ai-report-item-badges {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+}
+
+.ai-report-preview-toggle {
+  background: transparent;
+  border: none;
+  color: #60a5fa;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.ai-report-preview-toggle:hover {
+  text-decoration: underline;
+}
+
+.ai-report-sources-box {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.06));
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+}
+
+.ai-report-sources-title {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-muted, #94a3b8);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 0.65rem;
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.ai-report-sources-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.ai-source-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
+  border-radius: 8px;
+  padding: 0.3rem 0.65rem;
+  font-size: 0.78rem;
+  color: var(--text-main, #ffffff);
+}
+
+.ai-source-tag.is-user {
+  background: rgba(16, 185, 129, 0.12);
+  border-color: rgba(16, 185, 129, 0.35);
+  color: #34d399;
+  font-weight: 700;
+}
+
+.ai-source-count {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 0.08rem 0.35rem;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+
 

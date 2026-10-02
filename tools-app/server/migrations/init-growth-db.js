@@ -237,6 +237,21 @@ export async function initGrowthDb() {
       CREATE INDEX IF NOT EXISTS idx_ai_citations_workspace ON growth_ai_citations(workspace_id);
       CREATE INDEX IF NOT EXISTS idx_ai_citations_domain ON growth_ai_citations(domain);
 
+      -- 13b. AI Visibility Batch Reports (Historical snapshots)
+      CREATE TABLE IF NOT EXISTS growth_ai_visibility_batch_reports (
+        id SERIAL PRIMARY KEY,
+        workspace_id INT REFERENCES workspaces(id) ON DELETE CASCADE,
+        total_prompts INT DEFAULT 0,
+        mentioned_count INT DEFAULT 0,
+        cited_count INT DEFAULT 0,
+        visibility_score INT DEFAULT 0,
+        model VARCHAR(100) DEFAULT 'gemini-3.8-flash',
+        summary JSONB DEFAULT '{}'::jsonb,
+        results JSONB DEFAULT '[]'::jsonb,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      );
+      CREATE INDEX IF NOT EXISTS idx_ai_batch_reports_ws ON growth_ai_visibility_batch_reports(workspace_id, created_at DESC);
+
       -- 14. Background Jobs (Lightweight PostgreSQL queue)
       CREATE TABLE IF NOT EXISTS growth_background_jobs (
         id SERIAL PRIMARY KEY,

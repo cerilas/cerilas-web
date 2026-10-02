@@ -864,6 +864,19 @@ Cite real brands, websites, and sources if relevant.`;
       brandMentioned = true;
     }
 
+    const cleanPrimary = (workspace.primary_domain || '')
+      .toLowerCase()
+      .replace(/^(https?:\/\/)?(www\.)?/, '')
+      .split('/')[0]
+      .trim();
+
+    const domainCited = Boolean(
+      cleanPrimary && citations.some(c => {
+        const cd = (c.domain || '').toLowerCase().replace(/^(https?:\/\/)?(www\.)?/, '');
+        return cd === cleanPrimary || cd.endsWith('.' + cleanPrimary) || cleanPrimary.endsWith('.' + cd);
+      })
+    );
+
     const runInsert = await authPool.query(
       `INSERT INTO growth_ai_visibility_runs (
         workspace_id, prompt_id, provider, model, response_text, brand_mentioned, citations, checked_at
@@ -872,13 +885,165 @@ Cite real brands, websites, and sources if relevant.`;
       [workspace.id, trackedPrompt.id, responseText, brandMentioned, JSON.stringify(citations)]
     );
 
+    // Save individual citations to growth_ai_citations table
+    if (citations && citations.length > 0) {
+      for (const cit of citations) {
+        const cd = (cit.domain || '').toLowerCase().replace(/^(https?:\/\/)?(www\.)?/, '');
+        const isUserBrand = Boolean(cleanPrimary && (cd === cleanPrimary || cd.endsWith('.' + cleanPrimary)));
+        try {
+          await authPool.query(
+            `INSERT INTO growth_ai_citations (
+              workspace_id, run_id, source_url, domain, page_title, is_user_brand, discovered_at
+            ) VALUES ($1, $2, $3, $4, $5, $6, NOW())`,
+            [workspace.id, runInsert.rows[0].id, cit.url || '', cit.domain || '', cit.title || '', isUserBrand]
+          );
+        } catch {}
+      }
+    }
+
     res.json({
       success: true,
-      data: runInsert.rows[0]
+      data: {
+        ...runInsert.rows[0],
+        domain_cited: domainCited,
+        citations_count: citations.length,
+        prompt: trackedPrompt.prompt,
+        topic: trackedPrompt.topic,
+        country: trackedPrompt.country,
+        language: trackedPrompt.language
+      }
     });
   } catch (err) {
     console.error('[AI Visibility Run Error]:', err);
     res.status(500).json({ error: err.message || 'AI görünürlük simülasyonu çalıştırılamadı.' });
+  }
+});
+
+/**
+ * GET /api/growth/workspaces/:slugOrId/ai-reports
+ * List historical AI Visibility Batch Reports
+ */
+router.get('/workspaces/:slugOrId/ai-reports', requireAuth, async (req, res) => {
+  try {
+    const authData = await resolveAndAuthorizeWorkspace(req, req.params.slugOrId);
+    if (!authData) return res.status(404).json({ error: 'Çalışma alanı bulunamadı.' });
+
+    const { workspace } = authData;
+    const reportsRes = await authPool.query(
+      `SELECT id, workspace_id, total_prompts, mentioned_count, cited_count, visibility_score, model, summary, created_at
+       FROM growth_ai_visibility_batch_reports
+       WHERE workspace_id = $1
+       ORDER BY created_at DESC
+       LIMIT 50`,
+      [workspace.id]
+    );
+
+    res.json({
+      success: true,
+      data: reportsRes.rows
+    });
+  } catch (err) {
+    console.error('List AI reports error:', err);
+    res.status(500).json({ error: 'AI raporları alınamadı.' });
+  }
+});
+
+/**
+ * GET /api/growth/workspaces/:slugOrId/ai-reports/:reportId
+ * Get single AI Batch Report with complete details
+ */
+router.get('/workspaces/:slugOrId/ai-reports/:reportId', requireAuth, async (req, res) => {
+  try {
+    const authData = await resolveAndAuthorizeWorkspace(req, req.params.slugOrId);
+    if (!authData) return res.status(404).json({ error: 'Çalışma alanı bulunamadı.' });
+
+    const { workspace } = authData;
+    const reportRes = await authPool.query(
+      `SELECT * FROM growth_ai_visibility_batch_reports
+       WHERE id = $1 AND workspace_id = $2`,
+      [req.params.reportId, workspace.id]
+    );
+
+    if (reportRes.rows.length === 0) {
+      return res.status(404).json({ error: 'Rapor bulunamadı.' });
+    }
+
+    res.json({
+      success: true,
+      data: reportRes.rows[0]
+    });
+  } catch (err) {
+    console.error('Get AI report error:', err);
+    res.status(500).json({ error: 'AI raporu alınamadı.' });
+  }
+});
+
+/**
+ * POST /api/growth/workspaces/:slugOrId/ai-reports
+ * Save new AI Visibility Batch Report
+ */
+router.post('/workspaces/:slugOrId/ai-reports', requireAuth, async (req, res) => {
+  try {
+    const authData = await resolveAndAuthorizeWorkspace(req, req.params.slugOrId);
+    if (!authData) return res.status(404).json({ error: 'Çalışma alanı bulunamadı.' });
+
+    const { workspace } = authData;
+    const {
+      total_prompts,
+      mentioned_count,
+      cited_count,
+      visibility_score,
+      model = 'gemini-3.8-flash',
+      summary = {},
+      results = []
+    } = req.body;
+
+    const insertRes = await authPool.query(
+      `INSERT INTO growth_ai_visibility_batch_reports (
+        workspace_id, total_prompts, mentioned_count, cited_count, visibility_score, model, summary, results, created_at
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NOW())
+      RETURNING *`,
+      [
+        workspace.id,
+        Number(total_prompts) || 0,
+        Number(mentioned_count) || 0,
+        Number(cited_count) || 0,
+        Number(visibility_score) || 0,
+        model,
+        JSON.stringify(summary),
+        JSON.stringify(results)
+      ]
+    );
+
+    res.json({
+      success: true,
+      data: insertRes.rows[0]
+    });
+  } catch (err) {
+    console.error('Save AI report error:', err);
+    res.status(500).json({ error: 'AI raporu kaydedilemedi.' });
+  }
+});
+
+/**
+ * DELETE /api/growth/workspaces/:slugOrId/ai-reports/:reportId
+ * Delete an AI Batch Report
+ */
+router.delete('/workspaces/:slugOrId/ai-reports/:reportId', requireAuth, async (req, res) => {
+  try {
+    const authData = await resolveAndAuthorizeWorkspace(req, req.params.slugOrId);
+    if (!authData) return res.status(404).json({ error: 'Çalışma alanı bulunamadı.' });
+
+    const { workspace } = authData;
+    await authPool.query(
+      `DELETE FROM growth_ai_visibility_batch_reports WHERE id = $1 AND workspace_id = $2`,
+      [req.params.reportId, workspace.id]
+    );
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error('Delete AI report error:', err);
+    res.status(500).json({ error: 'Rapor silinemedi.' });
   }
 });
 
