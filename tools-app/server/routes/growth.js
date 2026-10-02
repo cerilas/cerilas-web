@@ -799,7 +799,7 @@ Cite real brands, websites, and sources if relevant.`;
       let response;
       try {
         response = await ai.models.generateContent({
-          model: 'gemini-2.5-flash',
+          model: 'gemini-3.8-flash',
           contents: promptQuery,
           config: {
             tools: [{ googleSearch: {} }]
@@ -808,7 +808,7 @@ Cite real brands, websites, and sources if relevant.`;
       } catch (toolErr) {
         console.warn('[Gemini Grounding fallback]:', toolErr.message);
         response = await ai.models.generateContent({
-          model: 'gemini-2.5-flash',
+          model: 'gemini-3.8-flash',
           contents: promptQuery
         });
       }
@@ -867,7 +867,7 @@ Cite real brands, websites, and sources if relevant.`;
     const runInsert = await authPool.query(
       `INSERT INTO growth_ai_visibility_runs (
         workspace_id, prompt_id, provider, model, response_text, brand_mentioned, citations, checked_at
-      ) VALUES ($1, $2, 'gemini', 'gemini-2.5-flash', $3, $4, $5, NOW())
+      ) VALUES ($1, $2, 'gemini', 'gemini-3.8-flash', $3, $4, $5, NOW())
       RETURNING *`,
       [workspace.id, trackedPrompt.id, responseText, brandMentioned, JSON.stringify(citations)]
     );

@@ -654,7 +654,7 @@ def get_ga4_realtime():
 
 # 3. Ask Gemini a question with automated Tool Calling
 response = client.models.generate_content(
-    model="gemini-2.5-flash",
+    model="gemini-3.8-flash",
     contents="Check our GA4 realtime users right now and summarize our top Search Console queries.",
     config=types.GenerateContentConfig(
         tools=[get_search_console_queries, get_ga4_traffic, get_ga4_realtime],
@@ -678,7 +678,7 @@ async function fetchSearchConsole(startDate = '2026-08-30', endDate = '2026-09-2
 
 // 2. Query Gemini with live context
 const response = await ai.models.generateContent({
-  model: 'gemini-2.5-flash',
+  model: 'gemini-3.8-flash',
   contents: 'Analyze our organic Search Console ranking positions and identify quick-win CTR opportunities.',
   config: {
     systemInstruction: \`You have live access to Cerilas Google Marketing MCP Server at ${apiOrigin}/api/mcp with key: ${effectiveKey}\`

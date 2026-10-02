@@ -456,7 +456,7 @@ export default function GrowthAiVisibility() {
               <span className="ai-stat-label">Test Edilen Motor</span>
               <span className="ai-stat-val text-muted" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                 <img src="/AI-logos/gemini-color.svg" alt="Gemini" style={{ width: 16, height: 16 }} />
-                <span>{lastRunResult.model || 'gemini-2.5-flash'}</span>
+                <span>{lastRunResult.model || 'gemini-3.8-flash'}</span>
               </span>
             </div>
           </div>
