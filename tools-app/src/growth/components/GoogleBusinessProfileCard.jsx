@@ -19,10 +19,20 @@ import {
   Loader2,
   Building2,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  ChevronLeft,
+  ChevronRight,
+  Compass,
+  Radio
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useGrowth } from '../GrowthContext';
+
+const SEARCH_ANIM_STEPS = [
+  'Google Haritalar dizininde eşleşen işletmeler taranıyor...',
+  'Konum, koordinat ve yerel mağaza bilgileri doğrulanıyor...',
+  'Müşteri puanları, yorum sayıları ve profil detayları derleniyor...'
+];
 
 export default function GoogleBusinessProfileCard() {
   const { activeWorkspace } = useGrowth();
@@ -35,9 +45,22 @@ export default function GoogleBusinessProfileCard() {
   // Search & connect state
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearching, setIsSearching] = useState(false);
+  const [searchStep, setSearchStep] = useState(0);
   const [searchResults, setSearchResults] = useState([]);
   const [isConnecting, setIsConnecting] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
+
+  // Search ticker animation effect
+  useEffect(() => {
+    let interval;
+    if (isSearching) {
+      setSearchStep(0);
+      interval = setInterval(() => {
+        setSearchStep(prev => (prev + 1) % SEARCH_ANIM_STEPS.length);
+      }, 2200);
+    }
+    return () => clearInterval(interval);
+  }, [isSearching]);
 
   // Manual fallback state
   const [showManualForm, setShowManualForm] = useState(false);
@@ -47,8 +70,11 @@ export default function GoogleBusinessProfileCard() {
   const [manualRating, setManualRating] = useState('4.8');
   const [manualReviews, setManualReviews] = useState('25');
 
-  // Review list state
-  const [reviewTab, setReviewTab] = useState('low_star'); // 'low_star', 'unanswered', 'all'
+  // Review list state & pagination
+  const [reviewTab, setReviewTab] = useState('all'); // 'all', 'low_star', 'unanswered', 'with_reply'
+  const [starFilter, setStarFilter] = useState('all'); // 'all', '5', '4', '3', '2', '1'
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(5);
   const [generatingReplyFor, setGeneratingReplyFor] = useState(null);
   const [generatedReplies, setGeneratedReplies] = useState({});
   const [copiedId, setCopiedId] = useState(null);
@@ -309,8 +335,48 @@ export default function GoogleBusinessProfileCard() {
             </button>
           </form>
 
+          {/* Live Radar Searching Animation Card */}
+          {isSearching && (
+            <div className="gbp-searching-anim-card animate-fade">
+              <div className="gbp-radar-visual-wrap">
+                <div className="gbp-radar-ring gbp-radar-ring-1" />
+                <div className="gbp-radar-ring gbp-radar-ring-2" />
+                <div className="gbp-radar-ring gbp-radar-ring-3" />
+                <div className="gbp-radar-crosshair-h" />
+                <div className="gbp-radar-crosshair-v" />
+                <div className="gbp-radar-sweep-beam" />
+                <div className="gbp-radar-center-blip">
+                  <Radio size={20} className="animate-pulse" />
+                </div>
+              </div>
+
+              <div className="gbp-search-steps-ticker">
+                <div className="gbp-ticker-title">
+                  <Compass size={18} color="#38bdf8" className="animate-spin" style={{ animationDuration: '4s' }} />
+                  <span>"{searchQuery}" için Google Haritalar Taranıyor</span>
+                </div>
+
+                <div className="gbp-ticker-desc">
+                  {SEARCH_ANIM_STEPS[searchStep]}
+                </div>
+
+                <div className="gbp-search-step-indicators">
+                  {SEARCH_ANIM_STEPS.map((_, sIdx) => (
+                    <div key={sIdx} className={`gbp-step-dot ${sIdx === searchStep ? 'active' : ''}`} />
+                  ))}
+                </div>
+
+                <div className="gbp-skeleton-preview-rows">
+                  <div className="gbp-skeleton-bar" style={{ width: '85%' }} />
+                  <div className="gbp-skeleton-bar" style={{ width: '100%' }} />
+                  <div className="gbp-skeleton-bar" style={{ width: '65%' }} />
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Search Results */}
-          {searchResults.length > 0 && (
+          {searchResults.length > 0 && !isSearching && (
             <div className="gbp-search-results animate-fade">
               <span className="gbp-results-title">Bulunan Eşleşen İşletmeler:</span>
               <div className="gbp-results-list">
@@ -513,13 +579,26 @@ export default function GoogleBusinessProfileCard() {
   // Connected State
   const reviews = Array.isArray(profile.reviews) ? profile.reviews : [];
   const lowStarReviews = reviews.filter(r => Number(r.rating) <= 2);
-  const unansweredReviews = lowStarReviews.filter(r => !r.has_owner_response);
+  const unansweredReviews = lowStarReviews.filter(r => !r.has_owner_response && !r.owner_response);
+  const withReplyReviews = reviews.filter(r => r.has_owner_response || Boolean(r.owner_response));
 
-  const displayedReviews = reviewTab === 'low_star' 
-    ? lowStarReviews 
-    : reviewTab === 'unanswered' 
-      ? unansweredReviews 
-      : reviews;
+  let baseFilteredReviews = reviews;
+  if (reviewTab === 'low_star') {
+    baseFilteredReviews = lowStarReviews;
+  } else if (reviewTab === 'unanswered') {
+    baseFilteredReviews = unansweredReviews;
+  } else if (reviewTab === 'with_reply') {
+    baseFilteredReviews = withReplyReviews;
+  }
+
+  const finalFilteredReviews = starFilter === 'all'
+    ? baseFilteredReviews
+    : baseFilteredReviews.filter(r => Number(r.rating) === Number(starFilter));
+
+  const totalPages = Math.max(1, Math.ceil(finalFilteredReviews.length / pageSize));
+  const validCurrentPage = Math.min(currentPage, totalPages);
+  const startIndex = (validCurrentPage - 1) * pageSize;
+  const paginatedReviews = finalFilteredReviews.slice(startIndex, startIndex + pageSize);
 
   const aiSummary = profile.ai_summary || {};
   const chronicThemes = aiSummary.chronic_complaint_themes || [];
@@ -689,54 +768,93 @@ export default function GoogleBusinessProfileCard() {
             )}
           </div>
 
-          {/* Reviews Explorer with Low-Star Filters */}
+          {/* Reviews Explorer with Filter Tabs & Pagination */}
           <div className="gbp-reviews-section">
             <div className="gbp-reviews-toolbar">
               <div className="gbp-tab-buttons">
                 <button
                   type="button"
-                  onClick={() => setReviewTab('low_star')}
-                  className={`gbp-tab-btn ${reviewTab === 'low_star' ? 'active danger' : ''}`}
+                  onClick={() => { setReviewTab('all'); setCurrentPage(1); }}
+                  className={`gbp-tab-btn ${reviewTab === 'all' ? 'active' : ''}`}
                 >
-                  <AlertTriangle size={13} />
-                  <span>Düşük Yıldızlı Yorumlar (1-2★) ({lowStarReviews.length})</span>
+                  <MessageSquare size={13} />
+                  <span>Tüm Yorumlar ({reviews.length})</span>
                 </button>
 
                 <button
                   type="button"
-                  onClick={() => setReviewTab('unanswered')}
+                  onClick={() => { setReviewTab('low_star'); setCurrentPage(1); }}
+                  className={`gbp-tab-btn ${reviewTab === 'low_star' ? 'active danger' : ''}`}
+                >
+                  <AlertTriangle size={13} />
+                  <span>Düşük Yıldızlı (1-2★) ({lowStarReviews.length})</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => { setReviewTab('unanswered'); setCurrentPage(1); }}
                   className={`gbp-tab-btn ${reviewTab === 'unanswered' ? 'active warning' : ''}`}
                 >
-                  <MessageSquare size={13} />
+                  <AlertTriangle size={13} />
                   <span>Yanıtsız Kalanlar ({unansweredReviews.length})</span>
                 </button>
 
                 <button
                   type="button"
-                  onClick={() => setReviewTab('all')}
-                  className={`gbp-tab-btn ${reviewTab === 'all' ? 'active' : ''}`}
+                  onClick={() => { setReviewTab('with_reply'); setCurrentPage(1); }}
+                  className={`gbp-tab-btn ${reviewTab === 'with_reply' ? 'active' : ''}`}
+                  style={{
+                    borderColor: reviewTab === 'with_reply' ? 'rgba(16, 185, 129, 0.4)' : undefined,
+                    color: reviewTab === 'with_reply' ? '#34d399' : undefined
+                  }}
                 >
-                  <span>Tüm Yorumlar ({reviews.length})</span>
+                  <CheckCircle2 size={13} />
+                  <span>İşletme Yanıtı Olanlar ({withReplyReviews.length})</span>
                 </button>
+              </div>
+
+              {/* Star Rating Filter Chips */}
+              <div className="gbp-star-filter-row">
+                <span style={{ fontSize: '0.74rem', color: '#94a3b8', fontWeight: 600, marginRight: 4 }}>
+                  Puan Filtresi:
+                </span>
+                {['all', '5', '4', '3', '2', '1'].map((starVal) => (
+                  <button
+                    key={starVal}
+                    type="button"
+                    onClick={() => { setStarFilter(starVal); setCurrentPage(1); }}
+                    className={`gbp-star-chip ${starFilter === starVal ? 'active' : ''}`}
+                  >
+                    {starVal === 'all' ? (
+                      <span>Tümü ({baseFilteredReviews.length})</span>
+                    ) : (
+                      <>
+                        <Star size={11} fill={starFilter === starVal ? '#eab308' : '#94a3b8'} color={starFilter === starVal ? '#eab308' : '#94a3b8'} />
+                        <span>{starVal}★ ({baseFilteredReviews.filter(r => Number(r.rating) === Number(starVal)).length})</span>
+                      </>
+                    )}
+                  </button>
+                ))}
               </div>
             </div>
 
             {/* Reviews List */}
-            {displayedReviews.length === 0 ? (
+            {finalFilteredReviews.length === 0 ? (
               <div className="gbp-empty-reviews">
                 <CheckCircle2 size={24} color="#34d399" />
                 <span style={{ fontWeight: 600, color: '#f8fafc', marginTop: 6 }}>
                   {reviewTab === 'unanswered' 
-                    ? 'Tebrikler! Yanıtsız kalan düşük yıldızlı yorum bulunmuyor.' 
-                    : 'Bu filtrede görüntülenecek yorum bulunamadı.'}
+                    ? 'Tebrikler! Yanıtsız kalan düşük yıldızlı şikayet bulunmuyor.' 
+                    : 'Seçili filtrelerde görüntülenecek yorum bulunamadı.'}
                 </span>
                 <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>
-                  İşletmenizin Google Haritalar'daki itibar durumu iyi görünüyor.
+                  Farklı bir puan veya sekme seçerek diğer müşteri yorumlarını inceleyebilirsiniz.
                 </span>
               </div>
             ) : (
               <div className="gbp-reviews-list">
-                {displayedReviews.map((rev, rIdx) => {
+                {paginatedReviews.map((rev, pIdx) => {
+                  const rIdx = startIndex + pIdx;
                   const isLow = Number(rev.rating) <= 2;
                   const hasReply = rev.has_owner_response || Boolean(rev.owner_response);
                   const generatedReply = generatedReplies[rIdx];
@@ -749,7 +867,7 @@ export default function GoogleBusinessProfileCard() {
                             {rev.author_name ? rev.author_name.charAt(0).toUpperCase() : 'M'}
                           </div>
                           <div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
                               <strong className="gbp-reviewer-name">{rev.author_name}</strong>
                               <span className={`gbp-stars-badge ${isLow ? 'bad' : 'good'}`}>
                                 <Star size={11} fill={isLow ? '#ef4444' : '#eab308'} color={isLow ? '#ef4444' : '#eab308'} />
@@ -760,14 +878,16 @@ export default function GoogleBusinessProfileCard() {
                           </div>
                         </div>
 
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
                           {hasReply ? (
-                            <span className="growth-badge green" style={{ fontSize: '0.72rem' }}>
-                              ✓ İşletme Yanıtladı
+                            <span className="growth-badge green" style={{ fontSize: '0.72rem', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                              <CheckCircle2 size={11} />
+                              <span>✓ İşletme Yanıtladı</span>
                             </span>
                           ) : isLow ? (
-                            <span className="growth-badge red" style={{ fontSize: '0.72rem' }}>
-                              ⚠️ Yanıtsız Şikayet
+                            <span className="growth-badge red" style={{ fontSize: '0.72rem', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                              <AlertTriangle size={11} />
+                              <span>⚠️ Yanıtsız Şikayet</span>
                             </span>
                           ) : null}
 
@@ -784,20 +904,26 @@ export default function GoogleBusinessProfileCard() {
                         "{rev.text || 'Kullanıcı metin girmeden sadece puan verdi.'}"
                       </p>
 
-                      {/* Existing owner response */}
+                      {/* Existing owner response - highlighted with verified badge */}
                       {rev.owner_response && (
-                        <div className="gbp-owner-response">
-                          <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 4 }}>
-                            <ThumbsUp size={11} color="#34d399" />
-                            <strong style={{ fontSize: '0.78rem', color: '#34d399' }}>İşletme Yanıtı:</strong>
+                        <div className="gbp-owner-response animate-fade">
+                          <div className="gbp-owner-response-header">
+                            <div className="gbp-owner-response-badge">
+                              <CheckCircle2 size={13} color="#10b981" />
+                              <span>İşletme Sahibinin Yanıtı</span>
+                              <span className="gbp-verified-tag">Doğrulanmış</span>
+                            </div>
+                            <span className="gbp-owner-response-date">
+                              {rev.owner_response_time || rev.relative_time || 'Google İşletme Yanıtı'}
+                            </span>
                           </div>
-                          <p style={{ margin: 0, fontSize: '0.8rem', color: '#cbd5e1', lineHeight: 1.4 }}>
+                          <p className="gbp-owner-response-text">
                             {rev.owner_response}
                           </p>
                         </div>
                       )}
 
-                      {/* AI Response Generator for Low-Star */}
+                      {/* AI Response Generator for Low-Star without reply */}
                       {isLow && !hasReply && (
                         <div className="gbp-ai-reply-container">
                           {!generatedReply ? (
@@ -852,6 +978,80 @@ export default function GoogleBusinessProfileCard() {
                     </div>
                   );
                 })}
+              </div>
+            )}
+
+            {/* Pagination Controls */}
+            {finalFilteredReviews.length > 0 && (
+              <div className="gbp-pagination-container">
+                <div className="gbp-pagination-info">
+                  Toplam <strong>{finalFilteredReviews.length}</strong> yorumdan{' '}
+                  <strong>{startIndex + 1} - {Math.min(startIndex + pageSize, finalFilteredReviews.length)}</strong> arası gösteriliyor
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem', flexWrap: 'wrap' }}>
+                  <div className="gbp-page-size-selector">
+                    <span>Sayfa Başı:</span>
+                    <select
+                      value={pageSize}
+                      onChange={(e) => {
+                        setPageSize(Number(e.target.value));
+                        setCurrentPage(1);
+                      }}
+                    >
+                      <option value={5}>5</option>
+                      <option value={10}>10</option>
+                      <option value={20}>20</option>
+                    </select>
+                  </div>
+
+                  <div className="gbp-pagination-controls">
+                    <button
+                      type="button"
+                      onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                      disabled={validCurrentPage <= 1}
+                      className="gbp-page-btn"
+                      title="Önceki Sayfa"
+                    >
+                      <ChevronLeft size={14} />
+                    </button>
+
+                    {Array.from({ length: totalPages }, (_, idx) => idx + 1).map(pNum => {
+                      if (
+                        totalPages > 7 &&
+                        pNum !== 1 &&
+                        pNum !== totalPages &&
+                        Math.abs(pNum - validCurrentPage) > 2
+                      ) {
+                        if (pNum === 2 || pNum === totalPages - 1) {
+                          return <span key={pNum} style={{ color: '#64748b', padding: '0 4px', fontSize: '0.8rem' }}>...</span>;
+                        }
+                        return null;
+                      }
+
+                      return (
+                        <button
+                          key={pNum}
+                          type="button"
+                          onClick={() => setCurrentPage(pNum)}
+                          className={`gbp-page-btn ${validCurrentPage === pNum ? 'active' : ''}`}
+                        >
+                          {pNum}
+                        </button>
+                      );
+                    })}
+
+                    <button
+                      type="button"
+                      onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                      disabled={validCurrentPage >= totalPages}
+                      className="gbp-page-btn"
+                      title="Sonraki Sayfa"
+                    >
+                      <ChevronRight size={14} />
+                    </button>
+                  </div>
+                </div>
               </div>
             )}
           </div>

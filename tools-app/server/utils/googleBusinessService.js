@@ -195,14 +195,21 @@ export async function getDetailedBusinessProfile(placeIdentifier, businessName, 
   if (geminiKey) {
     try {
       const ai = new GoogleGenAI({ apiKey: geminiKey });
-      const prompt = `Perform a comprehensive Google Business Profile & Google Maps Reviews Audit for:
+      const prompt = `Perform an in-depth Google Business Profile and Google Maps Reviews Audit for:
 Business Name: "${businessName}"
 Place / Address Context: "${baseData.formatted_address || country}"
 
-Search Google Maps and review platforms for this exact business. 
-Extract real user reviews, paying special attention to 1-STAR and 2-STAR reviews (düşük yıldızlı olumsuz yorumlar) and customer complaints.
+Search Google Maps and review sources for this exact business. 
+Extract ALL available real customer reviews across ALL star ratings (aim for 15 to 25 detailed reviews covering 5-star, 4-star, 3-star, 2-star, and 1-star ratings).
+CRITICAL: For every review, check whether the business owner or management replied ("İşletme Yanıtı", "Sahibin Yanıtı", "Owner response").
+- If there is an owner response:
+  "has_owner_response": true,
+  "owner_response": "Exact text of the owner/manager response"
+- If there is no owner response:
+  "has_owner_response": false,
+  "owner_response": null
 
-Return a JSON with this exact structure:
+Return JSON in this exact structure:
 {
   "rating": 4.6,
   "total_reviews": 120,
@@ -220,12 +227,12 @@ Return a JSON with this exact structure:
   "reviews": [
     {
       "author_name": "Reviewer Name",
-      "rating": 1,
-      "text": "Exact or synthesized complaint text from real reviews",
-      "relative_time": "1 ay önce",
-      "has_owner_response": false,
-      "owner_response": null,
-      "issue_category": "Kargo / Teslimat / Destek / Fiyat vb."
+      "rating": 5,
+      "text": "Exact customer review text",
+      "relative_time": "2 hafta önce",
+      "has_owner_response": true,
+      "owner_response": "Değerli müşterimiz, güzel geri bildiriminiz için teşekkür ederiz...",
+      "issue_category": "Hizmet / Lezzet / Destek / Fiyat / Genel"
     }
   ],
   "ai_analysis": {
@@ -246,7 +253,7 @@ Return a JSON with this exact structure:
     ]
   }
 }
-If there are no 1-2 star reviews found, chronic_complaint_themes can be empty and ai_recommendation_risk "Düşük Risk". Return pure JSON only.`;
+Return pure valid JSON only.`;
 
       const response = await ai.models.generateContent({
         model: 'gemini-3.8-flash',
@@ -257,8 +264,8 @@ If there are no 1-2 star reviews found, chronic_complaint_themes can be empty an
       });
 
       const text = response.text || '';
-      const cleanJson = text.replace(/```json/g, '').replace(/```/g, '').trim();
-      const enriched = JSON.parse(cleanJson);
+      const match = text.match(/\{[\s\S]*\}/);
+      const enriched = match ? JSON.parse(match[0]) : null;
 
       if (enriched) {
         if (!baseData.rating && enriched.rating) baseData.rating = Number(enriched.rating);
