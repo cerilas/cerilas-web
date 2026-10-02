@@ -6,7 +6,7 @@
 }
 
 .aivc-dropdown-group.is-open {
-  z-index: 100;
+  z-index: 9999;
 }
 
 .aivc-dropdown-label-bar {
@@ -192,18 +192,18 @@
   top: calc(100% + 6px);
   left: 0;
   right: 0;
-  z-index: 1000;
+  z-index: 99999;
   background: var(--card-bg, #1a1a24);
   backdrop-filter: blur(28px);
   -webkit-backdrop-filter: blur(28px);
   border: 1px solid var(--card-border, rgba(255, 255, 255, 0.15));
   border-radius: 14px;
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35), 0 2px 8px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5), 0 2px 8px rgba(0, 0, 0, 0.2);
   padding: 0.4rem;
   overflow: hidden;
   animation: aivcDropdownEntrance 0.18s cubic-bezier(0.16, 1, 0.3, 1);
   transform-origin: top center;
-  min-width: 280px;
+  min-width: 260px;
 }
 
 @keyframes aivcDropdownEntrance {

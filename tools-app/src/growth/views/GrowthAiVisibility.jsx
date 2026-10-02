@@ -1044,30 +1044,55 @@ export default function GrowthAiVisibility() {
       )}
 
       {/* Add New Tracked Prompt Card */}
-      <div className="growth-panel-card">
+      <div className="growth-panel-card growth-add-prompt-card">
         <div className="growth-panel-header">
           <div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: 4 }}>
+              <span className="growth-badge blue">
+                <Plus size={12} /> Prompt Takip Motoru
+              </span>
+            </div>
             <h3 className="growth-panel-title">Yeni Arama Sorusu (Prompt) Takip Et</h3>
             <p className="growth-panel-desc">
-              Kullanıcıların yapay zekaya sorduğu ve markanızın önerilmesini istediğiniz sektörel soruları ekleyin.
+              Müşterilerinizin Gemini, ChatGPT ve Perplexity'ye sorduğu kritik sektörel soruları ekleyin, markanızın görünürlüğünü takip edin.
             </p>
           </div>
         </div>
 
-        <form onSubmit={handleAddPrompt} className="growth-add-prompt-form">
-          <div className="growth-form-group">
-            <input
-              type="text"
-              placeholder="Örn: En iyi B2B SEO ve büyüme platformu hangisi?"
-              value={newPromptText}
-              onChange={(e) => setNewPromptText(e.target.value)}
-              className="growth-input"
-              required
-            />
+        <form onSubmit={handleAddPrompt} className="growth-prompt-form-grid">
+          <div className="growth-prompt-inputs-split">
+            <div className="growth-field-item flex-3">
+              <label className="growth-field-label">
+                <MessageSquare size={13} color="#3b82f6" />
+                <span>Hedef Arama Sorusu / Prompt</span>
+              </label>
+              <input
+                type="text"
+                placeholder="Örn: En iyi B2B SEO ve büyüme platformu hangisi?"
+                value={newPromptText}
+                onChange={(e) => setNewPromptText(e.target.value)}
+                className="growth-custom-text-input"
+                required
+              />
+            </div>
+
+            <div className="growth-field-item flex-1">
+              <label className="growth-field-label">
+                <Sparkles size={13} color="#8b5cf6" />
+                <span>Kategori / Konu</span>
+              </label>
+              <input
+                type="text"
+                placeholder="Örn: SEO & Büyüme"
+                value={newPromptTopic}
+                onChange={(e) => setNewPromptTopic(e.target.value)}
+                className="growth-custom-text-input"
+              />
+            </div>
           </div>
 
-          <div className="growth-prompt-targeting-row">
-            <div className="prompt-targeting-item">
+          <div className="growth-prompt-targeting-split">
+            <div className="growth-dropdown-col">
               <AiVisibilityDropdown
                 id="growth-prompt-country"
                 label="Hedef Pazar / Ülke"
@@ -1078,7 +1103,8 @@ export default function GrowthAiVisibility() {
                 disabled={addingPrompt}
               />
             </div>
-            <div className="prompt-targeting-item">
+
+            <div className="growth-dropdown-col">
               <AiVisibilityDropdown
                 id="growth-prompt-language"
                 label="Sorgu Dili"
@@ -1089,9 +1115,14 @@ export default function GrowthAiVisibility() {
                 disabled={addingPrompt}
               />
             </div>
-            <div className="prompt-submit-action">
-              <button type="submit" disabled={addingPrompt || !newPromptText.trim()} className="growth-primary-btn prompt-add-submit-btn">
-                {addingPrompt ? <Loader2 size={15} className="auth-spinner" /> : <Plus size={15} />}
+
+            <div className="growth-submit-col">
+              <button
+                type="submit"
+                disabled={addingPrompt || !newPromptText.trim()}
+                className="growth-primary-btn growth-prompt-submit-btn"
+              >
+                {addingPrompt ? <Loader2 size={15} className="spin" /> : <Plus size={15} />}
                 <span>Prompt Takip Et</span>
               </button>
             </div>
