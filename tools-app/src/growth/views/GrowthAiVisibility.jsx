@@ -29,7 +29,11 @@ import {
   Trash2,
   StopCircle,
   Layers,
-  Lock
+  Lock,
+  ChevronLeft,
+  ChevronRight,
+  Filter,
+  ArrowUpDown
 } from 'lucide-react';
 import { useGrowth } from '../GrowthContext';
 import { useAuth } from '../../context/AuthContext';
@@ -114,6 +118,68 @@ export default function GrowthAiVisibility() {
       [id]: !prev[id]
     }));
   };
+
+  // Historical Reports Filter & Pagination State
+  const [historyDateFilter, setHistoryDateFilter] = useState('all'); // 'all' | 'today' | '7d' | '30d' | 'custom'
+  const [historyStartDate, setHistoryStartDate] = useState('');
+  const [historyEndDate, setHistoryEndDate] = useState('');
+  const [historySortOrder, setHistorySortOrder] = useState('newest'); // 'newest' | 'oldest' | 'score_high' | 'score_low'
+  const [historyPage, setHistoryPage] = useState(1);
+  const historyPerPage = 6;
+
+  const filteredAndSortedReports = React.useMemo(() => {
+    let result = [...reportsList];
+
+    // Filter by date
+    if (historyDateFilter === 'today') {
+      const todayStart = new Date();
+      todayStart.setHours(0, 0, 0, 0);
+      result = result.filter(r => new Date(r.created_at) >= todayStart);
+    } else if (historyDateFilter === '7d') {
+      const sevenDaysAgo = new Date();
+      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+      result = result.filter(r => new Date(r.created_at) >= sevenDaysAgo);
+    } else if (historyDateFilter === '30d') {
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+      result = result.filter(r => new Date(r.created_at) >= thirtyDaysAgo);
+    } else if (historyDateFilter === 'custom') {
+      if (historyStartDate) {
+        const start = new Date(historyStartDate);
+        start.setHours(0, 0, 0, 0);
+        result = result.filter(r => new Date(r.created_at) >= start);
+      }
+      if (historyEndDate) {
+        const end = new Date(historyEndDate);
+        end.setHours(23, 59, 59, 999);
+        result = result.filter(r => new Date(r.created_at) <= end);
+      }
+    }
+
+    // Sort
+    result.sort((a, b) => {
+      if (historySortOrder === 'oldest') {
+        return new Date(a.created_at) - new Date(b.created_at);
+      }
+      if (historySortOrder === 'score_high') {
+        return (Number(b.visibility_score) || 0) - (Number(a.visibility_score) || 0);
+      }
+      if (historySortOrder === 'score_low') {
+        return (Number(a.visibility_score) || 0) - (Number(b.visibility_score) || 0);
+      }
+      return new Date(b.created_at) - new Date(a.created_at);
+    });
+
+    return result;
+  }, [reportsList, historyDateFilter, historyStartDate, historyEndDate, historySortOrder]);
+
+  const totalHistoryPages = Math.ceil(filteredAndSortedReports.length / historyPerPage) || 1;
+  const currentHistoryPage = Math.min(historyPage, totalHistoryPages);
+
+  const paginatedReports = React.useMemo(() => {
+    const startIndex = (currentHistoryPage - 1) * historyPerPage;
+    return filteredAndSortedReports.slice(startIndex, startIndex + historyPerPage);
+  }, [filteredAndSortedReports, currentHistoryPage, historyPerPage]);
 
   const fetchPrompts = async () => {
     if (!activeWorkspace?.id || !token) return;
@@ -1240,85 +1306,245 @@ export default function GrowthAiVisibility() {
               </div>
               <h3 className="growth-panel-title">Zamana Göre Kayıtlı AI Görünürlük Raporları</h3>
               <p className="growth-panel-desc">
-                Tüm promptlarınızın her taranması zaman damgalı tek bir rapor (snapshot) olarak kaydedilir. Herhangi bir rapora tıklayarak o tarihteki AI görünürlük durumunu inceleyebilirsiniz.
+                Tüm promptlarınızın her taranması zaman damgalı tek bir rapor (snapshot) olarak kaydedilir. Tarihe göre filtreleyebilir ve geçmiş raporları inceleyebilirsiniz.
               </p>
             </div>
           </div>
 
-          <div className="ai-reports-history-grid">
-            {reportsList.map((rep) => {
-              const isSelected = activeReport?.id === rep.id;
-              const repScore = Number(rep.visibility_score) || 0;
-              const scoreClass = repScore >= 70 ? '' : repScore >= 40 ? 'warning' : 'danger';
-
-              return (
-                <div
-                  key={rep.id}
+          {/* Date Filter & Sort Toolbar */}
+          <div className="ai-history-toolbar">
+            <div className="ai-history-date-filters">
+              <span style={{ fontSize: '0.76rem', fontWeight: 600, color: '#94a3b8', display: 'flex', alignItems: 'center', gap: 4, marginRight: 4 }}>
+                <Filter size={12} /> Filtrele:
+              </span>
+              {[
+                { key: 'all', label: `Tümü (${reportsList.length})` },
+                { key: 'today', label: 'Bugün' },
+                { key: '7d', label: 'Son 7 Gün' },
+                { key: '30d', label: 'Son 30 Gün' },
+                { key: 'custom', label: 'Özel Tarih' }
+              ].map(f => (
+                <button
+                  key={f.key}
+                  type="button"
                   onClick={() => {
-                    handleLoadReport(rep.id);
-                    reportPanelRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    setHistoryDateFilter(f.key);
+                    setHistoryPage(1);
                   }}
-                  className={`ai-history-report-card ${isSelected ? 'active' : ''}`}
-                  title="Bu tarihteki rapor detaylarını incele"
+                  className={`ai-history-filter-pill ${historyDateFilter === f.key ? 'active' : ''}`}
                 >
-                  <div className="ai-history-card-top">
-                    <div className="ai-history-date-box">
-                      <span className="ai-history-date-full">
-                        <Calendar size={13} color="#3b82f6" />
-                        <span>{formatFullDate(rep.created_at)}</span>
-                      </span>
-                      <span className="ai-history-date-rel">
-                        <Clock size={11} style={{ display: 'inline', marginRight: 3, verticalAlign: 'text-bottom' }} />
-                        {formatRelativeTime(rep.created_at)}
-                      </span>
-                    </div>
+                  {f.label}
+                </button>
+              ))}
+            </div>
 
-                    <div className={`ai-history-score-badge ${scoreClass}`}>
-                      <span>%{repScore} GEO</span>
-                    </div>
-                  </div>
-
-                  <div className="ai-history-stats-row">
-                    <div className="ai-history-stat-item">
-                      <span className="ai-history-stat-label">Taranan</span>
-                      <span className="ai-history-stat-val">{rep.total_prompts} Prompt</span>
-                    </div>
-                    <div className="ai-history-stat-item">
-                      <span className="ai-history-stat-label">Marka</span>
-                      <span className="ai-history-stat-val" style={{ color: rep.mentioned_count > 0 ? '#34d399' : '#f87171' }}>
-                        {rep.mentioned_count} Anıldı
-                      </span>
-                    </div>
-                    <div className="ai-history-stat-item">
-                      <span className="ai-history-stat-label">Alıntı</span>
-                      <span className="ai-history-stat-val" style={{ color: rep.cited_count > 0 ? '#34d399' : '#94a3b8' }}>
-                        {rep.cited_count} Site
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="ai-history-card-footer">
-                    <button
-                      type="button"
-                      className="ai-history-view-btn"
-                    >
-                      <span>{isSelected ? '✓ Şu An İnceleniyor' : 'Raporu İncele'}</span>
-                      <ArrowUpRight size={13} />
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={(e) => handleDeleteReport(rep.id, e)}
-                      className="ai-history-delete-btn"
-                      title="Bu raporu arşivden sil"
-                    >
-                      <Trash2 size={13} />
-                    </button>
-                  </div>
-                </div>
-              );
-            })}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <span style={{ fontSize: '0.76rem', color: '#94a3b8', display: 'flex', alignItems: 'center', gap: 4 }}>
+                <ArrowUpDown size={12} /> Sırala:
+              </span>
+              <select
+                className="ai-history-sort-select"
+                value={historySortOrder}
+                onChange={(e) => {
+                  setHistorySortOrder(e.target.value);
+                  setHistoryPage(1);
+                }}
+              >
+                <option value="newest">Tarih (En Yeni)</option>
+                <option value="oldest">Tarih (En Eski)</option>
+                <option value="score_high">Skor (En Yüksek)</option>
+                <option value="score_low">Skor (En Düşük)</option>
+              </select>
+            </div>
           </div>
+
+          {/* Custom Date Inputs Row */}
+          {historyDateFilter === 'custom' && (
+            <div className="ai-history-custom-range animate-fade">
+              <span style={{ fontSize: '0.78rem', color: '#94a3b8', display: 'flex', alignItems: 'center', gap: 5 }}>
+                <Calendar size={13} color="#3b82f6" /> Başlangıç:
+              </span>
+              <input
+                type="date"
+                value={historyStartDate}
+                onChange={(e) => {
+                  setHistoryStartDate(e.target.value);
+                  setHistoryPage(1);
+                }}
+                className="ai-history-date-input"
+              />
+              <span style={{ fontSize: '0.78rem', color: '#94a3b8', marginLeft: 6 }}>Bitiş:</span>
+              <input
+                type="date"
+                value={historyEndDate}
+                onChange={(e) => {
+                  setHistoryEndDate(e.target.value);
+                  setHistoryPage(1);
+                }}
+                className="ai-history-date-input"
+              />
+              {(historyStartDate || historyEndDate) && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setHistoryStartDate('');
+                    setHistoryEndDate('');
+                    setHistoryPage(1);
+                  }}
+                  style={{
+                    background: 'transparent',
+                    border: 'none',
+                    color: '#f87171',
+                    fontSize: '0.75rem',
+                    cursor: 'pointer',
+                    marginLeft: 6
+                  }}
+                >
+                  Tarihi Sıfırla
+                </button>
+              )}
+            </div>
+          )}
+
+          {/* Reports Grid */}
+          {filteredAndSortedReports.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '2.5rem 1rem', color: '#94a3b8' }}>
+              <Calendar size={28} style={{ margin: '0 auto 8px', opacity: 0.4 }} />
+              <p style={{ margin: '0 0 8px', fontSize: '0.9rem', color: '#e2e8f0', fontWeight: 600 }}>
+                Seçilen tarih kriterlerine uygun kayıtlı rapor bulunamadı.
+              </p>
+              <button
+                type="button"
+                onClick={() => {
+                  setHistoryDateFilter('all');
+                  setHistoryStartDate('');
+                  setHistoryEndDate('');
+                  setHistoryPage(1);
+                }}
+                className="growth-secondary-btn"
+                style={{ margin: '0 auto', fontSize: '0.8rem', padding: '0.35rem 0.85rem' }}
+              >
+                Filtreleri Temizle
+              </button>
+            </div>
+          ) : (
+            <div className="ai-reports-history-grid">
+              {paginatedReports.map((rep) => {
+                const isSelected = activeReport?.id === rep.id;
+                const repScore = Number(rep.visibility_score) || 0;
+                const scoreClass = repScore >= 70 ? '' : repScore >= 40 ? 'warning' : 'danger';
+
+                return (
+                  <div
+                    key={rep.id}
+                    onClick={() => {
+                      handleLoadReport(rep.id);
+                      reportPanelRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }}
+                    className={`ai-history-report-card ${isSelected ? 'active' : ''}`}
+                    title="Bu tarihteki rapor detaylarını incele"
+                  >
+                    <div className="ai-history-card-top">
+                      <div className="ai-history-date-box">
+                        <span className="ai-history-date-full">
+                          <Calendar size={13} color="#3b82f6" />
+                          <span>{formatFullDate(rep.created_at)}</span>
+                        </span>
+                        <span className="ai-history-date-rel">
+                          <Clock size={11} style={{ display: 'inline', marginRight: 3, verticalAlign: 'text-bottom' }} />
+                          {formatRelativeTime(rep.created_at)}
+                        </span>
+                      </div>
+
+                      <div className={`ai-history-score-badge ${scoreClass}`}>
+                        <span>%{repScore} GEO</span>
+                      </div>
+                    </div>
+
+                    <div className="ai-history-stats-row">
+                      <div className="ai-history-stat-item">
+                        <span className="ai-history-stat-label">Taranan</span>
+                        <span className="ai-history-stat-val">{rep.total_prompts} Prompt</span>
+                      </div>
+                      <div className="ai-history-stat-item">
+                        <span className="ai-history-stat-label">Marka</span>
+                        <span className="ai-history-stat-val" style={{ color: rep.mentioned_count > 0 ? '#34d399' : '#f87171' }}>
+                          {rep.mentioned_count} Anıldı
+                        </span>
+                      </div>
+                      <div className="ai-history-stat-item">
+                        <span className="ai-history-stat-label">Alıntı</span>
+                        <span className="ai-history-stat-val" style={{ color: rep.cited_count > 0 ? '#34d399' : '#94a3b8' }}>
+                          {rep.cited_count} Site
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="ai-history-card-footer">
+                      <button
+                        type="button"
+                        className="ai-history-view-btn"
+                      >
+                        <span>{isSelected ? '✓ Şu An İnceleniyor' : 'Raporu İncele'}</span>
+                        <ArrowUpRight size={13} />
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={(e) => handleDeleteReport(rep.id, e)}
+                        className="ai-history-delete-btn"
+                        title="Bu raporu arşivden sil"
+                      >
+                        <Trash2 size={13} />
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          {/* Pagination Controls */}
+          {filteredAndSortedReports.length > historyPerPage && (
+            <div className="ai-history-pagination-bar">
+              <span className="ai-history-page-info">
+                Toplam <strong>{filteredAndSortedReports.length}</strong> rapordan <strong>{(currentHistoryPage - 1) * historyPerPage + 1}</strong> - <strong>{Math.min(currentHistoryPage * historyPerPage, filteredAndSortedReports.length)}</strong> arası gösteriliyor (Sayfa {currentHistoryPage} / {totalHistoryPages})
+              </span>
+
+              <div className="ai-history-pagination-nav">
+                <button
+                  type="button"
+                  onClick={() => setHistoryPage(prev => Math.max(1, prev - 1))}
+                  disabled={currentHistoryPage <= 1}
+                  className="ai-history-page-btn"
+                  title="Önceki Sayfa"
+                >
+                  <ChevronLeft size={14} />
+                </button>
+
+                {Array.from({ length: totalHistoryPages }, (_, i) => i + 1).map((pageNum) => (
+                  <button
+                    key={pageNum}
+                    type="button"
+                    onClick={() => setHistoryPage(pageNum)}
+                    className={`ai-history-page-btn ${pageNum === currentHistoryPage ? 'active' : ''}`}
+                  >
+                    {pageNum}
+                  </button>
+                ))}
+
+                <button
+                  type="button"
+                  onClick={() => setHistoryPage(prev => Math.min(totalHistoryPages, prev + 1))}
+                  disabled={currentHistoryPage >= totalHistoryPages}
+                  className="ai-history-page-btn"
+                  title="Sonraki Sayfa"
+                >
+                  <ChevronRight size={14} />
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>
