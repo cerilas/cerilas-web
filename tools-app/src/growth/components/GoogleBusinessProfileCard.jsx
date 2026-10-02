@@ -217,48 +217,46 @@ export default function GoogleBusinessProfileCard() {
         <div className="growth-panel-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem', marginBottom: '1.25rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
             <div className="ai-report-icon-box" style={{ width: 38, height: 38, borderRadius: 10, background: 'rgba(234, 67, 53, 0.15)', borderColor: 'rgba(234, 67, 53, 0.3)', color: '#ea4335' }}>
-              <MapPin size={18} />
+              <Building2 size={18} />
             </div>
             <div>
-              <h3 className="growth-panel-title" style={{ margin: 0, fontSize: '1.15rem' }}>
-                Google İşletme Profili &amp; Yorum Radarı
+              <h3 className="growth-panel-title" style={{ margin: 0, fontSize: '1.1rem' }}>
+                Google Haritalar Profilinizi Bağlayın
               </h3>
               <p className="growth-panel-desc" style={{ margin: '0.2rem 0 0 0', fontSize: '0.82rem', color: '#94a3b8' }}>
-                İşletmenizin Google Haritalar profilini bağlayarak toplam yorum sayısını ve düşük yıldızlı şikayetleri denetleyin.
+                İşletmenizi aratarak puanınızı, yorum sayınızı ve düşük yıldızlı şikayetleri AI radarına dahil edin.
               </p>
             </div>
           </div>
 
           <span className="growth-badge neutral">
-            <Building2 size={12} /> İsteğe Bağlı
+            İsteğe Bağlı
           </span>
         </div>
 
         <div className="gbp-search-box">
-          <p style={{ margin: '0 0 1rem 0', fontSize: '0.86rem', color: '#cbd5e1', lineHeight: 1.5 }}>
+          <p style={{ margin: '0 0 1rem 0', fontSize: '0.86rem', color: 'var(--text-main, #e2e8f0)', lineHeight: 1.5 }}>
             Yapay zeka arama motorları (Gemini, ChatGPT, Perplexity), yerel aramalarda işletmenizin <strong>Google ortalama puanına</strong> ve <strong>düşük yıldızlı olumsuz yorumlardaki şikayet konularına</strong> göre tavsiye kararı verir.
           </p>
 
-          <form onSubmit={handleSearch} style={{ display: 'flex', gap: '0.6rem', flexWrap: 'wrap' }}>
-            <div style={{ flex: 1, minWidth: 260, position: 'relative' }}>
+          <form onSubmit={handleSearch} className="gbp-search-form">
+            <div className="gbp-search-input-wrap">
+              <Search size={16} className="gbp-search-icon" />
               <input
                 type="text"
-                className="growth-input-field"
-                placeholder="Google Haritalar işletme adı, şehir veya Maps linki..."
+                className="gbp-search-input"
+                placeholder="Google Haritalar işletme adı veya şehir..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                style={{ width: '100%', paddingLeft: '2.4rem' }}
               />
-              <Search size={15} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
             </div>
 
             <button
               type="submit"
               disabled={isSearching || !searchQuery.trim()}
-              className="growth-primary-btn"
-              style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}
+              className="growth-primary-btn gbp-search-btn"
             >
-              {isSearching ? <Loader2 size={14} className="animate-spin" /> : <Search size={14} />}
+              {isSearching ? <Loader2 size={15} className="animate-spin" /> : <Search size={15} />}
               <span>İşletmeyi Ara</span>
             </button>
           </form>
@@ -270,7 +268,7 @@ export default function GoogleBusinessProfileCard() {
               <div className="gbp-results-list">
                 {searchResults.map((place, pIdx) => (
                   <div key={pIdx} className="gbp-result-item">
-                    <div className="gbp-result-info">
+                    <div className="gbp-result-info" style={{ minWidth: 0, flex: 1 }}>
                       <div className="gbp-result-name-row">
                         <strong className="gbp-result-name">{place.business_name}</strong>
                         {place.rating > 0 && (
@@ -289,7 +287,7 @@ export default function GoogleBusinessProfileCard() {
                       disabled={isConnecting}
                       onClick={() => handleConnect(place)}
                       className="growth-secondary-btn"
-                      style={{ background: 'rgba(59, 130, 246, 0.15)', borderColor: 'rgba(59, 130, 246, 0.35)', color: '#38bdf8' }}
+                      style={{ background: 'rgba(59, 130, 246, 0.15)', borderColor: 'rgba(59, 130, 246, 0.35)', color: '#38bdf8', flexShrink: 0 }}
                     >
                       {isConnecting ? <Loader2 size={13} className="animate-spin" /> : <CheckCircle2 size={13} />}
                       <span>Bağla &amp; Analiz Et</span>

@@ -41,7 +41,7 @@ const NAV_GROUPS = [
     items: [
       { id: 'ai-visibility', label: 'AI Görünürlüğü (GEO)', icon: BrainCircuit },
       { id: 'ai-prompts', label: 'Takip Edilen Promptlar', icon: Terminal },
-      { id: 'google-business', label: 'Google İşletme & Yorumlar', icon: MapPin, isNew: true }
+      { id: 'google-business', label: 'Google İşletme Radarı', icon: MapPin, isNew: true }
     ]
   },
   {
