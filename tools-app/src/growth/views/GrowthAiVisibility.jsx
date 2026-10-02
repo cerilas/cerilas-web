@@ -451,181 +451,118 @@ export default function GrowthAiVisibility() {
 
   return (
     <div className="growth-page-container animate-fade">
-      {/* Hero Cover Banner */}
+      {/* Hero Cover Banner with Merged Live GEO Readiness Score Widget */}
       <GrowthPageCover
         badge="Generative Engine Optimization (GEO)"
         badgeIcon={Bot}
         title="Yapay Zeka (GEO) Görünürlüğü & Alıntı Takibi"
         subtitle="Google Gemini, ChatGPT Search ve Perplexity gibi yapay zeka arama motorlarında markanızın anılma ve kaynak gösterilme oranı."
         coverImage="/growth-covers/geo-cover.jpg"
-        stats={[
-          { 
-            label: 'GEO Hazırbulunuşluk', 
-            value: geoReadiness ? `${geoReadiness.geoScore}/100` : loadingGeoReadiness ? 'Taranıyor...' : 'Belirlenmedi', 
-            positive: (geoReadiness?.geoScore || 0) >= 70, 
-            sub: geoReadiness ? 'Canlı Standartlar' : 'Analiz Ediliyor' 
-          },
-          { 
-            label: 'Takip Edilen Prompt', 
-            value: `${prompts.length} Sorgu`, 
-            sub: 'Aktif İzlenen Sorular' 
-          },
-          { 
-            label: 'Kayıtlı Tarama', 
-            value: `${reportsList.length} Rapor`, 
-            sub: 'Tarihsel Rapor Arşivi' 
-          }
-        ]}
-        actions={<AiEngineGroup size={22} />}
-      />
-
-      {/* AI Engines Active Matrix */}
-      <div className="growth-panel-card" style={{ padding: '0.9rem 1.25rem', marginBottom: '1.25rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem' }}>
-          <span style={{ fontSize: '0.82rem', fontWeight: 600, color: '#94a3b8' }}>Desteklenen ve Taranan Yapay Zeka Motorları:</span>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
-            <AiEngineBadge engine="gemini" size={17} pill />
-            <AiEngineBadge engine="chatgpt" size={17} pill />
-            <AiEngineBadge engine="perplexity" size={17} pill />
-            <AiEngineBadge engine="claude" size={17} pill />
-            <AiEngineBadge engine="grok" size={15} pill />
-          </div>
-        </div>
-      </div>
-
-      {/* GEO Readiness Indicators Card */}
-      <div className="growth-panel-card geo-readiness-panel">
-        <div className="growth-panel-header">
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: 4 }}>
-              <span className="growth-badge purple">
-                <ShieldCheck size={12} /> Canlı Standartlar Denetimi
-              </span>
-              {geoReadiness?.checked_at && (
-                <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>
-                  Son Tarama: {formatRelativeTime(geoReadiness.checked_at)}
-                </span>
-              )}
+        actions={
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', flexWrap: 'wrap' }}>
+              <span style={{ fontSize: '0.8rem', color: '#94a3b8', fontWeight: 600 }}>Taranan AI Motorları:</span>
+              <AiEngineGroup size={18} />
             </div>
-            <h3 className="growth-panel-title">Yapay Zeka Arama Hazırbulunuşluk Standartları</h3>
-            <p className="growth-panel-desc">
-              Web sitenizin AI botları tarafından taranabilmesi, indekslenmesi ve yanıt motorlarında alıntılanabilmesi için gereken teknik altyapı.
-            </p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
+              <span className="growth-badge blue" style={{ fontSize: '0.74rem' }}>
+                <MessageSquare size={11} /> {prompts.length} / 10 Takip Edilen Prompt
+              </span>
+              <span className="growth-badge purple" style={{ fontSize: '0.74rem' }}>
+                <History size={11} /> {reportsList.length} Kayıtlı Rapor
+              </span>
+            </div>
           </div>
-          <div className="growth-panel-actions">
-            <button
-              type="button"
-              onClick={() => fetchGeoReadiness(true)}
-              disabled={scanningGeoReadiness || !activeWorkspace?.primary_domain}
-              className="growth-secondary-btn"
-              title="Domaininizin canlı robots.txt, llms.txt ve Schema standartlarını yeniden tara"
-            >
-              <RefreshCw size={14} className={scanningGeoReadiness ? 'spin' : ''} />
-              <span>{scanningGeoReadiness ? 'Taranıyor...' : 'Şimdi Yeniden Tara'}</span>
-            </button>
-          </div>
-        </div>
+        }
+        rightSlot={
+          <div className="hero-merged-score-widget">
+            {/* Top Bar: Domain Pill + Status Tag + Rescan Button */}
+            <div className="hero-score-widget-topbar">
+              <div className="hero-score-widget-domain-group">
+                {activeWorkspace?.primary_domain && (
+                  <span className="geo-domain-tag">
+                    <Globe size={11} color="#3b82f6" />
+                    <span>{activeWorkspace.primary_domain}</span>
+                  </span>
+                )}
+                {geoReadiness && (
+                  <span className={`geo-badge-status ${geoReadiness.geoScore >= 70 ? 'good' : 'warning'}`}>
+                    {geoReadiness.geoScore >= 80 ? '✓ Mükemmel AI Erişimi' : geoReadiness.geoScore >= 50 ? '⚡ Geliştirilebilir' : '✕ Eksikler Var'}
+                  </span>
+                )}
+              </div>
 
-        {geoError && (
-          <div style={{ padding: '0.75rem 1rem', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.25)', borderRadius: 8, color: '#f87171', fontSize: '0.85rem', marginBottom: '1rem' }}>
-            {geoError}
-          </div>
-        )}
+              <button
+                type="button"
+                onClick={() => fetchGeoReadiness(true)}
+                disabled={scanningGeoReadiness || !activeWorkspace?.primary_domain}
+                className="hero-score-rescan-btn"
+                title="Canlı robots.txt, llms.txt ve Schema standartlarını yeniden tara"
+              >
+                <RefreshCw size={11} className={scanningGeoReadiness ? 'spin' : ''} />
+                <span>{scanningGeoReadiness ? 'Taranıyor...' : 'Şimdi Yeniden Tara'}</span>
+              </button>
+            </div>
 
-        {loadingGeoReadiness ? (
-          <div style={{ padding: '2rem 1rem', textAlign: 'center', color: '#94a3b8' }}>
-            <Loader2 size={24} className="spin" style={{ margin: '0 auto 8px' }} />
-            <p style={{ margin: 0, fontSize: '0.85rem' }}>Standartlar ve canlı robots.txt/llms.txt protokolleri inceleniyor...</p>
-          </div>
-        ) : geoReadiness ? (
-          <>
-            {/* Hero Score Showcase Banner */}
-            <div className="geo-score-hero-container">
-              <div className="geo-score-left-wrap">
-                {/* Radial Score Box */}
-                <div className={`geo-score-radial-box ${geoReadiness.geoScore >= 70 ? '' : geoReadiness.geoScore >= 50 ? 'warning' : 'danger'}`}>
-                  <span className="geo-score-radial-num">{geoReadiness.geoScore}</span>
-                  <span className="geo-score-radial-max">/100</span>
-                </div>
+            {/* Score Body */}
+            {loadingGeoReadiness ? (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '1rem 0' }}>
+                <Loader2 size={20} className="spin" style={{ color: '#3b82f6' }} />
+                <span style={{ fontSize: '0.82rem', color: '#94a3b8' }}>Canlı AI hazırbulunuşluk standartları inceleniyor...</span>
+              </div>
+            ) : geoReadiness ? (
+              <>
+                <div className="hero-score-widget-body">
+                  <div className={`geo-score-radial-box ${geoReadiness.geoScore >= 70 ? '' : geoReadiness.geoScore >= 50 ? 'warning' : 'danger'}`}>
+                    <span className="geo-score-radial-num">{geoReadiness.geoScore}</span>
+                    <span className="geo-score-radial-max">/100</span>
+                  </div>
 
-                <div className="geo-score-text-details">
-                  <div className="geo-score-meta-pills">
-                    {activeWorkspace?.primary_domain && (
-                      <span className="geo-domain-tag">
-                        <Globe size={11} color="#3b82f6" />
-                        <span>{activeWorkspace.primary_domain}</span>
+                  <div className="hero-score-widget-texts">
+                    <h4 className="hero-score-widget-title">
+                      {geoReadiness.geoScore >= 80 ? 'Yüksek AI Hazırbulunuşluğu & Taranabilirlik' : 'Yapay Zeka Taranabilirlik Optimizasyonu Gerekli'}
+                    </h4>
+                    <p className="hero-score-widget-desc">
+                      {geoReadiness.summaryText || 'Alan adınızın taranabilirlik ve alıntılanabilirlik durumu yapay zeka arama motorları için analiz edildi.'}
+                    </p>
+                    {geoReadiness.checked_at && (
+                      <span style={{ fontSize: '0.72rem', color: '#64748b', marginTop: 2 }}>
+                        Son Tarama: {formatRelativeTime(geoReadiness.checked_at)}
                       </span>
                     )}
-                    <span className={`geo-badge-status ${geoReadiness.geoScore >= 70 ? 'good' : 'warning'}`}>
-                      {geoReadiness.geoScore >= 80 ? '✓ Mükemmel AI Erişimi' : geoReadiness.geoScore >= 50 ? '⚡ Geliştirilebilir Altyapı' : '✕ Kritik Eksikler Var'}
-                    </span>
                   </div>
-                  <h4 className="geo-score-main-title">
-                    {geoReadiness.geoScore >= 80 ? 'Yüksek AI Hazırbulunuşluğu & Taranabilirlik' : 'Yapay Zeka Taranabilirlik Optimizasyonu Gerekli'}
-                  </h4>
-                  <p className="geo-score-main-desc">
-                    {geoReadiness.summaryText || 'Alan adınızın taranabilirlik ve alıntılanabilirlik durumu yapay zeka arama motorları için analiz edildi.'}
-                  </p>
                 </div>
+
+                {/* Live Standards Mini Bar */}
+                <div className="hero-score-widget-standards-bar">
+                  {(geoReadiness.standards || []).map((std, sIdx) => {
+                    const isPassed = std.passed;
+                    return (
+                      <a
+                        key={sIdx}
+                        href={std.link || '#'}
+                        target={std.link ? '_blank' : '_self'}
+                        rel="noopener noreferrer"
+                        className="hero-std-pill"
+                        title={std.desc}
+                      >
+                        <span className={`hero-std-dot ${isPassed ? 'passed' : 'failed'}`} />
+                        <span>{std.title}: {isPassed ? 'Aktif' : 'Eksik'}</span>
+                        {std.link && <ExternalLink size={10} style={{ opacity: 0.6 }} />}
+                      </a>
+                    );
+                  })}
+                </div>
+              </>
+            ) : (
+              <div style={{ padding: '0.75rem 0', fontSize: '0.82rem', color: '#94a3b8' }}>
+                <Globe size={16} style={{ display: 'inline', marginRight: 6, verticalAlign: 'text-bottom' }} />
+                Alan adı analiz edilmedi. Ayarlardan alan adınızı doğrulayın.
               </div>
-
-              {/* Quick Summary Chips */}
-              <div className="geo-hero-chips-col">
-                {(geoReadiness.standards || []).map((std, idx) => (
-                  <div key={idx} className="geo-hero-chip">
-                    <span className={`geo-chip-indicator ${std.passed ? 'passed' : 'failed'}`} />
-                    <span>{std.title}: {std.passed ? 'Aktif' : 'Eksik'}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* 3 Standards Details Grid */}
-            <div className="geo-standards-grid">
-              {(geoReadiness.standards || []).map((std, idx) => {
-                const isPassed = std.passed;
-                const IconComponent = std.key === 'robots_ai_crawlers' ? Bot : std.key === 'llms_txt_presence' ? FileText : Layers;
-
-                return (
-                  <div key={idx} className={`geo-standard-card ${isPassed ? 'passed' : 'failed'}`}>
-                    <div className="geo-standard-top-row">
-                      <div className={`geo-standard-icon-wrap ${isPassed ? 'passed' : 'failed'}`}>
-                        <IconComponent size={18} />
-                      </div>
-                      <div className="geo-standard-title-box">
-                        <span className="geo-standard-title-text">{std.title}</span>
-                        <span className="geo-standard-key-text">{std.key}</span>
-                      </div>
-                    </div>
-
-                    <p className="geo-standard-body-desc">{std.desc}</p>
-
-                    <div className="geo-standard-bottom-bar">
-                      <span className={`geo-standard-status-tag ${isPassed ? 'passed' : 'failed'}`}>
-                        {isPassed ? <Check size={11} strokeWidth={3} /> : <AlertCircle size={11} />}
-                        <span>{isPassed ? 'Standart Karşılandı' : 'Optimizasyon Gerekli'}</span>
-                      </span>
-
-                      {std.link && (
-                        <a href={std.link} target="_blank" rel="noopener noreferrer" className="geo-standard-action-btn">
-                          <span>Canlı Test Et</span>
-                          <ExternalLink size={11} />
-                        </a>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </>
-        ) : (
-          <div className="growth-empty-card" style={{ padding: '1.5rem' }}>
-            <Globe size={24} className="text-muted" />
-            <h4>Domain Bilgisi Eksik</h4>
-            <p>Standartların canlı taranabilmesi için ayarlardan web sitenizin ana alan adını kaydedin.</p>
+            )}
           </div>
-        )}
-      </div>
+        }
+      />
 
       {/* =========================================================================
           BATCH SCAN PROGRESS & HISTORICAL REPORT SECTION

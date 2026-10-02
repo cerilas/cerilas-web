@@ -8,7 +8,9 @@ export default function GrowthPageCover({
   badgeIcon: BadgeIcon = Sparkles,
   coverImage,
   stats = [],
-  actions
+  actions,
+  rightSlot,
+  children
 }) {
   return (
     <div className="growth-page-hero-banner">
@@ -37,7 +39,9 @@ export default function GrowthPageCover({
           {actions && <div className="hero-banner-actions">{actions}</div>}
         </div>
 
-        {stats && stats.length > 0 && (
+        {rightSlot ? (
+          <div className="hero-banner-right-slot">{rightSlot}</div>
+        ) : stats && stats.length > 0 ? (
           <div className="hero-banner-stats-pillbox">
             {stats.map((st, sIdx) => {
               const Icon = st.icon;
@@ -55,8 +59,9 @@ export default function GrowthPageCover({
               );
             })}
           </div>
-        )}
+        ) : null}
       </div>
+      {children}
     </div>
   );
 }
