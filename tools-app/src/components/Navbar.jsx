@@ -116,16 +116,6 @@ export default function Navbar({ activeTool, onNavigateHome, onOpenStats, onSele
         </div>
 
         <div className="nav-links">
-          <a
-            href="#/growth"
-            className="nav-link nav-growth-btn"
-            title="Cerilas Growth — SEO & AI Visibility Platform"
-          >
-            <Sparkles size={14} className="nav-growth-sparkle" />
-            <span className="nav-growth-label">Growth</span>
-            <span className="nav-growth-pill">PREMIUM</span>
-          </a>
-
           <button
             onClick={onOpenStats}
             className="nav-link nav-stats-btn"
@@ -153,7 +143,7 @@ export default function Navbar({ activeTool, onNavigateHome, onOpenStats, onSele
                   <span className="nav-avatar-online-dot" />
                 </div>
                 <span className="nav-user-display-name">
-                  {user.first_name || user.name || user.email.split('@')[0]}
+                  {user.first_name || user.name || (user.email ? user.email.split('@')[0] : 'Kullanıcı')}
                 </span>
                 <ChevronDown size={14} className={`nav-user-chevron ${userMenuOpen ? 'rotate-180' : ''}`} />
               </button>
@@ -179,6 +169,7 @@ export default function Navbar({ activeTool, onNavigateHome, onOpenStats, onSele
                     <a
                       href="#/growth"
                       className="nav-dropdown-item nav-item-growth"
+                      style={{ textDecoration: 'none' }}
                       onClick={() => setUserMenuOpen(false)}
                     >
                       <TrendingUp size={16} className="nav-item-icon text-primary" />

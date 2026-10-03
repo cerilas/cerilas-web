@@ -10,10 +10,14 @@ import {
   Bell, 
   ShieldCheck,
   Calendar,
-  Globe
+  Globe,
+  Sun,
+  Moon
 } from 'lucide-react';
 import { useGrowth } from '../GrowthContext';
 import { useAuth } from '../../context/AuthContext';
+import { useTheme } from '../../context/ThemeContext';
+import GrowthFavicon from './GrowthFavicon';
 
 export default function GrowthHeader({ onBackToTools }) {
   const { 
@@ -23,6 +27,7 @@ export default function GrowthHeader({ onBackToTools }) {
     setIsOnboardingOpen 
   } = useGrowth();
   const { user } = useAuth();
+  const { toggleTheme, isDark } = useTheme();
 
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
@@ -45,10 +50,10 @@ export default function GrowthHeader({ onBackToTools }) {
           type="button"
           onClick={onBackToTools || (() => { window.location.hash = '#/'; })}
           className="growth-header-back-btn"
-          title="Cerilas Araçlar Ana Sayfasına Dön"
+          title="Return to Cerilas Tools Catalog"
         >
           <ArrowLeft size={16} />
-          <span>Araçlara Dön</span>
+          <span>Back to Tools</span>
         </button>
 
         <span className="growth-header-sep">/</span>
@@ -61,16 +66,16 @@ export default function GrowthHeader({ onBackToTools }) {
             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
           >
             <div className="growth-ws-btn-content">
-              {activeWorkspace?.favicon_url ? (
-                <img src={activeWorkspace.favicon_url} alt="" className="growth-ws-fav" />
-              ) : (
-                <div className="growth-ws-fallback-icon">
-                  <Globe size={14} />
-                </div>
-              )}
+              <GrowthFavicon
+                src={activeWorkspace?.favicon_url}
+                domain={activeWorkspace?.primary_domain}
+                name={activeWorkspace?.name}
+                size={22}
+                className="growth-ws-fav"
+              />
               <div className="growth-ws-titles">
-                <span className="growth-ws-title">{activeWorkspace?.name || 'Marka Seçin'}</span>
-                <span className="growth-ws-sub">{activeWorkspace?.primary_domain || 'Çalışma alanı'}</span>
+                <span className="growth-ws-title">{activeWorkspace?.name || 'Select Workspace'}</span>
+                <span className="growth-ws-sub">{activeWorkspace?.primary_domain || 'Workspace'}</span>
               </div>
             </div>
             <ChevronDown size={14} className={`growth-ws-chevron ${isDropdownOpen ? 'is-open' : ''}`} />
@@ -79,7 +84,7 @@ export default function GrowthHeader({ onBackToTools }) {
           {isDropdownOpen && (
             <div className="growth-ws-dropdown animate-fade">
               <div className="growth-ws-dropdown-header">
-                <span>Kayıtlı Markalar ({workspaces.length})</span>
+                <span>Registered Workspaces ({workspaces.length})</span>
               </div>
 
               <div className="growth-ws-list">
@@ -96,13 +101,13 @@ export default function GrowthHeader({ onBackToTools }) {
                       }}
                     >
                       <div className="growth-ws-item-info">
-                        {ws.favicon_url ? (
-                          <img src={ws.favicon_url} alt="" className="growth-ws-item-fav" />
-                        ) : (
-                          <div className="growth-ws-item-icon">
-                            <Building2 size={13} />
-                          </div>
-                        )}
+                        <GrowthFavicon
+                          src={ws.favicon_url}
+                          domain={ws.primary_domain}
+                          name={ws.name}
+                          size={20}
+                          className="growth-ws-item-fav"
+                        />
                         <div>
                           <span className="growth-ws-item-name">{ws.name}</span>
                           <span className="growth-ws-item-domain">{ws.primary_domain}</span>
@@ -128,7 +133,7 @@ export default function GrowthHeader({ onBackToTools }) {
                   }}
                 >
                   <Plus size={14} />
-                  <span>Yeni Marka / Web Sitesi Ekle</span>
+                  <span>Add Brand / Website</span>
                 </button>
               </div>
             </div>
@@ -153,12 +158,23 @@ export default function GrowthHeader({ onBackToTools }) {
         {/* Date Filter Badge */}
         <div className="growth-header-date-badge">
           <Calendar size={13} />
-          <span>Son 28 Gün</span>
+          <span>Last 28 Days</span>
         </div>
+
+        {/* Light / Dark Mode Toggle */}
+        <button
+          type="button"
+          onClick={toggleTheme}
+          className="growth-header-theme-btn"
+          title={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+          aria-label={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+        >
+          {isDark ? <Sun size={15} /> : <Moon size={15} />}
+        </button>
 
         {/* User Avatar */}
         <div className="growth-header-user">
-          <span className="growth-user-name">{user?.first_name || user?.name || 'Üye'}</span>
+          <span className="growth-user-name">{user?.first_name || user?.name || 'Member'}</span>
           {user?.avatar_url ? (
             <img src={user.avatar_url} alt={user?.name} className="growth-user-avatar" />
           ) : (

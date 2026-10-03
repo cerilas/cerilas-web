@@ -33,14 +33,14 @@ import { GrowthSearchSkeleton } from '../components/GrowthSkeleton';
 import GrowthWorldMap from '../components/GrowthWorldMap';
 
 const DATE_RANGE_OPTIONS = [
-  { id: '1d', label: 'Son 1 Gün', badge: 'Dün' },
-  { id: '3d', label: 'Son 3 Gün', badge: '72 saat' },
-  { id: '7d', label: 'Son 1 Hafta', badge: '7 gün' },
-  { id: '28d', label: 'Son 1 Ay', badge: '28 gün' },
-  { id: '3m', label: 'Son 3 Ay', badge: '90 gün' },
-  { id: '6m', label: 'Son 6 Ay', badge: '180 gün' },
-  { id: 'all', label: 'Tüm Zamanlar', badge: '1 Yıl' },
-  { id: 'custom', label: 'Özel Tarih Aralığı...', badge: 'Özel Seçim' }
+  { id: '1d', label: 'Last 1 Day', badge: 'Yesterday' },
+  { id: '3d', label: 'Last 3 Days', badge: '72 hours' },
+  { id: '7d', label: 'Last 1 Week', badge: '7 days' },
+  { id: '28d', label: 'Last 1 Month', badge: '28 days' },
+  { id: '3m', label: 'Last 3 Months', badge: '90 days' },
+  { id: '6m', label: 'Last 6 Months', badge: '180 days' },
+  { id: 'all', label: 'All Time', badge: '1 Year' },
+  { id: 'custom', label: 'Custom Date Range...', badge: 'Custom' }
 ];
 
 const CHANNEL_COLORS = {
@@ -56,33 +56,33 @@ const CHANNEL_COLORS = {
 
 const formatDuration = (seconds) => {
   const s = Math.round(Number(seconds) || 0);
-  if (s < 60) return `${s}sn`;
+  if (s < 60) return `${s}s`;
   const m = Math.floor(s / 60);
   const rem = s % 60;
-  return `${m}dk ${rem < 10 ? '0' : ''}${rem}sn`;
+  return `${m}m ${rem < 10 ? '0' : ''}${rem}s`;
 };
 
 const METRIC_CONFIG = {
   sessions: {
-    label: 'Oturumlar',
+    label: 'Sessions',
     color: '#38bdf8',
     glow: 'rgba(56, 189, 248, 0.45)',
     gradId: 'ga4TrendGradSessions',
-    unit: 'oturum'
+    unit: 'sessions'
   },
   activeUsers: {
-    label: 'Kullanıcılar',
+    label: 'Users',
     color: '#818cf8',
     glow: 'rgba(129, 140, 248, 0.45)',
     gradId: 'ga4TrendGradUsers',
-    unit: 'kullanıcı'
+    unit: 'users'
   },
   screenPageViews: {
-    label: 'Sayfa Görüntüleme',
+    label: 'Page Views',
     color: '#f472b6',
     glow: 'rgba(244, 114, 182, 0.45)',
     gradId: 'ga4TrendGradViews',
-    unit: 'görüntüleme'
+    unit: 'views'
   }
 };
 
@@ -131,9 +131,9 @@ const formatChartDate = (dateStr, format = 'short') => {
   if (isNaN(dt.getTime())) return dateStr;
 
   if (format === 'short') {
-    return dt.toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' });
+    return dt.toLocaleDateString('en-US', { day: 'numeric', month: 'short' });
   }
-  return dt.toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' });
+  return dt.toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' });
 };
 
 function generateSmoothCurve(pts, minY, maxY) {
@@ -237,10 +237,10 @@ export default function GrowthAnalytics() {
       if (customStartDate && customEndDate) {
         return `${customStartDate} → ${customEndDate}`;
       }
-      return 'Özel Tarih';
+      return 'Custom Date';
     }
     const found = DATE_RANGE_OPTIONS.find(o => o.id === dateRange);
-    return found ? found.label : 'Son 1 Ay';
+    return found ? found.label : 'Last 1 Month';
   }, [dateRange, customStartDate, customEndDate]);
 
   // Fetch Main Performance Data
@@ -263,7 +263,7 @@ export default function GrowthAnalytics() {
         headers: { Authorization: `Bearer ${token}` }
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Analytics verileri alınamadı.');
+      if (!res.ok) throw new Error(data.error || 'Failed to fetch Analytics data.');
 
       setAnalyticsData(data);
       if (data.realtime) {
@@ -331,6 +331,45 @@ export default function GrowthAnalytics() {
     fetchAnalytics(dateRange, customStartDate, customEndDate, true);
   };
 
+  const [connectingGoogle, setConnectingGoogle] = useState(false);
+
+  const handleConnectGoogle = async () => {
+    if (!activeWorkspace?.id) return;
+    setConnectingGoogle(true);
+    try {
+      const res = await fetch(`/api/growth/workspaces/${activeWorkspace.id}/integrations/google/url`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (!res.ok || !data.url) throw new Error(data.error || 'Failed to get Google authorization link');
+
+      const width = 560;
+      const height = 680;
+      const left = window.screenX + Math.max(0, (window.outerWidth - width) / 2);
+      const top = window.screenY + Math.max(0, (window.outerHeight - height) / 2);
+
+      const popup = window.open(
+        data.url,
+        'GoogleIntegrationAuth',
+        `width=${width},height=${height},left=${left},top=${top},scrollbars=yes,resizable=yes`
+      );
+
+      const handleMessage = async (event) => {
+        if (event.origin !== window.location.origin) return;
+        if (event.data?.type === 'GROWTH_GOOGLE_AUTH_SUCCESS') {
+          window.removeEventListener('message', handleMessage);
+          await fetchAnalytics(dateRange, customStartDate, customEndDate, true);
+        }
+      };
+      window.addEventListener('message', handleMessage);
+    } catch (err) {
+      console.error('[Google Connect Error]:', err);
+      setActiveTab('settings');
+    } finally {
+      setConnectingGoogle(false);
+    }
+  };
+
   // Sort & filter Pages
   const filteredPages = (analyticsData.topPages || []).filter(p =>
     (p.pagePath || '').toLowerCase().includes(searchFilter.toLowerCase()) ||
@@ -375,7 +414,7 @@ export default function GrowthAnalytics() {
     let filename = `ga4-${activeTabSub}-${dateRange}.csv`;
 
     if (activeTabSub === 'channels') {
-      headers = ['Kanal', 'Oturumlar', 'Aktif Kullanıcılar', 'Hemen Çıkma Oranı', 'Ort. Süre (sn)'];
+      headers = ['Channel', 'Sessions', 'Active Users', 'Bounce Rate', 'Avg Duration (s)'];
       rows = (analyticsData.trafficChannels || []).map(c => [
         c.channel,
         c.sessions,
@@ -384,7 +423,7 @@ export default function GrowthAnalytics() {
         c.avgDurationSeconds
       ]);
     } else if (activeTabSub === 'pages') {
-      headers = ['Sayfa Yolu', 'Sayfa Başlığı', 'Görüntüleme', 'Aktif Kullanıcılar', 'Ort. Süre (sn)', 'Hemen Çıkma'];
+      headers = ['Page Path', 'Page Title', 'Views', 'Active Users', 'Avg Duration (s)', 'Bounce Rate'];
       rows = sortedPages.map(p => [
         `"${p.pagePath}"`,
         `"${(p.pageTitle || '').replace(/"/g, '""')}"`,
@@ -394,14 +433,14 @@ export default function GrowthAnalytics() {
         p.bounceRate
       ]);
     } else if (activeTabSub === 'events') {
-      headers = ['Olay Adı', 'Tetiklenme Sayısı', 'Toplam Kullanıcı'];
+      headers = ['Event Name', 'Event Count', 'Total Users'];
       rows = (analyticsData.events || []).map(e => [
         e.eventName,
         e.eventCount,
         e.totalUsers
       ]);
     } else {
-      headers = ['Kategori / İsim', 'Oturumlar', 'Kullanıcılar'];
+      headers = ['Category / Name', 'Sessions', 'Users'];
       rows = (analyticsData.devices || []).map(d => [d.category, d.sessions, d.activeUsers]);
     }
 
@@ -495,138 +534,161 @@ export default function GrowthAnalytics() {
       <GrowthPageCover
         badge="Google Analytics 4 (GA4)"
         badgeIcon={Activity}
-        title="Web Analitiği & Ziyaretçi Telemetrisi"
-        subtitle="Gerçek zamanlı kullanıcı akışları, etkileşim süreleri, trafik kaynakları ve dönüşüm hunisi ölçümleri."
+        title="Web Analytics & Traffic Telemetry"
+        subtitle="Real-time user flows, engagement durations, traffic sources, and conversion funnel metrics."
         coverImage="/growth-covers/integrations-cover.jpg"
         actions={
-          <>
-            <div className="growth-date-picker-wrap" ref={dateDropdownRef}>
-              <button
-                type="button"
-                className={`growth-date-trigger-btn ${isDateMenuOpen ? 'is-open' : ''}`}
-                onClick={() => setIsDateMenuOpen(prev => !prev)}
-                title="Google Analytics veri tarih aralığını değiştirin"
-              >
-                {syncing ? (
-                  <Loader2 size={13} className="auth-spinner text-primary" />
-                ) : (
-                  <Calendar size={13} className="text-primary" />
+          isConnected ? (
+            <>
+              <div className="growth-date-picker-wrap" ref={dateDropdownRef}>
+                <button
+                  type="button"
+                  className={`growth-date-trigger-btn ${isDateMenuOpen ? 'is-open' : ''}`}
+                  onClick={() => setIsDateMenuOpen(prev => !prev)}
+                  title="Change Google Analytics date range"
+                >
+                  {syncing ? (
+                    <Loader2 size={13} className="auth-spinner text-primary" />
+                  ) : (
+                    <Calendar size={13} className="text-primary" />
+                  )}
+                  <span>{currentRangeLabel}</span>
+                  <ChevronDown size={13} style={{ transform: isDateMenuOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s ease', opacity: 0.7 }} />
+                </button>
+
+                {isDateMenuOpen && (
+                  <div className="growth-date-dropdown">
+                    <div className="growth-date-dropdown-header">
+                      <span>Time Range</span>
+                      {syncing && <Loader2 size={12} className="auth-spinner text-primary" />}
+                    </div>
+                    <div className="growth-date-options-list">
+                      {DATE_RANGE_OPTIONS.map((opt) => {
+                        const isSelected = dateRange === opt.id;
+                        return (
+                          <button
+                            key={opt.id}
+                            type="button"
+                            className={`growth-date-option ${isSelected ? 'active' : ''}`}
+                            onClick={() => handleSelectDateRange(opt.id)}
+                          >
+                            <div className="date-option-left">
+                              <Clock size={13} style={{ opacity: isSelected ? 1 : 0.45 }} />
+                              <span>{opt.label}</span>
+                            </div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                              <span className="date-option-badge">{opt.badge}</span>
+                              {isSelected && <Check size={14} color="#38bdf8" />}
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    {dateRange === 'custom' && (
+                      <form onSubmit={handleApplyCustomDate} className="growth-date-custom-panel">
+                        <div className="custom-date-row">
+                          <label className="custom-date-label">Start Date</label>
+                          <input
+                            type="date"
+                            value={customStartDate}
+                            onChange={(e) => setCustomStartDate(e.target.value)}
+                            required
+                            className="custom-date-input"
+                          />
+                        </div>
+                        <div className="custom-date-row">
+                          <label className="custom-date-label">End Date</label>
+                          <input
+                            type="date"
+                            value={customEndDate}
+                            min={customStartDate}
+                            onChange={(e) => setCustomEndDate(e.target.value)}
+                            required
+                            className="custom-date-input"
+                          />
+                        </div>
+                        <div className="custom-date-actions">
+                          <button type="submit" className="custom-date-apply-btn">
+                            Apply Range
+                          </button>
+                        </div>
+                      </form>
+                    )}
+                  </div>
                 )}
-                <span>{currentRangeLabel}</span>
-                <ChevronDown size={13} style={{ transform: isDateMenuOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s ease', opacity: 0.7 }} />
-              </button>
+              </div>
 
-              {isDateMenuOpen && (
-                <div className="growth-date-dropdown">
-                  <div className="growth-date-dropdown-header">
-                    <span>Zaman Aralığı</span>
-                    {syncing && <Loader2 size={12} className="auth-spinner text-primary" />}
-                  </div>
-                  <div className="growth-date-options-list">
-                    {DATE_RANGE_OPTIONS.map((opt) => {
-                      const isSelected = dateRange === opt.id;
-                      return (
-                        <button
-                          key={opt.id}
-                          type="button"
-                          className={`growth-date-option ${isSelected ? 'active' : ''}`}
-                          onClick={() => handleSelectDateRange(opt.id)}
-                        >
-                          <div className="date-option-left">
-                            <Clock size={13} style={{ opacity: isSelected ? 1 : 0.45 }} />
-                            <span>{opt.label}</span>
-                          </div>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                            <span className="date-option-badge">{opt.badge}</span>
-                            {isSelected && <Check size={14} color="#38bdf8" />}
-                          </div>
-                        </button>
-                      );
-                    })}
-                  </div>
-
-                  {dateRange === 'custom' && (
-                    <form onSubmit={handleApplyCustomDate} className="growth-date-custom-panel">
-                      <div className="custom-date-row">
-                        <label className="custom-date-label">Başlangıç Tarihi</label>
-                        <input
-                          type="date"
-                          value={customStartDate}
-                          onChange={(e) => setCustomStartDate(e.target.value)}
-                          required
-                          className="custom-date-input"
-                        />
-                      </div>
-                      <div className="custom-date-row">
-                        <label className="custom-date-label">Bitiş Tarihi</label>
-                        <input
-                          type="date"
-                          value={customEndDate}
-                          min={customStartDate}
-                          onChange={(e) => setCustomEndDate(e.target.value)}
-                          required
-                          className="custom-date-input"
-                        />
-                      </div>
-                      <div className="custom-date-actions">
-                        <button type="submit" className="custom-date-apply-btn">
-                          Aralığı Uygula
-                        </button>
-                      </div>
-                    </form>
+              {isConnected && (
+                <div 
+                  className="growth-gsc-compact-status" 
+                  style={{ background: 'rgba(56, 189, 248, 0.08)', borderColor: 'rgba(56, 189, 248, 0.25)' }}
+                  title={`Google Analytics 4 Property: ${analyticsData.propertyId || 'GA4 Connected'}`}
+                >
+                  <span className="gsc-live-dot" style={{ background: '#38bdf8', boxShadow: '0 0 8px rgba(56, 189, 248, 0.6)' }} />
+                  <span className="gsc-compact-site">{analyticsData.propertyId ? `Property: ${analyticsData.propertyId}` : 'GA4 Connected'}</span>
+                  {analyticsData.syncedAt && (
+                    <span className="gsc-compact-time">
+                      {new Date(analyticsData.syncedAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
+                    </span>
                   )}
                 </div>
               )}
-            </div>
 
-            {isConnected && (
-              <div 
-                className="growth-gsc-compact-status" 
-                style={{ background: 'rgba(56, 189, 248, 0.08)', borderColor: 'rgba(56, 189, 248, 0.25)' }}
-                title={`Google Analytics 4 Mülkü: ${analyticsData.propertyId || 'GA4 Bağlı'}`}
+              <button
+                type="button"
+                className="growth-secondary-btn"
+                onClick={handleManualSync}
+                disabled={syncing || !isConnected}
+                title="Fetch the latest data from Google Analytics 4"
               >
-                <span className="gsc-live-dot" style={{ background: '#38bdf8', boxShadow: '0 0 8px rgba(56, 189, 248, 0.6)' }} />
-                <span className="gsc-compact-site">{analyticsData.propertyId ? `Mülk: ${analyticsData.propertyId}` : 'GA4 Bağlı'}</span>
-                {analyticsData.syncedAt && (
-                  <span className="gsc-compact-time">
-                    {new Date(analyticsData.syncedAt).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}
-                  </span>
-                )}
-              </div>
-            )}
-
-            <button
-              type="button"
-              className="growth-secondary-btn"
-              onClick={handleManualSync}
-              disabled={syncing || !isConnected}
-              title="Google Analytics 4'ten en güncel verileri çek"
-            >
-              <RefreshCw size={13} className={syncing ? 'auth-spinner text-primary' : ''} />
-              <span>{syncing ? 'Eşitleniyor...' : 'Yenile'}</span>
-            </button>
-          </>
+                <RefreshCw size={13} className={syncing ? 'auth-spinner text-primary' : ''} />
+                <span>{syncing ? 'Syncing...' : 'Refresh'}</span>
+              </button>
+            </>
+          ) : null
         }
       />
 
       {/* DISCONNECTED STATE NOTICE */}
       {!isConnected ? (
-        <div className="growth-panel-card" style={{ textAlign: 'center', padding: '3.5rem 2rem' }}>
-          <div style={{ width: 68, height: 68, borderRadius: '50%', background: 'rgba(245, 158, 11, 0.15)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1.25rem', color: '#f59e0b' }}>
-            <Activity size={32} />
+        <div className="growth-panel-card" style={{ padding: '64px 24px', textAlign: 'center' }}>
+          <div style={{
+            width: 64,
+            height: 64,
+            margin: '0 auto 18px',
+            borderRadius: 16,
+            background: 'rgba(249, 171, 0, 0.1)',
+            border: '1px solid rgba(249, 171, 0, 0.25)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}>
+            <img src="/growth-covers/ga4-badge.svg" alt="Google Analytics 4" style={{ width: 34, height: 34, objectFit: 'contain' }} />
           </div>
-          <h2 style={{ fontSize: '1.4rem', fontWeight: 700, margin: '0 0 0.5rem', color: '#ffffff' }}>Google Analytics 4 Bağlantısı Bekleniyor</h2>
-          <p style={{ maxWidth: 520, margin: '0 auto 1.75rem', color: '#94a3b8', fontSize: '0.95rem', lineHeight: 1.6 }}>
-            Web sitenizin gerçek kullanıcı oturumlarını, hemen çıkma oranlarını ve canlı ziyaretçi sayısını doğrudan görmek için Ayarlar sekmesinden Google Analytics 4 mülkünüzü bağlayın.
+
+          <h3 style={{ fontSize: '1.2rem', fontWeight: 600, color: 'var(--text-main, #ffffff)', marginBottom: '8px' }}>
+            No Google Analytics 4 Connection Found
+          </h3>
+
+          <p style={{ maxWidth: 520, margin: '0 auto 24px', color: '#94a3b8', fontSize: '0.88rem', lineHeight: 1.6 }}>
+            Real user sessions, bounce rates, page views and live visitor pulse for this brand are only displayed when your verified Google Analytics 4 property is connected.
           </p>
+
           <button
             type="button"
-            className="growth-btn growth-btn-primary"
-            onClick={() => setActiveTab('settings')}
-            style={{ padding: '0.75rem 1.75rem', fontSize: '0.95rem' }}
+            disabled={connectingGoogle}
+            onClick={handleConnectGoogle}
+            className="growth-primary-btn"
+            style={{ margin: '0 auto', display: 'inline-flex' }}
           >
-            <SlidersHorizontal size={16} />
-            <span>Ayarlar'a Git ve GA4'ü Bağla</span>
+            {connectingGoogle ? (
+              <Loader2 size={15} className="auth-spinner" />
+            ) : (
+              <RefreshCw size={15} className="gsc-sync-spin-icon" />
+            )}
+            <span>{connectingGoogle ? 'Connecting...' : 'Connect Google Analytics 4'}</span>
+            <ArrowUpRight size={15} />
           </button>
         </div>
       ) : (
@@ -640,10 +702,10 @@ export default function GrowthAnalytics() {
               </div>
               <div className="realtime-title-group">
                 <h3 className="realtime-main-title">
-                  Canlı Ziyaretçi Nabzı: <strong>{realtimeData.activeUsers || 0} Kullanıcı</strong>
+                  Live Visitor Pulse: <strong>{realtimeData.activeUsers || 0} Users</strong>
                 </h3>
                 <span className="realtime-sub">
-                  Şu an sitede aktif olarak gezinen tekil kullanıcılar (Son 30 dakika)
+                  Unique users currently active on the site (Last 30 minutes)
                 </span>
               </div>
               <button 
@@ -651,21 +713,21 @@ export default function GrowthAnalytics() {
                 className="realtime-refresh-btn"
                 onClick={fetchRealtime}
                 disabled={realtimeUpdating}
-                title="Canlı kullanıcıları yenile"
+                title="Refresh live users"
               >
                 <Radio size={13} className={realtimeUpdating ? 'animate-pulse' : ''} />
-                <span>{realtimeUpdating ? 'Güncelleniyor...' : 'Canlı Veri'}</span>
+                <span>{realtimeUpdating ? 'Updating...' : 'Live Data'}</span>
               </button>
             </div>
 
             {realtimeData.activePages && realtimeData.activePages.length > 0 ? (
               <div className="realtime-active-pages-wrap">
-                <span className="realtime-pages-label">Şu An İzlenen Sayfalar:</span>
+                <span className="realtime-pages-label">Currently Active Pages:</span>
                 <div className="realtime-pages-chips">
                   {realtimeData.activePages.map((pg, idx) => (
                     <div key={idx} className="realtime-page-chip">
                       <span className="page-chip-path">{pg.screenName}</span>
-                      <span className="page-chip-badge">{pg.activeUsers} kişi</span>
+                      <span className="page-chip-badge">{pg.activeUsers} users</span>
                     </div>
                   ))}
                 </div>
@@ -673,7 +735,7 @@ export default function GrowthAnalytics() {
             ) : (
               <div className="realtime-idle-note">
                 <Radio size={14} style={{ opacity: 0.6 }} />
-                <span>Şu an anlık aktif oturum tespit edilmedi. Yeni bir kullanıcı siteye girdiğinde burada canlı belirecektir.</span>
+                <span>No live active sessions detected. A new user will appear here in real-time when they visit the site.</span>
               </div>
             )}
           </div>
@@ -682,79 +744,79 @@ export default function GrowthAnalytics() {
           <div className="growth-stats-grid">
             <div className="growth-stat-card">
               <div className="stat-card-header">
-                <span className="stat-card-title">Toplam & Aktif Kullanıcı</span>
+                <span className="stat-card-title">Total & Active Users</span>
                 <Users size={16} className="stat-card-icon text-primary" />
               </div>
               <div className="stat-card-value font-mono">
                 {Number(totals.activeUsers || 0).toLocaleString()}
               </div>
               <div className="stat-card-sub text-muted">
-                <span>Toplam: <strong>{Number(totals.totalUsers || 0).toLocaleString()}</strong> tekil ziyaretçi</span>
+                <span>Total: <strong>{Number(totals.totalUsers || 0).toLocaleString()}</strong> unique visitors</span>
               </div>
             </div>
 
             <div className="growth-stat-card">
               <div className="stat-card-header">
-                <span className="stat-card-title">Toplam Oturum (Sessions)</span>
+                <span className="stat-card-title">Total Sessions</span>
                 <Activity size={16} className="stat-card-icon" />
               </div>
               <div className="stat-card-value font-mono text-primary">
                 {Number(totals.sessions || 0).toLocaleString()}
               </div>
               <div className="stat-card-sub text-muted">
-                <span>Oturum başına <strong>{pagesPerSession}</strong> sayfa</span>
+                <span><strong>{pagesPerSession}</strong> pages per session</span>
               </div>
             </div>
 
             <div className="growth-stat-card">
               <div className="stat-card-header">
-                <span className="stat-card-title">Sayfa Görüntüleme (Views)</span>
+                <span className="stat-card-title">Page Views</span>
                 <Eye size={16} className="stat-card-icon" />
               </div>
               <div className="stat-card-value font-mono">
                 {Number(totals.screenPageViews || 0).toLocaleString()}
               </div>
               <div className="stat-card-sub text-muted">
-                <span>Seçili dönemdeki toplam okuma</span>
+                <span>Total reads in selected period</span>
               </div>
             </div>
 
             <div className="growth-stat-card">
               <div className="stat-card-header">
-                <span className="stat-card-title">Ort. Oturum Süresi</span>
+                <span className="stat-card-title">Avg. Session Duration</span>
                 <Clock size={16} className="stat-card-icon" />
               </div>
               <div className="stat-card-value font-mono text-success">
                 {formatDuration(totals.averageSessionDuration)}
               </div>
               <div className="stat-card-sub text-muted">
-                <span>Ortalama aktif etkileşim</span>
+                <span>Average active engagement</span>
               </div>
             </div>
 
             <div className="growth-stat-card">
               <div className="stat-card-header">
-                <span className="stat-card-title">Hemen Çıkma (Bounce Rate)</span>
+                <span className="stat-card-title">Bounce Rate</span>
                 <TrendingDown size={16} className="stat-card-icon text-warning" />
               </div>
               <div className="stat-card-value font-mono text-warning">
                 {totals.bounceRate || '0%'}
               </div>
               <div className="stat-card-sub text-muted">
-                <span>Etkileşim Oranı: <strong>{totals.engagementRate || '0%'}</strong></span>
+                <span>Engagement Rate: <strong>{totals.engagementRate || '0%'}</strong></span>
               </div>
             </div>
 
             <div className="growth-stat-card">
               <div className="stat-card-header">
-                <span className="stat-card-title">Yeni Ziyaretçi Payı</span>
+                <span className="stat-card-title">New Visitor Share</span>
                 <UserPlus size={16} className="stat-card-icon" />
               </div>
               <div className="stat-card-value font-mono">
-                %{newUsersPercent}
+                {newUsersPercent}%
               </div>
               <div className="stat-card-sub text-muted">
-                <span><strong>{Number(totals.newUsers || 0).toLocaleString()}</strong> yeni kullanıcı</span>
+                <span><strong>{Number(totals.newUsers || 0).toLocaleString()}</strong> new users</span>
               </div>
             </div>
           </div>
@@ -764,7 +826,7 @@ export default function GrowthAnalytics() {
             <div className="growth-chart-header">
               <div className="growth-chart-title-wrap">
                 <Activity size={16} style={{ color: activeMetricCfg.color }} />
-                <span className="growth-chart-title">{currentRangeLabel} Trafik ve Etkileşim Eğilimi</span>
+                <span className="growth-chart-title">{currentRangeLabel} Traffic & Engagement Trend</span>
               </div>
 
               <div className="growth-chart-legend">
@@ -774,7 +836,7 @@ export default function GrowthAnalytics() {
                   style={{ opacity: activeChartMetric === 'sessions' ? 1 : 0.45 }}
                 >
                   <span className="legend-dot clicks" />
-                  <span>Oturumlar</span>
+                  <span>Sessions</span>
                 </div>
                 <div
                   className={`chart-legend-item ${activeChartMetric === 'activeUsers' ? 'active' : ''}`}
@@ -782,7 +844,7 @@ export default function GrowthAnalytics() {
                   style={{ opacity: activeChartMetric === 'activeUsers' ? 1 : 0.45 }}
                 >
                   <span className="legend-dot impressions" />
-                  <span>Kullanıcılar</span>
+                  <span>Users</span>
                 </div>
                 <div
                   className={`chart-legend-item ${activeChartMetric === 'screenPageViews' ? 'active' : ''}`}
@@ -790,7 +852,7 @@ export default function GrowthAnalytics() {
                   style={{ opacity: activeChartMetric === 'screenPageViews' ? 1 : 0.45 }}
                 >
                   <span className="legend-dot" style={{ background: '#f472b6', boxShadow: '0 0 8px rgba(244, 114, 182, 0.6)' }} />
-                  <span>Sayfa Görüntüleme</span>
+                  <span>Page Views</span>
                 </div>
               </div>
             </div>
@@ -803,7 +865,7 @@ export default function GrowthAnalytics() {
               {dailyTrend.length === 0 ? (
                 <div style={{ textAlign: 'center', padding: '60px 20px', color: '#94a3b8' }}>
                   <Activity size={36} style={{ margin: '0 auto 12px', opacity: 0.4 }} />
-                  <p>Seçili dönem için günlük zaman serisi verisi bulunamadı.</p>
+                  <p>No daily time-series data found for the selected period.</p>
                 </div>
               ) : (
                 <div style={{ position: 'relative', width: '100%', height: '100%' }}>
@@ -950,16 +1012,16 @@ export default function GrowthAnalytics() {
                       </div>
                       <div className="chart-tooltip-sub-grid">
                         <div className="tooltip-sub-item">
-                          <span className="sub-item-lbl">Oturum</span>
+                          <span className="sub-item-lbl">Sessions</span>
                           <span className="sub-item-val font-mono">{Number(hoveredTrendPoint.data.sessions || 0).toLocaleString()}</span>
                         </div>
                         <div className="tooltip-sub-item">
-                          <span className="sub-item-lbl">Kullanıcı</span>
+                          <span className="sub-item-lbl">Users</span>
                           <span className="sub-item-val font-mono">{Number(hoveredTrendPoint.data.activeUsers || 0).toLocaleString()}</span>
                         </div>
                         {hoveredTrendPoint.data.bounceRate && (
                           <div className="tooltip-sub-item">
-                            <span className="sub-item-lbl">Hemen Çıkma</span>
+                            <span className="sub-item-lbl">Bounce Rate</span>
                             <span className="sub-item-val font-mono text-muted">{hoveredTrendPoint.data.bounceRate}</span>
                           </div>
                         )}
@@ -980,7 +1042,7 @@ export default function GrowthAnalytics() {
                 onClick={() => setActiveTabSub('channels')}
               >
                 <Layers size={13} />
-                <span>Trafik Kanalları ({(analyticsData.trafficChannels || []).length})</span>
+                <span>Traffic Channels ({(analyticsData.trafficChannels || []).length})</span>
               </button>
               <button
                 type="button"
@@ -988,7 +1050,7 @@ export default function GrowthAnalytics() {
                 onClick={() => setActiveTabSub('pages')}
               >
                 <FileText size={13} />
-                <span>Popüler Sayfalar ({(analyticsData.topPages || []).length})</span>
+                <span>Top Pages ({(analyticsData.topPages || []).length})</span>
               </button>
               <button
                 type="button"
@@ -996,7 +1058,7 @@ export default function GrowthAnalytics() {
                 onClick={() => setActiveTabSub('tech')}
               >
                 <Monitor size={13} />
-                <span>Cihazlar & Teknoloji</span>
+                <span>Devices & Technology</span>
               </button>
               <button
                 type="button"
@@ -1004,7 +1066,7 @@ export default function GrowthAnalytics() {
                 onClick={() => setActiveTabSub('demographics')}
               >
                 <Globe2 size={13} />
-                <span>Coğrafi Dağılım</span>
+                <span>Geographic Distribution</span>
               </button>
               <button
                 type="button"
@@ -1012,7 +1074,7 @@ export default function GrowthAnalytics() {
                 onClick={() => setActiveTabSub('events')}
               >
                 <Zap size={13} />
-                <span>Etkinlikler ({(analyticsData.events || []).length})</span>
+                <span>Events ({(analyticsData.events || []).length})</span>
               </button>
             </div>
 
@@ -1022,7 +1084,7 @@ export default function GrowthAnalytics() {
                   <Search size={14} className="search-input-icon" />
                   <input
                     type="text"
-                    placeholder="Listede ara..."
+                    placeholder="Search list..."
                     value={searchFilter}
                     onChange={(e) => setSearchFilter(e.target.value)}
                     className="growth-search-input"
@@ -1034,10 +1096,10 @@ export default function GrowthAnalytics() {
                 type="button"
                 className="growth-secondary-btn"
                 onClick={handleExportCsv}
-                title="Mevcut tabloyu CSV olarak indir"
+                title="Download current table as CSV"
               >
                 <Download size={13} />
-                <span>CSV İndir</span>
+                <span>Download CSV</span>
               </button>
             </div>
           </div>
@@ -1053,11 +1115,11 @@ export default function GrowthAnalytics() {
                   </div>
                   <div className="tab-infobar-content">
                     <h4 className="tab-infobar-title">
-                      <span>Edinme Kanalları (Default Channel Grouping)</span>
-                      <span className="tab-badge-tag">GA4 Standart Kanal Grubu</span>
+                      <span>Acquisition Channels (Default Channel Grouping)</span>
+                      <span className="tab-badge-tag">GA4 Standard Channel Group</span>
                     </h4>
                     <p className="tab-infobar-desc">
-                      Kullanıcılarınızın sitenize hangi trafik kaynağından geldiğini gösterir. Organik Arama (SEO), Doğrudan (Direct), Sosyal Medya ve Yönlendirme (Referral) kaynaklarının performansını karşılaştırın.
+                      Shows which traffic source your users come from. Compare performance across Organic Search (SEO), Direct, Social Media, and Referral channels.
                     </p>
                   </div>
                 </div>
@@ -1066,12 +1128,12 @@ export default function GrowthAnalytics() {
                   <table className="growth-table">
                     <thead>
                       <tr>
-                        <th>Kanal Grubu</th>
-                        <th>Paylaşım Dağılımı</th>
-                        <th>Oturumlar</th>
-                        <th>Kullanıcılar</th>
-                        <th>Hemen Çıkma</th>
-                        <th>Ort. Süre</th>
+                        <th>Channel Group</th>
+                        <th>Distribution Share</th>
+                        <th>Sessions</th>
+                        <th>Users</th>
+                        <th>Bounce Rate</th>
+                        <th>Avg. Duration</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -1083,15 +1145,15 @@ export default function GrowthAnalytics() {
                             <td>
                               <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
                                 <span style={{ width: 10, height: 10, borderRadius: '50%', background: barColor, flexShrink: 0 }} />
-                                <strong style={{ color: '#ffffff', fontSize: '0.9rem' }}>{ch.channel}</strong>
+                                <strong style={{ color: 'var(--text-main, #ffffff)', fontSize: '0.9rem' }}>{ch.channel}</strong>
                               </div>
                             </td>
                             <td style={{ minWidth: 160 }}>
                               <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                                <div style={{ flex: 1, height: 6, background: 'rgba(255,255,255,0.08)', borderRadius: 3, overflow: 'hidden' }}>
+                                <div style={{ flex: 1, height: 6, background: 'var(--border-color, rgba(255,255,255,0.08))', borderRadius: 3, overflow: 'hidden' }}>
                                   <div style={{ width: `${Math.min(100, Math.max(2, sharePct))}%`, height: '100%', background: barColor, borderRadius: 3 }} />
                                 </div>
-                                <span style={{ fontSize: '0.8rem', color: '#94a3b8', width: 45, textAlign: 'right' }}>%{sharePct}</span>
+                                <span style={{ fontSize: '0.8rem', color: '#94a3b8', width: 45, textAlign: 'right' }}>{sharePct}%</span>
                               </div>
                             </td>
                             <td className="font-semibold text-primary font-mono">{Number(ch.sessions).toLocaleString()}</td>
@@ -1116,11 +1178,11 @@ export default function GrowthAnalytics() {
                   </div>
                   <div className="tab-infobar-content">
                     <h4 className="tab-infobar-title">
-                      <span>Sayfalar ve Ekranlar (Pages & Screens)</span>
-                      <span className="tab-badge-tag">{sortedPages.length} sayfa bulundu</span>
+                      <span>Pages & Screens</span>
+                      <span className="tab-badge-tag">{sortedPages.length} pages found</span>
                     </h4>
                     <p className="tab-infobar-desc">
-                      Ziyaretçilerin en çok vakit geçirdiği ve görüntülediği açılış sayfalarınız. Hemen çıkma oranı düşük olan sayfalar yüksek dönüşüm fırsatı sunar.
+                      Your landing pages where visitors spend the most time and views. Pages with low bounce rates present high conversion opportunities.
                     </p>
                   </div>
                 </div>
@@ -1131,27 +1193,27 @@ export default function GrowthAnalytics() {
                       <tr>
                         <th className="growth-th-sortable" onClick={() => handleSortPages('pagePath')}>
                           <span className="th-sort-inner">
-                            <span>Sayfa Yolu & Başlık</span>
+                            <span>Page Path & Title</span>
                           </span>
                         </th>
                         <th className="growth-th-sortable" onClick={() => handleSortPages('views')}>
                           <span className="th-sort-inner">
-                            <span>Görüntülenme</span>
+                            <span>Pageviews</span>
                           </span>
                         </th>
                         <th className="growth-th-sortable" onClick={() => handleSortPages('activeUsers')}>
                           <span className="th-sort-inner">
-                            <span>Tekil Ziyaretçi</span>
+                            <span>Unique Visitors</span>
                           </span>
                         </th>
                         <th className="growth-th-sortable" onClick={() => handleSortPages('avgDurationSeconds')}>
                           <span className="th-sort-inner">
-                            <span>Ortalama Süre</span>
+                            <span>Avg. Duration</span>
                           </span>
                         </th>
                         <th className="growth-th-sortable" onClick={() => handleSortPages('bounceRate')}>
                           <span className="th-sort-inner">
-                            <span>Hemen Çıkma</span>
+                            <span>Bounce Rate</span>
                           </span>
                         </th>
                       </tr>
@@ -1182,9 +1244,9 @@ export default function GrowthAnalytics() {
                   {totalPagesCount > 1 && (
                     <div className="growth-table-pagination">
                       <div className="pagination-info">
-                        Toplam <strong>{sortedPages.length}</strong> sayfa arasından{' '}
-                        <strong>{(pageCurrentPage - 1) * pageSize + 1}</strong> -{' '}
-                        <strong>{Math.min(pageCurrentPage * pageSize, sortedPages.length)}</strong> arası gösteriliyor.
+                        Showing <strong>{(pageCurrentPage - 1) * pageSize + 1}</strong> –{' '}
+                        <strong>{Math.min(pageCurrentPage * pageSize, sortedPages.length)}</strong> of{' '}
+                        <strong>{sortedPages.length}</strong> pages.
                       </div>
                       <div className="pagination-controls">
                         <button
@@ -1193,10 +1255,10 @@ export default function GrowthAnalytics() {
                           onClick={() => setPageCurrentPage(prev => Math.max(prev - 1, 1))}
                           disabled={pageCurrentPage === 1}
                         >
-                          Önceki
+                          Previous
                         </button>
-                        <span style={{ fontSize: '0.825rem', color: '#cbd5e1' }}>
-                          Sayfa {pageCurrentPage} / {totalPagesCount}
+                        <span style={{ fontSize: '0.825rem', color: 'var(--text-muted, #64748b)' }}>
+                          Page {pageCurrentPage} / {totalPagesCount}
                         </span>
                         <button
                           type="button"
@@ -1204,7 +1266,7 @@ export default function GrowthAnalytics() {
                           onClick={() => setPageCurrentPage(prev => Math.min(prev + 1, totalPagesCount))}
                           disabled={pageCurrentPage === totalPagesCount}
                         >
-                          Sonraki
+                          Next
                         </button>
                       </div>
                     </div>
@@ -1222,20 +1284,20 @@ export default function GrowthAnalytics() {
                   </div>
                   <div className="tab-infobar-content">
                     <h4 className="tab-infobar-title">
-                      <span>Cihazlar, Tarayıcılar ve İşletim Sistemleri</span>
+                      <span>Devices, Browsers & Operating Systems</span>
                     </h4>
                     <p className="tab-infobar-desc">
-                      Kullanıcılarınızın sitenize bağlandığı donanım ve yazılım ortamı. Mobil uyumluluk ve tarayıcı optimizasyonları için teknik kararları yönlendirir.
+                      The hardware and software environment your users use to access your site. Guides technical decisions for mobile compatibility and browser optimizations.
                     </p>
                   </div>
                 </div>
 
                 <div className="growth-two-col-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1.5rem' }}>
                   {/* Device Categories */}
-                  <div className="growth-subcard" style={{ background: 'rgba(255,255,255,0.02)', padding: '1.25rem', borderRadius: 12, border: '1px solid rgba(255,255,255,0.06)' }}>
-                    <h4 style={{ margin: '0 0 1rem', fontSize: '0.95rem', color: '#ffffff', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <div className="growth-subcard">
+                    <h4 style={{ margin: '0 0 1rem', fontSize: '0.95rem', color: 'var(--text-main, #ffffff)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                       <Smartphone size={16} className="text-primary" />
-                      <span>Cihaz Kategorisi Dağılımı</span>
+                      <span>Device Category Distribution</span>
                     </h4>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
                       {(analyticsData.devices || []).map((dev, dIdx) => {
@@ -1244,14 +1306,14 @@ export default function GrowthAnalytics() {
                         const isTablet = dev.category.includes('tablet');
                         const Icon = isTablet ? Tablet : isMobile ? Smartphone : Monitor;
                         return (
-                          <div key={dIdx} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.75rem', background: 'rgba(255,255,255,0.03)', borderRadius: 8 }}>
+                          <div key={dIdx} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.75rem', background: 'var(--card-bg, rgba(255,255,255,0.03))', borderRadius: 8, border: '1px solid var(--border-color, rgba(255,255,255,0.05))' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
                               <Icon size={16} className="text-primary" />
                               <span style={{ textTransform: 'capitalize', fontWeight: 600 }}>{dev.category}</span>
                             </div>
                             <div style={{ textAlign: 'right' }}>
-                              <strong style={{ color: '#ffffff', fontSize: '0.95rem' }}>%{share}</strong>
-                              <span style={{ display: 'block', fontSize: '0.75rem', color: '#94a3b8' }}>{dev.sessions} oturum</span>
+                              <strong style={{ color: 'var(--text-main, #ffffff)', fontSize: '0.95rem' }}>{share}%</strong>
+                              <span style={{ display: 'block', fontSize: '0.75rem', color: '#94a3b8' }}>{dev.sessions} sessions</span>
                             </div>
                           </div>
                         );
@@ -1260,21 +1322,21 @@ export default function GrowthAnalytics() {
                   </div>
 
                   {/* Browsers & OS */}
-                  <div className="growth-subcard" style={{ background: 'rgba(255,255,255,0.02)', padding: '1.25rem', borderRadius: 12, border: '1px solid rgba(255,255,255,0.06)' }}>
-                    <h4 style={{ margin: '0 0 1rem', fontSize: '0.95rem', color: '#ffffff', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <div className="growth-subcard">
+                    <h4 style={{ margin: '0 0 1rem', fontSize: '0.95rem', color: 'var(--text-main, #ffffff)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                       <Globe2 size={16} className="text-primary" />
-                      <span>Tarayıcılar & İşletim Sistemleri</span>
+                      <span>Browsers & Operating Systems</span>
                     </h4>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
                       {(analyticsData.browsers || []).slice(0, 7).map((br, bIdx) => (
-                        <div key={bIdx} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.6rem 0.75rem', background: 'rgba(255,255,255,0.03)', borderRadius: 8 }}>
+                        <div key={bIdx} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.6rem 0.75rem', background: 'var(--card-bg, rgba(255,255,255,0.03))', borderRadius: 8, border: '1px solid var(--border-color, rgba(255,255,255,0.05))' }}>
                           <div>
-                            <strong style={{ color: '#ffffff', fontSize: '0.85rem' }}>{br.browser}</strong>
+                            <strong style={{ color: 'var(--text-main, #ffffff)', fontSize: '0.85rem' }}>{br.browser}</strong>
                             <span style={{ display: 'block', fontSize: '0.72rem', color: '#94a3b8' }}>OS: {br.os}</span>
                           </div>
                           <div style={{ textAlign: 'right' }}>
                             <span className="font-mono font-semibold text-primary">{br.sessions}</span>
-                            <span style={{ display: 'block', fontSize: '0.7rem', color: '#94a3b8' }}>oturum</span>
+                            <span style={{ display: 'block', fontSize: '0.7rem', color: '#94a3b8' }}>sessions</span>
                           </div>
                         </div>
                       ))}
@@ -1304,10 +1366,10 @@ export default function GrowthAnalytics() {
                   </div>
                   <div className="tab-infobar-content">
                     <h4 className="tab-infobar-title">
-                      <span>GA4 Etkinlikleri ve Kullanıcı Aksiyonları (Events)</span>
+                      <span>GA4 Events & User Actions</span>
                     </h4>
                     <p className="tab-infobar-desc">
-                      Kullanıcıların sitenizde gerçekleştirdiği sayfa görüntüleme, kaydırma (scroll), tıklama ve form başlatma gibi somut mikro etkileşimlerin dökümü.
+                      Breakdown of concrete micro-interactions performed by users on your site — page views, scrolls, clicks, and form initiations.
                     </p>
                   </div>
                 </div>
@@ -1316,10 +1378,10 @@ export default function GrowthAnalytics() {
                   <table className="growth-table">
                     <thead>
                       <tr>
-                        <th>Etkinlik Adı (Event Name)</th>
-                        <th>Tetiklenme Sayısı</th>
-                        <th>Kullanıcı Sayısı</th>
-                        <th>Olay Başına Ort.</th>
+                        <th>Event Name</th>
+                        <th>Event Count</th>
+                        <th>Total Users</th>
+                        <th>Events / User</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -1330,12 +1392,12 @@ export default function GrowthAnalytics() {
                             <td>
                               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                                 <Zap size={13} className="text-warning" />
-                                <strong style={{ color: '#ffffff', fontFamily: 'monospace' }}>{ev.eventName}</strong>
+                                <strong style={{ color: 'var(--text-main, #ffffff)', fontFamily: 'monospace' }}>{ev.eventName}</strong>
                               </div>
                             </td>
                             <td className="font-semibold text-primary font-mono">{Number(ev.eventCount).toLocaleString()}</td>
                             <td className="font-mono">{Number(ev.totalUsers).toLocaleString()}</td>
-                            <td className="font-mono text-muted">{perUser} kez/kişi</td>
+                            <td className="font-mono text-muted">{perUser} / user</td>
                           </tr>
                         );
                       })}

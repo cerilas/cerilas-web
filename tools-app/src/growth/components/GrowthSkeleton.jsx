@@ -21,16 +21,16 @@ export function SkeletonCover() {
   return (
     <div className="growth-skeleton-cover">
       <div className="skeleton-cover-left">
-        <SkeletonBlock width="130px" height="24px" borderRadius="999px" />
-        <SkeletonBlock width="340px" height="34px" borderRadius="8px" />
-        <SkeletonBlock width="520px" height="18px" borderRadius="6px" />
+        <SkeletonBlock width="120px" height="20px" borderRadius="999px" />
+        <SkeletonBlock width="320px" height="26px" borderRadius="6px" />
+        <SkeletonBlock width="460px" height="15px" borderRadius="4px" />
       </div>
       <div className="skeleton-cover-stats">
         {[1, 2, 3].map(i => (
           <div key={i} className="skeleton-cover-stat-box">
-            <SkeletonBlock width="70px" height="13px" borderRadius="4px" />
-            <SkeletonBlock width="95px" height="24px" borderRadius="6px" />
-            <SkeletonBlock width="115px" height="12px" borderRadius="4px" />
+            <SkeletonBlock width="60px" height="11px" borderRadius="3px" />
+            <SkeletonBlock width="80px" height="18px" borderRadius="4px" />
+            <SkeletonBlock width="95px" height="10px" borderRadius="3px" />
           </div>
         ))}
       </div>
@@ -328,33 +328,6 @@ export function GrowthCompetitorsSkeleton() {
   );
 }
 
-/**
- * 7. Content Page Skeleton
- */
-export function GrowthContentSkeleton() {
-  return (
-    <div className="growth-skeleton-container animate-fade">
-      <SkeletonCover />
-      <SkeletonMetricCards count={3} />
-
-      <div className="growth-skeleton-split-grid">
-        {[1, 2].map(i => (
-          <div key={i} className="growth-skeleton-card">
-            <SkeletonBlock width="65%" height="22px" borderRadius="6px" />
-            <SkeletonBlock width="40%" height="14px" borderRadius="4px" />
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 10 }}>
-              {[1, 2, 3].map(s => (
-                <SkeletonBlock key={s} width="100%" height="38px" borderRadius="8px" />
-              ))}
-            </div>
-          </div>
-        ))}
-      </div>
-
-      <SkeletonTable rows={4} cols={4} />
-    </div>
-  );
-}
 
 /**
  * 8. Action Feed Skeleton

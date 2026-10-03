@@ -79,13 +79,14 @@ export default function AiEngineBadge({
           border: `1px solid ${conf.border}`,
           fontSize: '0.78rem',
           fontWeight: 600,
-          color: '#f1f5f9',
+          color: 'var(--text-main, #f1f5f9)',
           ...style
         }}
       >
         <img 
           src={conf.icon} 
           alt={conf.name} 
+          className="growth-ai-badge-img"
           style={{ 
             width: size, 
             height: size, 
@@ -105,12 +106,14 @@ export default function AiEngineBadge({
         display: 'inline-flex',
         alignItems: 'center',
         gap: '0.4rem',
+        color: 'inherit',
         ...style
       }}
     >
       <img 
         src={conf.icon} 
         alt={conf.name} 
+        className="growth-ai-badge-img"
         style={{ 
           width: size, 
           height: size, 
@@ -154,7 +157,7 @@ export function AiEngineGroup({ size = 20, style = {} }) {
         />
       ))}
       <span style={{ fontSize: '0.72rem', color: '#94a3b8', marginLeft: '0.2rem', fontWeight: 500 }}>
-        Canlı GEO Taraması
+        Live GEO Scan
       </span>
     </div>
   );

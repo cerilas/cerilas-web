@@ -214,16 +214,28 @@ html.light .nav-login-btn {
   color: var(--text-main, #ffffff);
   cursor: pointer;
   text-align: left;
+  text-decoration: none !important;
   transition: all 0.15s ease;
+}
+
+.nav-dropdown-item,
+.nav-dropdown-item:hover,
+.nav-dropdown-item:focus,
+.nav-dropdown-item:visited,
+.nav-dropdown-item:active,
+.nav-dropdown-item * {
+  text-decoration: none !important;
 }
 
 .nav-dropdown-item:hover {
   background: rgba(255, 255, 255, 0.06);
+  text-decoration: none !important;
 }
 
 [data-theme="light"] .nav-dropdown-item:hover,
 html.light .nav-dropdown-item:hover {
   background: rgba(0, 0, 0, 0.04);
+  text-decoration: none !important;
 }
 
 .nav-item-icon {
@@ -323,5 +335,14 @@ html.light .nav-dropdown-item:hover {
   border-radius: 4px;
   background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
   color: #ffffff;
+  text-decoration: none !important;
+}
+
+.nav-item-growth,
+.nav-item-growth:hover,
+.nav-item-growth:focus,
+.nav-item-growth:active,
+.nav-item-growth * {
+  text-decoration: none !important;
 }
 

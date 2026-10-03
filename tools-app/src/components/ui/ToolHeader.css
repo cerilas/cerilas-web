@@ -38,7 +38,7 @@
   background: var(--card-bg);
   border: 1px solid var(--card-border);
   color: var(--text-muted);
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: 'Dosis', -apple-system, BlinkMacSystemFont, sans-serif;
   font-size: 0.85rem;
   font-weight: 500;
   cursor: pointer;
@@ -82,7 +82,7 @@
 }
 
 .c-tool-title {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: 'Dosis', -apple-system, BlinkMacSystemFont, sans-serif;
   font-size: 1.95rem;
   font-weight: 400;
   letter-spacing: -0.03em;
@@ -92,7 +92,7 @@
 }
 
 .c-tool-subtitle {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: 'Dosis', -apple-system, BlinkMacSystemFont, sans-serif;
   font-size: 0.92rem;
   color: var(--text-muted);
   line-height: 1.45;

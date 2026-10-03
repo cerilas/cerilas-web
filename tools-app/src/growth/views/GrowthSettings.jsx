@@ -91,14 +91,14 @@ export default function GrowthSettings() {
 
       if (!res.ok) {
         const d = await res.json();
-        throw new Error(d.error || 'Ayarlar kaydedilemedi.');
+        throw new Error(d.error || 'Failed to save settings.');
       }
 
-      setSuccessMsg('Çalışma alanı ayarları başarıyla güncellendi.');
+      setSuccessMsg('Workspace settings updated successfully.');
       await refreshWorkspaces();
       setTimeout(() => setSuccessMsg(''), 4000);
     } catch (err) {
-      setErrorMsg(err.message || 'Ayarlar kaydedilemedi.');
+      setErrorMsg(err.message || 'Failed to save settings.');
     } finally {
       setSaving(false);
     }
@@ -116,7 +116,7 @@ export default function GrowthSettings() {
       });
       const data = await res.json();
       if (!res.ok || !data.url) {
-        throw new Error(data.error || 'Google yetkilendirme bağlantısı alınamadı.');
+        throw new Error(data.error || 'Failed to get Google authorization URL.');
       }
 
       const width = 560;
@@ -131,7 +131,7 @@ export default function GrowthSettings() {
       );
 
       if (!popup) {
-        throw new Error('Açılır pencere tarayıcınız tarafından engellendi. Lütfen izin verin.');
+        throw new Error('Popup window was blocked by your browser. Please allow popups.');
       }
 
       const handleMessage = async (event) => {
@@ -139,13 +139,13 @@ export default function GrowthSettings() {
 
         if (event.data?.type === 'GROWTH_GOOGLE_AUTH_SUCCESS') {
           window.removeEventListener('message', handleMessage);
-          setSuccessMsg(`Google hesabı (${event.data.email}) başarıyla bağlandı! Mülkler senkronize ediliyor.`);
+          setSuccessMsg(`Google account (${event.data.email}) connected successfully! Syncing properties...`);
           await fetchIntegrations();
           setConnectingGoogle(false);
           setTimeout(() => setSuccessMsg(''), 5000);
         } else if (event.data?.type === 'GROWTH_GOOGLE_AUTH_ERROR') {
           window.removeEventListener('message', handleMessage);
-          setErrorMsg(`Google yetkilendirme hatası: ${event.data.error || 'Bilinmeyen hata'}`);
+          setErrorMsg(`Google authorization error: ${event.data.error || 'Unknown error'}`);
           setConnectingGoogle(false);
         }
       };
@@ -160,7 +160,7 @@ export default function GrowthSettings() {
         }
       }, 1000);
     } catch (err) {
-      setErrorMsg(err.message || 'Google yetkilendirmesi başlatılamadı.');
+      setErrorMsg(err.message || 'Failed to initiate Google authorization.');
       setConnectingGoogle(false);
     }
   };
@@ -174,12 +174,12 @@ export default function GrowthSettings() {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Search Console senkronizasyonu başarısız.');
-      setSuccessMsg('Google Search Console verileri ve sıralamalar canlı olarak güncellendi.');
+      if (!res.ok) throw new Error(data.error || 'Search Console synchronization failed.');
+      setSuccessMsg('Google Search Console data and keyword rankings updated live.');
       await fetchIntegrations();
       setTimeout(() => setSuccessMsg(''), 4000);
     } catch (err) {
-      setErrorMsg(err.message || 'Senkronizasyon yapılamadı.');
+      setErrorMsg(err.message || 'Synchronization failed.');
     } finally {
       setSyncingGsc(false);
     }
@@ -198,16 +198,16 @@ export default function GrowthSettings() {
       const data = await res.json();
       if (data.success && data.data) {
         setIntegrations(data.data);
-        setSuccessMsg(`Aktif mülk "${propertyName || propertyId}" olarak güncellendi.`);
+        setSuccessMsg(`Active property updated to "${propertyName || propertyId}".`);
         setTimeout(() => setSuccessMsg(''), 4000);
       }
     } catch (err) {
-      setErrorMsg('Mülk seçilemedi: ' + err.message);
+      setErrorMsg('Failed to select property: ' + err.message);
     }
   };
 
   const handleDisconnectGoogle = async () => {
-    if (!window.confirm('Google Search Console ve GA4 bağlantısını kesmek istediğinize emin misiniz? Canlı telemetri verileri kaldırılacaktır.')) {
+    if (!window.confirm('Are you sure you want to disconnect Google Search Console and GA4? Live telemetry feeds will be removed.')) {
       return;
     }
 
@@ -220,20 +220,20 @@ export default function GrowthSettings() {
       });
       const data = await res.json();
       if (data.success) {
-        setSuccessMsg('Google entegrasyonu bağlantısı başarıyla kaldırıldı.');
+        setSuccessMsg('Google integration disconnected successfully.');
         if (data.data) setIntegrations(data.data);
         else await fetchIntegrations();
         setTimeout(() => setSuccessMsg(''), 4000);
       }
     } catch (err) {
-      setErrorMsg('Bağlantı kesilemedi: ' + err.message);
+      setErrorMsg('Failed to disconnect: ' + err.message);
     } finally {
       setDisconnectingGoogle(false);
     }
   };
 
   const handleDeleteWorkspace = async () => {
-    if (!window.confirm(`"${activeWorkspace?.name}" çalışma alanını ve bağlı tüm analiz verilerini silmek istediğinize emin misiniz? Bu işlem geri alınamaz.`)) {
+    if (!window.confirm(`Are you sure you want to permanently delete "${activeWorkspace?.name}" and all associated analysis data? This action cannot be undone.`)) {
       return;
     }
 
@@ -246,7 +246,7 @@ export default function GrowthSettings() {
         await refreshWorkspaces();
       }
     } catch (err) {
-      alert('Silme işlemi başarısız: ' + err.message);
+      alert('Failed to delete workspace: ' + err.message);
     }
   };
 
@@ -260,15 +260,15 @@ export default function GrowthSettings() {
     <div className="growth-page-container animate-fade">
       {/* Hero Page Cover */}
       <GrowthPageCover
-        badge="Doğrulanmış Veri Entegrasyonları"
+        badge="Verified Data Integrations"
         badgeIcon={Settings}
-        title="Marka Ayarları & Entegrasyonlar"
-        subtitle="Google Search Console ve GA4 veri boru hatlarını ve çalışma alanı yapılandırmalarını yönetin."
+        title="Brand Settings &amp; Integrations"
+        subtitle="Manage Google Search Console and GA4 data telemetry pipelines and workspace configurations."
         coverImage="/growth-covers/integrations-cover.jpg"
         stats={[
-          { label: 'Google Servisleri', value: isGoogleConnected ? 'Bağlı & Canlı' : 'Bağlantı Bekliyor', sub: isGoogleConnected ? 'Search Console & GA4' : 'OAuth 2.0 Hazır' },
-          { label: 'Doğrulama', value: isGoogleConnected ? 'Yetkili Hesap' : 'Beklemede', sub: isGoogleConnected ? (integrations.gsc?.email || 'Aktif') : 'Google Girişi Gerekli' },
-          { label: 'Boru Hattı', value: isGoogleConnected ? 'Otomatik' : 'Hazır', sub: 'Canlı Telemetri' }
+          { label: 'Google Services', value: isGoogleConnected ? 'Connected & Live' : 'Awaiting Connection', sub: isGoogleConnected ? 'Search Console & GA4' : 'OAuth 2.0 Ready' },
+          { label: 'Verification', value: isGoogleConnected ? 'Authorized Account' : 'Pending', sub: isGoogleConnected ? (integrations.gsc?.email || 'Active') : 'Google Login Required' },
+          { label: 'Data Pipeline', value: isGoogleConnected ? 'Automated' : 'Ready', sub: 'Live Telemetry' }
         ]}
       />
 
@@ -290,9 +290,9 @@ export default function GrowthSettings() {
       <div className="growth-panel-card">
         <div className="growth-panel-header">
           <div>
-            <h3 className="growth-panel-title">Doğrulanmış Veri Kaynağı Entegrasyonları</h3>
+            <h3 className="growth-panel-title">Verified Data Source Integrations</h3>
             <p className="growth-panel-desc">
-              Doğrulanmış 1. parti organik arama ve trafik verilerini senkronize etmek için resmi Google hesabınızı bağlayın.
+              Connect your official Google account to stream verified 1st-party organic search queries and user traffic telemetry.
             </p>
           </div>
           {isGoogleConnected && (
@@ -304,7 +304,7 @@ export default function GrowthSettings() {
               style={{ borderColor: 'rgba(239, 68, 68, 0.3)', color: '#f87171' }}
             >
               {disconnectingGoogle ? <Loader2 size={13} className="auth-spinner" /> : <Unlink size={13} />}
-              <span>Google Bağlantısını Kes</span>
+              <span>Disconnect Google</span>
             </button>
           )}
         </div>
@@ -322,25 +322,25 @@ export default function GrowthSettings() {
                   {integrations.gsc?.connected ? (
                     <span className="integration-status-badge connected">
                       <CheckCircle2 size={12} />
-                      <span>Aktif & Canlı</span>
+                      <span>Active &amp; Live</span>
                     </span>
                   ) : (
                     <span className="integration-status-badge unconnected">
-                      Bağlantı Yok
+                      Not Connected
                     </span>
                   )}
                 </div>
-                <span className="integration-desc">Organik arama tıklamaları, gösterimler ve gerçek kelime sıralamaları.</span>
+                <span className="integration-desc">Organic search clicks, impressions, and verified keyword rankings.</span>
                 
                 {integrations.gsc?.connected && (
                   <div className="integration-meta-line">
                     <span>{integrations.gsc.email}</span>
                     <span className="integration-meta-dot">•</span>
-                    <span>Mülk: <strong style={{ color: '#f1f5f9' }}>{integrations.gsc.selectedSite || 'Mülk seçilmedi'}</strong></span>
+                    <span>Property: <strong style={{ color: '#f1f5f9' }}>{integrations.gsc.selectedSite || 'No property selected'}</strong></span>
                     {integrations.gsc.lastSyncAt && (
                       <>
                         <span className="integration-meta-dot">•</span>
-                        <span>Son eşitleme: {new Date(integrations.gsc.lastSyncAt).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}</span>
+                        <span>Last synced: {new Date(integrations.gsc.lastSyncAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</span>
                       </>
                     )}
                   </div>
@@ -371,7 +371,7 @@ export default function GrowthSettings() {
                     className="growth-secondary-btn btn-sm"
                   >
                     <RefreshCw size={13} className={syncingGsc ? 'auth-spinner' : ''} />
-                    <span>{syncingGsc ? 'Senkronize Ediliyor...' : 'Şimdi Eşitle'}</span>
+                    <span>{syncingGsc ? 'Syncing...' : 'Sync Now'}</span>
                   </button>
                 </div>
               ) : (
@@ -386,7 +386,7 @@ export default function GrowthSettings() {
                   ) : (
                     <img src="/growth-covers/google-icon.svg" alt="Google" style={{ width: 14, height: 14 }} />
                   )}
-                  <span>Google ile Bağla</span>
+                  <span>Connect with Google</span>
                 </button>
               )}
             </div>
@@ -404,21 +404,21 @@ export default function GrowthSettings() {
                   {integrations.ga4?.connected ? (
                     <span className="integration-status-badge connected">
                       <CheckCircle2 size={12} />
-                      <span>Aktif & Canlı</span>
+                      <span>Active &amp; Live</span>
                     </span>
                   ) : (
                     <span className="integration-status-badge unconnected">
-                      Bağlantı Yok
+                      Not Connected
                     </span>
                   )}
                 </div>
-                <span className="integration-desc">Ziyaretçi trafiği, etkileşim süresi ve dönüşüm metrikleri.</span>
+                <span className="integration-desc">User sessions, engagement time, and verified conversion metrics.</span>
 
                 {integrations.ga4?.connected && (
                   <div className="integration-meta-line">
                     <span>{integrations.ga4.email}</span>
                     <span className="integration-meta-dot">•</span>
-                    <span>Mülk: <strong style={{ color: '#f1f5f9' }}>{integrations.ga4.selectedPropertyName || integrations.ga4.selectedPropertyId || 'Mülk seçilmedi'}</strong></span>
+                    <span>Property: <strong style={{ color: '#f1f5f9' }}>{integrations.ga4.selectedPropertyName || integrations.ga4.selectedPropertyId || 'No property selected'}</strong></span>
                   </div>
                 )}
               </div>
@@ -445,7 +445,7 @@ export default function GrowthSettings() {
                   )}
                   <span style={{ fontSize: '0.8rem', color: '#34d399', display: 'flex', alignItems: 'center', gap: 5 }}>
                     <CheckCircle2 size={14} />
-                    <span>Bağlı</span>
+                    <span>Connected</span>
                   </span>
                 </div>
               ) : (
@@ -460,7 +460,7 @@ export default function GrowthSettings() {
                   ) : (
                     <img src="/growth-covers/google-icon.svg" alt="Google" style={{ width: 14, height: 14 }} />
                   )}
-                  <span>Google ile Bağla</span>
+                  <span>Connect with Google</span>
                 </button>
               )}
             </div>
@@ -472,14 +472,14 @@ export default function GrowthSettings() {
       <div className="growth-panel-card">
         <div className="growth-panel-header">
           <div>
-            <h3 className="growth-panel-title">Marka Profili</h3>
-            <p className="growth-panel-desc">Yapay zeka analizlerinde ve rakip karşılaştırmalarında kullanılan bilgiler.</p>
+            <h3 className="growth-panel-title">Brand Profile</h3>
+            <p className="growth-panel-desc">Core business profile used in AI citations, GEO prompts, and competitor benchmarking.</p>
           </div>
         </div>
 
         <form onSubmit={handleSaveProfile} className="growth-form-grid">
           <div className="growth-field-group">
-            <label className="growth-field-label">Marka Adı</label>
+            <label className="growth-field-label">Brand Name</label>
             <input
               type="text"
               className="growth-field-input"
@@ -489,7 +489,7 @@ export default function GrowthSettings() {
           </div>
 
           <div className="growth-field-group">
-            <label className="growth-field-label">Sektör</label>
+            <label className="growth-field-label">Industry</label>
             <input
               type="text"
               className="growth-field-input"
@@ -499,7 +499,7 @@ export default function GrowthSettings() {
           </div>
 
           <div className="growth-field-group field-span-2">
-            <label className="growth-field-label">Birincil Alan Adı (Domain)</label>
+            <label className="growth-field-label">Primary Domain (Domain)</label>
             <input
               type="text"
               disabled
@@ -509,7 +509,7 @@ export default function GrowthSettings() {
           </div>
 
           <div className="growth-field-group field-span-2">
-            <label className="growth-field-label">Açıklama</label>
+            <label className="growth-field-label">Description</label>
             <textarea
               rows={3}
               className="growth-field-textarea"
@@ -521,7 +521,7 @@ export default function GrowthSettings() {
           <div className="growth-field-group field-span-2">
             <button type="submit" disabled={saving} className="growth-primary-btn" style={{ maxWidth: '200px' }}>
               {saving ? <Loader2 size={16} className="auth-spinner" /> : <Save size={16} />}
-              <span>Değişiklikleri Kaydet</span>
+              <span>Save Changes</span>
             </button>
           </div>
         </form>
@@ -532,9 +532,9 @@ export default function GrowthSettings() {
         <div className="danger-zone-header">
           <Trash2 size={20} className="text-danger" />
           <div>
-            <h3 className="danger-title">Çalışma Alanını Sil</h3>
+            <h3 className="danger-title">Delete Workspace</h3>
             <p className="danger-desc">
-              Bu markayı ve ilişkili tüm teknik denetim kayıtlarını, GEO promptlarını ve aksiyon geçmişini kalıcı olarak siler.
+              Permanently deletes this brand and all associated technical audit logs, GEO prompts, and growth action history.
             </p>
           </div>
         </div>
@@ -544,7 +544,7 @@ export default function GrowthSettings() {
           onClick={handleDeleteWorkspace}
           className="growth-danger-btn"
         >
-          <span>Bu Markayı Kalıcı Olarak Sil</span>
+          <span>Permanently Delete Workspace</span>
         </button>
       </div>
     </div>

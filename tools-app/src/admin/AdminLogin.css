@@ -12,7 +12,7 @@
   justify-content: center;
   background-color: var(--bg-color, #09090b);
   color: var(--text-main, #f8fafc);
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", Roboto, sans-serif;
+  font-family: 'Dosis', -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", Roboto, sans-serif;
   padding: 1.5rem;
   box-sizing: border-box;
   overflow: hidden;

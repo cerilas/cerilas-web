@@ -10,10 +10,15 @@ export default function GrowthPageCover({
   stats = [],
   actions,
   rightSlot,
+  compact = true,
+  className = '',
   children
 }) {
+  const statsCount = Array.isArray(stats) ? stats.length : 0;
+  const hasSide = Boolean(rightSlot || statsCount > 0);
+
   return (
-    <div className="growth-page-hero-banner">
+    <div className={`growth-page-hero-banner ${compact ? 'is-compact' : ''} ${hasSide ? 'has-side-content' : ''} ${className}`.trim()}>
       {coverImage && (
         <div className="hero-banner-bg-wrap">
           <img 
@@ -41,19 +46,19 @@ export default function GrowthPageCover({
 
         {rightSlot ? (
           <div className="hero-banner-right-slot">{rightSlot}</div>
-        ) : stats && stats.length > 0 ? (
-          <div className="hero-banner-stats-pillbox">
+        ) : statsCount > 0 ? (
+          <div className={`hero-banner-stats-pillbox stats-count-${statsCount}`}>
             {stats.map((st, sIdx) => {
               const Icon = st.icon;
               return (
                 <div key={sIdx} className="hero-banner-stat-chip">
-                  <div className="chip-label-row">
+                  <div className="chip-label-row" title={st.label}>
                     {Icon && <Icon size={13} className="text-muted" />}
                     <span className="chip-label">{st.label}</span>
                   </div>
                   <div className="chip-val-row">
-                    <span className={`chip-val ${st.positive ? 'text-success' : ''}`}>{st.value}</span>
-                    {st.sub && <span className="chip-sub">{st.sub}</span>}
+                    <span className={`chip-val ${st.positive ? 'text-success' : ''}`} title={String(st.value)}>{st.value}</span>
+                    {st.sub && <span className="chip-sub" title={st.sub}>{st.sub}</span>}
                   </div>
                 </div>
               );

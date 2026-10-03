@@ -1,10 +1,96 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Roboto:wght@400;500;700;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Dosis:wght@200;300;400;500;600;700;800&family=Inter:wght@300;400;500;600&display=swap');
+
+/* Dosis - Primary Variable Font (Supports all continuous weights) */
+@font-face {
+  font-family: 'Dosis';
+  src: local('Dosis'),
+       url('/fonts/dosis/Dosis-VariableFont_wght.ttf') format('truetype-variations'),
+       url('/fonts/dosis/Dosis-VariableFont_wght.ttf') format('truetype');
+  font-weight: 200 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Static Fallbacks for specific weights ensuring exact weight fidelity */
+@font-face {
+  font-family: 'Dosis';
+  src: local('Dosis ExtraLight'),
+       url('/fonts/dosis/static/Dosis-ExtraLight.ttf') format('truetype');
+  font-weight: 200;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Dosis';
+  src: local('Dosis Light'),
+       url('/fonts/dosis/static/Dosis-Light.ttf') format('truetype');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Dosis';
+  src: local('Dosis Regular'),
+       url('/fonts/dosis/static/Dosis-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Dosis';
+  src: local('Dosis Medium'),
+       url('/fonts/dosis/static/Dosis-Medium.ttf') format('truetype');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Dosis';
+  src: local('Dosis SemiBold'),
+       url('/fonts/dosis/static/Dosis-SemiBold.ttf') format('truetype');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Dosis';
+  src: local('Dosis Bold'),
+       url('/fonts/dosis/static/Dosis-Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Dosis';
+  src: local('Dosis ExtraBold'),
+       url('/fonts/dosis/static/Dosis-ExtraBold.ttf') format('truetype');
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Aliases mapping directly to Dosis */
+@font-face {
+  font-family: 'Golos Text';
+  src: local('Dosis'),
+       url('/fonts/dosis/Dosis-VariableFont_wght.ttf') format('truetype-variations'),
+       url('/fonts/dosis/Dosis-VariableFont_wght.ttf') format('truetype');
+  font-weight: 200 800;
+  font-style: normal;
+  font-display: swap;
+}
 
 @font-face {
   font-family: 'Garet';
-  src: url('/fonts/GaretVariableVF.woff2') format('woff2-variations'),
-       url('/fonts/GaretVariableVF.woff2') format('woff2'),
-       url('/fonts/Garet-Book.woff2') format('woff2');
+  src: local('Dosis'),
+       url('/fonts/dosis/Dosis-VariableFont_wght.ttf') format('truetype-variations'),
+       url('/fonts/dosis/Dosis-VariableFont_wght.ttf') format('truetype');
   font-weight: 100 900;
   font-style: normal;
   font-display: swap;
@@ -57,12 +143,29 @@ html.dark {
   color-scheme: dark;
 }
 
-* {
+*,
+*::before,
+*::after {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: 'Dosis', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html, body {
+  font-family: 'Dosis', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+button, input, select, textarea, optgroup {
+  font-family: 'Dosis', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Dosis', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
 html {
@@ -347,7 +450,7 @@ body {
 }
 
 .nav-brand-text {
-  font-family: 'Garet', -apple-system, BlinkMacSystemFont, sans-serif !important;
+  font-family: 'Dosis', -apple-system, BlinkMacSystemFont, sans-serif !important;
   font-weight: 300;
   font-variation-settings: 'wght' 300;
   font-size: 1.15rem;
@@ -569,7 +672,7 @@ body {
 }
 
 .seo-footer-brand-name {
-  font-family: 'Garet', -apple-system, BlinkMacSystemFont, sans-serif !important;
+  font-family: 'Dosis', -apple-system, BlinkMacSystemFont, sans-serif !important;
   font-weight: 300;
   font-variation-settings: 'wght' 300;
   font-size: 1.35rem;
@@ -1314,7 +1417,7 @@ html.dark .seo-editorial-header {
 .hero-brand-title {
   margin: 0 !important;
   padding: 0 !important;
-  font-family: 'Garet', -apple-system, BlinkMacSystemFont, sans-serif !important;
+  font-family: 'Dosis', -apple-system, BlinkMacSystemFont, sans-serif !important;
   font-weight: 300 !important;
   font-variation-settings: 'wght' 300;
   font-size: 2.85rem !important;

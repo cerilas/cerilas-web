@@ -151,6 +151,7 @@ export async function getDetailedBusinessProfile(placeIdentifier, businessName, 
     google_maps_url: manualData.googleMapsUrl || '',
     website_url: manualData.websiteUrl || '',
     phone_number: manualData.phoneNumber || '',
+    photos: [],
     reviews: []
   };
 
@@ -160,7 +161,7 @@ export async function getDetailedBusinessProfile(placeIdentifier, businessName, 
       const res = await fetch(`${PLACES_DETAILS_URL}/${placeIdentifier}`, {
         headers: {
           'X-Goog-Api-Key': apiKey,
-          'X-Goog-FieldMask': 'id,displayName,formattedAddress,rating,userRatingCount,googleMapsUri,websiteUri,nationalPhoneNumber,reviews,types'
+          'X-Goog-FieldMask': 'id,displayName,formattedAddress,rating,userRatingCount,googleMapsUri,websiteUri,nationalPhoneNumber,reviews,types,photos'
         }
       });
       if (res.ok) {
@@ -172,6 +173,13 @@ export async function getDetailedBusinessProfile(placeIdentifier, businessName, 
         baseData.google_maps_url = d.googleMapsUri || '';
         baseData.website_url = d.websiteUri || '';
         baseData.phone_number = d.nationalPhoneNumber || '';
+        
+        if (d.photos && Array.isArray(d.photos)) {
+          baseData.photos = d.photos.slice(0, 10).map(photo => {
+            return `https://places.googleapis.com/v1/${photo.name}/media?maxHeightPx=400&maxWidthPx=400&key=${apiKey}`;
+          });
+        }
+        
         if (d.reviews && Array.isArray(d.reviews)) {
           baseData.reviews = d.reviews.map(r => ({
             author_name: r.authorAttribution?.displayName || 'Google Kullanıcısı',
@@ -200,7 +208,7 @@ Business Name: "${businessName}"
 Place / Address Context: "${baseData.formatted_address || country}"
 
 Search Google Maps and review sources for this exact business. 
-Extract ALL available real customer reviews across ALL star ratings (aim for 15 to 25 detailed reviews covering 5-star, 4-star, 3-star, 2-star, and 1-star ratings).
+Extract as many real customer reviews as possible (aim for 40 to 50 detailed reviews covering 5-star, 4-star, 3-star, 2-star, and 1-star ratings).
 CRITICAL: For every review, check whether the business owner or management replied ("İşletme Yanıtı", "Sahibin Yanıtı", "Owner response").
 - If there is an owner response:
   "has_owner_response": true,
@@ -337,23 +345,24 @@ export async function generateGoogleReviewReply({ businessName, reviewerName, ra
   }
 
   const ai = new GoogleGenAI({ apiKey: geminiKey });
-  const prompt = `Sen profesyonel bir Müşteri Deneyimi & Marka İtibar Yöneticisisin.
-İşletme Adı: "${businessName}"
-Google Haritalar'da bir müşteriden ${rating} yıldızlı olumsuz bir yorum aldık.
+  const prompt = `You are a Senior Customer Experience & Brand Reputation Manager.
+Business Name: "${businessName}"
+A customer left a ${rating}-star review on Google Maps / Google Business Profile.
 
-Müşteri Adı: "${reviewerName || 'Müşteri'}"
-Geri Bildirim / Şikayet Metni:
-"${reviewText}"
+Customer Name: "${reviewerName || 'Valued Customer'}"
+Review / Feedback Text:
+"${reviewText || 'No text provided'}"
 
-${issueTheme ? `Şikayet Teması: "${issueTheme}"` : ''}
+${issueTheme ? `Issue Theme: "${issueTheme}"` : ''}
 
-Lütfen bu yoruma Google İşletme Profilinde yayınlanmak üzere doğrudan yanıt oluştur.
-Kurallar:
-1. Kesinlikle kavgacı veya savunmacı olma. Samimi, kibar, profesyonel ve çözüm odaklı ol.
-2. Müşterinin yaşadığı aksaklıktan dolayı samimi bir empati göster.
-3. Sorunu çözmek veya telafi etmek için destek e-postası veya telefon üzerinden doğrudan iletişime geçmeye davet et.
-4. Hem olumsuz yorumu yapan müşteriyi kazanacak hem de bu yanıtı Google Haritalar'da okuyan diğer potansiyel müşterilere güven verecek bir ton kullan.
-5. Türkçe olarak hazır metin döndür (Başlık vb. koyma, doğrudan yanıta başla).`;
+Generate a polished, professional response ready to be posted directly to Google Business Profile.
+Rules:
+1. Never sound defensive or argumentative. Be empathetic, polite, professional, and resolution-oriented.
+2. Express sincere empathy for the inconvenience experienced.
+3. Invite them to connect directly via official support channels (email or phone) to investigate and resolve the issue.
+4. Maintain a tone that reassures both the reviewer and prospective customers reading this response on Google Maps.
+5. Return the ready-to-post reply in professional English (if the customer's review is in another language, you may respond in that language; otherwise default to fluent English).
+6. Output only the reply body directly—no subject lines, no quotation marks, and no introductory remarks.`;
 
   const response = await ai.models.generateContent({
     model: 'gemini-3.8-flash',

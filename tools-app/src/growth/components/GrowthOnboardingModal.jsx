@@ -17,31 +17,32 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useGrowth } from '../GrowthContext';
+import GrowthFavicon from './GrowthFavicon';
 import './GrowthOnboardingModal.css';
 
 const STAGES = [
-  { id: 'dns', title: 'DNS & SSL El Sıkışması' },
-  { id: 'robots', title: 'Crawler İzinleri (GPTBot, Perplexity)' },
-  { id: 'meta', title: 'Meta, OpenGraph & Schema.org Yapısı' },
-  { id: 'intel', title: 'Marka & Rakip Haritalandırması' }
+  { id: 'dns', title: 'DNS & SSL Handshake' },
+  { id: 'robots', title: 'Crawler Permissions (GPTBot, Perplexity)' },
+  { id: 'meta', title: 'Meta, OpenGraph & Schema Architecture' },
+  { id: 'intel', title: 'Brand & Competitor Mapping' }
 ];
 
 const BUSINESS_MODELS = [
   'B2B',
   'B2C',
   'SaaS',
-  'E-Ticaret',
-  'Pazar Yeri',
-  'Dijital Ajans',
-  'Diğer'
+  'E-Commerce',
+  'Marketplace',
+  'Digital Agency',
+  'Other'
 ];
 
 export function normalizeDomain(input) {
   if (!input || typeof input !== 'string') return '';
   let str = input.trim().toLowerCase();
   str = str.replace(/^https?:\/\//i, '');
-  str = str.split('/')[0].split('?')[0].split('#')[0];
-  str = str.split(':')[0];
+  str = (str.split('/')[0] || '').split('?')[0].split('#')[0];
+  str = (str.split(':')[0] || '');
   str = str.replace(/^www\./i, '');
   return str.trim();
 }
@@ -92,7 +93,7 @@ export default function GrowthOnboardingModal({ isOpen, onClose }) {
   const handleStartScan = async (e) => {
     e?.preventDefault();
     if (!url.trim()) {
-      setError('Lütfen web sitenizin adresini girin.');
+      setError('Please enter your website URL.');
       return;
     }
 
@@ -103,14 +104,14 @@ export default function GrowthOnboardingModal({ isOpen, onClose }) {
 
     const targetDomain = normalizeDomain(cleanUrl);
     if (!targetDomain) {
-      setError('Lütfen geçerli bir web sitesi adresi girin.');
+      setError('Please enter a valid website address.');
       return;
     }
 
     // Check if domain is already registered (subdomains allowed, exact match prohibited)
     const existingWs = workspaces?.find(w => normalizeDomain(w.primary_domain || w.canonical_url) === targetDomain);
     if (existingWs) {
-      setError(`"${targetDomain}" adresi zaten "${existingWs.name}" markası altında ekli. Aynı domaini tekrar ekleyemezsiniz (ancak blog.${targetDomain} gibi farklı bir subdomain ekleyebilirsiniz).`);
+      setError(`"${targetDomain}" is already registered under "${existingWs.name}". Duplicate root domains cannot be added (subdomains like blog.${targetDomain} are allowed).`);
       return;
     }
 
@@ -159,7 +160,7 @@ export default function GrowthOnboardingModal({ isOpen, onClose }) {
 
       const data = await res.json();
       if (!res.ok) {
-        throw new Error(data.error || 'Tarama başarısız oldu.');
+        throw new Error(data.error || 'Audit scan failed.');
       }
 
       clearTimeout(stageTimer1);
@@ -188,7 +189,7 @@ export default function GrowthOnboardingModal({ isOpen, onClose }) {
       clearTimeout(stageTimer2);
       clearTimeout(stageTimer3);
       console.error('Scan error:', err);
-      setError(err.message || 'Web sitesi taranamadı. Lütfen adresi kontrol edin.');
+      setError(err.message || 'Failed to scan website. Please check the domain address.');
       setStep(1);
       setScanning(false);
     }
@@ -207,9 +208,9 @@ export default function GrowthOnboardingModal({ isOpen, onClose }) {
   };
 
   const handleAddCompetitor = () => {
-    if (competitorDomain.trim()) {
-      const clean = competitorDomain.trim().replace(/^https?:\/\//, '').replace(/^www\./, '').split('/')[0];
-      if (!competitors.some(c => (c.domain || c.name) === clean)) {
+    if (competitorDomain && typeof competitorDomain === 'string' && competitorDomain.trim()) {
+      const clean = competitorDomain.trim().replace(/^https?:\/\//i, '').replace(/^www\./i, '').split('/')[0].trim();
+      if (clean && !competitors.some(c => (typeof c === 'string' ? c : (c?.domain || c?.name)) === clean)) {
         setCompetitors([...competitors, { name: clean, domain: clean }]);
       }
       setCompetitorDomain('');
@@ -222,14 +223,14 @@ export default function GrowthOnboardingModal({ isOpen, onClose }) {
 
   const handleCreateWorkspace = async () => {
     if (!brandName.trim()) {
-      setError('Lütfen bir marka adı belirtin.');
+      setError('Please specify a brand name.');
       return;
     }
 
     const targetDomain = normalizeDomain(scanResult?.url || url);
     const existingWs = workspaces?.find(w => normalizeDomain(w.primary_domain || w.canonical_url) === targetDomain);
     if (existingWs) {
-      setError(`"${targetDomain}" adresi zaten "${existingWs.name}" markası altında kayıtlı. Aynı domaini tekrar ekleyemezsiniz.`);
+      setError(`"${targetDomain}" is already registered under "${existingWs.name}". Duplicate domains cannot be added.`);
       return;
     }
 
@@ -260,15 +261,19 @@ export default function GrowthOnboardingModal({ isOpen, onClose }) {
 
       const data = await res.json();
       if (!res.ok) {
-        throw new Error(data.error || 'Çalışma alanı oluşturulamadı.');
+        throw new Error(data.error || 'Failed to create workspace.');
       }
 
-      const created = data.data.workspace;
-      await refreshWorkspaces(created.slug);
-      switchWorkspace(created);
+      const created = data.data?.workspace || data.data;
+      if (created?.slug) {
+        await refreshWorkspaces(created.slug);
+        switchWorkspace(created);
+      } else {
+        await refreshWorkspaces();
+      }
       handleClose();
     } catch (err) {
-      setError(err.message || 'Kayıt sırasında bir hata oluştu.');
+      setError(err.message || 'An error occurred during registration.');
     } finally {
       setCreating(false);
     }
@@ -294,7 +299,7 @@ export default function GrowthOnboardingModal({ isOpen, onClose }) {
             type="button" 
             className="growth-modal-close-btn" 
             onClick={handleClose}
-            aria-label="Kapat"
+            aria-label="Close"
           >
             <X size={17} />
           </button>
@@ -303,31 +308,31 @@ export default function GrowthOnboardingModal({ isOpen, onClose }) {
           <div className="growth-modal-stepper-row">
             <div className={`modal-step-tag ${step === 1 ? 'is-active' : step > 1 ? 'is-done' : ''}`}>
               <span className="step-tag-num">{step > 1 ? <CheckCircle2 size={12} /> : '1'}</span>
-              <span>Web Sitesi</span>
+              <span>Website</span>
             </div>
             <div className="modal-step-sep" />
             <div className={`modal-step-tag ${step === 2 ? 'is-active' : step > 2 ? 'is-done' : ''}`}>
               <span className="step-tag-num">{step > 2 ? <CheckCircle2 size={12} /> : '2'}</span>
-              <span>Analiz</span>
+              <span>Analyze</span>
             </div>
             <div className="modal-step-sep" />
             <div className={`modal-step-tag ${step === 3 ? 'is-active' : ''}`}>
               <span className="step-tag-num">3</span>
-              <span>Marka Profili</span>
+              <span>Brand Profile</span>
             </div>
           </div>
 
           {/* Banner Titles (Clean, direct, no essays) */}
           <div className="growth-modal-hero-titles">
             <h2 className="growth-modal-main-title">
-              {step === 1 && 'Web Sitenizi Ekleyin'}
-              {step === 2 && 'Web Siteniz Analiz Ediliyor'}
-              {step === 3 && 'Marka Analizi Tamamlandı'}
+              {step === 1 && 'Add Your Website'}
+              {step === 2 && 'Analyzing Website'}
+              {step === 3 && 'Brand Analysis Complete'}
             </h2>
             <p className="growth-modal-main-sub">
-              {step === 1 && 'Alan adınızı girin, SEO ve Yapay Zeka (GEO) görünürlüğünüzü hemen başlatalım.'}
-              {step === 2 && 'Sunucu yanıtı, arama motoru direktifleri ve yapay zeka bot izinleri taranıyor.'}
-              {step === 3 && 'Tespit edilen bilgileri inceleyin ve çalışma alanınızı başlatın.'}
+              {step === 1 && 'Enter your domain to initialize SEO and AI search (GEO) visibility.'}
+              {step === 2 && 'Scanning server response, search crawler directives, and AI agent permissions.'}
+              {step === 3 && 'Review discovered insights and launch your dedicated growth workspace.'}
             </p>
           </div>
         </div>
@@ -364,7 +369,7 @@ export default function GrowthOnboardingModal({ isOpen, onClose }) {
                     disabled={scanning || !url.trim() || isDuplicateDomain} 
                     className="growth-url-action-btn"
                   >
-                    <span>Analiz Et</span>
+                    <span>Analyze</span>
                     <ArrowRight size={15} />
                   </button>
                 </div>
@@ -373,7 +378,7 @@ export default function GrowthOnboardingModal({ isOpen, onClose }) {
                   <div className="growth-duplicate-hint">
                     <AlertCircle size={15} className="text-amber" />
                     <span>
-                      <strong>{currentNormalizedDomain}</strong> zaten "{matchingExistingWs.name}" markası altında kayıtlı. Aynı domaini tekrar ekleyemezsiniz (ancak <code>blog.{currentNormalizedDomain}</code> gibi bir subdomain ekleyebilirsiniz).
+                      <strong>{currentNormalizedDomain}</strong> is already registered under "{matchingExistingWs.name}". Duplicate domains cannot be added (subdomains like <code>blog.{currentNormalizedDomain}</code> are allowed).
                     </span>
                   </div>
                 )}
@@ -383,15 +388,15 @@ export default function GrowthOnboardingModal({ isOpen, onClose }) {
               <div className="growth-quick-feature-pills">
                 <div className="quick-pill">
                   <ShieldCheck size={14} className="text-emerald" />
-                  <span>Teknik SEO &amp; Hız</span>
+                  <span>Technical SEO &amp; Speed</span>
                 </div>
                 <div className="quick-pill">
                   <Bot size={14} className="text-indigo" />
-                  <span>GEO &amp; AI Bot Taraması</span>
+                  <span>GEO &amp; AI Bot Scan</span>
                 </div>
                 <div className="quick-pill">
                   <Layers size={14} className="text-blue" />
-                  <span>Otomatik Marka Profili</span>
+                  <span>Automated Brand Profile</span>
                 </div>
               </div>
             </div>
@@ -441,7 +446,12 @@ export default function GrowthOnboardingModal({ isOpen, onClose }) {
                   <div className="step3-domain-card">
                     <div className="step3-domain-top">
                       <div className="step3-domain-avatar">
-                        <Globe size={17} />
+                        <GrowthFavicon
+                          src={scanResult?.meta?.faviconUrl}
+                          domain={scanResult?.domain}
+                          name={brandName || scanResult?.domain}
+                          size={28}
+                        />
                       </div>
                       <div className="step3-domain-titles">
                         <h4 className="step3-domain-name">{scanResult?.domain || 'domain.com'}</h4>
@@ -460,7 +470,7 @@ export default function GrowthOnboardingModal({ isOpen, onClose }) {
                     <div className="step3-domain-tags">
                       <span className="step3-tag-status">
                         <Lock size={10} />
-                        <span>{scanResult?.meta?.hasSsl ? 'HTTPS Güvenli' : 'HTTP'}</span>
+                        <span>{scanResult?.meta?.hasSsl ? 'HTTPS Secure' : 'HTTP'}</span>
                       </span>
                       <span className="step3-tag-status">
                         <span>HTTP {scanResult?.statusCode || 200}</span>
@@ -474,7 +484,7 @@ export default function GrowthOnboardingModal({ isOpen, onClose }) {
 
                     {scanResult?.meta?.title && (
                       <div className="step3-title-preview">
-                        <span className="preview-label">Başlık:</span>
+                        <span className="preview-label">Title:</span>
                         <span className="preview-text">{scanResult.meta.title}</span>
                       </div>
                     )}
@@ -485,7 +495,7 @@ export default function GrowthOnboardingModal({ isOpen, onClose }) {
                     <div className="step3-score-box">
                       <div className="score-box-header">
                         <ShieldCheck size={15} className="text-emerald" />
-                        <span>Teknik SEO</span>
+                        <span>Technical SEO</span>
                         <strong className="score-val">{scanResult?.technicalScore || 85}/100</strong>
                       </div>
                       <div className="score-bar-track">
@@ -496,7 +506,7 @@ export default function GrowthOnboardingModal({ isOpen, onClose }) {
                     <div className="step3-score-box">
                       <div className="score-box-header">
                         <Bot size={15} className="text-indigo" />
-                        <span>GEO Hazırlığı</span>
+                        <span>GEO Readiness</span>
                         <strong className="score-val">{scanResult?.geoScore || 75}/100</strong>
                       </div>
                       <div className="score-bar-track">
@@ -512,7 +522,7 @@ export default function GrowthOnboardingModal({ isOpen, onClose }) {
                     {/* Row 1: Brand Name & Business Model */}
                     <div className="step3-row-2col">
                       <div className="step3-field">
-                        <label className="step3-label">Marka Adı</label>
+                        <label className="step3-label">Brand Name</label>
                         <input
                           type="text"
                           required
@@ -523,7 +533,7 @@ export default function GrowthOnboardingModal({ isOpen, onClose }) {
                       </div>
 
                       <div className="step3-field">
-                        <label className="step3-label">İş Modeli</label>
+                        <label className="step3-label">Business Model</label>
                         <select
                           className="step3-select"
                           value={businessModel}
@@ -538,7 +548,7 @@ export default function GrowthOnboardingModal({ isOpen, onClose }) {
 
                     {/* Row 2: Industry */}
                     <div className="step3-field">
-                      <label className="step3-label">Sektör</label>
+                      <label className="step3-label">Industry</label>
                       <input
                         type="text"
                         className="step3-input"
@@ -549,7 +559,7 @@ export default function GrowthOnboardingModal({ isOpen, onClose }) {
 
                     {/* Row 3: Description */}
                     <div className="step3-field">
-                      <label className="step3-label">Kısa Açıklama</label>
+                      <label className="step3-label">Short Description</label>
                       <textarea
                         rows={2}
                         className="step3-textarea"
@@ -561,7 +571,7 @@ export default function GrowthOnboardingModal({ isOpen, onClose }) {
                     {/* Row 4: Keywords */}
                     <div className="step3-field">
                       <div className="step3-label-row">
-                        <label className="step3-label">Anahtar Kelimeler</label>
+                        <label className="step3-label">Primary Keywords</label>
                         <span className="step3-pill-count">{keywords.length}</span>
                       </div>
                       <div className="step3-tags-container">
@@ -569,7 +579,7 @@ export default function GrowthOnboardingModal({ isOpen, onClose }) {
                           {keywords.map((kw) => (
                             <span key={kw} className="step3-tag-item">
                               <span>{kw}</span>
-                              <button type="button" onClick={() => handleRemoveKeyword(kw)} aria-label="Sil">
+                              <button type="button" onClick={() => handleRemoveKeyword(kw)} aria-label="Remove">
                                 <X size={11} />
                               </button>
                             </span>
@@ -578,7 +588,7 @@ export default function GrowthOnboardingModal({ isOpen, onClose }) {
                         <div className="step3-inline-add">
                           <input
                             type="text"
-                            placeholder="Kelime ekle + Enter"
+                            placeholder="Add keyword + Enter"
                             className="step3-inline-input"
                             value={keywordInput}
                             onChange={(e) => setKeywordInput(e.target.value)}
@@ -604,26 +614,29 @@ export default function GrowthOnboardingModal({ isOpen, onClose }) {
                     {/* Row 5: Competitors */}
                     <div className="step3-field">
                       <div className="step3-label-row">
-                        <label className="step3-label">Takip Edilecek Rakipler</label>
+                        <label className="step3-label">Competitors to Track</label>
                         <span className="step3-pill-count">{competitors.length}</span>
                       </div>
                       <div className="step3-competitors-container">
                         {competitors.length > 0 && (
                           <div className="step3-comp-pills-list">
-                            {competitors.map((comp, idx) => (
-                              <div key={idx} className="step3-comp-pill">
-                                <span>{comp.domain || comp.name}</span>
-                                <button type="button" onClick={() => handleRemoveCompetitor(idx)} aria-label="Sil">
-                                  <X size={11} />
-                                </button>
-                              </div>
-                            ))}
+                            {competitors.map((comp, idx) => {
+                              const compLabel = typeof comp === 'string' ? comp : (comp?.domain || comp?.name || 'Competitor');
+                              return (
+                                <div key={idx} className="step3-comp-pill">
+                                  <span>{compLabel}</span>
+                                  <button type="button" onClick={() => handleRemoveCompetitor(idx)} aria-label="Remove">
+                                    <X size={11} />
+                                  </button>
+                                </div>
+                              );
+                            })}
                           </div>
                         )}
                         <div className="step3-comp-add-bar">
                           <input
                             type="text"
-                            placeholder="rakipsite.com"
+                            placeholder="competitor.com"
                             className="step3-input"
                             value={competitorDomain}
                             onChange={(e) => setCompetitorDomain(e.target.value)}
@@ -641,7 +654,7 @@ export default function GrowthOnboardingModal({ isOpen, onClose }) {
                             disabled={!competitorDomain.trim()}
                           >
                             <Plus size={13} />
-                            <span>Ekle</span>
+                            <span>Add</span>
                           </button>
                         </div>
                       </div>
@@ -659,7 +672,7 @@ export default function GrowthOnboardingModal({ isOpen, onClose }) {
                   disabled={creating}
                 >
                   <ArrowLeft size={15} />
-                  <span>Farklı Site Tara</span>
+                  <span>Scan Different Site</span>
                 </button>
 
                 <button
@@ -671,12 +684,12 @@ export default function GrowthOnboardingModal({ isOpen, onClose }) {
                   {creating ? (
                     <>
                       <Loader2 size={16} className="telemetry-spinner" />
-                      <span>Çalışma Alanı Hazırlanıyor...</span>
+                      <span>Provisioning Workspace...</span>
                     </>
                   ) : (
                     <>
                       <CheckCircle2 size={16} />
-                      <span>Çalışma Alanını Başlat</span>
+                      <span>Launch Workspace</span>
                       <ArrowRight size={16} />
                     </>
                   )}

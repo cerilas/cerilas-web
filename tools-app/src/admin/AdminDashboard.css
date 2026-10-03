@@ -8,7 +8,7 @@
   min-height: 100vh;
   background-color: var(--bg-color, #ffffff);
   color: var(--text-main, #0f172a);
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif;
+  font-family: 'Dosis', -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif;
   transition: background-color 0.2s ease, color 0.2s ease;
   position: relative;
   overflow-x: hidden;

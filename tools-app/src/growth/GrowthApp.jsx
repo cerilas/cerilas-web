@@ -6,14 +6,11 @@ import GrowthOnboardingModal from './components/GrowthOnboardingModal';
 import GrowthOverview from './views/GrowthOverview';
 import GrowthActionFeed from './views/GrowthActionFeed';
 import GrowthAiVisibility from './views/GrowthAiVisibility';
-import GrowthAiPrompts from './views/GrowthAiPrompts';
 import GrowthGoogleBusiness from './views/GrowthGoogleBusiness';
 import GrowthTechnicalAudit from './views/GrowthTechnicalAudit';
 import GrowthSearch from './views/GrowthSearch';
 import GrowthAnalytics from './views/GrowthAnalytics';
-import GrowthKeywords from './views/GrowthKeywords';
 import GrowthCompetitors from './views/GrowthCompetitors';
-import GrowthContent from './views/GrowthContent';
 import GrowthDirectories from './views/GrowthDirectories';
 import GrowthReports from './views/GrowthReports';
 import GrowthSettings from './views/GrowthSettings';
@@ -37,14 +34,29 @@ function GrowthInner({ onBackToTools }) {
   } = useGrowth();
   const { isAuthenticated, openAuthModal, token } = useAuth();
 
-  // Handle URL hash changes like #/growth/myslug/ai-visibility
+  // Handle URL hash changes like #/growth/technical or #/growth/myslug/technical
   useEffect(() => {
+    const VALID_TABS = [
+      'overview', 'landing', 'action-feed', 'search', 'analytics',
+      'ai-visibility', 'google-business', 'competitors',
+      'technical', 'directories', 'reports', 'settings'
+    ];
+
     const handleHash = () => {
       const hash = window.location.hash;
       const match = hash.match(/^#\/growth\/([a-zA-Z0-9_-]+)(?:\/([a-zA-Z0-9_-]+))?/);
       if (match) {
-        if (match[2]) {
+        const target = match[2] || match[1];
+        if (target === 'ai-prompts') {
+          setActiveTab('ai-visibility');
+        } else if (target === 'keywords') {
+          setActiveTab('search');
+        } else if (target === 'content') {
+          setActiveTab('overview');
+        } else if (match[2] && VALID_TABS.includes(match[2])) {
           setActiveTab(match[2]);
+        } else if (match[1] && VALID_TABS.includes(match[1])) {
+          setActiveTab(match[1]);
         }
       }
     };
@@ -83,8 +95,13 @@ function GrowthInner({ onBackToTools }) {
             .then(res => res.json())
             .then(data => {
               if (data?.data) {
-                refreshWorkspaces(data.data.slug);
-                switchWorkspace(data.data);
+                const ws = data.data.workspace || data.data;
+                if (ws?.slug) {
+                  refreshWorkspaces(ws.slug);
+                  switchWorkspace(ws);
+                } else {
+                  refreshWorkspaces();
+                }
                 setActiveTab('overview');
               }
             })
@@ -125,13 +142,10 @@ function GrowthInner({ onBackToTools }) {
               {activeTab === 'action-feed' && <GrowthActionFeed />}
               {activeTab === 'search' && <GrowthSearch />}
               {activeTab === 'analytics' && <GrowthAnalytics />}
-              {activeTab === 'keywords' && <GrowthKeywords />}
               {activeTab === 'ai-visibility' && <GrowthAiVisibility />}
-              {activeTab === 'ai-prompts' && <GrowthAiPrompts />}
               {activeTab === 'google-business' && <GrowthGoogleBusiness />}
               {activeTab === 'competitors' && <GrowthCompetitors />}
               {activeTab === 'technical' && <GrowthTechnicalAudit />}
-              {activeTab === 'content' && <GrowthContent />}
               {activeTab === 'directories' && <GrowthDirectories />}
               {activeTab === 'reports' && <GrowthReports />}
               {activeTab === 'settings' && <GrowthSettings />}

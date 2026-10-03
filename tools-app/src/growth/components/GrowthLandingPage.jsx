@@ -21,10 +21,14 @@ import {
   KeyRound,
   ExternalLink,
   Lock,
-  Search
+  Search,
+  Sun,
+  Moon
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useGrowth } from '../GrowthContext';
+import { useTheme } from '../../context/ThemeContext';
+import GrowthFavicon from './GrowthFavicon';
 import './GrowthLandingPage.css';
 
 const QUICK_TEST_DOMAINS = [
@@ -36,43 +40,44 @@ const QUICK_TEST_DOMAINS = [
 ];
 
 const SCAN_STEPS = [
-  { id: 'dns', label: 'DNS, SSL ve Sunucu Yanıt Hızı Kontrolü' },
-  { id: 'crawlers', label: 'AI Crawler İzinleri (GPTBot, PerplexityBot, ClaudeBot)' },
-  { id: 'meta', label: 'Meta Etiketler, Schema.org ve llms.txt Varlığı' },
-  { id: 'intel', label: 'Yapay Zeka ile Marka Konumlandırması & Rakip Tespiti' }
+  { id: 'dns', label: 'Checking DNS, SSL & Server Response Time' },
+  { id: 'crawlers', label: 'Verifying AI Crawler Permissions (GPTBot, Perplexity, Claude)' },
+  { id: 'meta', label: 'Scanning Meta Tags, Schema.org & llms.txt Presence' },
+  { id: 'intel', label: 'AI Brand Positioning & Competitor Intelligence' }
 ];
 
 const PLATFORM_LOGOS = [
-  { name: 'Google Search', icon: '/AI-logos/google-color.svg', badge: 'Klasik Arama' },
-  { name: 'Google Search Console', icon: '/growth-covers/gsc-badge.svg', badge: 'Organik Veri' },
+  { name: 'Google Search', icon: '/AI-logos/google-color.svg', badge: 'Classic Search' },
+  { name: 'Google Search Console', icon: '/growth-covers/gsc-badge.svg', badge: 'Organic Data' },
   { name: 'ChatGPT / OpenAI', icon: '/AI-logos/chatgpt-black.svg', badge: 'GPTBot', invert: true },
-  { name: 'Perplexity AI', icon: '/AI-logos/perplexity-color.svg', badge: 'Canlı Arama' },
+  { name: 'Perplexity AI', icon: '/AI-logos/perplexity-color.svg', badge: 'Live Search' },
   { name: 'Anthropic Claude', icon: '/AI-logos/claude-color.svg', badge: 'ClaudeBot' },
   { name: 'Google Gemini', icon: '/AI-logos/gemini-color.svg', badge: 'AI Overviews' }
 ];
 
 const FAQS = [
   {
-    q: 'Generative Engine Optimization (GEO) nedir ve klasik SEO\'dan farkı nedir?',
-    a: 'GEO, markanızın ChatGPT, Perplexity, Claude ve Gemini gibi yapay zeka arama motorlarında doğru şekilde alıntılanması, kaynak gösterilmesi ve önerilmesi için yapılan yeni nesil optimizasyondur. Klasik SEO sadece Google\'daki 10 mavi linki hedeflerken, GEO yapay zeka modellerinin içeriğinizi yapısal olarak anlamasını ve alıntılamasını sağlar.'
+    q: 'What is Generative Engine Optimization (GEO) and how does it differ from traditional SEO?',
+    a: 'GEO is next-generation optimization designed to ensure your brand is accurately cited, referenced as a source, and recommended across AI search engines such as ChatGPT, Perplexity, Claude, and Gemini. While traditional SEO focuses solely on Google\'s 10 blue links, GEO ensures AI models structurally understand your content and cite your authority.'
   },
   {
-    q: 'Ücretsiz ilk analiz neleri kapsar?',
-    a: 'Girdiğiniz alan adı için SSL sertifikası, yanıt süresi, robots.txt bot izinleri (GPTBot, PerplexityBot vb.), meta başlık/açıklama, Schema.org mikro verileri, llms.txt varlığı ve yapay zekanın sitenizden çıkardığı pazar konumu anında gerçek verilerle raporlanır.'
+    q: 'What does the free initial audit cover?',
+    a: 'For your entered domain, it delivers real-time audits of your SSL certificate, server response latency, robots.txt bot permissions (GPTBot, PerplexityBot, etc.), meta tags, Schema.org structured data, llms.txt presence, and an AI-derived market positioning summary.'
   },
   {
-    q: 'Bu analizi kalıcı olarak kaydedip haftalık takip edebilir miyim?',
-    a: 'Evet! Ücretsiz hesap oluşturarak sitenizi çalışma alanınıza kaydedebilir, haftalık teknik sağlık taramalarını, Google Search Console entegrasyonunu ve yapay zeka görünürlük puanınızı düzenli olarak izleyebilirsiniz.'
+    q: 'Can I save this analysis and track progress weekly?',
+    a: 'Yes! By creating a free account, you can save your brand to your workspace, monitor automated weekly technical health audits, sync Google Search Console, and track your AI visibility score continuously.'
   },
   {
-    q: 'Google Search Console verilerim güvende mi?',
-    a: 'Kesinlikle. Cerilas Growth, Google API üzerinden sadece salt-okunur (read-only) arama performansı verilerini çeker. Hiçbir veriniz üçüncü şahıslarla paylaşılmaz veya modellerin eğitilmesinde kullanılmaz.'
+    q: 'Is my Google Search Console data secure?',
+    a: 'Absolutely. Cerilas Growth connects to the Google API using read-only access for search performance telemetry. Your data is never shared with third parties or used to train machine learning models.'
   }
 ];
 
 export default function GrowthLandingPage({ onBackToTools, initialDomain = '' }) {
   const { isAuthenticated, openAuthModal, token } = useAuth();
   const { workspaces, refreshWorkspaces, switchWorkspace, setActiveTab, setIsOnboardingOpen } = useGrowth();
+  const { toggleTheme, isDark } = useTheme();
 
   const [inputUrl, setInputUrl] = useState(initialDomain);
   const [scanning, setScanning] = useState(false);
@@ -103,14 +108,14 @@ export default function GrowthLandingPage({ onBackToTools, initialDomain = '' })
   }, []);
 
   const cleanDomainForDisplay = (val) => {
-    if (!val) return '';
+    if (!val || typeof val !== 'string') return '';
     return val.replace(/^https?:\/\//i, '').replace(/^www\./i, '').split('/')[0];
   };
 
   const handleStartScan = async (targetDomain) => {
     const raw = (targetDomain || inputUrl || '').trim();
     if (!raw) {
-      setError('Lütfen analiz etmek istediğiniz web sitesinin adresini girin.');
+      setError('Please enter the website address you want to analyze.');
       inputRef.current?.focus();
       return;
     }
@@ -146,7 +151,7 @@ export default function GrowthLandingPage({ onBackToTools, initialDomain = '' })
       clearInterval(stepInterval);
 
       if (!res.ok) {
-        throw new Error(data.error || 'Web sitesi analiz edilirken bir hata oluştu.');
+        throw new Error(data.error || 'An error occurred while analyzing the website.');
       }
 
       setScanResult(data.data.scan);
@@ -168,7 +173,7 @@ export default function GrowthLandingPage({ onBackToTools, initialDomain = '' })
 
     } catch (err) {
       clearInterval(stepInterval);
-      setError(err.message || 'Analiz tamamlanamadı. Lütfen URL adresinizi kontrol edin.');
+      setError(err.message || 'Analysis could not be completed. Please check your URL.');
     } finally {
       setScanning(false);
     }
@@ -221,22 +226,26 @@ export default function GrowthLandingPage({ onBackToTools, initialDomain = '' })
 
       const data = await res.json();
       if (!res.ok) {
-        throw new Error(data.error || 'Çalışma alanı oluşturulamadı.');
+        throw new Error(data.error || 'Could not create workspace.');
       }
 
       try {
         sessionStorage.removeItem('cerilas_pending_growth_scan');
       } catch {}
 
-      setSaveSuccessMsg('Markanız başarıyla kaydedildi! Panelinize yönlendiriliyorsunuz...');
+      setSaveSuccessMsg('Brand successfully saved! Redirecting to your dashboard...');
       
-      const newWs = data.data;
-      await refreshWorkspaces(newWs.slug);
-      switchWorkspace(newWs);
+      const newWs = data.data?.workspace || data.data;
+      if (newWs?.slug) {
+        await refreshWorkspaces(newWs.slug);
+        switchWorkspace(newWs);
+      } else {
+        await refreshWorkspaces();
+      }
       setActiveTab('overview');
 
     } catch (err) {
-      setError(err.message || 'Kayıt sırasında hata oluştu.');
+      setError(err.message || 'An error occurred while saving.');
     } finally {
       setIsSavingWorkspace(false);
     }
@@ -271,11 +280,11 @@ export default function GrowthLandingPage({ onBackToTools, initialDomain = '' })
 
           {/* Center: Clean Spaced Navigation */}
           <nav className="landing-nav-links">
-            <a href="#features">Özellikler</a>
-            <a href="#supported-platforms">Platformlar</a>
-            <a href="#how-it-works">Nasıl Çalışır?</a>
+            <a href="#features">Features</a>
+            <a href="#supported-platforms">Platforms</a>
+            <a href="#how-it-works">How It Works</a>
             <a href="#geo-intelligence">GEO vs SEO</a>
-            <a href="#faq">SSS</a>
+            <a href="#faq">FAQ</a>
           </nav>
 
           {/* Right: Actions */}
@@ -286,7 +295,18 @@ export default function GrowthLandingPage({ onBackToTools, initialDomain = '' })
               onClick={onBackToTools || (() => { window.location.hash = '#/'; })}
             >
               <ArrowLeft size={14} />
-              <span>Araçlara Dön</span>
+              <span>Back to Tools</span>
+            </button>
+
+            {/* Light / Dark Mode Toggle */}
+            <button
+              type="button"
+              onClick={toggleTheme}
+              className="landing-theme-toggle-btn"
+              title={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+              aria-label={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+            >
+              {isDark ? <Sun size={15} /> : <Moon size={15} />}
             </button>
 
             {isAuthenticated ? (
@@ -300,7 +320,7 @@ export default function GrowthLandingPage({ onBackToTools, initialDomain = '' })
                   }}
                 >
                   <BarChart3 size={15} />
-                  <span>Panele Git</span>
+                  <span>Go to Dashboard</span>
                 </button>
               ) : (
                 <button 
@@ -308,7 +328,7 @@ export default function GrowthLandingPage({ onBackToTools, initialDomain = '' })
                   className="landing-cta-sm-btn"
                   onClick={() => setIsOnboardingOpen(true)}
                 >
-                  <span>+ Marka Ekle</span>
+                  <span>+ Add Brand</span>
                 </button>
               )
             ) : (
@@ -318,14 +338,14 @@ export default function GrowthLandingPage({ onBackToTools, initialDomain = '' })
                   className="landing-login-btn"
                   onClick={() => openAuthModal('login')}
                 >
-                  Giriş Yap
+                  Log In
                 </button>
                 <button 
                   type="button" 
                   className="landing-cta-sm-btn"
                   onClick={() => openAuthModal('register')}
                 >
-                  <span>Ücretsiz Başla</span>
+                  <span>Get Started Free</span>
                   <ArrowRight size={14} />
                 </button>
               </div>
@@ -341,17 +361,17 @@ export default function GrowthLandingPage({ onBackToTools, initialDomain = '' })
           {/* Refined Minimalist Announcement Chip */}
           <div className="hero-announcement-chip">
             <span className="chip-live-dot" />
-            <span className="chip-text">Google & Yapay Zeka Arama İstihbaratı Platformu (GEO)</span>
+            <span className="chip-text">Google & AI Search Intelligence Platform (GEO)</span>
           </div>
 
           <h1 className="hero-title">
-            Sitenizin <span className="title-highlight">Google, ChatGPT</span> ve <br className="hidden-mobile" />
-            <span className="title-highlight">Perplexity</span>'deki Gerçek Gücünü Görün.
+            Uncover Your True Presence on <br className="hidden-mobile" />
+            <span className="title-highlight">Google, ChatGPT</span> & <span className="title-highlight">Perplexity</span>.
           </h1>
 
           <p className="hero-subtitle">
-            Web sitenizin adresini girin; Google dizinlenebilirliğini, LLM botlarının (GPTBot, Claude, Perplexity) sitenizi 
-            nasıl okuduğunu ve ilk büyüme fırsatlarını <strong>10 saniyede ücretsiz</strong> analiz edin.
+            Enter your website domain to inspect Google indexability, discover how LLM crawlers (GPTBot, Claude, Perplexity) 
+            read your site, and unlock growth opportunities in <strong>10 seconds for free</strong>.
           </p>
 
           {/* Interactive Domain Scanner Form */}
@@ -372,7 +392,7 @@ export default function GrowthLandingPage({ onBackToTools, initialDomain = '' })
                 ref={inputRef}
                 type="text"
                 className="scanner-url-input"
-                placeholder="siteniz.com veya https://orneksite.com"
+                placeholder="yourdomain.com or https://example.com"
                 value={inputUrl}
                 onChange={(e) => setInputUrl(e.target.value)}
                 disabled={scanning}
@@ -388,12 +408,12 @@ export default function GrowthLandingPage({ onBackToTools, initialDomain = '' })
                 {scanning ? (
                   <>
                     <Loader2 size={17} className="spinner-anim" />
-                    <span>Taranıyor...</span>
+                    <span>Scanning...</span>
                   </>
                 ) : (
                   <>
                     <Search size={17} />
-                    <span>Ücretsiz İlk Raporu Al</span>
+                    <span>Run Free Initial Audit</span>
                     <ArrowRight size={16} />
                   </>
                 )}
@@ -402,7 +422,7 @@ export default function GrowthLandingPage({ onBackToTools, initialDomain = '' })
 
             {/* Quick Test Presets */}
             <div className="scanner-presets-row">
-              <span className="presets-label">Örnek sitelerle hemen test et:</span>
+              <span className="presets-label">Quick test with example domains:</span>
               <div className="presets-chips">
                 {QUICK_TEST_DOMAINS.map(domain => (
                   <button
@@ -465,19 +485,19 @@ export default function GrowthLandingPage({ onBackToTools, initialDomain = '' })
             <div className="scanner-trust-bar">
               <div className="trust-item">
                 <img src="/AI-logos/google-color.svg" alt="Google" className="trust-logo" />
-                <span>Googlebot İndeks Kontrolü</span>
+                <span>Googlebot Index Check</span>
               </div>
               <div className="trust-item">
                 <img src="/AI-logos/chatgpt-black.svg" alt="OpenAI" className="trust-logo logo-invert" />
-                <span>GPTBot & Perplexity İzinleri</span>
+                <span>GPTBot & Perplexity Access</span>
               </div>
               <div className="trust-item">
                 <ShieldCheck size={16} className="text-emerald" />
-                <span>%100 Ücretsiz İlk Insight</span>
+                <span>100% Free Initial Insight</span>
               </div>
               <div className="trust-item">
                 <Lock size={15} className="text-slate" />
-                <span>Kredi Kartı Gerekmez</span>
+                <span>No Credit Card Required</span>
               </div>
             </div>
           </div>
@@ -494,11 +514,11 @@ export default function GrowthLandingPage({ onBackToTools, initialDomain = '' })
                   </div>
                   <div className="preview-url-bar">
                     <Lock size={12} />
-                    <span>cerilas.com/growth • Canlı Marka Paneli</span>
+                    <span>cerilas.com/growth • Live Brand Dashboard</span>
                   </div>
                   <div className="preview-right-tags">
                     <span className="status-live-pill">
-                      <span className="pulse-dot" /> CANLI İZLEME
+                      <span className="pulse-dot" /> LIVE MONITORING
                     </span>
                   </div>
                 </div>
@@ -507,21 +527,21 @@ export default function GrowthLandingPage({ onBackToTools, initialDomain = '' })
                 <div className="preview-image-wrapper">
                   <img 
                     src="/growth-covers/dashboard-preview.jpg" 
-                    alt="Cerilas Growth SaaS Kurumsal Analitik Paneli" 
+                    alt="Cerilas Growth SaaS Analytics Dashboard" 
                     className="preview-real-img"
                   />
                   <div className="preview-floating-chip chip-left">
                     <img src="/growth-covers/gsc-badge.svg" alt="GSC" className="chip-logo" />
                     <div>
-                      <span className="chip-title">GSC Senkronizasyonu</span>
-                      <span className="chip-stat">+%38.5 Organik Büyüme</span>
+                      <span className="chip-title">GSC Synchronization</span>
+                      <span className="chip-stat">+38.5% Organic Growth</span>
                     </div>
                   </div>
                   <div className="preview-floating-chip chip-right">
                     <img src="/AI-logos/perplexity-color.svg" alt="Perplexity" className="chip-logo" />
                     <div>
-                      <span className="chip-title">GEO AI Alıntı Skoru</span>
-                      <span className="chip-stat">14,890+ Alıntı</span>
+                      <span className="chip-title">GEO AI Citation Score</span>
+                      <span className="chip-stat">14,890+ Citations</span>
                     </div>
                   </div>
                 </div>
@@ -535,16 +555,13 @@ export default function GrowthLandingPage({ onBackToTools, initialDomain = '' })
           <section ref={resultsRef} className="landing-results-section animate-fade">
             <div className="results-header-banner">
               <div className="results-domain-info">
-                {scanResult.meta?.faviconUrl ? (
-                  <img 
-                    src={scanResult.meta.faviconUrl} 
-                    alt="" 
-                    className="results-favicon"
-                    onError={(e) => { e.currentTarget.style.display = 'none'; }}
-                  />
-                ) : (
-                  <Globe size={26} className="text-blue" />
-                )}
+                <GrowthFavicon
+                  src={scanResult.meta?.faviconUrl}
+                  domain={scanResult.domain}
+                  name={brandProfile.brandName || scanResult.domain}
+                  size={36}
+                  className="results-favicon"
+                />
                 <div className="results-domain-text">
                   <div className="domain-row">
                     <h2 className="results-domain-name">{cleanDomainForDisplay(scanResult.domain)}</h2>
@@ -567,7 +584,7 @@ export default function GrowthLandingPage({ onBackToTools, initialDomain = '' })
                 }}
               >
                 <RefreshCw size={14} />
-                <span>Farklı Bir Site Analiz Et</span>
+                <span>Analyze Another Site</span>
               </button>
             </div>
 
@@ -579,7 +596,7 @@ export default function GrowthLandingPage({ onBackToTools, initialDomain = '' })
                   <div className="gauge-brand-icon">
                     <img src="/AI-logos/google-color.svg" alt="Google" className="card-brand-img" />
                   </div>
-                  <span className="gauge-tag tag-blue">Google & Teknik SEO</span>
+                  <span className="gauge-tag tag-blue">Google & Technical SEO</span>
                 </div>
                 <div className="gauge-score-display">
                   <div className="score-number-wrap">
@@ -589,29 +606,29 @@ export default function GrowthLandingPage({ onBackToTools, initialDomain = '' })
                     <span className="score-denom">/100</span>
                   </div>
                   <span className="score-label">
-                    {scanResult.technicalScore >= 80 ? 'Güçlü Altyapı' : scanResult.technicalScore >= 60 ? 'İyileştirilmeli' : 'Kritik Eksikler'}
+                    {scanResult.technicalScore >= 80 ? 'Strong Foundation' : scanResult.technicalScore >= 60 ? 'Needs Improvement' : 'Critical Issues'}
                   </span>
                 </div>
                 <div className="gauge-metrics-list">
                   <div className="metric-row">
-                    <span>SSL Güvenlik Protokolü:</span>
+                    <span>SSL Security Protocol:</span>
                     <strong className={scanResult.meta?.hasSsl ? 'text-emerald' : 'text-rose'}>
-                      {scanResult.meta?.hasSsl ? 'Aktif (HTTPS)' : 'Eksik'}
+                      {scanResult.meta?.hasSsl ? 'Active (HTTPS)' : 'Missing'}
                     </strong>
                   </div>
                   <div className="metric-row">
-                    <span>Sunucu Yanıt Süresi:</span>
+                    <span>Server Response Time:</span>
                     <strong>{scanResult.loadTimeMs} ms</strong>
                   </div>
                   <div className="metric-row">
-                    <span>Robots.txt Durumu:</span>
+                    <span>Robots.txt Status:</span>
                     <strong className={scanResult.robotsTxtFound ? 'text-emerald' : 'text-amber'}>
-                      {scanResult.robotsTxtFound ? 'Mevcut' : 'Bulunamadı'}
+                      {scanResult.robotsTxtFound ? 'Present' : 'Not Found'}
                     </strong>
                   </div>
                   <div className="metric-row">
-                    <span>Metin Hacmi:</span>
-                    <strong>{scanResult.meta?.wordCount || 0} kelime</strong>
+                    <span>Content Volume:</span>
+                    <strong>{scanResult.meta?.wordCount || 0} words</strong>
                   </div>
                 </div>
               </div>
@@ -623,7 +640,7 @@ export default function GrowthLandingPage({ onBackToTools, initialDomain = '' })
                     <img src="/AI-logos/chatgpt-black.svg" alt="OpenAI" className="card-brand-img logo-invert" />
                     <img src="/AI-logos/perplexity-color.svg" alt="Perplexity" className="card-brand-img" />
                   </div>
-                  <span className="gauge-tag tag-cyan">GEO & LLM Hazırlığı</span>
+                  <span className="gauge-tag tag-cyan">GEO & LLM Readiness</span>
                 </div>
                 <div className="gauge-score-display">
                   <div className="score-number-wrap">
@@ -633,29 +650,29 @@ export default function GrowthLandingPage({ onBackToTools, initialDomain = '' })
                     <span className="score-denom">/100</span>
                   </div>
                   <span className="score-label">
-                    {scanResult.geoScore >= 75 ? 'LLM Uyumlu' : 'GEO Fırsatı Var'}
+                    {scanResult.geoScore >= 75 ? 'LLM Optimized' : 'GEO Opportunity Identified'}
                   </span>
                 </div>
                 <div className="gauge-metrics-list">
                   <div className="metric-row">
-                    <span>llms.txt Yapay Zeka Dosyası:</span>
+                    <span>llms.txt AI File:</span>
                     <strong className={scanResult.llmsTxtFound ? 'text-emerald' : 'text-rose'}>
-                      {scanResult.llmsTxtFound ? 'Aktif' : 'Eksik'}
+                      {scanResult.llmsTxtFound ? 'Active' : 'Missing'}
                     </strong>
                   </div>
                   <div className="metric-row">
                     <span>Schema.org JSON-LD:</span>
                     <strong className={scanResult.meta?.schemaTypes?.length > 0 ? 'text-emerald' : 'text-amber'}>
-                      {scanResult.meta?.schemaTypes?.length > 0 ? `${scanResult.meta.schemaTypes.length} Şema Tanımlı` : 'Eksik'}
+                      {scanResult.meta?.schemaTypes?.length > 0 ? `${scanResult.meta.schemaTypes.length} Schemas Defined` : 'Missing'}
                     </strong>
                   </div>
                   <div className="metric-row">
-                    <span>GPTBot & Perplexity İzinleri:</span>
-                    <strong className="text-emerald">Erişilebilir</strong>
+                    <span>GPTBot & Perplexity Crawlers:</span>
+                    <strong className="text-emerald">Allowed</strong>
                   </div>
                   <div className="metric-row">
-                    <span>Yapay Zeka Alıntılanma Potansiyeli:</span>
-                    <strong className="text-blue">Yüksek</strong>
+                    <span>AI Citation Potential:</span>
+                    <strong className="text-blue">High</strong>
                   </div>
                 </div>
               </div>
@@ -666,24 +683,24 @@ export default function GrowthLandingPage({ onBackToTools, initialDomain = '' })
                   <div className="gauge-brand-icon">
                     <img src="/AI-logos/gemini-color.svg" alt="Gemini" className="card-brand-img" />
                   </div>
-                  <span className="gauge-tag tag-gemini">Gemini Marka İstihbaratı</span>
+                  <span className="gauge-tag tag-gemini">Gemini Brand Intelligence</span>
                 </div>
                 <div className="intel-content">
                   <div className="intel-field">
-                    <span className="intel-k">Tespit Edilen Marka:</span>
+                    <span className="intel-k">Detected Brand:</span>
                     <strong className="intel-v">{brandProfile.brandName || scanResult.domain}</strong>
                   </div>
                   <div className="intel-field">
-                    <span className="intel-k">Sektör & Model:</span>
+                    <span className="intel-k">Industry & Model:</span>
                     <span className="intel-badge">{brandProfile.industry} • {brandProfile.businessModel}</span>
                   </div>
                   <div className="intel-field">
-                    <span className="intel-k">Yapay Zekanın Sitenizi Özeti:</span>
-                    <p className="intel-desc">"{brandProfile.description || scanResult.meta?.metaDescription || 'Dijital servis ve web platformu.'}"</p>
+                    <span className="intel-k">AI Brand Summary:</span>
+                    <p className="intel-desc">"{brandProfile.description || scanResult.meta?.metaDescription || 'Digital services and web platform.'}"</p>
                   </div>
                   {brandProfile.primaryKeywords?.length > 0 && (
                     <div className="intel-keywords">
-                      <span className="intel-k">Öne Çıkan Arama Terimleri:</span>
+                      <span className="intel-k">Key Search Queries:</span>
                       <div className="kw-tags">
                         {brandProfile.primaryKeywords.slice(0, 5).map((kw, i) => (
                           <span key={i} className="kw-tag">{kw}</span>
@@ -700,10 +717,10 @@ export default function GrowthLandingPage({ onBackToTools, initialDomain = '' })
               <div className="findings-header">
                 <div className="findings-title-wrap">
                   <TrendingUp size={20} className="text-blue" />
-                  <h3>Öncelikli Aksiyon ve İyileştirme Fırsatları</h3>
+                  <h3>Priority Action Items & Growth Opportunities</h3>
                 </div>
                 <span className="findings-count-badge">
-                  {(scanResult.meta?.issues?.length || 0) + (!scanResult.llmsTxtFound ? 1 : 0)} Fırsat Tespit Edildi
+                  {(scanResult.meta?.issues?.length || 0) + (!scanResult.llmsTxtFound ? 1 : 0)} Opportunities Detected
                 </span>
               </div>
 
@@ -715,12 +732,12 @@ export default function GrowthLandingPage({ onBackToTools, initialDomain = '' })
                     </div>
                     <div className="finding-body">
                       <div className="finding-top">
-                        <span className="finding-pill pill-critical">GEO Kritik Fırsat</span>
-                        <h4>/llms.txt Standart Dokümantasyon Dosyası Eksik</h4>
+                        <span className="finding-pill pill-critical">GEO Critical Opportunity</span>
+                        <h4>/llms.txt Standard Documentation File Missing</h4>
                       </div>
                       <p>
-                        Web sitenizde <code>/llms.txt</code> dosyası tespit edilemedi. ChatGPT, Perplexity ve Claude gibi LLM arama 
-                        motorları markanızı özetlerken bu dosyayı referans alır. Cerilas Growth ile sitenize özel llms.txt dosyasını 1 tıkla oluşturabilirsiniz.
+                        No <code>/llms.txt</code> file was detected on your website. LLM search engines like ChatGPT, Perplexity, and Claude
+                        reference this file when indexing and summarizing your brand. With Cerilas Growth, you can generate your custom llms.txt in 1 click.
                       </p>
                     </div>
                   </div>
@@ -737,7 +754,7 @@ export default function GrowthLandingPage({ onBackToTools, initialDomain = '' })
                     <div className="finding-body">
                       <div className="finding-top">
                         <span className={`finding-pill ${issue.severity === 'critical' ? 'pill-critical' : issue.severity === 'high' ? 'pill-high' : 'pill-mid'}`}>
-                          {issue.severity === 'critical' ? 'Kritik SEO' : issue.severity === 'high' ? 'Önemli' : 'İyileştirme'}
+                          {issue.severity === 'critical' ? 'Critical SEO' : issue.severity === 'high' ? 'High Priority' : 'Improvement'}
                         </span>
                         <h4>{issue.title}</h4>
                       </div>
@@ -753,12 +770,12 @@ export default function GrowthLandingPage({ onBackToTools, initialDomain = '' })
                     </div>
                     <div className="finding-body">
                       <div className="finding-top">
-                        <span className="finding-pill pill-high">Yapılandırılmış Veri</span>
-                        <h4>Schema.org JSON-LD Eklenmeli</h4>
+                        <span className="finding-pill pill-high">Structured Data</span>
+                        <h4>Add Schema.org JSON-LD</h4>
                       </div>
                       <p>
-                        Sitenizde Google ve AI modelleri için kurumsal Schema.org JSON-LD etiketi bulunmuyor. Organization ve 
-                        WebSite şemaları arama snippet görünümünüzü %30'a kadar iyileştirir.
+                        Your website is missing corporate Schema.org JSON-LD structured data for Google and AI models. Adding Organization and
+                        WebSite schemas improves search snippet CTR by up to 30%.
                       </p>
                     </div>
                   </div>
@@ -774,9 +791,9 @@ export default function GrowthLandingPage({ onBackToTools, initialDomain = '' })
                     <img src="/AI-logos/chatgpt-black.svg" alt="ChatGPT" className="sim-header-logo logo-invert" />
                     <img src="/AI-logos/perplexity-color.svg" alt="Perplexity" className="sim-header-logo" />
                   </div>
-                  <h4>ChatGPT & Perplexity Cevap Simülasyonu</h4>
+                  <h4>ChatGPT & Perplexity Response Simulation</h4>
                 </div>
-                <span className="sim-badge">Gemini Model Gözüyle Canlı Çıkarım</span>
+                <span className="sim-badge">Live Synthesis via Gemini 2.5 Flash</span>
               </div>
               <div className="sim-chat-bubble">
                 <div className="sim-ai-avatar">
@@ -784,14 +801,14 @@ export default function GrowthLandingPage({ onBackToTools, initialDomain = '' })
                 </div>
                 <div className="sim-ai-text">
                   <p>
-                    <strong>{brandProfile.brandName || scanResult.domain}</strong>, {brandProfile.industry} sektöründe faaliyet gösteren ve {brandProfile.targetAudience || 'kullanıcılara'} yönelik çözümler sunan bir platformdur.
+                    <strong>{brandProfile.brandName || scanResult.domain}</strong> is a platform operating in the {brandProfile.industry} industry, delivering solutions for {brandProfile.targetAudience || 'users'}.
                   </p>
                   <p className="sim-quote">
-                    "Temel Değer Önerisi: {brandProfile.valueProposition || scanResult.meta?.title || 'Dijital büyüme ve arama performansı çözümleri.'}"
+                    "Core Value Proposition: {brandProfile.valueProposition || scanResult.meta?.title || 'Digital growth and search visibility performance platform.'}"
                   </p>
                   {brandProfile.suggestedCompetitors?.length > 0 && (
                     <div className="sim-competitors">
-                      <span>Benzer Pazar Alternatifleri:</span>
+                      <span>Similar Market Alternatives:</span>
                       <div className="comp-chips">
                         {brandProfile.suggestedCompetitors.map((comp, idx) => (
                           <span key={idx} className="comp-chip">{comp.name || comp.domain}</span>
@@ -809,12 +826,11 @@ export default function GrowthLandingPage({ onBackToTools, initialDomain = '' })
                 <div className="cta-left">
                   <div className="cta-badge">
                     <BarChart3 size={14} />
-                    <span>Canlı Takip & Marka Paneli</span>
+                    <span>Live Monitoring & Brand Dashboard</span>
                   </div>
-                  <h3>Bu Analizi Marka Paneline Aktar & Canlı Takibe Başla</h3>
+                  <h3>Import Analysis & Start Continuous Monitoring</h3>
                   <p>
-                    {cleanDomainForDisplay(scanResult.domain)} için haftalık yapay zeka alıntı değişikliklerini, 
-                    Google Search Console senkronizasyonunu ve öncelikli Action Feed görevlerini devreye alın.
+                    Activate weekly AI citation tracking, Google Search Console telemetry, and prioritized Action Feed tasks for {cleanDomainForDisplay(scanResult.domain)}.
                   </p>
                   {saveSuccessMsg && (
                     <div className="save-success-box animate-fade">
@@ -834,22 +850,22 @@ export default function GrowthLandingPage({ onBackToTools, initialDomain = '' })
                     {isSavingWorkspace ? (
                       <>
                         <Loader2 size={18} className="spinner-anim" />
-                        <span>Kaydediliyor...</span>
+                        <span>Saving...</span>
                       </>
                     ) : isAuthenticated ? (
                       <>
-                        <span>Bu Markayı Çalışma Alanıma Ekle</span>
+                        <span>Add This Brand to My Workspace</span>
                         <ArrowRight size={18} />
                       </>
                     ) : (
                       <>
-                        <span>Ücretsiz Kayıt Ol & Bu Markayı Takip Et</span>
+                        <span>Create Free Account & Track Brand</span>
                         <ArrowRight size={18} />
                       </>
                     )}
                   </button>
                   <span className="cta-sub-text">
-                    ✓ Kredi kartı gerekmez • 1 tıkla anında kurulum • Tamamen ücretsiz
+                    ✓ No credit card required • Instant 1-click setup • 100% free
                   </span>
                 </div>
               </div>
@@ -860,7 +876,7 @@ export default function GrowthLandingPage({ onBackToTools, initialDomain = '' })
         {/* Supported AI & Search Platforms Bar (Real Logos) */}
         <section id="supported-platforms" className="landing-platforms-section">
           <div className="platforms-title-row">
-            <span className="platforms-eyebrow">DESTEKLENEN VE TARANAN ARAMA PLATFORMLARI</span>
+            <span className="platforms-eyebrow">SUPPORTED & CRAWLED SEARCH PLATFORMS</span>
           </div>
           <div className="platforms-grid">
             {PLATFORM_LOGOS.map((plat) => (
@@ -884,10 +900,10 @@ export default function GrowthLandingPage({ onBackToTools, initialDomain = '' })
         {/* Features Showcase with REAL PHOTOGRAPHY COVERS */}
         <section id="features" className="landing-features-section">
           <div className="section-title-wrap">
-            <span className="section-eyebrow">KURUMSAL BÜYÜME SİSTEMİ</span>
-            <h2 className="section-heading">Klasik SEO ve Yapay Zeka Arama Çağı İçin Tasarlandı</h2>
+            <span className="section-eyebrow">ENTERPRISE GROWTH ENGINE</span>
+            <h2 className="section-heading">Engineered for Classic SEO & the Generative AI Era</h2>
             <p className="section-sub">
-              Rastgele karmaşık grafikler yerine her hafta ne yapmanız gerektiğini söyleyen yapay zeka destekli büyüme ortağınız.
+              Your AI growth partner that tells you exactly what to execute each week, rather than overwhelming you with complex, raw charts.
             </p>
           </div>
 
@@ -897,7 +913,7 @@ export default function GrowthLandingPage({ onBackToTools, initialDomain = '' })
               <div className="feature-cover-wrap">
                 <img 
                   src="/growth-covers/geo-cover.jpg" 
-                  alt="Yapay Zeka ve GEO İstihbaratı" 
+                  alt="AI & GEO Intelligence" 
                   className="feature-cover-img"
                 />
                 <div className="feature-cover-badge">
@@ -906,10 +922,9 @@ export default function GrowthLandingPage({ onBackToTools, initialDomain = '' })
                 </div>
               </div>
               <div className="feature-body">
-                <h3>GEO & Yapay Zeka (LLM) Takibi</h3>
+                <h3>GEO & AI Citation Tracking</h3>
                 <p>
-                  ChatGPT, Perplexity ve Gemini aramalarında markanızın ne sıklıkla önerildiğini, 
-                  kaynak gösterildiğini ve hangi sorulara yanıt olduğunu gerçek zamanlı izleyin.
+                  Track in real time how often your brand is recommended, cited as a trusted source, and surfaced across ChatGPT, Perplexity, and Gemini queries.
                 </p>
               </div>
             </div>
@@ -919,7 +934,7 @@ export default function GrowthLandingPage({ onBackToTools, initialDomain = '' })
               <div className="feature-cover-wrap">
                 <img 
                   src="/growth-covers/seo-cover.jpg" 
-                  alt="Google Search Console ve Organik Arama" 
+                  alt="Google Search Console & Organic Search" 
                   className="feature-cover-img"
                 />
                 <div className="feature-cover-badge">
@@ -928,10 +943,9 @@ export default function GrowthLandingPage({ onBackToTools, initialDomain = '' })
                 </div>
               </div>
               <div className="feature-body">
-                <h3>Google Search Console Senkronizasyonu</h3>
+                <h3>Google Search Console Sync</h3>
                 <p>
-                  Tıklama, gösterim, TO (CTR) ve ortalama pozisyon verilerinizi 1 tıkla bağlayın. 
-                  Trafiği aniden düşen sayfaları anında tespit edin.
+                  Connect your clicks, impressions, CTR, and average rankings in 1 click. Instantly detect pages suffering from unexpected traffic drops.
                 </p>
               </div>
             </div>
@@ -941,19 +955,18 @@ export default function GrowthLandingPage({ onBackToTools, initialDomain = '' })
               <div className="feature-cover-wrap">
                 <img 
                   src="/growth-covers/overview-cover.jpg" 
-                  alt="Öncelikli Aksiyon Akışı" 
+                  alt="Priority Action Feed" 
                   className="feature-cover-img"
                 />
                 <div className="feature-cover-badge">
                   <Flame size={14} className="text-amber" />
-                  <span>Haftalık Öncelikler</span>
+                  <span>Weekly Priorities</span>
                 </div>
               </div>
               <div className="feature-body">
-                <h3>Öncelikli Aksiyon Akışı (Action Feed)</h3>
+                <h3>Priority Action Feed</h3>
                 <p>
-                  Hangi sayfayı güncellemelisiniz? Hangi anahtar kelimede sıralama kaybettiniz? 
-                  Action Feed her hafta somut, uygulanabilir ve önceliklendirilmiş görevler sunar.
+                  Which pages should you optimize? Which keywords lost rankings? Action Feed delivers concrete, prioritized, and high-impact tasks every single week.
                 </p>
               </div>
             </div>
@@ -963,19 +976,18 @@ export default function GrowthLandingPage({ onBackToTools, initialDomain = '' })
               <div className="feature-cover-wrap">
                 <img 
                   src="/growth-covers/audit-cover.jpg" 
-                  alt="7/24 Teknik SEO Denetimi" 
+                  alt="24/7 Technical SEO Audit" 
                   className="feature-cover-img"
                 />
                 <div className="feature-cover-badge">
                   <ShieldCheck size={14} className="text-emerald" />
-                  <span>Bot Denetimi</span>
+                  <span>Crawler Audit</span>
                 </div>
               </div>
               <div className="feature-body">
-                <h3>7/24 Teknik SEO & Bot Denetimi</h3>
+                <h3>24/7 Technical SEO & Bot Audits</h3>
                 <p>
-                  SSL süresi, kırık linkler, noindex hataları ve GPTBot erişim engelleri gibi 
-                  organik trafiğinizi baltalayabilecek teknik sorunları otomatik olarak tarayın.
+                  Continuously audit for SSL expirations, broken links, noindex errors, and GPTBot crawler blocks that sabotage your organic visibility.
                 </p>
               </div>
             </div>
@@ -985,19 +997,18 @@ export default function GrowthLandingPage({ onBackToTools, initialDomain = '' })
               <div className="feature-cover-wrap">
                 <img 
                   src="/growth-covers/integrations-cover.jpg" 
-                  alt="Google Entegrasyonları ve Çoklu Marka" 
+                  alt="Google Integrations & Multi-Brand" 
                   className="feature-cover-img"
                 />
                 <div className="feature-cover-badge">
                   <Layers size={14} className="text-blue" />
-                  <span>Çoklu Marka</span>
+                  <span>Multi-Brand</span>
                 </div>
               </div>
               <div className="feature-body">
-                <h3>Çoklu Marka & Workspace Mimarisi</h3>
+                <h3>Multi-Brand & Workspace Architecture</h3>
                 <p>
-                  İster tek bir girişimci olun ister onlarca müşterisi olan bir dijital ajans; 
-                  tüm web sitelerinizi bağımsız marka panelleriyle tek bir hesaptan yönetin.
+                  Whether you are a solo entrepreneur or a digital agency serving dozens of clients, manage every website through independent brand dashboards from a single account.
                 </p>
               </div>
             </div>
@@ -1007,19 +1018,18 @@ export default function GrowthLandingPage({ onBackToTools, initialDomain = '' })
               <div className="feature-cover-wrap">
                 <img 
                   src="/growth-covers/modal-cover.jpg" 
-                  alt="llms.txt Yapay Zeka Dosya Yönetimi" 
+                  alt="llms.txt AI File Management" 
                   className="feature-cover-img"
                 />
                 <div className="feature-cover-badge">
                   <FileText size={14} className="text-cyan" />
-                  <span>llms.txt Standardı</span>
+                  <span>llms.txt Standard</span>
                 </div>
               </div>
               <div className="feature-body">
-                <h3>Otomatik llms.txt & Dizin Yönetimi</h3>
+                <h3>Automated llms.txt & Directory Management</h3>
                 <p>
-                  Yapay zeka modellerinin sitenizi doğru özetlemesi için gereken <code>llms.txt</code> ve 
-                  <code>llms-full.txt</code> dosyalarını dakikalar içinde oluşturup yayınlayın.
+                  Generate, fine-tune, and deploy the <code>llms.txt</code> and <code>llms-full.txt</code> files needed for LLMs to accurately summarize and index your website.
                 </p>
               </div>
             </div>
@@ -1029,10 +1039,10 @@ export default function GrowthLandingPage({ onBackToTools, initialDomain = '' })
         {/* Traditional SEO vs GEO Comparison Table */}
         <section id="geo-intelligence" className="landing-comparison-section">
           <div className="section-title-wrap">
-            <span className="section-eyebrow">ARAMA DAVRANIŞINDA 2026 DEVRİMİ</span>
-            <h2 className="section-heading">Klasik SEO Artık Yetersiz: GEO Çağı Başladı</h2>
+            <span className="section-eyebrow">THE 2026 SHIFT IN SEARCH BEHAVIOR</span>
+            <h2 className="section-heading">Classic SEO Is No Longer Enough: Welcome to the GEO Era</h2>
             <p className="section-sub">
-              Kullanıcıların %40'tan fazlası artık Google'da aramak yerine doğrudan ChatGPT veya Perplexity'e soruyor.
+              Over 40% of users now query ChatGPT or Perplexity directly instead of browsing traditional search engine links.
             </p>
           </div>
 
@@ -1040,36 +1050,36 @@ export default function GrowthLandingPage({ onBackToTools, initialDomain = '' })
             <table className="comparison-table">
               <thead>
                 <tr>
-                  <th>Özellik & Yaklaşım</th>
-                  <th>Geleneksel SEO</th>
+                  <th>Capability & Approach</th>
+                  <th>Traditional SEO</th>
                   <th className="highlight-col">Cerilas Growth (GEO + Modern SEO)</th>
                 </tr>
               </thead>
               <tbody>
                 <tr>
-                  <td>Hedeflenen Arama Ağı</td>
-                  <td>Yalnızca Google & Bing 10 Mavi Link</td>
+                  <td>Target Search Networks</td>
+                  <td>Google & Bing 10 Blue Links Only</td>
                   <td className="highlight-col">Google + ChatGPT + Perplexity + Gemini + Claude</td>
                 </tr>
                 <tr>
-                  <td>İçerik Anlamlandırması</td>
-                  <td>Klasik anahtar kelime yoğunluğu</td>
-                  <td className="highlight-col">Semantik varlıklar, llms.txt ve LLM bilgi grafiği</td>
+                  <td>Content Comprehension</td>
+                  <td>Classic keyword density</td>
+                  <td className="highlight-col">Semantic entities, llms.txt & LLM knowledge graphs</td>
                 </tr>
                 <tr>
-                  <td>İş Akışı</td>
-                  <td>Karmaşık grafikler, yorumsuz veriler</td>
-                  <td className="highlight-col">Haftalık öncelikli Aksiyon Akışı (Action Feed)</td>
+                  <td>Workflow & Execution</td>
+                  <td>Complex graphs, uninterpreted raw data</td>
+                  <td className="highlight-col">Weekly prioritized Action Feed</td>
                 </tr>
                 <tr>
-                  <td>Teknik Kontroller</td>
-                  <td>Yalnızca Googlebot</td>
+                  <td>Technical Audits</td>
+                  <td>Googlebot only</td>
                   <td className="highlight-col">GPTBot, ClaudeBot, PerplexityBot + Googlebot</td>
                 </tr>
                 <tr>
-                  <td>Çoklu Marka Yönetimi</td>
-                  <td>Pahalı ajans paketleri</td>
-                  <td className="highlight-col">Tek panelde sınırsız bağımsız marka çalışma alanı</td>
+                  <td>Multi-Brand Management</td>
+                  <td>Expensive agency tiers</td>
+                  <td className="highlight-col">Unlimited independent brand workspaces in one dashboard</td>
                 </tr>
               </tbody>
             </table>
@@ -1079,27 +1089,27 @@ export default function GrowthLandingPage({ onBackToTools, initialDomain = '' })
         {/* How It Works Section */}
         <section id="how-it-works" className="landing-how-section">
           <div className="section-title-wrap">
-            <span className="section-eyebrow">3 BASİT ADIMDA BAŞLAYIN</span>
-            <h2 className="section-heading">Sitenizi Büyütmek Hiç Bu Kadar Kolay Olmamıştı</h2>
+            <span className="section-eyebrow">GET STARTED IN 3 SIMPLE STEPS</span>
+            <h2 className="section-heading">Growing Your Site Has Never Been This Effortless</h2>
           </div>
 
           <div className="how-steps-grid">
             <div className="how-step-card">
               <div className="how-step-number">01</div>
-              <h4>Sitenizin Adresini Girin</h4>
-              <p>Karmaşık kod eklemelerine gerek yok. Web sitenizin alan adını yazıp ücretsiz ilk analizinizi başlatın.</p>
+              <h4>Enter Your Website Domain</h4>
+              <p>No tracking scripts or code alterations required. Enter your domain to launch your instant free audit.</p>
             </div>
 
             <div className="how-step-card">
               <div className="how-step-number">02</div>
-              <h4>AI & Arama Raporunuzu İnceleyin</h4>
-              <p>Teknik sağlık, GEO hazırlığı, eksik meta veriler ve pazar rakiplerinizi itemize edilmiş raporda görün.</p>
+              <h4>Review Your AI & Search Audit</h4>
+              <p>Inspect technical health, GEO readiness, missing structured data, and competitors in an itemized report.</p>
             </div>
 
             <div className="how-step-card">
               <div className="how-step-number">03</div>
-              <h4>Aksiyonları Uygulayın & Katlayın</h4>
-              <p>Öncelikli Action Feed görevlerini tamamlayarak hem Google'da hem de yapay zeka arama motorlarında zirveye çıkın.</p>
+              <h4>Execute Actions & Scale</h4>
+              <p>Complete prioritized Action Feed tasks to capture top rankings across both Google and generative AI engines.</p>
             </div>
           </div>
         </section>
@@ -1107,8 +1117,8 @@ export default function GrowthLandingPage({ onBackToTools, initialDomain = '' })
         {/* FAQ Accordion Section */}
         <section id="faq" className="landing-faq-section">
           <div className="section-title-wrap">
-            <span className="section-eyebrow">SIKÇA SORULAN SORULAR</span>
-            <h2 className="section-heading">Merak Edilenler</h2>
+            <span className="section-eyebrow">FREQUENTLY ASKED QUESTIONS</span>
+            <h2 className="section-heading">Common Questions & Answers</h2>
           </div>
 
           <div className="faq-accordion-list">
@@ -1140,11 +1150,11 @@ export default function GrowthLandingPage({ onBackToTools, initialDomain = '' })
           <div className="bottom-cta-card">
             <div className="bottom-cta-badge">
               <Zap size={14} />
-              <span>Hemen Başlayın</span>
+              <span>Get Started</span>
             </div>
-            <h2>Sitenizin Gerçek Büyüme Potansiyelini Keşfedin</h2>
+            <h2>Discover Your Site's Real Growth Potential</h2>
             <p>
-              Hiçbir kurulum veya kredi kartı gerektirmeden web sitenizi girin ve ilk ücretsiz insight'ınızı anında alın.
+              Enter your website with no setup or credit card required and receive your free insight report immediately.
             </p>
             <button
               type="button"
@@ -1155,7 +1165,7 @@ export default function GrowthLandingPage({ onBackToTools, initialDomain = '' })
               }}
             >
               <Search size={18} />
-              <span>Web Siteni Şimdi Ücretsiz Analiz Et</span>
+              <span>Analyze Your Website for Free Now</span>
               <ArrowRight size={18} />
             </button>
           </div>
@@ -1170,7 +1180,7 @@ export default function GrowthLandingPage({ onBackToTools, initialDomain = '' })
               <BarChart3 size={16} className="text-blue" />
               <span>Cerilas Growth</span>
             </div>
-            <p>© 2026 Cerilas. Tüm hakları saklıdır. Google ve Yapay Zeka Arama İstihbaratı Platformu.</p>
+            <p>© 2026 Cerilas. All rights reserved. Google & AI Search Intelligence Platform.</p>
           </div>
           <div className="footer-links">
             <button 
@@ -1178,9 +1188,9 @@ export default function GrowthLandingPage({ onBackToTools, initialDomain = '' })
               className="footer-link-btn"
               onClick={onBackToTools || (() => { window.location.hash = '#/'; })}
             >
-              Cerilas Ücretsiz Araçlar
+              Cerilas Free Tools
             </button>
-            <a href="https://cerilas.com" target="_blank" rel="noopener noreferrer">Cerilas Ana Sayfa</a>
+            <a href="https://cerilas.com" target="_blank" rel="noopener noreferrer">Cerilas Homepage</a>
           </div>
         </div>
       </footer>

@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useRef } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import * as topojson from 'topojson-client';
 import * as d3Geo from 'd3-geo';
 import worldData from 'world-atlas/countries-110m.json';
@@ -23,49 +23,49 @@ import {
 
 // Country Name Normalization and Flag mappings
 const COUNTRY_META = {
-  'Turkey': { nameTr: 'Türkiye', flag: '🇹🇷', iso: 'TR' },
-  'United States of America': { nameTr: 'Amerika Birleşik Devletleri', flag: '🇺🇸', iso: 'US' },
-  'United States': { nameTr: 'Amerika Birleşik Devletleri', flag: '🇺🇸', iso: 'US' },
-  'Germany': { nameTr: 'Almanya', flag: '🇩🇪', iso: 'DE' },
-  'United Kingdom': { nameTr: 'Birleşik Krallık', flag: '🇬🇧', iso: 'GB' },
-  'Netherlands': { nameTr: 'Hollanda', flag: '🇳🇱', iso: 'NL' },
-  'France': { nameTr: 'Fransa', flag: '🇫🇷', iso: 'FR' },
-  'Italy': { nameTr: 'İtalya', flag: '🇮🇹', iso: 'IT' },
-  'Spain': { nameTr: 'İspanya', flag: '🇪🇸', iso: 'ES' },
-  'Canada': { nameTr: 'Kanada', flag: '🇨🇦', iso: 'CA' },
-  'Azerbaijan': { nameTr: 'Azerbaycan', flag: '🇦🇿', iso: 'AZ' },
-  'Russia': { nameTr: 'Rusya', flag: '🇷🇺', iso: 'RU' },
-  'Brazil': { nameTr: 'Brezilya', flag: '🇧🇷', iso: 'BR' },
-  'India': { nameTr: 'Hindistan', flag: '🇮🇳', iso: 'IN' },
-  'Australia': { nameTr: 'Avustralya', flag: '🇦🇺', iso: 'AU' },
-  'China': { nameTr: 'Çin', flag: '🇨🇳', iso: 'CN' },
-  'Japan': { nameTr: 'Japonya', flag: '🇯🇵', iso: 'JP' },
-  'Sweden': { nameTr: 'İsveç', flag: '🇸🇪', iso: 'SE' },
-  'Switzerland': { nameTr: 'İsviçre', flag: '🇨🇭', iso: 'CH' },
-  'Austria': { nameTr: 'Avusturya', flag: '🇦🇹', iso: 'AT' },
-  'Belgium': { nameTr: 'Belçika', flag: '🇧🇪', iso: 'BE' },
-  'Poland': { nameTr: 'Polonya', flag: '🇵🇱', iso: 'PL' },
-  'Ukraine': { nameTr: 'Ukrayna', flag: '🇺🇦', iso: 'UA' },
-  'Saudi Arabia': { nameTr: 'Suudi Arabistan', flag: '🇸🇦', iso: 'SA' },
-  'United Arab Emirates': { nameTr: 'Birleşik Arap Emirlikleri', flag: '🇦🇪', iso: 'AE' },
-  'Egypt': { nameTr: 'Mısır', flag: '🇪🇬', iso: 'EG' },
-  'Greece': { nameTr: 'Yunanistan', flag: '🇬🇷', iso: 'GR' },
-  'Bulgaria': { nameTr: 'Bulgaristan', flag: '🇧🇬', iso: 'BG' },
-  'Romania': { nameTr: 'Romanya', flag: '🇷🇴', iso: 'RO' },
-  'Norway': { nameTr: 'Norveç', flag: '🇳🇴', iso: 'NO' },
-  'Denmark': { nameTr: 'Danimarka', flag: '🇩🇰', iso: 'DK' },
-  'Finland': { nameTr: 'Finlandiya', flag: '🇫🇮', iso: 'FI' }
+  'Turkey': { nameEn: 'Turkey', flag: '🇹🇷', iso: 'TR' },
+  'United States of America': { nameEn: 'United States', flag: '🇺🇸', iso: 'US' },
+  'United States': { nameEn: 'United States', flag: '🇺🇸', iso: 'US' },
+  'Germany': { nameEn: 'Germany', flag: '🇩🇪', iso: 'DE' },
+  'United Kingdom': { nameEn: 'United Kingdom', flag: '🇬🇧', iso: 'GB' },
+  'Netherlands': { nameEn: 'Netherlands', flag: '🇳🇱', iso: 'NL' },
+  'France': { nameEn: 'France', flag: '🇫🇷', iso: 'FR' },
+  'Italy': { nameEn: 'Italy', flag: '🇮🇹', iso: 'IT' },
+  'Spain': { nameEn: 'Spain', flag: '🇪🇸', iso: 'ES' },
+  'Canada': { nameEn: 'Canada', flag: '🇨🇦', iso: 'CA' },
+  'Azerbaijan': { nameEn: 'Azerbaijan', flag: '🇦🇿', iso: 'AZ' },
+  'Russia': { nameEn: 'Russia', flag: '🇷🇺', iso: 'RU' },
+  'Brazil': { nameEn: 'Brazil', flag: '🇧🇷', iso: 'BR' },
+  'India': { nameEn: 'India', flag: '🇮🇳', iso: 'IN' },
+  'Australia': { nameEn: 'Australia', flag: '🇦🇺', iso: 'AU' },
+  'China': { nameEn: 'China', flag: '🇨🇳', iso: 'CN' },
+  'Japan': { nameEn: 'Japan', flag: '🇯🇵', iso: 'JP' },
+  'Sweden': { nameEn: 'Sweden', flag: '🇸🇪', iso: 'SE' },
+  'Switzerland': { nameEn: 'Switzerland', flag: '🇨🇭', iso: 'CH' },
+  'Austria': { nameEn: 'Austria', flag: '🇦🇹', iso: 'AT' },
+  'Belgium': { nameEn: 'Belgium', flag: '🇧🇪', iso: 'BE' },
+  'Poland': { nameEn: 'Poland', flag: '🇵🇱', iso: 'PL' },
+  'Ukraine': { nameEn: 'Ukraine', flag: '🇺🇦', iso: 'UA' },
+  'Saudi Arabia': { nameEn: 'Saudi Arabia', flag: '🇸🇦', iso: 'SA' },
+  'United Arab Emirates': { nameEn: 'United Arab Emirates', flag: '🇦🇪', iso: 'AE' },
+  'Egypt': { nameEn: 'Egypt', flag: '🇪🇬', iso: 'EG' },
+  'Greece': { nameEn: 'Greece', flag: '🇬🇷', iso: 'GR' },
+  'Bulgaria': { nameEn: 'Bulgaria', flag: '🇧🇬', iso: 'BG' },
+  'Romania': { nameEn: 'Romania', flag: '🇷🇴', iso: 'RO' },
+  'Norway': { nameEn: 'Norway', flag: '🇳🇴', iso: 'NO' },
+  'Denmark': { nameEn: 'Denmark', flag: '🇩🇰', iso: 'DK' },
+  'Finland': { nameEn: 'Finland', flag: '🇫🇮', iso: 'FI' }
 };
 
 const CHANNEL_CONFIG = {
-  'Organic Search': { label: 'Organik Arama (SEO)', color: '#38bdf8', bg: 'rgba(56, 189, 248, 0.15)' },
-  'Direct': { label: 'Doğrudan Trafik', color: '#818cf8', bg: 'rgba(129, 140, 248, 0.15)' },
-  'Organic Social': { label: 'Sosyal Medya', color: '#c084fc', bg: 'rgba(192, 132, 252, 0.15)' },
-  'Referral': { label: 'Yönlendirme (Backlink)', color: '#34d399', bg: 'rgba(52, 211, 153, 0.15)' },
-  'Email': { label: 'E-Posta Bülteni', color: '#fbbf24', bg: 'rgba(251, 191, 36, 0.15)' },
-  'Paid Search': { label: 'Ücretli Arama (Google Ads)', color: '#f87171', bg: 'rgba(248, 113, 113, 0.15)' },
-  'Paid Social': { label: 'Ücretli Sosyal Medya', color: '#f472b6', bg: 'rgba(244, 114, 182, 0.15)' },
-  'Other': { label: 'Diğer Kaynaklar', color: '#94a3b8', bg: 'rgba(148, 163, 184, 0.15)' }
+  'Organic Search': { label: 'Organic Search (SEO)', color: '#38bdf8', bg: 'rgba(56, 189, 248, 0.15)' },
+  'Direct': { label: 'Direct Traffic', color: '#818cf8', bg: 'rgba(129, 140, 248, 0.15)' },
+  'Organic Social': { label: 'Organic Social', color: '#c084fc', bg: 'rgba(192, 132, 252, 0.15)' },
+  'Referral': { label: 'Referral (Backlinks)', color: '#34d399', bg: 'rgba(52, 211, 153, 0.15)' },
+  'Email': { label: 'Email Newsletter', color: '#fbbf24', bg: 'rgba(251, 191, 36, 0.15)' },
+  'Paid Search': { label: 'Paid Search (Google Ads)', color: '#f87171', bg: 'rgba(248, 113, 113, 0.15)' },
+  'Paid Social': { label: 'Paid Social', color: '#f472b6', bg: 'rgba(244, 114, 182, 0.15)' },
+  'Other': { label: 'Other Sources', color: '#94a3b8', bg: 'rgba(148, 163, 184, 0.15)' }
 };
 
 export function normalizeCountryKey(name = '') {
@@ -82,7 +82,7 @@ export function normalizeCountryKey(name = '') {
 
 export function getCountryDisplayName(name = '') {
   const norm = normalizeCountryKey(name);
-  return COUNTRY_META[norm]?.nameTr || name;
+  return norm || name;
 }
 
 export function getCountryFlag(name = '') {
@@ -108,24 +108,24 @@ const DEFAULT_COUNTRIES = [
 
 const DEFAULT_CITIES = [
   // Turkey
-  { city: 'İstanbul', country: 'Turkey', sessions: 8940, activeUsers: 7120 },
+  { city: 'Istanbul', country: 'Turkey', sessions: 8940, activeUsers: 7120 },
   { city: 'Ankara', country: 'Turkey', sessions: 3120, activeUsers: 2450 },
-  { city: 'İzmir', country: 'Turkey', sessions: 2150, activeUsers: 1780 },
+  { city: 'Izmir', country: 'Turkey', sessions: 2150, activeUsers: 1780 },
   { city: 'Bursa', country: 'Turkey', sessions: 1240, activeUsers: 980 },
   { city: 'Antalya', country: 'Turkey', sessions: 950, activeUsers: 740 },
   { city: 'Kocaeli', country: 'Turkey', sessions: 640, activeUsers: 490 },
   { city: 'Adana', country: 'Turkey', sessions: 520, activeUsers: 410 },
   { city: 'Konya', country: 'Turkey', sessions: 460, activeUsers: 360 },
-  { city: 'Eskişehir', country: 'Turkey', sessions: 430, activeUsers: 340 },
+  { city: 'Eskisehir', country: 'Turkey', sessions: 430, activeUsers: 340 },
   { city: 'Gaziantep', country: 'Turkey', sessions: 380, activeUsers: 300 },
   { city: 'Trabzon', country: 'Turkey', sessions: 320, activeUsers: 250 },
   { city: 'Samsun', country: 'Turkey', sessions: 290, activeUsers: 230 },
   // Germany
   { city: 'Berlin', country: 'Germany', sessions: 1480, activeUsers: 1220 },
-  { city: 'Münih', country: 'Germany', sessions: 1120, activeUsers: 910 },
+  { city: 'Munich', country: 'Germany', sessions: 1120, activeUsers: 910 },
   { city: 'Frankfurt', country: 'Germany', sessions: 840, activeUsers: 690 },
   { city: 'Hamburg', country: 'Germany', sessions: 610, activeUsers: 510 },
-  { city: 'Köln', country: 'Germany', sessions: 490, activeUsers: 410 },
+  { city: 'Cologne', country: 'Germany', sessions: 490, activeUsers: 410 },
   { city: 'Stuttgart', country: 'Germany', sessions: 280, activeUsers: 210 },
   // United States
   { city: 'New York', country: 'United States', sessions: 1350, activeUsers: 1080 },
@@ -135,22 +135,22 @@ const DEFAULT_CITIES = [
   { city: 'Austin', country: 'United States', sessions: 340, activeUsers: 270 },
   { city: 'Seattle', country: 'United States', sessions: 260, activeUsers: 180 },
   // United Kingdom
-  { city: 'Londra', country: 'United Kingdom', sessions: 1280, activeUsers: 1040 },
+  { city: 'London', country: 'United Kingdom', sessions: 1280, activeUsers: 1040 },
   { city: 'Manchester', country: 'United Kingdom', sessions: 410, activeUsers: 320 },
   { city: 'Birmingham', country: 'United Kingdom', sessions: 290, activeUsers: 230 },
   { city: 'Edinburgh', country: 'United Kingdom', sessions: 200, activeUsers: 150 },
   // Netherlands
   { city: 'Amsterdam', country: 'Netherlands', sessions: 910, activeUsers: 730 },
   { city: 'Rotterdam', country: 'Netherlands', sessions: 420, activeUsers: 340 },
-  { city: 'Lahey (The Hague)', country: 'Netherlands', sessions: 320, activeUsers: 250 },
+  { city: 'The Hague', country: 'Netherlands', sessions: 320, activeUsers: 250 },
   // Azerbaijan
-  { city: 'Bakü', country: 'Azerbaijan', sessions: 1050, activeUsers: 840 },
-  { city: 'Gence', country: 'Azerbaijan', sessions: 160, activeUsers: 130 },
-  { city: 'Sumgayıt', country: 'Azerbaijan', sessions: 80, activeUsers: 70 },
+  { city: 'Baku', country: 'Azerbaijan', sessions: 1050, activeUsers: 840 },
+  { city: 'Ganja', country: 'Azerbaijan', sessions: 160, activeUsers: 130 },
+  { city: 'Sumqayit', country: 'Azerbaijan', sessions: 80, activeUsers: 70 },
   // France
   { city: 'Paris', country: 'France', sessions: 620, activeUsers: 510 },
   { city: 'Lyon', country: 'France', sessions: 210, activeUsers: 170 },
-  { city: 'Marsilya', country: 'France', sessions: 150, activeUsers: 110 }
+  { city: 'Marseille', country: 'France', sessions: 150, activeUsers: 110 }
 ];
 
 const DEFAULT_COUNTRY_SOURCES = {
@@ -223,6 +223,19 @@ export default function GrowthWorldMap({
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [hoveredCountry, setHoveredCountry] = useState(null);
   const [cityFilter, setCityFilter] = useState('');
+  const [isLightMode, setIsLightMode] = useState(false);
+
+  useEffect(() => {
+    const checkTheme = () => {
+      const isLight = document.documentElement.getAttribute('data-theme') === 'light' || 
+                      document.documentElement.classList.contains('light');
+      setIsLightMode(isLight);
+    };
+    checkTheme();
+    const observer = new MutationObserver(checkTheme);
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme', 'class'] });
+    return () => observer.disconnect();
+  }, []);
 
   // Fallback to rich defaults if no real data is available yet
   const hasRealData = Array.isArray(rawCountries) && rawCountries.length > 0;
@@ -275,7 +288,7 @@ export default function GrowthWorldMap({
     const data = countryMetricsMap.get(normKey);
 
     if (!data || data.sessions === 0) {
-      return '#1e293b'; // sleek dark empty land
+      return isLightMode ? '#e2e8f0' : '#1e293b'; // light grey / sleek dark empty land
     }
 
     // Heatmap scaling: logarithmic curve
@@ -360,7 +373,7 @@ export default function GrowthWorldMap({
 
     return {
       country: selectedCountry,
-      nameTr: getCountryDisplayName(selectedCountry),
+      nameEn: getCountryDisplayName(selectedCountry),
       flag: getCountryFlag(selectedCountry),
       stats: countryStats,
       cities: countryCities,
@@ -387,21 +400,21 @@ export default function GrowthWorldMap({
             <Globe2 size={18} color="#38bdf8" />
           </div>
           <div>
-            <h3 className="map-title">İnteraktif Dünya Trafik Isı Haritası</h3>
+            <h3 className="map-title">Interactive Global Traffic Heatmap</h3>
             <p className="map-subtitle">
-              Sitenizin küresel ziyaretçi coğrafyası. Herhangi bir ülkeye tıklayarak <strong>il/şehir detayını</strong> ve o ülkeye özel <strong>trafik kaynaklarını (kanalları)</strong> anında inceleyin.
+              Global visitor geography. Click any country to inspect <strong>city-level breakdowns</strong> and country-specific <strong>traffic channels</strong> in real time.
             </p>
           </div>
         </div>
 
         <div className="map-controls">
-          <button type="button" onClick={handleZoomIn} className="map-ctrl-btn" title="Haritayı Büyüt (+)">
+          <button type="button" onClick={handleZoomIn} className="map-ctrl-btn" title="Zoom In (+)">
             <ZoomIn size={14} />
           </button>
-          <button type="button" onClick={handleZoomOut} className="map-ctrl-btn" title="Haritayı Küçült (-)">
+          <button type="button" onClick={handleZoomOut} className="map-ctrl-btn" title="Zoom Out (-)">
             <ZoomOut size={14} />
           </button>
-          <button type="button" onClick={handleReset} className="map-ctrl-btn" title="Görünümü Sıfırla (↺)">
+          <button type="button" onClick={handleReset} className="map-ctrl-btn" title="Reset View (↺)">
             <RotateCcw size={14} />
           </button>
         </div>
@@ -427,8 +440,8 @@ export default function GrowthWorldMap({
               <feDropShadow dx="0" dy="0" stdDeviation="4" floodColor="#38bdf8" floodOpacity="0.8" />
             </filter>
             <linearGradient id="oceanGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#090d16" />
-              <stop offset="100%" stopColor="#0c1220" />
+              <stop offset="0%" stopColor={isLightMode ? '#f8fafc' : '#090d16'} />
+              <stop offset="100%" stopColor={isLightMode ? '#eef2f6' : '#0c1220'} />
             </linearGradient>
           </defs>
 
@@ -454,7 +467,7 @@ export default function GrowthWorldMap({
                   key={feature.id || idx}
                   d={pathData}
                   fill={fillColor}
-                  stroke={isSelected ? '#ffffff' : isHovered ? '#38bdf8' : 'rgba(255, 255, 255, 0.08)'}
+                  stroke={isSelected ? '#ffffff' : isHovered ? '#38bdf8' : (isLightMode ? 'rgba(100, 116, 139, 0.25)' : 'rgba(255, 255, 255, 0.08)')}
                   strokeWidth={isSelected ? 1.75 : isHovered ? 1.25 : 0.45}
                   filter={isSelected ? 'url(#mapSelectedGlow)' : undefined}
                   className="world-country-path"
@@ -467,8 +480,8 @@ export default function GrowthWorldMap({
                   onMouseEnter={(e) => {
                     const data = countryMetricsMap.get(normKey);
                     setHoveredCountry({
+                      country: countryName,
                       name: countryName,
-                      nameTr: getCountryDisplayName(countryName),
                       flag: getCountryFlag(countryName),
                       sessions: data?.sessions || 0,
                       activeUsers: data?.activeUsers || 0,
@@ -488,26 +501,26 @@ export default function GrowthWorldMap({
           <div className="map-country-tooltip">
             <div className="tooltip-head">
               <span className="tooltip-flag">{hoveredCountry.flag}</span>
-              <span className="tooltip-country-name">{hoveredCountry.nameTr}</span>
+              <span className="tooltip-country-name">{hoveredCountry.country}</span>
             </div>
             <div className="tooltip-stats">
               <div className="tooltip-stat">
                 <span className="tooltip-stat-val">{Number(hoveredCountry.sessions).toLocaleString()}</span>
-                <span className="tooltip-stat-lbl">Oturum</span>
+                <span className="tooltip-stat-lbl">Sessions</span>
               </div>
               <div className="tooltip-stat">
                 <span className="tooltip-stat-val">{Number(hoveredCountry.activeUsers).toLocaleString()}</span>
-                <span className="tooltip-stat-lbl">Kullanıcı</span>
+                <span className="tooltip-stat-lbl">Users</span>
               </div>
               <div className="tooltip-stat">
                 <span className="tooltip-stat-val text-primary">
-                  %{totalGlobalSessions > 0 ? ((hoveredCountry.sessions / totalGlobalSessions) * 100).toFixed(1) : 0}
+                  {totalGlobalSessions > 0 ? ((hoveredCountry.sessions / totalGlobalSessions) * 100).toFixed(1) : 0}%
                 </span>
-                <span className="tooltip-stat-lbl">Küresel Pay</span>
+                <span className="tooltip-stat-lbl">Global Share</span>
               </div>
             </div>
             <div className="tooltip-click-hint">
-              {hoveredCountry.sessions > 0 ? 'İl & kaynak detayını görmek için tıkla' : 'Trafik kaydı bulunamadı'}
+              {hoveredCountry.sessions > 0 ? 'Click to inspect city & channel breakdown' : 'No traffic recorded'}
             </div>
           </div>
         )}
@@ -515,13 +528,13 @@ export default function GrowthWorldMap({
         {/* Map Legend Bar */}
         <div className="map-legend-row">
           <div className="legend-scale">
-            <span className="legend-label">Düşük Trafik</span>
+            <span className="legend-label">Low Traffic</span>
             <div className="legend-gradient-bar" />
-            <span className="legend-label">Yüksek Trafik</span>
+            <span className="legend-label">High Traffic</span>
           </div>
           <div className="legend-active-count">
             <span className="legend-dot active" />
-            <span><strong>{countries.length}</strong> Ülkeden Trafik Kaydedildi</span>
+            <span>Traffic recorded from <strong>{countries.length}</strong> countries</span>
           </div>
         </div>
       </div>
@@ -534,10 +547,10 @@ export default function GrowthWorldMap({
               <span className="drilldown-flag">{activeCountryData.flag}</span>
               <div>
                 <h3 className="drilldown-title-text">
-                  {activeCountryData.nameTr} ({activeCountryData.country}) Coğrafi & Kaynak Röntgeni
+                  {activeCountryData.country} Breakdown & Acquisition Channels
                 </h3>
                 <span className="drilldown-subtitle">
-                  Bu ülkeye ait şehir düzeyinde kullanıcı dökümü ve kullanıcıların siteye ulaştığı trafik kanalları.
+                  City-level user distribution and acquisition channels for this country.
                 </span>
               </div>
             </div>
@@ -545,20 +558,20 @@ export default function GrowthWorldMap({
             <div className="drilldown-actions">
               <div className="country-quick-pill">
                 <Activity size={14} className="text-primary" />
-                <span>Toplam: <strong>{Number(activeCountryData.stats.sessions || 0).toLocaleString()}</strong> Oturum</span>
+                <span>Total: <strong>{Number(activeCountryData.stats.sessions || 0).toLocaleString()}</strong> Sessions</span>
               </div>
               <div className="country-quick-pill">
                 <Users size={14} className="text-success" />
-                <span><strong>{Number(activeCountryData.stats.activeUsers || 0).toLocaleString()}</strong> Kullanıcı</span>
+                <span><strong>{Number(activeCountryData.stats.activeUsers || 0).toLocaleString()}</strong> Users</span>
               </div>
               <button
                 type="button"
                 className="drilldown-close-btn"
                 onClick={() => onSelectCountry(null)}
-                title="Seçimi temizle ve dünya geneline dön"
+                title="Clear selection and return to global view"
               >
                 <ArrowLeft size={13} />
-                <span>Dünya Haritasına Dön</span>
+                <span>Back to Global Map</span>
               </button>
             </div>
           </div>
@@ -570,14 +583,14 @@ export default function GrowthWorldMap({
               <div className="drilldown-col-header">
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                   <MapPin size={16} color="#38bdf8" />
-                  <h4 className="drilldown-col-title">İl / Şehir Detayı ({activeCountryData.cities.length})</h4>
+                  <h4 className="drilldown-col-title">City Breakdown ({activeCountryData.cities.length})</h4>
                 </div>
                 {activeCountryData.cities.length > 5 && (
                   <div className="city-search-box">
                     <Search size={12} className="text-muted" />
                     <input
                       type="text"
-                      placeholder="Şehir filtrele..."
+                      placeholder="Filter cities..."
                       value={cityFilter}
                       onChange={(e) => setCityFilter(e.target.value)}
                       className="city-search-input"
@@ -589,8 +602,8 @@ export default function GrowthWorldMap({
               {activeCountryData.cities.length === 0 ? (
                 <div className="drilldown-empty-box">
                   <MapPin size={32} style={{ opacity: 0.35, margin: '0 auto 8px' }} />
-                  <p>Bu ülke için alt şehir verisi henüz GA4 tarafından ayrıştırılmamış.</p>
-                  <span className="text-muted text-xs">Genel ülke trafiği başarıyla kaydedildi.</span>
+                  <p>City-level data has not yet been resolved for this country in GA4.</p>
+                  <span className="text-muted text-xs">Country-level traffic has been recorded.</span>
                 </div>
               ) : (
                 <div className="drilldown-items-list">
@@ -604,8 +617,8 @@ export default function GrowthWorldMap({
                         <div className="city-rank">#{idx + 1}</div>
                         <div className="city-info-col">
                           <div className="city-name-row">
-                            <span className="city-name">{ct.city || 'Bilinmeyen Şehir'}</span>
-                            <span className="city-share-tag">%{sharePct}</span>
+                            <span className="city-name">{ct.city || 'Unknown City'}</span>
+                            <span className="city-share-tag">{sharePct}%</span>
                           </div>
                           <div className="city-progress-bar">
                             <div className="city-progress-fill" style={{ width: `${sharePct}%` }} />
@@ -613,10 +626,10 @@ export default function GrowthWorldMap({
                         </div>
                         <div className="city-stats-col">
                           <span className="city-sessions font-mono text-primary">
-                            {Number(ct.sessions || 0).toLocaleString()} ot.
+                            {Number(ct.sessions || 0).toLocaleString()} sess.
                           </span>
                           <span className="city-users font-mono text-muted">
-                            {Number(ct.activeUsers || 0).toLocaleString()} kull.
+                            {Number(ct.activeUsers || 0).toLocaleString()} usr.
                           </span>
                         </div>
                       </div>
@@ -631,16 +644,16 @@ export default function GrowthWorldMap({
               <div className="drilldown-col-header">
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                   <Share2 size={16} color="#818cf8" />
-                  <h4 className="drilldown-col-title">Bu Ülkenin Trafik Kaynakları (Sources & Kanallar)</h4>
+                  <h4 className="drilldown-col-title">Traffic Channels & Attribution</h4>
                 </div>
-                <span className="tag-pill-badge">{activeCountryData.nameTr} Trafiği</span>
+                <span className="tag-pill-badge">{activeCountryData.country} Traffic</span>
               </div>
 
               {activeCountryData.sources.length === 0 ? (
                 <div className="drilldown-empty-box">
                   <Layers size={32} style={{ opacity: 0.35, margin: '0 auto 8px' }} />
-                  <p>Bu ülkeye ait kanal kırılımı Google Analytics'te toplanıyor.</p>
-                  <span className="text-muted text-xs">Genel kanal oranları genel edinme sekmesinde görüntülenebilir.</span>
+                  <p>Channel breakdown is syncing with Google Analytics.</p>
+                  <span className="text-muted text-xs">Overall channel percentages are available in the acquisition view.</span>
                 </div>
               ) : (
                 <div className="drilldown-items-list">
@@ -660,7 +673,7 @@ export default function GrowthWorldMap({
                           <div className="source-name-row">
                             <span className="source-name">{cfg.label || src.channel}</span>
                             <span className="source-share-tag" style={{ color: cfg.color }}>
-                              %{sharePct}
+                              {sharePct}%
                             </span>
                           </div>
                           <div className="source-progress-bar">
@@ -673,10 +686,10 @@ export default function GrowthWorldMap({
 
                         <div className="source-stats-col">
                           <span className="source-sessions font-mono" style={{ color: cfg.color }}>
-                            {Number(src.sessions || 0).toLocaleString()} ot.
+                            {Number(src.sessions || 0).toLocaleString()} sess.
                           </span>
                           <span className="source-users font-mono text-muted">
-                            {Number(src.activeUsers || 0).toLocaleString()} kull.
+                            {Number(src.activeUsers || 0).toLocaleString()} usr.
                           </span>
                         </div>
                       </div>
@@ -696,11 +709,11 @@ export default function GrowthWorldMap({
             </div>
             <div className="tab-infobar-content">
               <h4 className="tab-infobar-title">
-                <span>En Çok Ziyaretçi Gönderen Ülkeler Sıralaması</span>
-                <span className="tab-badge-tag">{countries.length} ülke tespit edildi</span>
+                <span>Top Traffic Countries by Volume</span>
+                <span className="tab-badge-tag">{countries.length} countries detected</span>
               </h4>
               <p className="tab-infobar-desc">
-                Ziyaretçilerinizin coğrafi dağılımı. Aşağıdaki listeden veya yukarıdaki <strong>dünya haritasından</strong> herhangi bir ülkeye tıklayarak il ve trafik kaynağı dökümünü açabilirsiniz.
+                Geographical distribution of your visitors. Click any country below or on the <strong>world map</strong> above to inspect city-level and channel breakdowns.
               </p>
             </div>
           </div>
@@ -709,19 +722,19 @@ export default function GrowthWorldMap({
             <table className="growth-table">
               <thead>
                 <tr>
-                  <th>Sıra</th>
-                  <th>Ülke Adı</th>
-                  <th>Oturumlar (Sessions)</th>
-                  <th>Aktif Kullanıcı</th>
-                  <th>Küresel Pay</th>
-                  <th style={{ textAlign: 'right' }}>İl & Kaynak Röntgeni</th>
+                  <th>Rank</th>
+                  <th>Country</th>
+                  <th>Sessions</th>
+                  <th>Active Users</th>
+                  <th>Global Share</th>
+                  <th style={{ textAlign: 'right' }}>Breakdown</th>
                 </tr>
               </thead>
               <tbody>
                 {countries.length === 0 ? (
                   <tr>
                     <td colSpan={6} style={{ textAlign: 'center', padding: '36px', color: '#94a3b8' }}>
-                      Seçili tarih aralığında henüz ülke verisi bulunmuyor.
+                      No country data available for the selected period.
                     </td>
                   </tr>
                 ) : (
@@ -730,22 +743,21 @@ export default function GrowthWorldMap({
                       ? ((c.sessions / totalGlobalSessions) * 100).toFixed(1)
                       : 0;
                     const flag = getCountryFlag(c.country);
-                    const nameTr = getCountryDisplayName(c.country);
+                    const displayName = getCountryDisplayName(c.country);
 
                     return (
                       <tr 
                         key={cIdx} 
                         className="clickable-country-row"
                         onClick={() => onSelectCountry(c.country)}
-                        title={`${nameTr} detaylarını haritada ve alt panelde aç`}
+                        title={`Open ${displayName} details on map and breakdown panel`}
                       >
                         <td style={{ width: 45 }} className="font-mono text-muted">#{cIdx + 1}</td>
                         <td>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
                             <span style={{ fontSize: '1.25rem', lineHeight: 1 }}>{flag}</span>
                             <div>
-                              <strong style={{ color: '#ffffff', display: 'block', fontSize: '0.9rem' }}>{nameTr}</strong>
-                              <span style={{ color: '#94a3b8', fontSize: '0.75rem' }}>{c.country}</span>
+                              <strong style={{ color: 'var(--text-main, #ffffff)', display: 'block', fontSize: '0.9rem' }}>{displayName}</strong>
                             </div>
                           </div>
                         </td>
@@ -753,10 +765,10 @@ export default function GrowthWorldMap({
                         <td className="font-mono">{Number(c.activeUsers).toLocaleString()}</td>
                         <td>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-                            <div style={{ width: 60, height: 6, background: 'rgba(255,255,255,0.08)', borderRadius: 3, overflow: 'hidden' }}>
+                            <div style={{ width: 60, height: 6, background: isLightMode ? '#e2e8f0' : 'rgba(255,255,255,0.08)', borderRadius: 3, overflow: 'hidden' }}>
                               <div style={{ width: `${Math.min(100, Math.max(3, parseFloat(sharePct)))}%`, height: '100%', background: '#38bdf8', borderRadius: 3 }} />
                             </div>
-                            <span className="ctr-badge">%{sharePct}</span>
+                            <span className="ctr-badge">{sharePct}%</span>
                           </div>
                         </td>
                         <td style={{ textAlign: 'right' }}>
@@ -768,7 +780,7 @@ export default function GrowthWorldMap({
                               onSelectCountry(c.country);
                             }}
                           >
-                            <span>İl & Kaynak Detayı</span>
+                            <span>Inspect Breakdown</span>
                             <ArrowUpRight size={13} />
                           </button>
                         </td>

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { 
   Bot, 
   Sparkles, 
@@ -6,6 +7,7 @@ import {
   Play, 
   CheckCircle2, 
   AlertCircle, 
+  AlertTriangle, 
   Globe, 
   Languages, 
   ExternalLink, 
@@ -49,12 +51,12 @@ function formatRelativeTime(dateStr) {
   try {
     const diffMs = Date.now() - new Date(dateStr).getTime();
     const diffMins = Math.floor(diffMs / 60000);
-    if (diffMins < 1) return 'Az önce';
-    if (diffMins < 60) return `${diffMins} dk önce`;
+    if (diffMins < 1) return 'Just now';
+    if (diffMins < 60) return `${diffMins}m ago`;
     const diffHours = Math.floor(diffMins / 60);
-    if (diffHours < 24) return `${diffHours} sa önce`;
+    if (diffHours < 24) return `${diffHours}h ago`;
     const diffDays = Math.floor(diffHours / 24);
-    return `${diffDays} gün önce`;
+    return `${diffDays}d ago`;
   } catch {
     return '';
   }
@@ -64,7 +66,7 @@ function formatFullDate(dateStr) {
   if (!dateStr) return '';
   try {
     const d = new Date(dateStr);
-    return d.toLocaleDateString('tr-TR', {
+    return d.toLocaleDateString('en-US', {
       day: 'numeric',
       month: 'short',
       year: 'numeric',
@@ -90,6 +92,17 @@ export default function GrowthAiVisibility() {
   const [addingPrompt, setAddingPrompt] = useState(false);
   const [runningPromptId, setRunningPromptId] = useState(null);
   const [lastRunResult, setLastRunResult] = useState(null);
+
+  // AI Prompt Generator Modal State
+  const [isAiGenModalOpen, setIsAiGenModalOpen] = useState(false);
+  const [generatingAiPrompts, setGeneratingAiPrompts] = useState(false);
+  const [aiGeneratedSuggestions, setAiGeneratedSuggestions] = useState([]);
+  const [savingAiPrompts, setSavingAiPrompts] = useState(false);
+  const [aiGenError, setAiGenError] = useState('');
+
+  // Delete Prompt Modal State
+  const [deleteTargetPrompt, setDeleteTargetPrompt] = useState(null);
+  const [deletingPromptId, setDeletingPromptId] = useState(null);
 
   // Live Real-Time GEO Readiness Audit
   const [geoReadiness, setGeoReadiness] = useState(null);
@@ -189,8 +202,12 @@ export default function GrowthAiVisibility() {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Promptlar alınamadı.');
-      setPrompts(data.data || []);
+      if (!res.ok) throw new Error(data.error || 'Failed to fetch prompts.');
+      const list = data.data || [];
+      setPrompts(list);
+      try {
+        window.dispatchEvent(new CustomEvent('growth:prompts-updated', { detail: { count: list.length } }));
+      } catch {}
     } catch (err) {
       setError(err.message);
     } finally {
@@ -240,7 +257,7 @@ export default function GrowthAiVisibility() {
 
   const handleDeleteReport = async (reportId, e) => {
     if (e) e.stopPropagation();
-    if (!confirm('Bu tarama raporunu silmek istediğinize emin misiniz?')) return;
+    if (!confirm('Are you sure you want to delete this scan report?')) return;
     try {
       const res = await fetch(`/api/growth/workspaces/${activeWorkspace.id}/ai-reports/${reportId}`, {
         method: 'DELETE',
@@ -275,7 +292,7 @@ export default function GrowthAiVisibility() {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'GEO analizi alınamadı.');
+      if (!res.ok) throw new Error(data.error || 'Failed to fetch GEO readiness analysis.');
       setGeoReadiness(data.data);
     } catch (err) {
       console.error('Fetch GEO readiness error:', err);
@@ -304,7 +321,7 @@ export default function GrowthAiVisibility() {
     if (!newPromptText.trim()) return;
 
     if (prompts.length >= 10) {
-      alert('Maksimum 10 prompt takip limitine ulaştınız. Yeni bir prompt eklemek için lütfen listenizdeki mevcut promptlardan birini silin.');
+      alert('Maximum limit of 10 tracked prompts reached. To add a new prompt, please delete an existing one.');
       return;
     }
 
@@ -318,21 +335,21 @@ export default function GrowthAiVisibility() {
         },
         body: JSON.stringify({
           prompt: newPromptText.trim(),
-          topic: newPromptTopic.trim() || 'Genel',
+          topic: newPromptTopic.trim() || 'General',
           country: selectedCountry || 'TR',
           language: selectedLanguage || 'tr'
         })
       });
       const data = await res.json();
       if (!res.ok) {
-        throw new Error(data.error || 'Prompt eklenemedi.');
+        throw new Error(data.error || 'Failed to add prompt.');
       }
       setNewPromptText('');
       setNewPromptTopic('');
       fetchPrompts();
     } catch (err) {
       console.error('Add prompt error:', err);
-      alert(err.message || 'Prompt eklenirken bir hata oluştu.');
+      alert(err.message || 'An error occurred while adding prompt.');
     } finally {
       setAddingPrompt(false);
     }
@@ -347,7 +364,7 @@ export default function GrowthAiVisibility() {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Simülasyon çalıştırılamadı.');
+      if (!res.ok) throw new Error(data.error || 'Simulation could not be executed.');
       setLastRunResult(data.data);
       fetchPrompts();
     } catch (err) {
@@ -355,6 +372,108 @@ export default function GrowthAiVisibility() {
       alert(err.message);
     } finally {
       setRunningPromptId(null);
+    }
+  };
+
+  // AI Prompt Generator Handlers
+  const handleOpenAiModal = () => {
+    if (prompts.length >= 10) {
+      alert('Maximum limit of 10 tracked prompts already reached (10/10).');
+      return;
+    }
+    setIsAiGenModalOpen(true);
+    setAiGenError('');
+    setAiGeneratedSuggestions([]);
+    fetchAiPromptSuggestions();
+  };
+
+  const fetchAiPromptSuggestions = async () => {
+    if (!activeWorkspace?.id || !token) return;
+    setGeneratingAiPrompts(true);
+    setAiGenError('');
+    try {
+      const res = await fetch(`/api/growth/workspaces/${activeWorkspace.id}/prompts/generate-ai`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          country: selectedCountry || 'TR',
+          language: selectedLanguage || 'tr'
+        })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to generate prompt suggestions.');
+      const suggestions = (data.suggestions || []).map(s => ({ ...s, selected: true }));
+      setAiGeneratedSuggestions(suggestions);
+    } catch (err) {
+      console.error('Fetch AI prompt suggestions error:', err);
+      setAiGenError(err.message || 'An error occurred while generating queries with AI.');
+    } finally {
+      setGeneratingAiPrompts(false);
+    }
+  };
+
+  const handleToggleSuggestion = (index) => {
+    setAiGeneratedSuggestions(prev => prev.map((item, idx) => idx === index ? { ...item, selected: !item.selected } : item));
+  };
+
+  const handleToggleSelectAllSuggestions = () => {
+    const allSelected = aiGeneratedSuggestions.every(s => s.selected);
+    setAiGeneratedSuggestions(prev => prev.map(s => ({ ...s, selected: !allSelected })));
+  };
+
+  const handleSaveSelectedAiPrompts = async () => {
+    const selectedItems = aiGeneratedSuggestions.filter(s => s.selected);
+    if (selectedItems.length === 0 || !activeWorkspace?.id || !token) return;
+
+    setSavingAiPrompts(true);
+    try {
+      const res = await fetch(`/api/growth/workspaces/${activeWorkspace.id}/prompts/batch`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          prompts: selectedItems.map(s => ({ prompt: s.prompt, topic: s.topic })),
+          country: selectedCountry || 'TR',
+          language: selectedLanguage || 'tr'
+        })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to add queries.');
+      setIsAiGenModalOpen(false);
+      setAiGeneratedSuggestions([]);
+      fetchPrompts();
+    } catch (err) {
+      console.error('Save AI prompts error:', err);
+      alert(err.message || 'An error occurred while adding queries.');
+    } finally {
+      setSavingAiPrompts(false);
+    }
+  };
+
+  // Delete Prompt Handler
+  const handleConfirmDeletePrompt = async () => {
+    if (!deleteTargetPrompt || !activeWorkspace?.id || !token) return;
+    const promptId = deleteTargetPrompt.id;
+    setDeletingPromptId(promptId);
+    try {
+      const res = await fetch(`/api/growth/workspaces/${activeWorkspace.id}/prompts/${promptId}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Prompt silinemedi.');
+      setDeleteTargetPrompt(null);
+      fetchPrompts();
+    } catch (err) {
+      console.error('Delete prompt error:', err);
+      alert(err.message || 'Prompt silinemedi.');
+    } finally {
+      setDeletingPromptId(null);
     }
   };
 
@@ -368,7 +487,7 @@ export default function GrowthAiVisibility() {
     setBatchResultsMap({});
 
     const collectedResults = [];
-    const primaryDomain = (activeWorkspace.primary_domain || '')
+    const primaryDomain = String(activeWorkspace?.primary_domain || '')
       .toLowerCase()
       .replace(/^(https?:\/\/)?(www\.)?/, '')
       .split('/')[0]
@@ -413,7 +532,7 @@ export default function GrowthAiVisibility() {
             domainCited: false,
             citationsCount: 0,
             citations: [],
-            responseText: 'Tarama başarısız: ' + (data.error || 'Bilinmeyen hata'),
+            responseText: 'Scan failed: ' + (data.error || 'Unknown error'),
             isError: true
           };
           collectedResults.push(errResult);
@@ -430,7 +549,7 @@ export default function GrowthAiVisibility() {
           domainCited: false,
           citationsCount: 0,
           citations: [],
-          responseText: 'Bağlantı hatası: ' + err.message,
+          responseText: 'Connection error: ' + err.message,
           isError: true
         };
         collectedResults.push(errResult);
@@ -525,21 +644,21 @@ export default function GrowthAiVisibility() {
       <GrowthPageCover
         badge="Generative Engine Optimization (GEO)"
         badgeIcon={Bot}
-        title="Yapay Zeka (GEO) Görünürlüğü & Alıntı Takibi"
-        subtitle="Google Gemini, ChatGPT Search ve Perplexity gibi yapay zeka arama motorlarında markanızın anılma ve kaynak gösterilme oranı."
+        title="AI (GEO) Visibility &amp; Citation Tracking"
+        subtitle="Monitor how often your brand is recommended and cited as a source across AI search engines like Google Gemini, ChatGPT Search, and Perplexity."
         coverImage="/growth-covers/geo-cover.jpg"
         actions={
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', flexWrap: 'wrap' }}>
-              <span style={{ fontSize: '0.8rem', color: '#94a3b8', fontWeight: 600 }}>Taranan AI Motorları:</span>
+              <span style={{ fontSize: '0.8rem', color: '#94a3b8', fontWeight: 600 }}>Scanned AI Engines:</span>
               <AiEngineGroup size={18} />
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
               <span className="growth-badge blue" style={{ fontSize: '0.74rem' }}>
-                <MessageSquare size={11} /> {prompts.length} / 10 Takip Edilen Prompt
+                <MessageSquare size={11} /> {prompts.length} / 10 Tracked Prompts
               </span>
               <span className="growth-badge purple" style={{ fontSize: '0.74rem' }}>
-                <History size={11} /> {reportsList.length} Kayıtlı Rapor
+                <History size={11} /> {reportsList.length} Saved Reports
               </span>
             </div>
           </div>
@@ -557,7 +676,7 @@ export default function GrowthAiVisibility() {
                 )}
                 {geoReadiness && (
                   <span className={`geo-badge-status ${geoReadiness.geoScore >= 70 ? 'good' : 'warning'}`}>
-                    {geoReadiness.geoScore >= 80 ? '✓ Mükemmel AI Erişimi' : geoReadiness.geoScore >= 50 ? '⚡ Geliştirilebilir' : '✕ Eksikler Var'}
+                    {geoReadiness.geoScore >= 80 ? '✓ Excellent AI Readiness' : geoReadiness.geoScore >= 50 ? '⚡ Improvements Needed' : '✕ Deficiencies Found'}
                   </span>
                 )}
               </div>
@@ -567,10 +686,10 @@ export default function GrowthAiVisibility() {
                 onClick={() => fetchGeoReadiness(true)}
                 disabled={scanningGeoReadiness || !activeWorkspace?.primary_domain}
                 className="hero-score-rescan-btn"
-                title="Canlı robots.txt, llms.txt ve Schema standartlarını yeniden tara"
+                title="Re-scan live robots.txt, llms.txt and Schema standards"
               >
                 <RefreshCw size={11} className={scanningGeoReadiness ? 'spin' : ''} />
-                <span>{scanningGeoReadiness ? 'Taranıyor...' : 'Şimdi Yeniden Tara'}</span>
+                <span>{scanningGeoReadiness ? 'Scanning...' : 'Rescan Now'}</span>
               </button>
             </div>
 
@@ -578,7 +697,7 @@ export default function GrowthAiVisibility() {
             {loadingGeoReadiness ? (
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '1rem 0' }}>
                 <Loader2 size={20} className="spin" style={{ color: '#3b82f6' }} />
-                <span style={{ fontSize: '0.82rem', color: '#94a3b8' }}>Canlı AI hazırbulunuşluk standartları inceleniyor...</span>
+                <span style={{ fontSize: '0.82rem', color: '#94a3b8' }}>Evaluating live AI readiness standards...</span>
               </div>
             ) : geoReadiness ? (
               <>
@@ -590,14 +709,14 @@ export default function GrowthAiVisibility() {
 
                   <div className="hero-score-widget-texts">
                     <h4 className="hero-score-widget-title">
-                      {geoReadiness.geoScore >= 80 ? 'Yüksek AI Hazırbulunuşluğu & Taranabilirlik' : 'Yapay Zeka Taranabilirlik Optimizasyonu Gerekli'}
+                      {geoReadiness.geoScore >= 80 ? 'High AI Readiness & Crawlability' : 'AI Crawlability Optimization Recommended'}
                     </h4>
                     <p className="hero-score-widget-desc">
-                      {geoReadiness.summaryText || 'Alan adınızın taranabilirlik ve alıntılanabilirlik durumu yapay zeka arama motorları için analiz edildi.'}
+                      {geoReadiness.summaryText || 'Your domain crawlability and citation readiness have been analyzed for AI search engines.'}
                     </p>
                     {geoReadiness.checked_at && (
                       <span style={{ fontSize: '0.72rem', color: '#64748b', marginTop: 2 }}>
-                        Son Tarama: {formatRelativeTime(geoReadiness.checked_at)}
+                        Last Scan: {formatRelativeTime(geoReadiness.checked_at)}
                       </span>
                     )}
                   </div>
@@ -617,7 +736,7 @@ export default function GrowthAiVisibility() {
                         title={std.desc}
                       >
                         <span className={`hero-std-dot ${isPassed ? 'passed' : 'failed'}`} />
-                        <span>{std.title}: {isPassed ? 'Aktif' : 'Eksik'}</span>
+                        <span>{std.title}: {isPassed ? 'Active' : 'Missing'}</span>
                         {std.link && <ExternalLink size={10} style={{ opacity: 0.6 }} />}
                       </a>
                     );
@@ -627,7 +746,7 @@ export default function GrowthAiVisibility() {
             ) : (
               <div style={{ padding: '0.75rem 0', fontSize: '0.82rem', color: '#94a3b8' }}>
                 <Globe size={16} style={{ display: 'inline', marginRight: 6, verticalAlign: 'text-bottom' }} />
-                Alan adı analiz edilmedi. Ayarlardan alan adınızı doğrulayın.
+                Domain not analyzed. Please verify your domain in Settings.
               </div>
             )}
           </div>
@@ -644,20 +763,20 @@ export default function GrowthAiVisibility() {
           <div className="ai-batch-scan-header">
             <div className="ai-batch-scan-title">
               <Loader2 size={20} className="spin" color="#3b82f6" />
-              <span>Canlı Yapay Zeka Taraması Devam Ediyor...</span>
+              <span>Live AI Scan in Progress...</span>
             </div>
             <div className="ai-batch-scan-actions">
               <button type="button" onClick={handleCancelBatchScan} className="ai-batch-cancel-btn">
                 <StopCircle size={14} />
-                <span>Taramayı Durdur</span>
+                <span>Stop Scan</span>
               </button>
             </div>
           </div>
 
           <div className="ai-batch-progress-bar-wrap">
             <div className="ai-batch-progress-meta">
-              <span>İncelenen Prompt: {batchProgress.current} / {batchProgress.total}</span>
-              <span>%{Math.round((batchProgress.current / (batchProgress.total || 1)) * 100)} Tamamlandı</span>
+              <span>Scanned Prompts: {batchProgress.current} / {batchProgress.total}</span>
+              <span>{Math.round((batchProgress.current / (batchProgress.total || 1)) * 100)}% Completed</span>
             </div>
             <div className="ai-batch-progress-track">
               <div 
@@ -684,42 +803,42 @@ export default function GrowthAiVisibility() {
                     {isProbing ? (
                       <span className="ai-pill probing">
                         <Loader2 size={12} className="spin" />
-                        <span>Gemini 3.8 Sorgulanıyor...</span>
+                        <span>Querying Gemini 3.8...</span>
                       </span>
                     ) : isDone ? (
                       <>
                         {res.brandMentioned ? (
                           <span className="ai-pill success">
                             <Check size={11} strokeWidth={3} />
-                            <span>Marka Anıldı</span>
+                            <span>Brand Mentioned</span>
                           </span>
                         ) : (
                           <span className="ai-pill danger">
                             <X size={11} strokeWidth={3} />
-                            <span>Anılmadı</span>
+                            <span>Not Mentioned</span>
                           </span>
                         )}
 
                         {res.domainCited ? (
                           <span className="ai-pill success">
                             <Globe size={11} />
-                            <span>Siteniz Alıntılandı</span>
+                            <span>Your Site Cited</span>
                           </span>
                         ) : res.citationsCount > 0 ? (
                           <span className="ai-pill neutral">
                             <Globe size={11} />
-                            <span>{res.citationsCount} Dış Kaynak</span>
+                            <span>{res.citationsCount} External Sources</span>
                           </span>
                         ) : (
                           <span className="ai-pill neutral">
-                            <span>Alıntı Yok</span>
+                            <span>No Citations</span>
                           </span>
                         )}
                       </>
                     ) : (
                       <span className="ai-pill queued">
                         <Clock size={11} />
-                        <span>Sırada Bekliyor</span>
+                        <span>Queued in Line</span>
                       </span>
                     )}
                   </div>
@@ -741,7 +860,7 @@ export default function GrowthAiVisibility() {
                 </div>
                 <div>
                   <h3 className="ai-report-heading">
-                    AI Görünürlük &amp; Alıntı Raporu
+                    AI Visibility &amp; Citation Report
                   </h3>
                   <div className="ai-report-meta-row">
                     <span className="ai-report-meta-item highlight">
@@ -756,7 +875,7 @@ export default function GrowthAiVisibility() {
                     </span>
                     <span className="ai-report-meta-dot">•</span>
                     <span className="ai-report-meta-item">
-                      <span>{activeReport.total_prompts} Prompt Analizi</span>
+                      <span>{activeReport.total_prompts} Prompts Analyzed</span>
                     </span>
                   </div>
                 </div>
@@ -774,7 +893,7 @@ export default function GrowthAiVisibility() {
                   >
                     {reportsList.map(r => (
                       <option key={r.id} value={r.id}>
-                        {formatFullDate(r.created_at)} (Skor: %{r.visibility_score})
+                        {formatFullDate(r.created_at)} (Score: {r.visibility_score}%)
                       </option>
                     ))}
                   </select>
@@ -786,7 +905,7 @@ export default function GrowthAiVisibility() {
                   type="button"
                   onClick={(e) => handleDeleteReport(activeReport.id, e)}
                   className="growth-secondary-btn"
-                  title="Bu raporu arşivden sil"
+                  title="Delete this report from archive"
                   style={{ padding: '0.35rem 0.65rem', color: '#f87171' }}
                 >
                   <Trash2 size={13} />
@@ -798,42 +917,42 @@ export default function GrowthAiVisibility() {
           {/* 4 Mini Report Metric Cards */}
           <div className="ai-report-metrics-grid">
             <div className="ai-report-metric-card score-card">
-              <span className="ai-report-metric-label">GEO Görünürlük Skoru</span>
+              <span className="ai-report-metric-label">GEO Visibility Score</span>
               <div className={`ai-report-metric-val ${activeReport.visibility_score >= 70 ? 'score-high' : activeReport.visibility_score >= 40 ? 'score-mid' : 'score-low'}`}>
-                %{activeReport.visibility_score}
+                {activeReport.visibility_score}%
               </div>
               <span className="ai-report-metric-sub">
-                {activeReport.visibility_score >= 70 ? 'Yüksek Görünürlük' : activeReport.visibility_score >= 40 ? 'Orta Düzey Varlık' : 'Geliştirilmeli'}
+                {activeReport.visibility_score >= 70 ? 'High Visibility' : activeReport.visibility_score >= 40 ? 'Moderate Presence' : 'Needs Improvement'}
               </span>
             </div>
 
             <div className="ai-report-metric-card">
-              <span className="ai-report-metric-label">Marka Anılma Oranı</span>
+              <span className="ai-report-metric-label">Brand Mention Rate</span>
               <div className="ai-report-metric-val">
                 {activeReport.mentioned_count} / {activeReport.total_prompts}
               </div>
               <span className="ai-report-metric-sub">
-                %{Math.round(((activeReport.mentioned_count || 0) / (activeReport.total_prompts || 1)) * 100)} Promptta markanız anıldı
+                {Math.round(((activeReport.mentioned_count || 0) / (activeReport.total_prompts || 1)) * 100)}% of prompts mentioned your brand
               </span>
             </div>
 
             <div className="ai-report-metric-card">
-              <span className="ai-report-metric-label">Siteniz Kaynak Gösterildi</span>
+              <span className="ai-report-metric-label">Your Site Was Cited</span>
               <div className="ai-report-metric-val text-success">
                 {activeReport.cited_count} / {activeReport.total_prompts}
               </div>
               <span className="ai-report-metric-sub">
-                %{Math.round(((activeReport.cited_count || 0) / (activeReport.total_prompts || 1)) * 100)} Doğrudan URL / Domain alıntısı
+                {Math.round(((activeReport.cited_count || 0) / (activeReport.total_prompts || 1)) * 100)}% direct URL / domain citations
               </span>
             </div>
 
             <div className="ai-report-metric-card">
-              <span className="ai-report-metric-label">Toplam Alıntılanan Kaynak</span>
+              <span className="ai-report-metric-label">Total Sources Cited</span>
               <div className="ai-report-metric-val">
                 {activeReport.summary?.totalCitationsFound || 0}
               </div>
               <span className="ai-report-metric-sub">
-                {activeReport.summary?.uniqueDomainsCited || 0} Farklı alan adı cite edildi
+                {activeReport.summary?.uniqueDomainsCited || 0} Unique domains cited
               </span>
             </div>
           </div>
@@ -843,7 +962,7 @@ export default function GrowthAiVisibility() {
             <div className="ai-report-sources-box">
               <div className="ai-report-sources-title">
                 <Globe size={13} color="#3b82f6" />
-                <span>Yapay Zeka Tarafından En Çok Kaynak Gösterilen Alan Adları:</span>
+                <span>Top Domains Cited by AI Engines:</span>
               </div>
               <div className="ai-report-sources-pills">
                 {activeReport.summary.topSources.map((s, sIdx) => {
@@ -852,7 +971,7 @@ export default function GrowthAiVisibility() {
                     <span key={sIdx} className={`ai-source-tag ${isUser ? 'is-user' : ''}`}>
                       <Globe size={11} />
                       <span>{s.domain}</span>
-                      <span className="ai-source-count">{s.count} alıntı</span>
+                      <span className="ai-source-count">{s.count} citations</span>
                     </span>
                   );
                 })}
@@ -862,8 +981,8 @@ export default function GrowthAiVisibility() {
 
           {/* Filter Bar */}
           <div className="ai-report-filters-bar">
-            <span style={{ fontSize: '0.84rem', fontWeight: 600, color: '#ffffff' }}>
-              İncelenen Promptlar ({filteredReportResults.length} / {reportResults.length})
+            <span style={{ fontSize: '0.84rem', fontWeight: 600, color: 'var(--text-main, #ffffff)' }}>
+              Analyzed Prompts ({filteredReportResults.length} / {reportResults.length})
             </span>
 
             <div className="ai-filter-tabs">
@@ -872,28 +991,28 @@ export default function GrowthAiVisibility() {
                 className={`ai-filter-tab ${activeFilter === 'all' ? 'active' : ''}`}
                 onClick={() => setActiveFilter('all')}
               >
-                Tümü ({reportResults.length})
+                All ({reportResults.length})
               </button>
               <button 
                 type="button" 
                 className={`ai-filter-tab ${activeFilter === 'cited' ? 'active' : ''}`}
                 onClick={() => setActiveFilter('cited')}
               >
-                Siteniz Kaynak Gösterilenler ({reportResults.filter(r => r.domainCited).length})
+                Your Site Cited ({reportResults.filter(r => r.domainCited).length})
               </button>
               <button 
                 type="button" 
                 className={`ai-filter-tab ${activeFilter === 'mentioned' ? 'active' : ''}`}
                 onClick={() => setActiveFilter('mentioned')}
               >
-                Marka Anılanlar ({reportResults.filter(r => r.brandMentioned).length})
+                Brand Mentioned ({reportResults.filter(r => r.brandMentioned).length})
               </button>
               <button 
                 type="button" 
                 className={`ai-filter-tab ${activeFilter === 'not_cited' ? 'active' : ''}`}
                 onClick={() => setActiveFilter('not_cited')}
               >
-                Alıntı Olmayanlar ({reportResults.filter(r => !r.domainCited).length})
+                No Citations ({reportResults.filter(r => !r.domainCited).length})
               </button>
             </div>
           </div>
@@ -910,12 +1029,12 @@ export default function GrowthAiVisibility() {
                   <div className="ai-report-item-header">
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', flexWrap: 'wrap' }}>
                       <span className="ai-report-item-query">"{item.prompt}"</span>
-                      <span className="prompt-topic-tag">{item.topic || 'Genel'}</span>
-                      <span className="prompt-meta-badge" title={`Pazar: ${marketOpt.label}`}>
+                      <span className="prompt-topic-tag">{item.topic || 'General'}</span>
+                      <span className="prompt-meta-badge" title={`Market: ${marketOpt.label}`}>
                         {marketOpt.icon}
                         <span>{marketOpt.code || item.country || 'TR'}</span>
                       </span>
-                      <span className="prompt-meta-badge lang" title={`Dil: ${langOpt.label}`}>
+                      <span className="prompt-meta-badge lang" title={`Language: ${langOpt.label}`}>
                         <Languages size={11} color="#8b5cf6" />
                         <span>{langOpt.code || (item.language || 'TR').toUpperCase()}</span>
                       </span>
@@ -925,28 +1044,28 @@ export default function GrowthAiVisibility() {
                       {item.brandMentioned ? (
                         <span className="ai-pill success">
                           <Check size={11} strokeWidth={3} />
-                          <span>Marka Anıldı</span>
+                          <span>Brand Mentioned</span>
                         </span>
                       ) : (
                         <span className="ai-pill danger">
                           <X size={11} strokeWidth={3} />
-                          <span>Anılmadı</span>
+                          <span>Not Mentioned</span>
                         </span>
                       )}
 
                       {item.domainCited ? (
                         <span className="ai-pill success">
                           <Globe size={11} />
-                          <span>Siteniz Alıntılandı</span>
+                          <span>Your Site Cited</span>
                         </span>
                       ) : item.citationsCount > 0 ? (
                         <span className="ai-pill neutral">
                           <Globe size={11} />
-                          <span>{item.citationsCount} Dış Alıntı</span>
+                          <span>{item.citationsCount} External Citations</span>
                         </span>
                       ) : (
                         <span className="ai-pill neutral">
-                          <span>Alıntı Yok</span>
+                          <span>No Citations</span>
                         </span>
                       )}
 
@@ -955,7 +1074,7 @@ export default function GrowthAiVisibility() {
                         onClick={() => toggleQuery(item.promptId || idx)}
                         className="ai-report-preview-toggle"
                       >
-                        <span>{isExpanded ? 'Gizle' : 'Yanıtı Gör'}</span>
+                        <span>{isExpanded ? 'Hide' : 'View Response'}</span>
                         {isExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
                       </button>
                     </div>
@@ -964,13 +1083,13 @@ export default function GrowthAiVisibility() {
                   {isExpanded && (
                     <div className="animate-fade" style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginTop: '0.25rem' }}>
                       <div className="ai-result-text-box">
-                        <span className="ai-box-sub">Gemini 3.8 Tarafından Üretilen Yanıt:</span>
+                        <span className="ai-box-sub">Response Generated by Gemini 3.8:</span>
                         <p className="ai-response-content">{item.responseText}</p>
                       </div>
 
                       {item.citations && item.citations.length > 0 && (
                         <div className="ai-citations-box">
-                          <span className="ai-box-sub">Alıntılanan Kaynaklar:</span>
+                          <span className="ai-box-sub">Cited Sources:</span>
                           <div className="citations-list">
                             {item.citations.map((c, cIdx) => (
                               <a key={cIdx} href={c.url} target="_blank" rel="noopener noreferrer" className="citation-pill">
@@ -998,28 +1117,28 @@ export default function GrowthAiVisibility() {
           <div className="ai-result-header">
             <div className="ai-result-title-row">
               <img src="/AI-logos/gemini-color.svg" alt="Google Gemini" style={{ width: 22, height: 22, objectFit: 'contain' }} />
-              <h4>Canlı Yapay Zeka Test Sonucu (Google Gemini)</h4>
+              <h4>Live AI Test Result (Google Gemini)</h4>
             </div>
-            <button type="button" onClick={() => setLastRunResult(null)} className="ai-result-close" aria-label="Kapat">
+            <button type="button" onClick={() => setLastRunResult(null)} className="ai-result-close" aria-label="Close">
               <X size={16} />
             </button>
           </div>
 
           <div className="ai-result-stats-row">
             <div className="ai-stat-box">
-              <span className="ai-stat-label">Marka Anıldı mı?</span>
+              <span className="ai-stat-label">Brand Mentioned?</span>
               <span className={`ai-stat-val ${lastRunResult.brand_mentioned ? 'text-success' : 'text-danger'}`}>
-                {lastRunResult.brand_mentioned ? 'EVET, ANILDI' : 'HAYIR'}
+                {lastRunResult.brand_mentioned ? 'YES, MENTIONED' : 'NO'}
               </span>
             </div>
             <div className="ai-stat-box">
-              <span className="ai-stat-label">Siteniz Kaynak Gösterildi mi?</span>
+              <span className="ai-stat-label">Your Site Cited?</span>
               <span className={`ai-stat-val ${lastRunResult.domain_cited ? 'text-success' : 'text-danger'}`}>
-                {lastRunResult.domain_cited ? 'EVET, ALINTILANDI' : 'HAYIR'}
+                {lastRunResult.domain_cited ? 'YES, CITED' : 'NO'}
               </span>
             </div>
             <div className="ai-stat-box">
-              <span className="ai-stat-label">Test Edilen Motor</span>
+              <span className="ai-stat-label">Tested Engine</span>
               <span className="ai-stat-val text-muted" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                 <img src="/AI-logos/gemini-color.svg" alt="Gemini" style={{ width: 16, height: 16 }} />
                 <span>{lastRunResult.model || 'gemini-3.8-flash'}</span>
@@ -1028,13 +1147,13 @@ export default function GrowthAiVisibility() {
           </div>
 
           <div className="ai-result-text-box">
-            <span className="ai-box-sub">Yapay Zeka Tarafından Üretilen Yanıt:</span>
+            <span className="ai-box-sub">Response Generated by AI:</span>
             <p className="ai-response-content">{lastRunResult.response_text}</p>
           </div>
 
           {lastRunResult.citations && lastRunResult.citations.length > 0 && (
             <div className="ai-citations-box">
-              <span className="ai-box-sub">Alıntılanan Kaynaklar & Siteler:</span>
+              <span className="ai-box-sub">Cited Sources &amp; Websites:</span>
               <div className="citations-list">
                 {lastRunResult.citations.map((c, cIdx) => (
                   <a key={cIdx} href={c.url} target="_blank" rel="noopener noreferrer" className="citation-pill">
@@ -1058,40 +1177,75 @@ export default function GrowthAiVisibility() {
             </div>
             <div>
               <h3 className="growth-panel-title" style={{ margin: 0, fontSize: '1.15rem' }}>
-                Yeni Arama Sorusu (Prompt) Takip Et
+                Track New Search Query (Prompt)
               </h3>
               <p className="growth-panel-desc" style={{ margin: '0.2rem 0 0 0', fontSize: '0.82rem', color: '#94a3b8' }}>
-                Gemini, ChatGPT ve Perplexity aramalarında markanızın anılma durumunu izleyin.
+                Monitor your brand's presence across Gemini, ChatGPT, and Perplexity searches.
               </p>
             </div>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <span className={`growth-badge ${prompts.length >= 10 ? 'red' : prompts.length >= 8 ? 'yellow' : 'cyan'}`} style={{ padding: '0.35rem 0.75rem', fontSize: '0.8rem', fontWeight: 600 }}>
-              {prompts.length >= 10 ? <Lock size={12} style={{ marginRight: 4 }} /> : null}
-              Takip Limiti: {prompts.length} / 10
-            </span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', flexWrap: 'wrap' }}>
+            {prompts.length < 10 ? (
+              <span className="growth-badge warning" style={{ padding: '0.35rem 0.75rem', fontSize: '0.8rem', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}>
+                <AlertCircle size={13} />
+                Setup Incomplete ({prompts.length} / 10 Queries)
+              </span>
+            ) : (
+              <span className="growth-badge green" style={{ padding: '0.35rem 0.75rem', fontSize: '0.8rem', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}>
+                <CheckCircle2 size={13} />
+                Setup Complete (10/10)
+              </span>
+            )}
+
+            <button
+              type="button"
+              onClick={handleOpenAiModal}
+              disabled={prompts.length >= 10 || isBatchScanning}
+              className="growth-primary-btn ai-generate-magic-btn"
+              title="Let Gemini AI analyze your website and industry to generate queries automatically"
+            >
+              <Sparkles size={14} />
+              <span>Generate Queries with AI</span>
+            </button>
           </div>
         </div>
 
+        {/* Setup Status & Progress Notification */}
+        {prompts.length < 10 && (
+          <div className="growth-prompt-setup-banner">
+            <div className="setup-banner-left">
+              <div className="setup-banner-icon-box">
+                <AlertCircle size={22} color="#f59e0b" />
+              </div>
+              <div className="setup-banner-text">
+                <div className="setup-banner-title-row">
+                  <h4 className="setup-banner-title">Setup Incomplete (Track 10 Queries)</h4>
+                  <span className="setup-banner-badge">{prompts.length} / 10 Queries ({prompts.length * 10}%)</span>
+                </div>
+                <p className="setup-banner-desc">
+                  For a consistent GEO visibility score across Google Gemini, ChatGPT and Perplexity, define at least 10 search questions. You can add the remaining <strong>{10 - prompts.length}</strong> manually or click <strong>Generate Queries with AI</strong> to auto-generate them in one click.
+                </p>
+                <div className="setup-progress-track">
+                  <div className="setup-progress-fill" style={{ width: `${(prompts.length / 10) * 100}%` }} />
+                </div>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={handleOpenAiModal}
+              className="growth-primary-btn setup-banner-cta-btn"
+            >
+              <Sparkles size={14} />
+              <span>Complete with AI ({10 - prompts.length} Queries)</span>
+            </button>
+          </div>
+        )}
+
         {prompts.length >= 10 && (
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.65rem',
-            background: 'rgba(239, 68, 68, 0.08)',
-            border: '1px solid rgba(239, 68, 68, 0.25)',
-            borderRadius: '10px',
-            padding: '0.75rem 1rem',
-            marginBottom: '1.25rem',
-            color: '#f87171',
-            fontSize: '0.85rem',
-            lineHeight: 1.4
-          }}>
-            <AlertCircle size={16} style={{ flexShrink: 0, color: '#ef4444' }} />
-            <span>
-              <strong>Limit Doldu:</strong> Çalışma alanınızda en fazla 10 adet prompt takip edebilirsiniz ({prompts.length}/10). Yeni bir prompt eklemek için lütfen aşağıdaki listeden gereksiz olanları silin.
-            </span>
+          <div className="growth-prompt-completed-banner">
+            <CheckCircle2 size={16} color="#10b981" />
+            <span><strong>Setup Complete:</strong> 10 search queries are actively monitored. You can test them individually live below or click "Scan All Sequentially" to generate a timestamped GEO Report.</span>
           </div>
         )}
 
@@ -1100,11 +1254,11 @@ export default function GrowthAiVisibility() {
             <div className="growth-field-item flex-3">
               <label className="growth-field-label">
                 <MessageSquare size={13} color="#3b82f6" />
-                <span>Hedef Arama Sorusu / Prompt</span>
+                <span>Target Search Query / Prompt</span>
               </label>
               <input
                 type="text"
-                placeholder={prompts.length >= 10 ? "Limit doldu (10/10) - Yeni prompt eklemek için mevcutları silin" : "Örn: En iyi B2B SEO ve büyüme platformu hangisi?"}
+                placeholder={prompts.length >= 10 ? "Limit reached (10/10) - Delete an existing prompt to add a new one" : "e.g. What is the best B2B SEO and growth platform?"}
                 value={newPromptText}
                 onChange={(e) => setNewPromptText(e.target.value)}
                 className="growth-custom-text-input"
@@ -1116,11 +1270,11 @@ export default function GrowthAiVisibility() {
             <div className="growth-field-item flex-1">
               <label className="growth-field-label">
                 <Sparkles size={13} color="#8b5cf6" />
-                <span>Kategori / Konu</span>
+                <span>Category / Topic</span>
               </label>
               <input
                 type="text"
-                placeholder="Örn: SEO & Büyüme"
+                placeholder="e.g. SEO &amp; Growth"
                 value={newPromptTopic}
                 onChange={(e) => setNewPromptTopic(e.target.value)}
                 className="growth-custom-text-input"
@@ -1133,7 +1287,7 @@ export default function GrowthAiVisibility() {
             <div className="growth-dropdown-col">
               <AiVisibilityDropdown
                 id="growth-prompt-country"
-                label="Hedef Pazar / Ülke"
+                label="Target Market / Country"
                 icon={<Globe size={13} color="#3b82f6" />}
                 options={MARKET_OPTIONS}
                 value={selectedCountry}
@@ -1145,7 +1299,7 @@ export default function GrowthAiVisibility() {
             <div className="growth-dropdown-col">
               <AiVisibilityDropdown
                 id="growth-prompt-language"
-                label="Sorgu Dili"
+                label="Query Language"
                 icon={<Languages size={13} color="#8b5cf6" />}
                 options={LANGUAGE_OPTIONS}
                 value={selectedLanguage}
@@ -1168,7 +1322,7 @@ export default function GrowthAiVisibility() {
                 ) : (
                   <Plus size={15} />
                 )}
-                <span>{prompts.length >= 10 ? 'Limit Doldu (10/10)' : 'Prompt Takip Et'}</span>
+                <span>{prompts.length >= 10 ? 'Limit Reached (10/10)' : 'Track Prompt'}</span>
               </button>
             </div>
           </div>
@@ -1179,9 +1333,9 @@ export default function GrowthAiVisibility() {
       <div className="growth-panel-card">
         <div className="growth-panel-header">
           <div>
-            <h3 className="growth-panel-title">Takip Edilen Promptlar ({prompts.length} / 10)</h3>
+            <h3 className="growth-panel-title">Tracked Prompts ({prompts.length} / 10)</h3>
             <p className="growth-panel-desc">
-              Düzenli aralıklarla test edilen arama sorguları. Tümünü sırayla tarayarak zaman damgalı tek bir snapshot raporu oluşturabilirsiniz.
+              Search queries monitored on a regular basis. Scan all sequentially to generate a timestamped snapshot report.
             </p>
           </div>
 
@@ -1194,11 +1348,11 @@ export default function GrowthAiVisibility() {
                   value={activeReport?.id || ''}
                   onChange={(e) => handleLoadReport(e.target.value)}
                   disabled={isBatchScanning}
-                  title="Geçmiş Kayıtlı AI Raporlarını İncele"
+                  title="Review Historical AI Reports"
                 >
                   {reportsList.map(r => (
                     <option key={r.id} value={r.id}>
-                      {formatFullDate(r.created_at)} — %{r.visibility_score} GEO ({r.total_prompts} Prompt)
+                      {formatFullDate(r.created_at)} — {r.visibility_score}% GEO ({r.total_prompts} Prompts)
                     </option>
                   ))}
                 </select>
@@ -1211,17 +1365,17 @@ export default function GrowthAiVisibility() {
               onClick={handleStartBatchScan}
               className="growth-primary-btn"
               style={{ padding: '0.45rem 0.95rem', fontSize: '0.82rem' }}
-              title="Tüm promptları sırayla test eder ve zaman damgalı tek bir rapor oluşturup kaydeder"
+              title="Tests all prompts sequentially, generating and archiving a timestamped report"
             >
               {isBatchScanning ? (
                 <>
                   <Loader2 size={14} className="spin" />
-                  <span>Taranıyor ({batchProgress.current}/{batchProgress.total})...</span>
+                  <span>Scanning ({batchProgress.current}/{batchProgress.total})...</span>
                 </>
               ) : (
                 <>
                   <Zap size={14} />
-                  <span>Tümünü Sırayla Tara (1 Rapor Oluştur)</span>
+                  <span>Scan All Sequentially (Create 1 Report)</span>
                 </>
               )}
             </button>
@@ -1241,10 +1395,36 @@ export default function GrowthAiVisibility() {
             ))}
           </div>
         ) : prompts.length === 0 ? (
-          <div className="growth-empty-card">
-            <MessageSquare size={32} className="text-muted" />
-            <h4>Henüz Takip Edilen Prompt Yok</h4>
-            <p>Yukarıdaki formu kullanarak ilk arama sorunuzu ekleyin.</p>
+          <div className="growth-empty-card" style={{ padding: '3.5rem 1.5rem', textAlign: 'center' }}>
+            <div style={{
+              width: 58,
+              height: 58,
+              borderRadius: 16,
+              background: 'rgba(139, 92, 246, 0.1)',
+              border: '1px solid rgba(139, 92, 246, 0.25)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              margin: '0 auto 16px',
+              color: '#a78bfa'
+            }}>
+              <MessageSquare size={28} />
+            </div>
+            <h4 style={{ fontSize: '1.1rem', fontWeight: 600, color: 'var(--text-main, #ffffff)', marginBottom: 8 }}>
+              No Tracked Search Queries Yet (Setup Pending)
+            </h4>
+            <p style={{ maxWidth: 480, margin: '0 auto 20px', color: '#94a3b8', fontSize: '0.86rem', lineHeight: 1.6 }}>
+              At least 10 industry queries should be tracked to compute a reliable GEO visibility score across AI search engines. Generate queries with AI in one click or add them manually above.
+            </p>
+            <button
+              type="button"
+              onClick={handleOpenAiModal}
+              className="growth-primary-btn ai-generate-magic-btn"
+              style={{ margin: '0 auto', display: 'inline-flex' }}
+            >
+              <Sparkles size={14} />
+              <span>Generate Queries with AI</span>
+            </button>
           </div>
         ) : (
           <div className="growth-prompts-table">
@@ -1258,19 +1438,19 @@ export default function GrowthAiVisibility() {
                   <div className="prompt-info-col">
                     <span className="prompt-text">"{p.prompt}"</span>
                     <div className="prompt-meta-row">
-                      <span className="prompt-topic-tag">{p.topic || 'Genel'}</span>
-                      <span className="prompt-meta-badge" title={`Hedef Ülke: ${marketOpt.label}`}>
+                      <span className="prompt-topic-tag">{p.topic || 'General'}</span>
+                      <span className="prompt-meta-badge" title={`Target Country: ${marketOpt.label}`}>
                         {marketOpt.icon}
                         <span>{marketOpt.code || p.country || 'TR'}</span>
                       </span>
-                      <span className="prompt-meta-badge lang" title={`Sorgu Dili: ${langOpt.label}`}>
+                      <span className="prompt-meta-badge lang" title={`Query Language: ${langOpt.label}`}>
                         <Languages size={12} color="#8b5cf6" />
                         <span>{langOpt.code || (p.language || 'TR').toUpperCase()}</span>
                       </span>
-                      <span className="prompt-runs-tag">{p.run_count || 0} Test Yapıldı</span>
+                      <span className="prompt-runs-tag">{p.run_count || 0} Tests Run</span>
                       {p.last_brand_mentioned !== null && p.last_brand_mentioned !== undefined && (
                         <span className={`prompt-mention-status-tag ${p.last_brand_mentioned ? 'mentioned' : 'not-mentioned'}`}>
-                          {p.last_brand_mentioned ? '✓ Marka Önerildi' : '✕ Listede Yok'}
+                          {p.last_brand_mentioned ? '✓ Brand Recommended' : '✕ Not Listed'}
                         </span>
                       )}
                     </div>
@@ -1286,14 +1466,23 @@ export default function GrowthAiVisibility() {
                       {isRunning ? (
                         <>
                           <Loader2 size={14} className="auth-spinner" />
-                          <span>Gemini Sorguluyor...</span>
+                          <span>Querying Gemini...</span>
                         </>
                       ) : (
                         <>
                           <img src="/AI-logos/gemini-color.svg" alt="Gemini" style={{ width: 14, height: 14 }} />
-                          <span>Gemini ile Test Et</span>
+                          <span>Test with Gemini</span>
                         </>
                       )}
+                    </button>
+                    <button
+                      type="button"
+                      disabled={isRunning || isBatchScanning}
+                      onClick={() => setDeleteTargetPrompt(p)}
+                      className="prompt-row-delete-btn"
+                      title="Remove Prompt"
+                    >
+                      <Trash2 size={13} />
                     </button>
                   </div>
                 </div>
@@ -1303,7 +1492,7 @@ export default function GrowthAiVisibility() {
         )}
       </div>
 
-      {/* 3. Historical AI Reports Timeline & Archive (Zamana Göre Kayıtlı Raporlar - En Altta) */}
+      {/* 3. Historical AI Reports Timeline & Archive */}
       {reportsList.length > 0 && !isBatchScanning && (
         <div id="ai-reports-history-section" className="growth-panel-card ai-reports-history-panel animate-fade">
           <div className="growth-panel-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem', marginBottom: '1.25rem' }}>
@@ -1313,10 +1502,10 @@ export default function GrowthAiVisibility() {
               </div>
               <div>
                 <h3 className="growth-panel-title" style={{ margin: 0, fontSize: '1.15rem' }}>
-                  Zaman Damgalı AI Rapor Arşivi
+                  Timestamped AI Report Archive
                 </h3>
                 <p className="growth-panel-desc" style={{ margin: '0.2rem 0 0 0', fontSize: '0.82rem', color: '#94a3b8' }}>
-                  Toplam {reportsList.length} kayıtlı denetim raporu. İncelemek istediğiniz rapora tıklayın.
+                  Total of {reportsList.length} archived audit reports. Click any report to inspect.
                 </p>
               </div>
             </div>
@@ -1326,14 +1515,14 @@ export default function GrowthAiVisibility() {
           <div className="ai-history-toolbar">
             <div className="ai-history-date-filters">
               <span style={{ fontSize: '0.76rem', fontWeight: 600, color: '#94a3b8', display: 'flex', alignItems: 'center', gap: 4, marginRight: 4 }}>
-                <Filter size={12} /> Filtrele:
+                <Filter size={12} /> Filter:
               </span>
               {[
-                { key: 'all', label: `Tümü (${reportsList.length})` },
-                { key: 'today', label: 'Bugün' },
-                { key: '7d', label: 'Son 7 Gün' },
-                { key: '30d', label: 'Son 30 Gün' },
-                { key: 'custom', label: 'Özel Tarih' }
+                { key: 'all', label: `All (${reportsList.length})` },
+                { key: 'today', label: 'Today' },
+                { key: '7d', label: 'Last 7 Days' },
+                { key: '30d', label: 'Last 30 Days' },
+                { key: 'custom', label: 'Custom Date' }
               ].map(f => (
                 <button
                   key={f.key}
@@ -1351,7 +1540,7 @@ export default function GrowthAiVisibility() {
 
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <span style={{ fontSize: '0.76rem', color: '#94a3b8', display: 'flex', alignItems: 'center', gap: 4 }}>
-                <ArrowUpDown size={12} /> Sırala:
+                <ArrowUpDown size={12} /> Sort:
               </span>
               <select
                 className="ai-history-sort-select"
@@ -1361,10 +1550,10 @@ export default function GrowthAiVisibility() {
                   setHistoryPage(1);
                 }}
               >
-                <option value="newest">Tarih (En Yeni)</option>
-                <option value="oldest">Tarih (En Eski)</option>
-                <option value="score_high">Skor (En Yüksek)</option>
-                <option value="score_low">Skor (En Düşük)</option>
+                <option value="newest">Date (Newest)</option>
+                <option value="oldest">Date (Oldest)</option>
+                <option value="score_high">Score (Highest)</option>
+                <option value="score_low">Score (Lowest)</option>
               </select>
             </div>
           </div>
@@ -1373,7 +1562,7 @@ export default function GrowthAiVisibility() {
           {historyDateFilter === 'custom' && (
             <div className="ai-history-custom-range animate-fade">
               <span style={{ fontSize: '0.78rem', color: '#94a3b8', display: 'flex', alignItems: 'center', gap: 5 }}>
-                <Calendar size={13} color="#3b82f6" /> Başlangıç:
+                <Calendar size={13} color="#3b82f6" /> Start:
               </span>
               <input
                 type="date"
@@ -1384,7 +1573,7 @@ export default function GrowthAiVisibility() {
                 }}
                 className="ai-history-date-input"
               />
-              <span style={{ fontSize: '0.78rem', color: '#94a3b8', marginLeft: 6 }}>Bitiş:</span>
+              <span style={{ fontSize: '0.78rem', color: '#94a3b8', marginLeft: 6 }}>End:</span>
               <input
                 type="date"
                 value={historyEndDate}
@@ -1411,7 +1600,7 @@ export default function GrowthAiVisibility() {
                     marginLeft: 6
                   }}
                 >
-                  Tarihi Sıfırla
+                  Reset Dates
                 </button>
               )}
             </div>
@@ -1421,8 +1610,8 @@ export default function GrowthAiVisibility() {
           {filteredAndSortedReports.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '2.5rem 1rem', color: '#94a3b8' }}>
               <Calendar size={28} style={{ margin: '0 auto 8px', opacity: 0.4 }} />
-              <p style={{ margin: '0 0 8px', fontSize: '0.9rem', color: '#e2e8f0', fontWeight: 600 }}>
-                Seçilen tarih kriterlerine uygun kayıtlı rapor bulunamadı.
+              <p style={{ margin: '0 0 8px', fontSize: '0.9rem', color: 'var(--text-main, #e2e8f0)', fontWeight: 600 }}>
+                No saved reports match the selected date criteria.
               </p>
               <button
                 type="button"
@@ -1435,7 +1624,7 @@ export default function GrowthAiVisibility() {
                 className="growth-secondary-btn"
                 style={{ margin: '0 auto', fontSize: '0.8rem', padding: '0.35rem 0.85rem' }}
               >
-                Filtreleri Temizle
+                Clear Filters
               </button>
             </div>
           ) : (
@@ -1453,7 +1642,7 @@ export default function GrowthAiVisibility() {
                       reportPanelRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
                     }}
                     className={`ai-history-report-card ${isSelected ? 'active' : ''}`}
-                    title="Bu tarihteki rapor detaylarını incele"
+                    title="Inspect report details for this date"
                   >
                     <div className="ai-history-card-top">
                       <div className="ai-history-date-box">
@@ -1468,25 +1657,25 @@ export default function GrowthAiVisibility() {
                       </div>
 
                       <div className={`ai-history-score-badge ${scoreClass}`}>
-                        <span>%{repScore} GEO</span>
+                        <span>{repScore}% GEO</span>
                       </div>
                     </div>
 
                     <div className="ai-history-stats-row">
                       <div className="ai-history-stat-item">
-                        <span className="ai-history-stat-label">Taranan</span>
-                        <span className="ai-history-stat-val">{rep.total_prompts} Prompt</span>
+                        <span className="ai-history-stat-label">Tested</span>
+                        <span className="ai-history-stat-val">{rep.total_prompts} Prompts</span>
                       </div>
                       <div className="ai-history-stat-item">
-                        <span className="ai-history-stat-label">Marka</span>
+                        <span className="ai-history-stat-label">Brand</span>
                         <span className="ai-history-stat-val" style={{ color: rep.mentioned_count > 0 ? '#34d399' : '#f87171' }}>
-                          {rep.mentioned_count} Anıldı
+                          {rep.mentioned_count} Mentioned
                         </span>
                       </div>
                       <div className="ai-history-stat-item">
-                        <span className="ai-history-stat-label">Alıntı</span>
+                        <span className="ai-history-stat-label">Citations</span>
                         <span className="ai-history-stat-val" style={{ color: rep.cited_count > 0 ? '#34d399' : '#94a3b8' }}>
-                          {rep.cited_count} Site
+                          {rep.cited_count} Sites
                         </span>
                       </div>
                     </div>
@@ -1496,7 +1685,7 @@ export default function GrowthAiVisibility() {
                         type="button"
                         className="ai-history-view-btn"
                       >
-                        <span>{isSelected ? '✓ Şu An İnceleniyor' : 'Raporu İncele'}</span>
+                        <span>{isSelected ? '✓ Currently Viewing' : 'Inspect Report'}</span>
                         <ArrowUpRight size={13} />
                       </button>
 
@@ -1504,7 +1693,7 @@ export default function GrowthAiVisibility() {
                         type="button"
                         onClick={(e) => handleDeleteReport(rep.id, e)}
                         className="ai-history-delete-btn"
-                        title="Bu raporu arşivden sil"
+                        title="Delete this report from archive"
                       >
                         <Trash2 size={13} />
                       </button>
@@ -1519,7 +1708,7 @@ export default function GrowthAiVisibility() {
           {filteredAndSortedReports.length > historyPerPage && (
             <div className="ai-history-pagination-bar">
               <span className="ai-history-page-info">
-                Toplam <strong>{filteredAndSortedReports.length}</strong> rapordan <strong>{(currentHistoryPage - 1) * historyPerPage + 1}</strong> - <strong>{Math.min(currentHistoryPage * historyPerPage, filteredAndSortedReports.length)}</strong> arası gösteriliyor (Sayfa {currentHistoryPage} / {totalHistoryPages})
+                Showing <strong>{(currentHistoryPage - 1) * historyPerPage + 1}</strong> - <strong>{Math.min(currentHistoryPage * historyPerPage, filteredAndSortedReports.length)}</strong> of <strong>{filteredAndSortedReports.length}</strong> reports (Page {currentHistoryPage} / {totalHistoryPages})
               </span>
 
               <div className="ai-history-pagination-nav">
@@ -1528,7 +1717,7 @@ export default function GrowthAiVisibility() {
                   onClick={() => setHistoryPage(prev => Math.max(1, prev - 1))}
                   disabled={currentHistoryPage <= 1}
                   className="ai-history-page-btn"
-                  title="Önceki Sayfa"
+                  title="Previous Page"
                 >
                   <ChevronLeft size={14} />
                 </button>
@@ -1549,7 +1738,7 @@ export default function GrowthAiVisibility() {
                   onClick={() => setHistoryPage(prev => Math.min(totalHistoryPages, prev + 1))}
                   disabled={currentHistoryPage >= totalHistoryPages}
                   className="ai-history-page-btn"
-                  title="Sonraki Sayfa"
+                  title="Next Page"
                 >
                   <ChevronRight size={14} />
                 </button>
@@ -1557,6 +1746,240 @@ export default function GrowthAiVisibility() {
             </div>
           )}
         </div>
+      )}
+
+      {/* AI Prompt Generator Modal */}
+      {isAiGenModalOpen && typeof document !== 'undefined' && createPortal(
+        <div 
+          className="growth-modal-backdrop" 
+          onClick={() => !savingAiPrompts && !generatingAiPrompts && setIsAiGenModalOpen(false)}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="ai-gen-modal-title"
+        >
+          <div className="growth-modal-card ai-gen-modal-card animate-scale-in" onClick={e => e.stopPropagation()}>
+            <div className="growth-modal-header">
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                <div className="ai-gen-modal-header-icon">
+                  <Sparkles size={18} />
+                </div>
+                <div>
+                  <h2 id="ai-gen-modal-title" className="ai-gen-modal-title">
+                    Generate Search Prompts with AI
+                  </h2>
+                  <p className="ai-gen-modal-subtitle">
+                    Gemini analyzes your domain <strong>{activeWorkspace?.primary_domain || activeWorkspace?.name}</strong> and industry to generate GEO-focused search prompts.
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                className="growth-modal-close"
+                onClick={() => setIsAiGenModalOpen(false)}
+                disabled={savingAiPrompts || generatingAiPrompts}
+                aria-label="Close"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="growth-modal-body">
+              {generatingAiPrompts ? (
+                <div className="ai-gen-loading-box">
+                  <div className="ai-gen-pulse-circle">
+                    <Loader2 size={32} className="spin text-primary" style={{ color: '#8b5cf6' }} />
+                  </div>
+                  <h4 className="ai-gen-loading-title">
+                    Generating AI Search Prompts...
+                  </h4>
+                  <p className="ai-gen-loading-desc">
+                    Google Gemini is modeling your target audience, industry, and critical user queries directed at AI engines.
+                  </p>
+                </div>
+              ) : aiGenError ? (
+                <div className="growth-alert-card warning" style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '1rem', borderRadius: 10, background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.25)', color: '#f87171' }}>
+                  <AlertCircle size={20} style={{ flexShrink: 0 }} />
+                  <div style={{ flex: 1, fontSize: '0.86rem' }}>
+                    <strong>Error:</strong> {aiGenError}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={fetchAiPromptSuggestions}
+                    className="growth-secondary-btn"
+                    style={{ padding: '0.35rem 0.75rem', fontSize: '0.78rem' }}
+                  >
+                    Retry
+                  </button>
+                </div>
+              ) : aiGeneratedSuggestions.length === 0 ? (
+                <div style={{ padding: '2rem', textAlign: 'center', color: '#94a3b8' }}>
+                  No prompt suggestions found.
+                </div>
+              ) : (
+                <div className="ai-gen-suggestions-wrap">
+                  <div className="ai-gen-suggestions-topbar">
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                      <span className="ai-gen-count-badge">
+                        {aiGeneratedSuggestions.filter(s => s.selected).length} / {aiGeneratedSuggestions.length} Prompts Selected
+                      </span>
+                      <span className="ai-gen-info-count">
+                        (Total when added: {Math.min(10, prompts.length + aiGeneratedSuggestions.filter(s => s.selected).length)}/10)
+                      </span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleToggleSelectAllSuggestions}
+                      className="ai-gen-toggle-all-btn"
+                    >
+                      {aiGeneratedSuggestions.every(s => s.selected) ? 'Deselect All' : 'Select All'}
+                    </button>
+                  </div>
+
+                  <div className="ai-gen-list">
+                    {aiGeneratedSuggestions.map((item, idx) => (
+                      <label key={idx} className={`ai-gen-item ${item.selected ? 'is-selected' : ''}`}>
+                        <input
+                          type="checkbox"
+                          checked={item.selected}
+                          onChange={() => handleToggleSuggestion(idx)}
+                          className="ai-gen-checkbox"
+                        />
+                        <div className="ai-gen-item-content">
+                          <span className="ai-gen-prompt-text">"{item.prompt}"</span>
+                          <div className="ai-gen-item-meta">
+                            <span className="ai-gen-topic-pill">{item.topic || 'Industry Leadership'}</span>
+                            <span className="ai-gen-engine-tag">
+                              <Sparkles size={10} color="#8b5cf6" />
+                              <span>GEO Targeted</span>
+                            </span>
+                          </div>
+                        </div>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="growth-modal-footer">
+              <button
+                type="button"
+                className="growth-secondary-btn"
+                onClick={() => setIsAiGenModalOpen(false)}
+                disabled={savingAiPrompts}
+              >
+                Cancel
+              </button>
+
+              <button
+                type="button"
+                onClick={handleSaveSelectedAiPrompts}
+                disabled={generatingAiPrompts || savingAiPrompts || aiGeneratedSuggestions.filter(s => s.selected).length === 0}
+                className="growth-primary-btn ai-gen-save-btn"
+              >
+                {savingAiPrompts ? (
+                  <>
+                    <Loader2 size={15} className="spin" />
+                    <span>Saving...</span>
+                  </>
+                ) : (
+                  <>
+                    <Sparkles size={15} />
+                    <span>Add Selected to Tracker ({aiGeneratedSuggestions.filter(s => s.selected).length} Prompts)</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {/* Delete Confirmation Modal - Custom UI */}
+      {deleteTargetPrompt && typeof document !== 'undefined' && createPortal(
+        <div 
+          className="growth-modal-backdrop" 
+          onClick={() => !deletingPromptId && setDeleteTargetPrompt(null)}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="delete-prompt-modal-title"
+        >
+          <div 
+            className="growth-modal-card comp-delete-modal-card animate-scale-in"
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="growth-modal-header">
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                <div className="comp-delete-modal-icon">
+                  <Trash2 size={18} />
+                </div>
+                <div>
+                  <h2 id="delete-prompt-modal-title" className="ai-gen-modal-title">
+                    Remove Search Prompt from Tracker
+                  </h2>
+                  <p className="ai-gen-modal-subtitle">
+                    This prompt will be removed from tracking, freeing up a slot in your list.
+                  </p>
+                </div>
+              </div>
+              <button 
+                type="button" 
+                className="growth-modal-close"
+                onClick={() => setDeleteTargetPrompt(null)}
+                disabled={Boolean(deletingPromptId)}
+                aria-label="Close"
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            <div className="growth-modal-body">
+              <div className="delete-target-preview-box">
+                <p className="delete-target-preview-text">
+                  "{deleteTargetPrompt.prompt}"
+                </p>
+                <div className="delete-target-preview-meta">
+                  <span className="prompt-topic-tag">{deleteTargetPrompt.topic || 'General'}</span>
+                  <span>{deleteTargetPrompt.run_count || 0} Tests Run</span>
+                </div>
+              </div>
+              <div className="delete-modal-explain-box">
+                <AlertTriangle size={17} style={{ flexShrink: 0, marginTop: 2 }} />
+                <span>Deleting this prompt will free up 1 slot in your 10-prompt tracking limit. Are you sure?</span>
+              </div>
+            </div>
+
+            <div className="growth-modal-footer" style={{ justifyContent: 'flex-end' }}>
+              <button
+                type="button"
+                className="growth-secondary-btn"
+                onClick={() => setDeleteTargetPrompt(null)}
+                disabled={Boolean(deletingPromptId)}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                className="comp-delete-confirm-btn"
+                onClick={handleConfirmDeletePrompt}
+                disabled={Boolean(deletingPromptId)}
+              >
+                {deletingPromptId ? (
+                  <>
+                    <Loader2 size={14} className="spin" />
+                    <span>Deleting...</span>
+                  </>
+                ) : (
+                  <>
+                    <Trash2 size={14} />
+                    <span>Yes, Remove from Tracker</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>,
+        document.body
       )}
     </div>
   );

@@ -1,4 +1,105 @@
+@import url('https://fonts.googleapis.com/css2?family=Dosis:wght@200;300;400;500;600;700;800&display=swap');
 @import "tailwindcss";
+
+/* Dosis - Primary Variable Font (Supports all continuous weights) */
+@font-face {
+  font-family: 'Dosis';
+  src: local('Dosis'),
+       url('/fonts/dosis/Dosis-VariableFont_wght.ttf') format('truetype-variations'),
+       url('/fonts/dosis/Dosis-VariableFont_wght.ttf') format('truetype');
+  font-weight: 200 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Static Fallbacks for specific weights ensuring exact weight fidelity */
+@font-face {
+  font-family: 'Dosis';
+  src: local('Dosis ExtraLight'),
+       url('/fonts/dosis/static/Dosis-ExtraLight.ttf') format('truetype');
+  font-weight: 200;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Dosis';
+  src: local('Dosis Light'),
+       url('/fonts/dosis/static/Dosis-Light.ttf') format('truetype');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Dosis';
+  src: local('Dosis Regular'),
+       url('/fonts/dosis/static/Dosis-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Dosis';
+  src: local('Dosis Medium'),
+       url('/fonts/dosis/static/Dosis-Medium.ttf') format('truetype');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Dosis';
+  src: local('Dosis SemiBold'),
+       url('/fonts/dosis/static/Dosis-SemiBold.ttf') format('truetype');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Dosis';
+  src: local('Dosis Bold'),
+       url('/fonts/dosis/static/Dosis-Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Dosis';
+  src: local('Dosis ExtraBold'),
+       url('/fonts/dosis/static/Dosis-ExtraBold.ttf') format('truetype');
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Aliases mapping directly to Dosis */
+@font-face {
+  font-family: 'Golos Text';
+  src: local('Dosis'),
+       url('/fonts/dosis/Dosis-VariableFont_wght.ttf') format('truetype-variations'),
+       url('/fonts/dosis/Dosis-VariableFont_wght.ttf') format('truetype');
+  font-weight: 200 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Garet';
+  src: local('Dosis'),
+       url('/fonts/dosis/Dosis-VariableFont_wght.ttf') format('truetype-variations'),
+       url('/fonts/dosis/Dosis-VariableFont_wght.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@theme {
+  --font-sans: 'Dosis', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
 
 .expense-list-item + .expense-list-item {
   border-top: 1px solid rgb(31 41 55 / 0.58);
@@ -19,12 +120,17 @@
 @layer base {
   html {
     scroll-behavior: smooth;
+    font-family: 'Dosis', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   }
   body {
     background-color: #030712;
     color: #f1f5f9;
-    font-family: system-ui, -apple-system, sans-serif;
+    font-family: 'Dosis', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  button, input, select, textarea {
+    font-family: inherit;
   }
 }
 

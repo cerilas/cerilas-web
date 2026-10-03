@@ -31,7 +31,7 @@ export function GrowthProvider({ children }) {
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data.error || 'Çalışma alanları alınamadı.');
+        throw new Error(data.error || 'Failed to load workspaces.');
       }
 
       const list = data.data || [];

@@ -8,7 +8,7 @@
   min-height: 100vh;
   background-color: #08090d;
   color: #f1f5f9;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Inter", sans-serif;
+  font-family: 'Dosis', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   overflow-x: hidden;
   display: flex;
   flex-direction: column;
@@ -124,6 +124,54 @@
 
 .landing-tools-nav-link:hover {
   color: #ffffff;
+}
+
+.landing-theme-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #94a3b8;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  flex-shrink: 0;
+}
+
+.landing-theme-toggle-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.25);
+  transform: scale(1.06);
+}
+
+.landing-theme-toggle-btn:active {
+  transform: scale(0.94);
+}
+
+.landing-theme-toggle-btn svg {
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.landing-theme-toggle-btn:hover svg {
+  transform: rotate(20deg);
+}
+
+[data-theme="light"] .landing-theme-toggle-btn,
+html.light .landing-theme-toggle-btn {
+  background: rgba(0, 0, 0, 0.04);
+  border-color: rgba(0, 0, 0, 0.1);
+  color: #52525b;
+}
+
+[data-theme="light"] .landing-theme-toggle-btn:hover,
+html.light .landing-theme-toggle-btn:hover {
+  background: rgba(0, 0, 0, 0.08);
+  border-color: rgba(0, 0, 0, 0.18);
+  color: #09090b;
 }
 
 .landing-auth-btns {
