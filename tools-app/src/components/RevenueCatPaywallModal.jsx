@@ -119,12 +119,12 @@ export default function RevenueCatPaywallModal({
       aliasIds: ['yearly', 'annual'],
       name: isTr ? 'PRO Yıllık' : 'PRO Yearly',
       matchedPkg: yearlyPkg,
-      badge: isTr ? '%33 İndirim' : 'Save 33%',
+      badge: isTr ? '2 Ay Bedava' : '2 Months Free',
       fallbackPrice: '$79.99 / yıl',
       periodText: isTr ? '/ yıl' : '/ yr',
       desc: isTr 
-        ? 'Yıllık peşin faturalandırma ile 4 ay ücretsiz kullanım avantajı.' 
-        : 'Best annual rate with 4 months free. Billed annually.'
+        ? 'Yıllık alımda 2 ay hediye (10 ay fiyatına 12 ay kesintisiz erişim).' 
+        : 'Get 2 months free with annual billing (12 months for the price of 10).'
     },
     {
       id: 'lifetime',
