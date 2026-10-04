@@ -22,7 +22,8 @@ import './RevenueCatPaywallModal.css';
 export default function RevenueCatPaywallModal({ 
   isOpen, 
   onClose,
-  initialProductId = null 
+  initialProductId = null,
+  initialCycle = null
 }) {
   const { 
     isPro, 
@@ -123,6 +124,49 @@ export default function RevenueCatPaywallModal({
   const unlimitedMonthlyPkg = getPackageForSelection('unlimited', 'monthly');
   const unlimitedAnnualPkg = getPackageForSelection('unlimited', 'annual');
 
+  // Canonical price resolver: Guaranteed consistency across footer pricing & subscription views
+  // Prevents default RevenueCat test starter sample products ($9.99/$79.99) from corrupting the UI prices
+  const getPlanPrice = (planId, cycle) => {
+    if (planId === 'free') return '$0';
+
+    if (planId === 'pro') {
+      if (cycle === 'annual') {
+        if (proAnnualPkg?.product?.price?.formattedPrice && 
+            proAnnualPkg.product.identifier !== 'yearly' && 
+            proAnnualPkg.product.price?.amount !== 7999) {
+          return proAnnualPkg.product.price.formattedPrice;
+        }
+        return '$49.90';
+      } else {
+        if (proMonthlyPkg?.product?.price?.formattedPrice && 
+            proMonthlyPkg.product.identifier !== 'monthly' && 
+            proMonthlyPkg.product.price?.amount !== 999) {
+          return proMonthlyPkg.product.price.formattedPrice;
+        }
+        return '$4.99';
+      }
+    }
+
+    if (planId === 'unlimited') {
+      if (cycle === 'annual') {
+        if (unlimitedAnnualPkg?.product?.price?.formattedPrice && 
+            unlimitedAnnualPkg.product.identifier !== 'yearly' && 
+            unlimitedAnnualPkg.product.price?.amount !== 7999) {
+          return unlimitedAnnualPkg.product.price.formattedPrice;
+        }
+        return '$99.90';
+      } else {
+        if (unlimitedMonthlyPkg?.product?.price?.formattedPrice && 
+            unlimitedMonthlyPkg.product.identifier !== 'monthly') {
+          return unlimitedMonthlyPkg.product.price.formattedPrice;
+        }
+        return '$9.99';
+      }
+    }
+
+    return '$0';
+  };
+
   // Plan Definitions in exact order: Free -> Pro -> Unlimited
   const plans = [
     {
@@ -159,9 +203,7 @@ export default function RevenueCatPaywallModal({
         : 'High token allowance for premium AI, PDF and developer tools with priority execution.',
       hasCycleSwitch: true,
       currentCycle: cardCycles.pro,
-      price: cardCycles.pro === 'annual' 
-        ? (proAnnualPkg?.product?.price?.formattedPrice || '$49.90')
-        : (proMonthlyPkg?.product?.price?.formattedPrice || '$4.99'),
+      price: getPlanPrice('pro', cardCycles.pro),
       period: cardCycles.pro === 'annual' ? (isTr ? '/ yıl' : '/ year') : (isTr ? '/ ay' : '/ month'),
       savingsPill: cardCycles.pro === 'annual' ? (isTr ? '🎁 2 Ay Bedava!' : '🎁 2 Months Free!') : null,
       subDetail: cardCycles.pro === 'annual'
@@ -188,9 +230,7 @@ export default function RevenueCatPaywallModal({
         : 'Maximum token allowance and turbo concurrency for power users and teams.',
       hasCycleSwitch: true,
       currentCycle: cardCycles.unlimited,
-      price: cardCycles.unlimited === 'annual' 
-        ? (unlimitedAnnualPkg?.product?.price?.formattedPrice || '$99.90')
-        : (unlimitedMonthlyPkg?.product?.price?.formattedPrice || '$9.99'),
+      price: getPlanPrice('unlimited', cardCycles.unlimited),
       period: cardCycles.unlimited === 'annual' ? (isTr ? '/ yıl' : '/ year') : (isTr ? '/ ay' : '/ month'),
       savingsPill: cardCycles.unlimited === 'annual' ? (isTr ? '🎁 2 Ay Bedava!' : '🎁 2 Months Free!') : null,
       subDetail: cardCycles.unlimited === 'annual'
@@ -238,6 +278,13 @@ export default function RevenueCatPaywallModal({
       }
     }
   }, [initialProductId]);
+
+  // Sync initial billing cycle if provided
+  useEffect(() => {
+    if (initialCycle) {
+      handleMasterCycleChange(initialCycle);
+    }
+  }, [initialCycle, isOpen]);
 
   // Cancel / abort active purchasing
   const handleCancelCheckout = () => {

@@ -44,8 +44,24 @@ export const REVENUECAT_CONFIG = {
       name: 'Pro Yearly',
       type: 'subscription',
       interval: 'year',
-      badge: 'Save 20%',
+      badge: '2 Months Free',
       fallbackPrice: '$49.90 / yr'
+    },
+    PRO_YEARLY: {
+      id: 'pro_yearly',
+      name: 'Pro Yearly',
+      type: 'subscription',
+      interval: 'year',
+      badge: '2 Months Free',
+      fallbackPrice: '$49.90 / yr'
+    },
+    UNLIMITED_YEARLY: {
+      id: 'unlimited_yearly',
+      name: 'Unlimited Yearly',
+      type: 'subscription',
+      interval: 'year',
+      badge: '2 Months Free',
+      fallbackPrice: '$99.90 / yr'
     },
     MONTHLY: {
       id: 'monthly',

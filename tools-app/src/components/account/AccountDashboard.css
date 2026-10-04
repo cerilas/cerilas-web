@@ -432,6 +432,64 @@ html.light .account-tab-btn.is-active {
   border-color: rgba(255, 255, 255, 0.25);
 }
 
+/* Billing Switcher in Package Tab */
+.account-billing-switch-wrapper {
+  display: inline-flex;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
+  border-radius: 9999px;
+  padding: 4px;
+  margin-bottom: 1.5rem;
+  gap: 4px;
+}
+
+[data-theme="light"] .account-billing-switch-wrapper,
+html.light .account-billing-switch-wrapper {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+}
+
+.account-billing-toggle-tab {
+  background: transparent;
+  border: none;
+  border-radius: 9999px;
+  padding: 0.45rem 1rem;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--text-muted, #94a3b8);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  transition: all 0.2s ease;
+}
+
+.account-billing-toggle-tab.is-active {
+  background: #3b82f6;
+  color: #ffffff;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.35);
+}
+
+.account-billing-discount-badge {
+  background: #10b981;
+  color: #ffffff;
+  padding: 0.12rem 0.5rem;
+  border-radius: 9999px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.upgrade-card-savings-text {
+  font-size: 0.76rem;
+  color: #10b981;
+  font-weight: 600;
+  margin: 0.3rem 0 0 0;
+  line-height: 1.35;
+}
+
 /* Upgrade Matrix Grid */
 .account-upgrade-grid {
   display: grid;

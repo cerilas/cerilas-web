@@ -108,6 +108,7 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
   const [invoices, setInvoices] = useState([]);
   const [upgradingPlan, setUpgradingPlan] = useState(null);
   const [planSuccessMsg, setPlanSuccessMsg] = useState('');
+  const [packageBillingCycle, setPackageBillingCycle] = useState('monthly'); // 'monthly' | 'annual'
 
   const fileInputRef = useRef(null);
 
@@ -333,7 +334,10 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
   // Upgrade Plan handler
   const handleUpgradePlan = async (targetPlan) => {
     if (targetPlan === 'pro' || targetPlan === 'enterprise' || targetPlan === 'unlimited') {
-      presentPaywall({ defaultPackageId: (targetPlan === 'enterprise' || targetPlan === 'unlimited') ? 'unlimited' : 'pro' });
+      presentPaywall({ 
+        defaultPackageId: (targetPlan === 'enterprise' || targetPlan === 'unlimited') ? 'unlimited' : 'pro',
+        cycle: packageBillingCycle 
+      });
       return;
     }
     setUpgradingPlan(targetPlan);
@@ -617,6 +621,27 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
                 </button>
               </div>
 
+              {/* Billing Frequency Switcher */}
+              <div className="account-billing-switch-wrapper" role="group" aria-label="Billing frequency">
+                <button
+                  type="button"
+                  className={`account-billing-toggle-tab ${packageBillingCycle === 'monthly' ? 'is-active' : ''}`}
+                  onClick={() => setPackageBillingCycle('monthly')}
+                >
+                  {isTr ? 'Aylık Ödeme' : 'Monthly Billing'}
+                </button>
+                <button
+                  type="button"
+                  className={`account-billing-toggle-tab ${packageBillingCycle === 'annual' ? 'is-active' : ''}`}
+                  onClick={() => setPackageBillingCycle('annual')}
+                >
+                  <span>{isTr ? 'Yıllık Ödeme' : 'Annual Billing'}</span>
+                  <span className="account-billing-discount-badge">
+                    {isTr ? '🎁 2 Ay Bedava' : '🎁 2 Months Free'}
+                  </span>
+                </button>
+              </div>
+
               <div className="account-upgrade-grid">
                 {/* Plan 1: Free */}
                 <div className={`account-upgrade-card ${currentPlan === 'free' ? 'is-current' : ''}`}>
@@ -652,7 +677,15 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
                   </div>
                   <div className="upgrade-card-head">
                     <h3 className="upgrade-card-name">Pro Developer</h3>
-                    <p className="upgrade-card-price">$4.99 <span className="period">/ {isTr ? 'aylık' : 'month'}</span></p>
+                    <p className="upgrade-card-price">
+                      {packageBillingCycle === 'annual' ? '$49.90' : '$4.99'}{' '}
+                      <span className="period">/ {packageBillingCycle === 'annual' ? (isTr ? 'yıl' : 'year') : (isTr ? 'ay' : 'month')}</span>
+                    </p>
+                    {packageBillingCycle === 'annual' && (
+                      <p className="upgrade-card-savings-text">
+                        {isTr ? '🎁 10 ay fiyatına 12 ay erişim (Aylık ~$4.16)' : '🎁 12 months for price of 10 (~$4.16/mo)'}
+                      </p>
+                    )}
                   </div>
                   <ul className="upgrade-features">
                     <li>✓ Free tools free forever</li>
@@ -678,7 +711,15 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
                 <div className={`account-upgrade-card ${currentPlan === 'enterprise' || currentPlan === 'unlimited' ? 'is-current' : ''}`}>
                   <div className="upgrade-card-head">
                     <h3 className="upgrade-card-name">Unlimited</h3>
-                    <p className="upgrade-card-price">$9.99 <span className="period">/ {isTr ? 'aylık' : 'month'}</span></p>
+                    <p className="upgrade-card-price">
+                      {packageBillingCycle === 'annual' ? '$99.90' : '$9.99'}{' '}
+                      <span className="period">/ {packageBillingCycle === 'annual' ? (isTr ? 'yıl' : 'year') : (isTr ? 'ay' : 'month')}</span>
+                    </p>
+                    {packageBillingCycle === 'annual' && (
+                      <p className="upgrade-card-savings-text">
+                        {isTr ? '🎁 10 ay fiyatına 12 ay erişim (Aylık ~$8.33)' : '🎁 12 months for price of 10 (~$8.33/mo)'}
+                      </p>
+                    )}
                   </div>
                   <ul className="upgrade-features">
                     <li>✓ Free tools free forever</li>

@@ -27,12 +27,16 @@ export function RevenueCatProvider({ children }) {
   const [isPaywallOpen, setIsPaywallOpen] = useState(false);
   const [isCustomerCenterOpen, setIsCustomerCenterOpen] = useState(false);
   const [paywallInitialProduct, setPaywallInitialProduct] = useState(null);
+  const [paywallInitialCycle, setPaywallInitialCycle] = useState('annual');
 
   // Listen to custom window events triggered across the app
   useEffect(() => {
     const handleOpenPaywallEvt = (e) => {
       if (e?.detail?.defaultPackageId || e?.detail?.initialProductId) {
         setPaywallInitialProduct(e.detail.defaultPackageId || e.detail.initialProductId);
+      }
+      if (e?.detail?.cycle) {
+        setPaywallInitialCycle(e.detail.cycle);
       }
       setIsPaywallOpen(true);
     };
@@ -129,10 +133,13 @@ export function RevenueCatProvider({ children }) {
     }
   }, [user?.email]);
 
-  // Present Paywall - Opens custom modal with optional default selected package
+  // Present Paywall - Opens custom modal with optional default selected package and billing cycle
   const handlePresentPaywall = useCallback((options = {}) => {
     if (options.defaultPackageId || options.initialProductId) {
       setPaywallInitialProduct(options.defaultPackageId || options.initialProductId);
+    }
+    if (options.cycle) {
+      setPaywallInitialCycle(options.cycle);
     }
     setIsPaywallOpen(true);
   }, []);
@@ -171,6 +178,8 @@ export function RevenueCatProvider({ children }) {
     setIsPaywallOpen,
     paywallInitialProduct,
     setPaywallInitialProduct,
+    paywallInitialCycle,
+    setPaywallInitialCycle,
     isCustomerCenterOpen,
     setIsCustomerCenterOpen,
     config: REVENUECAT_CONFIG

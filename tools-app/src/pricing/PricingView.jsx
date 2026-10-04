@@ -17,9 +17,8 @@ import './pricing.css';
 
 export default function PricingView({ onBack }) {
   const { language } = useTranslation();
-  const { isPro, setIsPaywallOpen, openCustomerCenter } = useRevenueCat();
+  const { isPro, presentPaywall, openCustomerCenter } = useRevenueCat();
   const [billingCycle, setBillingCycle] = useState('annual'); // 'monthly' | 'annual'
-  const [selectedCheckoutPlan, setSelectedCheckoutPlan] = useState(null);
 
   useEffect(() => {
     try {
@@ -28,14 +27,6 @@ export default function PricingView({ onBack }) {
       window.scrollTo(0, 0);
     }
   }, []);
-
-  const handleOpenCheckoutModal = (planName) => {
-    setSelectedCheckoutPlan(planName);
-  };
-
-  const handleCloseModal = () => {
-    setSelectedCheckoutPlan(null);
-  };
 
   return (
     <div className="pricing-page-container">
@@ -215,7 +206,7 @@ export default function PricingView({ onBack }) {
               <button 
                 type="button" 
                 className="pricing-cta-btn"
-                onClick={() => setIsPaywallOpen(true)}
+                onClick={() => presentPaywall({ defaultPackageId: 'pro', cycle: billingCycle })}
               >
                 <span>{language === 'tr' ? 'Pro\'ya Abone Ol' : 'Subscribe to Pro'}</span>
               </button>
@@ -278,7 +269,7 @@ export default function PricingView({ onBack }) {
             <button 
               type="button" 
               className="pricing-cta-btn"
-              onClick={() => setIsPaywallOpen(true)}
+              onClick={() => presentPaywall({ defaultPackageId: 'unlimited', cycle: billingCycle })}
             >
               <span>{language === 'tr' ? 'Unlimited Başlat' : 'Get Unlimited'}</span>
             </button>
@@ -373,9 +364,9 @@ export default function PricingView({ onBack }) {
           </div>
 
           <div className="pricing-faq-card">
-            <h4 className="pricing-faq-q">Why does the checkout show Coming Soon?</h4>
+            <h4 className="pricing-faq-q">How does checkout &amp; subscription billing work?</h4>
             <p className="pricing-faq-a">
-              We are currently in the final stages of integrating our compliant, secure payment gateway infrastructure. Self-serve checkout will be activated shortly. In the meantime, you can enjoy generous free limits across all 31+ tools.
+              Self-serve checkout is live and securely processed via RevenueCat &amp; Stripe with 256-bit SSL encryption. All major cards and digital wallets are supported. Upgrades and unlocks take effect immediately across your account.
             </p>
           </div>
 
@@ -389,37 +380,11 @@ export default function PricingView({ onBack }) {
           <div className="pricing-faq-card">
             <h4 className="pricing-faq-q">Can I switch plans or cancel at any time?</h4>
             <p className="pricing-faq-a">
-              Yes. Once payment processing is live, you will be able to upgrade, downgrade, or cancel your subscription at any time with one click from your account dashboard with zero hidden fees.
+              Yes. You can upgrade, downgrade, or cancel your subscription at any time with one click from your account dashboard with zero cancellation fees or hidden terms.
             </p>
           </div>
         </div>
       </section>
-
-      {/* Coming Soon Checkout Dialog */}
-      {selectedCheckoutPlan && (
-        <div className="pricing-modal-backdrop" onClick={handleCloseModal}>
-          <div className="pricing-modal-card" onClick={(e) => e.stopPropagation()}>
-            <div className="pricing-modal-icon-wrap">
-              <CreditCard size={28} />
-            </div>
-            <h3 className="pricing-modal-title">Checkout Coming Soon</h3>
-            <p className="pricing-modal-desc">
-              We are currently completing the final regulatory and security audits for our payment processing infrastructure for the <strong>{selectedCheckoutPlan}</strong>.
-              <br /><br />
-              Self-serve checkout will be live shortly. In the meantime, all 31+ tools remain available with generous free tier access.
-            </p>
-            <div className="pricing-modal-actions">
-              <button 
-                type="button" 
-                className="pricing-modal-btn primary"
-                onClick={handleCloseModal}
-              >
-                Got It
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
