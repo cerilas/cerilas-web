@@ -332,8 +332,8 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
 
   // Upgrade Plan handler
   const handleUpgradePlan = async (targetPlan) => {
-    if (targetPlan === 'pro' || targetPlan === 'enterprise') {
-      presentPaywall({ defaultPackageId: targetPlan === 'enterprise' ? 'unlimited' : 'pro' });
+    if (targetPlan === 'pro' || targetPlan === 'enterprise' || targetPlan === 'unlimited') {
+      presentPaywall({ defaultPackageId: (targetPlan === 'enterprise' || targetPlan === 'unlimited') ? 'unlimited' : 'pro' });
       return;
     }
     setUpgradingPlan(targetPlan);
@@ -674,10 +674,10 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
                   )}
                 </div>
 
-                {/* Plan 3: Enterprise */}
-                <div className={`account-upgrade-card ${currentPlan === 'enterprise' ? 'is-current' : ''}`}>
+                {/* Plan 3: Unlimited */}
+                <div className={`account-upgrade-card ${currentPlan === 'enterprise' || currentPlan === 'unlimited' ? 'is-current' : ''}`}>
                   <div className="upgrade-card-head">
-                    <h3 className="upgrade-card-name">Enterprise</h3>
+                    <h3 className="upgrade-card-name">Unlimited</h3>
                     <p className="upgrade-card-price">$9.99 <span className="period">/ {isTr ? 'aylık' : 'month'}</span></p>
                   </div>
                   <ul className="upgrade-features">
@@ -686,16 +686,16 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
                     <li>✓ {isTr ? 'Maksimum token tahsisi' : 'Maximum token allowance'}</li>
                     <li>✓ 7/24 {isTr ? 'Öncelikli destek & Turbo hız' : 'Priority Support & Turbo speed'}</li>
                   </ul>
-                  {currentPlan === 'enterprise' ? (
+                  {currentPlan === 'enterprise' || currentPlan === 'unlimited' ? (
                     <div className="upgrade-current-pill">{isTr ? 'Mevcut Paketiniz' : 'Current Plan'}</div>
                   ) : (
                     <button
                       type="button"
-                      disabled={upgradingPlan === 'enterprise'}
-                      onClick={() => handleUpgradePlan('enterprise')}
+                      disabled={upgradingPlan === 'unlimited' || upgradingPlan === 'enterprise'}
+                      onClick={() => handleUpgradePlan('unlimited')}
                       className="upgrade-action-btn btn-secondary"
                     >
-                      {upgradingPlan === 'enterprise' ? <Loader2 size={15} className="auth-spinner" /> : (isTr ? 'Enterprise\'a Yükselt' : 'Upgrade to Enterprise')}
+                      {upgradingPlan === 'unlimited' || upgradingPlan === 'enterprise' ? <Loader2 size={15} className="auth-spinner" /> : (isTr ? 'Unlimited\'a Yükselt' : 'Upgrade to Unlimited')}
                     </button>
                   )}
                 </div>
