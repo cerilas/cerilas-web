@@ -13,7 +13,9 @@ import {
   Activity,
   MapPin,
   Plug,
-  Mail
+  Mail,
+  PanelLeftClose,
+  PanelLeftOpen
 } from 'lucide-react';
 import { useGrowth } from '../GrowthContext';
 import { useAuth } from '../../context/AuthContext';
@@ -65,6 +67,27 @@ const NAV_GROUPS = [
 export default function GrowthSidebar() {
   const { activeTab, setActiveTab, activeWorkspace } = useGrowth();
   const { token } = useAuth();
+
+  const [isCollapsed, setIsCollapsed] = useState(() => {
+    try {
+      return localStorage.getItem('cerilas_growth_sidebar_collapsed') === 'true';
+    } catch (e) {
+      return false;
+    }
+  });
+
+  const toggleCollapse = () => {
+    setIsCollapsed(prev => {
+      const next = !prev;
+      try {
+        localStorage.setItem('cerilas_growth_sidebar_collapsed', String(next));
+      } catch (e) {}
+      setTimeout(() => {
+        window.dispatchEvent(new Event('resize'));
+      }, 260);
+      return next;
+    });
+  };
 
   const [integrations, setIntegrations] = useState({
     gsc: false,
@@ -147,23 +170,60 @@ export default function GrowthSidebar() {
   };
 
   return (
-    <aside className="growth-app-sidebar">
-      {/* Platform Branding Mini */}
+    <aside className={`growth-app-sidebar ${isCollapsed ? 'is-collapsed' : ''}`}>
+      {/* Platform Branding Mini + Collapse Toggle */}
       <div className="growth-sidebar-brand-box">
-        <div className="growth-logo-glow-wrap">
-          <Layers size={17} strokeWidth={2} />
-        </div>
-        <div className="growth-brand-titles">
-          <span className="growth-app-title">Cerilas Growth</span>
-          <span className="growth-app-tag">AI Intelligence v1.0</span>
-        </div>
+        {!isCollapsed ? (
+          <>
+            <div className="growth-brand-titles-row">
+              <div className="growth-logo-glow-wrap" title="Cerilas Growth">
+                <Layers size={17} strokeWidth={2} />
+              </div>
+              <div className="growth-brand-titles">
+                <span className="growth-app-title">Cerilas Growth</span>
+                <span className="growth-app-tag">AI Intelligence v1.0</span>
+              </div>
+            </div>
+            <button
+              type="button"
+              className="growth-sidebar-toggle-btn"
+              onClick={toggleCollapse}
+              title="Menüyü Daralt (Collapse)"
+              aria-label="Menüyü Daralt"
+            >
+              <PanelLeftClose size={16} />
+            </button>
+          </>
+        ) : (
+          <div className="growth-collapsed-brand-col">
+            <div 
+              className="growth-logo-glow-wrap" 
+              title="Cerilas Growth"
+            >
+              <Layers size={17} strokeWidth={2} />
+            </div>
+            <button
+              type="button"
+              className="growth-sidebar-toggle-btn collapsed"
+              onClick={toggleCollapse}
+              title="Menüyü Genişlet (Expand)"
+              aria-label="Menüyü Genişlet"
+            >
+              <PanelLeftOpen size={16} />
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Navigation Sections */}
       <div className="growth-sidebar-nav">
-        {NAV_GROUPS.map((group) => (
+        {NAV_GROUPS.map((group, groupIdx) => (
           <div key={group.title} className="growth-nav-group">
-            <span className="growth-group-title">{group.title}</span>
+            {!isCollapsed ? (
+              <span className="growth-group-title">{group.title}</span>
+            ) : (
+              groupIdx > 0 && <div className="growth-nav-divider" />
+            )}
             <div className="growth-group-items">
               {group.items.map((item) => {
                 const Icon = item.icon;
@@ -173,25 +233,30 @@ export default function GrowthSidebar() {
                   <button
                     key={item.id}
                     type="button"
-                    className={`growth-nav-item ${isActive ? 'is-active' : ''} ${needsSetup ? 'requires-setup' : ''}`}
+                    className={`growth-nav-item ${isActive ? 'is-active' : ''} ${needsSetup ? 'requires-setup' : ''} ${isCollapsed ? 'is-collapsed' : ''}`}
                     onClick={() => {
                       setActiveTab(item.id);
                       if (activeWorkspace) {
                         window.location.hash = `#/growth/${activeWorkspace.slug}/${item.id}`;
                       }
                     }}
+                    title={isCollapsed ? `${item.label}${needsSetup ? ' (Setup Gerekiyor)' : ''}` : undefined}
                   >
-                    <Icon size={16} strokeWidth={1.8} className="growth-nav-icon" />
-                    <span className="growth-nav-label">{item.label}</span>
-                    {needsSetup ? (
-                      <span className="growth-nav-setup-tag" title="Setup / Connection Action Required">
-                        <Plug size={11} strokeWidth={2.2} />
-                        <span>Setup</span>
-                      </span>
-                    ) : (
+                    <Icon size={17} strokeWidth={isActive ? 2.2 : 1.8} className="growth-nav-icon" />
+                    {!isCollapsed && (
                       <>
-                        {item.badge && <span className="growth-nav-badge">{item.badge}</span>}
-                        {item.isNew && <span className="growth-nav-new-badge">GEO</span>}
+                        <span className="growth-nav-label">{item.label}</span>
+                        {needsSetup ? (
+                          <span className="growth-nav-setup-tag" title="Setup / Connection Action Required">
+                            <Plug size={11} strokeWidth={2.2} />
+                            <span>Setup</span>
+                          </span>
+                        ) : (
+                          <>
+                            {item.badge && <span className="growth-nav-badge">{item.badge}</span>}
+                            {item.isNew && <span className="growth-nav-new-badge">GEO</span>}
+                          </>
+                        )}
                       </>
                     )}
                   </button>
@@ -204,12 +269,24 @@ export default function GrowthSidebar() {
 
       {/* Sidebar Footer (Active workspace status card) */}
       {activeWorkspace && (
-        <div className="growth-sidebar-footer">
-          <div className="growth-footer-score-pill">
-            <div className="growth-footer-dot" />
-            <span>Score: {activeWorkspace.growth_score || 72}/100</span>
-          </div>
-          <span className="growth-footer-domain">{activeWorkspace.primary_domain}</span>
+        <div 
+          className={`growth-sidebar-footer ${isCollapsed ? 'is-collapsed' : ''}`}
+          title={isCollapsed ? `Growth Score: ${activeWorkspace.growth_score || 72}/100 • ${activeWorkspace.primary_domain}` : undefined}
+        >
+          {!isCollapsed ? (
+            <>
+              <div className="growth-footer-score-pill">
+                <div className="growth-footer-dot" />
+                <span>Score: {activeWorkspace.growth_score || 72}/100</span>
+              </div>
+              <span className="growth-footer-domain">{activeWorkspace.primary_domain}</span>
+            </>
+          ) : (
+            <div className="growth-footer-score-collapsed">
+              <div className="growth-footer-dot" />
+              <span className="growth-footer-score-val">{activeWorkspace.growth_score || 72}</span>
+            </div>
+          )}
         </div>
       )}
     </aside>

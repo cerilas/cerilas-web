@@ -3,13 +3,14 @@
    ========================================================================== */
 
 .growth-app-shell {
-  min-height: 100vh;
+  height: 100vh;
+  max-height: 100vh;
   display: flex;
   flex-direction: column;
   background: var(--bg-color, #09090b);
   color: var(--text-main, #f4f4f5);
   font-family: 'Dosis', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  overflow-x: hidden;
+  overflow: hidden;
 }
 
 @keyframes spin {
@@ -449,19 +450,32 @@ html.light .growth-header-theme-btn:hover {
 .growth-app-body {
   display: flex;
   flex: 1;
-  min-height: calc(100vh - 64px);
+  height: calc(100vh - 64px);
+  max-height: calc(100vh - 64px);
+  overflow: hidden;
+  min-height: 0;
 }
 
 /* Sidebar */
 .growth-app-sidebar {
   width: 260px;
+  height: 100%;
+  max-height: 100%;
   flex-shrink: 0;
   background: rgba(9, 9, 11, 0.95);
   border-right: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
   padding: 1.25rem 0.85rem;
+  overflow: hidden;
+  box-sizing: border-box;
+  transition: width 0.22s cubic-bezier(0.4, 0, 0.2, 1), padding 0.22s ease;
+  overscroll-behavior: contain;
+}
+
+.growth-app-sidebar.is-collapsed {
+  width: 72px;
+  padding: 1.25rem 0.5rem;
 }
 
 [data-theme="light"] .growth-app-sidebar,
@@ -473,9 +487,70 @@ html.light .growth-app-sidebar {
 .growth-sidebar-brand-box {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  padding: 0.4rem 0.65rem 1.25rem;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.4rem 0.4rem 1.15rem;
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  flex-shrink: 0;
+}
+
+[data-theme="light"] .growth-sidebar-brand-box,
+html.light .growth-sidebar-brand-box {
+  border-bottom-color: #e4e4e7;
+}
+
+.growth-brand-titles-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.growth-sidebar-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--text-muted, #a1a1aa);
+  cursor: pointer;
+  transition: all 0.18s ease;
+  flex-shrink: 0;
+}
+
+.growth-sidebar-toggle-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-main, #ffffff);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.growth-collapsed-brand-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.growth-sidebar-toggle-btn.collapsed {
+  width: 32px;
+  height: 32px;
+}
+
+[data-theme="light"] .growth-sidebar-toggle-btn,
+html.light .growth-sidebar-toggle-btn {
+  background: rgba(0, 0, 0, 0.04);
+  border-color: #e4e4e7;
+  color: #71717a;
+}
+
+[data-theme="light"] .growth-sidebar-toggle-btn:hover,
+html.light .growth-sidebar-toggle-btn:hover {
+  background: rgba(0, 0, 0, 0.08);
+  color: #18181b;
 }
 
 .growth-logo-glow-wrap {
@@ -488,6 +563,7 @@ html.light .growth-app-sidebar {
   align-items: center;
   justify-content: center;
   color: #818cf8;
+  flex-shrink: 0;
 }
 
 .growth-brand-titles {
@@ -500,6 +576,7 @@ html.light .growth-app-sidebar {
   font-weight: 700;
   letter-spacing: -0.015em;
   color: var(--text-main, #ffffff);
+  white-space: nowrap;
 }
 
 .growth-app-tag {
@@ -507,15 +584,46 @@ html.light .growth-app-sidebar {
   color: #818cf8;
   font-weight: 600;
   letter-spacing: 0.02em;
+  white-space: nowrap;
 }
 
 /* Nav groups */
 .growth-sidebar-nav {
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
-  margin-top: 1rem;
+  gap: 1.15rem;
+  margin-top: 0.85rem;
   flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 2px;
+  overscroll-behavior: contain;
+}
+
+.growth-sidebar-nav::-webkit-scrollbar {
+  width: 4px;
+}
+.growth-sidebar-nav::-webkit-scrollbar-track {
+  background: transparent;
+}
+.growth-sidebar-nav::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 4px;
+}
+.growth-sidebar-nav::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.growth-nav-divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.07);
+  margin: 0.35rem 0.5rem;
+}
+
+[data-theme="light"] .growth-nav-divider,
+html.light .growth-nav-divider {
+  background: #e4e4e7;
 }
 
 .growth-nav-group {
@@ -554,6 +662,7 @@ html.light .growth-app-sidebar {
   text-align: left;
   transition: all 0.18s ease;
   width: 100%;
+  box-sizing: border-box;
 }
 
 .growth-nav-item:hover {
@@ -565,6 +674,38 @@ html.light .growth-app-sidebar {
   background: rgba(255, 255, 255, 0.09);
   color: var(--text-main, #ffffff);
   font-weight: 600;
+}
+
+.growth-app-sidebar.is-collapsed .growth-nav-item {
+  justify-content: center;
+  padding: 0.65rem 0;
+  width: 100%;
+  border-radius: 10px;
+}
+
+.growth-app-sidebar.is-collapsed .growth-nav-icon {
+  margin: 0;
+}
+
+.growth-app-sidebar.is-collapsed .growth-nav-item.requires-setup {
+  position: relative;
+  background: rgba(245, 158, 11, 0.06);
+}
+
+.growth-app-sidebar.is-collapsed .growth-nav-item.requires-setup::after {
+  content: '';
+  position: absolute;
+  top: 6px;
+  right: 12px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #f59e0b;
+  box-shadow: 0 0 6px rgba(245, 158, 11, 0.8);
+}
+
+.growth-app-sidebar.is-collapsed .growth-nav-item.requires-setup::before {
+  display: none;
 }
 
 .growth-nav-icon {
@@ -672,6 +813,21 @@ html.light .growth-app-sidebar {
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
+  flex-shrink: 0;
+  margin-top: auto;
+}
+
+[data-theme="light"] .growth-sidebar-footer,
+html.light .growth-sidebar-footer {
+  background: #f4f4f5;
+  border-color: #e4e4e7;
+}
+
+.growth-sidebar-footer.is-collapsed {
+  padding: 0.5rem 0.25rem;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.02);
 }
 
 .growth-footer-score-pill {
@@ -683,11 +839,34 @@ html.light .growth-app-sidebar {
   color: #34d399;
 }
 
+.growth-footer-score-collapsed {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #34d399;
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  border-radius: 8px;
+  padding: 0.35rem 0.4rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.growth-footer-score-val {
+  font-size: 0.82rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
 .growth-footer-dot {
   width: 6px;
   height: 6px;
   border-radius: 50%;
   background: #10b981;
+  flex-shrink: 0;
 }
 
 .growth-footer-domain {
@@ -704,9 +883,13 @@ html.light .growth-app-sidebar {
   min-width: 0;
   width: 100%;
   max-width: 1440px;
+  height: 100%;
+  max-height: 100%;
   padding: 2rem 2.25rem;
   overflow-y: auto;
+  overflow-x: hidden;
   box-sizing: border-box;
+  overscroll-behavior: contain;
 }
 
 @media (max-width: 1200px) {
@@ -3848,14 +4031,24 @@ html.light .comp-visit-link:hover {
 }
 
 @media (max-width: 768px) {
+  .growth-app-shell {
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+  }
   .growth-app-body {
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
     flex-direction: column;
   }
   .growth-app-sidebar {
-    width: 100%;
+    width: 100% !important;
+    height: auto !important;
+    max-height: none !important;
     border-right: none;
     border-bottom: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
-    padding: 0.65rem 0.85rem;
+    padding: 0.65rem 0.85rem !important;
     position: sticky;
     top: 64px;
     z-index: 40;
@@ -3864,10 +4057,16 @@ html.light .comp-visit-link:hover {
     -webkit-backdrop-filter: blur(16px);
   }
   .growth-sidebar-brand-box {
-    display: none;
+    display: none !important;
   }
   .growth-sidebar-footer {
-    display: none;
+    display: none !important;
+  }
+  .growth-sidebar-toggle-btn {
+    display: none !important;
+  }
+  .growth-nav-divider {
+    display: none !important;
   }
   .growth-sidebar-nav {
     display: flex;
@@ -3910,6 +4109,9 @@ html.light .comp-visit-link:hover {
     box-shadow: 0 2px 10px rgba(99, 102, 241, 0.25);
   }
   .growth-main-viewport {
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
     padding: 1.25rem 0.85rem;
   }
   .growth-guest-features {
