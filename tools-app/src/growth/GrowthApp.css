@@ -258,6 +258,49 @@ html.light .growth-app-header {
   color: #34d399;
 }
 
+.growth-ws-delete-quick-btn {
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  background: transparent;
+  border: 1px solid transparent;
+  color: #94a3b8;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+  transition: all 0.15s ease;
+  opacity: 0.4;
+  margin-left: 2px;
+}
+
+.growth-ws-item:hover .growth-ws-delete-quick-btn {
+  opacity: 0.85;
+}
+
+.growth-ws-delete-quick-btn:hover {
+  opacity: 1 !important;
+  color: #ef4444 !important;
+  background: rgba(239, 68, 68, 0.14) !important;
+  border-color: rgba(239, 68, 68, 0.3) !important;
+  transform: scale(1.08);
+}
+
+[data-theme="light"] .growth-ws-delete-quick-btn,
+html.light .growth-ws-delete-quick-btn,
+body.light .growth-ws-delete-quick-btn {
+  color: #64748b;
+}
+
+[data-theme="light"] .growth-ws-delete-quick-btn:hover,
+html.light .growth-ws-delete-quick-btn:hover,
+body.light .growth-ws-delete-quick-btn:hover {
+  color: #dc2626 !important;
+  background: #fee2e2 !important;
+  border-color: #fca5a5 !important;
+}
+
 .growth-ws-dropdown-footer {
   padding-top: 0.4rem;
   border-top: 1px solid rgba(255, 255, 255, 0.06);

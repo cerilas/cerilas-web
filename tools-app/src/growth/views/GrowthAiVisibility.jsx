@@ -104,6 +104,10 @@ export default function GrowthAiVisibility() {
   const [deleteTargetPrompt, setDeleteTargetPrompt] = useState(null);
   const [deletingPromptId, setDeletingPromptId] = useState(null);
 
+  // Delete Report Modal State
+  const [deleteTargetReport, setDeleteTargetReport] = useState(null);
+  const [deletingReport, setDeletingReport] = useState(false);
+
   // Live Real-Time GEO Readiness Audit
   const [geoReadiness, setGeoReadiness] = useState(null);
   const [loadingGeoReadiness, setLoadingGeoReadiness] = useState(true);
@@ -255,9 +259,15 @@ export default function GrowthAiVisibility() {
     }
   };
 
-  const handleDeleteReport = async (reportId, e) => {
+  const handleDeleteReport = (reportId, e) => {
     if (e) e.stopPropagation();
-    if (!confirm('Are you sure you want to delete this scan report?')) return;
+    setDeleteTargetReport(reportId);
+  };
+
+  const handleConfirmDeleteReport = async () => {
+    if (!deleteTargetReport) return;
+    const reportId = deleteTargetReport;
+    setDeletingReport(true);
     try {
       const res = await fetch(`/api/growth/workspaces/${activeWorkspace.id}/ai-reports/${reportId}`, {
         method: 'DELETE',
@@ -268,9 +278,12 @@ export default function GrowthAiVisibility() {
         if (activeReport?.id === reportId) {
           setActiveReport(null);
         }
+        setDeleteTargetReport(null);
       }
     } catch (err) {
       console.error('Delete report error:', err);
+    } finally {
+      setDeletingReport(false);
     }
   };
 
@@ -2018,6 +2031,84 @@ export default function GrowthAiVisibility() {
                   <>
                     <Trash2 size={14} />
                     <span>Yes, Remove from Tracker</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {/* Delete Report Confirmation Modal - Custom UI */}
+      {deleteTargetReport && typeof document !== 'undefined' && createPortal(
+        <div 
+          className="growth-modal-backdrop" 
+          onClick={() => !deletingReport && setDeleteTargetReport(null)}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="delete-report-modal-title"
+        >
+          <div 
+            className="growth-modal-card comp-delete-modal-card animate-scale-in"
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="growth-modal-header">
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                <div className="comp-delete-modal-icon">
+                  <Trash2 size={18} />
+                </div>
+                <div>
+                  <h2 id="delete-report-modal-title" className="ai-gen-modal-title">
+                    Delete AI Scan Report
+                  </h2>
+                  <p className="ai-gen-modal-subtitle">
+                    This snapshot audit and its model answer citations will be permanently deleted.
+                  </p>
+                </div>
+              </div>
+              <button 
+                type="button" 
+                className="growth-modal-close"
+                onClick={() => setDeleteTargetReport(null)}
+                disabled={Boolean(deletingReport)}
+                aria-label="Close"
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            <div className="growth-modal-body">
+              <div className="delete-modal-explain-box">
+                <AlertTriangle size={17} style={{ flexShrink: 0, marginTop: 2 }} />
+                <span>Are you sure you want to permanently delete this scan report? Historical benchmark records for this run cannot be recovered.</span>
+              </div>
+            </div>
+
+            <div className="growth-modal-footer" style={{ justifyContent: 'flex-end' }}>
+              <button
+                type="button"
+                className="growth-secondary-btn"
+                onClick={() => setDeleteTargetReport(null)}
+                disabled={Boolean(deletingReport)}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                className="comp-delete-confirm-btn"
+                onClick={handleConfirmDeleteReport}
+                disabled={Boolean(deletingReport)}
+              >
+                {deletingReport ? (
+                  <>
+                    <Loader2 size={14} className="spin" />
+                    <span>Deleting...</span>
+                  </>
+                ) : (
+                  <>
+                    <Trash2 size={14} />
+                    <span>Yes, Delete Report</span>
                   </>
                 )}
               </button>

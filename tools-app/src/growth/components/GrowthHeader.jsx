@@ -19,12 +19,14 @@ import {
   LogOut,
   Crown,
   CheckCircle2,
-  AlertCircle
+  AlertCircle,
+  Trash2
 } from 'lucide-react';
 import { useGrowth } from '../GrowthContext';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
 import GrowthFavicon from './GrowthFavicon';
+import GrowthDeleteWorkspaceModal from './GrowthDeleteWorkspaceModal';
 import '../../components/NavbarAuth.css';
 
 export default function GrowthHeader({ onBackToTools }) {
@@ -32,12 +34,14 @@ export default function GrowthHeader({ onBackToTools }) {
     workspaces, 
     activeWorkspace, 
     switchWorkspace, 
-    setIsOnboardingOpen 
+    setIsOnboardingOpen,
+    refreshWorkspaces
   } = useGrowth();
-  const { user, isAuthenticated, logout, openAuthModal } = useAuth();
+  const { user, isAuthenticated, logout, openAuthModal, token } = useAuth();
   const { toggleTheme, isDark } = useTheme();
 
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [deleteTargetWs, setDeleteTargetWs] = useState(null);
   const dropdownRef = useRef(null);
 
   const [userMenuOpen, setUserMenuOpen] = useState(false);
@@ -162,6 +166,18 @@ export default function GrowthHeader({ onBackToTools }) {
                       <div className="growth-ws-item-right">
                         <span className="growth-score-tag">{ws.growth_score || 70}</span>
                         {isSelected && <Check size={14} className="text-primary" />}
+                        <button
+                          type="button"
+                          className="growth-ws-delete-quick-btn"
+                          title={isTr ? `${ws.name} çalışma alanını sil` : `Delete ${ws.name}`}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setDeleteTargetWs(ws);
+                            setIsDropdownOpen(false);
+                          }}
+                        >
+                          <Trash2 size={13} />
+                        </button>
                       </div>
                     </button>
                   );
@@ -361,6 +377,17 @@ export default function GrowthHeader({ onBackToTools }) {
           </button>
         )}
       </div>
+
+      {/* Quick Delete Workspace Modal */}
+      <GrowthDeleteWorkspaceModal
+        isOpen={Boolean(deleteTargetWs)}
+        onClose={() => setDeleteTargetWs(null)}
+        workspace={deleteTargetWs}
+        token={token}
+        onSuccess={async () => {
+          await refreshWorkspaces();
+        }}
+      />
     </header>
   );
 }

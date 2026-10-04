@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { 
   Settings, 
   Search, 
@@ -13,16 +14,24 @@ import {
   Sparkles,
   RefreshCw,
   Unlink,
-  ChevronDown
+  ChevronDown,
+  X,
+  AlertTriangle
 } from 'lucide-react';
 import { useGrowth } from '../GrowthContext';
 import { useAuth } from '../../context/AuthContext';
 import GrowthPageCover from '../components/GrowthPageCover';
 import { GrowthSettingsSkeleton } from '../components/GrowthSkeleton';
+import GrowthDeleteWorkspaceModal from '../components/GrowthDeleteWorkspaceModal';
 
 export default function GrowthSettings() {
   const { activeWorkspace, refreshWorkspaces, switchWorkspace, workspaces } = useGrowth();
   const { token } = useAuth();
+
+  const isTr = typeof window !== 'undefined' && (
+    localStorage.getItem('preferred_language') === 'tr' ||
+    (navigator.language && navigator.language.startsWith('tr'))
+  );
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -31,6 +40,8 @@ export default function GrowthSettings() {
   const [connectingGoogle, setConnectingGoogle] = useState(false);
   const [syncingGsc, setSyncingGsc] = useState(false);
   const [disconnectingGoogle, setDisconnectingGoogle] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isDisconnectGoogleModalOpen, setIsDisconnectGoogleModalOpen] = useState(false);
 
   // Integrations state
   const [integrations, setIntegrations] = useState({
@@ -206,11 +217,12 @@ export default function GrowthSettings() {
     }
   };
 
-  const handleDisconnectGoogle = async () => {
-    if (!window.confirm('Are you sure you want to disconnect Google Search Console and GA4? Live telemetry feeds will be removed.')) {
-      return;
-    }
+  const handleOpenDisconnectModal = () => {
+    setIsDisconnectGoogleModalOpen(true);
+  };
 
+  const handleConfirmDisconnectGoogle = async () => {
+    setIsDisconnectGoogleModalOpen(false);
     setDisconnectingGoogle(true);
     setErrorMsg('');
     try {
@@ -232,22 +244,8 @@ export default function GrowthSettings() {
     }
   };
 
-  const handleDeleteWorkspace = async () => {
-    if (!window.confirm(`Are you sure you want to permanently delete "${activeWorkspace?.name}" and all associated analysis data? This action cannot be undone.`)) {
-      return;
-    }
-
-    try {
-      const res = await fetch(`/api/growth/workspaces/${activeWorkspace.id}`, {
-        method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      if (res.ok) {
-        await refreshWorkspaces();
-      }
-    } catch (err) {
-      alert('Failed to delete workspace: ' + err.message);
-    }
+  const handleOpenDeleteModal = () => {
+    setIsDeleteModalOpen(true);
   };
 
   if (loading) {
@@ -299,7 +297,7 @@ export default function GrowthSettings() {
             <button
               type="button"
               disabled={disconnectingGoogle}
-              onClick={handleDisconnectGoogle}
+              onClick={handleOpenDisconnectModal}
               className="growth-secondary-btn btn-sm text-danger"
               style={{ borderColor: 'rgba(239, 68, 68, 0.3)', color: '#f87171' }}
             >
@@ -541,12 +539,101 @@ export default function GrowthSettings() {
 
         <button
           type="button"
-          onClick={handleDeleteWorkspace}
+          onClick={handleOpenDeleteModal}
           className="growth-danger-btn"
         >
-          <span>Permanently Delete Workspace</span>
+          <span>{isTr ? 'Çalışma Alanını Kalıcı Olarak Sil' : 'Permanently Delete Workspace'}</span>
         </button>
       </div>
+
+      {/* Custom Workspace / Site Deletion Modal */}
+      <GrowthDeleteWorkspaceModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        workspace={activeWorkspace}
+        token={token}
+        onSuccess={async () => {
+          await refreshWorkspaces();
+        }}
+      />
+
+      {/* Custom Disconnect Google Confirmation Modal */}
+      {isDisconnectGoogleModalOpen && typeof document !== 'undefined' && createPortal(
+        <div 
+          className="growth-delete-modal-backdrop"
+          onClick={() => !disconnectingGoogle && setIsDisconnectGoogleModalOpen(false)}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="growth-disconnect-google-title"
+        >
+          <div 
+            className="growth-delete-modal-card" 
+            style={{ maxWidth: 480 }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="growth-delete-modal-header">
+              <div className="growth-delete-header-top">
+                <div className="growth-delete-header-badge-wrap">
+                  <div className="growth-delete-modal-icon-badge" style={{ background: 'rgba(234, 179, 8, 0.14)', borderColor: 'rgba(234, 179, 8, 0.32)', color: '#eab308' }}>
+                    <Unlink size={19} />
+                  </div>
+                  <span className="growth-delete-pill" style={{ background: 'rgba(234, 179, 8, 0.12)', borderColor: 'rgba(234, 179, 8, 0.28)', color: '#facc15' }}>
+                    {isTr ? 'Bağlantı Kaldırma' : 'Disconnect Integration'}
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  className="growth-delete-modal-close-btn"
+                  onClick={() => setIsDisconnectGoogleModalOpen(false)}
+                  disabled={disconnectingGoogle}
+                >
+                  <X size={16} />
+                </button>
+              </div>
+
+              <h2 id="growth-disconnect-google-title" className="growth-delete-modal-title">
+                {isTr ? 'Google Entegrasyonunu Kaldır?' : 'Disconnect Google Integration?'}
+              </h2>
+              <p className="growth-delete-modal-subtitle">
+                {isTr
+                  ? 'Google Search Console ve GA4 bağlantısı kesilecek. Canlı arama sorguları ve organik trafik telemetrisi artık güncellenmeyecek.'
+                  : 'Google Search Console and GA4 will be unlinked from this workspace. Live telemetry feeds will be removed.'}
+              </p>
+            </div>
+
+            <div className="growth-delete-modal-footer">
+              <button
+                type="button"
+                className="growth-delete-cancel-btn"
+                onClick={() => setIsDisconnectGoogleModalOpen(false)}
+                disabled={disconnectingGoogle}
+              >
+                {isTr ? 'Vazgeç' : 'Cancel'}
+              </button>
+              <button
+                type="button"
+                className="growth-delete-submit-btn"
+                onClick={handleConfirmDisconnectGoogle}
+                disabled={disconnectingGoogle}
+                style={{ background: 'linear-gradient(135deg, #eab308 0%, #ca8a04 100%)', borderColor: '#a16207' }}
+              >
+                {disconnectingGoogle ? (
+                  <>
+                    <Loader2 size={15} className="spin" />
+                    <span>{isTr ? 'Bağlantı Kesiliyor...' : 'Disconnecting...'}</span>
+                  </>
+                ) : (
+                  <>
+                    <Unlink size={15} />
+                    <span>{isTr ? 'Evet, Bağlantıyı Kaldır' : 'Yes, Disconnect Google'}</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
     </div>
   );
 }
