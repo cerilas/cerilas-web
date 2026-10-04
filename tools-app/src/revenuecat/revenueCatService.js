@@ -233,20 +233,58 @@ export async function purchasePackage(rcPackage, customerEmail = null, htmlTarge
  * @param {Function} [options.onClose] Callback when paywall is dismissed
  * @returns {Promise<import('@revenuecat/purchases-js').PaywallPurchaseResult>}
  */
+/**
+ * Safely removes any orphaned RevenueCat native paywall DOM containers
+ */
+export function cleanupOrphanedPaywallElements() {
+  if (typeof document === 'undefined') return;
+  const stale = document.getElementById('rcb-ui-pw-root');
+  if (stale) {
+    try {
+      stale.remove();
+    } catch (_) {}
+  }
+}
+
+/**
+ * Present a RevenueCat Paywall using modern SDK method or fall back to Cerilas UI paywall
+ * @param {Object} options Paywall options
+ * @param {HTMLElement} [options.htmlTarget] Mount element
+ * @param {import('@revenuecat/purchases-js').Offering} [options.offering] Custom offering to present
+ * @param {string} [options.customerEmail] Pre-filled customer email
+ * @param {Function} [options.onSuccess] Callback on successful purchase
+ * @param {Function} [options.onClose] Callback when paywall is dismissed
+ */
 export async function presentPaywall(options = {}) {
+  cleanupOrphanedPaywallElements();
   const purchases = getPurchases() || initRevenueCat();
 
   try {
+    const offerings = await purchases.getOfferings().catch(() => null);
+    const current = options.offering || offerings?.current;
+
+    // Check if the offering in RevenueCat dashboard actually has paywall components configured.
+    // If not, calling purchases.presentPaywall() will inject a full-screen #rcb-ui-pw-root div
+    // and throw "This offering doesn't have a paywall attached", blocking all mouse clicks.
+    if (!current?.paywallComponents && !current?.uiConfig) {
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('cerilas:open-paywall', { detail: options }));
+      }
+      return { status: 'in_app_paywall_opened' };
+    }
+
     const paywallParams = {
       htmlTarget: options.htmlTarget || undefined,
       offering: options.offering || undefined,
       customerEmail: options.customerEmail || undefined,
       onBack: (closePaywall) => {
+        cleanupOrphanedPaywallElements();
         if (options.onClose) options.onClose();
         closePaywall();
       },
       listener: {
         onPurchaseCompleted: (customerInfo) => {
+          cleanupOrphanedPaywallElements();
           if (options.onSuccess) options.onSuccess(customerInfo);
         },
         onPurchaseError: (error) => {
@@ -257,8 +295,12 @@ export async function presentPaywall(options = {}) {
 
     return await purchases.presentPaywall(paywallParams);
   } catch (err) {
-    console.error('[RevenueCat] presentPaywall error:', err);
-    throw err;
+    cleanupOrphanedPaywallElements();
+    console.warn('[RevenueCat] Native presentPaywall unavailable or thrown, opening in-app paywall modal:', err?.message || err);
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('cerilas:open-paywall', { detail: options }));
+    }
+    return { status: 'in_app_paywall_opened' };
   }
 }
 
@@ -272,7 +314,7 @@ export function getCustomerManagementUrl(customerInfo) {
 }
 
 /**
- * Open Customer Center management URL in a new tab
+ * Open Customer Center management URL in a new tab or trigger in-app modal
  * @param {import('@revenuecat/purchases-js').CustomerInfo} customerInfo
  * @returns {boolean} True if URL was opened
  */
@@ -281,6 +323,9 @@ export function openCustomerCenter(customerInfo) {
   if (url && typeof window !== 'undefined') {
     window.open(url, '_blank', 'noopener,noreferrer');
     return true;
+  }
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new CustomEvent('cerilas:open-customer-center'));
   }
   return false;
 }

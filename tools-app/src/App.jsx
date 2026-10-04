@@ -253,6 +253,7 @@ export default function App() {
   const { 
     isPaywallOpen, 
     setIsPaywallOpen, 
+    paywallInitialProduct,
     isCustomerCenterOpen, 
     setIsCustomerCenterOpen 
   } = useRevenueCat();
@@ -928,6 +929,7 @@ export default function App() {
         <AuthModal />
         <RevenueCatPaywallModal 
           isOpen={isPaywallOpen}
+          initialProductId={paywallInitialProduct}
           onClose={() => setIsPaywallOpen(false)}
         />
         <RevenueCatCustomerCenterModal
@@ -1100,6 +1102,7 @@ export default function App() {
       <AuthModal />
       <RevenueCatPaywallModal 
         isOpen={isPaywallOpen}
+        initialProductId={paywallInitialProduct}
         onClose={() => setIsPaywallOpen(false)}
       />
       <RevenueCatCustomerCenterModal

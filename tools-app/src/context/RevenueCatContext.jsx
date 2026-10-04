@@ -26,6 +26,28 @@ export function RevenueCatProvider({ children }) {
   const [error, setError] = useState(null);
   const [isPaywallOpen, setIsPaywallOpen] = useState(false);
   const [isCustomerCenterOpen, setIsCustomerCenterOpen] = useState(false);
+  const [paywallInitialProduct, setPaywallInitialProduct] = useState(null);
+
+  // Listen to custom window events triggered across the app
+  useEffect(() => {
+    const handleOpenPaywallEvt = (e) => {
+      if (e?.detail?.defaultPackageId || e?.detail?.initialProductId) {
+        setPaywallInitialProduct(e.detail.defaultPackageId || e.detail.initialProductId);
+      }
+      setIsPaywallOpen(true);
+    };
+    const handleOpenCustomerCenterEvt = () => {
+      setIsCustomerCenterOpen(true);
+    };
+
+    window.addEventListener('cerilas:open-paywall', handleOpenPaywallEvt);
+    window.addEventListener('cerilas:open-customer-center', handleOpenCustomerCenterEvt);
+
+    return () => {
+      window.removeEventListener('cerilas:open-paywall', handleOpenPaywallEvt);
+      window.removeEventListener('cerilas:open-customer-center', handleOpenCustomerCenterEvt);
+    };
+  }, []);
 
   // Initialize SDK
   useEffect(() => {
@@ -107,23 +129,13 @@ export function RevenueCatProvider({ children }) {
     }
   }, [user?.email]);
 
-  // Present Paywall
-  const handlePresentPaywall = useCallback(async (options = {}) => {
-    try {
-      return await presentPaywall({
-        ...options,
-        customerEmail: options.customerEmail || user?.email,
-        onSuccess: (updatedInfo) => {
-          setCustomerInfo(updatedInfo);
-          setIsPro(checkProEntitlement(updatedInfo));
-          if (options.onSuccess) options.onSuccess(updatedInfo);
-        }
-      });
-    } catch (err) {
-      console.error('[RevenueCatContext] presentPaywall failed, opening fallback modal:', err);
-      setIsPaywallOpen(true);
+  // Present Paywall - Opens custom modal with optional default selected package
+  const handlePresentPaywall = useCallback((options = {}) => {
+    if (options.defaultPackageId || options.initialProductId) {
+      setPaywallInitialProduct(options.defaultPackageId || options.initialProductId);
     }
-  }, [user?.email]);
+    setIsPaywallOpen(true);
+  }, []);
 
   // Open Customer Center / Subscription Management
   const handleOpenCustomerCenter = useCallback(() => {
@@ -157,6 +169,8 @@ export function RevenueCatProvider({ children }) {
     openCustomerCenter: handleOpenCustomerCenter,
     isPaywallOpen,
     setIsPaywallOpen,
+    paywallInitialProduct,
+    setPaywallInitialProduct,
     isCustomerCenterOpen,
     setIsCustomerCenterOpen,
     config: REVENUECAT_CONFIG
