@@ -41,6 +41,9 @@ import AuthModal from './components/auth/AuthModal';
 import AccountDashboard from './components/account/AccountDashboard';
 import GrowthApp from './growth/GrowthApp';
 import { useAuth } from './context/AuthContext';
+import { useRevenueCat } from './context/RevenueCatContext';
+import RevenueCatPaywallModal from './components/RevenueCatPaywallModal';
+import RevenueCatCustomerCenterModal from './components/RevenueCatCustomerCenterModal';
 import { LEGAL_DOCS } from './legal/legalContent';
 import { toolsRegistry, getAllRegisteredTools, getRegisteredTool } from './tools/registry';
 import { getToolSeo } from './seo/toolsSeoRegistry';
@@ -247,6 +250,12 @@ const SkeletonCard = () => (
 
 export default function App() {
   const { t, language } = useTranslation();
+  const { 
+    isPaywallOpen, 
+    setIsPaywallOpen, 
+    isCustomerCenterOpen, 
+    setIsCustomerCenterOpen 
+  } = useRevenueCat();
   const [tools, setTools] = useState(() => getAllRegisteredTools());
   const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -917,6 +926,14 @@ export default function App() {
       <ErrorBoundary>
         <GrowthApp onBackToTools={navigateToHome} />
         <AuthModal />
+        <RevenueCatPaywallModal 
+          isOpen={isPaywallOpen}
+          onClose={() => setIsPaywallOpen(false)}
+        />
+        <RevenueCatCustomerCenterModal
+          isOpen={isCustomerCenterOpen}
+          onClose={() => setIsCustomerCenterOpen(false)}
+        />
       </ErrorBoundary>
     );
   }
@@ -1081,6 +1098,14 @@ export default function App() {
       />
 
       <AuthModal />
+      <RevenueCatPaywallModal 
+        isOpen={isPaywallOpen}
+        onClose={() => setIsPaywallOpen(false)}
+      />
+      <RevenueCatCustomerCenterModal
+        isOpen={isCustomerCenterOpen}
+        onClose={() => setIsCustomerCenterOpen(false)}
+      />
     </div>
   );
 }

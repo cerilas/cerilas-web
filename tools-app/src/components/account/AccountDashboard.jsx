@@ -25,6 +25,7 @@ import {
   Image as ImageIcon
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import { useRevenueCat } from '../../context/RevenueCatContext';
 import { useTranslation } from '../../i18n';
 import './AccountDashboard.css';
 
@@ -57,6 +58,12 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
     unlinkGoogleAccount,
     logout 
   } = useAuth();
+  const { 
+    isPro: isRevenueCatPro, 
+    customerInfo: rcCustomerInfo,
+    openCustomerCenter,
+    presentPaywall 
+  } = useRevenueCat();
   const { language } = useTranslation();
   const isTr = language === 'tr';
 
@@ -325,6 +332,10 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
 
   // Upgrade Plan handler
   const handleUpgradePlan = async (targetPlan) => {
+    if (targetPlan === 'pro' || targetPlan === 'enterprise') {
+      presentPaywall({ defaultPackageId: targetPlan === 'enterprise' ? 'unlimited' : 'pro' });
+      return;
+    }
     setUpgradingPlan(targetPlan);
     setPlanSuccessMsg('');
     try {
@@ -347,7 +358,7 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
     .slice(0, 2)
     .toUpperCase();
 
-  const currentPlan = user?.plan || 'free';
+  const currentPlan = isRevenueCatPro ? 'pro' : (user?.plan || 'free');
 
   if (!isAuthenticated && !loading) {
     return (
@@ -506,7 +517,7 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
 
             {/* Current Subscription Status Card */}
             <div className="account-panel-card">
-              <div className="account-panel-header">
+              <div className="account-panel-header" style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                 <div>
                   <h2 className="account-panel-title">{isTr ? 'Mevcut Abonelik Paketiniz' : 'Current Subscription'}</h2>
                   <p className="account-panel-desc">
@@ -515,10 +526,27 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
                       : 'Your active plan limits, quotas, and feature entitlements.'}
                   </p>
                 </div>
-                <span className="account-active-status-tag">
-                  <span className="status-indicator-dot" />
-                  <span>{isTr ? 'Aktif Üyelik' : 'Active Subscription'}</span>
-                </span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem', flexWrap: 'wrap' }}>
+                  {isRevenueCatPro && (
+                    <span className="account-active-status-tag" style={{ background: 'rgba(99, 102, 241, 0.15)', borderColor: 'rgba(99, 102, 241, 0.3)', color: '#818cf8' }}>
+                      <Crown size={13} style={{ marginRight: '4px' }} />
+                      <span>RevenueCat PRO</span>
+                    </span>
+                  )}
+                  <span className="account-active-status-tag">
+                    <span className="status-indicator-dot" />
+                    <span>{isTr ? 'Aktif Üyelik' : 'Active Subscription'}</span>
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => openCustomerCenter()}
+                    className="account-pricing-link-btn"
+                    title={isTr ? 'Fatura & Abonelik Yönetim Portalı' : 'Subscription & Billing Portal'}
+                  >
+                    <CreditCard size={14} />
+                    <span>{isTr ? 'Abonelik Portalı' : 'Customer Center'}</span>
+                  </button>
+                </div>
               </div>
 
               <div className="account-plan-overview-grid">

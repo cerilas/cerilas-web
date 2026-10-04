@@ -12,10 +12,12 @@ import {
   Cpu
 } from 'lucide-react';
 import { useTranslation } from '../i18n';
+import { useRevenueCat } from '../context/RevenueCatContext';
 import './pricing.css';
 
 export default function PricingView({ onBack }) {
   const { language } = useTranslation();
+  const { isPro, setIsPaywallOpen, openCustomerCenter } = useRevenueCat();
   const [billingCycle, setBillingCycle] = useState('annual'); // 'monthly' | 'annual'
   const [selectedCheckoutPlan, setSelectedCheckoutPlan] = useState(null);
 
@@ -199,14 +201,25 @@ export default function PricingView({ onBack }) {
           </ul>
 
           <div className="pricing-card-footer">
-            <button 
-              type="button" 
-              className="pricing-cta-btn is-coming-soon"
-              onClick={() => handleOpenCheckoutModal('Pro Plan ($4.99/mo or $49.90/yr)')}
-            >
-              <span>Checkout</span>
-              <span className="pricing-cta-badge">Coming Soon</span>
-            </button>
+            {isPro ? (
+              <button 
+                type="button" 
+                className="pricing-cta-btn"
+                style={{ background: 'rgba(16, 185, 129, 0.15)', borderColor: '#10b981', color: '#10b981' }}
+                onClick={openCustomerCenter}
+              >
+                <Check size={16} />
+                <span>{language === 'tr' ? 'Mevcut Plan (Yönet)' : 'Active Plan (Manage)'}</span>
+              </button>
+            ) : (
+              <button 
+                type="button" 
+                className="pricing-cta-btn"
+                onClick={() => setIsPaywallOpen(true)}
+              >
+                <span>{language === 'tr' ? 'Pro\'ya Abone Ol' : 'Subscribe to Pro'}</span>
+              </button>
+            )}
           </div>
         </div>
 
@@ -264,11 +277,10 @@ export default function PricingView({ onBack }) {
           <div className="pricing-card-footer">
             <button 
               type="button" 
-              className="pricing-cta-btn is-coming-soon"
-              onClick={() => handleOpenCheckoutModal('Unlimited Plan ($9.99/mo or $99.90/yr)')}
+              className="pricing-cta-btn"
+              onClick={() => setIsPaywallOpen(true)}
             >
-              <span>Checkout</span>
-              <span className="pricing-cta-badge">Coming Soon</span>
+              <span>{language === 'tr' ? 'Unlimited Başlat' : 'Get Unlimited'}</span>
             </button>
           </div>
         </div>
