@@ -382,9 +382,23 @@ export default function RevenueCatPaywallModal({
     } catch (err) {
       if (!err?.isCancelled) {
         console.error('[RevenueCat Paywall] Checkout error:', err);
-        setErrorMessage(err.message || (isTr 
-          ? 'Ödeme tamamlanamadı. Lütfen kart bilgilerinizi kontrol ediniz.' 
-          : 'Payment could not be completed. Please try again.'));
+        const rawMsg = err.message || '';
+        let userMsg = '';
+        if (
+          rawMsg.includes('8101') || 
+          rawMsg.includes('not fully configured') || 
+          rawMsg.includes('not_enabled') || 
+          rawMsg.includes('onboarding')
+        ) {
+          userMsg = isTr 
+            ? 'Paddle canlı ödeme onayı henüz tamamlanmamış (Onboarding incelemede). Paddle panelinizdeki hesap onay adımlarını tamamlayınız.'
+            : 'Checkouts are not yet enabled for this Paddle account (Onboarding in review). Please complete verification in your Paddle dashboard.';
+        } else {
+          userMsg = rawMsg || (isTr 
+            ? 'Ödeme tamamlanamadı. Lütfen kart bilgilerinizi kontrol ediniz.' 
+            : 'Payment could not be completed. Please try again.');
+        }
+        setErrorMessage(userMsg);
       }
     } finally {
       setIsPurchasing(false);
