@@ -100,8 +100,8 @@ export default function Footer({ onOpenStats, onNavigatePricing }) {
               />
               <span className="seo-footer-brand-name">Cerilas' Tools</span>
             </div>
-            <p className="seo-footer-brand-desc" title="Privacy-first developer utilities powered 100% locally by browser WebAssembly.">
-              Privacy-first developer utilities powered 100% locally by browser WebAssembly.
+            <p className="seo-footer-brand-desc" title="Privacy-first in-browser productivity and AI utilities powered 100% locally by browser WebAssembly.">
+              Privacy-first in-browser productivity and AI utilities powered 100% locally by browser WebAssembly.
             </p>
             <div className="seo-footer-badges">
               <span className="seo-footer-pill">

@@ -199,8 +199,8 @@ export default function RevenueCatPaywallModal({
       badge: isTr ? 'En Popüler' : 'Most Popular',
       badgeType: 'featured',
       desc: isTr 
-        ? 'Geliştiriciler ve yoğun kullanıcılar için yüksek token hakkı ve öncelikli işlem hızı.' 
-        : 'High token allowance for premium AI, PDF and developer tools with priority execution.',
+        ? 'Profesyoneller ve yoğun kullanıcılar için yüksek token hakkı ve öncelikli işlem hızı.' 
+        : 'High token allowance for premium AI, PDF, and productivity tools with priority execution.',
       hasCycleSwitch: true,
       currentCycle: cardCycles.pro,
       price: getPlanPrice('pro', cardCycles.pro),
@@ -241,7 +241,7 @@ export default function RevenueCatPaywallModal({
         isTr ? 'Tüm ücretsiz ve Pro özellikleri dahil' : 'Everything in Free & Pro included',
         isTr ? 'Maksimum token tahsisi (Tüm AI, PDF ve araştırma araçları)' : 'Maximum token allowance across all tools',
         isTr ? 'Turbo işlem hızı & en yüksek concurrency' : 'Turbo execution speed & highest priority',
-        isTr ? '7/24 VIP öncelikli teknik destek' : '24/7 VIP priority developer support',
+        isTr ? '7/24 VIP öncelikli teknik destek' : '24/7 VIP priority support',
         isTr ? 'Gelecek tüm araçlara anında erişim' : 'Instant access to all upcoming tools'
       ],
       ctaText: isTr ? 'Unlimited\'a Abone Ol' : 'Subscribe to Unlimited',

@@ -985,7 +985,7 @@ router.get('/invoices', requireAuth, async (req, res) => {
     if (invoices.length === 0) {
       const userRes = await authPool.query('SELECT plan, created_at FROM users WHERE id = $1', [req.user.id]);
       const u = userRes.rows[0] || {};
-      const planName = u.plan === 'pro' ? 'Pro Developer Plan' : (u.plan === 'enterprise' ? 'Enterprise Plan' : 'Free Starter Plan');
+      const planName = u.plan === 'pro' ? 'Pro Plan' : (u.plan === 'enterprise' || u.plan === 'unlimited' ? 'Unlimited Plan' : 'Free Starter Plan');
       const amount = u.plan === 'pro' ? 9.00 : (u.plan === 'enterprise' ? 29.00 : 0.00);
 
       invoices = [{
@@ -1027,7 +1027,7 @@ router.post('/upgrade-plan', requireAuth, async (req, res) => {
     );
 
     const amount = plan === 'pro' ? 9.00 : (plan === 'enterprise' ? 29.00 : 0.00);
-    const planTitle = plan === 'pro' ? 'Pro Developer Plan' : (plan === 'enterprise' ? 'Enterprise Plan' : 'Free Starter Plan');
+    const planTitle = plan === 'pro' ? 'Pro Plan' : (plan === 'enterprise' || plan === 'unlimited' ? 'Unlimited Plan' : 'Free Starter Plan');
     const invNum = `INV-${Date.now().toString().slice(-6)}`;
     
     await authPool.query(

@@ -434,7 +434,7 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
               <span className={`account-plan-badge badge-${currentPlan}`}>
                 <Crown size={12} />
                 <span>
-                  {currentPlan === 'pro' ? 'Pro Developer' : currentPlan === 'enterprise' ? 'Unlimited Enterprise' : (isTr ? 'Ücretsiz Plan' : 'Free Starter')}
+                  {currentPlan === 'pro' ? 'Pro' : (currentPlan === 'enterprise' || currentPlan === 'unlimited') ? 'Unlimited' : (isTr ? 'Ücretsiz Plan' : 'Free Starter')}
                 </span>
               </span>
             </div>
@@ -557,7 +557,7 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
                 <div className="account-metric-box">
                   <span className="account-metric-label">{isTr ? 'Plan Adı' : 'Plan Name'}</span>
                   <span className="account-metric-val">
-                    {currentPlan === 'pro' ? 'Pro Developer' : currentPlan === 'enterprise' ? 'Unlimited Enterprise' : 'Forever Free'}
+                    {currentPlan === 'pro' ? 'Pro' : (currentPlan === 'enterprise' || currentPlan === 'unlimited') ? 'Unlimited' : 'Forever Free'}
                   </span>
                 </div>
                 <div className="account-metric-box">
@@ -669,14 +669,14 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
                   )}
                 </div>
 
-                {/* Plan 2: Pro Developer */}
+                {/* Plan 2: Pro */}
                 <div className={`account-upgrade-card card-featured ${currentPlan === 'pro' ? 'is-current' : ''}`}>
                   <div className="card-popular-badge">
                     <Sparkles size={11} />
                     <span>{isTr ? 'En Popüler' : 'Most Popular'}</span>
                   </div>
                   <div className="upgrade-card-head">
-                    <h3 className="upgrade-card-name">Pro Developer</h3>
+                    <h3 className="upgrade-card-name">Pro</h3>
                     <p className="upgrade-card-price">
                       {packageBillingCycle === 'annual' ? '$99.90' : '$9.99'}{' '}
                       <span className="period">/ {packageBillingCycle === 'annual' ? (isTr ? 'yıl' : 'year') : (isTr ? 'ay' : 'month')}</span>
@@ -828,7 +828,7 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
                     <div className="avatar-spotlight-meta">
                       <span className="spotlight-user-name">{user?.name || user?.email}</span>
                       <span className="spotlight-user-role">
-                        {currentPlan === 'pro' ? 'Pro Developer' : currentPlan === 'enterprise' ? 'Unlimited Enterprise' : (isTr ? 'Cerilas Kullanıcısı' : 'Cerilas Member')}
+                        {currentPlan === 'pro' ? 'Pro' : (currentPlan === 'enterprise' || currentPlan === 'unlimited') ? 'Unlimited' : (isTr ? 'Cerilas Kullanıcısı' : 'Cerilas Member')}
                       </span>
                     </div>
 

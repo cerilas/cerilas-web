@@ -43,7 +43,7 @@ By accessing, visiting, or utilizing the web applications, micro-tools, software
         id: 'services',
         heading: '2. Description of Services & Local Architecture',
         headingTr: '2. Hizmetlerin Tanımı ve İstemci Tabanlı Mimari',
-        body: `Cerilas Tools provides a state-of-the-art suite of in-browser productivity, developer, AI-assisted, research, and document processing utilities.
+        body: `Cerilas Tools provides a state-of-the-art suite of in-browser productivity, AI-assisted, research, and document processing utilities.
 
 Client-Side Execution Guarantee: Unless explicitly stated otherwise (such as for cloud AI inference, webhook relay testing, or grant database queries), the core document and file utilities (including PDF editor, PDF merger, PDF compressor, image compressor, video compressor, and local calculators) execute 100% locally within your client browser using WebAssembly (WASM), WebGPU, and HTML5 Canvas sandbox memory. Your sensitive files and private inputs are not uploaded, copied, or stored on our servers during standard client-side operations.`
       },

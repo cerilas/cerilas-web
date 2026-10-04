@@ -57,7 +57,7 @@ export default function PricingView({ onBack }) {
           Simple, Predictable Plans for Everyone
         </h1>
         <p className="pricing-lead-text">
-          Access our suite of 31+ privacy-first developer, PDF, AI, research, and financial tools with zero server file uploads. Choose the plan tailored to your workflow.
+          Access our suite of 31+ privacy-first AI, PDF, image, document, research, and productivity tools with zero server file uploads. Choose the plan tailored to your workflow.
         </p>
 
         {/* Billing Cycle Switcher */}

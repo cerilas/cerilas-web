@@ -233,7 +233,7 @@ export default function Navbar({ activeTool, onNavigateHome, onOpenStats, onSele
                       <div className="nav-item-text-wrap">
                         <span className="nav-item-title">{isTr ? 'Plan' : 'Plan'}</span>
                         <span className="nav-item-sub">
-                          {currentPlan === 'pro' ? 'Pro Developer' : currentPlan === 'enterprise' ? 'Enterprise' : (isTr ? 'Ücretsiz Başlangıç' : 'Free Starter')}
+                          {currentPlan === 'pro' ? 'Pro' : (currentPlan === 'enterprise' || currentPlan === 'unlimited') ? 'Unlimited' : (isTr ? 'Ücretsiz Başlangıç' : 'Free Starter')}
                         </span>
                       </div>
                     </button>
