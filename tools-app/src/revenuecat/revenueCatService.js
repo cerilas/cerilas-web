@@ -10,7 +10,8 @@ import { Purchases, ErrorCode } from '@revenuecat/purchases-js';
 // Configuration Constants
 // ============================================================================
 export const REVENUECAT_CONFIG = {
-  API_KEY: 'test_QcfBRgbKRBopjvuWkSgRumPyFWK',
+  API_KEY: 'pdl_WBnMsdzJRdmzoYfKutAecxwmRtfn',
+  APP_ID: 'app174fb8403c',
   ENTITLEMENT_ID: 'cerilas_tools_pro',
   ANONYMOUS_USER_STORAGE_KEY: 'cerilas_rc_anon_user_id',
   
