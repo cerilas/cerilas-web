@@ -239,12 +239,58 @@ export default function RevenueCatPaywallModal({
     }
   }, [initialProductId]);
 
-  // Handle ESC key to dismiss
+  // Cancel / abort active purchasing
+  const handleCancelCheckout = () => {
+    setIsPurchasing(false);
+    cleanupOrphanedPaywallElements();
+    try {
+      const testOverlays = document.querySelectorAll('.rc-simulated-store-modal-overlay');
+      testOverlays.forEach(o => {
+        o.parentElement?.remove?.();
+        o.remove?.();
+      });
+    } catch (_) {}
+  };
+
+  // Watch for any RevenueCat test store or billing container and ensure it's on top
+  useEffect(() => {
+    if (!isPurchasing) return;
+
+    const elevateRevenueCatElements = () => {
+      const selectors = [
+        '.rc-simulated-store-modal-overlay',
+        '.rc-simulated-store-modal',
+        '.rcb-ui-root',
+        '.rcb-ui-container',
+        '.rcb-ui-container.fullscreen'
+      ];
+      selectors.forEach(sel => {
+        document.querySelectorAll(sel).forEach(el => {
+          el.style.setProperty('z-index', '2147483647', 'important');
+          el.style.setProperty('pointer-events', 'auto', 'important');
+          el.style.setProperty('visibility', 'visible', 'important');
+          if (el.parentElement && el.parentElement !== document.body) {
+            el.parentElement.style.setProperty('z-index', '2147483647', 'important');
+          }
+        });
+      });
+    };
+
+    elevateRevenueCatElements();
+    const interval = setInterval(elevateRevenueCatElements, 100);
+    return () => clearInterval(interval);
+  }, [isPurchasing]);
+
+  // Handle ESC key to dismiss or cancel checkout
   useEffect(() => {
     if (!isOpen) return;
     const handleKeyDown = (e) => {
-      if (e.key === 'Escape' && !isPurchasing) {
-        onClose();
+      if (e.key === 'Escape') {
+        if (isPurchasing) {
+          handleCancelCheckout();
+        } else {
+          onClose();
+        }
       }
     };
     window.addEventListener('keydown', handleKeyDown);
@@ -301,8 +347,8 @@ export default function RevenueCatPaywallModal({
 
   return createPortal(
     <div 
-      className="rc-paywall-backdrop"
-      onClick={() => !isPurchasing && onClose()}
+      className={`rc-paywall-backdrop ${isPurchasing ? 'is-purchasing-active' : ''}`}
+      onClick={() => isPurchasing ? handleCancelCheckout() : onClose()}
       role="dialog"
       aria-modal="true"
       aria-labelledby="rc-paywall-main-title"
@@ -316,9 +362,9 @@ export default function RevenueCatPaywallModal({
           <button 
             type="button" 
             className="rc-paywall-close-btn"
-            onClick={onClose}
-            disabled={isPurchasing}
+            onClick={isPurchasing ? handleCancelCheckout : onClose}
             aria-label={isTr ? 'Kapat' : 'Close'}
+            title={isPurchasing ? (isTr ? 'İptal Et' : 'Cancel') : (isTr ? 'Kapat' : 'Close')}
           >
             <X size={17} />
           </button>
@@ -564,7 +610,7 @@ export default function RevenueCatPaywallModal({
                   {isPurchasing ? (
                     <>
                       <Loader2 size={18} className="spin" />
-                      <span>{isTr ? 'Ödeme Sayfası Açılıyor...' : 'Opening Checkout...'}</span>
+                      <span>{isTr ? 'Ödeme Penceresi Açıldı...' : 'Checkout Window Open...'}</span>
                     </>
                   ) : selectedPlan.id === 'free' ? (
                     <>
@@ -583,6 +629,16 @@ export default function RevenueCatPaywallModal({
                     </>
                   )}
                 </button>
+
+                {isPurchasing && (
+                  <button 
+                    type="button" 
+                    onClick={handleCancelCheckout}
+                    className="rc-cancel-checkout-link"
+                  >
+                    {isTr ? 'Ödeme Penceresini Kapat / İptal Et' : 'Cancel & Close Payment Window'}
+                  </button>
+                )}
 
                 <div className="rc-security-note">
                   <span>🔒 {isTr ? 'RevenueCat & Stripe ile 256-bit SSL şifreli güvenli ödeme' : 'Secure checkout powered by RevenueCat & Stripe'}</span>

@@ -213,7 +213,13 @@ export async function purchasePackage(rcPackage, customerEmail = null, htmlTarge
       result
     };
   } catch (err) {
-    if (err?.errorCode === ErrorCode.UserCancelledError) {
+    const isCancelled = 
+      err?.errorCode === ErrorCode.UserCancelledError ||
+      err?.errorCode === 1 ||
+      err?.isCancelled ||
+      err?.message?.toLowerCase().includes('cancel');
+
+    if (isCancelled) {
       const userCancelErr = new Error('Purchase was cancelled.');
       userCancelErr.isCancelled = true;
       throw userCancelErr;

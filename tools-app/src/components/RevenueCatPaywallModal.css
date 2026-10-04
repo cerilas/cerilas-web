@@ -49,7 +49,7 @@
   background: rgba(3, 7, 18, 0.88);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  z-index: 2147483645;
+  z-index: 100000;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -58,6 +58,12 @@
   box-sizing: border-box;
   animation: rcPaywallFadeIn 0.2s ease-out;
   pointer-events: auto;
+  transition: opacity 0.25s ease;
+}
+
+.rc-paywall-backdrop.is-purchasing-active {
+  opacity: 0.18;
+  pointer-events: none;
 }
 
 [data-theme="light"] .rc-paywall-backdrop,
@@ -899,3 +905,129 @@ body.light .rc-security-note {
     padding: 1px 6px;
   }
 }
+
+/* Cancel checkout link */
+.rc-cancel-checkout-link {
+  background: none;
+  border: none;
+  color: #94a3b8;
+  font-size: 0.82rem;
+  text-decoration: underline;
+  cursor: pointer;
+  padding: 4px 8px;
+  transition: color 0.18s ease;
+}
+
+.rc-cancel-checkout-link:hover {
+  color: #f87171;
+}
+
+/* ==========================================================================
+   RevenueCat Dialogs & Web Billing Elements Layering
+   Ensures Test Store simulation modal and Stripe billing elements are ALWAYS
+   rendered on top of all custom modals, full screen, and completely clickable.
+   ========================================================================== */
+
+/* Test Store Modal Container (injected into body for test_ keys) */
+.rc-simulated-store-modal-overlay,
+.rc-simulated-store-modal-overlay *,
+.rcb-ui-root,
+.rcb-ui-root *,
+.rcb-ui-container,
+.rcb-ui-container * {
+  z-index: 2147483647 !important;
+  pointer-events: auto !important;
+  visibility: visible !important;
+}
+
+.rc-simulated-store-modal-overlay {
+  position: fixed !important;
+  inset: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background-color: rgba(3, 7, 18, 0.82) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+}
+
+.rc-simulated-store-modal {
+  background: #0f172a !important;
+  color: #f8fafc !important;
+  border: 1.5px solid rgba(59, 130, 246, 0.45) !important;
+  border-radius: 20px !important;
+  padding: 0 !important;
+  max-width: 520px !important;
+  width: 92% !important;
+  box-shadow: 0 35px 80px -15px rgba(0, 0, 0, 0.95), 0 0 50px -10px rgba(59, 130, 246, 0.35) !important;
+  overflow: hidden !important;
+}
+
+.rc-simulated-store-modal-content {
+  padding: 28px !important;
+}
+
+.rc-simulated-store-modal-title {
+  color: #f8fafc !important;
+  font-size: 1.45rem !important;
+  font-weight: 800 !important;
+  margin: 0 0 16px 0 !important;
+}
+
+.rc-simulated-store-modal-details p {
+  color: #cbd5e1 !important;
+  font-size: 0.95rem !important;
+  margin: 8px 0 !important;
+}
+
+.rc-simulated-store-modal-details strong {
+  color: #60a5fa !important;
+}
+
+.rc-simulated-store-modal-buttons {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 10px !important;
+  margin-top: 20px !important;
+}
+
+.rc-simulated-store-modal-button {
+  padding: 12px 20px !important;
+  border-radius: 12px !important;
+  font-size: 0.95rem !important;
+  font-weight: 700 !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+}
+
+.rc-simulated-store-modal-button-primary {
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%) !important;
+  color: #ffffff !important;
+  border: 1px solid #1d4ed8 !important;
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.4) !important;
+}
+
+.rc-simulated-store-modal-button-primary:hover {
+  background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%) !important;
+  transform: translateY(-1px) !important;
+}
+
+.rc-simulated-store-modal-button-secondary {
+  background: rgba(239, 68, 68, 0.15) !important;
+  color: #f87171 !important;
+  border: 1px solid rgba(239, 68, 68, 0.3) !important;
+}
+
+.rc-simulated-store-modal-button-cancel {
+  background: rgba(255, 255, 255, 0.08) !important;
+  color: #cbd5e1 !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+}
+
+.rc-simulated-store-modal-button-cancel:hover {
+  background: rgba(255, 255, 255, 0.15) !important;
+  color: #ffffff !important;
+}
+
