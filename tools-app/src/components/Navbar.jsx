@@ -83,15 +83,15 @@ export default function Navbar({ activeTool, onNavigateHome, onOpenStats, onSele
             }}
           >
             <img 
-              src="/platform-logo.webp" 
+              src="/cgrowthlogo.svg" 
               alt="Cerilas' Tools" 
               className="nav-platform-logo"
               width={28}
               height={28}
               onError={(e) => {
-                if (!e.target.dataset.triedPng) {
-                  e.target.dataset.triedPng = 'true';
-                  e.target.src = '/platform-logo.png';
+                if (!e.target.dataset.triedFallback) {
+                  e.target.dataset.triedFallback = 'true';
+                  e.target.src = '/platform-logo.webp';
                 }
               }}
             />

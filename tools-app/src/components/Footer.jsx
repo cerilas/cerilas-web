@@ -86,15 +86,15 @@ export default function Footer({ onOpenStats, onNavigatePricing }) {
           <div className="seo-footer-brand-col">
             <div className="seo-footer-logo-row">
               <img 
-                src="/platform-logo.webp" 
+                src="/cgrowthlogo.svg" 
                 alt="Cerilas' Tools" 
                 className="seo-footer-logo"
                 width={36}
                 height={36}
                 onError={(e) => {
-                  if (!e.target.dataset.triedPng) {
-                    e.target.dataset.triedPng = 'true';
-                    e.target.src = '/platform-logo.png';
+                  if (!e.target.dataset.triedFallback) {
+                    e.target.dataset.triedFallback = 'true';
+                    e.target.src = '/platform-logo.webp';
                   }
                 }}
               />

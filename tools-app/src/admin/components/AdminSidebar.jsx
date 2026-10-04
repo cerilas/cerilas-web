@@ -63,13 +63,13 @@ export default function AdminSidebar({
         <div className="admin-sidebar-brand-wrapper">
           <a href="/admin" className="admin-sidebar-brand" onClick={(e) => { e.preventDefault(); handleNavClick('tools'); }}>
             <img 
-              src="/platform-logo.webp" 
+              src="/cgrowthlogo.svg" 
               alt="Cerilas" 
               className="admin-brand-icon"
               onError={(e) => {
-                if (!e.target.dataset.triedPng) {
-                  e.target.dataset.triedPng = 'true';
-                  e.target.src = '/platform-logo.png';
+                if (!e.target.dataset.triedFallback) {
+                  e.target.dataset.triedFallback = 'true';
+                  e.target.src = '/platform-logo.webp';
                 }
               }}
             />

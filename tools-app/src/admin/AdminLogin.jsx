@@ -82,12 +82,12 @@ export default function AdminLogin({ onLoginSuccess }) {
           <div className="admin-login-header">
             <div className="admin-login-logo-wrap">
               <img
-                src="/platform-logo.webp"
+                src="/cgrowthlogo.svg"
                 alt="Cerilas"
                 className="admin-login-logo"
                 onError={(e) => {
                   e.target.onerror = null;
-                  e.target.src = '/platform-logo.png';
+                  e.target.src = '/platform-logo.webp';
                 }}
               />
             </div>

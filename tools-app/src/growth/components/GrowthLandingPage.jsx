@@ -267,10 +267,10 @@ export default function GrowthLandingPage({ onBackToTools, initialDomain = '' })
               }}
             >
               <img 
-                src="/platform-logo.webp" 
+                src="/cgrowthlogo.svg" 
                 alt="Cerilas" 
                 className="landing-platform-logo"
-                onError={(e) => { e.currentTarget.src = '/platform-logo.png'; }}
+                onError={(e) => { e.currentTarget.src = '/platform-logo.webp'; }}
               />
               <span className="landing-brand-title">
                 Cerilas <span className="brand-accent">Growth</span>

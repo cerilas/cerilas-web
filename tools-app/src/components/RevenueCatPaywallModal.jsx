@@ -430,6 +430,16 @@ export default function RevenueCatPaywallModal({
             <X size={17} />
           </button>
 
+          <div className="rc-paywall-logo-row">
+            <img 
+              src="/cgrowthlogo.svg" 
+              alt="Cerilas" 
+              className="rc-paywall-logo-img"
+              width={42}
+              height={42}
+            />
+          </div>
+
           <div className="rc-paywall-badge">
             <Crown size={14} />
             <span>Cerilas Tools Plans</span>

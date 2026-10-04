@@ -79,6 +79,16 @@ export default function RevenueCatCustomerCenterModal({ isOpen, onClose }) {
             <X size={17} />
           </button>
 
+          <div className="rc-paywall-logo-row">
+            <img 
+              src="/cgrowthlogo.svg" 
+              alt="Cerilas" 
+              className="rc-paywall-logo-img"
+              width={38}
+              height={38}
+            />
+          </div>
+
           <div className="rc-paywall-badge" style={{ background: 'rgba(16, 185, 129, 0.12)', borderColor: 'rgba(16, 185, 129, 0.3)', color: '#34d399' }}>
             <CreditCard size={14} />
             <span>Customer Center &bull; Web Billing</span>

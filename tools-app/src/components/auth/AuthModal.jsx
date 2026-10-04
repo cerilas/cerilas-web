@@ -147,12 +147,12 @@ export default function AuthModal() {
         <div className="auth-modal-header">
           <div className="auth-modal-logo-wrap">
             <img 
-              src="/platform-logo.webp" 
+              src="/cgrowthlogo.svg" 
               alt="Cerilas" 
               className="auth-modal-logo"
               onError={(e) => {
                 e.target.onerror = null;
-                e.target.src = '/platform-logo.png';
+                e.target.src = '/platform-logo.webp';
               }}
             />
           </div>

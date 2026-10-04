@@ -177,7 +177,13 @@ export default function GrowthSidebar() {
           <>
             <div className="growth-brand-titles-row">
               <div className="growth-logo-glow-wrap" title="Cerilas Growth">
-                <Layers size={17} strokeWidth={2} />
+                <img 
+                  src="/cgrowthlogo.svg" 
+                  alt="Cerilas Growth" 
+                  className="growth-sidebar-brand-img"
+                  width={20}
+                  height={20}
+                />
               </div>
               <div className="growth-brand-titles">
                 <span className="growth-app-title">Cerilas Growth</span>
@@ -200,7 +206,13 @@ export default function GrowthSidebar() {
               className="growth-logo-glow-wrap" 
               title="Cerilas Growth"
             >
-              <Layers size={17} strokeWidth={2} />
+              <img 
+                src="/cgrowthlogo.svg" 
+                alt="Cerilas Growth" 
+                className="growth-sidebar-brand-img"
+                width={20}
+                height={20}
+              />
             </div>
             <button
               type="button"

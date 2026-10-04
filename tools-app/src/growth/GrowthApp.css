@@ -622,6 +622,13 @@ html.light .growth-sidebar-toggle-btn:hover {
   flex-shrink: 0;
 }
 
+.growth-sidebar-brand-img {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+  display: block;
+}
+
 .growth-brand-titles {
   display: flex;
   flex-direction: column;

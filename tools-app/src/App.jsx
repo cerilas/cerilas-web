@@ -1006,13 +1006,13 @@ export default function App() {
                 <header className="header hero-header">
                   <div className="hero-brand-badge">
                     <img 
-                      src="/platform-logo.webp" 
+                      src="/cgrowthlogo.svg" 
                       alt="Cerilas' Tools" 
                       className="hero-brand-logo"
                       onError={(e) => {
-                        if (!e.target.dataset.triedPng) {
-                          e.target.dataset.triedPng = 'true';
-                          e.target.src = '/platform-logo.png';
+                        if (!e.target.dataset.triedFallback) {
+                          e.target.dataset.triedFallback = 'true';
+                          e.target.src = '/platform-logo.webp';
                         }
                       }}
                     />
