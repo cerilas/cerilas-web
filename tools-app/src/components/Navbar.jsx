@@ -26,9 +26,21 @@ export default function Navbar({ activeTool, onNavigateHome, onOpenStats, onSele
   const { user, isAuthenticated, logout, openAuthModal } = useAuth();
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const userMenuRef = useRef(null);
+  const userMenuTimeoutRef = useRef(null);
 
   const isAi = activeTool && (activeTool.isAi || activeTool.badge === 'AI Assisted' || activeTool.badge === 'AI Powered' || activeTool.slug === 'ats-resume-checker');
   const isTr = language === 'tr';
+
+  const handleUserMenuMouseEnter = () => {
+    if (userMenuTimeoutRef.current) clearTimeout(userMenuTimeoutRef.current);
+    setUserMenuOpen(true);
+  };
+
+  const handleUserMenuMouseLeave = () => {
+    userMenuTimeoutRef.current = setTimeout(() => {
+      setUserMenuOpen(false);
+    }, 200);
+  };
 
   // Handle outside click for user dropdown
   useEffect(() => {
@@ -37,11 +49,12 @@ export default function Navbar({ activeTool, onNavigateHome, onOpenStats, onSele
         setUserMenuOpen(false);
       }
     };
-    if (userMenuOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
-    }
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [userMenuOpen]);
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      if (userMenuTimeoutRef.current) clearTimeout(userMenuTimeoutRef.current);
+    };
+  }, []);
 
   const handleNavigateAccountTab = (tab) => {
     setUserMenuOpen(false);
@@ -127,11 +140,16 @@ export default function Navbar({ activeTool, onNavigateHome, onOpenStats, onSele
 
           {/* User Auth Section */}
           {isAuthenticated && user ? (
-            <div className="nav-user-dropdown-wrap" ref={userMenuRef}>
+            <div 
+              className="nav-user-dropdown-wrap" 
+              ref={userMenuRef}
+              onMouseEnter={handleUserMenuMouseEnter}
+              onMouseLeave={handleUserMenuMouseLeave}
+            >
               <button
                 type="button"
                 className={`nav-user-trigger-btn ${userMenuOpen ? 'is-active' : ''}`}
-                onClick={() => setUserMenuOpen(!userMenuOpen)}
+                onClick={() => setUserMenuOpen(prev => !prev)}
                 aria-expanded={userMenuOpen}
               >
                 <div className="nav-user-avatar-mini">
