@@ -154,7 +154,7 @@ export default function PricingView({ onBack }) {
               <div className="pricing-price-row">
                 <span className="pricing-currency">$</span>
                 <span className="pricing-amount">
-                  {billingCycle === 'annual' ? '49.90' : '4.99'}
+                  {billingCycle === 'annual' ? '99.90' : '9.99'}
                 </span>
                 <span className="pricing-period">
                   {billingCycle === 'annual' ? '/ year' : '/ month'}
@@ -162,8 +162,8 @@ export default function PricingView({ onBack }) {
               </div>
               <div className="pricing-billing-detail">
                 {billingCycle === 'annual' 
-                  ? 'Equivalent to $4.16/mo (2 Months Free)' 
-                  : 'Billed monthly at $4.99/mo'}
+                  ? 'Equivalent to $8.33/mo (2 Months Free)' 
+                  : 'Billed monthly at $9.99/mo'}
               </div>
             </div>
           </div>
@@ -228,7 +228,7 @@ export default function PricingView({ onBack }) {
               <div className="pricing-price-row">
                 <span className="pricing-currency">$</span>
                 <span className="pricing-amount">
-                  {billingCycle === 'annual' ? '99.90' : '9.99'}
+                  {billingCycle === 'annual' ? '149.90' : '14.99'}
                 </span>
                 <span className="pricing-period">
                   {billingCycle === 'annual' ? '/ year' : '/ month'}
@@ -236,8 +236,8 @@ export default function PricingView({ onBack }) {
               </div>
               <div className="pricing-billing-detail">
                 {billingCycle === 'annual' 
-                  ? 'Equivalent to $8.33/mo (2 Months Free)' 
-                  : 'Billed monthly at $9.99/mo'}
+                  ? 'Equivalent to $12.49/mo (2 Months Free)' 
+                  : 'Billed monthly at $14.99/mo'}
               </div>
             </div>
           </div>
@@ -290,8 +290,8 @@ export default function PricingView({ onBack }) {
               <tr>
                 <th className="col-feature">Feature / Toolset</th>
                 <th className="col-plan">Forever Free</th>
-                <th className="col-plan is-highlight">Pro ($4.99/mo)</th>
-                <th className="col-plan">Unlimited ($9.99/mo)</th>
+                <th className="col-plan is-highlight">Pro ($9.99/mo)</th>
+                <th className="col-plan">Unlimited ($14.99/mo)</th>
               </tr>
             </thead>
             <tbody>
@@ -328,8 +328,8 @@ export default function PricingView({ onBack }) {
               <tr>
                 <td className="col-feature">Annual Billing Discount</td>
                 <td className="col-plan">None ($0)</td>
-                <td className="col-plan is-highlight">2 Months Free ($49.90/yr)</td>
-                <td className="col-plan">2 Months Free ($99.90/yr)</td>
+                <td className="col-plan is-highlight">2 Months Free ($99.90/yr)</td>
+                <td className="col-plan">2 Months Free ($149.90/yr)</td>
               </tr>
               <tr>
                 <td className="col-feature">Commercial Usage License</td>
@@ -359,7 +359,7 @@ export default function PricingView({ onBack }) {
           <div className="pricing-faq-card">
             <h4 className="pricing-faq-q">How does the 2 months free annual discount work?</h4>
             <p className="pricing-faq-a">
-              When you choose annual billing, you pay for only 10 months upfront and receive 12 full months of service. For the Pro plan, you pay $49.90 instead of $59.88 (saving $9.98). For the Unlimited plan, you pay $99.90 instead of $119.88 (saving $19.98).
+              When you choose annual billing, you pay for only 10 months upfront and receive 12 full months of service. For the Pro plan, you pay $99.90 instead of $119.88 (saving $19.98). For the Unlimited plan, you pay $149.90 instead of $179.88 (saving $29.98).
             </p>
           </div>
 

@@ -22,7 +22,7 @@ export const REVENUECAT_CONFIG = {
       type: 'subscription',
       interval: 'month',
       badge: 'Popular',
-      fallbackPrice: '$4.99 / mo'
+      fallbackPrice: '$9.99 / mo'
     },
     UNLIMITED_MONTHLY: {
       id: 'pri_01m41vmta5xebbmwt1k46xbfsf',
@@ -30,14 +30,14 @@ export const REVENUECAT_CONFIG = {
       type: 'subscription',
       interval: 'month',
       badge: 'Power User',
-      fallbackPrice: '$9.99 / mo'
+      fallbackPrice: '$14.99 / mo'
     },
     LIFETIME: {
       id: 'lifetime',
       name: 'Lifetime Pro',
       type: 'one_time',
       badge: 'Best Value',
-      fallbackPrice: '$149.00 once'
+      fallbackPrice: '$199.00 once'
     },
     YEARLY: {
       id: 'yearly',
@@ -45,7 +45,7 @@ export const REVENUECAT_CONFIG = {
       type: 'subscription',
       interval: 'year',
       badge: '2 Months Free',
-      fallbackPrice: '$49.90 / yr'
+      fallbackPrice: '$99.90 / yr'
     },
     PRO_YEARLY: {
       id: 'pro_yearly',
@@ -53,7 +53,7 @@ export const REVENUECAT_CONFIG = {
       type: 'subscription',
       interval: 'year',
       badge: '2 Months Free',
-      fallbackPrice: '$49.90 / yr'
+      fallbackPrice: '$99.90 / yr'
     },
     UNLIMITED_YEARLY: {
       id: 'unlimited_yearly',
@@ -61,14 +61,14 @@ export const REVENUECAT_CONFIG = {
       type: 'subscription',
       interval: 'year',
       badge: '2 Months Free',
-      fallbackPrice: '$99.90 / yr'
+      fallbackPrice: '$149.90 / yr'
     },
     MONTHLY: {
       id: 'monthly',
       name: 'Pro Monthly',
       type: 'subscription',
       interval: 'month',
-      fallbackPrice: '$4.99 / mo'
+      fallbackPrice: '$9.99 / mo'
     }
   }
 };

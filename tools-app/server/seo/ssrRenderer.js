@@ -538,18 +538,18 @@ export function renderPricingPageHtml(templateHtml) {
       {
         '@type': 'Offer',
         name: 'Pro Plan',
-        price: '4.99',
+        price: '9.99',
         priceCurrency: 'USD',
-        description: 'Tiny & basic tools are unlimited usage, premium tools x5 more usage than free plan. $4.99/mo or $49.90/yr with 2 months free.',
-        availability: 'https://schema.org/PreOrder'
+        description: 'Tiny & basic tools are unlimited usage, premium tools x5 more usage than free plan. $9.99/mo or $99.90/yr with 2 months free.',
+        availability: 'https://schema.org/InStock'
       },
       {
         '@type': 'Offer',
         name: 'Unlimited Plan',
-        price: '9.99',
+        price: '14.99',
         priceCurrency: 'USD',
-        description: 'Unlimited usage all tiny & premium tools. $9.99/mo or $99.90/yr with 2 months free.',
-        availability: 'https://schema.org/PreOrder'
+        description: 'Unlimited usage all tiny & premium tools. $14.99/mo or $149.90/yr with 2 months free.',
+        availability: 'https://schema.org/InStock'
       }
     ]
   };
@@ -594,14 +594,14 @@ export function renderPricingPageHtml(templateHtml) {
           <div style="position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: #0284c7; color: #ffffff; padding: 0.2rem 0.75rem; border-radius: 999px; font-size: 0.72rem; font-weight: 700;">POPULAR</div>
           <h2 style="font-size: 1.5rem; margin: 0 0 0.5rem 0; color: #ffffff;">Pro</h2>
           <p style="font-size: 0.92rem; color: #94a3b8; margin: 0 0 1.5rem 0;">Tiny &amp; basic tools are unlimited usage, premium tools x5 more usage than free plan.</p>
-          <div style="font-size: 2.5rem; font-weight: 700; color: #ffffff; margin-bottom: 0.25rem;">$4.99 <span style="font-size: 1rem; font-weight: 400; color: #94a3b8;">/ month</span></div>
-          <div style="font-size: 0.8rem; color: #10b981; font-weight: 600; margin-bottom: 1.5rem;">Annual: $49.90/yr (2 Months Free)</div>
+          <div style="font-size: 2.5rem; font-weight: 700; color: #ffffff; margin-bottom: 0.25rem;">$9.99 <span style="font-size: 1rem; font-weight: 400; color: #94a3b8;">/ month</span></div>
+          <div style="font-size: 0.8rem; color: #10b981; font-weight: 600; margin-bottom: 1.5rem;">Annual: $99.90/yr (2 Months Free)</div>
           <ul style="list-style: none; padding: 0; margin: 0; line-height: 1.8; font-size: 0.9rem; color: #cbd5e1;">
             <li>&bull; <strong>Unlimited usage</strong> on all tiny &amp; basic utilities</li>
             <li>&bull; <strong>x5 more usage</strong> on premium tools than free plan</li>
             <li>&bull; Priority concurrency WebAssembly execution</li>
             <li>&bull; Ad-free workspace &amp; commercial rights</li>
-            <li>&bull; Checkout: <em>Coming Soon</em></li>
+            <li>&bull; Checkout: <em>Paddle Instant Checkout</em></li>
           </ul>
         </div>
 
@@ -609,14 +609,14 @@ export function renderPricingPageHtml(templateHtml) {
         <div style="background: rgba(30, 41, 59, 0.5); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; padding: 2rem;">
           <h2 style="font-size: 1.5rem; margin: 0 0 0.5rem 0; color: #ffffff;">Unlimited</h2>
           <p style="font-size: 0.92rem; color: #94a3b8; margin: 0 0 1.5rem 0;">Unlimited usage all tiny &amp; premium tools</p>
-          <div style="font-size: 2.5rem; font-weight: 700; color: #ffffff; margin-bottom: 0.25rem;">$9.99 <span style="font-size: 1rem; font-weight: 400; color: #94a3b8;">/ month</span></div>
-          <div style="font-size: 0.8rem; color: #10b981; font-weight: 600; margin-bottom: 1.5rem;">Annual: $99.90/yr (2 Months Free)</div>
+          <div style="font-size: 2.5rem; font-weight: 700; color: #ffffff; margin-bottom: 0.25rem;">$14.99 <span style="font-size: 1rem; font-weight: 400; color: #94a3b8;">/ month</span></div>
+          <div style="font-size: 0.8rem; color: #10b981; font-weight: 600; margin-bottom: 1.5rem;">Annual: $149.90/yr (2 Months Free)</div>
           <ul style="list-style: none; padding: 0; margin: 0; line-height: 1.8; font-size: 0.9rem; color: #cbd5e1;">
             <li>&bull; <strong>Unlimited usage</strong> on all tiny &amp; premium tools</li>
             <li>&bull; Unlimited AI queries, ATS evaluations &amp; PDF tools</li>
             <li>&bull; Horizon Europe &amp; Cascade Grants tracking &amp; exports</li>
             <li>&bull; Maximum turbo execution speed</li>
-            <li>&bull; Checkout: <em>Coming Soon</em></li>
+            <li>&bull; Checkout: <em>Paddle Instant Checkout</em></li>
           </ul>
         </div>
       </div>

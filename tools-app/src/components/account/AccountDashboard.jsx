@@ -678,12 +678,12 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
                   <div className="upgrade-card-head">
                     <h3 className="upgrade-card-name">Pro Developer</h3>
                     <p className="upgrade-card-price">
-                      {packageBillingCycle === 'annual' ? '$49.90' : '$4.99'}{' '}
+                      {packageBillingCycle === 'annual' ? '$99.90' : '$9.99'}{' '}
                       <span className="period">/ {packageBillingCycle === 'annual' ? (isTr ? 'yıl' : 'year') : (isTr ? 'ay' : 'month')}</span>
                     </p>
                     {packageBillingCycle === 'annual' && (
                       <p className="upgrade-card-savings-text">
-                        {isTr ? '🎁 10 ay fiyatına 12 ay erişim (Aylık ~$4.16)' : '🎁 12 months for price of 10 (~$4.16/mo)'}
+                        {isTr ? '🎁 10 ay fiyatına 12 ay erişim (Aylık ~$8.33)' : '🎁 12 months for price of 10 (~$8.33/mo)'}
                       </p>
                     )}
                   </div>
@@ -712,12 +712,12 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
                   <div className="upgrade-card-head">
                     <h3 className="upgrade-card-name">Unlimited</h3>
                     <p className="upgrade-card-price">
-                      {packageBillingCycle === 'annual' ? '$99.90' : '$9.99'}{' '}
+                      {packageBillingCycle === 'annual' ? '$149.90' : '$14.99'}{' '}
                       <span className="period">/ {packageBillingCycle === 'annual' ? (isTr ? 'yıl' : 'year') : (isTr ? 'ay' : 'month')}</span>
                     </p>
                     {packageBillingCycle === 'annual' && (
                       <p className="upgrade-card-savings-text">
-                        {isTr ? '🎁 10 ay fiyatına 12 ay erişim (Aylık ~$8.33)' : '🎁 12 months for price of 10 (~$8.33/mo)'}
+                        {isTr ? '🎁 10 ay fiyatına 12 ay erişim (Aylık ~$12.49)' : '🎁 12 months for price of 10 (~$12.49/mo)'}
                       </p>
                     )}
                   </div>

@@ -125,7 +125,7 @@ export default function RevenueCatPaywallModal({
   const unlimitedAnnualPkg = getPackageForSelection('unlimited', 'annual');
 
   // Canonical price resolver: Guaranteed consistency across footer pricing & subscription views
-  // Prevents default RevenueCat test starter sample products ($9.99/$79.99) from corrupting the UI prices
+  // Reflects real Paddle & RevenueCat product pricing: Pro ($9.99/mo, $99.90/yr) & Unlimited ($14.99/mo, $149.90/yr)
   const getPlanPrice = (planId, cycle) => {
     if (planId === 'free') return '$0';
 
@@ -136,14 +136,14 @@ export default function RevenueCatPaywallModal({
             proAnnualPkg.product.price?.amount !== 7999) {
           return proAnnualPkg.product.price.formattedPrice;
         }
-        return '$49.90';
+        return '$99.90';
       } else {
         if (proMonthlyPkg?.product?.price?.formattedPrice && 
             proMonthlyPkg.product.identifier !== 'monthly' && 
             proMonthlyPkg.product.price?.amount !== 999) {
           return proMonthlyPkg.product.price.formattedPrice;
         }
-        return '$4.99';
+        return '$9.99';
       }
     }
 
@@ -154,13 +154,13 @@ export default function RevenueCatPaywallModal({
             unlimitedAnnualPkg.product.price?.amount !== 7999) {
           return unlimitedAnnualPkg.product.price.formattedPrice;
         }
-        return '$99.90';
+        return '$149.90';
       } else {
         if (unlimitedMonthlyPkg?.product?.price?.formattedPrice && 
             unlimitedMonthlyPkg.product.identifier !== 'monthly') {
           return unlimitedMonthlyPkg.product.price.formattedPrice;
         }
-        return '$9.99';
+        return '$14.99';
       }
     }
 
@@ -207,8 +207,8 @@ export default function RevenueCatPaywallModal({
       period: cardCycles.pro === 'annual' ? (isTr ? '/ yıl' : '/ year') : (isTr ? '/ ay' : '/ month'),
       savingsPill: cardCycles.pro === 'annual' ? (isTr ? '🎁 2 Ay Bedava!' : '🎁 2 Months Free!') : null,
       subDetail: cardCycles.pro === 'annual'
-        ? (isTr ? '10 ay fiyatına 12 ay erişim (Aylık ~$4.16)' : '12 months for the price of 10 (~$4.16/mo)')
-        : (isTr ? 'Aylık faturalandırılır • İstediğiniz an iptal edin' : 'Billed monthly • Cancel anytime'),
+        ? (isTr ? '10 ay fiyatına 12 ay erişim (Aylık ~$8.33)' : '12 months for the price of 10 (~$8.33/mo)')
+        : (isTr ? 'Aylık faturalandırılır • İstediğiniz an iptal edin' : 'Billed monthly at $9.99/mo • Cancel anytime'),
       matchedPkg: cardCycles.pro === 'annual' ? proAnnualPkg : proMonthlyPkg,
       features: [
         isTr ? 'Tüm ücretsiz araçlar sınırsız ve ömür boyu bedava' : 'All free tools free forever',
@@ -234,8 +234,8 @@ export default function RevenueCatPaywallModal({
       period: cardCycles.unlimited === 'annual' ? (isTr ? '/ yıl' : '/ year') : (isTr ? '/ ay' : '/ month'),
       savingsPill: cardCycles.unlimited === 'annual' ? (isTr ? '🎁 2 Ay Bedava!' : '🎁 2 Months Free!') : null,
       subDetail: cardCycles.unlimited === 'annual'
-        ? (isTr ? '10 ay fiyatına 12 ay erişim (Aylık ~$8.33)' : '12 months for the price of 10 (~$8.33/mo)')
-        : (isTr ? 'Aylık faturalandırılır • İstediğiniz an iptal edin' : 'Billed monthly • Cancel anytime'),
+        ? (isTr ? '10 ay fiyatına 12 ay erişim (Aylık ~$12.49)' : '12 months for the price of 10 (~$12.49/mo)')
+        : (isTr ? 'Aylık faturalandırılır • İstediğiniz an iptal edin' : 'Billed monthly at $14.99/mo • Cancel anytime'),
       matchedPkg: cardCycles.unlimited === 'annual' ? unlimitedAnnualPkg : unlimitedMonthlyPkg,
       features: [
         isTr ? 'Tüm ücretsiz ve Pro özellikleri dahil' : 'Everything in Free & Pro included',
