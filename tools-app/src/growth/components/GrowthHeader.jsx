@@ -157,7 +157,7 @@ export default function GrowthHeader({ onBackToTools }) {
                           size={20}
                           className="growth-ws-item-fav"
                         />
-                        <div>
+                        <div className="growth-ws-item-titles">
                           <span className="growth-ws-item-name">{ws.name}</span>
                           <span className="growth-ws-item-domain">{ws.primary_domain}</span>
                         </div>
@@ -165,7 +165,9 @@ export default function GrowthHeader({ onBackToTools }) {
 
                       <div className="growth-ws-item-right">
                         <span className="growth-score-tag">{ws.growth_score || 70}</span>
-                        {isSelected && <Check size={14} className="text-primary" />}
+                        <span className="growth-ws-check-slot">
+                          {isSelected && <Check size={14} className="text-primary" />}
+                        </span>
                         <button
                           type="button"
                           className="growth-ws-delete-quick-btn"
