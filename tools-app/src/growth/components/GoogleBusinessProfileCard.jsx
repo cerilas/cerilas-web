@@ -749,6 +749,15 @@ export default function GoogleBusinessProfileCard({ onProfileChange }) {
   const aiSummary = profile.ai_summary || {};
   const riskClass = (profile.ai_recommendation_risk === 'Yüksek Risk' || profile.ai_recommendation_risk === 'High Risk') ? 'red' : (profile.ai_recommendation_risk === 'Orta Risk' || profile.ai_recommendation_risk === 'Medium Risk') ? 'yellow' : 'green';
   const riskLabel = (profile.ai_recommendation_risk === 'Yüksek Risk' || profile.ai_recommendation_risk === 'High Risk') ? 'High Risk' : (profile.ai_recommendation_risk === 'Orta Risk' || profile.ai_recommendation_risk === 'Medium Risk') ? 'Medium Risk' : 'Low Risk';
+  const chronicThemes = Array.isArray(aiSummary.chronic_complaint_themes)
+    ? aiSummary.chronic_complaint_themes
+    : Array.isArray(aiSummary.chronic_themes)
+    ? aiSummary.chronic_themes
+    : Array.isArray(profile.chronic_complaint_themes)
+    ? profile.chronic_complaint_themes
+    : Array.isArray(profile.chronic_themes)
+    ? profile.chronic_themes
+    : [];
 
   return (
     <div className="growth-panel-card gbp-connected-card animate-fade">
@@ -907,13 +916,17 @@ export default function GoogleBusinessProfileCard({ onProfileChange }) {
                   Chronic Customer Complaints in Low-Star Reviews:
                 </span>
                 <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-                  {chronicThemes.map((th, thIdx) => (
-                    <span key={thIdx} className="gbp-theme-pill">
-                      <AlertTriangle size={12} color="#f87171" />
-                      <strong>{th.theme}</strong>
-                      <span className="theme-count">({th.count} mentions)</span>
-                    </span>
-                  ))}
+                  {chronicThemes.map((th, thIdx) => {
+                    const themeName = typeof th === 'string' ? th : (th.theme || th.name || th.topic || 'Complaint');
+                    const mentionCount = typeof th === 'object' ? (th.count || th.mentions || null) : null;
+                    return (
+                      <span key={thIdx} className="gbp-theme-pill">
+                        <AlertTriangle size={12} color="#f87171" />
+                        <strong>{themeName}</strong>
+                        {mentionCount !== null && <span className="theme-count">({mentionCount} mentions)</span>}
+                      </span>
+                    );
+                  })}
                 </div>
               </div>
             )}
