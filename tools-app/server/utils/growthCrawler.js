@@ -510,6 +510,9 @@ Return a strict, valid JSON object with the following fields:
   ]
 }
 
+CRITICAL LANGUAGE RULE:
+- All descriptive text values (industry, description, targetAudience, valueProposition, primaryKeywords, mainProducts) MUST be written strictly in fluent, professional English, regardless of the language of the source website.
+
 CRITICAL RULES FOR "suggestedCompetitors":
 - You MUST return AT LEAST 5 real, high-relevance direct or industry/search competitors (return between 5 and 8 competitors). NEVER return fewer than 5 competitors.
 - Each competitor must have a realistic official domain name (e.g., "example.com" or "example.com.tr", without protocol or slashes) and official brand name.

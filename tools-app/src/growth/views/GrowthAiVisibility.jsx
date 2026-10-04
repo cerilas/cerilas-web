@@ -87,8 +87,8 @@ export default function GrowthAiVisibility() {
   const [error, setError] = useState('');
   const [newPromptText, setNewPromptText] = useState('');
   const [newPromptTopic, setNewPromptTopic] = useState('');
-  const [selectedCountry, setSelectedCountry] = useState('TR');
-  const [selectedLanguage, setSelectedLanguage] = useState('tr');
+  const [selectedCountry, setSelectedCountry] = useState('US');
+  const [selectedLanguage, setSelectedLanguage] = useState('en');
   const [addingPrompt, setAddingPrompt] = useState(false);
   const [runningPromptId, setRunningPromptId] = useState(null);
   const [lastRunResult, setLastRunResult] = useState(null);
@@ -336,8 +336,8 @@ export default function GrowthAiVisibility() {
         body: JSON.stringify({
           prompt: newPromptText.trim(),
           topic: newPromptTopic.trim() || 'General',
-          country: selectedCountry || 'TR',
-          language: selectedLanguage || 'tr'
+          country: selectedCountry || 'US',
+          language: selectedLanguage || 'en'
         })
       });
       const data = await res.json();
@@ -387,11 +387,13 @@ export default function GrowthAiVisibility() {
     fetchAiPromptSuggestions();
   };
 
-  const fetchAiPromptSuggestions = async () => {
+  const fetchAiPromptSuggestions = async (countryOverride, langOverride) => {
     if (!activeWorkspace?.id || !token) return;
     setGeneratingAiPrompts(true);
     setAiGenError('');
     try {
+      const countryToUse = countryOverride || selectedCountry || 'US';
+      const langToUse = langOverride || selectedLanguage || 'en';
       const res = await fetch(`/api/growth/workspaces/${activeWorkspace.id}/prompts/generate-ai`, {
         method: 'POST',
         headers: {
@@ -399,8 +401,8 @@ export default function GrowthAiVisibility() {
           'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
-          country: selectedCountry || 'TR',
-          language: selectedLanguage || 'tr'
+          country: countryToUse,
+          language: langToUse
         })
       });
       const data = await res.json();
@@ -438,8 +440,8 @@ export default function GrowthAiVisibility() {
         },
         body: JSON.stringify({
           prompts: selectedItems.map(s => ({ prompt: s.prompt, topic: s.topic })),
-          country: selectedCountry || 'TR',
-          language: selectedLanguage || 'tr'
+          country: selectedCountry || 'US',
+          language: selectedLanguage || 'en'
         })
       });
       const data = await res.json();
@@ -1021,8 +1023,8 @@ export default function GrowthAiVisibility() {
           <div className="ai-report-results-list">
             {filteredReportResults.map((item, idx) => {
               const isExpanded = !!expandedQueries[item.promptId || idx];
-              const marketOpt = getMarketOption(item.country || 'TR');
-              const langOpt = getLanguageOption(item.language || 'tr');
+              const marketOpt = getMarketOption(item.country || 'US');
+              const langOpt = getLanguageOption(item.language || 'en');
 
               return (
                 <div key={item.promptId || idx} className="ai-report-item-card">
@@ -1032,11 +1034,11 @@ export default function GrowthAiVisibility() {
                       <span className="prompt-topic-tag">{item.topic || 'General'}</span>
                       <span className="prompt-meta-badge" title={`Market: ${marketOpt.label}`}>
                         {marketOpt.icon}
-                        <span>{marketOpt.code || item.country || 'TR'}</span>
+                        <span>{marketOpt.code || item.country || 'US'}</span>
                       </span>
                       <span className="prompt-meta-badge lang" title={`Language: ${langOpt.label}`}>
                         <Languages size={11} color="#8b5cf6" />
-                        <span>{langOpt.code || (item.language || 'TR').toUpperCase()}</span>
+                        <span>{langOpt.code || (item.language || 'EN').toUpperCase()}</span>
                       </span>
                     </div>
 
@@ -1430,8 +1432,8 @@ export default function GrowthAiVisibility() {
           <div className="growth-prompts-table">
             {prompts.map((p) => {
               const isRunning = runningPromptId === p.id;
-              const marketOpt = getMarketOption(p.country || 'TR');
-              const langOpt = getLanguageOption(p.language || 'tr');
+              const marketOpt = getMarketOption(p.country || 'US');
+              const langOpt = getLanguageOption(p.language || 'en');
 
               return (
                 <div key={p.id} className="prompt-table-row">
@@ -1441,11 +1443,11 @@ export default function GrowthAiVisibility() {
                       <span className="prompt-topic-tag">{p.topic || 'General'}</span>
                       <span className="prompt-meta-badge" title={`Target Country: ${marketOpt.label}`}>
                         {marketOpt.icon}
-                        <span>{marketOpt.code || p.country || 'TR'}</span>
+                        <span>{marketOpt.code || p.country || 'US'}</span>
                       </span>
                       <span className="prompt-meta-badge lang" title={`Query Language: ${langOpt.label}`}>
                         <Languages size={12} color="#8b5cf6" />
-                        <span>{langOpt.code || (p.language || 'TR').toUpperCase()}</span>
+                        <span>{langOpt.code || (p.language || 'EN').toUpperCase()}</span>
                       </span>
                       <span className="prompt-runs-tag">{p.run_count || 0} Tests Run</span>
                       {p.last_brand_mentioned !== null && p.last_brand_mentioned !== undefined && (
@@ -1784,6 +1786,49 @@ export default function GrowthAiVisibility() {
             </div>
 
             <div className="growth-modal-body">
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.75rem', marginBottom: '1.25rem', padding: '0.75rem 1rem', background: 'rgba(255,255,255,0.03)', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.08)', flexWrap: 'wrap' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap', flex: 1 }}>
+                  <div style={{ minWidth: '180px', flex: '1 1 180px' }}>
+                    <AiVisibilityDropdown
+                      id="modal-ai-visibility-country"
+                      label="Target Market"
+                      icon={<Globe size={13} color="#3b82f6" />}
+                      options={MARKET_OPTIONS}
+                      value={selectedCountry}
+                      onChange={(val) => {
+                        setSelectedCountry(val);
+                        fetchAiPromptSuggestions(val, selectedLanguage);
+                      }}
+                      disabled={generatingAiPrompts || savingAiPrompts}
+                    />
+                  </div>
+                  <div style={{ minWidth: '180px', flex: '1 1 180px' }}>
+                    <AiVisibilityDropdown
+                      id="modal-ai-visibility-language"
+                      label="Prompt Language"
+                      icon={<Languages size={13} color="#8b5cf6" />}
+                      options={LANGUAGE_OPTIONS}
+                      value={selectedLanguage}
+                      onChange={(val) => {
+                        setSelectedLanguage(val);
+                        fetchAiPromptSuggestions(selectedCountry, val);
+                      }}
+                      disabled={generatingAiPrompts || savingAiPrompts}
+                    />
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => fetchAiPromptSuggestions(selectedCountry, selectedLanguage)}
+                  disabled={generatingAiPrompts || savingAiPrompts}
+                  className="growth-secondary-btn"
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '0.8rem', padding: '0.55rem 0.95rem' }}
+                >
+                  <Sparkles size={14} color="#8b5cf6" />
+                  <span>Regenerate</span>
+                </button>
+              </div>
+
               {generatingAiPrompts ? (
                 <div className="ai-gen-loading-box">
                   <div className="ai-gen-pulse-circle">

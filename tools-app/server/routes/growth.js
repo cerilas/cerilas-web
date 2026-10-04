@@ -413,16 +413,16 @@ router.post('/workspaces', requireAuth, async (req, res) => {
       initialOpps.push({
         type: 'llms_txt_readiness',
         category: 'ai_visibility',
-        title: 'Yapay Zeka (GEO) için /llms.txt Dosyası Ekleyin',
-        description: 'ChatGPT, Perplexity ve Gemini arama motorları sitenizi özetlerken /llms.txt standardını referans alır. llms.txt eklemek yapay zeka arama sonuçlarında alıntılanma olasılığınızı 3 kata kadar artırır.',
+        title: 'Add /llms.txt File for Generative Engine Optimization (GEO)',
+        description: 'Modern AI search engines (ChatGPT, Perplexity, Gemini) reference the /llms.txt standard to synthesize web knowledge. Adding this file significantly increases your brand citation probability in AI answers.',
         impact_score: 85,
         priority_score: 92,
-        estimated_traffic_upside: '+150–300 AI alıntısı/ay',
-        evidence: { reason: 'Sitenizde /llms.txt bulunamadı.', detectedAt: new Date().toISOString() },
+        estimated_traffic_upside: '+150–300 AI citations/month',
+        evidence: { reason: 'No /llms.txt file detected on your site.', detectedAt: new Date().toISOString() },
         action_steps: [
-          'Markanızın ana hizmetlerini ve ürünlerini listeleyen bir /llms.txt dosyası hazırlayın.',
-          'Dosyayı sunucunuzun kök dizinine yerleştirin.',
-          'AI crawler botlarının erişebildiğini test edin.'
+          'Create a structured /llms.txt file listing your primary products and services.',
+          'Deploy the file to your server root directory.',
+          'Verify that AI crawlers can access it without restriction.'
         ]
       });
     }
@@ -432,15 +432,15 @@ router.post('/workspaces', requireAuth, async (req, res) => {
       initialOpps.push({
         type: 'schema_markup',
         category: 'technical',
-        title: 'Organization & WebSite Schema.org İşaretlemesi Yapın',
-        description: 'Sitenizde JSON-LD yapılandırılmış veri bulunmuyor. Schema eklemek Google Knowledge Graph ve AI arama motorlarının markanızı doğru tanımasını sağlar.',
+        title: 'Implement Organization & WebSite Schema.org Markup',
+        description: 'No structured JSON-LD data was detected. Adding schema markup establishes your brand in Google Knowledge Graph and clarifies your entity for LLM crawlers.',
         impact_score: 80,
         priority_score: 88,
-        estimated_traffic_upside: 'Doğrudan Knowledge Graph & Zengin Sonuçlar',
-        evidence: { reason: '0 adet Schema.org tipi tespit edildi.' },
+        estimated_traffic_upside: 'Direct Knowledge Graph & Rich Snippet Eligibility',
+        evidence: { reason: '0 Schema.org types detected.' },
         action_steps: [
-          'Kurumsal künye, logo ve iletişim bilgilerini içeren Organization şeması ekleyin.',
-          'Ana sayfaya arama motoru site içi arama kutusu destekli WebSite şeması uygulayın.'
+          'Add Organization schema including brand name, logo, and verified profiles.',
+          'Implement WebSite schema on the homepage with search potential.'
         ]
       });
     }
@@ -450,15 +450,15 @@ router.post('/workspaces', requireAuth, async (req, res) => {
       initialOpps.push({
         type: 'missing_meta_description',
         category: 'content',
-        title: 'Tıklama Oranını (CTR) Artırmak İçin Meta Açıklama Ekleyin',
-        description: 'Ana sayfada meta description bulunmuyor. Arama motorları ve yapay zeka ajanları rastgele metin parçaları gösteriyor, bu da organik tıklama oranını düşürür.',
+        title: 'Add Compelling Meta Description to Improve Organic CTR',
+        description: 'The homepage is missing a meta description. Search engines and AI agents may generate arbitrary snippets, reducing organic click-through rate.',
         impact_score: 75,
         priority_score: 84,
-        estimated_traffic_upside: '+15% ila +25% CTR artışı',
-        evidence: { reason: 'Meta description etiketi boş.' },
+        estimated_traffic_upside: '+15% to +25% CTR increase',
+        evidence: { reason: 'Meta description tag is empty.' },
         action_steps: [
-          '150-160 karakter aralığında, harekete geçirici mesaj (CTA) içeren bir açıklama yazın.',
-          'Anahtar kelimelerinizi doğal bir biçimde açıklamaya dahil edin.'
+          'Write a 150-160 character description with a clear call to action.',
+          'Naturally integrate primary keywords into the description.'
         ]
       });
     }
@@ -467,14 +467,14 @@ router.post('/workspaces', requireAuth, async (req, res) => {
     initialOpps.push({
       type: 'connect_search_console',
       category: 'search',
-      title: 'Google Search Console Bağlantısını Tamamlayın',
-      description: 'Sitenize gelen gerçek tıklamaları, 5-10. sıradaki yüksek potansiyelli anahtar kelimeleri ve CTR fırsatlarını analiz etmek için Search Console bağlayın.',
+      title: 'Connect Google Search Console Integration',
+      description: 'Connect Google Search Console to unlock real click telemetry, identify high-intent striking distance queries (positions 4-15), and maximize search traffic.',
       impact_score: 95,
       priority_score: 96,
-      estimated_traffic_upside: 'İlk elden organik arama analitiği ve aksiyon haritası',
-      evidence: { reason: 'GSC entegrasyonu henüz bağlı değil.' },
+      estimated_traffic_upside: 'Direct first-party organic search intelligence',
+      evidence: { reason: 'Google Search Console integration not yet connected.' },
       action_steps: [
-        'Ayarlar > Entegrasyonlar sekmesinden tek tıkla Search Console mülkünüzü eşleştirin.'
+        'Navigate to Settings > Integrations and link your Search Console property with one click.'
       ]
     });
 
@@ -520,17 +520,17 @@ router.post('/workspaces', requireAuth, async (req, res) => {
       }
     }
 
-    // 6. Seed Default GEO Tracked Prompts based on brand & industry
+    // 6. Seed Default GEO Tracked Prompts based on brand & industry (in English by default)
     const seedPrompts = [
-      `En iyi ${industry || 'teknoloji'} çözümleri nelerdir?`,
-      `${name} nedir, ne işe yarar?`,
-      `${check.domain} güvenilir mi, kullanıcı yorumları nasıl?`
+      { prompt: `What are the best modern platforms for ${industry || 'digital technology'}?`, topic: 'Industry Leadership' },
+      { prompt: `What is ${name} and what core problems does it solve?`, topic: 'General Brand & Industry Awareness' },
+      { prompt: `How reliable is ${check.domain} and what are users saying about it?`, topic: 'Brand & Credibility' }
     ];
     for (const sp of seedPrompts) {
       await authPool.query(
-        `INSERT INTO growth_tracked_prompts (workspace_id, prompt, topic, created_at)
-         VALUES ($1, $2, 'Genel Marka ve Sektör Bilinirliği', NOW())`,
-        [workspace.id, sp]
+        `INSERT INTO growth_tracked_prompts (workspace_id, prompt, topic, country, language, created_at)
+         VALUES ($1, $2, $3, 'US', 'en', NOW())`,
+        [workspace.id, sp.prompt, sp.topic]
       );
     }
 
@@ -1860,14 +1860,14 @@ router.post('/workspaces/:slugOrId/prompts', requireAuth, async (req, res) => {
       return res.status(400).json({ error: 'Lütfen takip edilecek soruyu (prompt) yazın.' });
     }
 
-    const targetCountry = country ? String(country).toUpperCase().trim() : 'TR';
-    const targetLanguage = language ? String(language).toLowerCase().trim() : 'tr';
+    const targetCountry = country ? String(country).toUpperCase().trim() : (authData.workspace?.country || 'US');
+    const targetLanguage = language ? String(language).toLowerCase().trim() : (authData.workspace?.language || 'en');
 
     const insertRes = await authPool.query(
       `INSERT INTO growth_tracked_prompts (workspace_id, prompt, topic, country, language, created_at)
        VALUES ($1, $2, $3, $4, $5, NOW())
        RETURNING *`,
-      [authData.workspace.id, prompt.trim(), topic?.trim() || 'Genel', targetCountry, targetLanguage]
+      [authData.workspace.id, prompt.trim(), topic?.trim() || 'General', targetCountry, targetLanguage]
     );
 
     res.status(201).json({
@@ -1935,22 +1935,22 @@ router.post('/workspaces/:slugOrId/prompts/batch', requireAuth, async (req, res)
       });
     }
 
-    const targetCountry = country ? String(country).toUpperCase().trim() : 'TR';
-    const targetLanguage = language ? String(language).toLowerCase().trim() : 'tr';
+    const targetCountry = country ? String(country).toUpperCase().trim() : (authData.workspace?.country || 'US');
+    const targetLanguage = language ? String(language).toLowerCase().trim() : (authData.workspace?.language || 'en');
 
     const itemsToInsert = newItems.slice(0, availableSlots);
     const inserted = [];
 
     for (const item of itemsToInsert) {
       const promptText = typeof item === 'string' ? item : item.prompt;
-      const topicText = typeof item === 'object' ? item.topic : 'Genel';
+      const topicText = typeof item === 'object' ? item.topic : 'General';
       if (!promptText || !promptText.trim()) continue;
 
       const ins = await authPool.query(
         `INSERT INTO growth_tracked_prompts (workspace_id, prompt, topic, country, language, created_at)
          VALUES ($1, $2, $3, $4, $5, NOW())
          RETURNING *`,
-        [authData.workspace.id, promptText.trim(), topicText?.trim() || 'Genel', targetCountry, targetLanguage]
+        [authData.workspace.id, promptText.trim(), topicText?.trim() || 'General', targetCountry, targetLanguage]
       );
       inserted.push(ins.rows[0]);
     }
@@ -2097,7 +2097,7 @@ STRICTLY return a valid JSON array without codeblocks or explanations:
           `INSERT INTO growth_tracked_prompts (workspace_id, prompt, topic, country, language, created_at)
            VALUES ($1, $2, $3, $4, $5, NOW())
            RETURNING *`,
-          [authData.workspace.id, item.prompt, item.topic || 'Genel', targetCountry, targetLanguage]
+          [authData.workspace.id, item.prompt, item.topic || 'Industry Leadership', targetCountry, targetLanguage]
         );
         inserted.push(ins.rows[0]);
       }
@@ -2145,8 +2145,8 @@ router.post('/workspaces/:slugOrId/prompts/:promptId/run', requireAuth, async (r
     }
 
     const trackedPrompt = promptRes.rows[0];
-    const targetCountry = (trackedPrompt.country || 'TR').toUpperCase();
-    const targetLanguage = (trackedPrompt.language || 'tr').toLowerCase();
+    const targetCountry = (trackedPrompt.country || workspace.country || 'US').toUpperCase();
+    const targetLanguage = (trackedPrompt.language || workspace.language || 'en').toLowerCase();
     const apiKey = process.env.GEMINI_API_KEY;
 
     let responseText = '';
@@ -3274,7 +3274,7 @@ Domain: ${domain}
 Brand Name: ${workspace.name}
 Industry: ${workspace.industry || 'Technology & Digital Services'}
 Primary Keywords: ${keywordsStr}
-Target Country/Market: ${workspace.country || 'TR'}
+Target Country/Market: ${workspace.country || 'US'}
 
 Find 6 to 8 realistic, real-world competitors in this sector and market.
 Categorize each competitor strictly into one of these 3 types:
@@ -4530,8 +4530,8 @@ router.post('/workspaces/:slugOrId/google-business/search', requireAuth, async (
     const query = req.body?.query || workspace.name;
 
     const places = await searchGoogleBusiness(query, {
-      country: workspace.country || 'TR',
-      language: workspace.language || 'tr'
+      country: workspace.country || 'US',
+      language: workspace.language || 'en'
     });
 
     return res.json({ places });
@@ -4555,8 +4555,8 @@ router.post('/workspaces/:slugOrId/google-business/connect', requireAuth, async 
 
     const targetName = businessName || workspace.name;
     const detailed = await getDetailedBusinessProfile(placeId, targetName, {
-      country: workspace.country || 'TR',
-      language: workspace.language || 'tr',
+      country: workspace.country || 'US',
+      language: workspace.language || 'en',
       manualData: {
         formattedAddress,
         googleMapsUrl,
@@ -4644,8 +4644,8 @@ router.post('/workspaces/:slugOrId/google-business/sync', requireAuth, async (re
 
     const current = existing.rows[0];
     const detailed = await getDetailedBusinessProfile(current.place_id, current.business_name, {
-      country: workspace.country || 'TR',
-      language: workspace.language || 'tr'
+      country: workspace.country || 'US',
+      language: workspace.language || 'en'
     });
 
     const updateRes = await authPool.query(
