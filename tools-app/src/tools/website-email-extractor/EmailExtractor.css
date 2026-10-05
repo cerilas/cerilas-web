@@ -411,7 +411,7 @@
 }
 
 .email-link-text {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-family: 'Dosis', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   font-size: 0.85rem;
   color: var(--text-main);
   text-decoration: none;

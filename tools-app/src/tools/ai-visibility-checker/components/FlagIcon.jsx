@@ -229,7 +229,7 @@ export default function FlagIcon({ code, className = '' }) {
             fill="currentColor"
             fontSize="7"
             fontWeight="bold"
-            fontFamily="monospace"
+            fontFamily="'Dosis', -apple-system, sans-serif"
           >
             {normCode.slice(0, 2)}
           </text>

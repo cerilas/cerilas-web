@@ -163,7 +163,7 @@ export default function HudRadarWorldMap({
                       fill={isDark ? "#fff" : "#0f172a"}
                       fontSize="9"
                       fontWeight="700"
-                      fontFamily="JetBrains Mono, monospace"
+                      fontFamily="'Dosis', -apple-system, sans-serif"
                     >
                       {node.code || node.country?.slice(0, 2)} {node.percentage}%
                     </text>

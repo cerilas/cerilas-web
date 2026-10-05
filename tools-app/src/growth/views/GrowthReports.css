@@ -316,8 +316,8 @@
   background: #060911;
   border: 1px solid rgba(255, 255, 255, 0.1);
   color: #38bdf8;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  font-size: 0.82rem;
+  font-family: 'Dosis', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 0.88rem;
   padding: 0.65rem 0.85rem;
   border-radius: 8px;
   outline: none;

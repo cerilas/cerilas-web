@@ -411,8 +411,8 @@ export default function HudTimeSeriesChart({
                 textAnchor="end"
                 fontSize="10"
                 fill={isDark ? "rgba(161, 161, 170, 0.55)" : "#64748b"}
-                fontFamily="JetBrains Mono, monospace"
-                fontWeight="500"
+                fontFamily="'Dosis', -apple-system, sans-serif"
+                fontWeight="600"
               >
                 {formatAxisNum(gl.val)}
               </text>
@@ -455,8 +455,8 @@ export default function HudTimeSeriesChart({
             textAnchor="middle"
             fontSize="10"
             fill={isDark ? "rgba(161, 161, 170, 0.65)" : "#475569"}
-            fontFamily="Inter, sans-serif"
-            fontWeight="500"
+            fontFamily="'Dosis', -apple-system, sans-serif"
+            fontWeight="600"
           >
             {xl.text}
           </text>

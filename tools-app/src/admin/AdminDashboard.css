@@ -783,7 +783,7 @@ html.dark .admin-table tr:hover td {
 .admin-tool-slug {
   font-size: 0.75rem;
   color: var(--text-muted, #64748b);
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-family: 'Dosis', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
 .admin-status-pill {

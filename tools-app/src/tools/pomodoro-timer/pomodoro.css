@@ -1037,7 +1037,7 @@ html.dark .pom-sound-play-btn {
 }
 
 .pom-fs-time-digits {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: 'Dosis', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   font-size: clamp(5.5rem, 14vw, 10rem);
   font-weight: 200;
   letter-spacing: -0.05em;

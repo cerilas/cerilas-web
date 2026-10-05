@@ -3088,7 +3088,7 @@ html.light .subnav-pill.highlight.active {
 }
 
 .ctr-badge {
-  font-family: ui-monospace, SFMono-Regular, monospace;
+  font-family: 'Dosis', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   font-size: 0.8rem;
   font-weight: 600;
   color: #34d399;
@@ -3116,7 +3116,7 @@ html.light .subnav-pill.highlight.active {
 
 .rank-pill {
   display: inline-block;
-  font-family: ui-monospace, monospace;
+  font-family: 'Dosis', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   font-size: 0.825rem;
   font-weight: 700;
   padding: 0.15rem 0.5rem;
@@ -3213,7 +3213,7 @@ html.light .subnav-pill.highlight.active {
 .diff-bar.high { background: #ef4444; }
 
 .diff-val {
-  font-family: monospace;
+  font-family: 'Dosis', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   font-size: 0.75rem;
 }
 
@@ -3292,7 +3292,7 @@ html.light .subnav-pill.highlight.active {
 .sim-model-tag {
   font-size: 0.75rem;
   color: var(--text-muted, #71717a);
-  font-family: monospace;
+  font-family: 'Dosis', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
 .sim-close-btn {
@@ -3968,7 +3968,7 @@ html.light .comp-visit-link:hover {
 .report-date-tag {
   font-size: 0.8rem;
   color: var(--text-muted, #71717a);
-  font-family: monospace;
+  font-family: 'Dosis', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
 .report-title {
@@ -4215,7 +4215,7 @@ html.light .comp-visit-link:hover {
 .gap-1 { gap: 0.25rem; }
 .font-medium { font-weight: 500; }
 .font-semibold { font-weight: 600; }
-.font-mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
+.font-mono { font-family: 'Dosis', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-variant-numeric: tabular-nums; letter-spacing: -0.01em; }
 .text-xs { font-size: 0.75rem; }
 .text-base { font-size: 1rem; }
 .text-main { color: var(--text-main, #f4f4f5); }
@@ -4903,7 +4903,7 @@ html.light .growth-audit-tab.is-active {
   gap: 0.5rem;
   font-size: 0.78rem;
   color: var(--text-muted, #71717a);
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-family: 'Dosis', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -5200,7 +5200,7 @@ html.light .growth-empty-card p {
 .page-url-sub {
   font-size: 0.76rem;
   color: var(--text-muted, #71717a);
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-family: 'Dosis', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -5365,7 +5365,7 @@ html.light .geo-score-radial-num {
   font-size: 0.74rem;
   font-weight: 600;
   color: #ffffff;
-  font-family: ui-monospace, SFMono-Regular, monospace;
+  font-family: 'Dosis', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
 [data-theme="light"] .geo-domain-tag,
@@ -5567,7 +5567,7 @@ html.light .geo-hero-chip {
 .geo-standard-key-text {
   font-size: 0.68rem;
   color: var(--text-muted, #94a3b8);
-  font-family: ui-monospace, SFMono-Regular, monospace;
+  font-family: 'Dosis', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
 .geo-standard-body-desc {
@@ -7619,7 +7619,7 @@ html.light .growth-run-test-btn:hover {
 .growth-comp-domain {
   font-size: 0.78rem;
   color: #a1a1aa;
-  font-family: monospace;
+  font-family: 'Dosis', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 .growth-comp-del {
   background: transparent;
@@ -8690,13 +8690,13 @@ html.light .integration-icon-wrap.img-badge {
 .chart-axis-label {
   fill: #64748b;
   font-size: 10px;
-  font-family: ui-monospace, monospace;
+  font-family: 'Dosis', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
 .chart-axis-label-x {
   fill: #94a3b8;
   font-size: 10px;
-  font-family: ui-monospace, monospace;
+  font-family: 'Dosis', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   font-weight: 500;
 }
 
@@ -8785,7 +8785,7 @@ html.light .integration-icon-wrap.img-badge {
 
 .tooltip-metric-number {
   font-size: 1.1rem;
-  font-family: ui-monospace, monospace;
+  font-family: 'Dosis', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   font-weight: 700;
   margin-left: auto;
 }
@@ -9032,7 +9032,7 @@ html.light .meta-stat-num {
 }
 
 .cannibal-page-url {
-  font-family: ui-monospace, monospace;
+  font-family: 'Dosis', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   color: #94a3b8;
   max-width: 320px;
   overflow: hidden;
@@ -9131,7 +9131,7 @@ html.light .meta-stat-num {
   color: #ffffff;
   font-size: 0.875rem;
   outline: none;
-  font-family: ui-monospace, monospace;
+  font-family: 'Dosis', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
 .gsc-inspect-input:focus {
@@ -9355,7 +9355,7 @@ html.light .tab-badge-tag {
 .realtime-main-title strong {
   color: #34d399;
   font-size: 1.3rem;
-  font-family: ui-monospace, monospace;
+  font-family: 'Dosis', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
 .realtime-sub {
@@ -9423,7 +9423,7 @@ html.light .tab-badge-tag {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-family: ui-monospace, monospace;
+  font-family: 'Dosis', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
 .page-chip-badge {
@@ -9715,7 +9715,7 @@ html.light .realtime-idle-note {
 .tooltip-stat-val {
   font-size: 0.95rem;
   font-weight: 700;
-  font-family: ui-monospace, monospace;
+  font-family: 'Dosis', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   color: #f1f5f9;
 }
 
@@ -9984,7 +9984,7 @@ html.light .realtime-idle-note {
 
 .city-rank {
   font-size: 0.75rem;
-  font-family: ui-monospace, monospace;
+  font-family: 'Dosis', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   color: #64748b;
   font-weight: 600;
   width: 26px;
@@ -10018,7 +10018,7 @@ html.light .realtime-idle-note {
 .city-share-tag {
   font-size: 0.72rem;
   font-weight: 700;
-  font-family: ui-monospace, monospace;
+  font-family: 'Dosis', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   color: #38bdf8;
 }
 
@@ -10106,7 +10106,7 @@ html.light .realtime-idle-note {
 .source-share-tag {
   font-size: 0.72rem;
   font-weight: 700;
-  font-family: ui-monospace, monospace;
+  font-family: 'Dosis', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
 .source-progress-bar {
@@ -13586,7 +13586,7 @@ html.light .gsc-device-card .device-icon-box {
 }
 
 .station-status-text {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: 'Dosis', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   font-size: 0.72rem;
   font-weight: 700;
   letter-spacing: 0.08em;
@@ -13597,7 +13597,7 @@ html.light .gsc-device-card .device-icon-box {
   display: flex;
   align-items: center;
   gap: 6px;
-  font-family: 'JetBrains Mono', monospace;
+  font-family: 'Dosis', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   font-size: 0.72rem;
   color: #38bdf8;
   background: rgba(56, 189, 248, 0.08);
@@ -13623,7 +13623,7 @@ html.light .gsc-device-card .device-icon-box {
   background: transparent;
   border: none;
   color: #a1a1aa;
-  font-family: 'JetBrains Mono', monospace;
+  font-family: 'Dosis', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   font-size: 0.74rem;
   font-weight: 700;
   padding: 5px 14px;
@@ -13692,7 +13692,7 @@ html.light .gsc-device-card .device-icon-box {
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  font-family: 'JetBrains Mono', monospace;
+  font-family: 'Dosis', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   font-size: 0.72rem;
   color: #71717a;
   background: rgba(255, 255, 255, 0.04);
@@ -13726,7 +13726,7 @@ html.light .gsc-device-card .device-icon-box {
 }
 
 .station-growth-score-chip .sg-num {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: 'Dosis', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   font-size: 0.82rem;
   font-weight: 800;
   color: #38bdf8;
@@ -13833,7 +13833,7 @@ html.light .gsc-device-card .device-icon-box {
 }
 
 .mtp-val {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: 'Dosis', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   font-size: 1.35rem;
   font-weight: 800;
   color: #f1f5f9;
@@ -13842,7 +13842,7 @@ html.light .gsc-device-card .device-icon-box {
 }
 
 .mtp-delta {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: 'Dosis', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   font-size: 0.72rem;
   font-weight: 700;
   display: inline-flex;
@@ -13851,7 +13851,7 @@ html.light .gsc-device-card .device-icon-box {
 }
 
 .mtp-ratio {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: 'Dosis', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   font-size: 0.68rem;
   color: #f472b6;
   background: rgba(244, 114, 182, 0.1);
@@ -13860,7 +13860,7 @@ html.light .gsc-device-card .device-icon-box {
 }
 
 .mtp-tag {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: 'Dosis', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   font-size: 0.65rem;
   font-weight: 700;
   color: #a1a1aa;
@@ -13945,7 +13945,7 @@ html.light .gsc-device-card .device-icon-box {
 }
 
 .radar-node-badge .rnb-stats {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: 'Dosis', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   color: #cbd5e1;
 }
 
@@ -14019,7 +14019,7 @@ html.light .gsc-device-card .device-icon-box {
   align-items: center;
   justify-content: flex-end;
   gap: 8px;
-  font-family: 'JetBrains Mono', monospace;
+  font-family: 'Dosis', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   font-size: 0.72rem;
 }
 
@@ -14090,7 +14090,7 @@ html.light .gsc-device-card .device-icon-box {
 }
 
 .station-card-tag {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: 'Dosis', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   font-size: 0.68rem;
   font-weight: 700;
   letter-spacing: 0.06em;
@@ -14161,7 +14161,7 @@ html.light .gsc-device-card .device-icon-box {
 }
 
 .hud-status-pill {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: 'Dosis', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   font-size: 0.68rem;
   font-weight: 700;
   padding: 4px 9px;
@@ -14237,7 +14237,7 @@ html.light .gsc-device-card .device-icon-box {
 }
 
 .scd-badge {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: 'Dosis', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   font-size: 0.68rem;
   font-weight: 700;
   letter-spacing: 0.06em;
@@ -14393,7 +14393,7 @@ html.light .gsc-device-card .device-icon-box {
 }
 
 .sfc-placeholder {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: 'Dosis', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   font-size: 0.95rem;
   font-weight: 700;
   color: #64748b;
@@ -14523,7 +14523,7 @@ html.light .scd-feature-card {
 }
 
 .pod-val {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: 'Dosis', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   font-size: 1.35rem;
   font-weight: 800;
   color: #fff;
@@ -14534,7 +14534,7 @@ html.light .scd-feature-card {
   display: inline-flex;
   align-items: center;
   gap: 3px;
-  font-family: 'JetBrains Mono', monospace;
+  font-family: 'Dosis', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   font-size: 0.72rem;
   font-weight: 700;
 }
@@ -14545,7 +14545,7 @@ html.light .scd-feature-card {
 }
 
 .pod-tag-fraction {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: 'Dosis', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   font-size: 0.75rem;
   color: #00f0ff;
   font-weight: 700;
@@ -14576,7 +14576,7 @@ html.light .scd-feature-card {
 }
 
 .chart-legend-title {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: 'Dosis', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   font-size: 0.68rem;
   font-weight: 700;
   color: #71717a;
@@ -14683,7 +14683,7 @@ html.light .scd-feature-card {
 
 .channel-stats strong {
   color: #fff;
-  font-family: 'JetBrains Mono', monospace;
+  font-family: 'Dosis', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
 .channel-bar-track {
@@ -14734,13 +14734,13 @@ html.light .scd-feature-card {
 }
 
 .cnt-count {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: 'Dosis', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   color: #a1a1aa;
   font-size: 0.7rem;
 }
 
 .cnt-share {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: 'Dosis', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   color: #38bdf8;
   font-weight: 700;
   font-size: 0.7rem;
@@ -14771,7 +14771,7 @@ html.light .scd-feature-card {
 
 .subtable-count {
   color: #38bdf8;
-  font-family: 'JetBrains Mono', monospace;
+  font-family: 'Dosis', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
 .subtable-rows-list {
@@ -14819,14 +14819,14 @@ html.light .scd-feature-card {
 }
 
 .kw-rank {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: 'Dosis', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   font-size: 0.85rem;
   font-weight: 700;
   color: #f59e0b;
 }
 
 .kw-badge {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: 'Dosis', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   font-size: 0.68rem;
   font-weight: 700;
   padding: 1px 5px;
@@ -14860,7 +14860,7 @@ html.light .scd-feature-card {
 }
 
 .subtable-cell-clicks {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: 'Dosis', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   font-size: 0.74rem;
   color: #a1a1aa;
 }
@@ -15095,7 +15095,7 @@ html.light .scd-feature-card {
 }
 
 .eff-val {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: 'Dosis', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   font-size: 0.95rem;
   font-weight: 700;
   color: #fff;
@@ -15139,7 +15139,7 @@ html.light .scd-feature-card {
 .engine-chip-share {
   font-size: 0.7rem;
   color: #00f0ff;
-  font-family: 'JetBrains Mono', monospace;
+  font-family: 'Dosis', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
 .station-prompts-matrix {
@@ -15164,7 +15164,7 @@ html.light .scd-feature-card {
   display: flex;
   align-items: center;
   gap: 7px;
-  font-family: 'JetBrains Mono', monospace;
+  font-family: 'Dosis', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   font-size: 0.76rem;
   font-weight: 700;
   color: #38bdf8;
@@ -15228,7 +15228,7 @@ html.light .scd-feature-card {
 }
 
 .prompt-status-badge {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: 'Dosis', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   font-size: 0.68rem;
   font-weight: 700;
   display: inline-flex;
@@ -15317,7 +15317,7 @@ html.light .scd-feature-card {
 }
 
 .citation-count-badge {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: 'Dosis', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   font-size: 0.65rem;
   color: #00f0ff;
   background: rgba(0, 240, 255, 0.1);
@@ -15364,7 +15364,7 @@ html.light .scd-feature-card {
 }
 
 .hist-star {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: 'Dosis', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   color: #fbbf24;
   width: 32px;
 }
@@ -15385,14 +15385,14 @@ html.light .scd-feature-card {
 }
 
 .hist-count {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: 'Dosis', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   color: #e4e4e7;
   width: 24px;
   text-align: right;
 }
 
 .hist-pct {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: 'Dosis', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   color: #71717a;
   width: 34px;
   text-align: right;
@@ -15441,7 +15441,7 @@ html.light .scd-feature-card {
 }
 
 .crit-score-badge {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: 'Dosis', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   font-size: 1.25rem;
   font-weight: 800;
   color: #10b981;
@@ -15470,7 +15470,7 @@ html.light .scd-feature-card {
 }
 
 .vital-val {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: 'Dosis', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   font-size: 0.95rem;
   font-weight: 700;
 }
@@ -15529,14 +15529,14 @@ html.light .scd-feature-card {
 }
 
 .dir-chip-da {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: 'Dosis', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   font-size: 0.68rem;
   color: #a855f7;
   font-weight: 700;
 }
 
 .dir-chip-badge {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: 'Dosis', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   font-size: 0.62rem;
   font-weight: 700;
   align-self: flex-start;
@@ -15648,7 +15648,7 @@ html.light .scd-feature-card {
 }
 
 .hud-tooltip-date {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: 'Dosis', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   font-size: 0.72rem;
   font-weight: 700;
   color: #e4e4e7;
@@ -15678,7 +15678,7 @@ html.light .scd-feature-card {
 }
 
 .hud-tooltip-val {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: 'Dosis', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   font-weight: 700;
   margin-left: auto;
 }
@@ -15798,7 +15798,7 @@ html.light .scd-feature-card {
   display: flex;
   align-items: baseline;
   gap: 6px;
-  font-family: 'JetBrains Mono', monospace;
+  font-family: 'Dosis', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
 .hud-skeleton-headline {
