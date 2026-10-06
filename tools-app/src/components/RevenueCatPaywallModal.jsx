@@ -41,12 +41,6 @@ export default function RevenueCatPaywallModal({
   // State: billing cycle ('monthly' | 'annual')
   const [billingCycle, setBillingCycle] = useState('annual');
 
-  // Independent cycle override per card (synced to master billingCycle by default)
-  const [cardCycles, setCardCycles] = useState({
-    pro: 'annual',
-    unlimited: 'annual'
-  });
-
   const [isPurchasing, setIsPurchasing] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [purchaseSuccess, setPurchaseSuccess] = useState(false);
@@ -105,17 +99,6 @@ export default function RevenueCatPaywallModal({
   // Switch master cycle
   const handleMasterCycleChange = (newCycle) => {
     setBillingCycle(newCycle);
-    setCardCycles({
-      pro: newCycle,
-      unlimited: newCycle
-    });
-  };
-
-  // Switch specific card cycle
-  const handleCardCycleChange = (planId, newCycle, e) => {
-    if (e) e.stopPropagation();
-    setCardCycles(prev => ({ ...prev, [planId]: newCycle }));
-    setSelectedPlanId(planId);
   };
 
   // Dynamic packages
@@ -124,8 +107,7 @@ export default function RevenueCatPaywallModal({
   const unlimitedMonthlyPkg = getPackageForSelection('unlimited', 'monthly');
   const unlimitedAnnualPkg = getPackageForSelection('unlimited', 'annual');
 
-  // Canonical price resolver: Guaranteed consistency across footer pricing & subscription views
-  // Reflects real Paddle & RevenueCat product pricing: Pro ($9.99/mo, $99.90/yr) & Unlimited ($14.99/mo, $149.90/yr)
+  // Canonical price resolver
   const getPlanPrice = (planId, cycle) => {
     if (planId === 'free') return '$0';
 
@@ -180,7 +162,6 @@ export default function RevenueCatPaywallModal({
       price: '$0',
       period: isTr ? '/ ömür boyu' : '/ forever',
       subDetail: isTr ? 'Kredi kartı gerekmez • %100 İstemci taraflı' : 'No credit card required • 100% Client-side',
-      hasCycleSwitch: false,
       features: [
         isTr ? 'Tüm ücretsiz araçlar sınırsız ve ömür boyu bedava' : 'All free tools free forever',
         isTr ? 'Premium araçlar için sınırlı token hakkı' : 'Limited token allowance for premium tools',
@@ -201,15 +182,13 @@ export default function RevenueCatPaywallModal({
       desc: isTr 
         ? 'Profesyoneller ve yoğun kullanıcılar için yüksek token hakkı ve öncelikli işlem hızı.' 
         : 'High token allowance for premium AI, PDF, and productivity tools with priority execution.',
-      hasCycleSwitch: true,
-      currentCycle: cardCycles.pro,
-      price: getPlanPrice('pro', cardCycles.pro),
-      period: cardCycles.pro === 'annual' ? (isTr ? '/ yıl' : '/ year') : (isTr ? '/ ay' : '/ month'),
-      savingsPill: cardCycles.pro === 'annual' ? (isTr ? '🎁 2 Ay Bedava!' : '🎁 2 Months Free!') : null,
-      subDetail: cardCycles.pro === 'annual'
+      price: getPlanPrice('pro', billingCycle),
+      period: billingCycle === 'annual' ? (isTr ? '/ yıl' : '/ year') : (isTr ? '/ ay' : '/ month'),
+      savingsPill: billingCycle === 'annual' ? (isTr ? '🎁 2 Ay Bedava!' : '🎁 2 Months Free!') : null,
+      subDetail: billingCycle === 'annual'
         ? (isTr ? '10 ay fiyatına 12 ay erişim (Aylık ~$8.33)' : '12 months for the price of 10 (~$8.33/mo)')
         : (isTr ? 'Aylık faturalandırılır • İstediğiniz an iptal edin' : 'Billed monthly at $9.99/mo • Cancel anytime'),
-      matchedPkg: cardCycles.pro === 'annual' ? proAnnualPkg : proMonthlyPkg,
+      matchedPkg: billingCycle === 'annual' ? proAnnualPkg : proMonthlyPkg,
       features: [
         isTr ? 'Tüm ücretsiz araçlar sınırsız ve ömür boyu bedava' : 'All free tools free forever',
         isTr ? 'Premium araçlar için genişletilmiş token hakkı' : 'Expanded token allowance for premium tools',
@@ -228,15 +207,13 @@ export default function RevenueCatPaywallModal({
       desc: isTr 
         ? 'Profesyonel ekipler ve yoğun AI/PDF işlemleri için maksimum tahsis ve turbo hız.' 
         : 'Maximum token allowance and turbo concurrency for power users and teams.',
-      hasCycleSwitch: true,
-      currentCycle: cardCycles.unlimited,
-      price: getPlanPrice('unlimited', cardCycles.unlimited),
-      period: cardCycles.unlimited === 'annual' ? (isTr ? '/ yıl' : '/ year') : (isTr ? '/ ay' : '/ month'),
-      savingsPill: cardCycles.unlimited === 'annual' ? (isTr ? '🎁 2 Ay Bedava!' : '🎁 2 Months Free!') : null,
-      subDetail: cardCycles.unlimited === 'annual'
+      price: getPlanPrice('unlimited', billingCycle),
+      period: billingCycle === 'annual' ? (isTr ? '/ yıl' : '/ year') : (isTr ? '/ ay' : '/ month'),
+      savingsPill: billingCycle === 'annual' ? (isTr ? '🎁 2 Ay Bedava!' : '🎁 2 Months Free!') : null,
+      subDetail: billingCycle === 'annual'
         ? (isTr ? '10 ay fiyatına 12 ay erişim (Aylık ~$12.49)' : '12 months for the price of 10 (~$12.49/mo)')
         : (isTr ? 'Aylık faturalandırılır • İstediğiniz an iptal edin' : 'Billed monthly at $14.99/mo • Cancel anytime'),
-      matchedPkg: cardCycles.unlimited === 'annual' ? unlimitedAnnualPkg : unlimitedMonthlyPkg,
+      matchedPkg: billingCycle === 'annual' ? unlimitedAnnualPkg : unlimitedMonthlyPkg,
       features: [
         isTr ? 'Tüm ücretsiz ve Pro özellikleri dahil' : 'Everything in Free & Pro included',
         isTr ? 'Maksimum token tahsisi (Tüm AI, PDF ve araştırma araçları)' : 'Maximum token allowance across all tools',
@@ -357,7 +334,7 @@ export default function RevenueCatPaywallModal({
 
     const planToProcess = targetPlan || selectedPlan;
 
-    // If Free plan clicked, simply close modal or navigate
+    // If Free plan clicked, simply close modal
     if (planToProcess.id === 'free') {
       onClose();
       return;
@@ -418,6 +395,9 @@ export default function RevenueCatPaywallModal({
         className="rc-paywall-card"
         onClick={(e) => e.stopPropagation()}
       >
+        {/* Ambient Top Glow Effect */}
+        <div className="rc-paywall-ambient-glow" aria-hidden="true" />
+
         {/* Header */}
         <div className="rc-paywall-header">
           <button 
@@ -427,7 +407,7 @@ export default function RevenueCatPaywallModal({
             aria-label={isTr ? 'Kapat' : 'Close'}
             title={isPurchasing ? (isTr ? 'İptal Et' : 'Cancel') : (isTr ? 'Kapat' : 'Close')}
           >
-            <X size={17} />
+            <X size={18} />
           </button>
 
           <div className="rc-paywall-logo-row">
@@ -435,23 +415,23 @@ export default function RevenueCatPaywallModal({
               src="/cgrowthlogo.svg" 
               alt="Cerilas" 
               className="rc-paywall-logo-img"
-              width={42}
-              height={42}
+              width={46}
+              height={46}
             />
           </div>
 
           <div className="rc-paywall-badge">
-            <Crown size={14} />
-            <span>Cerilas Tools Plans</span>
+            <Sparkles size={13} />
+            <span>Cerilas Tools Premium</span>
           </div>
 
           <h2 id="rc-paywall-main-title" className="rc-paywall-title">
-            {isTr ? 'Paketinizi Seçin ve Sınırları Kaldırın' : 'Simple, Transparent Plans Tailored For You'}
+            {isTr ? 'Paketinizi Seçin ve Sınırları Kaldırın' : 'Choose Your Plan & Unlock Maximum Power'}
           </h2>
           <p className="rc-paywall-subtitle">
             {isTr 
-              ? 'Sıfır sunucu depolaması. İstemci taraflı %100 gizlilik. İhtiyacınıza uygun paketi seçin.' 
-              : 'Zero server file uploads. 100% In-browser confidentiality. Choose the plan that fits your workflow.'}
+              ? 'Sıfır sunucu depolaması. İstemci taraflı %100 gizlilik. İş akışınıza en uygun paketi seçin.' 
+              : 'Zero server uploads. 100% In-browser confidentiality. Pick the plan tailored to your workflow.'}
           </p>
 
           {/* Master Billing Switcher with 2 Months Free Badge */}
@@ -503,16 +483,16 @@ export default function RevenueCatPaywallModal({
           {/* Success Banner */}
           {purchaseSuccess ? (
             <div style={{ textAlign: 'center', padding: '2.5rem 1.5rem' }}>
-              <div style={{ width: 64, height: 64, borderRadius: '50%', background: 'rgba(16, 185, 129, 0.15)', border: '2px solid #10b981', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.25rem auto', color: '#10b981' }}>
-                <Check size={32} />
+              <div style={{ width: 68, height: 68, borderRadius: '50%', background: 'rgba(16, 185, 129, 0.15)', border: '2px solid #10b981', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.25rem auto', color: '#10b981', boxShadow: '0 0 30px rgba(16, 185, 129, 0.3)' }}>
+                <Check size={34} />
               </div>
-              <h3 style={{ fontSize: '1.45rem', fontWeight: 800, color: '#f8fafc', margin: '0 0 0.5rem 0' }}>
+              <h3 style={{ fontSize: '1.6rem', fontWeight: 850, color: '#f8fafc', margin: '0 0 0.5rem 0' }}>
                 {isTr ? 'Tebrikler! Aboneliğiniz Aktifleştirildi' : 'Welcome to Cerilas Pro!'}
               </h3>
-              <p style={{ fontSize: '0.92rem', color: '#94a3b8', maxWidth: 440, margin: '0 auto 1.5rem auto' }}>
+              <p style={{ fontSize: '0.95rem', color: '#94a3b8', maxWidth: 440, margin: '0 auto 1.5rem auto' }}>
                 {isTr 
-                  ? 'Aboneliğiniz RevenueCat üzerinden başarıyla onaylandı. Tüm limit ve araçlar hesabınıza tanımlandı.' 
-                  : 'Your subscription has been activated via RevenueCat. All premium limits and tools are unlocked immediately.'}
+                  ? 'Aboneliğiniz RevenueCat & Paddle üzerinden başarıyla onaylandı. Tüm limit ve araçlar hesabınıza tanımlandı.' 
+                  : 'Your subscription has been activated. All premium limits and tools are unlocked immediately.'}
               </p>
               <button 
                 type="button" 
@@ -561,29 +541,6 @@ export default function RevenueCatPaywallModal({
 
                       {/* Price Section */}
                       <div className="rc-plan-pricing-section">
-                        {/* Monthly vs Yearly Switch on card for Pro & Unlimited */}
-                        {plan.hasCycleSwitch ? (
-                          <div className="rc-card-cycle-pill-group" onClick={(e) => e.stopPropagation()}>
-                            <button
-                              type="button"
-                              className={`rc-card-cycle-pill ${plan.currentCycle === 'monthly' ? 'is-active' : ''}`}
-                              onClick={(e) => handleCardCycleChange(plan.id, 'monthly', e)}
-                            >
-                              {isTr ? 'Aylık' : 'Monthly'}
-                            </button>
-                            <button
-                              type="button"
-                              className={`rc-card-cycle-pill ${plan.currentCycle === 'annual' ? 'is-active' : ''}`}
-                              onClick={(e) => handleCardCycleChange(plan.id, 'annual', e)}
-                            >
-                              <span>{isTr ? 'Yıllık' : 'Yearly'}</span>
-                              <span className="rc-cycle-badge-save">{isTr ? '2 Ay Bedava' : '2 Mo Free'}</span>
-                            </button>
-                          </div>
-                        ) : (
-                          <div className="rc-card-cycle-spacer" />
-                        )}
-
                         {/* Savings Banner for Annual */}
                         {plan.savingsPill && (
                           <div className="rc-plan-savings-pill">
@@ -616,7 +573,7 @@ export default function RevenueCatPaywallModal({
                       <div className="rc-plan-card-foot">
                         <button
                           type="button"
-                          className={`rc-card-action-btn ${isSelected ? 'is-active' : ''} ${plan.id === 'free' ? 'btn-free' : ''}`}
+                          className={`rc-card-action-btn ${isSelected ? 'is-active' : ''} ${plan.id === 'free' ? 'btn-free' : ''} ${plan.id === 'unlimited' ? 'btn-turbo' : ''}`}
                           onClick={(e) => {
                             e.stopPropagation();
                             setSelectedPlanId(plan.id);
@@ -636,30 +593,39 @@ export default function RevenueCatPaywallModal({
                 })}
               </div>
 
-              {/* Security & Benefits Guarantee Box */}
-              <div className="rc-benefits-box">
-                <h4 className="rc-benefits-title">
-                  <ShieldCheck size={15} color="#38bdf8" />
-                  <span>{isTr ? 'Cerilas Tools Güvencesi & Mimari Standartlar:' : 'Cerilas Tools Core Guarantees:'}</span>
-                </h4>
-                <ul className="rc-benefits-list">
-                  <li className="rc-benefit-item">
-                    <Check size={15} className="rc-benefit-icon" />
-                    <span><strong>{isTr ? 'Sıfır Sunucu Depolaması:' : 'Zero Server Storage:'}</strong> {isTr ? '%100 istemci taraflı gizlilik' : '100% in-browser confidentiality'}</span>
-                  </li>
-                  <li className="rc-benefit-item">
-                    <Check size={15} className="rc-benefit-icon" />
-                    <span><strong>{isTr ? '31+ Aracın Tamamı:' : 'Full 31+ Tools:'}</strong> {isTr ? 'Kesintisiz ve reklamsız erişim' : 'Unlimited & uninterrupted access'}</span>
-                  </li>
-                  <li className="rc-benefit-item">
-                    <Check size={15} className="rc-benefit-icon" />
-                    <span><strong>{isTr ? 'Esnek İptal:' : 'Cancel Anytime:'}</strong> {isTr ? 'Tek tıkla self-servis iptal ve yönetim' : 'One-click self-service cancellation'}</span>
-                  </li>
-                  <li className="rc-benefit-item">
-                    <Check size={15} className="rc-benefit-icon" />
-                    <span><strong>{isTr ? 'Öncelikli Güncellemeler:' : 'Priority Sync:'}</strong> {isTr ? 'Yeni araçlara anında erişim' : 'Instant access to newly released tools'}</span>
-                  </li>
-                </ul>
+              {/* Security & Benefits Guarantee Ribbon */}
+              <div className="rc-trust-ribbon">
+                <div className="rc-trust-item">
+                  <ShieldCheck size={16} className="rc-trust-icon" />
+                  <div>
+                    <strong>{isTr ? '%100 İstemci Taraflı Gizlilik' : '100% Client-Side Privacy'}</strong>
+                    <span>{isTr ? 'Dosyalarınız asla sunucuya yüklenmez' : 'Zero cloud file storage'}</span>
+                  </div>
+                </div>
+
+                <div className="rc-trust-item">
+                  <Zap size={16} className="rc-trust-icon rc-trust-icon-zap" />
+                  <div>
+                    <strong>{isTr ? '31+ Üst Düzey Araç' : '31+ Pro Tools Suite'}</strong>
+                    <span>{isTr ? 'Limitsiz ve reklamsız erişim' : 'Instant ad-free execution'}</span>
+                  </div>
+                </div>
+
+                <div className="rc-trust-item">
+                  <Lock size={16} className="rc-trust-icon" />
+                  <div>
+                    <strong>{isTr ? '256-Bit SSL Güvenli Ödeme' : '256-Bit SSL Checkout'}</strong>
+                    <span>{isTr ? 'Paddle & RevenueCat korumalı' : 'Paddle & RevenueCat secured'}</span>
+                  </div>
+                </div>
+
+                <div className="rc-trust-item">
+                  <CheckCircle2 size={16} className="rc-trust-icon rc-trust-icon-check" />
+                  <div>
+                    <strong>{isTr ? 'Taahhüt Yok, Kolay İptal' : 'Cancel Anytime'}</strong>
+                    <span>{isTr ? 'Tek tıkla self-servis yönetim' : 'One-click self-service control'}</span>
+                  </div>
+                </div>
               </div>
 
               {/* Error Banner */}
@@ -680,23 +646,23 @@ export default function RevenueCatPaywallModal({
                 >
                   {isPurchasing ? (
                     <>
-                      <Loader2 size={18} className="spin" />
-                      <span>{isTr ? 'Ödeme Penceresi Açıldı...' : 'Checkout Window Open...'}</span>
+                      <Loader2 size={19} className="spin" />
+                      <span>{isTr ? 'Ödeme Penceresi Açılıyor...' : 'Opening Checkout Window...'}</span>
                     </>
                   ) : selectedPlan.id === 'free' ? (
                     <>
                       <span>{isTr ? 'Ücretsiz Plan ile Devam Et' : 'Continue with Free Plan'}</span>
-                      <ArrowRight size={16} />
+                      <ArrowRight size={17} />
                     </>
                   ) : (
                     <>
-                      <Lock size={16} />
+                      <Lock size={17} />
                       <span>
                         {isTr 
-                          ? `${selectedPlan.name} ile Devam Et (${selectedPlan.price} ${selectedPlan.period})` 
-                          : `Continue with ${selectedPlan.name} (${selectedPlan.price} ${selectedPlan.period})`}
+                          ? `${selectedPlan.name} ile Devam Et — ${selectedPlan.price} ${selectedPlan.period}` 
+                          : `Continue with ${selectedPlan.name} — ${selectedPlan.price} ${selectedPlan.period}`}
                       </span>
-                      <ArrowRight size={16} />
+                      <ArrowRight size={17} />
                     </>
                   )}
                 </button>
@@ -712,9 +678,9 @@ export default function RevenueCatPaywallModal({
                 )}
 
                 <div className="rc-security-note">
-                  <span>🔒 {isTr ? 'RevenueCat & Stripe ile 256-bit SSL şifreli güvenli ödeme' : 'Secure checkout powered by RevenueCat & Stripe'}</span>
+                  <span>🔒 {isTr ? 'Paddle & RevenueCat ile 256-bit SSL şifreli güvenli ödeme' : 'Secure checkout powered by Paddle & RevenueCat'}</span>
                   <span>•</span>
-                  <span>{isTr ? 'İstediğiniz zaman iptal edebilirsiniz' : 'Cancel anytime'}</span>
+                  <span>{isTr ? 'İstediğiniz zaman tek tıkla iptal edebilirsiniz' : 'Cancel anytime with 1 click'}</span>
                 </div>
               </div>
             </>
