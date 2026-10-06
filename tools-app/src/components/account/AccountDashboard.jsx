@@ -364,20 +364,21 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
 
   const currentPlan = isRevenueCatPro ? 'pro' : (user?.plan || 'free');
 
-  if (!isAuthenticated && !loading) {
+  // If user is not authenticated and is trying to access Profile or Billing, show auth prompt
+  if (!isAuthenticated && !loading && activeTab !== 'package') {
     return (
-      <div className="account-page-root" style={{ textAlign: 'center', padding: '6rem 1.5rem' }}>
-        <div className="account-panel-card" style={{ maxWidth: 480, margin: '0 auto', padding: '3rem 2rem' }}>
+      <div className="account-page-root auth-required-page">
+        <div className="account-panel-card auth-required-card">
           <div className="auth-modal-logo-wrap" style={{ margin: '0 auto 1.25rem' }}>
-            <ShieldCheck size={28} style={{ color: 'var(--text-main)' }} />
+            <ShieldCheck size={28} style={{ color: 'var(--text-main, #38bdf8)' }} />
           </div>
-          <h2 style={{ fontSize: '1.4rem', marginBottom: '0.5rem', color: 'var(--text-main)' }}>
+          <h2 style={{ fontSize: '1.4rem', marginBottom: '0.5rem', color: 'var(--text-main, #ffffff)' }}>
             {isTr ? 'Giriş Yapmanız Gerekiyor' : 'Authentication Required'}
           </h2>
-          <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)', marginBottom: '1.75rem', lineHeight: 1.5 }}>
+          <p style={{ fontSize: '0.875rem', color: 'var(--text-muted, #94a3b8)', marginBottom: '1.75rem', lineHeight: 1.5 }}>
             {isTr 
-              ? 'Paketiniz, profiliniz ve faturalandırma bilgilerinize erişmek için lütfen giriş yapın veya ücretsiz üye olun.' 
-              : 'Please sign in or create an account to view your package, profile, and billing information.'}
+              ? 'Profiliniz ve faturalandırma bilgilerinize erişmek için lütfen giriş yapın veya ücretsiz üye olun.' 
+              : 'Please sign in or create an account to view your profile and billing information.'}
           </p>
           <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center' }}>
             <button
@@ -519,27 +520,68 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
               </div>
             )}
 
+            {/* Guest Welcome Banner if visitor is not logged in */}
+            {!isAuthenticated && (
+              <div className="account-guest-banner">
+                <div className="guest-banner-left">
+                  <div className="guest-banner-icon-wrap">
+                    <ShieldCheck size={22} />
+                  </div>
+                  <div>
+                    <h3 className="guest-banner-title">
+                      {isTr ? 'Şeffaf Planlar & %100 Gizlilik' : 'Transparent Plans & 100% Privacy'}
+                    </h3>
+                    <p className="guest-banner-desc">
+                      {isTr 
+                        ? 'Tüm temel araçlar ömür boyu ücretsizdir. Yüksek hacimli AI ve token kullanımı için paketinizi seçebilirsiniz.' 
+                        : 'All core utilities are free forever. Select a plan below for expanded AI token quotas and concurrency.'}
+                    </p>
+                  </div>
+                </div>
+                <div className="guest-banner-actions">
+                  <button 
+                    type="button" 
+                    onClick={() => openAuthModal('login')} 
+                    className="guest-auth-btn btn-login"
+                  >
+                    {isTr ? 'Giriş Yap' : 'Sign In'}
+                  </button>
+                  <button 
+                    type="button" 
+                    onClick={() => openAuthModal('register')} 
+                    className="guest-auth-btn btn-register"
+                  >
+                    {isTr ? 'Ücretsiz Kayıt Ol' : 'Create Free Account'}
+                  </button>
+                </div>
+              </div>
+            )}
+
             {/* Current Subscription Status Card */}
-            <div className="account-panel-card">
-              <div className="account-panel-header" style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+            <div className="account-panel-card account-current-sub-card">
+              <div className="account-panel-header">
                 <div>
+                  <div className="account-panel-pill">
+                    <Crown size={13} />
+                    <span>{isTr ? 'ÜYELİK DURUMU' : 'MEMBERSHIP STATUS'}</span>
+                  </div>
                   <h2 className="account-panel-title">{isTr ? 'Mevcut Abonelik Paketiniz' : 'Current Subscription'}</h2>
                   <p className="account-panel-desc">
                     {isTr 
-                      ? 'Hesabınıza tanımlı paket limitleri ve aktif kullanım hakları.' 
+                      ? 'Hesabınıza tanımlı paket limitleri, aktif token tahsisi ve kullanım hakları.' 
                       : 'Your active plan limits, quotas, and feature entitlements.'}
                   </p>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem', flexWrap: 'wrap' }}>
+                <div className="account-header-actions-row">
                   {isRevenueCatPro && (
-                    <span className="account-active-status-tag" style={{ background: 'rgba(99, 102, 241, 0.15)', borderColor: 'rgba(99, 102, 241, 0.3)', color: '#818cf8' }}>
-                      <Crown size={13} style={{ marginRight: '4px' }} />
-                      <span>RevenueCat PRO</span>
+                    <span className="account-active-status-tag tag-rc-pro">
+                      <Crown size={13} />
+                      <span>PRO ACTIVE</span>
                     </span>
                   )}
-                  <span className="account-active-status-tag">
+                  <span className="account-active-status-tag tag-emerald">
                     <span className="status-indicator-dot" />
-                    <span>{isTr ? 'Aktif Üyelik' : 'Active Subscription'}</span>
+                    <span>{isTr ? 'Aktif Üyelik' : 'Active Account'}</span>
                   </span>
                   <button
                     type="button"
@@ -555,29 +597,41 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
 
               <div className="account-plan-overview-grid">
                 <div className="account-metric-box">
-                  <span className="account-metric-label">{isTr ? 'Plan Adı' : 'Plan Name'}</span>
+                  <div className="account-metric-top">
+                    <span className="account-metric-label">{isTr ? 'Plan Adı' : 'Plan Name'}</span>
+                    <Crown size={15} className="metric-icon text-amber" />
+                  </div>
                   <span className="account-metric-val">
                     {currentPlan === 'pro' ? 'Pro' : (currentPlan === 'enterprise' || currentPlan === 'unlimited') ? 'Unlimited' : 'Forever Free'}
                   </span>
                 </div>
                 <div className="account-metric-box">
-                  <span className="account-metric-label">{isTr ? 'Ücretsiz Araçlar' : 'Free Tools'}</span>
+                  <div className="account-metric-top">
+                    <span className="account-metric-label">{isTr ? 'Ücretsiz Araçlar' : 'Free Tools'}</span>
+                    <Sparkles size={15} className="metric-icon text-cyan" />
+                  </div>
                   <span className="account-metric-val">
-                    {isTr ? 'Ömür Boyu Ücretsiz' : 'Free Forever'}
+                    {isTr ? 'Ömür Boyu Sınırsız' : 'Unlimited Free'}
                   </span>
                 </div>
                 <div className="account-metric-box">
-                  <span className="account-metric-label">{isTr ? 'Premium Araçlar' : 'Premium Tools'}</span>
+                  <div className="account-metric-top">
+                    <span className="account-metric-label">{isTr ? 'Premium Araçlar' : 'Premium Tools'}</span>
+                    <Zap size={15} className="metric-icon text-indigo" />
+                  </div>
                   <span className="account-metric-val">
                     {currentPlan === 'free' 
-                      ? (isTr ? 'Tokenli (Sınırlı Ücretsiz Hak)' : 'Token (Limited Free Allowance)')
+                      ? (isTr ? 'Tokenli (Ücretsiz Kota)' : 'Token (Free Quota)')
                       : currentPlan === 'pro'
-                      ? (isTr ? 'Genişletilmiş Token Hakkı' : 'Expanded Token Allowance')
-                      : (isTr ? 'Maksimum Token Tahsisi' : 'Maximum Token Allowance')}
+                      ? (isTr ? 'Genişletilmiş Token' : 'Expanded Token Allowance')
+                      : (isTr ? 'Maksimum Tahsis' : 'Maximum Token Allowance')}
                   </span>
                 </div>
                 <div className="account-metric-box">
-                  <span className="account-metric-label">{isTr ? 'Gizlilik & Depolama' : 'Privacy & Storage'}</span>
+                  <div className="account-metric-top">
+                    <span className="account-metric-label">{isTr ? 'Gizlilik & Depolama' : 'Privacy & Storage'}</span>
+                    <ShieldCheck size={15} className="metric-icon text-emerald" />
+                  </div>
                   <span className="account-metric-val">
                     {isTr ? '%100 İstemci Taraflı' : '100% Client-Side'}
                   </span>
@@ -586,28 +640,32 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
 
               <div className="account-plan-perks-list">
                 <div className="account-perk-item">
-                  <Check size={16} className="perk-icon" />
-                  <span><strong>Free tools free forever</strong> — {isTr ? 'Tüm ücretsiz araçlar sınırsız ve ömür boyu bedava' : 'All free utility tools are free forever'}</span>
+                  <div className="account-perk-icon-circle"><Check size={13} /></div>
+                  <span><strong>Free tools free forever:</strong> {isTr ? 'Tüm ücretsiz araçlar sınırsız ve ömür boyu bedava' : 'All free utility tools are free forever'}</span>
                 </div>
                 <div className="account-perk-item">
-                  <Check size={16} className="perk-icon" />
-                  <span><strong>Premium tools uses token, limited free allowance</strong> — {isTr ? 'Premium araçlar token kullanır, sınırlı ücretsiz kullanım hakkı içerir' : 'Premium tools use tokens with a limited free tier allowance'}</span>
+                  <div className="account-perk-icon-circle"><Check size={13} /></div>
+                  <span><strong>Premium tools uses token:</strong> {isTr ? 'Premium araçlar token kullanır, sınırlı ücretsiz kullanım hakkı içerir' : 'Premium tools use tokens with a limited free tier allowance'}</span>
                 </div>
                 <div className="account-perk-item">
-                  <Check size={16} className="perk-icon" />
-                  <span>{isTr ? 'Sıfır Sunucu Depolaması ile %100 İstemci Taraflı Gizlilik' : 'Zero Server File Uploads & Client-Side Privacy'}</span>
+                  <div className="account-perk-icon-circle"><Check size={13} /></div>
+                  <span><strong>%100 In-Browser Privacy:</strong> {isTr ? 'Sıfır sunucu depolaması, dosyalarınız asla cihazınızdan çıkmaz' : 'Zero server file uploads, files never leave your device'}</span>
                 </div>
               </div>
             </div>
 
             {/* Plans Switcher / Upgrade Matrix */}
-            <div className="account-panel-card">
+            <div className="account-panel-card account-upgrade-matrix-card">
               <div className="account-panel-header">
                 <div>
-                  <h2 className="account-panel-title">{isTr ? 'Paketinizi Değiştirin veya Yükseltin' : 'Change or Upgrade Your Plan'}</h2>
+                  <div className="account-panel-pill pill-cyan">
+                    <Sparkles size={13} />
+                    <span>{isTr ? 'FİYATLANDIRMA & YÜKSELTME' : 'PRICING & UPGRADE'}</span>
+                  </div>
+                  <h2 className="account-panel-title">{isTr ? 'Paketinizi Seçin veya Yükseltin' : 'Select or Upgrade Your Plan'}</h2>
                   <p className="account-panel-desc">
                     {isTr 
-                      ? 'İhtiyacınıza uygun paketi seçerek limitlerinizi anında genişletin.' 
+                      ? 'İhtiyacınıza uygun paketi seçerek limitlerinizi ve işlem hızınızı anında genişletin.' 
                       : 'Choose the plan tailored to your team or daily workflow.'}
                   </p>
                 </div>
@@ -616,7 +674,7 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
                   onClick={() => { window.location.hash = '#/pricing'; }}
                   className="account-pricing-link-btn"
                 >
-                  <span>{isTr ? 'Tüm Paketleri Kıyasla' : 'Compare All Plans'}</span>
+                  <span>{isTr ? 'Detaylı Kıyaslama' : 'Compare Plans'}</span>
                   <ExternalLink size={14} />
                 </button>
               </div>
@@ -644,101 +702,217 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
 
               <div className="account-upgrade-grid">
                 {/* Plan 1: Free */}
-                <div className={`account-upgrade-card ${currentPlan === 'free' ? 'is-current' : ''}`}>
-                  <div className="upgrade-card-head">
-                    <h3 className="upgrade-card-name">Forever Free</h3>
-                    <p className="upgrade-card-price">$0 <span className="period">/ {isTr ? 'ömür boyu' : 'forever'}</span></p>
-                  </div>
-                  <ul className="upgrade-features">
-                    <li>✓ Free tools free forever</li>
-                    <li>✓ Premium tools uses token</li>
-                    <li>✓ Limited free allowance</li>
-                    <li>✓ {isTr ? '%100 İstemci taraflı gizlilik' : '100% In-browser privacy'}</li>
-                  </ul>
-                  {currentPlan === 'free' ? (
-                    <div className="upgrade-current-pill">{isTr ? 'Mevcut Paketiniz' : 'Current Plan'}</div>
-                  ) : (
-                    <button
-                      type="button"
-                      disabled={upgradingPlan === 'free'}
-                      onClick={() => handleUpgradePlan('free')}
-                      className="upgrade-action-btn btn-secondary"
-                    >
-                      {upgradingPlan === 'free' ? <Loader2 size={15} className="auth-spinner" /> : (isTr ? 'Ücretsiz Plana Geç' : 'Downgrade to Free')}
-                    </button>
-                  )}
-                </div>
-
-                {/* Plan 2: Pro */}
-                <div className={`account-upgrade-card card-featured ${currentPlan === 'pro' ? 'is-current' : ''}`}>
-                  <div className="card-popular-badge">
-                    <Sparkles size={11} />
-                    <span>{isTr ? 'En Popüler' : 'Most Popular'}</span>
-                  </div>
-                  <div className="upgrade-card-head">
-                    <h3 className="upgrade-card-name">Pro</h3>
-                    <p className="upgrade-card-price">
-                      {packageBillingCycle === 'annual' ? '$99.90' : '$9.99'}{' '}
-                      <span className="period">/ {packageBillingCycle === 'annual' ? (isTr ? 'yıl' : 'year') : (isTr ? 'ay' : 'month')}</span>
+                <div className={`account-upgrade-card ${currentPlan === 'free' ? 'is-current-card' : ''}`}>
+                  <div className="account-upgrade-card-head">
+                    <h3 className="account-upgrade-card-name">Forever Free</h3>
+                    <p className="account-upgrade-card-desc">
+                      {isTr ? 'Tüm ücretsiz araçlar sınırsız, premium araçlar için sınırlı kota.' : 'Free tools free forever, with limited free allowance for premium tools.'}
                     </p>
-                    {packageBillingCycle === 'annual' && (
-                      <p className="upgrade-card-savings-text">
-                        {isTr ? '🎁 10 ay fiyatına 12 ay erişim (Aylık ~$8.33)' : '🎁 12 months for price of 10 (~$8.33/mo)'}
-                      </p>
+                    <div className="account-upgrade-price-wrap">
+                      <span className="account-upgrade-currency">$</span>
+                      <span className="account-upgrade-amount">0</span>
+                      <span className="account-upgrade-period">/ {isTr ? 'ömür boyu' : 'forever'}</span>
+                    </div>
+                    <div className="account-upgrade-price-detail">
+                      {isTr ? 'Kredi kartı gerekmez &bull; Herkese açık' : 'No credit card required &bull; Free forever'}
+                    </div>
+                  </div>
+
+                  <ul className="account-upgrade-features-list">
+                    <li className="account-upgrade-feature-item">
+                      <div className="account-feature-check-icon"><Check size={13} /></div>
+                      <span><strong>Free tools free forever:</strong> {isTr ? 'Tüm ücretsiz araçlar sınırsız' : 'Unlimited free tools'}</span>
+                    </li>
+                    <li className="account-upgrade-feature-item">
+                      <div className="account-feature-check-icon"><Check size={13} /></div>
+                      <span><strong>Premium tools:</strong> {isTr ? 'Sınırlı ücretsiz token hakkı' : 'Limited free allowance'}</span>
+                    </li>
+                    <li className="account-upgrade-feature-item">
+                      <div className="account-feature-check-icon"><Check size={13} /></div>
+                      <span><strong>%100 Tarayıcı Gizliliği:</strong> {isTr ? 'Sıfır sunucu depolaması' : 'Zero server file uploads'}</span>
+                    </li>
+                    <li className="account-upgrade-feature-item">
+                      <div className="account-feature-check-icon"><Check size={13} /></div>
+                      <span>{isTr ? 'Standart WebAssembly işlem hızı' : 'Standard WebAssembly speed'}</span>
+                    </li>
+                  </ul>
+
+                  <div className="account-upgrade-card-footer">
+                    {currentPlan === 'free' ? (
+                      <div className="account-current-plan-pill">{isTr ? 'Mevcut Planınız' : 'Current Plan'}</div>
+                    ) : (
+                      <button
+                        type="button"
+                        disabled={upgradingPlan === 'free'}
+                        onClick={() => handleUpgradePlan('free')}
+                        className="account-plan-action-btn btn-secondary-sub"
+                      >
+                        {upgradingPlan === 'free' ? <Loader2 size={15} className="auth-spinner" /> : (isTr ? 'Ücretsiz Plana Geç' : 'Downgrade to Free')}
+                      </button>
                     )}
                   </div>
-                  <ul className="upgrade-features">
-                    <li>✓ Free tools free forever</li>
-                    <li>✓ Premium tools uses token</li>
-                    <li>✓ {isTr ? 'Genişletilmiş token hakkı' : 'Expanded token allowance'}</li>
-                    <li>✓ {isTr ? 'Öncelikli işlem hızı' : 'Priority execution speed'}</li>
+                </div>
+
+                {/* Plan 2: Pro (Featured) */}
+                <div className={`account-upgrade-card is-featured ${currentPlan === 'pro' ? 'is-current-card is-active-featured' : ''}`}>
+                  <div className="account-card-top-tag tag-featured">
+                    <Sparkles size={12} />
+                    <span>{isTr ? 'POPÜLER SEÇİM' : 'POPULAR CHOICE'}</span>
+                  </div>
+
+                  <div className="account-upgrade-card-head">
+                    <h3 className="account-upgrade-card-name">Pro</h3>
+                    <p className="account-upgrade-card-desc">
+                      {isTr ? 'Genişletilmiş token kotası ve öncelikli istemci işlem hızı.' : 'Expanded token allowance with priority client-side execution.'}
+                    </p>
+                    <div className="account-upgrade-price-wrap">
+                      <span className="account-upgrade-currency">$</span>
+                      <span className="account-upgrade-amount">
+                        {packageBillingCycle === 'annual' ? '99.90' : '9.99'}
+                      </span>
+                      <span className="account-upgrade-period">
+                        {packageBillingCycle === 'annual' ? (isTr ? '/ yıl' : '/ year') : (isTr ? '/ ay' : '/ month')}
+                      </span>
+                    </div>
+                    <div className="account-upgrade-price-detail is-highlight">
+                      {packageBillingCycle === 'annual' 
+                        ? (isTr ? '🎁 2 Ay Bedava (Aylık ~$8.33)' : '🎁 2 Months Free (~$8.33/mo)')
+                        : (isTr ? 'Aylık faturalandırılır ($9.99/ay)' : 'Billed monthly at $9.99/mo')}
+                    </div>
+                  </div>
+
+                  <ul className="account-upgrade-features-list">
+                    <li className="account-upgrade-feature-item">
+                      <div className="account-feature-check-icon icon-cyan"><Check size={13} /></div>
+                      <span><strong>Free tools free forever:</strong> {isTr ? 'Tüm ücretsiz araçlar sınırsız' : 'Unlimited free tools'}</span>
+                    </li>
+                    <li className="account-upgrade-feature-item">
+                      <div className="account-feature-check-icon icon-cyan"><Check size={13} /></div>
+                      <span><strong>Premium tools:</strong> {isTr ? 'Genişletilmiş yüksek token kotası' : 'Expanded token allowance'}</span>
+                    </li>
+                    <li className="account-upgrade-feature-item">
+                      <div className="account-feature-check-icon icon-cyan"><Check size={13} /></div>
+                      <span><strong>Öncelikli Concurrency:</strong> {isTr ? 'Daha hızlı WebAssembly motoru' : 'Faster multi-threaded WASM'}</span>
+                    </li>
+                    <li className="account-upgrade-feature-item">
+                      <div className="account-feature-check-icon icon-cyan"><Check size={13} /></div>
+                      <span><strong>Reklamsız çalışma alanı</strong></span>
+                    </li>
+                    <li className="account-upgrade-feature-item">
+                      <div className="account-feature-check-icon icon-cyan"><Check size={13} /></div>
+                      <span>{isTr ? 'Öncelikli destek & ticari kullanım' : 'Priority support & commercial rights'}</span>
+                    </li>
                   </ul>
-                  {currentPlan === 'pro' ? (
-                    <div className="upgrade-current-pill is-primary">{isTr ? 'Mevcut Paketiniz' : 'Current Plan'}</div>
-                  ) : (
-                    <button
-                      type="button"
-                      disabled={upgradingPlan === 'pro'}
-                      onClick={() => handleUpgradePlan('pro')}
-                      className="upgrade-action-btn btn-primary"
-                    >
-                      {upgradingPlan === 'pro' ? <Loader2 size={15} className="auth-spinner" /> : (isTr ? 'Pro\'ya Yükselt' : 'Upgrade to Pro')}
-                    </button>
-                  )}
+
+                  <div className="account-upgrade-card-footer">
+                    {currentPlan === 'pro' ? (
+                      <button
+                        type="button"
+                        onClick={openCustomerCenter}
+                        className="account-current-plan-pill is-manage-btn"
+                      >
+                        <Check size={14} />
+                        <span>{isTr ? 'Mevcut Planınız (Yönet)' : 'Active Plan (Manage)'}</span>
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        disabled={upgradingPlan === 'pro'}
+                        onClick={() => handleUpgradePlan('pro')}
+                        className="account-plan-action-btn btn-primary-featured"
+                      >
+                        {upgradingPlan === 'pro' ? (
+                          <Loader2 size={15} className="auth-spinner" />
+                        ) : (
+                          <>
+                            <span>{isTr ? "Pro'ya Abone Ol" : 'Subscribe to Pro'}</span>
+                            <Sparkles size={14} />
+                          </>
+                        )}
+                      </button>
+                    )}
+                  </div>
                 </div>
 
                 {/* Plan 3: Unlimited */}
-                <div className={`account-upgrade-card ${currentPlan === 'enterprise' || currentPlan === 'unlimited' ? 'is-current' : ''}`}>
-                  <div className="upgrade-card-head">
-                    <h3 className="upgrade-card-name">Unlimited</h3>
-                    <p className="upgrade-card-price">
-                      {packageBillingCycle === 'annual' ? '$149.90' : '$14.99'}{' '}
-                      <span className="period">/ {packageBillingCycle === 'annual' ? (isTr ? 'yıl' : 'year') : (isTr ? 'ay' : 'month')}</span>
+                <div className={`account-upgrade-card is-turbo ${currentPlan === 'enterprise' || currentPlan === 'unlimited' ? 'is-current-card is-active-turbo' : ''}`}>
+                  <div className="account-card-top-tag tag-turbo">
+                    <Zap size={12} />
+                    <span>{isTr ? 'MAKSİMUM GÜÇ' : 'POWER USER'}</span>
+                  </div>
+
+                  <div className="account-upgrade-card-head">
+                    <h3 className="account-upgrade-card-name">Unlimited</h3>
+                    <p className="account-upgrade-card-desc">
+                      {isTr ? 'Ağır kullanım ve profesyoneller için maksimum token kotası.' : 'Maximum token allowance and turbo execution speed.'}
                     </p>
-                    {packageBillingCycle === 'annual' && (
-                      <p className="upgrade-card-savings-text">
-                        {isTr ? '🎁 10 ay fiyatına 12 ay erişim (Aylık ~$12.49)' : '🎁 12 months for price of 10 (~$12.49/mo)'}
-                      </p>
+                    <div className="account-upgrade-price-wrap">
+                      <span className="account-upgrade-currency">$</span>
+                      <span className="account-upgrade-amount">
+                        {packageBillingCycle === 'annual' ? '149.90' : '14.99'}
+                      </span>
+                      <span className="account-upgrade-period">
+                        {packageBillingCycle === 'annual' ? (isTr ? '/ yıl' : '/ year') : (isTr ? '/ ay' : '/ month')}
+                      </span>
+                    </div>
+                    <div className="account-upgrade-price-detail is-highlight-purple">
+                      {packageBillingCycle === 'annual' 
+                        ? (isTr ? '🎁 2 Ay Bedava (Aylık ~$12.49)' : '🎁 2 Months Free (~$12.49/mo)')
+                        : (isTr ? 'Aylık faturalandırılır ($14.99/ay)' : 'Billed monthly at $14.99/mo')}
+                    </div>
+                  </div>
+
+                  <ul className="account-upgrade-features-list">
+                    <li className="account-upgrade-feature-item">
+                      <div className="account-feature-check-icon icon-purple"><Check size={13} /></div>
+                      <span><strong>Free tools free forever:</strong> {isTr ? 'Tüm ücretsiz araçlar sınırsız' : 'Unlimited free tools'}</span>
+                    </li>
+                    <li className="account-upgrade-feature-item">
+                      <div className="account-feature-check-icon icon-purple"><Check size={13} /></div>
+                      <span><strong>Maksimum Token Kotası:</strong> {isTr ? 'Tüm premium araçlarda tam güç' : 'Maximum token quota'}</span>
+                    </li>
+                    <li className="account-upgrade-feature-item">
+                      <div className="account-feature-check-icon icon-purple"><Check size={13} /></div>
+                      <span><strong>Turbo WASM & WebGPU:</strong> {isTr ? 'En yüksek donanım ivmesi' : 'Hardware-accelerated processing'}</span>
+                    </li>
+                    <li className="account-upgrade-feature-item">
+                      <div className="account-feature-check-icon icon-purple"><Check size={13} /></div>
+                      <span><strong>VIP Destek:</strong> {isTr ? '7/24 öncelikli kanal' : '24/7 priority support'}</span>
+                    </li>
+                    <li className="account-upgrade-feature-item">
+                      <div className="account-feature-check-icon icon-purple"><Check size={13} /></div>
+                      <span>{isTr ? 'Yeni araçlara erken erişim' : 'Early access to upcoming tools'}</span>
+                    </li>
+                  </ul>
+
+                  <div className="account-upgrade-card-footer">
+                    {currentPlan === 'enterprise' || currentPlan === 'unlimited' ? (
+                      <button
+                        type="button"
+                        onClick={openCustomerCenter}
+                        className="account-current-plan-pill is-manage-btn"
+                      >
+                        <Check size={14} />
+                        <span>{isTr ? 'Mevcut Planınız (Yönet)' : 'Active Plan (Manage)'}</span>
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        disabled={upgradingPlan === 'unlimited' || upgradingPlan === 'enterprise'}
+                        onClick={() => handleUpgradePlan('unlimited')}
+                        className="account-plan-action-btn btn-primary-turbo"
+                      >
+                        {upgradingPlan === 'unlimited' || upgradingPlan === 'enterprise' ? (
+                          <Loader2 size={15} className="auth-spinner" />
+                        ) : (
+                          <>
+                            <span>{isTr ? "Unlimited'a Abone Ol" : 'Subscribe to Unlimited'}</span>
+                            <Zap size={14} />
+                          </>
+                        )}
+                      </button>
                     )}
                   </div>
-                  <ul className="upgrade-features">
-                    <li>✓ Free tools free forever</li>
-                    <li>✓ Premium tools uses token</li>
-                    <li>✓ {isTr ? 'Maksimum token tahsisi' : 'Maximum token allowance'}</li>
-                    <li>✓ 7/24 {isTr ? 'Öncelikli destek & Turbo hız' : 'Priority Support & Turbo speed'}</li>
-                  </ul>
-                  {currentPlan === 'enterprise' || currentPlan === 'unlimited' ? (
-                    <div className="upgrade-current-pill">{isTr ? 'Mevcut Paketiniz' : 'Current Plan'}</div>
-                  ) : (
-                    <button
-                      type="button"
-                      disabled={upgradingPlan === 'unlimited' || upgradingPlan === 'enterprise'}
-                      onClick={() => handleUpgradePlan('unlimited')}
-                      className="upgrade-action-btn btn-secondary"
-                    >
-                      {upgradingPlan === 'unlimited' || upgradingPlan === 'enterprise' ? <Loader2 size={15} className="auth-spinner" /> : (isTr ? 'Unlimited\'a Yükselt' : 'Upgrade to Unlimited')}
-                    </button>
-                  )}
                 </div>
               </div>
             </div>
