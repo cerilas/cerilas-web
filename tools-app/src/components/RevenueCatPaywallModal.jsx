@@ -15,6 +15,7 @@ import {
   Gift
 } from 'lucide-react';
 import { useRevenueCat } from '../context/RevenueCatContext';
+import { useTheme } from '../context/ThemeContext';
 import { REVENUECAT_CONFIG, cleanupOrphanedPaywallElements } from '../revenuecat/revenueCatService';
 import { useTranslation } from '../i18n';
 import './RevenueCatPaywallModal.css';
@@ -32,6 +33,7 @@ export default function RevenueCatPaywallModal({
     openCustomerCenter
   } = useRevenueCat();
 
+  const { theme, isDark } = useTheme();
   const { language } = useTranslation();
   const isTr = language === 'tr';
 
@@ -385,7 +387,8 @@ export default function RevenueCatPaywallModal({
 
   return createPortal(
     <div 
-      className={`rc-paywall-backdrop ${isPurchasing ? 'is-purchasing-active' : ''}`}
+      className={`rc-paywall-backdrop ${isPurchasing ? 'is-purchasing-active' : ''} ${isDark ? 'is-dark-theme' : 'is-light-theme'}`}
+      data-theme={theme || (isDark ? 'dark' : 'light')}
       onClick={() => isPurchasing ? handleCancelCheckout() : onClose()}
       role="dialog"
       aria-modal="true"
@@ -393,6 +396,7 @@ export default function RevenueCatPaywallModal({
     >
       <div 
         className="rc-paywall-card"
+        data-theme={theme || (isDark ? 'dark' : 'light')}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Ambient Top Glow Effect */}
