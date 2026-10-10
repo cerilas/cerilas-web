@@ -53,7 +53,8 @@ export default function GrowthHeader({ onBackToTools }) {
   const userMenuRef = useRef(null);
   const userMenuTimeoutRef = useRef(null);
 
-  const isTr = typeof window !== 'undefined' && (localStorage.getItem('preferred_language') === 'tr' || navigator.language?.startsWith('tr'));
+  // GrowthControl is strictly in English
+  const isTr = false;
 
   const handleUserMenuMouseEnter = () => {
     if (userMenuTimeoutRef.current) clearTimeout(userMenuTimeoutRef.current);

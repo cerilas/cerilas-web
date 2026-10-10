@@ -49,6 +49,7 @@ import { useGrowth } from '../GrowthContext';
 import { useTheme } from '../../context/ThemeContext';
 import { useRevenueCat } from '../../context/RevenueCatContext';
 import CloudCanvas from './CloudCanvas';
+import GrowthOnboardingModal from './GrowthOnboardingModal';
 import './GrowthLandingPage.css';
 
 const QUICK_TEST_DOMAINS = [
@@ -258,9 +259,49 @@ function Formats3DGrid() {
 
 export default function GrowthLandingPage({ onBackToTools, initialDomain = '' }) {
   const { isAuthenticated, openAuthModal, token } = useAuth();
-  const { setActiveTab } = useGrowth();
+  const { 
+    setActiveTab, 
+    setIsOnboardingOpen, 
+    isOnboardingOpen, 
+    workspaces, 
+    activeWorkspace, 
+    switchWorkspace 
+  } = useGrowth();
   const { toggleTheme, isDark } = useTheme();
   const { isPro, isUnlimited, presentPaywall, openCustomerCenter } = useRevenueCat() || {};
+
+  // Smooth scroll helper without breaking hash route
+  const scrollToSection = useCallback((e, sectionId) => {
+    if (e && e.preventDefault) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    const el = document.getElementById(sectionId);
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, []);
+
+  // Dashboard button handler in navbar
+  const handleGoToDashboard = useCallback(() => {
+    if (!isAuthenticated) {
+      openAuthModal('login');
+      return;
+    }
+    if (activeWorkspace?.slug) {
+      setActiveTab('overview');
+      window.location.hash = `#/growth/${activeWorkspace.slug}/overview`;
+      return;
+    }
+    if (workspaces && workspaces.length > 0) {
+      const target = workspaces[0];
+      switchWorkspace(target);
+      setActiveTab('overview');
+      window.location.hash = target.slug ? `#/growth/${target.slug}/overview` : '#/growth/overview';
+      return;
+    }
+    setIsOnboardingOpen(true);
+  }, [isAuthenticated, activeWorkspace, workspaces, setActiveTab, switchWorkspace, setIsOnboardingOpen, openAuthModal]);
 
   // Mobile menu state
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -445,7 +486,12 @@ export default function GrowthLandingPage({ onBackToTools, initialDomain = '' })
         {/* Header Navbar */}
         <header className="cl-header">
           <div className="cl-header-grid">
-            <a href="#hero" className="cl-logo-link" aria-label="GrowthControl home">
+            <a 
+              href="#hero" 
+              onClick={(e) => scrollToSection(e, 'hero')} 
+              className="cl-logo-link" 
+              aria-label="GrowthControl home"
+            >
               <div className="cl-logo-badge">
                 <Sparkles size={16} />
               </div>
@@ -453,11 +499,11 @@ export default function GrowthLandingPage({ onBackToTools, initialDomain = '' })
             </a>
 
             <ul className="cl-nav-list">
-              <li><a href="#features" className="cl-nav-link">Features</a></li>
-              <li><a href="#capabilities" className="cl-nav-link">Capabilities</a></li>
-              <li><a href="#formats" className="cl-nav-link">GEO Engine</a></li>
-              <li><a href="#benchmarks" className="cl-nav-link">Benchmarks</a></li>
-              <li><a href="#pricing" className="cl-nav-link">Pricing</a></li>
+              <li><a href="#features" onClick={(e) => scrollToSection(e, 'features')} className="cl-nav-link">Features</a></li>
+              <li><a href="#capabilities" onClick={(e) => scrollToSection(e, 'capabilities')} className="cl-nav-link">Capabilities</a></li>
+              <li><a href="#formats" onClick={(e) => scrollToSection(e, 'formats')} className="cl-nav-link">GEO Engine</a></li>
+              <li><a href="#benchmarks" onClick={(e) => scrollToSection(e, 'benchmarks')} className="cl-nav-link">Benchmarks</a></li>
+              <li><a href="#pricing" onClick={(e) => scrollToSection(e, 'pricing')} className="cl-nav-link">Pricing</a></li>
             </ul>
 
             <div className="cl-header-actions">
@@ -484,7 +530,7 @@ export default function GrowthLandingPage({ onBackToTools, initialDomain = '' })
               {isAuthenticated ? (
                 <button
                   type="button"
-                  onClick={() => setActiveTab('overview')}
+                  onClick={handleGoToDashboard}
                   className="cl-btn-primary"
                 >
                   <span>Dashboard</span>
@@ -501,13 +547,11 @@ export default function GrowthLandingPage({ onBackToTools, initialDomain = '' })
                   </button>
                   <button
                     type="button"
-                    onClick={() => {
-                      inputRef.current?.focus();
-                      inputRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    }}
+                    onClick={handleGoToDashboard}
                     className="cl-btn-primary"
                   >
-                    Audit Domain Free
+                    <span>Dashboard</span>
+                    <ArrowRight size={14} />
                   </button>
                 </>
               )}
@@ -528,12 +572,12 @@ export default function GrowthLandingPage({ onBackToTools, initialDomain = '' })
           {mobileMenuOpen && (
             <div className="cl-mobile-drawer">
               <nav className="cl-mobile-nav">
-                <a href="#features" onClick={() => setMobileMenuOpen(false)}>Features</a>
-                <a href="#capabilities" onClick={() => setMobileMenuOpen(false)}>Capabilities</a>
-                <a href="#formats" onClick={() => setMobileMenuOpen(false)}>GEO Engine</a>
-                <a href="#benchmarks" onClick={() => setMobileMenuOpen(false)}>Benchmarks</a>
-                <a href="#pricing" onClick={() => setMobileMenuOpen(false)}>Pricing</a>
-                <a href="#help" onClick={() => setMobileMenuOpen(false)}>FAQ</a>
+                <a href="#features" onClick={(e) => { setMobileMenuOpen(false); scrollToSection(e, 'features'); }}>Features</a>
+                <a href="#capabilities" onClick={(e) => { setMobileMenuOpen(false); scrollToSection(e, 'capabilities'); }}>Capabilities</a>
+                <a href="#formats" onClick={(e) => { setMobileMenuOpen(false); scrollToSection(e, 'formats'); }}>GEO Engine</a>
+                <a href="#benchmarks" onClick={(e) => { setMobileMenuOpen(false); scrollToSection(e, 'benchmarks'); }}>Benchmarks</a>
+                <a href="#pricing" onClick={(e) => { setMobileMenuOpen(false); scrollToSection(e, 'pricing'); }}>Pricing</a>
+                <a href="#help" onClick={(e) => { setMobileMenuOpen(false); scrollToSection(e, 'help'); }}>FAQ</a>
                 {!isAuthenticated && (
                   <button
                     type="button"
@@ -547,6 +591,18 @@ export default function GrowthLandingPage({ onBackToTools, initialDomain = '' })
                     Sign in to Account
                   </button>
                 )}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    handleGoToDashboard();
+                  }}
+                  className="cl-btn-primary"
+                  style={{ width: '100%', justifyContent: 'center', marginTop: '0.4rem' }}
+                >
+                  <span>Dashboard</span>
+                  <ArrowRight size={14} />
+                </button>
                 {onBackToTools && (
                   <button
                     type="button"
@@ -568,7 +624,11 @@ export default function GrowthLandingPage({ onBackToTools, initialDomain = '' })
         {/* Hero Body Content */}
         <div className="cl-hero-body">
           <div>
-            <a href="#formats" className="cl-pill-badge">
+            <a 
+              href="#formats" 
+              onClick={(e) => scrollToSection(e, 'formats')} 
+              className="cl-pill-badge"
+            >
               <span>Now with Generative Engine Optimization (GEO) 2.0</span>
               <ChevronRight size={13} />
             </a>
@@ -587,15 +647,22 @@ export default function GrowthLandingPage({ onBackToTools, initialDomain = '' })
           <div className="cl-hero-cta-row">
             <button
               type="button"
-              onClick={() => inputRef.current?.focus()}
+              onClick={() => {
+                inputRef.current?.focus();
+                inputRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              }}
               className="cl-btn-hero-primary"
             >
               <span>Run Free Audit</span>
               <ArrowRight size={16} />
             </button>
-            <a href="#features" className="cl-btn-hero-glass">
+            <button 
+              type="button" 
+              onClick={(e) => scrollToSection(e, 'features')} 
+              className="cl-btn-hero-glass"
+            >
               <span>See How It Works</span>
-            </a>
+            </button>
           </div>
 
           {/* Interactive Mac OS App Window Mockup */}
@@ -864,6 +931,123 @@ export default function GrowthLandingPage({ onBackToTools, initialDomain = '' })
       </section>
 
       {/* ==========================================================================
+          TRUSTED BY PRODUCT COMMUNITIES
+          ========================================================================== */}
+      <section className="cl-communities-section" aria-label="Trusted by product communities">
+        <div className="cl-communities-container">
+          <div className="cl-communities-header">
+            <span className="cl-communities-eyebrow">
+              <Sparkles size={13} style={{ color: '#f59e0b' }} />
+              <span>TRUSTED & FEATURED IN TOP PRODUCT COMMUNITIES</span>
+            </span>
+            <p className="cl-communities-sub">
+              Empowering founders, indie builders, and organic growth teams across global product ecosystems.
+            </p>
+          </div>
+
+          <div className="cl-communities-grid">
+            {/* 1. Product Hunt */}
+            <div className="cl-community-card" title="Product Hunt">
+              <div className="cl-community-icon-box">
+                <svg viewBox="0 0 24 24" width="24" height="24" fill="none">
+                  <rect width="24" height="24" rx="12" fill="#DA552F" />
+                  <path d="M13.5 10.2H10.5V7.5H13.5C14.25 7.5 14.85 8.1 14.85 8.85C14.85 9.6 14.25 10.2 13.5 10.2ZM13.5 6H9V18H10.5V11.7H13.5C15.07 11.7 16.35 10.42 16.35 8.85C16.35 7.28 15.07 6 13.5 6Z" fill="white" />
+                </svg>
+              </div>
+              <div className="cl-community-meta">
+                <span className="cl-community-name">Product Hunt</span>
+                <span className="cl-community-role">Featured Product</span>
+              </div>
+            </div>
+
+            {/* 2. F6S */}
+            <div className="cl-community-card" title="F6S Network">
+              <div className="cl-community-icon-box">
+                <svg viewBox="0 0 24 24" width="24" height="24" fill="none">
+                  <rect width="24" height="24" rx="6" fill="#D32F2F" />
+                  <text x="12" y="16.5" fontFamily="system-ui, -apple-system, sans-serif" fontSize="10" fontWeight="900" fill="white" textAnchor="middle" letterSpacing="-0.5">F6S</text>
+                </svg>
+              </div>
+              <div className="cl-community-meta">
+                <span className="cl-community-name">F6S</span>
+                <span className="cl-community-role">Top Tech Network</span>
+              </div>
+            </div>
+
+            {/* 3. BetaList */}
+            <div className="cl-community-card" title="BetaList">
+              <div className="cl-community-icon-box">
+                <svg viewBox="0 0 24 24" width="24" height="24" fill="none">
+                  <rect width="24" height="24" rx="6" fill="#1A73E8" />
+                  <path d="M8 6h5a3 3 0 0 1 2.4 4.8A3.2 3.2 0 0 1 14 18H8V6zm2.2 2v3.2h2.5a1.6 1.6 0 0 0 0-3.2h-2.5zm0 5.2V16h3a1.8 1.8 0 0 0 0-3.6h-3z" fill="white" />
+                </svg>
+              </div>
+              <div className="cl-community-meta">
+                <span className="cl-community-name">BetaList</span>
+                <span className="cl-community-role">Early Adopter Hub</span>
+              </div>
+            </div>
+
+            {/* 4. Indie Hackers */}
+            <div className="cl-community-card" title="Indie Hackers">
+              <div className="cl-community-icon-box">
+                <svg viewBox="0 0 24 24" width="24" height="24" fill="none">
+                  <rect width="24" height="24" rx="6" fill="#0E2439" />
+                  <path d="M7 7h2.2v10H7V7zm7.8 0H17v10h-2.2V7zm-4.8 4.2h2.8v1.6H10v-1.6z" fill="#0080FF" />
+                </svg>
+              </div>
+              <div className="cl-community-meta">
+                <span className="cl-community-name">Indie Hackers</span>
+                <span className="cl-community-role">Founder Community</span>
+              </div>
+            </div>
+
+            {/* 5. G2 */}
+            <div className="cl-community-card" title="G2">
+              <div className="cl-community-icon-box">
+                <svg viewBox="0 0 24 24" width="24" height="24" fill="none">
+                  <rect width="24" height="24" rx="6" fill="#FF492C" />
+                  <path d="M12.5 11.5h3.2v3.6c-0.9 0.9-2.2 1.4-3.5 1.4-2.8 0-4.7-2-4.7-4.5s1.9-4.5 4.7-4.5c1.3 0 2.4 0.5 3.2 1.3l-1.4 1.4c-0.5-0.5-1.1-0.8-1.8-0.8-1.7 0-2.8 1.2-2.8 2.6s1.1 2.6 2.8 2.6c0.8 0 1.5-0.3 2-0.7v-0.9H12.5v-1.5z" fill="white" />
+                </svg>
+              </div>
+              <div className="cl-community-meta">
+                <span className="cl-community-name">G2</span>
+                <span className="cl-community-role">Verified Software</span>
+              </div>
+            </div>
+
+            {/* 6. Y Combinator */}
+            <div className="cl-community-card" title="Y Combinator Startup School">
+              <div className="cl-community-icon-box">
+                <svg viewBox="0 0 24 24" width="24" height="24" fill="none">
+                  <rect width="24" height="24" rx="5" fill="#FF6600" />
+                  <path d="M7.5 7L11 13V17H13V13L16.5 7H14.2L12 11.2L9.8 7H7.5Z" fill="white" />
+                </svg>
+              </div>
+              <div className="cl-community-meta">
+                <span className="cl-community-name">Y Combinator</span>
+                <span className="cl-community-role">Startup Community</span>
+              </div>
+            </div>
+
+            {/* 7. Trustpilot */}
+            <div className="cl-community-card" title="Trustpilot">
+              <div className="cl-community-icon-box">
+                <svg viewBox="0 0 24 24" width="24" height="24" fill="none">
+                  <rect width="24" height="24" rx="6" fill="#00B67A" />
+                  <path d="M12 5.5l1.8 3.8 4.2.6-3 3 .7 4.1-3.7-2-3.7 2 .7-4.1-3-3 4.2-.6z" fill="white" />
+                </svg>
+              </div>
+              <div className="cl-community-meta">
+                <span className="cl-community-name">Trustpilot</span>
+                <span className="cl-community-role">Verified Reviews</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ==========================================================================
           AUDIT RESULTS DRAWER / HUB (APPEARS WHEN SCAN IS PERFORMED)
           ========================================================================== */}
       {scanResult && brandProfile && (
@@ -969,7 +1153,11 @@ export default function GrowthLandingPage({ onBackToTools, initialDomain = '' })
       <Rail id="features" fadeTop={true}>
         <div className="cl-manifesto-grid">
           <div>
-            <a href="#capabilities" className="cl-eyebrow">
+            <a 
+              href="#capabilities" 
+              onClick={(e) => scrollToSection(e, 'capabilities')} 
+              className="cl-eyebrow"
+            >
               <span>Introducing GrowthControl</span>
               <ChevronRight size={14} />
             </a>
@@ -1722,12 +1910,12 @@ export default function GrowthLandingPage({ onBackToTools, initialDomain = '' })
           </div>
 
           <div className="cl-footer-links">
-            <a href="#features">Features</a>
-            <a href="#capabilities">Capabilities</a>
-            <a href="#formats">GEO Engine</a>
-            <a href="#benchmarks">Benchmarks</a>
-            <a href="#pricing">Pricing</a>
-            <a href="#help">FAQ</a>
+            <a href="#features" onClick={(e) => scrollToSection(e, 'features')}>Features</a>
+            <a href="#capabilities" onClick={(e) => scrollToSection(e, 'capabilities')}>Capabilities</a>
+            <a href="#formats" onClick={(e) => scrollToSection(e, 'formats')}>GEO Engine</a>
+            <a href="#benchmarks" onClick={(e) => scrollToSection(e, 'benchmarks')}>Benchmarks</a>
+            <a href="#pricing" onClick={(e) => scrollToSection(e, 'pricing')}>Pricing</a>
+            <a href="#help" onClick={(e) => scrollToSection(e, 'help')}>FAQ</a>
             {onBackToTools && (
               <button
                 type="button"
@@ -1740,6 +1928,12 @@ export default function GrowthLandingPage({ onBackToTools, initialDomain = '' })
           </div>
         </div>
       </footer>
+
+      {/* Onboarding Wizard Modal if triggered from landing */}
+      <GrowthOnboardingModal
+        isOpen={isOnboardingOpen}
+        onClose={() => setIsOnboardingOpen(false)}
+      />
     </div>
   );
 }

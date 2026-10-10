@@ -28,10 +28,8 @@ export default function GrowthSettings() {
   const { activeWorkspace, refreshWorkspaces, switchWorkspace, workspaces } = useGrowth();
   const { token } = useAuth();
 
-  const isTr = typeof window !== 'undefined' && (
-    localStorage.getItem('preferred_language') === 'tr' ||
-    (navigator.language && navigator.language.startsWith('tr'))
-  );
+  // GrowthControl is strictly in English
+  const isTr = false;
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);

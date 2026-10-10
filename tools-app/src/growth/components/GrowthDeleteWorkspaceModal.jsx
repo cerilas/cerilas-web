@@ -31,10 +31,8 @@ export default function GrowthDeleteWorkspaceModal({
   const [copied, setCopied] = useState(false);
   const inputRef = useRef(null);
 
-  const isTr = typeof window !== 'undefined' && (
-    localStorage.getItem('preferred_language') === 'tr' ||
-    (navigator.language && navigator.language.startsWith('tr'))
-  );
+  // GrowthControl is strictly in English
+  const isTr = false;
 
   const workspaceName = workspace?.name || 'Workspace';
   const targetDomain = workspace?.primary_domain || workspace?.canonical_url || '';

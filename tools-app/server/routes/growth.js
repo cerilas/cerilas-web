@@ -141,7 +141,7 @@ router.post('/scan', async (req, res) => {
   try {
     const { url } = req.body;
     if (!url || typeof url !== 'string') {
-      return res.status(400).json({ error: 'Geçerli bir web sitesi adresi (URL) girmelisiniz.' });
+      return res.status(400).json({ error: 'Please enter a valid website domain or URL.' });
     }
 
     const check = validatePublicUrl(url);
@@ -180,7 +180,7 @@ router.post('/scan', async (req, res) => {
           );
           if (dupRes.rows.length > 0) {
             return res.status(400).json({
-              error: `"${normalizedDomain}" adresi zaten "${dupRes.rows[0].name}" markası altında kayıtlı. Aynı domaini tekrar ekleyemezsiniz (ancak blog.${normalizedDomain} gibi farklı bir subdomain ekleyebilirsiniz).`
+              error: `"${normalizedDomain}" is already registered under the brand "${dupRes.rows[0].name}". You cannot add a duplicate root domain (you can add a subdomain like blog.${normalizedDomain}).`
             });
           }
         }

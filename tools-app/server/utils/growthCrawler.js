@@ -245,7 +245,7 @@ export async function scanDomain(targetUrl) {
     html = await res.text();
     loadTimeMs = Date.now() - startTime;
   } catch (err) {
-    throw new Error(`Web sitesine ulaşılamadı (${err.message}). Lütfen adresi kontrol edin.`);
+    throw new Error(`Could not connect to website (${err.message}). Please verify the domain and ensure it is accessible.`);
   }
 
   const meta = extractPageMetadata(html, cleanUrl);

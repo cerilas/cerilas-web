@@ -137,12 +137,28 @@ function GrowthInner({ onBackToTools }) {
 
   // If user is not signed in, show the premier landing page with instant domain audit
   if (!isAuthenticated) {
-    return <GrowthLandingPage onBackToTools={onBackToTools} />;
+    return (
+      <>
+        <GrowthLandingPage onBackToTools={onBackToTools} />
+        <GrowthOnboardingModal
+          isOpen={isOnboardingOpen}
+          onClose={() => setIsOnboardingOpen(false)}
+        />
+      </>
+    );
   }
 
   // If user is signed in, but has no workspace yet and isn't loading, show the landing page so they can immediately audit & add their first domain
   if (!loading && !activeWorkspace && (!workspaces || workspaces.length === 0)) {
-    return <GrowthLandingPage onBackToTools={onBackToTools} />;
+    return (
+      <>
+        <GrowthLandingPage onBackToTools={onBackToTools} />
+        <GrowthOnboardingModal
+          isOpen={isOnboardingOpen}
+          onClose={() => setIsOnboardingOpen(false)}
+        />
+      </>
+    );
   }
 
   return (
