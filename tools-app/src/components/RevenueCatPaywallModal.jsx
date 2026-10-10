@@ -396,15 +396,15 @@ export default function RevenueCatPaywallModal({
       aria-labelledby="rc-paywall-main-title"
     >
       <div 
-        className="rc-paywall-card"
+        className={`rc-paywall-card ${purchaseSuccess ? 'is-success-card' : ''}`}
         data-theme={theme || (isDark ? 'dark' : 'light')}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Ambient Top Glow Effect */}
         <div className="rc-paywall-ambient-glow" aria-hidden="true" />
 
-        {/* Minimal Header */}
-        <div className="rc-paywall-header">
+        {/* Header - Only show plan title and billing cycle toggle when NOT in success state */}
+        <div className={`rc-paywall-header ${purchaseSuccess ? 'is-success-header' : ''}`}>
           <button 
             type="button" 
             className="rc-paywall-close-btn"
@@ -415,30 +415,34 @@ export default function RevenueCatPaywallModal({
             <X size={17} />
           </button>
 
-          <h2 id="rc-paywall-main-title" className="rc-paywall-title">
-            {isTr ? 'Paket Seçin' : 'Choose Plan'}
-          </h2>
+          {!purchaseSuccess && (
+            <>
+              <h2 id="rc-paywall-main-title" className="rc-paywall-title">
+                {isTr ? 'Paket Seçin' : 'Choose Plan'}
+              </h2>
 
-          {/* Master Billing Switcher */}
-          <div className="rc-billing-switch-wrapper" role="group" aria-label="Billing frequency">
-            <button
-              type="button"
-              className={`rc-toggle-tab ${billingCycle === 'monthly' ? 'is-active' : ''}`}
-              onClick={() => handleMasterCycleChange('monthly')}
-            >
-              {isTr ? 'Aylık' : 'Monthly'}
-            </button>
-            <button
-              type="button"
-              className={`rc-toggle-tab ${billingCycle === 'annual' ? 'is-active' : ''}`}
-              onClick={() => handleMasterCycleChange('annual')}
-            >
-              <span>{isTr ? 'Yıllık' : 'Annual'}</span>
-              <span className="rc-discount-pill">
-                {isTr ? '2 Ay Bedava' : '2 Months Free'}
-              </span>
-            </button>
-          </div>
+              {/* Master Billing Switcher */}
+              <div className="rc-billing-switch-wrapper" role="group" aria-label="Billing frequency">
+                <button
+                  type="button"
+                  className={`rc-toggle-tab ${billingCycle === 'monthly' ? 'is-active' : ''}`}
+                  onClick={() => handleMasterCycleChange('monthly')}
+                >
+                  {isTr ? 'Aylık' : 'Monthly'}
+                </button>
+                <button
+                  type="button"
+                  className={`rc-toggle-tab ${billingCycle === 'annual' ? 'is-active' : ''}`}
+                  onClick={() => handleMasterCycleChange('annual')}
+                >
+                  <span>{isTr ? 'Yıllık' : 'Annual'}</span>
+                  <span className="rc-discount-pill">
+                    {isTr ? '2 Ay Bedava' : '2 Months Free'}
+                  </span>
+                </button>
+              </div>
+            </>
+          )}
         </div>
 
         {/* Body - Scrollable content area if screen is compact */}
@@ -468,23 +472,49 @@ export default function RevenueCatPaywallModal({
           {purchaseSuccess ? (
             <div className="rc-success-view">
               <div className="rc-success-icon-badge">
-                <Check size={32} />
+                <Check size={36} />
               </div>
+
+              <div className="rc-success-plan-pill">
+                <Sparkles size={13} />
+                <span>
+                  {selectedPlan.name === 'Unlimited' 
+                    ? (isTr ? 'Unlimited Plan Aktifleştirildi' : 'Unlimited Plan Activated') 
+                    : (isTr ? 'Pro Plan Aktifleştirildi' : 'Pro Plan Activated')}
+                </span>
+              </div>
+
               <h3 className="rc-success-title">
-                {isTr ? 'Aboneliğiniz Aktifleştirildi' : 'Welcome to Cerilas Pro!'}
+                {isTr ? 'Aboneliğiniz Aktifleştirildi!' : 'Welcome to Cerilas Pro!'}
               </h3>
               <p className="rc-success-desc">
                 {isTr 
-                  ? 'Tüm limitler ve araçlar hesabınıza tanımlandı.' 
-                  : 'All limits and tools are unlocked immediately.'}
+                  ? 'Ödemeniz başarıyla tamamlandı. Tüm araçlar, analizler ve genişletilmiş kotalar hesabınıza anında tanımlandı.' 
+                  : 'Your payment was successful. All tools, advanced features, and priority speed are now unlocked.'}
               </p>
+
+              <div className="rc-success-perks">
+                <div className="rc-success-perk-item">
+                  <CheckCircle2 size={16} className="rc-success-perk-icon" />
+                  <span>{isTr ? 'Tüm Araçlara Sınırsız Erişim' : 'Full Unlimited Access to All Tools'}</span>
+                </div>
+                <div className="rc-success-perk-item">
+                  <CheckCircle2 size={16} className="rc-success-perk-icon" />
+                  <span>{isTr ? 'Yüksek İşlem & Yanıt Hızı' : 'High Priority Execution Speed'}</span>
+                </div>
+                <div className="rc-success-perk-item">
+                  <CheckCircle2 size={16} className="rc-success-perk-icon" />
+                  <span>{isTr ? 'Otomatik Aktif Hesap Hakları' : 'Instant Account Provisioning'}</span>
+                </div>
+              </div>
+
               <button 
                 type="button" 
-                className="rc-subscribe-btn"
-                style={{ margin: '0 auto' }}
+                className="rc-subscribe-btn rc-success-action-btn"
                 onClick={onClose}
               >
-                {isTr ? 'Başla' : 'Get Started'}
+                <span>{isTr ? 'Kullanmaya Başla' : 'Get Started'}</span>
+                <ArrowRight size={16} />
               </button>
             </div>
           ) : (

@@ -115,6 +115,11 @@ body.light .rc-paywall-card {
   box-shadow: 0 25px 60px -15px rgba(15, 23, 42, 0.12), 0 0 30px -10px rgba(37, 99, 235, 0.08);
 }
 
+/* Post-purchase compact card */
+.rc-paywall-card.is-success-card {
+  max-width: 490px;
+}
+
 /* Subtle Ambient Glow */
 .rc-paywall-ambient-glow {
   position: absolute;
@@ -141,6 +146,12 @@ body.light .rc-paywall-card {
   position: relative;
   z-index: 1;
   flex-shrink: 0;
+}
+
+.rc-paywall-header.is-success-header {
+  border-bottom: none;
+  padding: 1.1rem 1.25rem 0.2rem 1.25rem;
+  min-height: 40px;
 }
 
 [data-theme="light"] .rc-paywall-header,
@@ -361,7 +372,7 @@ html.light .rc-active-pro-banner-text {
 /* Purchase Success View */
 .rc-success-view {
   text-align: center;
-  padding: 2.75rem 1.5rem;
+  padding: 0.8rem 1.5rem 2.2rem 1.5rem;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -369,25 +380,54 @@ html.light .rc-active-pro-banner-text {
 }
 
 .rc-success-icon-badge {
-  width: 64px;
-  height: 64px;
+  width: 68px;
+  height: 68px;
   border-radius: 50%;
-  background: rgba(16, 185, 129, 0.15);
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.22) 0%, rgba(5, 150, 105, 0.12) 100%);
   border: 2px solid #10b981;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 0 auto 1.25rem auto;
+  margin: 0 auto 0.95rem auto;
   color: #10b981;
-  box-shadow: 0 0 25px rgba(16, 185, 129, 0.25);
+  box-shadow: 0 0 32px rgba(16, 185, 129, 0.35);
+  animation: rcSuccessPulse 2.4s infinite ease-in-out;
+}
+
+@keyframes rcSuccessPulse {
+  0%, 100% { transform: scale(1); box-shadow: 0 0 28px rgba(16, 185, 129, 0.3); }
+  50% { transform: scale(1.05); box-shadow: 0 0 42px rgba(16, 185, 129, 0.5); }
+}
+
+.rc-success-plan-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(16, 185, 129, 0.14);
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  color: #34d399;
+  font-size: 0.74rem;
+  font-weight: 750;
+  padding: 3px 11px;
+  border-radius: 999px;
+  margin-bottom: 0.8rem;
+  letter-spacing: 0.02em;
+}
+
+[data-theme="light"] .rc-success-plan-pill,
+.rc-paywall-card[data-theme="light"] .rc-success-plan-pill,
+body.light .rc-success-plan-pill {
+  background: #dcfce7;
+  border-color: #86efac;
+  color: #15803d;
 }
 
 .rc-success-title {
-  font-size: 1.45rem;
-  font-weight: 800;
+  font-size: 1.5rem;
+  font-weight: 850;
   color: #f8fafc;
-  margin: 0 0 0.5rem 0;
-  letter-spacing: -0.015em;
+  margin: 0 0 0.45rem 0;
+  letter-spacing: -0.02em;
   line-height: 1.25;
 }
 
@@ -399,10 +439,10 @@ html.light .rc-success-title {
 }
 
 .rc-success-desc {
-  font-size: 0.92rem;
+  font-size: 0.88rem;
   color: #94a3b8;
-  max-width: 420px;
-  margin: 0 auto 1.5rem auto;
+  max-width: 400px;
+  margin: 0 auto 1.35rem auto;
   line-height: 1.45;
 }
 
@@ -411,6 +451,59 @@ html.light .rc-success-title {
 body.light .rc-success-desc,
 html.light .rc-success-desc {
   color: #475569;
+}
+
+.rc-success-perks {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  width: 100%;
+  max-width: 380px;
+  margin-bottom: 1.6rem;
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 0.8rem 1rem;
+  box-sizing: border-box;
+}
+
+[data-theme="light"] .rc-success-perks,
+.rc-paywall-card[data-theme="light"] .rc-success-perks,
+body.light .rc-success-perks {
+  background: #f8fafc;
+  border-color: #e2e8f0;
+}
+
+.rc-success-perk-item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 0.78rem;
+  color: #cbd5e1;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+[data-theme="light"] .rc-success-perk-item,
+.rc-paywall-card[data-theme="light"] .rc-success-perk-item,
+body.light .rc-success-perk-item {
+  color: #334155;
+}
+
+.rc-success-perk-icon {
+  color: #10b981;
+  flex-shrink: 0;
+}
+
+.rc-success-action-btn {
+  width: 100%;
+  max-width: 380px;
+  padding: 0.8rem 1.6rem;
+  font-size: 0.95rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 }
 
 /* 3-Column Plans Grid */
