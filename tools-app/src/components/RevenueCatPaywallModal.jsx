@@ -448,7 +448,7 @@ export default function RevenueCatPaywallModal({
             <div className="rc-active-pro-banner">
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                 <CheckCircle2 size={16} color="#10b981" />
-                <span style={{ fontSize: '0.84rem', color: '#6ee7b7', fontWeight: 600 }}>
+                <span className="rc-active-pro-banner-text">
                   {isTr 
                     ? 'Aktif cerilas_tools_pro aboneliğiniz bulunmaktadır.' 
                     : 'Active subscription detected.'}
@@ -466,14 +466,14 @@ export default function RevenueCatPaywallModal({
 
           {/* Success Banner */}
           {purchaseSuccess ? (
-            <div style={{ textAlign: 'center', padding: '2.5rem 1.5rem' }}>
-              <div style={{ width: 60, height: 60, borderRadius: '50%', background: 'rgba(16, 185, 129, 0.15)', border: '2px solid #10b981', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.25rem auto', color: '#10b981', boxShadow: '0 0 25px rgba(16, 185, 129, 0.3)' }}>
-                <Check size={30} />
+            <div className="rc-success-view">
+              <div className="rc-success-icon-badge">
+                <Check size={32} />
               </div>
-              <h3 style={{ fontSize: '1.4rem', fontWeight: 800, color: '#f8fafc', margin: '0 0 0.5rem 0' }}>
+              <h3 className="rc-success-title">
                 {isTr ? 'Aboneliğiniz Aktifleştirildi' : 'Welcome to Cerilas Pro!'}
               </h3>
-              <p style={{ fontSize: '0.9rem', color: '#94a3b8', maxWidth: 400, margin: '0 auto 1.5rem auto' }}>
+              <p className="rc-success-desc">
                 {isTr 
                   ? 'Tüm limitler ve araçlar hesabınıza tanımlandı.' 
                   : 'All limits and tools are unlocked immediately.'}

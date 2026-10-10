@@ -327,6 +327,19 @@ body.light .rc-paywall-card {
   box-shadow: none;
 }
 
+.rc-active-pro-banner-text {
+  font-size: 0.84rem;
+  color: #6ee7b7;
+  font-weight: 600;
+}
+
+[data-theme="light"] .rc-active-pro-banner-text,
+.rc-paywall-card[data-theme="light"] .rc-active-pro-banner-text,
+body.light .rc-active-pro-banner-text,
+html.light .rc-active-pro-banner-text {
+  color: #065f46;
+}
+
 .rc-manage-sub-link-btn {
   background: linear-gradient(135deg, #10b981 0%, #059669 100%);
   color: #ffffff;
@@ -343,6 +356,61 @@ body.light .rc-paywall-card {
 .rc-manage-sub-link-btn:hover {
   background: linear-gradient(135deg, #34d399 0%, #10b981 100%);
   transform: translateY(-1px);
+}
+
+/* Purchase Success View */
+.rc-success-view {
+  text-align: center;
+  padding: 2.75rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.rc-success-icon-badge {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: rgba(16, 185, 129, 0.15);
+  border: 2px solid #10b981;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.25rem auto;
+  color: #10b981;
+  box-shadow: 0 0 25px rgba(16, 185, 129, 0.25);
+}
+
+.rc-success-title {
+  font-size: 1.45rem;
+  font-weight: 800;
+  color: #f8fafc;
+  margin: 0 0 0.5rem 0;
+  letter-spacing: -0.015em;
+  line-height: 1.25;
+}
+
+[data-theme="light"] .rc-success-title,
+.rc-paywall-card[data-theme="light"] .rc-success-title,
+body.light .rc-success-title,
+html.light .rc-success-title {
+  color: #0f172a;
+}
+
+.rc-success-desc {
+  font-size: 0.92rem;
+  color: #94a3b8;
+  max-width: 420px;
+  margin: 0 auto 1.5rem auto;
+  line-height: 1.45;
+}
+
+[data-theme="light"] .rc-success-desc,
+.rc-paywall-card[data-theme="light"] .rc-success-desc,
+body.light .rc-success-desc,
+html.light .rc-success-desc {
+  color: #475569;
 }
 
 /* 3-Column Plans Grid */
