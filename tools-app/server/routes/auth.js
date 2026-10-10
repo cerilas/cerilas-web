@@ -992,38 +992,81 @@ router.put('/billing', requireAuth, async (req, res) => {
 
 /**
  * GET /api/auth/invoices
- * Get user invoices
+ * Get real user invoices & transactions from RevenueCat / Paddle
  */
 router.get('/invoices', requireAuth, async (req, res) => {
   try {
-    const invoicesResult = await authPool.query(
-      `SELECT * FROM user_invoices WHERE user_id = $1 ORDER BY invoice_date DESC`,
-      [req.user.id]
-    );
+    const rcSubscriber = await fetchRevenueCatSubscriber(req.user.id);
+    const invoices = [];
 
-    let invoices = invoicesResult.rows;
+    if (rcSubscriber) {
+      const portalUrl = rcSubscriber.management_url || null;
 
-    if (invoices.length === 0) {
-      const userRes = await authPool.query('SELECT plan, created_at FROM users WHERE id = $1', [req.user.id]);
-      const u = userRes.rows[0] || {};
-      const planName = u.plan === 'pro' ? 'Pro Plan' : (u.plan === 'enterprise' || u.plan === 'unlimited' ? 'Unlimited Plan' : 'Free Starter Plan');
-      const amount = u.plan === 'pro' ? 9.00 : (u.plan === 'enterprise' ? 29.00 : 0.00);
+      // 1. Process subscriptions from RevenueCat / Paddle
+      if (rcSubscriber.subscriptions) {
+        for (const [prodId, sub] of Object.entries(rcSubscriber.subscriptions)) {
+          if (sub.store_transaction_id) {
+            let amount = 0;
+            if (sub.price && typeof sub.price.amount === 'number' && sub.price.amount > 0) {
+              amount = sub.price.amount;
+            } else {
+              const lower = prodId.toLowerCase();
+              amount = (lower.includes('unlimited') || lower.includes('enterprise')) ? 14.99 : 9.99;
+            }
 
-      invoices = [{
-        id: 1,
-        invoice_number: `INV-2026-${String(req.user.id).padStart(4, '0')}-01`,
-        plan_name: planName,
-        amount,
-        currency: 'USD',
-        status: 'paid',
-        invoice_date: u.created_at || new Date().toISOString(),
-        download_url: '#'
-      }];
+            const currency = sub.price?.currency || 'USD';
+            const subPortalUrl = sub.management_url || portalUrl;
+
+            invoices.push({
+              id: sub.store_transaction_id,
+              invoice_number: sub.store_transaction_id,
+              plan_name: sub.display_name || (prodId.toLowerCase().includes('unlimited') ? 'Unlimited Plan' : 'Pro Plan'),
+              amount,
+              currency,
+              status: sub.refunded_at ? 'refunded' : 'paid',
+              invoice_date: sub.purchase_date || sub.original_purchase_date,
+              expires_date: sub.expires_date,
+              store: sub.store || 'paddle',
+              is_sandbox: !!sub.is_sandbox,
+              management_url: subPortalUrl,
+              download_url: subPortalUrl
+            });
+          }
+        }
+      }
+
+      // 2. Process non_subscriptions if any
+      if (rcSubscriber.non_subscriptions) {
+        for (const [prodId, items] of Object.entries(rcSubscriber.non_subscriptions)) {
+          if (Array.isArray(items)) {
+            for (const item of items) {
+              if (item.store_transaction_id) {
+                invoices.push({
+                  id: item.store_transaction_id,
+                  invoice_number: item.store_transaction_id,
+                  plan_name: prodId,
+                  amount: item.price?.amount || 0,
+                  currency: item.price?.currency || 'USD',
+                  status: 'paid',
+                  invoice_date: item.purchase_date,
+                  store: item.store || 'paddle',
+                  management_url: portalUrl,
+                  download_url: portalUrl
+                });
+              }
+            }
+          }
+        }
+      }
     }
+
+    // Sort by invoice_date descending (newest first)
+    invoices.sort((a, b) => new Date(b.invoice_date) - new Date(a.invoice_date));
 
     res.json({
       success: true,
-      invoices
+      invoices,
+      management_url: rcSubscriber?.management_url || null
     });
   } catch (err) {
     console.error('Get invoices error:', err);

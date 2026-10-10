@@ -121,18 +121,6 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
   const [otpError, setOtpError] = useState('');
   const [isChangingPhone, setIsChangingPhone] = useState(false);
 
-  // Billing State
-  const [billingType, setBillingType] = useState('individual'); // 'individual' | 'company'
-  const [billingName, setBillingName] = useState('');
-  const [billingTaxId, setBillingTaxId] = useState('');
-  const [billingTaxOffice, setBillingTaxOffice] = useState('');
-  const [billingAddress, setBillingAddress] = useState('');
-  const [billingCity, setBillingCity] = useState('');
-  const [billingCountry, setBillingCountry] = useState('Türkiye');
-  const [savingBilling, setSavingBilling] = useState(false);
-  const [billingSuccessMsg, setBillingSuccessMsg] = useState('');
-  const [billingErrorMsg, setBillingErrorMsg] = useState('');
-
   // Plan / Invoices State
   const [invoices, setInvoices] = useState([]);
   const [upgradingPlan, setUpgradingPlan] = useState(null);
@@ -148,13 +136,6 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
       setLastName(user.last_name || '');
       setAvatarUrl(user.avatar_url || '');
       setPhone(user.phone || '');
-      setBillingType(user.billing_type || 'individual');
-      setBillingName(user.billing_name || (user.name || ''));
-      setBillingTaxId(user.billing_tax_id || '');
-      setBillingTaxOffice(user.billing_tax_office || '');
-      setBillingAddress(user.billing_address || '');
-      setBillingCity(user.billing_city || '');
-      setBillingCountry(user.billing_country || 'Türkiye');
     }
   }, [user]);
 
@@ -342,32 +323,6 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
       setOtpError(err.message || 'Invalid or expired verification code.');
     } finally {
       setOtpLoading(false);
-    }
-  };
-
-  // Save Billing Information
-  const handleSaveBilling = async (e) => {
-    e?.preventDefault();
-    setSavingBilling(true);
-    setBillingSuccessMsg('');
-    setBillingErrorMsg('');
-
-    try {
-      await updateBilling({
-        billing_type: billingType,
-        billing_name: billingName,
-        billing_tax_id: billingTaxId,
-        billing_tax_office: billingTaxOffice,
-        billing_address: billingAddress,
-        billing_city: billingCity,
-        billing_country: billingCountry
-      });
-      setBillingSuccessMsg(isTr ? 'Fatura bilgileriniz başarıyla kaydedildi.' : 'Billing details saved successfully.');
-      setTimeout(() => setBillingSuccessMsg(''), 4000);
-    } catch (err) {
-      setBillingErrorMsg(err.message || (isTr ? 'Fatura bilgileri kaydedilemedi.' : 'Failed to save billing info.'));
-    } finally {
-      setSavingBilling(false);
     }
   };
 
@@ -717,7 +672,7 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
           onClick={() => switchTab('billing')}
         >
           <CreditCard size={17} />
-          <span>Billing</span>
+          <span>{isTr ? 'Fatura & Ödeme' : 'Billing'}</span>
         </button>
       </div>
 
@@ -1738,225 +1693,137 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
            ======================================================== */}
         {activeTab === 'billing' && (
           <div className="account-tab-pane animate-fade">
-            {billingSuccessMsg && (
-              <div className="account-alert-banner alert-success">
-                <CheckCircle2 size={16} />
-                <span>{billingSuccessMsg}</span>
-              </div>
-            )}
-            {billingErrorMsg && (
-              <div className="account-alert-banner alert-error">
-                <AlertCircle size={16} />
-                <span>{billingErrorMsg}</span>
-              </div>
-            )}
-
-            {/* Invoicing Details Form */}
-            <form onSubmit={handleSaveBilling} className="account-billing-form">
-              <div className="account-panel-card">
-                <div className="account-panel-header">
-                  <div>
-                    <h2 className="account-panel-title">{isTr ? 'Fatura Bilgileri' : 'Billing & Invoice Details'}</h2>
-                    <p className="account-panel-desc">
-                      {isTr 
-                        ? 'Satın alımlarınız ve abonelikleriniz için düzenlenecek e-fatura / e-arşiv bilgileri.' 
-                        : 'Official details used for electronic invoice issuance and receipts.'}
-                    </p>
-                  </div>
-
-                  {/* Individual vs Corporate switch */}
-                  <div className="billing-type-switch">
-                    <button
-                      type="button"
-                      className={`type-switch-btn ${billingType === 'individual' ? 'is-active' : ''}`}
-                      onClick={() => setBillingType('individual')}
-                    >
-                      <User size={14} />
-                      <span>{isTr ? 'Bireysel' : 'Individual'}</span>
-                    </button>
-                    <button
-                      type="button"
-                      className={`type-switch-btn ${billingType === 'company' ? 'is-active' : ''}`}
-                      onClick={() => setBillingType('company')}
-                    >
-                      <Building2 size={14} />
-                      <span>{isTr ? 'Kurumsal' : 'Corporate'}</span>
-                    </button>
-                  </div>
-                </div>
-
-                <div className="account-form-grid">
-                  <div className="account-field-group field-span-2">
-                    <label className="account-field-label">
-                      {billingType === 'individual' 
-                        ? (isTr ? 'Fatura Adı & Soyadı' : 'Full Legal Name') 
-                        : (isTr ? 'Şirket Resmi Unvanı' : 'Company Legal Name')}
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      className="account-field-input"
-                      placeholder={billingType === 'individual' ? (isTr ? 'Ad Soyad' : 'John Doe') : (isTr ? 'Örn: Cerilas Bilişim ve İnovasyon A.Ş.' : 'Cerilas Inc.')}
-                      value={billingName}
-                      onChange={(e) => setBillingName(e.target.value)}
-                    />
-                  </div>
-
-                  <div className="account-field-group">
-                    <label className="account-field-label">
-                      {billingType === 'individual' 
-                        ? (isTr ? 'TC Kimlik Numarası (TCKN)' : 'National ID') 
-                        : (isTr ? 'Vergi Kimlik Numarası (VKN)' : 'Tax Number / VAT ID')}
-                    </label>
-                    <input
-                      type="text"
-                      className="account-field-input"
-                      placeholder={billingType === 'individual' ? '11111111111' : '1234567890'}
-                      value={billingTaxId}
-                      onChange={(e) => setBillingTaxId(e.target.value)}
-                    />
-                  </div>
-
-                  {billingType === 'company' && (
-                    <div className="account-field-group">
-                      <label className="account-field-label">{isTr ? 'Vergi Dairesi' : 'Tax Office'}</label>
-                      <input
-                        type="text"
-                        className="account-field-input"
-                        placeholder={isTr ? 'Örn: Kadıköy V.D.' : 'Tax Office Name'}
-                        value={billingTaxOffice}
-                        onChange={(e) => setBillingTaxOffice(e.target.value)}
-                      />
-                    </div>
-                  )}
-
-                  <div className="account-field-group field-span-2">
-                    <label className="account-field-label">{isTr ? 'Fatura Adresi' : 'Billing Address'}</label>
-                    <textarea
-                      rows={2}
-                      className="account-field-textarea"
-                      placeholder={isTr ? 'Mahalle, Cadde, Sokak, Kapı No...' : 'Street address, building, suite...'}
-                      value={billingAddress}
-                      onChange={(e) => setBillingAddress(e.target.value)}
-                    />
-                  </div>
-
-                  <div className="account-field-group">
-                    <label className="account-field-label">{isTr ? 'Şehir' : 'City'}</label>
-                    <input
-                      type="text"
-                      className="account-field-input"
-                      placeholder={isTr ? 'İstanbul' : 'City'}
-                      value={billingCity}
-                      onChange={(e) => setBillingCity(e.target.value)}
-                    />
-                  </div>
-
-                  <div className="account-field-group">
-                    <label className="account-field-label">{isTr ? 'Ülke' : 'Country'}</label>
-                    <input
-                      type="text"
-                      className="account-field-input"
-                      value={billingCountry}
-                      onChange={(e) => setBillingCountry(e.target.value)}
-                    />
-                  </div>
-                </div>
-
-                <div className="billing-save-row">
-                  <button
-                    type="submit"
-                    disabled={savingBilling}
-                    className="account-btn btn-primary"
-                  >
-                    {savingBilling ? <Loader2 size={15} className="auth-spinner" /> : <Check size={15} />}
-                    <span>{isTr ? 'Fatura Bilgilerini Kaydet' : 'Save Billing Details'}</span>
-                  </button>
-                </div>
-              </div>
-            </form>
-
-            {/* Payment Method & Security Card */}
+            {/* Paddle Billing & Management Hero Card */}
             <div className="account-panel-card">
               <div className="account-panel-header">
                 <div>
-                  <h2 className="account-panel-title">{isTr ? 'Ödeme Güvenliği ve Altyapı' : 'Payment Security'}</h2>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                    <CreditCard size={18} className="text-primary" />
+                    <h2 className="account-panel-title">
+                      {isTr ? 'Paddle Güvenli Ödeme & Faturalandırma Portalı' : 'Paddle Billing & Customer Portal'}
+                    </h2>
+                  </div>
                   <p className="account-panel-desc">
                     {isTr 
-                      ? 'Tüm işlemler uluslararası 256-Bit SSL sertifikası ve 3D Secure güvencesiyle gerçekleşir.' 
-                      : 'All transactions are strictly encrypted with 256-Bit SSL and 3D Secure.'}
+                      ? 'Ödemeleriniz, faturalandırma ve abonelik yönetiminiz yetkili Merchant of Record ortağımız Paddle üzerinden gerçekleşmektedir. Kayıtlı kartınızı güncellemek, resmi PDF e-faturalarınızı indirmek ve fatura adresinizi yönetmek için güvenli Paddle portalını kullanabilirsiniz.' 
+                      : 'All payments, tax compliance, and subscription billing are processed securely via Paddle (Merchant of Record). Manage your payment method, view tax receipts, and edit billing address in the Paddle Customer Portal.'}
                   </p>
                 </div>
+
                 <div className="payment-security-badges">
                   <span className="security-chip">
                     <ShieldCheck size={14} />
-                    <span>256-Bit SSL</span>
+                    <span>Paddle MoR</span>
                   </span>
                   <span className="security-chip">
                     <Zap size={14} />
-                    <span>3D Secure</span>
+                    <span>256-Bit SSL</span>
                   </span>
                 </div>
               </div>
 
-              <div className="payment-methods-showcase">
-                <div className="card-brand-pill">Visa</div>
-                <div className="card-brand-pill">Mastercard</div>
-                <div className="card-brand-pill">Troy</div>
-                <div className="card-brand-pill">Apple Pay</div>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid var(--border-subtle, rgba(255, 255, 255, 0.08))', flexWrap: 'wrap' }}>
+                <div style={{ fontSize: '0.875rem', color: 'var(--text-muted, #94a3b8)' }}>
+                  {isTr ? 'Abonelik & Ödeme Durumu:' : 'Subscription & Payment Status:'}{' '}
+                  <strong style={{ color: currentPlan === 'pro' || currentPlan === 'unlimited' ? '#10b981' : 'inherit' }}>
+                    {currentPlan === 'pro' ? 'Cerilas Pro' : currentPlan === 'unlimited' ? 'Cerilas Unlimited' : 'Free Plan'}
+                  </strong>
+                  {formattedPeriodEndDate && (currentPlan === 'pro' || currentPlan === 'unlimited') && (
+                    <span style={{ marginLeft: '8px', opacity: 0.8 }}>
+                      • {user?.cancel_at_period_end ? (isTr ? `Bitiş: ${formattedPeriodEndDate}` : `Expires: ${formattedPeriodEndDate}`) : (isTr ? `Yenilenme: ${formattedPeriodEndDate}` : `Renews: ${formattedPeriodEndDate}`)}
+                    </span>
+                  )}
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => openCustomerCenter('overview')}
+                  className="account-btn btn-primary"
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}
+                >
+                  <ExternalLink size={15} />
+                  <span>{isTr ? 'Paddle Müşteri Portalı’nı Aç (Kart & Fatura Yönetimi)' : 'Open Paddle Customer Portal'}</span>
+                </button>
               </div>
             </div>
 
             {/* Invoices History Table */}
             <div className="account-panel-card">
-              <h2 className="account-panel-title">{isTr ? 'Fatura & Makbuz Geçmişi' : 'Invoices & Receipts'}</h2>
-              <p className="account-panel-desc">
-                {isTr ? 'Geçmiş abonelik ödemeleriniz ve indirilebilir e-faturalarınız.' : 'Your billing history and downloadable tax receipts.'}
-              </p>
+              <div className="account-panel-header" style={{ marginBottom: '1rem' }}>
+                <div>
+                  <h2 className="account-panel-title">{isTr ? 'Fatura & Makbuz Geçmişi' : 'Invoices & Receipts'}</h2>
+                  <p className="account-panel-desc">
+                    {isTr 
+                      ? 'Paddle ve RevenueCat üzerinden gerçekleştirilen resmi ödeme işlemleriniz ve indirilebilir makbuzlar.' 
+                      : 'Your official payment transactions and downloadable tax receipts from Paddle.'}
+                  </p>
+                </div>
+                {invoices.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => openCustomerCenter('overview')}
+                    className="account-portal-shortcut-btn"
+                    style={{
+                      background: 'transparent',
+                      border: 'none',
+                      color: '#818cf8',
+                      cursor: 'pointer',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                      fontSize: '0.825rem',
+                      textDecoration: 'underline'
+                    }}
+                  >
+                    <ExternalLink size={13} />
+                    <span>{isTr ? 'Tüm Makbuzları Paddle’da Gör' : 'View all receipts in Paddle'}</span>
+                  </button>
+                )}
+              </div>
 
               <div className="account-invoices-table-wrap">
                 <table className="account-invoices-table">
                   <thead>
                     <tr>
-                      <th>{isTr ? 'Fatura No' : 'Invoice ID'}</th>
+                      <th>{isTr ? 'İşlem / Fatura No' : 'Transaction ID'}</th>
                       <th>{isTr ? 'Tarih' : 'Date'}</th>
                       <th>{isTr ? 'Paket / Açıklama' : 'Plan / Description'}</th>
                       <th>{isTr ? 'Tutar' : 'Amount'}</th>
                       <th>{isTr ? 'Durum' : 'Status'}</th>
-                      <th style={{ textAlign: 'right' }}>{isTr ? 'Belge' : 'Action'}</th>
+                      <th style={{ textAlign: 'right' }}>{isTr ? 'Resmi Belge' : 'Receipt'}</th>
                     </tr>
                   </thead>
                   <tbody>
                     {invoices.length > 0 ? (
                       invoices.map((inv) => (
                         <tr key={inv.id}>
-                          <td className="font-mono">{inv.invoice_number}</td>
+                          <td className="font-mono" style={{ fontSize: '0.85rem' }}>{inv.invoice_number}</td>
                           <td>{new Date(inv.invoice_date).toLocaleDateString(isTr ? 'tr-TR' : 'en-US')}</td>
                           <td className="font-medium">{inv.plan_name}</td>
-                          <td className="font-semibold">${Number(inv.amount).toFixed(2)}</td>
+                          <td className="font-semibold">${Number(inv.amount).toFixed(2)} {inv.currency || 'USD'}</td>
                           <td>
                             <span className="invoice-status-paid">
                               <CheckCircle2 size={12} />
-                              <span>{isTr ? 'Ödendi' : 'Paid'}</span>
+                              <span>{inv.status === 'paid' ? (isTr ? 'Ödendi' : 'Paid') : inv.status}</span>
                             </span>
                           </td>
                           <td style={{ textAlign: 'right' }}>
                             <button
                               type="button"
-                              onClick={() => setDialogModal({
-                                isOpen: true,
-                                type: 'info',
-                                badge: 'PDF',
-                                title: isTr ? 'Fatura Hazırlanıyor' : 'Generating Invoice',
-                                message: isTr ? `${inv.invoice_number} numaralı faturanız hazırlanıyor...` : `Generating PDF invoice ${inv.invoice_number}...`,
-                                confirmText: isTr ? 'Tamam' : 'OK',
-                                onConfirm: () => setDialogModal(prev => ({ ...prev, isOpen: false }))
-                              })}
+                              onClick={() => {
+                                const targetUrl = inv.download_url || inv.management_url || managementUrl;
+                                if (targetUrl && targetUrl !== '#') {
+                                  window.open(targetUrl, '_blank', 'noopener,noreferrer');
+                                } else {
+                                  openCustomerCenter('overview');
+                                }
+                              }}
                               className="invoice-download-btn"
-                              title={isTr ? 'Fatura PDF İndir' : 'Download Invoice'}
+                              title={isTr ? 'Paddle Fatura & Makbuz Görüntüle' : 'View Paddle Invoice'}
+                              style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}
                             >
-                              <Download size={13} />
-                              <span>PDF</span>
+                              <ExternalLink size={13} />
+                              <span>{isTr ? 'Görüntüle' : 'View'}</span>
                             </button>
                           </td>
                         </tr>
@@ -1964,7 +1831,7 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
                     ) : (
                       <tr>
                         <td colSpan={6} className="table-empty-cell">
-                          {isTr ? 'Henüz düzenlenmiş bir fatura bulunmuyor.' : 'No invoices found.'}
+                          {isTr ? 'Henüz düzenlenmiş bir fatura veya ödeme kaydı bulunmuyor.' : 'No invoices or transactions found.'}
                         </td>
                       </tr>
                     )}
