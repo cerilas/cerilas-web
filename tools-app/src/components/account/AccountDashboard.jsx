@@ -841,15 +841,15 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
               <div className="account-plan-perks-list">
                 <div className="account-perk-item">
                   <div className="account-perk-icon-circle"><Check size={13} /></div>
-                  <span><strong>Free tools free forever:</strong> {isTr ? 'Tüm ücretsiz araçlar sınırsız ve ömür boyu bedava' : 'All free utility tools are free forever'}</span>
+                  <span><strong>{isTr ? 'Temel Araçlar Sınırsız:' : 'Free tools free forever:'}</strong> {isTr ? 'Tüm ücretsiz araçlar sınırsız ve ömür boyu bedava' : 'All free utility tools are free forever'}</span>
                 </div>
                 <div className="account-perk-item">
                   <div className="account-perk-icon-circle"><Check size={13} /></div>
-                  <span><strong>Premium tools uses token:</strong> {isTr ? 'Premium araçlar token kullanır, sınırlı ücretsiz kullanım hakkı içerir' : 'Premium tools use tokens with a limited free tier allowance'}</span>
+                  <span><strong>{isTr ? 'Premium Araçlar:' : 'Premium tools uses tokens:'}</strong> {isTr ? 'Premium araçlar token kullanır, sınırlı ücretsiz kullanım hakkı içerir' : 'Premium tools use tokens with a limited free tier allowance'}</span>
                 </div>
                 <div className="account-perk-item">
                   <div className="account-perk-icon-circle"><Check size={13} /></div>
-                  <span><strong>%100 In-Browser Privacy:</strong> {isTr ? 'Sıfır sunucu depolaması, dosyalarınız asla cihazınızdan çıkmaz' : 'Zero server file uploads, files never leave your device'}</span>
+                  <span><strong>{isTr ? '%100 Tarayıcı İçi Gizlilik:' : '100% In-Browser Privacy:'}</strong> {isTr ? 'Sıfır sunucu depolaması, dosyalarınız asla cihazınızdan çıkmaz' : 'Zero server file uploads, files never leave your device'}</span>
                 </div>
               </div>
             </div>
@@ -928,15 +928,15 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
                   <ul className="account-upgrade-features-list">
                     <li className="account-upgrade-feature-item">
                       <div className="account-feature-check-icon"><Check size={13} /></div>
-                      <span><strong>Free tools free forever:</strong> {isTr ? 'Tüm ücretsiz araçlar sınırsız' : 'Unlimited free tools'}</span>
+                      <span><strong>{isTr ? 'Temel Araçlar Sınırsız:' : 'Free tools free forever:'}</strong> {isTr ? 'Tüm ücretsiz araçlar sınırsız' : 'Unlimited free tools'}</span>
                     </li>
                     <li className="account-upgrade-feature-item">
                       <div className="account-feature-check-icon"><Check size={13} /></div>
-                      <span><strong>Premium tools:</strong> {isTr ? 'Sınırlı ücretsiz token hakkı' : 'Limited free allowance'}</span>
+                      <span><strong>{isTr ? 'Premium Araçlar:' : 'Premium tools:'}</strong> {isTr ? 'Sınırlı ücretsiz token hakkı' : 'Limited free allowance'}</span>
                     </li>
                     <li className="account-upgrade-feature-item">
                       <div className="account-feature-check-icon"><Check size={13} /></div>
-                      <span><strong>%100 Tarayıcı Gizliliği:</strong> {isTr ? 'Sıfır sunucu depolaması' : 'Zero server file uploads'}</span>
+                      <span><strong>{isTr ? '%100 Tarayıcı Gizliliği:' : '100% In-Browser Privacy:'}</strong> {isTr ? 'Sıfır sunucu depolaması' : 'Zero server file uploads'}</span>
                     </li>
                     <li className="account-upgrade-feature-item">
                       <div className="account-feature-check-icon"><Check size={13} /></div>
@@ -996,19 +996,19 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
                   <ul className="account-upgrade-features-list">
                     <li className="account-upgrade-feature-item">
                       <div className="account-feature-check-icon icon-cyan"><Check size={13} /></div>
-                      <span><strong>Free tools free forever:</strong> {isTr ? 'Tüm ücretsiz araçlar sınırsız' : 'Unlimited free tools'}</span>
+                      <span><strong>{isTr ? 'Temel Araçlar Sınırsız:' : 'Free tools free forever:'}</strong> {isTr ? 'Tüm ücretsiz araçlar sınırsız' : 'Unlimited free tools'}</span>
                     </li>
                     <li className="account-upgrade-feature-item">
                       <div className="account-feature-check-icon icon-cyan"><Check size={13} /></div>
-                      <span><strong>Premium tools:</strong> {isTr ? 'Genişletilmiş yüksek token kotası' : 'Expanded token allowance'}</span>
+                      <span><strong>{isTr ? 'Premium Araçlar:' : 'Premium tools:'}</strong> {isTr ? 'Genişletilmiş yüksek token kotası' : 'Expanded token allowance'}</span>
                     </li>
                     <li className="account-upgrade-feature-item">
                       <div className="account-feature-check-icon icon-cyan"><Check size={13} /></div>
-                      <span><strong>Öncelikli Concurrency:</strong> {isTr ? 'Daha hızlı WebAssembly motoru' : 'Faster multi-threaded WASM'}</span>
+                      <span><strong>{isTr ? 'Öncelikli Concurrency:' : 'Priority Concurrency:'}</strong> {isTr ? 'Daha hızlı WebAssembly motoru' : 'Faster multi-threaded WASM'}</span>
                     </li>
                     <li className="account-upgrade-feature-item">
                       <div className="account-feature-check-icon icon-cyan"><Check size={13} /></div>
-                      <span><strong>Reklamsız çalışma alanı</strong></span>
+                      <span><strong>{isTr ? 'Reklamsız çalışma alanı' : 'Ad-free workspace'}</strong></span>
                     </li>
                     <li className="account-upgrade-feature-item">
                       <div className="account-feature-check-icon icon-cyan"><Check size={13} /></div>
@@ -1117,19 +1117,19 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
                   <ul className="account-upgrade-features-list">
                     <li className="account-upgrade-feature-item">
                       <div className="account-feature-check-icon icon-purple"><Check size={13} /></div>
-                      <span><strong>Free tools free forever:</strong> {isTr ? 'Tüm ücretsiz araçlar sınırsız' : 'Unlimited free tools'}</span>
+                      <span><strong>{isTr ? 'Temel Araçlar Sınırsız:' : 'Free tools free forever:'}</strong> {isTr ? 'Tüm ücretsiz araçlar sınırsız' : 'Unlimited free tools'}</span>
                     </li>
                     <li className="account-upgrade-feature-item">
                       <div className="account-feature-check-icon icon-purple"><Check size={13} /></div>
-                      <span><strong>Maksimum Token Kotası:</strong> {isTr ? 'Tüm premium araçlarda tam güç' : 'Maximum token quota'}</span>
+                      <span><strong>{isTr ? 'Maksimum Token Kotası:' : 'Maximum Token Quota:'}</strong> {isTr ? 'Tüm premium araçlarda tam güç' : 'Maximum token quota'}</span>
                     </li>
                     <li className="account-upgrade-feature-item">
                       <div className="account-feature-check-icon icon-purple"><Check size={13} /></div>
-                      <span><strong>Turbo WASM & WebGPU:</strong> {isTr ? 'En yüksek donanım ivmesi' : 'Hardware-accelerated processing'}</span>
+                      <span><strong>{isTr ? 'Turbo WASM & WebGPU:' : 'Turbo WASM & WebGPU:'}</strong> {isTr ? 'En yüksek donanım ivmesi' : 'Hardware-accelerated processing'}</span>
                     </li>
                     <li className="account-upgrade-feature-item">
                       <div className="account-feature-check-icon icon-purple"><Check size={13} /></div>
-                      <span><strong>VIP Destek:</strong> {isTr ? '7/24 öncelikli kanal' : '24/7 priority support'}</span>
+                      <span><strong>{isTr ? 'VIP Destek:' : 'VIP Support:'}</strong> {isTr ? '7/24 öncelikli kanal' : '24/7 priority support'}</span>
                     </li>
                     <li className="account-upgrade-feature-item">
                       <div className="account-feature-check-icon icon-purple"><Check size={13} /></div>
