@@ -1800,7 +1800,27 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
                           <td className="font-mono" style={{ fontSize: '0.85rem' }}>{inv.invoice_number}</td>
                           <td>{new Date(inv.invoice_date).toLocaleDateString(isTr ? 'tr-TR' : 'en-US')}</td>
                           <td className="font-medium">{inv.plan_name}</td>
-                          <td className="font-semibold">${Number(inv.amount).toFixed(2)} {inv.currency || 'USD'}</td>
+                          <td className="font-semibold">
+                            {inv.is_discounted || (inv.original_amount != null && Number(inv.original_amount) > Number(inv.amount)) ? (
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                  <span style={{ textDecoration: 'line-through', color: 'var(--text-muted, #94a3b8)', fontSize: '0.85rem' }}>
+                                    ${Number(inv.original_amount).toFixed(2)}
+                                  </span>
+                                  <span style={{ color: '#10b981', fontWeight: 700 }}>
+                                    ${Number(inv.amount).toFixed(2)} {inv.currency || 'USD'}
+                                  </span>
+                                </div>
+                                <span style={{ fontSize: '0.72rem', color: '#10b981', fontWeight: 500 }}>
+                                  {Number(inv.amount) === 0 
+                                    ? (isTr ? 'İndirimli (0.00 USD Ödendi)' : '100% Promo Discount ($0 Paid)') 
+                                    : (isTr ? 'İndirimli Tutar' : 'Discounted Price')}
+                                </span>
+                              </div>
+                            ) : (
+                              <span>${Number(inv.amount).toFixed(2)} {inv.currency || 'USD'}</span>
+                            )}
+                          </td>
                           <td>
                             <span className="invoice-status-paid">
                               <CheckCircle2 size={12} />

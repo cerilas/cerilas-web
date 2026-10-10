@@ -1006,13 +1006,10 @@ router.get('/invoices', requireAuth, async (req, res) => {
       if (rcSubscriber.subscriptions) {
         for (const [prodId, sub] of Object.entries(rcSubscriber.subscriptions)) {
           if (sub.store_transaction_id) {
-            let amount = 0;
-            if (sub.price && typeof sub.price.amount === 'number' && sub.price.amount > 0) {
-              amount = sub.price.amount;
-            } else {
-              const lower = prodId.toLowerCase();
-              amount = (lower.includes('unlimited') || lower.includes('enterprise')) ? 14.99 : 9.99;
-            }
+            const lower = prodId.toLowerCase();
+            const regularAmount = (lower.includes('unlimited') || lower.includes('enterprise')) ? 14.99 : 9.99;
+            const paidAmount = (sub.price && typeof sub.price.amount === 'number') ? sub.price.amount : 0;
+            const isDiscounted = paidAmount < regularAmount || sub.period_type === 'intro';
 
             const currency = sub.price?.currency || 'USD';
             const subPortalUrl = sub.management_url || portalUrl;
@@ -1020,8 +1017,11 @@ router.get('/invoices', requireAuth, async (req, res) => {
             invoices.push({
               id: sub.store_transaction_id,
               invoice_number: sub.store_transaction_id,
-              plan_name: sub.display_name || (prodId.toLowerCase().includes('unlimited') ? 'Unlimited Plan' : 'Pro Plan'),
-              amount,
+              plan_name: sub.display_name || (lower.includes('unlimited') ? 'Unlimited Plan' : 'Pro Plan'),
+              amount: paidAmount,
+              original_amount: regularAmount,
+              is_discounted: isDiscounted,
+              period_type: sub.period_type || 'normal',
               currency,
               status: sub.refunded_at ? 'refunded' : 'paid',
               invoice_date: sub.purchase_date || sub.original_purchase_date,
