@@ -114,12 +114,39 @@ export function RevenueCatProvider({ children }) {
     }
   }, []);
 
+  const [manualPlanOverride, setManualPlanOverride] = useState(() => {
+    if (typeof window === 'undefined') return null;
+    try {
+      return localStorage.getItem('cerilas_manual_plan_override');
+    } catch (_) {
+      return null;
+    }
+  });
+
+  // Explicit downgrade to free
+  const downgradeToFree = useCallback(async () => {
+    try {
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('cerilas_manual_plan_override', 'free');
+      }
+    } catch (_) {}
+    setManualPlanOverride('free');
+    setIsPro(false);
+    setIsUnlimited(false);
+  }, []);
+
   // Purchase a package
   const handlePurchase = useCallback(async (rcPackage, email = null) => {
     setError(null);
     try {
       const customerEmail = email || user?.email || null;
       const { customerInfo: updatedInfo, isPro: userIsPro } = await purchasePackage(rcPackage, customerEmail);
+      try {
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem('cerilas_manual_plan_override');
+        }
+      } catch (_) {}
+      setManualPlanOverride(null);
       setCustomerInfo(updatedInfo);
       setIsPro(userIsPro);
       return { success: true, customerInfo: updatedInfo, isPro: userIsPro };
@@ -159,7 +186,14 @@ export function RevenueCatProvider({ children }) {
 
   // Derive effective plan: 'free' | 'pro' | 'unlimited'
   const effectivePlan = useMemo(() => {
+    if (manualPlanOverride === 'free') {
+      return 'free';
+    }
+
     const dbPlan = (user?.plan || '').toLowerCase();
+    if (dbPlan === 'free') {
+      return 'free';
+    }
     if (dbPlan === 'unlimited' || dbPlan === 'enterprise') return 'unlimited';
     if (dbPlan === 'pro') return 'pro';
 
@@ -167,10 +201,14 @@ export function RevenueCatProvider({ children }) {
     if (isPro || checkProEntitlement(customerInfo)) return 'pro';
 
     return 'free';
-  }, [user?.plan, isUnlimited, isPro, customerInfo]);
+  }, [manualPlanOverride, user?.plan, isUnlimited, isPro, customerInfo]);
 
   // Sync to database if user is authenticated and higher tier detected
   useEffect(() => {
+    if (manualPlanOverride === 'free' || user?.plan === 'free') {
+      return;
+    }
+
     if (isAuthenticated && user?.id && effectivePlan !== 'free' && user?.plan !== effectivePlan) {
       try {
         const token = localStorage.getItem('cerilas_tools_user_token');
@@ -186,7 +224,7 @@ export function RevenueCatProvider({ children }) {
         }
       } catch (_) {}
     }
-  }, [isAuthenticated, user?.id, user?.plan, effectivePlan]);
+  }, [isAuthenticated, user?.id, user?.plan, effectivePlan, manualPlanOverride]);
 
   const managementUrl = customerInfo?.managementURL || null;
 
@@ -204,6 +242,7 @@ export function RevenueCatProvider({ children }) {
     managementUrl,
     error,
     refreshCustomerInfo,
+    downgradeToFree,
     purchasePackage: handlePurchase,
     presentPaywall: handlePresentPaywall,
     openCustomerCenter: handleOpenCustomerCenter,
@@ -226,6 +265,7 @@ export function RevenueCatProvider({ children }) {
     managementUrl,
     error,
     refreshCustomerInfo,
+    downgradeToFree,
     handlePurchase,
     handlePresentPaywall,
     handleOpenCustomerCenter,

@@ -62,7 +62,9 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
     isPro: isRevenueCatPro, 
     customerInfo: rcCustomerInfo,
     openCustomerCenter,
-    presentPaywall 
+    presentPaywall,
+    downgradeToFree,
+    effectivePlan
   } = useRevenueCat();
   const { language } = useTranslation();
   const isTr = language === 'tr';
@@ -331,8 +333,13 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
     }
   };
 
-  // Upgrade Plan handler
+  // Upgrade / Downgrade Plan handler
   const handleUpgradePlan = async (targetPlan) => {
+    if (!isAuthenticated) {
+      openAuthModal('login');
+      return;
+    }
+
     if (targetPlan === 'pro' || targetPlan === 'enterprise' || targetPlan === 'unlimited') {
       presentPaywall({ 
         defaultPackageId: (targetPlan === 'enterprise' || targetPlan === 'unlimited') ? 'unlimited' : 'pro',
@@ -340,16 +347,34 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
       });
       return;
     }
+
+    if (targetPlan === 'free') {
+      const confirmMsg = isTr
+        ? 'Hesabınızı Ücretsiz (Free) plana düşürmek istediğinize emin misiniz? Pro özellikler ve genişletilmiş token limitleriniz sıfırlanacaktır.'
+        : 'Are you sure you want to downgrade to the Free plan? Your Pro limits and priority execution will be removed.';
+      if (!window.confirm(confirmMsg)) {
+        return;
+      }
+    }
+
     setUpgradingPlan(targetPlan);
     setPlanSuccessMsg('');
     try {
       await upgradePlan(targetPlan);
-      setPlanSuccessMsg(isTr ? `Planınız ${targetPlan.toUpperCase()} olarak güncellendi!` : `Plan updated to ${targetPlan.toUpperCase()}!`);
-      const updatedInvoices = await getInvoices();
-      setInvoices(updatedInvoices);
-      setTimeout(() => setPlanSuccessMsg(''), 4000);
+      if (targetPlan === 'free' && typeof downgradeToFree === 'function') {
+        await downgradeToFree();
+      }
+      const successText = targetPlan === 'free'
+        ? (isTr ? 'Planınız başarıyla Ücretsiz (Free) pakete düşürüldü.' : 'Your plan has been downgraded to Free.')
+        : (isTr ? `Planınız ${targetPlan.toUpperCase()} olarak güncellendi!` : `Plan updated to ${targetPlan.toUpperCase()}!`);
+      setPlanSuccessMsg(successText);
+      try {
+        const updatedInvoices = await getInvoices();
+        setInvoices(updatedInvoices);
+      } catch (_) {}
+      setTimeout(() => setPlanSuccessMsg(''), 5000);
     } catch (err) {
-      alert(err.message || 'Plan güncellenemedi.');
+      alert(err.message || (isTr ? 'Plan güncellenemedi.' : 'Failed to update plan.'));
     } finally {
       setUpgradingPlan(null);
     }
@@ -362,7 +387,7 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
     .slice(0, 2)
     .toUpperCase();
 
-  const currentPlan = isRevenueCatPro ? 'pro' : (user?.plan || 'free');
+  const currentPlan = (effectivePlan || user?.plan || 'free').toLowerCase();
 
   // If user is not authenticated and is trying to access Profile or Billing, show auth prompt
   if (!isAuthenticated && !loading && activeTab !== 'package') {
@@ -699,6 +724,13 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
                   </span>
                 </button>
               </div>
+
+              {planSuccessMsg && (
+                <div className="account-alert-banner alert-success" style={{ margin: '0 0 1.5rem 0' }}>
+                  <CheckCircle2 size={16} />
+                  <span>{planSuccessMsg}</span>
+                </div>
+              )}
 
               <div className="account-upgrade-grid">
                 {/* Plan 1: Free */}

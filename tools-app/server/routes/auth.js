@@ -1068,6 +1068,16 @@ router.post('/sync-plan', requireAuth, async (req, res) => {
       return res.status(400).json({ error: 'Invalid plan.' });
     }
 
+    // If user's plan is currently free, prevent background sync from inadvertently reverting it
+    const current = await authPool.query('SELECT * FROM users WHERE id = $1', [req.user.id]);
+    if (current.rows.length > 0 && current.rows[0].plan === 'free' && plan !== 'free') {
+      return res.json({
+        success: true,
+        message: 'Plan is free; background auto-upgrade skipped.',
+        user: formatUser(current.rows[0])
+      });
+    }
+
     const updated = await authPool.query(
       'UPDATE users SET plan = $1 WHERE id = $2 RETURNING *',
       [plan, req.user.id]
