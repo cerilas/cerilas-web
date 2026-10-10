@@ -12,7 +12,8 @@ import {
   ArrowRight,
   ShieldCheck,
   Zap,
-  Gift
+  Gift,
+  ExternalLink
 } from 'lucide-react';
 import { useRevenueCat } from '../context/RevenueCatContext';
 import { useAuth } from '../context/AuthContext';
@@ -52,6 +53,9 @@ export default function RevenueCatPaywallModal({
   const [errorMessage, setErrorMessage] = useState('');
   const [purchaseSuccess, setPurchaseSuccess] = useState(false);
   const [isRestoredPro, setIsRestoredPro] = useState(false);
+
+  // Check whether user currently has active Pro
+  const hasActivePro = isPro || checkProEntitlement(customerInfo) || (user?.plan === 'pro');
 
   // Available packages from RevenueCat
   const availablePackages = currentOffering?.availablePackages || [];
