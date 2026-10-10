@@ -273,6 +273,23 @@ export async function purchasePackage(rcPackage, customerEmail = null, htmlTarge
       userCancelErr.isCancelled = true;
       throw userCancelErr;
     }
+
+    const rawMsg = (err?.message || '').toLowerCase();
+    const isAlreadyPurchased = 
+      err?.errorCode === ErrorCode?.ProductAlreadyPurchasedError ||
+      err?.errorCode === 6 ||
+      rawMsg.includes('already purchased') ||
+      rawMsg.includes('already has an active subscription') ||
+      rawMsg.includes('zaten bunu satın') ||
+      rawMsg.includes('zaten satın alınmış');
+
+    if (isAlreadyPurchased) {
+      const alreadyPurchasedErr = new Error(err?.message || 'Product already purchased');
+      alreadyPurchasedErr.isAlreadyPurchased = true;
+      alreadyPurchasedErr.errorCode = 6;
+      throw alreadyPurchasedErr;
+    }
+
     console.error('[RevenueCat] Purchase failed:', err);
     throw err;
   }
@@ -362,25 +379,31 @@ export async function presentPaywall(options = {}) {
 /**
  * Get the Customer Center self-service management URL for active subscribers
  * @param {import('@revenuecat/purchases-js').CustomerInfo} [customerInfo]
+ * @param {'overview'|'cancel'} [action] Target action in Paddle portal
  * @returns {string|null} URL to manage/cancel/update subscription
  */
-export function getCustomerManagementUrl(customerInfo) {
-  return customerInfo?.managementURL || null;
+export function getCustomerManagementUrl(customerInfo, action = 'overview') {
+  let url = customerInfo?.managementURL || null;
+  if (url && action === 'cancel' && url.includes('action=overview')) {
+    url = url.replace('action=overview', 'action=cancel');
+  }
+  return url;
 }
 
 /**
  * Open Customer Center management URL in a new tab or trigger in-app modal
  * @param {import('@revenuecat/purchases-js').CustomerInfo} customerInfo
+ * @param {'overview'|'cancel'} [action] Target action ('overview' or 'cancel')
  * @returns {boolean} True if URL was opened
  */
-export function openCustomerCenter(customerInfo) {
-  const url = getCustomerManagementUrl(customerInfo);
+export function openCustomerCenter(customerInfo, action = 'overview') {
+  const url = getCustomerManagementUrl(customerInfo, action);
   if (url && typeof window !== 'undefined') {
     window.open(url, '_blank', 'noopener,noreferrer');
     return true;
   }
   if (typeof window !== 'undefined') {
-    window.dispatchEvent(new CustomEvent('cerilas:open-customer-center'));
+    window.dispatchEvent(new CustomEvent('cerilas:open-customer-center', { detail: { action } }));
   }
   return false;
 }

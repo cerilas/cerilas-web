@@ -419,6 +419,44 @@ export function AuthProvider({ children }) {
     return data;
   };
 
+  // Sync Plan with RevenueCat
+  const syncPlan = async (plan = 'pro', force = true) => {
+    if (!token) return null;
+
+    const res = await fetch('/api/auth/sync-plan', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({ plan, force })
+    });
+
+    const data = await res.json();
+    if (!res.ok) {
+      throw new Error(data.error || 'Plan senkronize edilemedi.');
+    }
+
+    if (data.user) {
+      setUser(data.user);
+    }
+    return data;
+  };
+
+  // Get live subscription status
+  const getSubscriptionStatus = async () => {
+    if (!token) return null;
+
+    const res = await fetch('/api/auth/subscription-status', {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+
+    if (!res.ok) return null;
+    return await res.json();
+  };
+
   // Fetch Invoices
   const getInvoices = async () => {
     if (!token) return [];
@@ -467,6 +505,8 @@ export function AuthProvider({ children }) {
     upgradePlan,
     scheduleDowngrade,
     resumeSubscription,
+    syncPlan,
+    getSubscriptionStatus,
     getInvoices,
     refreshUser: () => fetchCurrentUser(token),
     isAuthModalOpen,

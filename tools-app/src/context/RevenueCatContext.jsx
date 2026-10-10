@@ -123,6 +123,15 @@ export function RevenueCatProvider({ children }) {
     }
   });
 
+  const clearManualOverride = useCallback(() => {
+    try {
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('cerilas_manual_plan_override');
+      }
+    } catch (_) {}
+    setManualPlanOverride(null);
+  }, []);
+
   // Explicit downgrade to free
   const downgradeToFree = useCallback(async () => {
     try {
@@ -141,12 +150,7 @@ export function RevenueCatProvider({ children }) {
     try {
       const customerEmail = email || user?.email || null;
       const { customerInfo: updatedInfo, isPro: userIsPro } = await purchasePackage(rcPackage, customerEmail);
-      try {
-        if (typeof window !== 'undefined') {
-          localStorage.removeItem('cerilas_manual_plan_override');
-        }
-      } catch (_) {}
-      setManualPlanOverride(null);
+      clearManualOverride();
       setCustomerInfo(updatedInfo);
       setIsPro(userIsPro);
       return { success: true, customerInfo: updatedInfo, isPro: userIsPro };
@@ -154,10 +158,34 @@ export function RevenueCatProvider({ children }) {
       if (err?.isCancelled) {
         return { success: false, cancelled: true };
       }
+      if (err?.isAlreadyPurchased) {
+        clearManualOverride();
+        setIsPro(true);
+        try {
+          const token = localStorage.getItem('cerilas_tools_user_token');
+          if (token) {
+            await fetch('/api/auth/sync-plan', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+              },
+              body: JSON.stringify({ plan: 'pro', force: true })
+            });
+          }
+        } catch (_) {}
+        const latest = await refreshCustomerInfo();
+        return { 
+          success: true, 
+          isAlreadyPurchased: true, 
+          customerInfo: latest || customerInfo, 
+          isPro: true 
+        };
+      }
       setError(err.message || 'Purchase failed');
       throw err;
     }
-  }, [user?.email]);
+  }, [user?.email, clearManualOverride, refreshCustomerInfo, customerInfo]);
 
   // Present Paywall - Opens custom modal with optional default selected package and billing cycle
   const handlePresentPaywall = useCallback((options = {}) => {
@@ -169,8 +197,8 @@ export function RevenueCatProvider({ children }) {
   }, []);
 
   // Open Customer Center / Subscription Management
-  const handleOpenCustomerCenter = useCallback(() => {
-    const opened = openRCManagementUrl(customerInfo);
+  const handleOpenCustomerCenter = useCallback((action = 'overview') => {
+    const opened = openRCManagementUrl(customerInfo, action);
     if (!opened) {
       // If no direct URL, open the internal Customer Center modal
       setIsCustomerCenterOpen(true);
@@ -226,7 +254,9 @@ export function RevenueCatProvider({ children }) {
     }
   }, [isAuthenticated, user?.id, user?.plan, effectivePlan, manualPlanOverride]);
 
-  const managementUrl = customerInfo?.managementURL || null;
+  const cancelUrl = useMemo(() => {
+    return managementUrl ? managementUrl.replace('action=overview', 'action=cancel') : null;
+  }, [managementUrl]);
 
   const value = useMemo(() => ({
     isInitialized,
@@ -240,6 +270,8 @@ export function RevenueCatProvider({ children }) {
     currentOffering: offerings?.current || null,
     activeSubscriptions,
     managementUrl,
+    cancelUrl,
+    clearManualOverride,
     error,
     refreshCustomerInfo,
     downgradeToFree,
@@ -263,6 +295,8 @@ export function RevenueCatProvider({ children }) {
     offerings,
     activeSubscriptions,
     managementUrl,
+    cancelUrl,
+    clearManualOverride,
     error,
     refreshCustomerInfo,
     downgradeToFree,

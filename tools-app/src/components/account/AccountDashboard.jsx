@@ -31,6 +31,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useRevenueCat } from '../../context/RevenueCatContext';
+import { checkProEntitlement } from '../../revenuecat/revenueCatService';
 import { useTranslation } from '../../i18n';
 import './AccountDashboard.css';
 
@@ -60,6 +61,8 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
     upgradePlan, 
     scheduleDowngrade,
     resumeSubscription,
+    syncPlan,
+    getSubscriptionStatus,
     getInvoices, 
     initiateGoogleAuth,
     unlinkGoogleAccount,
@@ -71,7 +74,11 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
     openCustomerCenter,
     presentPaywall,
     downgradeToFree,
-    effectivePlan
+    effectivePlan,
+    managementUrl,
+    cancelUrl,
+    clearManualOverride,
+    refreshCustomerInfo
   } = useRevenueCat();
   const { language } = useTranslation();
   const isTr = language === 'tr';
@@ -400,9 +407,45 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
       return;
     }
 
-    if (targetPlan === 'pro' || targetPlan === 'enterprise' || targetPlan === 'unlimited') {
+    if (targetPlan === 'unlimited' || targetPlan === 'enterprise') {
       presentPaywall({ 
-        defaultPackageId: (targetPlan === 'enterprise' || targetPlan === 'unlimited') ? 'unlimited' : 'pro',
+        defaultPackageId: 'unlimited',
+        cycle: packageBillingCycle 
+      });
+      return;
+    }
+
+    if (targetPlan === 'pro') {
+      // Check if user already has an active Pro entitlement in RevenueCat / DB
+      const hasActiveRcPro = isRevenueCatPro || (rcCustomerInfo && checkProEntitlement(rcCustomerInfo));
+      if (hasActiveRcPro) {
+        setUpgradingPlan('pro');
+        try {
+          if (syncPlan) await syncPlan('pro', true);
+          if (clearManualOverride) clearManualOverride();
+          if (refreshCustomerInfo) await refreshCustomerInfo();
+          
+          setDialogModal({
+            isOpen: true,
+            type: 'success',
+            badge: isTr ? 'PRO AKTİF' : 'PRO ACTIVE',
+            title: isTr ? 'Pro Aboneliğiniz Hesabınızla Eşitlendi' : 'Pro Subscription Synced',
+            message: isTr 
+              ? `Hesabınızda ${formattedPeriodEndDate} tarihine kadar geçerli bir Pro aboneliği zaten aktiftir. Tekrar satın alma işlemi yapılmadan Pro yetkileriniz profilinize başarıyla geri yüklendi.` 
+              : `Your account already has an active Pro subscription until ${formattedPeriodEndDate}. Your Pro membership has been synced with no extra charge.`,
+            confirmText: isTr ? 'Tamam, Harika' : 'Got it',
+            onConfirm: () => setDialogModal(prev => ({ ...prev, isOpen: false }))
+          });
+          return;
+        } catch (e) {
+          console.warn('Sync existing pro failed:', e);
+        } finally {
+          setUpgradingPlan(null);
+        }
+      }
+
+      presentPaywall({ 
+        defaultPackageId: 'pro',
         cycle: packageBillingCycle 
       });
       return;
@@ -428,22 +471,28 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
     }
   };
 
-  // Confirm Downgrade Handler (Scheduled Downgrade)
+  // Confirm Downgrade Handler (Scheduled Downgrade + Paddle Portal Sync)
   const handleConfirmDowngrade = async () => {
     setIsDowngradeModalOpen(false);
     setUpgradingPlan('free');
     setPlanSuccessMsg('');
     try {
-      await scheduleDowngrade(periodEndDate.toISOString());
+      const result = await scheduleDowngrade(periodEndDate.toISOString());
       
+      // Open authenticated Paddle Customer Portal cancellation in new tab if available
+      const targetPortalUrl = result?.cancel_url || result?.management_url || cancelUrl || managementUrl;
+      if (targetPortalUrl && typeof window !== 'undefined') {
+        window.open(targetPortalUrl, '_blank', 'noopener,noreferrer');
+      }
+
       setDialogModal({
         isOpen: true,
         type: 'success',
         badge: isTr ? 'BAŞARILI' : 'SUCCESS',
         title: isTr ? 'Downgrade Planlandı' : 'Downgrade Scheduled',
         message: isTr 
-          ? `Pro üyeliğiniz ${formattedPeriodEndDate} tarihine kadar kesintisiz devam edecektir. Bu tarihten sonra hesabınız otomatik olarak Ücretsiz (Free) plana geçecek ve kartınızdan herhangi bir yenileme ücreti alınmayacaktır.`
-          : `Your Pro membership will remain active until ${formattedPeriodEndDate}. After this date, your account will switch to the Free plan with no renewal charges.`,
+          ? `Pro üyeliğiniz ${formattedPeriodEndDate} tarihine kadar kesintisiz devam edecektir. Yinelenen ödemenin durdurulması için Paddle Müşteri Portalı yeni sekmede açılmıştır. Bu tarihten sonra hesabınız otomatik olarak Ücretsiz (Free) plana geçecektir.`
+          : `Your Pro membership will remain active until ${formattedPeriodEndDate}. The Paddle Customer Portal has been opened in a new tab to manage auto-renewal. After this date, your account will switch to the Free plan.`,
         confirmText: isTr ? 'Harika, Anladım' : 'Got it',
         onConfirm: () => setDialogModal(prev => ({ ...prev, isOpen: false }))
       });
@@ -478,36 +527,38 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
       isOpen: true,
       type: 'warning',
       badge: isTr ? 'ABONELİK YENİLEME' : 'SUBSCRIPTION RENEWAL',
-      title: isTr ? 'Aboneliği Sürdür' : 'Resume Subscription',
+      title: isTr ? 'Aboneliği Devam Ettir' : 'Resume Pro Subscription',
       message: isTr 
-        ? 'Pro aboneliğinizi sürdürmek ve otomatik yenilemeyi tekrar aktif etmek istediğinize emin misiniz?' 
-        : 'Are you sure you want to resume your Pro subscription and keep automatic renewal active?',
-      confirmText: isTr ? "Evet, Pro'yu Sürdür" : 'Yes, Keep Pro',
+        ? 'Planlanan iptal işlemi geri alınacak ve Pro üyeliğiniz kesintisiz olarak devam edecektir.'
+        : 'The scheduled cancellation will be reverted and your Pro membership will continue renewing.',
+      confirmText: isTr ? 'Aboneliği Sürdür' : 'Resume Subscription',
       cancelText: isTr ? 'Vazgeç' : 'Cancel',
       onConfirm: async () => {
-        setDialogModal(prev => ({ ...prev, isOpen: false }));
-        setUpgradingPlan('resume');
+        setUpgradingPlan('pro');
         try {
           await resumeSubscription();
+          if (clearManualOverride) clearManualOverride();
+          if (refreshCustomerInfo) await refreshCustomerInfo();
           setDialogModal({
             isOpen: true,
             type: 'success',
             badge: isTr ? 'BAŞARILI' : 'SUCCESS',
             title: isTr ? 'Abonelik Sürdürüldü' : 'Subscription Resumed',
             message: isTr 
-              ? 'Pro aboneliğiniz başarıyla sürdürüldü! Otomatik yenilemeniz aktif kaldı.'
-              : 'Your Pro subscription has been resumed successfully!',
+              ? 'Pro üyeliğiniz başarıyla sürdürüldü. Dönem sonunda yenilenmeye devam edecektir.' 
+              : 'Your Pro subscription has been resumed successfully.',
             confirmText: isTr ? 'Tamam' : 'Close',
             onConfirm: () => setDialogModal(prev => ({ ...prev, isOpen: false }))
           });
-          setPlanSuccessMsg(isTr ? 'Pro aboneliğiniz başarıyla sürdürüldü.' : 'Subscription resumed.');
+          const successText = isTr ? 'Pro aboneliğiniz başarıyla sürdürüldü.' : 'Pro subscription resumed successfully.';
+          setPlanSuccessMsg(successText);
           setTimeout(() => setPlanSuccessMsg(''), 5000);
         } catch (err) {
           setDialogModal({
             isOpen: true,
             type: 'danger',
             badge: isTr ? 'HATA' : 'ERROR',
-            title: isTr ? 'Hata' : 'Error',
+            title: isTr ? 'İşlem Başarısız' : 'Action Failed',
             message: err.message || (isTr ? 'Abonelik sürdürülemedi.' : 'Failed to resume subscription.'),
             confirmText: isTr ? 'Tamam' : 'Close',
             onConfirm: () => setDialogModal(prev => ({ ...prev, isOpen: false }))
@@ -1025,7 +1076,7 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
                       ) : (
                         <button
                           type="button"
-                          onClick={openCustomerCenter}
+                          onClick={() => openCustomerCenter('overview')}
                           className="account-current-plan-pill is-manage-btn"
                         >
                           <Check size={14} />
@@ -1033,21 +1084,49 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
                         </button>
                       )
                     ) : (
-                      <button
-                        type="button"
-                        disabled={upgradingPlan === 'pro'}
-                        onClick={() => handleUpgradePlan('pro')}
-                        className="account-plan-action-btn btn-primary-featured"
-                      >
-                        {upgradingPlan === 'pro' ? (
-                          <Loader2 size={15} className="auth-spinner" />
-                        ) : (
-                          <>
-                            <span>{isTr ? "Pro'ya Abone Ol" : 'Subscribe to Pro'}</span>
-                            <Sparkles size={14} />
-                          </>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', width: '100%' }}>
+                        <button
+                          type="button"
+                          disabled={upgradingPlan === 'pro'}
+                          onClick={() => handleUpgradePlan('pro')}
+                          className="account-plan-action-btn btn-primary-featured"
+                        >
+                          {upgradingPlan === 'pro' ? (
+                            <Loader2 size={15} className="auth-spinner" />
+                          ) : isRevenueCatPro || checkProEntitlement(rcCustomerInfo) ? (
+                            <>
+                              <RotateCcw size={14} />
+                              <span>{isTr ? "Pro'yu Geri Yükle" : 'Restore Pro Plan'}</span>
+                            </>
+                          ) : (
+                            <>
+                              <span>{isTr ? "Pro'ya Abone Ol" : 'Subscribe to Pro'}</span>
+                              <Sparkles size={14} />
+                            </>
+                          )}
+                        </button>
+                        {(managementUrl || cancelUrl) && (
+                          <button
+                            type="button"
+                            onClick={() => openCustomerCenter('overview')}
+                            style={{
+                              background: 'transparent',
+                              border: 'none',
+                              color: 'var(--text-muted, #94a3b8)',
+                              fontSize: '0.78rem',
+                              cursor: 'pointer',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              gap: '4px',
+                              padding: '2px 0'
+                            }}
+                          >
+                            <ExternalLink size={12} />
+                            <span>{isTr ? 'Paddle Portalında Yönet' : 'Manage on Paddle'}</span>
+                          </button>
                         )}
-                      </button>
+                      </div>
                     )}
                   </div>
                 </div>
@@ -1970,7 +2049,14 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
                 disabled={upgradingPlan === 'free'}
                 className="account-dialog-btn btn-confirm-warning"
               >
-                {upgradingPlan === 'free' ? <Loader2 size={15} className="auth-spinner" /> : (isTr ? "Downgrade'i Onayla" : 'Confirm Downgrade')}
+                {upgradingPlan === 'free' ? (
+                  <Loader2 size={15} className="auth-spinner" />
+                ) : (
+                  <>
+                    <ExternalLink size={14} />
+                    <span>{isTr ? "Paddle Portalını Aç ve Onayla" : 'Confirm & Open Paddle Portal'}</span>
+                  </>
+                )}
               </button>
             </div>
           </div>

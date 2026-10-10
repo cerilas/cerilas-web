@@ -15,8 +15,9 @@ import {
   Gift
 } from 'lucide-react';
 import { useRevenueCat } from '../context/RevenueCatContext';
+import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
-import { REVENUECAT_CONFIG, cleanupOrphanedPaywallElements } from '../revenuecat/revenueCatService';
+import { REVENUECAT_CONFIG, cleanupOrphanedPaywallElements, checkProEntitlement } from '../revenuecat/revenueCatService';
 import { useTranslation } from '../i18n';
 import './RevenueCatPaywallModal.css';
 
@@ -30,8 +31,12 @@ export default function RevenueCatPaywallModal({
     isPro, 
     currentOffering, 
     purchasePackage, 
-    openCustomerCenter
+    openCustomerCenter,
+    customerInfo,
+    clearManualOverride,
+    refreshCustomerInfo
   } = useRevenueCat();
+  const { user, syncPlan } = useAuth();
 
   const { theme, isDark } = useTheme();
   const { language } = useTranslation();
@@ -46,6 +51,7 @@ export default function RevenueCatPaywallModal({
   const [isPurchasing, setIsPurchasing] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [purchaseSuccess, setPurchaseSuccess] = useState(false);
+  const [isRestoredPro, setIsRestoredPro] = useState(false);
 
   // Available packages from RevenueCat
   const availablePackages = currentOffering?.availablePackages || [];
@@ -343,6 +349,24 @@ export default function RevenueCatPaywallModal({
       return;
     }
 
+    // Check if user already has active Pro in RevenueCat / DB and is trying to re-purchase Pro
+    const hasActivePro = isPro || checkProEntitlement(customerInfo) || (user?.plan === 'pro');
+    if (planToProcess.id === 'pro' && hasActivePro) {
+      setIsPurchasing(true);
+      try {
+        if (syncPlan) await syncPlan('pro', true);
+        if (clearManualOverride) clearManualOverride();
+        if (refreshCustomerInfo) await refreshCustomerInfo();
+        setIsRestoredPro(true);
+        setPurchaseSuccess(true);
+      } catch (e) {
+        console.warn('Auto restore failed:', e);
+      } finally {
+        setIsPurchasing(false);
+      }
+      return;
+    }
+
     const pkgToPurchase = planToProcess.matchedPkg || availablePackages[0];
 
     if (!pkgToPurchase) {
@@ -357,12 +381,34 @@ export default function RevenueCatPaywallModal({
     try {
       const res = await purchasePackage(pkgToPurchase);
       if (res && res.success) {
+        if (res.isAlreadyPurchased) {
+          setIsRestoredPro(true);
+        }
         setPurchaseSuccess(true);
       }
     } catch (err) {
       if (!err?.isCancelled) {
         console.error('[RevenueCat Paywall] Checkout error:', err);
-        const rawMsg = err.message || '';
+        const rawMsg = err?.message || '';
+
+        // Check if error is product already purchased / active subscription
+        if (
+          err?.isAlreadyPurchased ||
+          err?.errorCode === 6 ||
+          rawMsg.toLowerCase().includes('already purchased') ||
+          rawMsg.toLowerCase().includes('already has an active subscription') ||
+          rawMsg.toLowerCase().includes('zaten')
+        ) {
+          try {
+            if (syncPlan) await syncPlan('pro', true);
+            if (clearManualOverride) clearManualOverride();
+            if (refreshCustomerInfo) await refreshCustomerInfo();
+            setIsRestoredPro(true);
+            setPurchaseSuccess(true);
+            return;
+          } catch (_) {}
+        }
+
         let userMsg = '';
         if (
           rawMsg.includes('8101') || 
@@ -478,19 +524,27 @@ export default function RevenueCatPaywallModal({
               <div className="rc-success-plan-pill">
                 <Sparkles size={13} />
                 <span>
-                  {selectedPlan.name === 'Unlimited' 
+                  {isRestoredPro 
+                    ? (isTr ? 'Pro Aboneliğiniz Doğrulandı' : 'Pro Subscription Verified')
+                    : selectedPlan.name === 'Unlimited' 
                     ? (isTr ? 'Unlimited Plan Aktifleştirildi' : 'Unlimited Plan Activated') 
                     : (isTr ? 'Pro Plan Aktifleştirildi' : 'Pro Plan Activated')}
                 </span>
               </div>
 
               <h3 className="rc-success-title">
-                {isTr ? 'Aboneliğiniz Aktifleştirildi!' : 'Welcome to Cerilas Pro!'}
+                {isRestoredPro 
+                  ? (isTr ? 'Pro Aboneliğiniz Hesabınızla Eşitlendi!' : 'Pro Subscription Restored!') 
+                  : (isTr ? 'Aboneliğiniz Aktifleştirildi!' : 'Welcome to Cerilas Pro!')}
               </h3>
               <p className="rc-success-desc">
-                {isTr 
-                  ? 'Ödemeniz başarıyla tamamlandı. Tüm araçlar, analizler ve genişletilmiş kotalar hesabınıza anında tanımlandı.' 
-                  : 'Your payment was successful. All tools, advanced features, and priority speed are now unlocked.'}
+                {isRestoredPro 
+                  ? (isTr 
+                    ? 'Paddle ve RevenueCat altyapısında aktif Pro aboneliğiniz doğrulandı. Mükerrer bir ücret alınmadan Pro ayrıcalıklarınız profilinize eksiksiz geri tanımlandı.' 
+                    : 'Your active Pro subscription was verified with Paddle & RevenueCat. All Pro benefits have been restored with zero extra charges.')
+                  : (isTr 
+                    ? 'Ödemeniz başarıyla tamamlandı. Tüm araçlar, analizler ve genişletilmiş kotalar hesabınıza anında tanımlandı.' 
+                    : 'Your payment was successful. All tools, advanced features, and priority speed are now unlocked.')}
               </p>
 
               <div className="rc-success-perks">
@@ -508,14 +562,34 @@ export default function RevenueCatPaywallModal({
                 </div>
               </div>
 
-              <button 
-                type="button" 
-                className="rc-subscribe-btn rc-success-action-btn"
-                onClick={onClose}
-              >
-                <span>{isTr ? 'Kullanmaya Başla' : 'Get Started'}</span>
-                <ArrowRight size={16} />
-              </button>
+              <div style={{ display: 'flex', gap: '0.75rem', width: '100%', marginTop: '0.5rem', flexWrap: 'wrap' }}>
+                <button 
+                  type="button" 
+                  className="rc-subscribe-btn rc-success-action-btn"
+                  style={{ flex: 1, minWidth: '160px' }}
+                  onClick={onClose}
+                >
+                  <span>{isTr ? 'Kullanmaya Başla' : 'Get Started'}</span>
+                  <ArrowRight size={16} />
+                </button>
+                <button 
+                  type="button" 
+                  className="account-btn btn-secondary-sub"
+                  style={{ 
+                    padding: '0.8rem 1.25rem', 
+                    borderRadius: '12px',
+                    fontSize: '0.9rem',
+                    fontWeight: 600,
+                    background: 'rgba(255, 255, 255, 0.06)',
+                    color: 'var(--text-main, #ffffff)',
+                    border: '1px solid rgba(255, 255, 255, 0.12)',
+                    cursor: 'pointer'
+                  }}
+                  onClick={() => openCustomerCenter('overview')}
+                >
+                  {isTr ? 'Paddle Aboneliğini Yönet' : 'Manage on Paddle'}
+                </button>
+              </div>
             </div>
           ) : (
             <>

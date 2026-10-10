@@ -1082,14 +1082,114 @@ router.post('/upgrade-plan', requireAuth, async (req, res) => {
   }
 });
 
+const REVENUECAT_API_KEY = process.env.REVENUECAT_API_KEY || 'pdl_WBnMsdzJRdmzoYfKutAecxwmRtfn';
+
+/**
+ * Fetch subscriber object directly from RevenueCat v1 REST API
+ */
+export async function fetchRevenueCatSubscriber(userId) {
+  try {
+    const res = await fetch(`https://api.revenuecat.com/v1/subscribers/${userId}`, {
+      headers: {
+        'Authorization': `Bearer ${REVENUECAT_API_KEY}`,
+        'Content-Type': 'application/json'
+      }
+    });
+    if (!res.ok) {
+      return null;
+    }
+    const data = await res.json();
+    return data?.subscriber || null;
+  } catch (err) {
+    console.error('[RevenueCat API] Subscriber fetch failed:', err?.message || err);
+    return null;
+  }
+}
+
+/**
+ * GET /api/auth/subscription-status
+ * Check live RevenueCat and Paddle subscription status for user
+ */
+router.get('/subscription-status', requireAuth, async (req, res) => {
+  try {
+    const userRes = await authPool.query('SELECT * FROM users WHERE id = $1', [req.user.id]);
+    if (userRes.rows.length === 0) {
+      return res.status(404).json({ error: 'Kullanıcı bulunamadı.' });
+    }
+    const userRow = userRes.rows[0];
+
+    const rcSubscriber = await fetchRevenueCatSubscriber(req.user.id);
+    const proEntitlement = rcSubscriber?.entitlements?.cerilas_tools_pro;
+    const hasActiveRcPro = !!(
+      proEntitlement &&
+      (!proEntitlement.expires_date || new Date(proEntitlement.expires_date) > new Date())
+    );
+
+    const managementUrl = rcSubscriber?.management_url || null;
+    const cancelUrl = managementUrl ? managementUrl.replace('action=overview', 'action=cancel') : null;
+
+    let unsubscribeDetectedAt = null;
+    if (rcSubscriber?.subscriptions) {
+      for (const key of Object.keys(rcSubscriber.subscriptions)) {
+        if (rcSubscriber.subscriptions[key]?.unsubscribe_detected_at) {
+          unsubscribeDetectedAt = rcSubscriber.subscriptions[key].unsubscribe_detected_at;
+          break;
+        }
+      }
+    }
+
+    res.json({
+      success: true,
+      user: formatUser(userRow),
+      hasActiveRcPro,
+      expiresDate: proEntitlement?.expires_date || userRow.plan_expires_at || null,
+      managementUrl,
+      cancelUrl,
+      unsubscribeDetectedAt
+    });
+  } catch (err) {
+    console.error('Subscription status error:', err);
+    res.status(500).json({ error: 'Abonelik durumu alınamadı.' });
+  }
+});
+
+/**
+ * GET /api/auth/management-portal
+ * Fetch direct Paddle Customer Portal URL for active subscriber
+ */
+router.get('/management-portal', requireAuth, async (req, res) => {
+  try {
+    const rcSubscriber = await fetchRevenueCatSubscriber(req.user.id);
+    const managementUrl = rcSubscriber?.management_url || null;
+    const cancelUrl = managementUrl ? managementUrl.replace('action=overview', 'action=cancel') : null;
+
+    res.json({
+      success: true,
+      managementUrl,
+      cancelUrl
+    });
+  } catch (err) {
+    console.error('Management portal error:', err);
+    res.status(500).json({ error: 'Yönetim portalı alınamadı.' });
+  }
+});
+
 /**
  * POST /api/auth/schedule-downgrade
- * Retain Pro/Unlimited until period end date, then automatically downgrade to Free
+ * Retain Pro/Unlimited until period end date, sync with RevenueCat/Paddle, then auto-downgrade
  */
 router.post('/schedule-downgrade', requireAuth, async (req, res) => {
   try {
     const { periodEndDate } = req.body;
-    const expiryDate = periodEndDate ? new Date(periodEndDate) : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+    
+    // Live RevenueCat subscriber check
+    const rcSubscriber = await fetchRevenueCatSubscriber(req.user.id);
+    const proEntitlement = rcSubscriber?.entitlements?.cerilas_tools_pro;
+    const rcExpiryDate = proEntitlement?.expires_date ? new Date(proEntitlement.expires_date) : null;
+    
+    const expiryDate = rcExpiryDate || (periodEndDate ? new Date(periodEndDate) : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000));
+    const managementUrl = rcSubscriber?.management_url || null;
+    const cancelUrl = managementUrl ? managementUrl.replace('action=overview', 'action=cancel') : null;
 
     const updated = await authPool.query(
       `UPDATE users 
@@ -1109,6 +1209,8 @@ router.post('/schedule-downgrade', requireAuth, async (req, res) => {
       success: true,
       scheduled: true,
       plan_expires_at: expiryDate.toISOString(),
+      management_url: managementUrl,
+      cancel_url: cancelUrl,
       message: 'Downgrade işlemi planlandı. Üyeliğiniz dönem sonuna kadar kesintisiz devam edecektir.',
       user: formatUser(updated.rows[0])
     });
@@ -1120,15 +1222,19 @@ router.post('/schedule-downgrade', requireAuth, async (req, res) => {
 
 /**
  * POST /api/auth/resume-subscription
- * Cancel scheduled downgrade and resume regular renewal
+ * Cancel scheduled downgrade, sync with RevenueCat and resume active subscription
  */
 router.post('/resume-subscription', requireAuth, async (req, res) => {
   try {
+    const rcSubscriber = await fetchRevenueCatSubscriber(req.user.id);
+    const managementUrl = rcSubscriber?.management_url || null;
+
     const updated = await authPool.query(
       `UPDATE users 
        SET cancel_at_period_end = FALSE, 
            plan_expires_at = NULL, 
-           subscription_status = 'active' 
+           subscription_status = 'active',
+           plan = 'pro' 
        WHERE id = $1 
        RETURNING *`,
       [req.user.id]
@@ -1140,6 +1246,7 @@ router.post('/resume-subscription', requireAuth, async (req, res) => {
 
     res.json({
       success: true,
+      management_url: managementUrl,
       message: 'Aboneliğiniz başarıyla sürdürüldü.',
       user: formatUser(updated.rows[0])
     });
@@ -1155,37 +1262,68 @@ router.post('/resume-subscription', requireAuth, async (req, res) => {
  */
 router.post('/sync-plan', requireAuth, async (req, res) => {
   try {
-    let { plan } = req.body;
+    let { plan, force } = req.body;
     if (plan === 'enterprise') plan = 'unlimited';
     if (!['free', 'pro', 'unlimited'].includes(plan)) {
       return res.status(400).json({ error: 'Invalid plan.' });
     }
 
-    // If user's plan is currently free, prevent background sync from inadvertently reverting it
+    // Verify live RevenueCat subscriber entitlements
+    const rcSubscriber = await fetchRevenueCatSubscriber(req.user.id);
+    const proEntitlement = rcSubscriber?.entitlements?.cerilas_tools_pro;
+    const hasActiveRcPro = !!(
+      proEntitlement &&
+      (!proEntitlement.expires_date || new Date(proEntitlement.expires_date) > new Date())
+    );
+
     const current = await authPool.query('SELECT * FROM users WHERE id = $1', [req.user.id]);
-    if (current.rows.length > 0 && current.rows[0].plan === 'free' && plan !== 'free') {
+    const currentUser = current.rows[0];
+
+    let targetPlan = plan;
+    // If RevenueCat shows active Pro, honor it when requested or forced
+    if (hasActiveRcPro && (force || plan === 'pro')) {
+      targetPlan = 'pro';
+    } else if (currentUser && currentUser.plan === 'free' && plan !== 'free' && !force && !hasActiveRcPro) {
       return res.json({
         success: true,
         message: 'Plan is free; background auto-upgrade skipped.',
-        user: formatUser(current.rows[0])
+        user: formatUser(currentUser)
       });
     }
 
+    let cancelAtPeriodEnd = currentUser ? currentUser.cancel_at_period_end : false;
+    let subscriptionStatus = currentUser ? currentUser.subscription_status : 'active';
+    let planExpiresAt = currentUser ? currentUser.plan_expires_at : null;
+
+    if (targetPlan === 'pro' && force) {
+      cancelAtPeriodEnd = false;
+      subscriptionStatus = 'active';
+      planExpiresAt = null;
+    }
+
     const updated = await authPool.query(
-      'UPDATE users SET plan = $1 WHERE id = $2 RETURNING *',
-      [plan, req.user.id]
+      `UPDATE users 
+       SET plan = $1,
+           cancel_at_period_end = $2,
+           subscription_status = $3,
+           plan_expires_at = $4
+       WHERE id = $5 
+       RETURNING *`,
+      [targetPlan, cancelAtPeriodEnd, subscriptionStatus, planExpiresAt, req.user.id]
     );
 
     try {
       await authPool.query(
         'UPDATE organizations SET plan = $1 WHERE created_by_user_id = $2',
-        [plan, req.user.id]
+        [targetPlan, req.user.id]
       );
     } catch (_) {}
 
     res.json({
       success: true,
-      user: formatUser(updated.rows[0])
+      user: formatUser(updated.rows[0]),
+      hasRcPro: hasActiveRcPro,
+      management_url: rcSubscriber?.management_url || null
     });
   } catch (err) {
     console.error('Sync plan error:', err);
