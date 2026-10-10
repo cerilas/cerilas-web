@@ -605,3 +605,53 @@ html.light .reports-logs-table td {
   border-color: #f1f5f9;
   color: #1e293b;
 }
+
+@media (max-width: 640px) {
+  .reports-card {
+    padding: 1.15rem 0.85rem;
+    border-radius: 14px;
+  }
+  .reports-card-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+  .report-toggle-wrap {
+    align-self: flex-start;
+  }
+  .preview-kpi-grid {
+    grid-template-columns: 1fr !important;
+    gap: 0.5rem !important;
+  }
+  .webhook-display-box {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.65rem;
+  }
+  .logs-table-wrap {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .reports-logs-table {
+    min-width: 480px;
+  }
+}
+
+@media (max-width: 480px) {
+  .add-recipient-form {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+  }
+  .add-recipient-btn {
+    width: 100%;
+    justify-content: center;
+  }
+  .email-preview-topbar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.35rem;
+  }
+}
+

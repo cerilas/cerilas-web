@@ -1525,6 +1525,44 @@ html.dark .seo-editorial-header {
   }
 }
 
+@media (max-width: 480px) {
+  .catalog-hero-banner {
+    padding: 3rem 1rem 2rem 1rem !important;
+    min-height: 280px !important;
+  }
+  .hero-header .hero-brand-title,
+  .hero-brand-title {
+    font-size: 1.6rem !important;
+  }
+  .hero-brand-subtitle {
+    font-size: 0.88rem !important;
+  }
+  .hero-search-bar {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 0.6rem 0.85rem !important;
+  }
+  .catalog-container {
+    padding-left: 0.75rem !important;
+    padding-right: 0.75rem !important;
+  }
+  .card {
+    padding: 1.15rem 0.95rem !important;
+    border-radius: 16px !important;
+  }
+}
+
+@media (max-width: 360px) {
+  .hero-header .hero-brand-title,
+  .hero-brand-title {
+    font-size: 1.35rem !important;
+  }
+  .nav-brand-text {
+    font-size: 0.85rem !important;
+  }
+}
+
+
 
 @media (max-width: 768px) {
   html, body {

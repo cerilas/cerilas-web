@@ -2126,12 +2126,194 @@
 }
 
 @media (max-width: 640px) {
+  .cl-hero {
+    margin: 0.5rem;
+    border-radius: 1.15rem;
+    min-height: auto;
+  }
+  .cl-header {
+    height: 3.5rem;
+    padding-inline: 0.75rem;
+  }
+  .cl-logo-link {
+    font-size: 0.95rem;
+    gap: 0.4rem;
+  }
+  .cl-logo-badge {
+    width: 26px;
+    height: 26px;
+  }
+  .cl-btn-primary,
+  .cl-btn-secondary {
+    height: 2.1rem;
+    padding-inline: 0.75rem;
+    font-size: 0.82rem;
+  }
+  .cl-hero-body {
+    padding-inline: 0.75rem;
+    padding-top: 4.75rem;
+  }
+  .cl-pill-badge {
+    font-size: 0.72rem;
+    height: auto;
+    padding: 0.35rem 0.65rem;
+    line-height: 1.35;
+    text-align: center;
+  }
+  .cl-hero-title {
+    font-size: clamp(1.65rem, 6.5vw, 2.15rem);
+    line-height: 1.15;
+    margin-top: 0.75rem;
+  }
+  .cl-hero-subtitle {
+    font-size: 0.92rem;
+    line-height: 1.5;
+    margin-top: 0.75rem;
+  }
+  .cl-hero-cta-row {
+    flex-direction: column;
+    width: 100%;
+    gap: 0.65rem;
+    margin-top: 1.5rem;
+  }
+  .cl-btn-hero-primary,
+  .cl-btn-hero-glass {
+    width: 100%;
+    justify-content: center;
+    height: 2.75rem;
+  }
+  .cl-app-preview-wrap {
+    margin-top: 2rem;
+  }
+  .cl-app-window {
+    border-radius: 12px;
+  }
+  .cl-app-inner-content {
+    padding: 1.5rem 0.75rem 1.25rem;
+  }
+  .cl-pill-tabs-bar {
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    display: flex;
+    flex-wrap: nowrap;
+    padding: 3px;
+  }
+  .cl-pill-tabs-bar::-webkit-scrollbar {
+    display: none;
+  }
+  .cl-pill-tab-btn {
+    flex-shrink: 0;
+    padding: 0.45rem 0.75rem;
+    font-size: 0.8rem;
+  }
+  .cl-capability-display-card {
+    padding: 1.35rem 1rem;
+    gap: 1.35rem;
+    border-radius: 1rem;
+  }
+  .cl-capability-preview-box {
+    padding: 1rem;
+    border-radius: 0.85rem;
+  }
+  .cl-manifesto-grid {
+    padding: 2.5rem 0.85rem;
+    gap: 1.5rem;
+  }
+  .cl-manifesto-text {
+    font-size: 0.98rem;
+    line-height: 1.6;
+    gap: 1rem;
+  }
+  .cl-radar-sub-block {
+    padding: 2.5rem 0.85rem 3rem;
+  }
+  .cl-radar-app-card {
+    max-width: 100%;
+    overflow: hidden;
+  }
+  .cl-radar-item-row {
+    gap: 0.5rem;
+    padding: 0.5rem;
+  }
+  .cl-radar-item-thumb {
+    width: 36px;
+    height: 36px;
+  }
+  .cl-formats-wrap {
+    padding: 3rem 0.85rem;
+  }
+  .cl-cards-3-grid {
+    margin-top: 2rem;
+    gap: 0.85rem;
+  }
+  .cl-feature-card {
+    padding: 1.25rem 1rem;
+    border-radius: 0.85rem;
+  }
+  .cl-benchmark-block {
+    padding: 1.25rem 1rem;
+    margin-top: 1.75rem;
+  }
+  .cl-testimonial-card {
+    padding: 1.5rem 1rem;
+    margin-top: 2rem;
+  }
+  .cl-quote-text {
+    font-size: 1.05rem;
+    line-height: 1.55;
+  }
+  .cl-pricing-grid {
+    margin-top: 2rem;
+    gap: 1rem;
+  }
+  .cl-price-card {
+    padding: 1.5rem 1.15rem;
+    border-radius: 1rem;
+  }
+  .cl-final-cta-section {
+    margin: 3rem 0.5rem 2rem;
+  }
+  .cl-final-cta-card {
+    padding: 2.25rem 1rem;
+    min-height: auto;
+    border-radius: 1.15rem;
+  }
+  .cl-final-cta-title {
+    font-size: 1.75rem;
+  }
+  .cl-results-topbar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.85rem;
+    padding: 1rem 0.85rem;
+  }
+  .cl-results-body {
+    padding: 1.25rem 0.85rem;
+  }
+  .cl-metrics-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.65rem;
+  }
+  .cl-metric-stat-box {
+    padding: 1rem 0.75rem;
+  }
+  .cl-metric-stat-val {
+    font-size: 1.45rem;
+  }
   .cl-communities-section {
-    padding: 2rem 1rem 1rem;
+    padding: 2rem 0.85rem 1rem;
+  }
+  .cl-communities-grid {
+    gap: 0.65rem;
   }
   .cl-community-card {
-    padding: 0.6rem 0.95rem;
-    gap: 0.65rem;
+    padding: 0.6rem 0.85rem;
+    gap: 0.6rem;
+    flex: 1 1 calc(50% - 0.65rem);
+    min-width: 130px;
+    box-sizing: border-box;
   }
   .cl-community-icon-box {
     width: 28px;
@@ -2140,5 +2322,58 @@
   .cl-community-icon-box svg {
     width: 20px;
     height: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .cl-hero {
+    margin: 0.35rem;
+    border-radius: 1rem;
+  }
+  .cl-header {
+    padding-inline: 0.55rem;
+  }
+  .cl-composer-input-bar {
+    height: auto !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    padding: 0.65rem !important;
+    gap: 0.55rem !important;
+    border-radius: 0.85rem !important;
+  }
+  .cl-composer-input {
+    width: 100% !important;
+    height: 2.5rem !important;
+    font-size: 0.88rem !important;
+    padding: 0 0.5rem !important;
+  }
+  .cl-composer-btn {
+    width: 100% !important;
+    height: 2.6rem !important;
+    justify-content: center !important;
+    font-size: 0.88rem !important;
+  }
+  .cl-composer-presets-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.4rem;
+  }
+  .cl-formats-grid {
+    width: 96%;
+    gap: 0.45rem;
+  }
+  .cl-format-tile {
+    padding: 0.25rem;
+    border-radius: 0.75rem;
+  }
+  .cl-tile-ext {
+    font-size: 0.6rem;
+  }
+  .cl-metrics-row {
+    grid-template-columns: 1fr;
+  }
+  .cl-community-card {
+    flex: 1 1 100%;
+    min-width: 100%;
   }
 }

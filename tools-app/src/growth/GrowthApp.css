@@ -17925,3 +17925,260 @@ body.light .growth-info-alert {
   border: 1px solid #bfdbfe;
   color: #1e3a8a;
 }
+
+/* ==========================================================================
+   CERILAS GROWTH — GLOBAL MOBILE RESPONSIVENESS SUITE (< 768px & < 480px)
+   ========================================================================== */
+
+@media (max-width: 768px) {
+  /* Application Header */
+  .growth-app-header {
+    height: 56px !important;
+    padding: 0 0.75rem !important;
+    gap: 0.4rem !important;
+  }
+
+  .growth-header-left {
+    gap: 0.4rem !important;
+    min-width: 0 !important;
+    flex: 1 1 auto !important;
+  }
+
+  .growth-header-back-btn {
+    padding: 0.35rem 0.6rem !important;
+    font-size: 0.76rem !important;
+    gap: 0.35rem !important;
+    border-radius: 8px !important;
+    flex-shrink: 0 !important;
+  }
+
+  .growth-header-sep {
+    margin: 0 0.1rem !important;
+    opacity: 0.6 !important;
+  }
+
+  .growth-workspace-switcher {
+    min-width: 0 !important;
+    max-width: 175px !important;
+  }
+
+  .growth-ws-select-btn {
+    padding: 0.32rem 0.55rem !important;
+    gap: 0.45rem !important;
+    border-radius: 9px !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+  }
+
+  .growth-ws-btn-content {
+    min-width: 0 !important;
+    gap: 0.45rem !important;
+  }
+
+  .growth-ws-titles {
+    min-width: 0 !important;
+  }
+
+  .growth-ws-title {
+    max-width: 100px !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+    font-size: 0.8rem !important;
+  }
+
+  .growth-ws-sub {
+    display: none !important;
+  }
+
+  .growth-header-right {
+    gap: 0.35rem !important;
+    flex-shrink: 0 !important;
+  }
+
+  .growth-header-site-link,
+  .growth-header-date-badge {
+    display: none !important;
+  }
+
+  .growth-plan-badge-btn {
+    padding: 0.32rem 0.6rem !important;
+    font-size: 0.76rem !important;
+    gap: 0.35rem !important;
+    border-radius: 8px !important;
+  }
+
+  .growth-header-theme-btn {
+    width: 32px !important;
+    height: 32px !important;
+    border-radius: 8px !important;
+  }
+
+  .nav-user-trigger-btn {
+    padding: 0.25rem 0.4rem !important;
+    gap: 0.3rem !important;
+  }
+
+  .nav-user-display-name {
+    display: none !important;
+  }
+
+  .growth-ws-dropdown {
+    width: min(320px, calc(100vw - 1.25rem)) !important;
+    max-width: calc(100vw - 1.25rem) !important;
+    left: 0 !important;
+    right: auto !important;
+    border-radius: 14px !important;
+  }
+
+  .nav-user-menu-dropdown {
+    width: min(280px, calc(100vw - 1.25rem)) !important;
+    max-width: calc(100vw - 1.25rem) !important;
+    right: 0 !important;
+    left: auto !important;
+    border-radius: 14px !important;
+  }
+
+  /* Sticky Horizontal Tab Sidebar */
+  .growth-app-sidebar {
+    top: 56px !important;
+    padding: 0.45rem 0.65rem !important;
+  }
+
+  .growth-sidebar-nav {
+    gap: 0.35rem !important;
+    padding: 0.15rem 0 !important;
+  }
+
+  .growth-nav-item {
+    padding: 0.38rem 0.75rem !important;
+    font-size: 0.78rem !important;
+    border-radius: 999px !important;
+  }
+
+  .growth-nav-icon {
+    width: 14px !important;
+    height: 14px !important;
+  }
+
+  /* Main Viewport */
+  .growth-main-viewport {
+    padding: 1rem 0.65rem 3rem !important;
+    width: 100% !important;
+    max-width: 100vw !important;
+    box-sizing: border-box !important;
+    overflow-x: hidden !important;
+  }
+
+  /* Ensure All Tables Are Horizontally Scrollable */
+  .growth-table-wrap,
+  .growth-pages-table,
+  .logs-table-wrap,
+  .table-responsive {
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Grid Layout Collapses */
+  .overview-kpi-grid,
+  .growth-metrics-grid,
+  .growth-stats-grid,
+  .reports-grid-two-col {
+    grid-template-columns: 1fr !important;
+    gap: 0.75rem !important;
+  }
+
+  .growth-overview-split,
+  .growth-grid-two,
+  .report-highlights-grid,
+  .brief-meta-grid {
+    grid-template-columns: 1fr !important;
+    gap: 0.85rem !important;
+  }
+
+  /* Panel Cards Padding */
+  .growth-panel-card,
+  .growth-card,
+  .growth-chart-card,
+  .reports-card {
+    padding: 1.15rem 0.85rem !important;
+    border-radius: 14px !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Modals */
+  .growth-modal-container,
+  .growth-onboarding-modal-card {
+    padding: 1.5rem 1rem !important;
+    border-radius: 16px !important;
+    max-width: calc(100vw - 1.25rem) !important;
+    max-height: calc(100vh - 1.5rem) !important;
+    max-height: calc(100dvh - 1.5rem) !important;
+    box-sizing: border-box !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .growth-header-back-btn span {
+    display: none !important;
+  }
+
+  .growth-header-back-btn {
+    padding: 0.4rem !important;
+    width: 32px !important;
+    height: 32px !important;
+    justify-content: center !important;
+  }
+
+  .growth-header-sep {
+    display: none !important;
+  }
+
+  .growth-workspace-switcher {
+    max-width: 135px !important;
+  }
+
+  .growth-ws-title {
+    max-width: 75px !important;
+    font-size: 0.76rem !important;
+  }
+
+  .growth-plan-badge-btn {
+    padding: 0.3rem 0.5rem !important;
+    font-size: 0.72rem !important;
+    gap: 0.25rem !important;
+  }
+
+  .overview-kpi-grid,
+  .growth-metrics-grid,
+  .growth-subscores-grid {
+    grid-template-columns: 1fr !important;
+    gap: 0.5rem !important;
+  }
+
+  .growth-page-actions {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    width: 100% !important;
+  }
+
+  .growth-page-actions button {
+    width: 100% !important;
+    justify-content: center !important;
+  }
+
+  .growth-onboarding-actions {
+    flex-direction: column-reverse !important;
+    align-items: stretch !important;
+    width: 100% !important;
+  }
+
+  .growth-onboarding-actions button {
+    width: 100% !important;
+    justify-content: center !important;
+  }
+}
+
