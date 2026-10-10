@@ -48,7 +48,7 @@ export const requireAuth = async (req, res, next) => {
   try {
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return res.status(401).json({ error: 'Bu işlem için giriş yapmalısınız.' });
+      return res.status(401).json({ error: 'You must be logged in to perform this action.' });
     }
 
     const token = authHeader.split(' ')[1];
@@ -60,13 +60,13 @@ export const requireAuth = async (req, res, next) => {
     );
 
     if (userRes.rows.length === 0) {
-      return res.status(401).json({ error: 'Kullanıcı bulunamadı.' });
+      return res.status(401).json({ error: 'User not found.' });
     }
 
     req.user = userRes.rows[0];
     next();
   } catch (err) {
-    return res.status(401).json({ error: 'Oturum süresi dolmuş veya geçersiz.' });
+    return res.status(401).json({ error: 'Session expired or invalid.' });
   }
 };
 
@@ -202,7 +202,7 @@ router.post('/scan', async (req, res) => {
     });
   } catch (err) {
     console.error('[Growth Scan Error]:', err.message);
-    res.status(500).json({ error: err.message || 'Web sitesi taranırken bir hata oluştu.' });
+    res.status(500).json({ error: err.message || 'An error occurred while scanning the website.' });
   }
 });
 
@@ -233,7 +233,7 @@ router.get('/workspaces', requireAuth, async (req, res) => {
     });
   } catch (err) {
     console.error('[Growth List Workspaces Error]:', err);
-    res.status(500).json({ error: 'Çalışma alanları alınamadı.' });
+    res.status(500).json({ error: 'Failed to fetch workspaces.' });
   }
 });
 
@@ -272,7 +272,7 @@ router.post('/workspaces', requireAuth, async (req, res) => {
     } = req.body;
 
     if (!name || !url) {
-      return res.status(400).json({ error: 'Marka adı ve web sitesi URL zorunludur.' });
+      return res.status(400).json({ error: 'Brand name and website URL are required.' });
     }
 
     const check = validatePublicUrl(url);
@@ -301,7 +301,7 @@ router.post('/workspaces', requireAuth, async (req, res) => {
 
     if (existingWsRes.rows.length > 0) {
       return res.status(400).json({
-        error: `"${normalizedDomain}" adresi zaten "${existingWsRes.rows[0].name}" markası altında kayıtlı. Aynı domaini tekrar ekleyemezsiniz (ancak blog.${normalizedDomain} gibi farklı bir subdomain ekleyebilirsiniz).`
+        error: `"${normalizedDomain}" is already registered under the brand "${existingWsRes.rows[0].name}". You cannot add a duplicate root domain (you can add a subdomain like blog.${normalizedDomain}).`
       });
     }
 
@@ -571,10 +571,10 @@ router.post('/workspaces', requireAuth, async (req, res) => {
     console.error('[Growth Create Workspace Error]:', err);
     if (err.code === '23505' || err.constraint?.includes('idx_workspaces_org_normalized_domain')) {
       return res.status(400).json({
-        error: 'Bu web sitesi / domain adresi zaten kayıtlı. Aynı domaini tekrar ekleyemezsiniz (farklı bir subdomain ekleyebilirsiniz).'
+        error: 'This website or domain is already registered. You cannot add duplicate root domains.'
       });
     }
-    res.status(500).json({ error: err.message || 'Çalışma alanı oluşturulamadı.' });
+    res.status(500).json({ error: err.message || 'Failed to create workspace.' });
   }
 });
 

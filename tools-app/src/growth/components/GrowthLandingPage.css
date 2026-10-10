@@ -823,12 +823,14 @@
   border: 1px solid var(--cl-card-border);
   padding: 0.55rem;
   background: var(--cl-card-bg);
-  transition: transform 0.2s ease, border-color 0.2s ease;
+  cursor: pointer;
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .cl-audit-preview-card:hover {
   transform: translateY(-2px);
-  border-color: rgba(150, 150, 150, 0.3);
+  border-color: rgba(150, 150, 150, 0.4);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
 }
 
 .cl-audit-card-body {

@@ -265,7 +265,8 @@ export default function GrowthLandingPage({ onBackToTools, initialDomain = '' })
     isOnboardingOpen, 
     workspaces, 
     activeWorkspace, 
-    switchWorkspace 
+    switchWorkspace,
+    refreshWorkspaces 
   } = useGrowth();
   const { toggleTheme, isDark } = useTheme();
   const { isPro, isUnlimited, presentPaywall, openCustomerCenter } = useRevenueCat() || {};
@@ -462,9 +463,25 @@ export default function GrowthLandingPage({ onBackToTools, initialDomain = '' })
         throw new Error(data.error || 'Failed to save brand to workspace.');
       }
 
-      setSaveSuccessMsg('Brand workspace initialized successfully! Redirecting...');
+      const createdWs = data.data?.workspace || data.data;
+
+      // Clean up pending scan session
+      try {
+        sessionStorage.removeItem('cerilas_pending_growth_scan');
+      } catch {}
+
+      // Refresh workspaces in context so activeWorkspace updates
+      if (typeof refreshWorkspaces === 'function') {
+        await refreshWorkspaces(createdWs?.slug);
+      }
+      if (createdWs && typeof switchWorkspace === 'function') {
+        switchWorkspace(createdWs);
+      }
+
+      setSaveSuccessMsg('Brand workspace initialized successfully! Redirecting to dashboard...');
       setTimeout(() => {
         setActiveTab('overview');
+        window.location.hash = createdWs?.slug ? `#/growth/${createdWs.slug}/overview` : '#/growth/overview';
       }, 700);
     } catch (e) {
       setError(e.message || 'Error creating workspace.');
@@ -687,20 +704,36 @@ export default function GrowthLandingPage({ onBackToTools, initialDomain = '' })
 
                   <p className="cl-sidebar-section-title">Favorites</p>
                   <ul className="cl-sidebar-nav-list">
-                    <li className="cl-sidebar-item active">
+                    <li 
+                      className="cl-sidebar-item active"
+                      onClick={() => resultsRef.current ? resultsRef.current.scrollIntoView({ behavior: 'smooth' }) : inputRef.current?.focus()}
+                      title="Scroll to audit results"
+                    >
                       <Clock size={14} />
                       <span>Recent Audits</span>
                     </li>
-                    <li className="cl-sidebar-item">
+                    <li 
+                      className="cl-sidebar-item"
+                      onClick={(e) => scrollToSection(e, 'features')}
+                      title="Jump to AI Citation Radar"
+                    >
                       <Sparkles size={14} />
                       <span>AI Citation Radar</span>
                       <span className="cl-sidebar-badge">4</span>
                     </li>
-                    <li className="cl-sidebar-item">
+                    <li 
+                      className="cl-sidebar-item"
+                      onClick={(e) => { scrollToSection(e, 'capabilities'); setActiveCapabilityTab(1); }}
+                      title="Jump to Search Console Sync"
+                    >
                       <BarChart3 size={14} />
                       <span>Search Console</span>
                     </li>
-                    <li className="cl-sidebar-item">
+                    <li 
+                      className="cl-sidebar-item"
+                      onClick={(e) => { scrollToSection(e, 'capabilities'); setActiveCapabilityTab(0); }}
+                      title="Jump to GEO Capabilities"
+                    >
                       <Star size={14} />
                       <span>Starred Queries</span>
                     </li>
@@ -764,7 +797,15 @@ export default function GrowthLandingPage({ onBackToTools, initialDomain = '' })
                 {/* Right Main Pane */}
                 <div className="cl-app-main-pane">
                   <div className="cl-app-topbar">
-                    <div className="cl-topbar-search">
+                    <div 
+                      className="cl-topbar-search"
+                      style={{ cursor: 'pointer' }}
+                      onClick={() => {
+                        inputRef.current?.focus();
+                        inputRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                      }}
+                      title="Focus domain audit input"
+                    >
                       <Search size={14} />
                       <span>Search queries, competitors, or AI citations</span>
                     </div>
@@ -879,7 +920,15 @@ export default function GrowthLandingPage({ onBackToTools, initialDomain = '' })
                     <div className="cl-recent-audits-section">
                       <p className="cl-recent-audits-title">Recent AI citation intelligence</p>
                       <div className="cl-recent-audits-grid">
-                        <div className="cl-audit-preview-card">
+                        <div 
+                          className="cl-audit-preview-card"
+                          style={{ cursor: 'pointer' }}
+                          onClick={() => {
+                            setInputUrl('linear.app');
+                            handleStartScan('linear.app');
+                          }}
+                          title="Click to audit linear.app"
+                        >
                           <div className="cl-audit-card-body">
                             <span className="cl-audit-card-badge">Cited in 86% of prompts</span>
                             <p className="cl-audit-card-domain">linear.app</p>
@@ -893,7 +942,15 @@ export default function GrowthLandingPage({ onBackToTools, initialDomain = '' })
                           </div>
                         </div>
 
-                        <div className="cl-audit-preview-card">
+                        <div 
+                          className="cl-audit-preview-card"
+                          style={{ cursor: 'pointer' }}
+                          onClick={() => {
+                            setInputUrl('supabase.com');
+                            handleStartScan('supabase.com');
+                          }}
+                          title="Click to audit supabase.com"
+                        >
                           <div className="cl-audit-card-body">
                             <span className="cl-audit-card-badge">Top Source · 92% Citation</span>
                             <p className="cl-audit-card-domain">supabase.com</p>
@@ -907,7 +964,15 @@ export default function GrowthLandingPage({ onBackToTools, initialDomain = '' })
                           </div>
                         </div>
 
-                        <div className="cl-audit-preview-card">
+                        <div 
+                          className="cl-audit-preview-card"
+                          style={{ cursor: 'pointer' }}
+                          onClick={() => {
+                            setInputUrl('posthog.com');
+                            handleStartScan('posthog.com');
+                          }}
+                          title="Click to audit posthog.com"
+                        >
                           <div className="cl-audit-card-body">
                             <span className="cl-audit-card-badge">Perplexity Featured Snippet</span>
                             <p className="cl-audit-card-domain">posthog.com</p>
@@ -1185,7 +1250,15 @@ export default function GrowthLandingPage({ onBackToTools, initialDomain = '' })
           />
 
           <div className="cl-radar-preview-layout">
-            <div className="cl-radar-prompt-bubble">
+            <div 
+              className="cl-radar-prompt-bubble"
+              style={{ cursor: 'pointer' }}
+              onClick={() => {
+                inputRef.current?.focus();
+                inputRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              }}
+              title="Click to run your domain audit"
+            >
               "Find which AI prompts cite our domain as a primary recommendation vs. Linear and Notion"
             </div>
 
@@ -1207,7 +1280,15 @@ export default function GrowthLandingPage({ onBackToTools, initialDomain = '' })
                     <span className="cl-radar-item-title">Best modern issue tracker for engineers</span>
                     <span className="cl-radar-item-desc">Cited in 94% of answers · Direct source link</span>
                   </div>
-                  <button type="button" className="cl-radar-action-btn">
+                  <button 
+                    type="button" 
+                    className="cl-radar-action-btn"
+                    onClick={() => {
+                      setInputUrl('linear.app');
+                      handleStartScan('linear.app');
+                    }}
+                    title="Audit linear.app for this citation query"
+                  >
                     <Link2 size={12} />
                     <span>Re-check</span>
                   </button>
@@ -1221,7 +1302,15 @@ export default function GrowthLandingPage({ onBackToTools, initialDomain = '' })
                     <span className="cl-radar-item-title">Top Postgres backend alternatives</span>
                     <span className="cl-radar-item-desc">Perplexity Grounding · Ranked #1 source</span>
                   </div>
-                  <button type="button" className="cl-radar-action-btn">
+                  <button 
+                    type="button" 
+                    className="cl-radar-action-btn"
+                    onClick={() => {
+                      setInputUrl('supabase.com');
+                      handleStartScan('supabase.com');
+                    }}
+                    title="Audit supabase.com for this citation query"
+                  >
                     <Link2 size={12} />
                     <span>Re-check</span>
                   </button>
@@ -1542,28 +1631,49 @@ export default function GrowthLandingPage({ onBackToTools, initialDomain = '' })
               </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0.75rem' }}>
-                <div style={{ padding: '1rem', border: '1px solid var(--cl-card-border)', borderRadius: '10px', background: 'var(--cl-bg)' }}>
+                <div 
+                  style={{ padding: '1rem', border: '1px solid var(--cl-card-border)', borderRadius: '10px', background: 'var(--cl-bg)', cursor: 'pointer', transition: 'all 0.2s' }}
+                  onClick={() => {
+                    setInputUrl('linear.app');
+                    handleStartScan('linear.app');
+                  }}
+                  title="Run instant live audit for linear.app"
+                >
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.35rem' }}>
                     <span className="cl-dot" style={{ background: '#38bdf8' }} />
                     <span style={{ fontWeight: 600, fontSize: '0.88rem' }}>linear.app</span>
                   </div>
-                  <span style={{ fontSize: '0.75rem', color: '#10b981' }}>86% Citation Share</span>
+                  <span style={{ fontSize: '0.75rem', color: '#10b981' }}>86% Citation Share · Test Audit</span>
                 </div>
 
-                <div style={{ padding: '1rem', border: '1px solid var(--cl-card-border)', borderRadius: '10px', background: 'var(--cl-bg)' }}>
+                <div 
+                  style={{ padding: '1rem', border: '1px solid var(--cl-card-border)', borderRadius: '10px', background: 'var(--cl-bg)', cursor: 'pointer', transition: 'all 0.2s' }}
+                  onClick={() => {
+                    setInputUrl('supabase.com');
+                    handleStartScan('supabase.com');
+                  }}
+                  title="Run instant live audit for supabase.com"
+                >
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.35rem' }}>
                     <span className="cl-dot" style={{ background: '#f59e0b' }} />
                     <span style={{ fontWeight: 600, fontSize: '0.88rem' }}>supabase.com</span>
                   </div>
-                  <span style={{ fontSize: '0.75rem', color: '#10b981' }}>92% Citation Share</span>
+                  <span style={{ fontSize: '0.75rem', color: '#10b981' }}>92% Citation Share · Test Audit</span>
                 </div>
 
-                <div style={{ padding: '1rem', border: '1px solid var(--cl-card-border)', borderRadius: '10px', background: 'var(--cl-bg)' }}>
+                <div 
+                  style={{ padding: '1rem', border: '1px solid var(--cl-card-border)', borderRadius: '10px', background: 'var(--cl-bg)', cursor: 'pointer', transition: 'all 0.2s' }}
+                  onClick={() => {
+                    setInputUrl('cerilas.com');
+                    handleStartScan('cerilas.com');
+                  }}
+                  title="Run instant live audit for cerilas.com"
+                >
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.35rem' }}>
                     <span className="cl-dot" style={{ background: '#10b981' }} />
                     <span style={{ fontWeight: 600, fontSize: '0.88rem' }}>cerilas.com</span>
                   </div>
-                  <span style={{ fontSize: '0.75rem', color: '#3b82f6' }}>Primary Workspace</span>
+                  <span style={{ fontSize: '0.75rem', color: '#3b82f6' }}>Primary Workspace · Test Audit</span>
                 </div>
               </div>
             </div>
@@ -1681,8 +1791,11 @@ export default function GrowthLandingPage({ onBackToTools, initialDomain = '' })
               <button
                 type="button"
                 onClick={() => {
-                  if (isAuthenticated) setActiveTab('overview');
-                  else openAuthModal('register');
+                  if (isAuthenticated) {
+                    handleGoToDashboard();
+                  } else {
+                    openAuthModal('register');
+                  }
                 }}
                 className="cl-plan-cta-btn"
               >
@@ -1887,8 +2000,17 @@ export default function GrowthLandingPage({ onBackToTools, initialDomain = '' })
                   disabled={scanning || !inputUrl.trim()}
                   className="cl-composer-btn"
                 >
-                  <span>Run Audit</span>
-                  <ArrowRight size={14} />
+                  {scanning ? (
+                    <>
+                      <Loader2 size={15} className="spin" />
+                      <span>Auditing...</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>Run Audit</span>
+                      <ArrowRight size={14} />
+                    </>
+                  )}
                 </button>
               </form>
             </div>

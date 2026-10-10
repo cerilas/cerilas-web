@@ -72,9 +72,9 @@ export function extractPageMetadata(html, baseUrl) {
         result.issues.push({
           type: 'noindex_detected',
           severity: 'critical',
-          title: 'Sayfa noindex ile engellenmiş',
-          description: 'Sayfa meta robots noindex etiketi içeriyor; arama motorları bu sayfayı dizine ekleyemez.',
-          recommendedFix: 'Sayfanın arama motorlarında dizine girmesini istiyorsanız robots meta etiketindeki "noindex" değerini kaldırın.'
+          title: 'Page blocked with noindex',
+          description: 'Page contains meta robots noindex tag; search engines cannot index this page.',
+          recommendedFix: 'Remove the "noindex" directive from the robots meta tag if you want this page indexed.'
         });
       }
     }
@@ -87,9 +87,9 @@ export function extractPageMetadata(html, baseUrl) {
       result.issues.push({
         type: 'missing_h1',
         severity: 'high',
-        title: 'H1 Başlığı Eksik',
-        description: 'Bu sayfada tek bir birincil H1 başlığı bulunamadı. H1 etiketi SEO ve arama motoru anlamlandırması için kritiktir.',
-        recommendedFix: 'Sayfanın ana konusunu özetleyen tek ve güçlü bir <h1> etiketi ekleyin.'
+        title: 'Missing H1 Heading',
+        description: 'No primary H1 heading found on this page. An H1 tag is critical for SEO and search engine entity understanding.',
+        recommendedFix: 'Add a single descriptive <h1> heading that summarizes the core topic of the page.'
       });
     }
 
@@ -153,9 +153,9 @@ export function extractPageMetadata(html, baseUrl) {
       result.issues.push({
         type: 'missing_schema',
         severity: 'medium',
-        title: 'Yapılandırılmış Veri (Schema.org) Yok',
-        description: 'Sitede JSON-LD yapılandırılmış veri bulunamadı. Organization veya WebSite şeması eklemek Google ve AI (GEO) görünürlüğünü artırır.',
-        recommendedFix: 'Sayfaya JSON-LD formatında Organization veya WebSite Schema.org etiketi entegre edin.'
+        title: 'Missing Structured Data (Schema.org)',
+        description: 'No JSON-LD structured data detected. Adding Organization or WebSite schema improves AI (GEO) and search visibility.',
+        recommendedFix: 'Integrate Schema.org JSON-LD structured data such as Organization or WebSite.'
       });
     }
 
@@ -173,9 +173,9 @@ export function extractPageMetadata(html, baseUrl) {
       result.issues.push({
         type: 'missing_meta_description',
         severity: 'high',
-        title: 'Meta Açıklama Eksik',
-        description: 'Arama sonuçlarında ve AI özetlerinde snippet oluşturmak için birincil meta açıklama bulunamadı.',
-        recommendedFix: 'Sayfa için 140-160 karakter uzunluğunda, harekete geçirici özgün bir <meta name="description"> etiketi ekleyin.'
+        title: 'Missing Meta Description',
+        description: 'No primary meta description found to generate snippets in search results and AI citations.',
+        recommendedFix: 'Add a unique 140-160 character <meta name="description"> tag for the page.'
       });
     }
 
@@ -183,9 +183,9 @@ export function extractPageMetadata(html, baseUrl) {
       result.issues.push({
         type: 'missing_title',
         severity: 'critical',
-        title: 'Sayfa Başlığı (Title) Eksik',
-        description: 'Sayfanın arama motoru başlığı (title tag) bulunamadı.',
-        recommendedFix: 'Sayfanın <head> alanına 50-60 karakter uzunluğunda benzersiz bir <title> etiketi ekleyin.'
+        title: 'Missing Page Title',
+        description: 'No title tag found for the page.',
+        recommendedFix: 'Add a unique 50-60 character <title> tag inside the <head> element.'
       });
     }
 
@@ -410,9 +410,9 @@ export async function scanSitemapAndPages(targetUrl) {
                   issues: [{
                     type: 'http_error',
                     severity: 'critical',
-                    title: `Erişim Hatası (HTTP ${res.status})`,
-                    description: `Bu sayfa HTTP ${res.status} durum kodu ile yanıt verdi. Sayfa arama motorları ve ziyaretçiler için erişilemez.`,
-                    recommendedFix: 'Kırık URL yönlendirmesini (301) veya sunucu yapılandırmasını düzeltin.'
+                    title: `Access Error (HTTP ${res.status})`,
+                    description: `This page returned HTTP status ${res.status}. It is unreachable for search engine bots and visitors.`,
+                    recommendedFix: 'Fix broken URL redirects (301) or server configuration.'
                   }]
                 }
               };
@@ -585,7 +585,7 @@ Only return pure JSON, no markdown codeblocks, no extra explanations.`;
  * Tests Robots.txt for AI bots, /llms.txt standard, and Schema.org Entity/Organization JSON-LD
  */
 export async function auditGeoReadiness(rawDomain) {
-  if (!rawDomain) throw new Error('Alan adı belirtilmedi.');
+  if (!rawDomain) throw new Error('Domain name was not specified.');
 
   let domain = String(rawDomain).trim().toLowerCase();
   domain = domain.replace(/^https?:\/\//, '').replace(/\/.*$/, '');
@@ -678,7 +678,7 @@ export async function auditGeoReadiness(rawDomain) {
       if (rootDisallow && !rootAllow) return { allowed: false, status: 'explicit_disallowed', rule: 'Disallow: /' };
       if (rootAllow) return { allowed: true, status: 'explicit_allowed', rule: 'Allow: /' };
       const emptyDisallow = specificRecord.rules.find(r => r.type === 'disallow' && r.path === '');
-      if (emptyDisallow) return { allowed: true, status: 'explicit_allowed', rule: 'Disallow: (Boş)' };
+      if (emptyDisallow) return { allowed: true, status: 'explicit_allowed', rule: 'Disallow: (Allowed)' };
       return { allowed: true, status: 'partial_allowed', rule: null };
     }
 
