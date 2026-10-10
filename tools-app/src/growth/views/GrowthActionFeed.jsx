@@ -49,7 +49,15 @@ const TAB_NAME_MAP = {
 };
 
 export default function GrowthActionFeed() {
-  const { activeWorkspace, setActiveTab } = useGrowth();
+  const { 
+    activeWorkspace, 
+    setActiveTab,
+    plan,
+    planLimits,
+    limitsSummary,
+    refreshLimits,
+    promptPaywall
+  } = useGrowth();
   const { token } = useAuth();
 
   const [opportunities, setOpportunities] = useState([]);
@@ -122,6 +130,16 @@ export default function GrowthActionFeed() {
 
   const handleSyncOpportunities = async () => {
     if (!activeWorkspace?.id || !token || syncing) return;
+
+    // Pre-flight check on client daily limit
+    const usedToday = limitsSummary?.usage?.actionFeedAiToday || 0;
+    const maxDaily = planLimits?.actionFeedAiDaily ?? 1;
+    if (maxDaily !== Infinity && usedToday >= maxDaily) {
+      showToast(`You have reached your daily AI action analysis limit (${maxDaily}/${maxDaily}). Upgrade your plan for higher or unlimited allowance.`);
+      promptPaywall({ plan: plan === 'free' ? 'pro' : 'unlimited' });
+      return;
+    }
+
     setSyncing(true);
     try {
       const res = await fetch(`/api/growth/workspaces/${activeWorkspace.id}/opportunities/sync`, {
@@ -135,6 +153,10 @@ export default function GrowthActionFeed() {
       if (res.ok && Array.isArray(json.data)) {
         setOpportunities(json.data);
         showToast('AI growth actions refreshed and synchronized with live telemetry! 🚀');
+        if (typeof refreshLimits === 'function') refreshLimits();
+      } else if (res.status === 429) {
+        showToast(json.error || 'You have reached your daily AI action analysis limit.');
+        promptPaywall({ plan: plan === 'free' ? 'pro' : 'unlimited' });
       } else {
         showToast(json.error || 'Failed to scan and synthesize actions.');
       }
@@ -408,6 +430,16 @@ export default function GrowthActionFeed() {
             >
               {syncing ? <Loader2 size={15} className="spin" /> : <Bot size={15} />}
               <span>{syncing ? 'Analyzing Telemetry...' : 'Sync Telemetry with AI'}</span>
+              <span style={{
+                fontSize: '0.72rem',
+                padding: '1px 6px',
+                borderRadius: '999px',
+                background: 'rgba(255,255,255,0.18)',
+                fontWeight: 600,
+                marginLeft: '2px'
+              }}>
+                {limitsSummary?.usage?.actionFeedAiToday ?? 0}/{planLimits?.actionFeedAiDaily === Infinity ? '∞' : (planLimits?.actionFeedAiDaily ?? 1)}
+              </span>
             </button>
 
             <button
@@ -634,9 +666,20 @@ export default function GrowthActionFeed() {
                 type="button"
                 className="growth-primary-btn"
                 onClick={handleSyncOpportunities}
+                disabled={syncing}
               >
-                <Bot size={14} />
+                {syncing ? <Loader2 size={14} className="spin" /> : <Bot size={14} />}
                 <span>Scan Telemetry with AI</span>
+                <span style={{
+                  fontSize: '0.72rem',
+                  padding: '1px 6px',
+                  borderRadius: '999px',
+                  background: 'rgba(255,255,255,0.18)',
+                  fontWeight: 600,
+                  marginLeft: '2px'
+                }}>
+                  {limitsSummary?.usage?.actionFeedAiToday ?? 0}/{planLimits?.actionFeedAiDaily === Infinity ? '∞' : (planLimits?.actionFeedAiDaily ?? 1)}
+                </span>
               </button>
             </div>
           </div>

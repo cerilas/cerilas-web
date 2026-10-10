@@ -112,6 +112,29 @@ function GrowthInner({ onBackToTools }) {
     }
   }, [isAuthenticated, token, refreshWorkspaces, switchWorkspace, setActiveTab]);
 
+  // Dynamically update document title based on active tab and brand workspace
+  useEffect(() => {
+    const tabTitles = {
+      overview: 'Overview & Authority Score',
+      landing: 'AI Search Visibility & GEO Audit',
+      'action-feed': 'Action Feed & Priorities',
+      search: 'Search Performance (GSC)',
+      analytics: 'Web Analytics (GA4)',
+      'ai-visibility': 'AI Visibility Engine (GEO)',
+      'google-business': 'Google Business Radar',
+      competitors: 'Competitor Intelligence',
+      technical: 'Technical SEO & Audit',
+      directories: 'Directories & Distribution',
+      reports: 'Executive Email Reports',
+      settings: 'Workspace & Integrations'
+    };
+    const currentTabName = tabTitles[activeTab] || 'Dashboard';
+    const wsPrefix = (activeWorkspace?.name || activeWorkspace?.primary_domain)
+      ? `${activeWorkspace?.name || activeWorkspace?.primary_domain} • `
+      : '';
+    document.title = `${wsPrefix}${currentTabName} | GrowthControl – Cerilas`;
+  }, [activeTab, activeWorkspace]);
+
   // If user is not signed in, show the premier landing page with instant domain audit
   if (!isAuthenticated) {
     return <GrowthLandingPage onBackToTools={onBackToTools} />;

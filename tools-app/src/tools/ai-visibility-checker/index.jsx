@@ -26,7 +26,9 @@ import {
   Languages,
   Cpu,
   Compass,
-  MapPin
+  MapPin,
+  ArrowRight,
+  X
 } from 'lucide-react';
 import { aiVisibilityCheckerManifest } from './manifest';
 import { useToolAnalytics } from '../../hooks/useToolAnalytics';
@@ -36,6 +38,7 @@ import ToolSeoDivider from '../../components/ui/ToolSeoDivider';
 import AiVisibilityCheckerSeo from './components/AiVisibilityCheckerSeo';
 import AiVisibilityDropdown from './components/AiVisibilityDropdown';
 import FlagIcon from './components/FlagIcon';
+import AiVisibilityGrowthModal from './components/AiVisibilityGrowthModal';
 import { MARKET_OPTIONS, LANGUAGE_OPTIONS } from './options';
 import './ai-visibility-checker.css';
 
@@ -101,6 +104,44 @@ export default function AiVisibilityChecker({ onBack, toolMeta }) {
   const [activeFilter, setActiveFilter] = useState('all'); // 'all' | 'cited' | 'mentioned' | 'not_cited'
   const [expandedQueries, setExpandedQueries] = useState({});
   const [copiedJson, setCopiedJson] = useState(false);
+  const [growthModalOpen, setGrowthModalOpen] = useState(false);
+
+  // GrowthControl Deep-Dive & Redirection Handler
+  const handleNavigateGrowth = (overrideDomain = null) => {
+    const domainToPass = overrideDomain || auditData?.report?.domain || inputUrl.trim();
+    if (domainToPass) {
+      try {
+        sessionStorage.setItem('cerilas_pending_growth_scan', JSON.stringify({
+          scanResult: {
+            domain: domainToPass,
+            url: auditData?.report?.url || `https://${domainToPass}`
+          },
+          brandProfile: {
+            brandName: domainToPass,
+            primaryKeywords: auditData?.report?.results?.map(r => r.query).slice(0, 5) || []
+          }
+        }));
+      } catch (e) {
+        console.warn('Pending scan storage warning:', e);
+      }
+    }
+    window.location.hash = '#/growth';
+  };
+
+  // Trigger minimalist GrowthControl modal after initial scan
+  const triggerFirstScanModal = (data) => {
+    try {
+      const alreadyShown = sessionStorage.getItem('aivc_growth_modal_seen');
+      if (!alreadyShown) {
+        sessionStorage.setItem('aivc_growth_modal_seen', 'true');
+        setTimeout(() => {
+          setGrowthModalOpen(true);
+        }, 850);
+      }
+    } catch (e) {
+      console.warn('First scan modal trigger error:', e);
+    }
+  };
 
   // Ref and Auto-Scroll for Progress Card
   const progressCardRef = useRef(null);
@@ -169,6 +210,7 @@ export default function AiVisibilityChecker({ onBack, toolMeta }) {
       throw new Error(data.error || 'The AI Visibility audit could not be completed.');
     }
     setAuditData(data);
+    triggerFirstScanModal(data);
     if (data.report?.results?.length > 0) {
       setExpandedQueries({
         [data.report.results[0].id]: true,
@@ -267,6 +309,7 @@ export default function AiVisibilityChecker({ onBack, toolMeta }) {
           } else if (eventType === 'complete') {
             receivedComplete = true;
             setAuditData(data);
+            triggerFirstScanModal(data);
             if (data.quota) {
               setQuota(data.quota);
             }
@@ -394,6 +437,27 @@ export default function AiVisibilityChecker({ onBack, toolMeta }) {
         resetInMinutes={quota.resetInMinutes}
         toolName="AI Visibility Checker"
       />
+
+      {/* GrowthControl Ecosystem Redirection Banner */}
+      <div className="aivc-growth-suite-banner">
+        <div className="aivc-growth-suite-content">
+          <div className="aivc-growth-suite-badge">
+            <TrendingUp size={13} />
+            <span>GrowthControl Platform</span>
+          </div>
+          <span className="aivc-growth-suite-text">
+            Need <strong>continuous weekly monitoring, competitor radar</strong> and <strong>Google Search Console sync</strong>?
+          </span>
+        </div>
+        <button
+          type="button"
+          className="aivc-growth-suite-cta"
+          onClick={() => handleNavigateGrowth()}
+        >
+          <span>Explore GrowthControl</span>
+          <ArrowRight size={13} />
+        </button>
+      </div>
 
       {/* Error Alert Banner */}
       {errorMessage && (
@@ -735,6 +799,38 @@ export default function AiVisibilityChecker({ onBack, toolMeta }) {
             </div>
           </div>
 
+          {/* GrowthControl Deep-Dive Hub Card */}
+          <div className="aivc-growth-hub-card">
+            <div className="aivc-growth-hub-left">
+              <div className="aivc-growth-hub-icon-wrap">
+                <img 
+                  src="/cgrowthlogo.svg" 
+                  alt="GrowthControl" 
+                  width={26} 
+                  height={26} 
+                  onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                />
+              </div>
+              <div className="aivc-growth-hub-text">
+                <h4>Automate Continuous AI Search &amp; GEO Tracking with GrowthControl</h4>
+                <p>
+                  This single audit shows your visibility right now. With <strong>GrowthControl</strong>, monitor <strong>{auditData.report?.domain || 'your domain'}</strong> continuously: track weekly citation changes across Gemini &amp; ChatGPT, spy on competitor citations, auto-sync Google Search Console, and receive executive email digests.
+                </p>
+              </div>
+            </div>
+            <div className="aivc-growth-hub-actions">
+              <button
+                type="button"
+                className="aivc-growth-hub-btn"
+                onClick={() => handleNavigateGrowth(auditData.report?.domain)}
+              >
+                <TrendingUp size={15} />
+                <span>Launch in GrowthControl (Free)</span>
+                <ArrowRight size={14} />
+              </button>
+            </div>
+          </div>
+
           {/* AI Visibility Score & Overview Grid */}
           <div className="aivc-overview-grid">
             {/* Score Card */}
@@ -1015,6 +1111,16 @@ export default function AiVisibilityChecker({ onBack, toolMeta }) {
       {/* SEO Section & Divider */}
       <ToolSeoDivider />
       <AiVisibilityCheckerSeo />
+
+      {/* Minimalist First-Scan GrowthControl Modal */}
+      <AiVisibilityGrowthModal
+        isOpen={growthModalOpen}
+        onClose={() => setGrowthModalOpen(false)}
+        domain={auditData?.report?.domain || inputUrl.trim()}
+        score={auditData?.report?.visibilityScore}
+        grade={auditData?.report?.visibilityGrade}
+        onNavigateGrowth={() => handleNavigateGrowth(auditData?.report?.domain)}
+      />
     </div>
   );
 }

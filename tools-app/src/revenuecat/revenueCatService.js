@@ -183,6 +183,38 @@ export function checkProEntitlement(customerInfo) {
 }
 
 /**
+ * Verify whether the user has active Unlimited plan
+ * @param {import('@revenuecat/purchases-js').CustomerInfo} [customerInfo]
+ * @returns {boolean}
+ */
+export function checkUnlimitedEntitlement(customerInfo) {
+  if (!customerInfo) return false;
+
+  // Check active entitlements
+  const activeMap = customerInfo.entitlements?.active;
+  if (activeMap && (activeMap['cerilas_tools_unlimited'] || activeMap['unlimited'])) {
+    return true;
+  }
+
+  // Fallback inspect all entitlements
+  const allMap = customerInfo.entitlements?.all;
+  if (allMap && (allMap['cerilas_tools_unlimited']?.isActive || allMap['unlimited']?.isActive)) {
+    return true;
+  }
+
+  // Check active subscriptions
+  const subs = Array.from(customerInfo.activeSubscriptions || []);
+  for (const s of subs) {
+    const lower = String(s).toLowerCase();
+    if (lower.includes('unlimited') || s === REVENUECAT_CONFIG.PRODUCTS?.UNLIMITED_MONTHLY?.id) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+/**
  * Convenience method to check pro entitlement asynchronously directly from SDK
  * @returns {Promise<boolean>}
  */

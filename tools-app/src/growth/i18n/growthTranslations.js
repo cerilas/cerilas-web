@@ -7,7 +7,7 @@
 export const growthTranslations = {
   en: {
     nav: {
-      brandTitle: 'Cerilas Growth',
+      brandTitle: 'GrowthControl',
       brandTag: 'AI Intelligence v1.0',
       overview: 'OVERVIEW',
       overviewItem: 'Overview & Score',
@@ -299,7 +299,7 @@ export const growthTranslations = {
 
   tr: {
     nav: {
-      brandTitle: 'Cerilas Growth',
+      brandTitle: 'GrowthControl',
       brandTag: 'AI Intelligence v1.0',
       overview: 'GENEL BAKIŞ',
       overviewItem: 'Genel Bakış & Skor',

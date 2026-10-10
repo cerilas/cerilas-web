@@ -5,6 +5,7 @@ import {
   getPurchases, 
   getCustomerInfo, 
   checkProEntitlement, 
+  checkUnlimitedEntitlement,
   getOfferings, 
   purchasePackage, 
   presentPaywall, 
@@ -27,17 +28,15 @@ export function RevenueCatProvider({ children }) {
   const [isPaywallOpen, setIsPaywallOpen] = useState(false);
   const [isCustomerCenterOpen, setIsCustomerCenterOpen] = useState(false);
   const [paywallInitialProduct, setPaywallInitialProduct] = useState(null);
-  const [paywallInitialCycle, setPaywallInitialCycle] = useState('annual');
+  const [paywallInitialCycle, setPaywallInitialCycle] = useState('monthly');
 
   // Listen to custom window events triggered across the app
   useEffect(() => {
     const handleOpenPaywallEvt = (e) => {
-      if (e?.detail?.defaultPackageId || e?.detail?.initialProductId) {
-        setPaywallInitialProduct(e.detail.defaultPackageId || e.detail.initialProductId);
+      if (e?.detail?.defaultPackageId || e?.detail?.initialProductId || e?.detail?.plan) {
+        setPaywallInitialProduct(e.detail.defaultPackageId || e.detail.initialProductId || e.detail.plan);
       }
-      if (e?.detail?.cycle) {
-        setPaywallInitialCycle(e.detail.cycle);
-      }
+      setPaywallInitialCycle(e?.detail?.cycle || 'monthly');
       setIsPaywallOpen(true);
     };
     const handleOpenCustomerCenterEvt = () => {
@@ -138,9 +137,7 @@ export function RevenueCatProvider({ children }) {
     if (options.defaultPackageId || options.initialProductId) {
       setPaywallInitialProduct(options.defaultPackageId || options.initialProductId);
     }
-    if (options.cycle) {
-      setPaywallInitialCycle(options.cycle);
-    }
+    setPaywallInitialCycle(options.cycle || 'monthly');
     setIsPaywallOpen(true);
   }, []);
 
@@ -158,13 +155,49 @@ export function RevenueCatProvider({ children }) {
     return Array.from(customerInfo.activeSubscriptions);
   }, [customerInfo]);
 
+  const [isUnlimited, setIsUnlimited] = useState(false);
+
+  // Derive effective plan: 'free' | 'pro' | 'unlimited'
+  const effectivePlan = useMemo(() => {
+    const dbPlan = (user?.plan || '').toLowerCase();
+    if (dbPlan === 'unlimited' || dbPlan === 'enterprise') return 'unlimited';
+    if (dbPlan === 'pro') return 'pro';
+
+    if (isUnlimited || checkUnlimitedEntitlement(customerInfo)) return 'unlimited';
+    if (isPro || checkProEntitlement(customerInfo)) return 'pro';
+
+    return 'free';
+  }, [user?.plan, isUnlimited, isPro, customerInfo]);
+
+  // Sync to database if user is authenticated and higher tier detected
+  useEffect(() => {
+    if (isAuthenticated && user?.id && effectivePlan !== 'free' && user?.plan !== effectivePlan) {
+      try {
+        const token = localStorage.getItem('cerilas_tools_user_token');
+        if (token) {
+          fetch('/api/auth/sync-plan', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ plan: effectivePlan })
+          }).catch(() => {});
+        }
+      } catch (_) {}
+    }
+  }, [isAuthenticated, user?.id, user?.plan, effectivePlan]);
+
   const managementUrl = customerInfo?.managementURL || null;
 
   const value = useMemo(() => ({
     isInitialized,
     isLoading,
     customerInfo,
-    isPro,
+    isPro: effectivePlan === 'pro' || effectivePlan === 'unlimited',
+    isUnlimited: effectivePlan === 'unlimited',
+    effectivePlan,
+    plan: effectivePlan,
     offerings,
     currentOffering: offerings?.current || null,
     activeSubscriptions,
@@ -187,7 +220,7 @@ export function RevenueCatProvider({ children }) {
     isInitialized,
     isLoading,
     customerInfo,
-    isPro,
+    effectivePlan,
     offerings,
     activeSubscriptions,
     managementUrl,

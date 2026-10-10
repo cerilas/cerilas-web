@@ -4,7 +4,7 @@ import { Sparkles } from 'lucide-react';
 export default function GrowthPageCover({
   title,
   subtitle,
-  badge = 'Cerilas Growth',
+  badge = 'GrowthControl',
   badgeIcon: BadgeIcon = Sparkles,
   coverImage,
   stats = [],

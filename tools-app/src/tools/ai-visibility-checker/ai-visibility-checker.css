@@ -1705,3 +1705,414 @@ html.dark .aivc-input-field::placeholder {
     max-width: 140px;
   }
 }
+
+/* ==========================================================================
+   GrowthControl In-Page Redirection & First-Scan Modal Styles
+   ========================================================================== */
+
+/* 1. Top Announcement Suite Banner */
+.aivc-growth-suite-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  background: linear-gradient(135deg, rgba(56, 189, 248, 0.08) 0%, rgba(99, 102, 241, 0.06) 100%);
+  border: 1px solid rgba(56, 189, 248, 0.22);
+  border-radius: 16px;
+  padding: 0.75rem 1.25rem;
+  margin-bottom: 1.5rem;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  transition: all 0.25s ease;
+}
+
+:root[data-theme="light"] .aivc-growth-suite-banner {
+  background: linear-gradient(135deg, rgba(2, 132, 199, 0.06) 0%, rgba(79, 70, 229, 0.05) 100%);
+  border-color: rgba(2, 132, 199, 0.2);
+}
+
+.aivc-growth-suite-content {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  flex-wrap: wrap;
+}
+
+.aivc-growth-suite-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.25rem 0.65rem;
+  border-radius: 999px;
+  background: rgba(56, 189, 248, 0.15);
+  color: #38bdf8;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+:root[data-theme="light"] .aivc-growth-suite-badge {
+  background: rgba(2, 132, 199, 0.12);
+  color: #0284c7;
+}
+
+.aivc-growth-suite-text {
+  font-size: 0.86rem;
+  color: var(--text-main);
+  line-height: 1.4;
+}
+
+.aivc-growth-suite-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.45rem 0.95rem;
+  border-radius: 10px;
+  background: var(--text-main);
+  color: var(--bg-color);
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.aivc-growth-suite-cta:hover {
+  opacity: 0.88;
+  transform: translateY(-1px);
+}
+
+/* 2. Audit Results Growth Hub Card */
+.aivc-growth-hub-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.8) 0%, rgba(30, 41, 59, 0.5) 100%);
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  border-radius: 20px;
+  padding: 1.5rem 1.75rem;
+  margin-top: 1.5rem;
+  margin-bottom: 1.5rem;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 12px 32px -10px rgba(0, 0, 0, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+:root[data-theme="light"] .aivc-growth-hub-card {
+  background: linear-gradient(135deg, rgba(240, 249, 255, 0.85) 0%, rgba(224, 242, 254, 0.6) 100%);
+  border-color: rgba(2, 132, 199, 0.25);
+  box-shadow: 0 12px 32px -10px rgba(2, 132, 199, 0.12);
+}
+
+.aivc-growth-hub-left {
+  display: flex;
+  align-items: flex-start;
+  gap: 1.25rem;
+  flex: 1;
+}
+
+.aivc-growth-hub-icon-wrap {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  background: rgba(56, 189, 248, 0.15);
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 4px 16px rgba(56, 189, 248, 0.15);
+}
+
+.aivc-growth-hub-text h4 {
+  margin: 0 0 0.35rem 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text-main);
+  letter-spacing: -0.01em;
+}
+
+.aivc-growth-hub-text p {
+  margin: 0;
+  font-size: 0.86rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+  max-width: 780px;
+}
+
+.aivc-growth-hub-actions {
+  flex-shrink: 0;
+}
+
+.aivc-growth-hub-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.35rem;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #0284c7 0%, #2563eb 100%);
+  color: #ffffff;
+  font-size: 0.88rem;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+  box-shadow: 0 8px 24px -6px rgba(2, 132, 199, 0.4);
+  transition: all 0.25s ease;
+}
+
+.aivc-growth-hub-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px -6px rgba(2, 132, 199, 0.55);
+  opacity: 0.95;
+}
+
+/* 3. Modern Minimalist First-Scan Modal */
+.aivc-growth-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.25rem;
+  animation: aivcBackdropFade 0.25s ease forwards;
+}
+
+@keyframes aivcBackdropFade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.aivc-growth-modal-card {
+  position: relative;
+  width: 100%;
+  max-width: 540px;
+  background: var(--card-bg, #0b0f17);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 24px;
+  padding: 2.25rem 2rem;
+  box-shadow: 0 32px 80px -16px rgba(0, 0, 0, 0.6);
+  color: var(--text-main, #ffffff);
+  overflow: hidden;
+}
+
+:root[data-theme="light"] .aivc-growth-modal-card {
+  background: #ffffff;
+  border-color: rgba(0, 0, 0, 0.08);
+  box-shadow: 0 32px 80px -16px rgba(0, 0, 0, 0.18);
+}
+
+.aivc-growth-modal-glow {
+  position: absolute;
+  top: -80px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 280px;
+  height: 160px;
+  background: radial-gradient(circle, rgba(56, 189, 248, 0.25) 0%, transparent 70%);
+  pointer-events: none;
+  filter: blur(40px);
+}
+
+.aivc-growth-modal-close {
+  position: absolute;
+  top: 1.25rem;
+  right: 1.25rem;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid var(--card-border, rgba(255, 255, 255, 0.1));
+  background: rgba(150, 150, 150, 0.08);
+  color: var(--text-muted, #94a3b8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.aivc-growth-modal-close:hover {
+  color: var(--text-main, #ffffff);
+  background: rgba(150, 150, 150, 0.16);
+  transform: scale(1.05);
+}
+
+.aivc-growth-modal-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.3rem 0.75rem;
+  border-radius: 999px;
+  background: rgba(56, 189, 248, 0.12);
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  margin-bottom: 1.25rem;
+}
+
+.aivc-modal-brand-logo {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+}
+
+.aivc-modal-badge-text {
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: #38bdf8;
+  letter-spacing: 0.02em;
+}
+
+.aivc-modal-badge-sub {
+  font-size: 0.7rem;
+  color: var(--text-muted, #94a3b8);
+  border-left: 1px solid rgba(150, 150, 150, 0.3);
+  padding-left: 0.45rem;
+}
+
+.aivc-growth-modal-header {
+  margin-bottom: 1.5rem;
+}
+
+.aivc-growth-modal-title {
+  font-size: 1.45rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin: 0 0 0.65rem 0;
+  line-height: 1.25;
+}
+
+.aivc-growth-modal-title .gradient-text {
+  background: linear-gradient(135deg, #38bdf8 0%, #818cf8 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.aivc-growth-modal-sub {
+  font-size: 0.88rem;
+  color: var(--text-muted, #94a3b8);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.aivc-growth-modal-features {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  margin-bottom: 1.85rem;
+}
+
+.aivc-growth-feature-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.85rem;
+  padding: 0.75rem 0.9rem;
+  background: rgba(150, 150, 150, 0.04);
+  border: 1px solid var(--card-border, rgba(255, 255, 255, 0.06));
+  border-radius: 14px;
+}
+
+.aivc-feature-icon-box {
+  width: 32px;
+  height: 32px;
+  border-radius: 9px;
+  background: rgba(56, 189, 248, 0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.aivc-feature-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.aivc-feature-text strong {
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.aivc-feature-text span {
+  font-size: 0.78rem;
+  color: var(--text-muted, #94a3b8);
+  line-height: 1.4;
+}
+
+.aivc-growth-modal-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.aivc-growth-modal-primary-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.85rem 1.25rem;
+  border-radius: 14px;
+  border: none;
+  background: linear-gradient(135deg, #0284c7 0%, #2563eb 100%);
+  color: #ffffff;
+  font-size: 0.92rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 8px 24px -4px rgba(2, 132, 199, 0.45);
+  transition: all 0.25s ease;
+}
+
+.aivc-growth-modal-primary-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px -4px rgba(2, 132, 199, 0.6);
+  opacity: 0.96;
+}
+
+.aivc-growth-modal-secondary-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted, #94a3b8);
+  font-size: 0.82rem;
+  font-weight: 500;
+  padding: 0.45rem;
+  cursor: pointer;
+  text-align: center;
+  transition: color 0.2s ease;
+}
+
+.aivc-growth-modal-secondary-btn:hover {
+  color: var(--text-main);
+}
+
+@media (max-width: 768px) {
+  .aivc-growth-suite-banner {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 0.85rem 1rem;
+  }
+  .aivc-growth-suite-cta {
+    width: 100%;
+    justify-content: center;
+  }
+  .aivc-growth-hub-card {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 1.25rem;
+  }
+  .aivc-growth-hub-btn {
+    width: 100%;
+    justify-content: center;
+  }
+  .aivc-growth-modal-card {
+    padding: 1.5rem 1.25rem;
+  }
+}

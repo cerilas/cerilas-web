@@ -16,6 +16,25 @@
     </image:image>
   </url>
 
+  <!-- GrowthControl AI Visibility & GEO Platform -->
+  <url>
+    <loc>https://tools.cerilas.com/growth</loc>
+    <lastmod>2026-10-07</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.00</priority>
+    <image:image>
+      <image:loc>https://tools.cerilas.com/og-image.svg</image:loc>
+      <image:title>GrowthControl – AI Search Visibility &amp; Generative Engine Optimization (GEO)</image:title>
+      <image:caption>Audit if your brand is cited in ChatGPT, Perplexity, Claude, and Gemini with actionable GEO intelligence.</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://tools.cerilas.com/#/growth</loc>
+    <lastmod>2026-10-07</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.98</priority>
+  </url>
+
   <!-- 2. Free Online PDF Editor -->
   <url>
     <loc>https://tools.cerilas.com/tool/pdf-editor</loc>

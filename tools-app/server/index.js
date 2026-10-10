@@ -111,12 +111,24 @@ app.get('/sitemap.xml', (req, res) => {
   let xml = `<?xml version="1.0" encoding="UTF-8"?>\n`;
   xml += `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n`;
 
-  // 1. Homepage
+  // 1. Homepage & Flagship Growth Platform
   xml += `  <url>\n`;
   xml += `    <loc>https://tools.cerilas.com/</loc>\n`;
   xml += `    <lastmod>${today}</lastmod>\n`;
   xml += `    <changefreq>daily</changefreq>\n`;
   xml += `    <priority>1.0</priority>\n`;
+  xml += `  </url>\n`;
+  xml += `  <url>\n`;
+  xml += `    <loc>https://tools.cerilas.com/growth</loc>\n`;
+  xml += `    <lastmod>${today}</lastmod>\n`;
+  xml += `    <changefreq>daily</changefreq>\n`;
+  xml += `    <priority>1.0</priority>\n`;
+  xml += `  </url>\n`;
+  xml += `  <url>\n`;
+  xml += `    <loc>https://tools.cerilas.com/ai-visibility-checker</loc>\n`;
+  xml += `    <lastmod>${today}</lastmod>\n`;
+  xml += `    <changefreq>daily</changefreq>\n`;
+  xml += `    <priority>0.95</priority>\n`;
   xml += `  </url>\n`;
 
   // 2. Category Pages

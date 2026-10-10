@@ -1,6 +1,6 @@
 export const aiVisibilityCheckerManifest = {
   slug: 'ai-visibility-checker',
-  title: 'AI Visibility Checker',
+  title: 'AI Visibility Checker by GrowthControl',
   shortDescription: 'Audit your website visibility in AI search engines (Gemini, ChatGPT, Perplexity). Automatically extracts top 10 search queries from your content and tests live citation grounding.',
   category: 'AI Assisted',
   iconName: 'Eye',
@@ -18,12 +18,12 @@ export const aiVisibilityCheckerManifest = {
     'Actionable AEO Recommendations: Concrete steps to optimize schema markup, Q&A architecture, and digital entity authority'
   ],
   seo: {
-    title: "Free AI Visibility Checker – Gemini & ChatGPT | Cerilas Tools",
+    title: "AI Visibility Checker by GrowthControl – Gemini & ChatGPT | Cerilas Tools",
     description: "Audit if your brand and website are cited in AI search engines. Test live Gemini, ChatGPT, and Perplexity answer grounding with actionable GEO suggestions.",
     keywords: "ai visibility checker, geo audit tool, check if gemini cites my website, chatgpt search citation checker, perplexity citation audit, test ai search citations free, generative engine optimization tool",
     ogImage: 'https://tools.cerilas.com/tool-icons/ai-visibility-checker.webp',
-    ogImageAlt: "Free AI Visibility Checker – Gemini & ChatGPT | Cerilas Tools",
-    breadcrumbsName: "AI Visibility Checker",
+    ogImageAlt: "AI Visibility Checker by GrowthControl – Gemini & ChatGPT | Cerilas Tools",
+    breadcrumbsName: "AI Visibility Checker by GrowthControl",
     faq: [
         {
             "q": "What is an AI Visibility Score and how is it calculated?",

@@ -771,11 +771,11 @@ export const TOOLS_SEO_REGISTRY = {
   // 18. AI Visibility Checker
   'ai-visibility-checker': {
     slug: 'ai-visibility-checker',
-    name: 'AI Visibility Checker',
-    h1: 'Free AI Visibility Checker – Test Gemini & ChatGPT Citations',
+    name: 'AI Visibility Checker by GrowthControl',
+    h1: 'AI Visibility Checker by GrowthControl – Test Gemini & ChatGPT Citations',
     category: 'SEO Tools',
     categorySlug: 'seo-tools',
-    title: 'Free AI Visibility Checker – Gemini & ChatGPT | Cerilas Tools',
+    title: 'AI Visibility Checker by GrowthControl – Gemini & ChatGPT | Cerilas Tools',
     description: 'Audit if your brand and website are cited in AI search engines. Test live Gemini, ChatGPT, and Perplexity answer grounding with actionable GEO suggestions.',
     shortDescription: 'Audit your brand\'s visibility and citation share across AI search engines. Analyzes Google Gemini Search Grounding, ChatGPT Search, and Perplexity AI citations.',
     howItWorks: 'Submits real user commercial queries to Gemini with live Google Search grounding enabled. Analyzes grounded sources, citation indices, and competitor mentions to generate a comprehensive AI Visibility Score.',

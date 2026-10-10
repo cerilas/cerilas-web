@@ -40,8 +40,8 @@ export default function RevenueCatPaywallModal({
   // State: selected plan ('free' | 'pro' | 'unlimited')
   const [selectedPlanId, setSelectedPlanId] = useState('pro');
   
-  // State: billing cycle ('monthly' | 'annual')
-  const [billingCycle, setBillingCycle] = useState('annual');
+  // State: billing cycle ('monthly' | 'annual') - default is monthly
+  const [billingCycle, setBillingCycle] = useState('monthly');
 
   const [isPurchasing, setIsPurchasing] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
@@ -50,48 +50,65 @@ export default function RevenueCatPaywallModal({
   // Available packages from RevenueCat
   const availablePackages = currentOffering?.availablePackages || [];
 
+  // Robust package classification helpers
+  const isAnnualPackage = (pkg) => {
+    if (!pkg) return false;
+    if (pkg.packageType === 'ANNUAL') return true;
+    if (pkg.identifier === '$rc_annual') return true;
+    const id = String(pkg.product?.identifier || pkg.identifier || '').toLowerCase();
+    if (id.includes('annual') || id.includes('yearly') || id.includes('year')) return true;
+    const period = String(pkg.product?.subscriptionPeriod || pkg.product?.normalDuration || '').toLowerCase();
+    if (period.includes('y') || period.includes('year') || period.includes('p1y')) return true;
+    const amount = Number(pkg.product?.price?.amount || 0);
+    if (amount >= 50) return true;
+    return false;
+  };
+
+  const isMonthlyPackage = (pkg) => {
+    if (!pkg) return false;
+    if (pkg.packageType === 'MONTHLY') return true;
+    if (pkg.identifier === '$rc_monthly') return true;
+    const id = String(pkg.product?.identifier || pkg.identifier || '').toLowerCase();
+    if (id.includes('month')) return true;
+    const period = String(pkg.product?.subscriptionPeriod || pkg.product?.normalDuration || '').toLowerCase();
+    if (period.includes('m') || period.includes('month') || period.includes('p1m')) return true;
+    const amount = Number(pkg.product?.price?.amount || 0);
+    if (amount > 0 && amount < 40) return true;
+    return false;
+  };
+
   // Match packages dynamically from the RevenueCat offering
   const getPackageForSelection = (planId, cycle) => {
     if (!availablePackages || availablePackages.length === 0) return null;
 
     if (planId === 'pro') {
       if (cycle === 'annual') {
-        return availablePackages.find(pkg => 
-          pkg.identifier === '$rc_annual' || 
-          pkg.packageType === 'ANNUAL' ||
-          pkg.product?.identifier === 'yearly' ||
-          pkg.product?.identifier?.toLowerCase().includes('annual') ||
-          pkg.product?.identifier?.toLowerCase().includes('year')
-        ) || availablePackages.find(pkg => pkg.identifier === '$rc_annual') || availablePackages[0];
+        return availablePackages.find(pkg => {
+          if (!isAnnualPackage(pkg)) return false;
+          const id = String(pkg.product?.identifier || pkg.identifier || '').toLowerCase();
+          return !id.includes('unlimited');
+        }) || null;
       } else {
-        return availablePackages.find(pkg => 
-          pkg.product?.identifier === 'pri_01m41vjy149vqr2av5b43x4yf9' ||
-          pkg.identifier === 'pri_01m41vjy149vqr2av5b43x4yf9' ||
-          pkg.identifier === '$rc_monthly' || 
-          pkg.packageType === 'MONTHLY' ||
-          pkg.product?.identifier === 'monthly'
-        ) || availablePackages[0];
+        return availablePackages.find(pkg => {
+          if (!isMonthlyPackage(pkg)) return false;
+          const id = String(pkg.product?.identifier || pkg.identifier || '').toLowerCase();
+          return !id.includes('unlimited');
+        }) || availablePackages.find(pkg => pkg.packageType === 'MONTHLY') || availablePackages[0];
       }
     }
 
     if (planId === 'unlimited') {
       if (cycle === 'annual') {
-        return availablePackages.find(pkg => 
-          pkg.product?.identifier?.toLowerCase().includes('unlimited') && 
-          (pkg.packageType === 'ANNUAL' || pkg.identifier?.toLowerCase().includes('annual'))
-        ) || availablePackages.find(pkg => 
-          pkg.identifier === '$rc_annual' || 
-          pkg.packageType === 'ANNUAL' ||
-          pkg.product?.identifier === 'yearly'
-        ) || availablePackages[0];
+        return availablePackages.find(pkg => {
+          if (!isAnnualPackage(pkg)) return false;
+          const id = String(pkg.product?.identifier || pkg.identifier || '').toLowerCase();
+          return id.includes('unlimited');
+        }) || null;
       } else {
-        return availablePackages.find(pkg => 
-          pkg.product?.identifier === 'pri_01m41vmta5xebbmwt1k46xbfsf' ||
-          pkg.identifier === 'pri_01m41vmta5xebbmwt1k46xbfsf' ||
-          pkg.product?.identifier?.toLowerCase().includes('unlimited') ||
-          pkg.identifier === '$rc_monthly' || 
-          pkg.packageType === 'MONTHLY'
-        ) || availablePackages[0];
+        return availablePackages.find(pkg => {
+          const id = String(pkg.product?.identifier || pkg.identifier || '').toLowerCase();
+          return id.includes('unlimited') && isMonthlyPackage(pkg);
+        }) || null;
       }
     }
 
@@ -115,16 +132,12 @@ export default function RevenueCatPaywallModal({
 
     if (planId === 'pro') {
       if (cycle === 'annual') {
-        if (proAnnualPkg?.product?.price?.formattedPrice && 
-            proAnnualPkg.product.identifier !== 'yearly' && 
-            proAnnualPkg.product.price?.amount !== 7999) {
+        if (proAnnualPkg && isAnnualPackage(proAnnualPkg) && proAnnualPkg.product?.price?.formattedPrice) {
           return proAnnualPkg.product.price.formattedPrice;
         }
         return '$99.90';
       } else {
-        if (proMonthlyPkg?.product?.price?.formattedPrice && 
-            proMonthlyPkg.product.identifier !== 'monthly' && 
-            proMonthlyPkg.product.price?.amount !== 999) {
+        if (proMonthlyPkg && isMonthlyPackage(proMonthlyPkg) && proMonthlyPkg.product?.price?.formattedPrice) {
           return proMonthlyPkg.product.price.formattedPrice;
         }
         return '$9.99';
@@ -133,15 +146,12 @@ export default function RevenueCatPaywallModal({
 
     if (planId === 'unlimited') {
       if (cycle === 'annual') {
-        if (unlimitedAnnualPkg?.product?.price?.formattedPrice && 
-            unlimitedAnnualPkg.product.identifier !== 'yearly' && 
-            unlimitedAnnualPkg.product.price?.amount !== 7999) {
+        if (unlimitedAnnualPkg && isAnnualPackage(unlimitedAnnualPkg) && unlimitedAnnualPkg.product?.price?.formattedPrice) {
           return unlimitedAnnualPkg.product.price.formattedPrice;
         }
         return '$149.90';
       } else {
-        if (unlimitedMonthlyPkg?.product?.price?.formattedPrice && 
-            unlimitedMonthlyPkg.product.identifier !== 'monthly') {
+        if (unlimitedMonthlyPkg && isMonthlyPackage(unlimitedMonthlyPkg) && unlimitedMonthlyPkg.product?.price?.formattedPrice) {
           return unlimitedMonthlyPkg.product.price.formattedPrice;
         }
         return '$14.99';
@@ -151,80 +161,69 @@ export default function RevenueCatPaywallModal({
     return '$0';
   };
 
-  // Plan Definitions in exact order: Free -> Pro -> Unlimited
+  // Plan Definitions in exact order: Free -> Pro -> Unlimited (Detailed & Minimalist)
   const plans = [
     {
       id: 'free',
-      name: isTr ? 'Forever Free' : 'Forever Free',
-      badge: isTr ? 'Ömür Boyu Ücretsiz' : 'Free Forever',
-      badgeType: 'neutral',
-      desc: isTr 
-        ? 'Tüm temel araçlar ömür boyu bedava, premium araçlar için sınırlı token kotası.' 
-        : 'Free tools free forever, with limited free token allowance for premium tools.',
+      name: 'Free',
+      badge: null,
       price: '$0',
       period: isTr ? '/ ömür boyu' : '/ forever',
-      subDetail: isTr ? 'Kredi kartı gerekmez • %100 İstemci taraflı' : 'No credit card required • 100% Client-side',
+      ctaPriceDetail: '$0',
+      subDetail: isTr ? 'Kredi kartı gerekmez' : 'No credit card needed',
       features: [
-        isTr ? 'Tüm ücretsiz araçlar sınırsız ve ömür boyu bedava' : 'All free tools free forever',
-        isTr ? 'Premium araçlar için sınırlı token hakkı' : 'Limited token allowance for premium tools',
-        isTr ? '%100 İstemci taraflı gizlilik (Local WASM/WebGPU)' : '100% In-browser confidentiality (Local WASM)',
-        isTr ? 'Dosyalarınız asla sunucuya yüklenmez' : 'Zero server uploads (Files stay on device)',
-        isTr ? 'Standart tarayıcı işlem hızı' : 'Standard client processing speed'
-      ],
-      ctaText: !isPro 
-        ? (isTr ? 'Mevcut Paketiniz' : 'Current Plan') 
-        : (isTr ? 'Ücretsiz Plana Dön' : 'Switch to Free'),
-      ctaVariant: 'secondary'
+        isTr ? '1 Workspace (Web sitesi / Marka)' : '1 Workspace (Website / Brand)',
+        isTr ? '3 GEO / AEO Arama İstemi (Prompt)' : '3 GEO / AEO Search Prompts',
+        isTr ? 'Temel token kotası & ücretsiz araçlar' : 'Basic token allowance & free tools',
+        isTr ? 'Günlük 1 AI Aksiyon & Rakip Keşfi' : '1 Daily AI Action & Competitor Discovery',
+        isTr ? 'Standart işlem ve yanıt hızı' : 'Standard execution speed'
+      ]
     },
     {
       id: 'pro',
       name: 'Pro',
-      badge: isTr ? 'En Popüler' : 'Most Popular',
+      badge: isTr ? 'Popüler' : 'Popular',
       badgeType: 'featured',
-      desc: isTr 
-        ? 'Profesyoneller ve yoğun kullanıcılar için yüksek token hakkı ve öncelikli işlem hızı.' 
-        : 'High token allowance for premium AI, PDF, and productivity tools with priority execution.',
-      price: getPlanPrice('pro', billingCycle),
-      period: billingCycle === 'annual' ? (isTr ? '/ yıl' : '/ year') : (isTr ? '/ ay' : '/ month'),
-      savingsPill: billingCycle === 'annual' ? (isTr ? '🎁 2 Ay Bedava!' : '🎁 2 Months Free!') : null,
+      price: billingCycle === 'annual' ? '$99.90' : '$9.99',
+      period: billingCycle === 'annual' ? (isTr ? '/ yıl' : '/ yr') : (isTr ? '/ ay' : '/ mo'),
+      ctaPriceDetail: billingCycle === 'annual' ? (isTr ? '$99.90 / yıl ($8.33/ay)' : '$99.90 / yr ($8.33/mo)') : (isTr ? '$9.99 / ay' : '$9.99 / mo'),
+      savingsPill: billingCycle === 'annual' ? (isTr ? '2 Ay Bedava' : '2 Months Free') : null,
       subDetail: billingCycle === 'annual'
-        ? (isTr ? '10 ay fiyatına 12 ay erişim (Aylık ~$8.33)' : '12 months for the price of 10 (~$8.33/mo)')
-        : (isTr ? 'Aylık faturalandırılır • İstediğiniz an iptal edin' : 'Billed monthly at $9.99/mo • Cancel anytime'),
-      matchedPkg: billingCycle === 'annual' ? proAnnualPkg : proMonthlyPkg,
+        ? (isTr ? 'Yıllık çekim ($8.33/ay)' : 'Billed annually ($8.33/mo)')
+        : (isTr ? 'Aylık çekim' : 'Billed monthly'),
+      matchedPkg: billingCycle === 'annual' ? (proAnnualPkg || proMonthlyPkg || availablePackages[0]) : (proMonthlyPkg || availablePackages[0]),
       features: [
-        isTr ? 'Tüm ücretsiz araçlar sınırsız ve ömür boyu bedava' : 'All free tools free forever',
-        isTr ? 'Premium araçlar için genişletilmiş token hakkı' : 'Expanded token allowance for premium tools',
-        isTr ? 'Öncelikli çok çekirdekli işlem hızları' : 'Priority concurrency & multi-threaded speed',
-        isTr ? 'Reklamsız ve dikkat dağıtmayan çalışma alanı' : 'Ad-free workspace with zero distractions',
-        isTr ? 'Öncelikli e-posta desteği ve ticari kullanım' : 'Priority email support & commercial rights'
-      ],
-      ctaText: isTr ? 'Pro\'ya Abone Ol' : 'Subscribe to Pro',
-      ctaVariant: 'primary'
+        isTr ? '3 Workspace (Web sitesi / Marka)' : '3 Workspaces (Websites / Brands)',
+        isTr ? '5 Takip Edilebilir GEO / AEO İstemi' : '5 Trackable GEO / AEO Prompts',
+        isTr ? '3 Rakip Takip Radarı' : '3 Competitor Tracking Radar',
+        isTr ? 'Sınırsız Teknik Site Denetimi (Audit)' : 'Unlimited Technical Site Audit & Issues',
+        isTr ? 'Günlük Yönetici E-Posta Özeti (Digest)' : 'Daily Executive Email Digest Reports',
+        isTr ? 'Günlük 3 AI Aksiyon & Rakip Keşfi' : '3 Daily AI Priority Actions & Discovery',
+        isTr ? '5x Token Kotası & Ticari Lisans' : '5x Token Allowance & Commercial Rights'
+      ]
     },
     {
       id: 'unlimited',
       name: 'Unlimited',
-      badge: isTr ? 'Maksimum Güç' : 'Power User',
+      badge: isTr ? 'Turbo' : 'Turbo',
       badgeType: 'turbo',
-      desc: isTr 
-        ? 'Profesyonel ekipler ve yoğun AI/PDF işlemleri için maksimum tahsis ve turbo hız.' 
-        : 'Maximum token allowance and turbo concurrency for power users and teams.',
-      price: getPlanPrice('unlimited', billingCycle),
-      period: billingCycle === 'annual' ? (isTr ? '/ yıl' : '/ year') : (isTr ? '/ ay' : '/ month'),
-      savingsPill: billingCycle === 'annual' ? (isTr ? '🎁 2 Ay Bedava!' : '🎁 2 Months Free!') : null,
+      price: billingCycle === 'annual' ? '$149.90' : '$14.99',
+      period: billingCycle === 'annual' ? (isTr ? '/ yıl' : '/ yr') : (isTr ? '/ ay' : '/ mo'),
+      ctaPriceDetail: billingCycle === 'annual' ? (isTr ? '$149.90 / yıl ($12.49/ay)' : '$149.90 / yr ($12.49/mo)') : (isTr ? '$14.99 / ay' : '$14.99 / mo'),
+      savingsPill: billingCycle === 'annual' ? (isTr ? '2 Ay Bedava' : '2 Months Free') : null,
       subDetail: billingCycle === 'annual'
-        ? (isTr ? '10 ay fiyatına 12 ay erişim (Aylık ~$12.49)' : '12 months for the price of 10 (~$12.49/mo)')
-        : (isTr ? 'Aylık faturalandırılır • İstediğiniz an iptal edin' : 'Billed monthly at $14.99/mo • Cancel anytime'),
-      matchedPkg: billingCycle === 'annual' ? unlimitedAnnualPkg : unlimitedMonthlyPkg,
+        ? (isTr ? 'Yıllık çekim ($12.49/ay)' : 'Billed annually ($12.49/mo)')
+        : (isTr ? 'Aylık çekim' : 'Billed monthly'),
+      matchedPkg: billingCycle === 'annual' ? (unlimitedAnnualPkg || unlimitedMonthlyPkg || proAnnualPkg || availablePackages[0]) : (unlimitedMonthlyPkg || proMonthlyPkg || availablePackages[0]),
       features: [
-        isTr ? 'Tüm ücretsiz ve Pro özellikleri dahil' : 'Everything in Free & Pro included',
-        isTr ? 'Maksimum token tahsisi (Tüm AI, PDF ve araştırma araçları)' : 'Maximum token allowance across all tools',
-        isTr ? 'Turbo işlem hızı & en yüksek concurrency' : 'Turbo execution speed & highest priority',
-        isTr ? '7/24 VIP öncelikli teknik destek' : '24/7 VIP priority support',
-        isTr ? 'Gelecek tüm araçlara anında erişim' : 'Instant access to all upcoming tools'
-      ],
-      ctaText: isTr ? 'Unlimited\'a Abone Ol' : 'Subscribe to Unlimited',
-      ctaVariant: 'turbo'
+        isTr ? 'Sınırsız Workspace (Tüm markalarınız)' : 'Unlimited Workspaces (All brands)',
+        isTr ? '10 Takip Edilebilir GEO / AEO İstemi' : '10 Trackable GEO / AEO Prompts',
+        isTr ? 'Sınırsız Rakip Takip Radarı' : 'Unlimited Competitor Tracking Radar',
+        isTr ? 'Tam Kapsamlı Teknik Denetim & Raporlar' : 'Full Technical Site Audit & Reports',
+        isTr ? 'Sınırsız AI Aksiyon & Rakip Keşfi' : 'Unlimited AI Actions & Discovery Runs',
+        isTr ? 'Maksimum Token Kotası & Turbo Hız' : 'Maximum Token Allowance & Turbo Speed',
+        isTr ? '7/24 VIP Öncelikli Teknik Destek' : '24/7 Dedicated VIP Priority Support'
+      ]
     }
   ];
 
@@ -258,10 +257,12 @@ export default function RevenueCatPaywallModal({
     }
   }, [initialProductId]);
 
-  // Sync initial billing cycle if provided
+  // Sync initial billing cycle if provided (default to monthly)
   useEffect(() => {
     if (initialCycle) {
       handleMasterCycleChange(initialCycle);
+    } else {
+      handleMasterCycleChange('monthly');
     }
   }, [initialCycle, isOpen]);
 
@@ -402,7 +403,7 @@ export default function RevenueCatPaywallModal({
         {/* Ambient Top Glow Effect */}
         <div className="rc-paywall-ambient-glow" aria-hidden="true" />
 
-        {/* Header */}
+        {/* Minimal Header */}
         <div className="rc-paywall-header">
           <button 
             type="button" 
@@ -411,67 +412,46 @@ export default function RevenueCatPaywallModal({
             aria-label={isTr ? 'Kapat' : 'Close'}
             title={isPurchasing ? (isTr ? 'İptal Et' : 'Cancel') : (isTr ? 'Kapat' : 'Close')}
           >
-            <X size={18} />
+            <X size={17} />
           </button>
 
-          <div className="rc-paywall-logo-row">
-            <img 
-              src="/cgrowthlogo.svg" 
-              alt="Cerilas" 
-              className="rc-paywall-logo-img"
-              width={46}
-              height={46}
-            />
-          </div>
-
-          <div className="rc-paywall-badge">
-            <Sparkles size={13} />
-            <span>Cerilas Tools Premium</span>
-          </div>
-
           <h2 id="rc-paywall-main-title" className="rc-paywall-title">
-            {isTr ? 'Paketinizi Seçin ve Sınırları Kaldırın' : 'Choose Your Plan & Unlock Maximum Power'}
+            {isTr ? 'Paket Seçin' : 'Choose Plan'}
           </h2>
-          <p className="rc-paywall-subtitle">
-            {isTr 
-              ? 'Sıfır sunucu depolaması. İstemci taraflı %100 gizlilik. İş akışınıza en uygun paketi seçin.' 
-              : 'Zero server uploads. 100% In-browser confidentiality. Pick the plan tailored to your workflow.'}
-          </p>
 
-          {/* Master Billing Switcher with 2 Months Free Badge */}
+          {/* Master Billing Switcher */}
           <div className="rc-billing-switch-wrapper" role="group" aria-label="Billing frequency">
             <button
               type="button"
               className={`rc-toggle-tab ${billingCycle === 'monthly' ? 'is-active' : ''}`}
               onClick={() => handleMasterCycleChange('monthly')}
             >
-              {isTr ? 'Aylık Ödeme' : 'Monthly Billing'}
+              {isTr ? 'Aylık' : 'Monthly'}
             </button>
             <button
               type="button"
               className={`rc-toggle-tab ${billingCycle === 'annual' ? 'is-active' : ''}`}
               onClick={() => handleMasterCycleChange('annual')}
             >
-              <span>{isTr ? 'Yıllık Ödeme' : 'Annual Billing'}</span>
+              <span>{isTr ? 'Yıllık' : 'Annual'}</span>
               <span className="rc-discount-pill">
-                <Gift size={12} style={{ marginRight: 3, verticalAlign: 'middle' }} />
                 {isTr ? '2 Ay Bedava' : '2 Months Free'}
               </span>
             </button>
           </div>
         </div>
 
-        {/* Body */}
+        {/* Body - Scrollable content area if screen is compact */}
         <div className="rc-paywall-body">
           {/* Active Pro Banner */}
           {isPro && !purchaseSuccess && (
             <div className="rc-active-pro-banner">
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                <CheckCircle2 size={18} color="#10b981" />
-                <span style={{ fontSize: '0.9rem', color: '#6ee7b7', fontWeight: 600 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <CheckCircle2 size={16} color="#10b981" />
+                <span style={{ fontSize: '0.84rem', color: '#6ee7b7', fontWeight: 600 }}>
                   {isTr 
-                    ? 'Hesabınızda aktif cerilas_tools_pro aboneliği bulunmaktadır.' 
-                    : 'You currently have active cerilas_tools_pro entitlement.'}
+                    ? 'Aktif cerilas_tools_pro aboneliğiniz bulunmaktadır.' 
+                    : 'Active subscription detected.'}
                 </span>
               </div>
               <button 
@@ -479,7 +459,7 @@ export default function RevenueCatPaywallModal({
                 onClick={openCustomerCenter}
                 className="rc-manage-sub-link-btn"
               >
-                {isTr ? 'Aboneliği Yönet' : 'Manage Subscription'}
+                {isTr ? 'Yönet' : 'Manage'}
               </button>
             </div>
           )}
@@ -487,16 +467,16 @@ export default function RevenueCatPaywallModal({
           {/* Success Banner */}
           {purchaseSuccess ? (
             <div style={{ textAlign: 'center', padding: '2.5rem 1.5rem' }}>
-              <div style={{ width: 68, height: 68, borderRadius: '50%', background: 'rgba(16, 185, 129, 0.15)', border: '2px solid #10b981', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.25rem auto', color: '#10b981', boxShadow: '0 0 30px rgba(16, 185, 129, 0.3)' }}>
-                <Check size={34} />
+              <div style={{ width: 60, height: 60, borderRadius: '50%', background: 'rgba(16, 185, 129, 0.15)', border: '2px solid #10b981', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.25rem auto', color: '#10b981', boxShadow: '0 0 25px rgba(16, 185, 129, 0.3)' }}>
+                <Check size={30} />
               </div>
-              <h3 style={{ fontSize: '1.6rem', fontWeight: 850, color: '#f8fafc', margin: '0 0 0.5rem 0' }}>
-                {isTr ? 'Tebrikler! Aboneliğiniz Aktifleştirildi' : 'Welcome to Cerilas Pro!'}
+              <h3 style={{ fontSize: '1.4rem', fontWeight: 800, color: '#f8fafc', margin: '0 0 0.5rem 0' }}>
+                {isTr ? 'Aboneliğiniz Aktifleştirildi' : 'Welcome to Cerilas Pro!'}
               </h3>
-              <p style={{ fontSize: '0.95rem', color: '#94a3b8', maxWidth: 440, margin: '0 auto 1.5rem auto' }}>
+              <p style={{ fontSize: '0.9rem', color: '#94a3b8', maxWidth: 400, margin: '0 auto 1.5rem auto' }}>
                 {isTr 
-                  ? 'Aboneliğiniz RevenueCat & Paddle üzerinden başarıyla onaylandı. Tüm limit ve araçlar hesabınıza tanımlandı.' 
-                  : 'Your subscription has been activated. All premium limits and tools are unlocked immediately.'}
+                  ? 'Tüm limitler ve araçlar hesabınıza tanımlandı.' 
+                  : 'All limits and tools are unlocked immediately.'}
               </p>
               <button 
                 type="button" 
@@ -504,7 +484,7 @@ export default function RevenueCatPaywallModal({
                 style={{ margin: '0 auto' }}
                 onClick={onClose}
               >
-                {isTr ? 'Araçları Kullanmaya Başla' : 'Start Using Tools'}
+                {isTr ? 'Başla' : 'Get Started'}
               </button>
             </div>
           ) : (
@@ -525,41 +505,30 @@ export default function RevenueCatPaywallModal({
                       {/* Card Top Pill Badge */}
                       {plan.badge && (
                         <div className={`rc-plan-top-badge badge-${plan.badgeType || 'default'}`}>
-                          {isCardFeatured && <Sparkles size={11} style={{ marginRight: 4 }} />}
-                          {isCardTurbo && <Zap size={11} style={{ marginRight: 4 }} />}
                           <span>{plan.badge}</span>
                         </div>
                       )}
 
                       {/* Header Info */}
                       <div className="rc-plan-card-head">
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                          <h3 className="rc-plan-name">{plan.name}</h3>
-                          <div className={`rc-plan-radio ${isSelected ? 'is-checked' : ''}`}>
-                            {isSelected && <div className="rc-plan-radio-dot" />}
-                          </div>
+                        <h3 className="rc-plan-name">{plan.name}</h3>
+                        <div className={`rc-plan-radio ${isSelected ? 'is-checked' : ''}`}>
+                          {isSelected && <div className="rc-plan-radio-dot" />}
                         </div>
-
-                        <p className="rc-plan-desc">{plan.desc}</p>
                       </div>
 
                       {/* Price Section */}
                       <div className="rc-plan-pricing-section">
-                        {/* Savings Banner for Annual */}
-                        {plan.savingsPill && (
-                          <div className="rc-plan-savings-pill">
-                            <Gift size={13} />
-                            <span>{plan.savingsPill}</span>
-                          </div>
-                        )}
-
                         <div className="rc-plan-price-row">
                           <span className="rc-plan-price-num">{plan.price}</span>
                           <span className="rc-plan-price-period">{plan.period}</span>
                         </div>
 
-                        <div className="rc-plan-subdetail">
-                          {plan.subDetail}
+                        <div className="rc-plan-subdetail-row">
+                          <span className="rc-plan-subdetail">{plan.subDetail}</span>
+                          {plan.savingsPill && (
+                            <span className="rc-plan-savings-pill">{plan.savingsPill}</span>
+                          )}
                         </div>
                       </div>
 
@@ -567,129 +536,74 @@ export default function RevenueCatPaywallModal({
                       <ul className="rc-plan-features-list">
                         {plan.features.map((feat, idx) => (
                           <li key={idx} className="rc-plan-feature-item">
-                            <Check size={14} className="rc-plan-feature-icon" />
+                            <Check size={13} className="rc-plan-feature-icon" />
                             <span>{feat}</span>
                           </li>
                         ))}
                       </ul>
-
-                      {/* Card CTA Action Button */}
-                      <div className="rc-plan-card-foot">
-                        <button
-                          type="button"
-                          className={`rc-card-action-btn ${isSelected ? 'is-active' : ''} ${plan.id === 'free' ? 'btn-free' : ''} ${plan.id === 'unlimited' ? 'btn-turbo' : ''}`}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setSelectedPlanId(plan.id);
-                            handleStartCheckout(plan);
-                          }}
-                          disabled={isPurchasing}
-                        >
-                          {isPurchasing && isSelected ? (
-                            <Loader2 size={15} className="spin" />
-                          ) : (
-                            <span>{plan.ctaText}</span>
-                          )}
-                        </button>
-                      </div>
                     </div>
                   );
                 })}
               </div>
 
-              {/* Security & Benefits Guarantee Ribbon */}
-              <div className="rc-trust-ribbon">
-                <div className="rc-trust-item">
-                  <ShieldCheck size={16} className="rc-trust-icon" />
-                  <div>
-                    <strong>{isTr ? '%100 İstemci Taraflı Gizlilik' : '100% Client-Side Privacy'}</strong>
-                    <span>{isTr ? 'Dosyalarınız asla sunucuya yüklenmez' : 'Zero cloud file storage'}</span>
-                  </div>
-                </div>
-
-                <div className="rc-trust-item">
-                  <Zap size={16} className="rc-trust-icon rc-trust-icon-zap" />
-                  <div>
-                    <strong>{isTr ? '31+ Üst Düzey Araç' : '31+ Pro Tools Suite'}</strong>
-                    <span>{isTr ? 'Limitsiz ve reklamsız erişim' : 'Instant ad-free execution'}</span>
-                  </div>
-                </div>
-
-                <div className="rc-trust-item">
-                  <Lock size={16} className="rc-trust-icon" />
-                  <div>
-                    <strong>{isTr ? '256-Bit SSL Güvenli Ödeme' : '256-Bit SSL Checkout'}</strong>
-                    <span>{isTr ? 'Paddle & RevenueCat korumalı' : 'Paddle & RevenueCat secured'}</span>
-                  </div>
-                </div>
-
-                <div className="rc-trust-item">
-                  <CheckCircle2 size={16} className="rc-trust-icon rc-trust-icon-check" />
-                  <div>
-                    <strong>{isTr ? 'Taahhüt Yok, Kolay İptal' : 'Cancel Anytime'}</strong>
-                    <span>{isTr ? 'Tek tıkla self-servis yönetim' : 'One-click self-service control'}</span>
-                  </div>
-                </div>
-              </div>
-
               {/* Error Banner */}
               {errorMessage && (
                 <div className="rc-error-alert">
-                  <AlertCircle size={17} style={{ flexShrink: 0 }} />
+                  <AlertCircle size={15} style={{ flexShrink: 0 }} />
                   <span>{errorMessage}</span>
                 </div>
               )}
-
-              {/* Primary Footer CTA */}
-              <div className="rc-paywall-actions">
-                <button
-                  type="button"
-                  className="rc-subscribe-btn"
-                  onClick={() => handleStartCheckout()}
-                  disabled={isPurchasing}
-                >
-                  {isPurchasing ? (
-                    <>
-                      <Loader2 size={19} className="spin" />
-                      <span>{isTr ? 'Ödeme Penceresi Açılıyor...' : 'Opening Checkout Window...'}</span>
-                    </>
-                  ) : selectedPlan.id === 'free' ? (
-                    <>
-                      <span>{isTr ? 'Ücretsiz Plan ile Devam Et' : 'Continue with Free Plan'}</span>
-                      <ArrowRight size={17} />
-                    </>
-                  ) : (
-                    <>
-                      <Lock size={17} />
-                      <span>
-                        {isTr 
-                          ? `${selectedPlan.name} ile Devam Et — ${selectedPlan.price} ${selectedPlan.period}` 
-                          : `Continue with ${selectedPlan.name} — ${selectedPlan.price} ${selectedPlan.period}`}
-                      </span>
-                      <ArrowRight size={17} />
-                    </>
-                  )}
-                </button>
-
-                {isPurchasing && (
-                  <button 
-                    type="button" 
-                    onClick={handleCancelCheckout}
-                    className="rc-cancel-checkout-link"
-                  >
-                    {isTr ? 'Ödeme Penceresini Kapat / İptal Et' : 'Cancel & Close Payment Window'}
-                  </button>
-                )}
-
-                <div className="rc-security-note">
-                  <span>🔒 {isTr ? 'Paddle & RevenueCat ile 256-bit SSL şifreli güvenli ödeme' : 'Secure checkout powered by Paddle & RevenueCat'}</span>
-                  <span>•</span>
-                  <span>{isTr ? 'İstediğiniz zaman tek tıkla iptal edebilirsiniz' : 'Cancel anytime with 1 click'}</span>
-                </div>
-              </div>
             </>
           )}
         </div>
+
+        {/* Pinned Bottom Actions Bar */}
+        {!purchaseSuccess && (
+          <div className="rc-paywall-footer">
+            <button
+              type="button"
+              className="rc-subscribe-btn"
+              onClick={() => handleStartCheckout()}
+              disabled={isPurchasing}
+            >
+              {isPurchasing ? (
+                <>
+                  <Loader2 size={18} className="spin" />
+                  <span>{isTr ? 'Lütfen bekleyin...' : 'Processing...'}</span>
+                </>
+              ) : selectedPlan.id === 'free' ? (
+                <>
+                  <span>{isTr ? 'Ücretsiz Plan ile Devam Et' : 'Continue with Free Plan'}</span>
+                  <ArrowRight size={16} />
+                </>
+              ) : (
+                <>
+                  <Lock size={15} />
+                  <span>
+                    {isTr 
+                      ? `${selectedPlan.name} ile Devam Et — ${selectedPlan.ctaPriceDetail}` 
+                      : `Continue with ${selectedPlan.name} — ${selectedPlan.ctaPriceDetail}`}
+                  </span>
+                  <ArrowRight size={16} />
+                </>
+              )}
+            </button>
+
+            {isPurchasing && (
+              <button 
+                type="button" 
+                onClick={handleCancelCheckout}
+                className="rc-cancel-checkout-link"
+              >
+                {isTr ? 'İptal Et' : 'Cancel'}
+              </button>
+            )}
+
+            <div className="rc-security-note">
+              <span>🔒 {isTr ? '256-bit SSL güvenli ödeme • İstediğiniz an iptal edin' : '256-bit SSL secured • Cancel anytime'}</span>
+            </div>
+          </div>
+        )}
       </div>
     </div>,
     document.body

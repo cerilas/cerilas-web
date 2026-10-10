@@ -79,8 +79,17 @@ function formatFullDate(dateStr) {
 }
 
 export default function GrowthAiVisibility() {
-  const { activeWorkspace } = useGrowth();
+  const { 
+    activeWorkspace,
+    plan,
+    planLimits,
+    promptPaywall
+  } = useGrowth();
   const { token } = useAuth();
+
+  const maxAddablePrompts = planLimits?.addablePrompts ?? 10;
+  const trackablePrompts = planLimits?.trackablePrompts ?? 10;
+  const isSimulationLocked = trackablePrompts === 0;
 
   const [prompts, setPrompts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -333,8 +342,8 @@ export default function GrowthAiVisibility() {
     e.preventDefault();
     if (!newPromptText.trim()) return;
 
-    if (prompts.length >= 10) {
-      alert('Maximum limit of 10 tracked prompts reached. To add a new prompt, please delete an existing one.');
+    if (prompts.length >= maxAddablePrompts) {
+      promptPaywall({ plan: plan === 'free' ? 'pro' : 'unlimited' });
       return;
     }
 
@@ -369,6 +378,10 @@ export default function GrowthAiVisibility() {
   };
 
   const handleRunPrompt = async (promptId) => {
+    if (isSimulationLocked) {
+      promptPaywall({ plan: 'pro' });
+      return;
+    }
     setRunningPromptId(promptId);
     setLastRunResult(null);
     try {
@@ -377,7 +390,13 @@ export default function GrowthAiVisibility() {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Simulation could not be executed.');
+      if (!res.ok) {
+        if (res.status === 403) {
+          promptPaywall({ plan: 'pro' });
+          return;
+        }
+        throw new Error(data.error || 'Simulation could not be executed.');
+      }
       setLastRunResult(data.data);
       fetchPrompts();
     } catch (err) {
@@ -390,8 +409,8 @@ export default function GrowthAiVisibility() {
 
   // AI Prompt Generator Handlers
   const handleOpenAiModal = () => {
-    if (prompts.length >= 10) {
-      alert('Maximum limit of 10 tracked prompts already reached (10/10).');
+    if (prompts.length >= maxAddablePrompts) {
+      promptPaywall({ plan: plan === 'free' ? 'pro' : 'unlimited' });
       return;
     }
     setIsAiGenModalOpen(true);
@@ -443,6 +462,13 @@ export default function GrowthAiVisibility() {
     const selectedItems = aiGeneratedSuggestions.filter(s => s.selected);
     if (selectedItems.length === 0 || !activeWorkspace?.id || !token) return;
 
+    const remainingSlots = Math.max(0, maxAddablePrompts - prompts.length);
+    if (remainingSlots <= 0) {
+      promptPaywall({ plan: plan === 'free' ? 'pro' : 'unlimited' });
+      return;
+    }
+    const itemsToSave = selectedItems.slice(0, remainingSlots);
+
     setSavingAiPrompts(true);
     try {
       const res = await fetch(`/api/growth/workspaces/${activeWorkspace.id}/prompts/batch`, {
@@ -452,7 +478,7 @@ export default function GrowthAiVisibility() {
           'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
-          prompts: selectedItems.map(s => ({ prompt: s.prompt, topic: s.topic })),
+          prompts: itemsToSave.map(s => ({ prompt: s.prompt, topic: s.topic })),
           country: selectedCountry || 'US',
           language: selectedLanguage || 'en'
         })
@@ -494,6 +520,10 @@ export default function GrowthAiVisibility() {
 
   // Start Batch Scan for all prompts
   const handleStartBatchScan = async () => {
+    if (isSimulationLocked) {
+      promptPaywall({ plan: 'pro' });
+      return;
+    }
     if (!prompts || prompts.length === 0 || isBatchScanning) return;
 
     setIsBatchScanning(true);
@@ -670,7 +700,7 @@ export default function GrowthAiVisibility() {
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
               <span className="growth-badge blue" style={{ fontSize: '0.74rem' }}>
-                <MessageSquare size={11} /> {prompts.length} / 10 Tracked Prompts
+                <MessageSquare size={11} /> {prompts.length} / {maxAddablePrompts} Tracked Prompts
               </span>
               <span className="growth-badge purple" style={{ fontSize: '0.74rem' }}>
                 <History size={11} /> {reportsList.length} Saved Reports
@@ -1201,22 +1231,22 @@ export default function GrowthAiVisibility() {
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', flexWrap: 'wrap' }}>
-            {prompts.length < 10 ? (
+            {prompts.length < maxAddablePrompts ? (
               <span className="growth-badge warning" style={{ padding: '0.35rem 0.75rem', fontSize: '0.8rem', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}>
                 <AlertCircle size={13} />
-                Setup Incomplete ({prompts.length} / 10 Queries)
+                Setup Incomplete ({prompts.length} / {maxAddablePrompts} Queries)
               </span>
             ) : (
               <span className="growth-badge green" style={{ padding: '0.35rem 0.75rem', fontSize: '0.8rem', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}>
                 <CheckCircle2 size={13} />
-                Setup Complete (10/10)
+                Setup Complete ({maxAddablePrompts}/{maxAddablePrompts})
               </span>
             )}
 
             <button
               type="button"
-              onClick={handleOpenAiModal}
-              disabled={prompts.length >= 10 || isBatchScanning}
+              onClick={prompts.length >= maxAddablePrompts ? () => promptPaywall({ plan: plan === 'free' ? 'pro' : 'unlimited' }) : handleOpenAiModal}
+              disabled={isBatchScanning}
               className="growth-primary-btn ai-generate-magic-btn"
               title="Let Gemini AI analyze your website and industry to generate queries automatically"
             >
@@ -1226,8 +1256,36 @@ export default function GrowthAiVisibility() {
           </div>
         </div>
 
+        {/* Free Plan Simulation Locked Notification */}
+        {isSimulationLocked && (
+          <div className="growth-pro-feature-banner">
+            <div className="pro-banner-left">
+              <div className="pro-banner-icon-box">
+                <Zap size={22} />
+              </div>
+              <div className="pro-banner-text">
+                <div className="pro-banner-title-row">
+                  <h4 className="pro-banner-title">Live GEO Telemetry Simulation (Pro Feature)</h4>
+                  <span className="pro-banner-badge">Pro / Unlimited</span>
+                </div>
+                <p className="pro-banner-desc">
+                  On the Free plan, you can add up to {maxAddablePrompts} target queries. Live response simulations and telemetry reports across Google Gemini, ChatGPT, and Perplexity are available on Pro and Unlimited plans.
+                </p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => promptPaywall({ plan: 'pro' })}
+              className="pro-banner-btn"
+            >
+              <Sparkles size={14} />
+              <span>Upgrade to Pro</span>
+            </button>
+          </div>
+        )}
+
         {/* Setup Status & Progress Notification */}
-        {prompts.length < 10 && (
+        {prompts.length < maxAddablePrompts && (
           <div className="growth-prompt-setup-banner">
             <div className="setup-banner-left">
               <div className="setup-banner-icon-box">
@@ -1235,14 +1293,14 @@ export default function GrowthAiVisibility() {
               </div>
               <div className="setup-banner-text">
                 <div className="setup-banner-title-row">
-                  <h4 className="setup-banner-title">Setup Incomplete (Track 10 Queries)</h4>
-                  <span className="setup-banner-badge">{prompts.length} / 10 Queries ({prompts.length * 10}%)</span>
+                  <h4 className="setup-banner-title">Setup Incomplete (Track {maxAddablePrompts} Queries)</h4>
+                  <span className="setup-banner-badge">{prompts.length} / {maxAddablePrompts} Queries ({Math.round((prompts.length / maxAddablePrompts) * 100)}%)</span>
                 </div>
                 <p className="setup-banner-desc">
-                  For a consistent GEO visibility score across Google Gemini, ChatGPT and Perplexity, define at least 10 search questions. You can add the remaining <strong>{10 - prompts.length}</strong> manually or click <strong>Generate Queries with AI</strong> to auto-generate them in one click.
+                  For a consistent GEO visibility score across Google Gemini, ChatGPT and Perplexity, define at least {maxAddablePrompts} search questions. You can add the remaining <strong>{maxAddablePrompts - prompts.length}</strong> manually or click <strong>Generate Queries with AI</strong> to auto-generate them in one click.
                 </p>
                 <div className="setup-progress-track">
-                  <div className="setup-progress-fill" style={{ width: `${(prompts.length / 10) * 100}%` }} />
+                  <div className="setup-progress-fill" style={{ width: `${(prompts.length / maxAddablePrompts) * 100}%` }} />
                 </div>
               </div>
             </div>
@@ -1252,19 +1310,19 @@ export default function GrowthAiVisibility() {
               className="growth-primary-btn setup-banner-cta-btn"
             >
               <Sparkles size={14} />
-              <span>Complete with AI ({10 - prompts.length} Queries)</span>
+              <span>Complete with AI ({maxAddablePrompts - prompts.length} Queries)</span>
             </button>
           </div>
         )}
 
-        {prompts.length >= 10 && (
+        {prompts.length >= maxAddablePrompts && (
           <div className="growth-prompt-completed-banner">
             <CheckCircle2 size={16} color="#10b981" />
-            <span><strong>Setup Complete:</strong> 10 search queries are actively monitored. You can test them individually live below or click "Scan All Sequentially" to generate a timestamped GEO Report.</span>
+            <span><strong>Setup Complete:</strong> {maxAddablePrompts} search queries are actively monitored. {isSimulationLocked ? 'Upgrade to Pro to execute live telemetry simulations.' : 'You can test them individually live below or click "Scan All Sequentially" to generate a timestamped GEO Report.'}</span>
           </div>
         )}
 
-        <form onSubmit={handleAddPrompt} className="growth-prompt-form-grid" style={prompts.length >= 10 ? { opacity: 0.7 } : {}}>
+        <form onSubmit={handleAddPrompt} className="growth-prompt-form-grid" style={prompts.length >= maxAddablePrompts ? { opacity: 0.7 } : {}}>
           <div className="growth-prompt-inputs-split">
             <div className="growth-field-item flex-3">
               <label className="growth-field-label">
@@ -1273,11 +1331,11 @@ export default function GrowthAiVisibility() {
               </label>
               <input
                 type="text"
-                placeholder={prompts.length >= 10 ? "Limit reached (10/10) - Delete an existing prompt to add a new one" : "e.g. What is the best B2B SEO and growth platform?"}
+                placeholder={prompts.length >= maxAddablePrompts ? `Limit reached (${maxAddablePrompts}/${maxAddablePrompts}) - Delete an existing prompt or upgrade` : "e.g. What is the best B2B SEO and growth platform?"}
                 value={newPromptText}
                 onChange={(e) => setNewPromptText(e.target.value)}
                 className="growth-custom-text-input"
-                disabled={addingPrompt || prompts.length >= 10}
+                disabled={addingPrompt || prompts.length >= maxAddablePrompts}
                 required
               />
             </div>
@@ -1293,7 +1351,7 @@ export default function GrowthAiVisibility() {
                 value={newPromptTopic}
                 onChange={(e) => setNewPromptTopic(e.target.value)}
                 className="growth-custom-text-input"
-                disabled={addingPrompt || prompts.length >= 10}
+                disabled={addingPrompt || prompts.length >= maxAddablePrompts}
               />
             </div>
           </div>
@@ -1307,7 +1365,7 @@ export default function GrowthAiVisibility() {
                 options={MARKET_OPTIONS}
                 value={selectedCountry}
                 onChange={setSelectedCountry}
-                disabled={addingPrompt || prompts.length >= 10}
+                disabled={addingPrompt || prompts.length >= maxAddablePrompts}
               />
             </div>
 
@@ -1319,25 +1377,25 @@ export default function GrowthAiVisibility() {
                 options={LANGUAGE_OPTIONS}
                 value={selectedLanguage}
                 onChange={setSelectedLanguage}
-                disabled={addingPrompt || prompts.length >= 10}
+                disabled={addingPrompt || prompts.length >= maxAddablePrompts}
               />
             </div>
 
             <div className="growth-submit-col">
               <button
                 type="submit"
-                disabled={addingPrompt || !newPromptText.trim() || prompts.length >= 10}
+                disabled={addingPrompt || !newPromptText.trim() || prompts.length >= maxAddablePrompts}
                 className="growth-primary-btn growth-prompt-submit-btn"
-                style={prompts.length >= 10 ? { opacity: 0.5, cursor: 'not-allowed' } : {}}
+                style={prompts.length >= maxAddablePrompts ? { opacity: 0.5, cursor: 'not-allowed' } : {}}
               >
                 {addingPrompt ? (
                   <Loader2 size={15} className="spin" />
-                ) : prompts.length >= 10 ? (
+                ) : prompts.length >= maxAddablePrompts ? (
                   <Lock size={15} />
                 ) : (
                   <Plus size={15} />
                 )}
-                <span>{prompts.length >= 10 ? 'Limit Reached (10/10)' : 'Track Prompt'}</span>
+                <span>{prompts.length >= maxAddablePrompts ? `Limit Reached (${maxAddablePrompts}/${maxAddablePrompts})` : 'Track Prompt'}</span>
               </button>
             </div>
           </div>
@@ -1348,7 +1406,7 @@ export default function GrowthAiVisibility() {
       <div className="growth-panel-card">
         <div className="growth-panel-header">
           <div>
-            <h3 className="growth-panel-title">Tracked Prompts ({prompts.length} / 10)</h3>
+            <h3 className="growth-panel-title">Tracked Prompts ({prompts.length} / {maxAddablePrompts})</h3>
             <p className="growth-panel-desc">
               Search queries monitored on a regular basis. Scan all sequentially to generate a timestamped snapshot report.
             </p>
@@ -1377,15 +1435,21 @@ export default function GrowthAiVisibility() {
             <button
               type="button"
               disabled={isBatchScanning || prompts.length === 0}
-              onClick={handleStartBatchScan}
+              onClick={isSimulationLocked ? () => promptPaywall({ plan: 'pro' }) : handleStartBatchScan}
               className="growth-primary-btn"
               style={{ padding: '0.45rem 0.95rem', fontSize: '0.82rem' }}
-              title="Tests all prompts sequentially, generating and archiving a timestamped report"
+              title={isSimulationLocked ? 'Sequential GEO Scan is available on Pro and Unlimited plans' : 'Tests all prompts sequentially, generating and archiving a timestamped report'}
             >
               {isBatchScanning ? (
                 <>
                   <Loader2 size={14} className="spin" />
                   <span>Scanning ({batchProgress.current}/{batchProgress.total})...</span>
+                </>
+              ) : isSimulationLocked ? (
+                <>
+                  <Zap size={14} />
+                  <span>Scan All Sequentially</span>
+                  <span style={{ fontSize: '0.68rem', padding: '1px 5px', borderRadius: '999px', background: 'rgba(255,255,255,0.2)', fontWeight: 700 }}>PRO</span>
                 </>
               ) : (
                 <>
@@ -1477,6 +1541,7 @@ export default function GrowthAiVisibility() {
                       disabled={isRunning || isBatchScanning}
                       onClick={() => handleRunPrompt(p.id)}
                       className="growth-run-test-btn"
+                      title={isSimulationLocked ? 'Live telemetry simulation is available on Pro and Unlimited plans' : 'Query Gemini live'}
                     >
                       {isRunning ? (
                         <>
@@ -1485,8 +1550,19 @@ export default function GrowthAiVisibility() {
                         </>
                       ) : (
                         <>
-                          <img src="/AI-logos/gemini-color.svg" alt="Gemini" style={{ width: 14, height: 14 }} />
+                          <img src="/AI-logos/gemini-color.svg" alt="Gemini" style={{ width: 14, height: 14, opacity: isSimulationLocked ? 0.7 : 1 }} />
                           <span>Test with Gemini</span>
+                          {isSimulationLocked && (
+                            <span style={{
+                              fontSize: '0.68rem',
+                              padding: '1px 5px',
+                              borderRadius: '999px',
+                              background: 'rgba(99, 102, 241, 0.25)',
+                              color: '#a5b4fc',
+                              fontWeight: 700,
+                              marginLeft: 2
+                            }}>PRO</span>
+                          )}
                         </>
                       )}
                     </button>
@@ -1881,7 +1957,7 @@ export default function GrowthAiVisibility() {
                         {aiGeneratedSuggestions.filter(s => s.selected).length} / {aiGeneratedSuggestions.length} Prompts Selected
                       </span>
                       <span className="ai-gen-info-count">
-                        (Total when added: {Math.min(10, prompts.length + aiGeneratedSuggestions.filter(s => s.selected).length)}/10)
+                        (Total when added: {Math.min(maxAddablePrompts, prompts.length + aiGeneratedSuggestions.filter(s => s.selected).length)}/{maxAddablePrompts})
                       </span>
                     </div>
                     <button
@@ -2003,7 +2079,7 @@ export default function GrowthAiVisibility() {
               </div>
               <div className="delete-modal-explain-box">
                 <AlertTriangle size={17} style={{ flexShrink: 0, marginTop: 2 }} />
-                <span>Deleting this prompt will free up 1 slot in your 10-prompt tracking limit. Are you sure?</span>
+                <span>Deleting this prompt will free up 1 slot in your {maxAddablePrompts}-prompt tracking limit. Are you sure?</span>
               </div>
             </div>
 

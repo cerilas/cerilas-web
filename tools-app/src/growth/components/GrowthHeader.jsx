@@ -20,7 +20,8 @@ import {
   Crown,
   CheckCircle2,
   AlertCircle,
-  Trash2
+  Trash2,
+  Lock
 } from 'lucide-react';
 import { useGrowth } from '../GrowthContext';
 import { useAuth } from '../../context/AuthContext';
@@ -35,7 +36,11 @@ export default function GrowthHeader({ onBackToTools }) {
     activeWorkspace, 
     switchWorkspace, 
     setIsOnboardingOpen,
-    refreshWorkspaces
+    refreshWorkspaces,
+    plan,
+    planLimits,
+    canAddWorkspace,
+    promptPaywall
   } = useGrowth();
   const { user, isAuthenticated, logout, openAuthModal, token } = useAuth();
   const { toggleTheme, isDark } = useTheme();
@@ -189,14 +194,23 @@ export default function GrowthHeader({ onBackToTools }) {
               <div className="growth-ws-dropdown-footer">
                 <button
                   type="button"
-                  className="growth-add-ws-action-btn"
+                  className={`growth-add-ws-action-btn ${!canAddWorkspace ? 'is-limited' : ''}`}
                   onClick={() => {
                     setIsDropdownOpen(false);
-                    setIsOnboardingOpen(true);
+                    if (!canAddWorkspace) {
+                      promptPaywall({ plan: plan === 'free' ? 'pro' : 'unlimited' });
+                    } else {
+                      setIsOnboardingOpen(true);
+                    }
                   }}
+                  title={!canAddWorkspace ? `Plan limit reached (${workspaces.length}/${planLimits.workspaces})` : 'Add Brand / Website'}
                 >
-                  <Plus size={14} />
-                  <span>Add Brand / Website</span>
+                  {!canAddWorkspace ? <Lock size={13} style={{ color: '#f59e0b' }} /> : <Plus size={14} />}
+                  <span>
+                    {!canAddWorkspace 
+                      ? `Limit Reached (${workspaces.length}/${planLimits.workspaces}) – Upgrade`
+                      : 'Add Brand / Website'}
+                  </span>
                 </button>
               </div>
             </div>
@@ -205,6 +219,51 @@ export default function GrowthHeader({ onBackToTools }) {
       </div>
 
       <div className="growth-header-right">
+        {/* Plan Upgrade CTA Badge */}
+        {plan === 'free' && (
+          <button
+            type="button"
+            onClick={() => promptPaywall({ plan: 'pro' })}
+            className="growth-plan-badge-btn pro"
+            title="Upgrade to Pro (3 Websites, 5 GEO Prompts)"
+          >
+            <Sparkles size={13} />
+            <span>Upgrade to Pro</span>
+          </button>
+        )}
+
+        {plan === 'pro' && (
+          <button
+            type="button"
+            onClick={() => promptPaywall({ plan: 'unlimited' })}
+            className="growth-plan-badge-btn unlimited"
+            title="Upgrade to Unlimited (Unlimited Websites & AI)"
+          >
+            <Crown size={13} />
+            <span>Get Unlimited</span>
+          </button>
+        )}
+
+        {plan === 'unlimited' && (
+          <div
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '5px 12px',
+              borderRadius: '8px',
+              fontSize: '0.8rem',
+              fontWeight: 750,
+              background: 'rgba(16, 185, 129, 0.12)',
+              border: '1px solid rgba(16, 185, 129, 0.4)',
+              color: '#10b981'
+            }}
+          >
+            <Crown size={13} />
+            <span>Unlimited</span>
+          </div>
+        )}
+
         {/* External Link to Active Domain */}
         {activeWorkspace?.canonical_url && (
           <a
@@ -331,9 +390,9 @@ export default function GrowthHeader({ onBackToTools }) {
                   >
                     <Package size={16} className="nav-item-icon" />
                     <div className="nav-item-text-wrap">
-                      <span className="nav-item-title">{isTr ? 'Plan' : 'Plan'}</span>
+                      <span className="nav-item-title">Plan</span>
                       <span className="nav-item-sub">
-                        {currentPlan === 'pro' ? 'Pro' : (currentPlan === 'enterprise' || currentPlan === 'unlimited') ? 'Unlimited' : (isTr ? 'Ücretsiz Başlangıç' : 'Free Starter')}
+                        {currentPlan === 'pro' ? 'Pro' : (currentPlan === 'enterprise' || currentPlan === 'unlimited') ? 'Unlimited' : 'Free Starter'}
                       </span>
                     </div>
                   </button>

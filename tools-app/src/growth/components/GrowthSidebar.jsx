@@ -15,7 +15,9 @@ import {
   Plug,
   Mail,
   PanelLeftClose,
-  PanelLeftOpen
+  PanelLeftOpen,
+  Lock,
+  Sparkles
 } from 'lucide-react';
 import { useGrowth } from '../GrowthContext';
 import { useAuth } from '../../context/AuthContext';
@@ -65,7 +67,7 @@ const NAV_GROUPS = [
 ];
 
 export default function GrowthSidebar() {
-  const { activeTab, setActiveTab, activeWorkspace } = useGrowth();
+  const { activeTab, setActiveTab, activeWorkspace, isFree, plan } = useGrowth();
   const { token } = useAuth();
 
   const [isCollapsed, setIsCollapsed] = useState(() => {
@@ -176,17 +178,17 @@ export default function GrowthSidebar() {
         {!isCollapsed ? (
           <>
             <div className="growth-brand-titles-row">
-              <div className="growth-logo-glow-wrap" title="Cerilas Growth">
+              <div className="growth-logo-glow-wrap" title="GrowthControl">
                 <img 
                   src="/cgrowthlogo.svg" 
-                  alt="Cerilas Growth" 
+                  alt="GrowthControl" 
                   className="growth-sidebar-brand-img"
                   width={20}
                   height={20}
                 />
               </div>
               <div className="growth-brand-titles">
-                <span className="growth-app-title">Cerilas Growth</span>
+                <span className="growth-app-title">GrowthControl</span>
                 <span className="growth-app-tag">AI Intelligence v1.0</span>
               </div>
             </div>
@@ -204,11 +206,11 @@ export default function GrowthSidebar() {
           <div className="growth-collapsed-brand-col">
             <div 
               className="growth-logo-glow-wrap" 
-              title="Cerilas Growth"
+              title="GrowthControl"
             >
               <img 
                 src="/cgrowthlogo.svg" 
-                alt="Cerilas Growth" 
+                alt="GrowthControl" 
                 className="growth-sidebar-brand-img"
                 width={20}
                 height={20}
@@ -258,7 +260,23 @@ export default function GrowthSidebar() {
                     {!isCollapsed && (
                       <>
                         <span className="growth-nav-label">{item.label}</span>
-                        {needsSetup ? (
+                        {isFree && (item.id === 'technical' || item.id === 'competitors') ? (
+                          <span 
+                            className="growth-sidebar-tag-pro"
+                            title="Requires Pro or Unlimited plan"
+                          >
+                            <Lock size={10} />
+                            <span>PRO</span>
+                          </span>
+                        ) : isFree && item.id === 'reports' ? (
+                          <span 
+                            className="growth-sidebar-tag-report"
+                            title="Daily digest requires Pro or Unlimited plan"
+                          >
+                            <Sparkles size={10} />
+                            <span>PRO</span>
+                          </span>
+                        ) : needsSetup ? (
                           <span className="growth-nav-setup-tag" title="Setup / Connection Action Required">
                             <Plug size={11} strokeWidth={2.2} />
                             <span>Setup</span>

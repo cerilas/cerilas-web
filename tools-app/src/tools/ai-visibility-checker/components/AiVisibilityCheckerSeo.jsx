@@ -212,7 +212,7 @@ export default function AiVisibilityCheckerSeo() {
     const webAppSchema = {
       '@context': 'https://schema.org',
       '@type': 'WebApplication',
-      name: 'Cerilas AI Visibility Checker',
+      name: 'AI Visibility Checker by GrowthControl',
       url: 'https://tools.cerilas.com/#/tool/ai-visibility-checker',
       applicationCategory: 'UtilitiesApplication',
       operatingSystem: 'All',

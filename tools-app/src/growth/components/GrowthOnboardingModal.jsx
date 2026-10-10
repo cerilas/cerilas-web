@@ -49,7 +49,14 @@ export function normalizeDomain(input) {
 
 export default function GrowthOnboardingModal({ isOpen, onClose }) {
   const { token } = useAuth();
-  const { workspaces, refreshWorkspaces, switchWorkspace } = useGrowth();
+  const { 
+    workspaces, 
+    refreshWorkspaces, 
+    switchWorkspace,
+    canAddWorkspace,
+    promptPaywall,
+    plan
+  } = useGrowth();
 
   const [step, setStep] = useState(1); // 1: URL input, 2: Scanning, 3: Review & Launch
   const [url, setUrl] = useState('');
@@ -94,6 +101,12 @@ export default function GrowthOnboardingModal({ isOpen, onClose }) {
     e?.preventDefault();
     if (!url.trim()) {
       setError('Please enter your website URL.');
+      return;
+    }
+
+    if (!canAddWorkspace) {
+      setError('You have reached your workspace (website) limit. Please upgrade your plan to add more websites.');
+      promptPaywall({ plan: plan === 'free' ? 'pro' : 'unlimited' });
       return;
     }
 
@@ -227,6 +240,12 @@ export default function GrowthOnboardingModal({ isOpen, onClose }) {
       return;
     }
 
+    if (!canAddWorkspace) {
+      setError('You have reached your workspace (website) limit. Please upgrade your plan to add more websites.');
+      promptPaywall({ plan: plan === 'free' ? 'pro' : 'unlimited' });
+      return;
+    }
+
     const targetDomain = normalizeDomain(scanResult?.url || url);
     const existingWs = workspaces?.find(w => normalizeDomain(w.primary_domain || w.canonical_url) === targetDomain);
     if (existingWs) {
@@ -261,6 +280,9 @@ export default function GrowthOnboardingModal({ isOpen, onClose }) {
 
       const data = await res.json();
       if (!res.ok) {
+        if (res.status === 403) {
+          promptPaywall({ plan: plan === 'free' ? 'pro' : 'unlimited' });
+        }
         throw new Error(data.error || 'Failed to create workspace.');
       }
 
@@ -349,6 +371,23 @@ export default function GrowthOnboardingModal({ isOpen, onClose }) {
           {/* STEP 1: Simplified URL Input & Compact Badges */}
           {step === 1 && (
             <div className="growth-modal-step1">
+              {!canAddWorkspace && (
+                <div className="growth-modal-limit-warning">
+                  <div className="limit-warning-left">
+                    <Lock size={15} className="limit-warning-icon" />
+                    <span className="limit-warning-text">
+                      You have reached your workspace limit ({workspaces?.length || 0} websites). Upgrade your plan to add more websites.
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => promptPaywall({ plan: plan === 'free' ? 'pro' : 'unlimited' })}
+                    className="limit-warning-cta-btn"
+                  >
+                    Upgrade
+                  </button>
+                </div>
+              )}
               <form onSubmit={handleStartScan} className="growth-url-form">
                 <div className={`growth-url-bar-wrap ${isDuplicateDomain ? 'is-duplicate' : ''}`}>
                   <div className="growth-url-protocol">https://</div>
@@ -621,7 +660,9 @@ export default function GrowthOnboardingModal({ isOpen, onClose }) {
                         {competitors.length > 0 && (
                           <div className="step3-comp-pills-list">
                             {competitors.map((comp, idx) => {
-                              const compLabel = typeof comp === 'string' ? comp : (comp?.domain || comp?.name || 'Competitor');
+                              const compLabel = typeof comp === 'string'
+                                ? comp
+                                : (typeof comp?.domain === 'string' ? comp.domain : (typeof comp?.name === 'string' ? comp.name : 'Competitor'));
                               return (
                                 <div key={idx} className="step3-comp-pill">
                                   <span>{compLabel}</span>

@@ -2,7 +2,14 @@
 
 > Cerilas Tools (https://tools.cerilas.com) is a suite of 100% free, privacy-first, client-side web utilities built for developers, creators, and professionals. All data processing (image compression, PDF editing, video compression, AI background removal, ATS resume checking, QR generation) executes locally inside the user's browser sandbox via WebAssembly and HTML5 APIs. Zero files or sensitive data are uploaded to third-party servers.
 
+## Flagship Platform: GrowthControl (AI Visibility & GEO)
+
+- [GrowthControl](https://tools.cerilas.com/growth): Autonomous Generative Engine Optimization (GEO) & AI Search Visibility platform. Audit whether ChatGPT Search, Perplexity AI, Claude 3.7, and Google Gemini cite your domain. Features automated weekly prompt radars, Google Search Console deep sync, robots.txt AI bot directives (GPTBot, ClaudeBot, PerplexityBot), llms.txt validation, and prioritized weekly organic action feeds.
+- [AI Visibility Checker by GrowthControl](https://tools.cerilas.com/tool/ai-visibility-checker): Instant free AI search visibility and citation checker. Probes live Google Gemini and ChatGPT citation grounding with real-time GEO scoring.
+
 ## Tools & Capabilities
+
+- [GrowthControl Platform](https://tools.cerilas.com/growth): All-in-one Generative Engine Optimization (GEO) suite. Audit, track, and optimize brand citations across LLM search engines.
 
 - [PDF Editor](https://tools.cerilas.com/tool/pdf-editor): Free in-browser PDF editor. Add text annotations, insert legal digital signatures, permanently redact sensitive PII/numbers with destructive vector blackout, and organize, rotate, and reorder pages with zero watermark.
 - [QR Code Generator](https://tools.cerilas.com/tool/qr-code-generator): Free permanent QR code generator that never expires. Generate high-resolution SVG vector and 2048px PNG QR codes for URLs, Wi-Fi, vCard, Plain Text, and Email with Apple-minimalist styling and zero signup.

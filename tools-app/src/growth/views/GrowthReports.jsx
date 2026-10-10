@@ -27,8 +27,15 @@ import { SkeletonBlock } from '../components/GrowthSkeleton';
 import './GrowthReports.css';
 
 export default function GrowthReports() {
-  const { activeWorkspace } = useGrowth();
+  const { 
+    activeWorkspace,
+    plan,
+    planLimits,
+    promptPaywall
+  } = useGrowth();
   const { token, user } = useAuth();
+
+  const isReportsLocked = !planLimits?.dailyEmailReport;
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -121,6 +128,10 @@ export default function GrowthReports() {
 
   // Save config
   const handleSaveConfig = async () => {
+    if (isReportsLocked) {
+      promptPaywall({ plan: 'pro' });
+      return;
+    }
     if (!activeWorkspace?.id || !token) return;
     setSaving(true);
     try {
@@ -139,6 +150,8 @@ export default function GrowthReports() {
       const json = await res.json();
       if (res.ok && json.success) {
         showToast('Reporting settings and recipient list saved successfully!');
+      } else if (res.status === 403) {
+        promptPaywall({ plan: 'pro' });
       } else {
         showToast(json.error || 'Error saving settings.', 'error');
       }
@@ -151,6 +164,10 @@ export default function GrowthReports() {
 
   // Trigger immediate test email
   const handleSendTestEmail = async () => {
+    if (isReportsLocked) {
+      promptPaywall({ plan: 'pro' });
+      return;
+    }
     if (!activeWorkspace?.id || !token) return;
     if (recipients.length === 0) {
       showToast('Please add at least one email recipient first.', 'error');
@@ -172,6 +189,8 @@ export default function GrowthReports() {
         showToast(`Daily test report sent successfully: ${recipients.join(', ')}`);
         // Refresh logs
         fetchConfig();
+      } else if (res.status === 403) {
+        promptPaywall({ plan: 'pro' });
       } else {
         showToast(json.error || 'Failed to send test email.', 'error');
       }
@@ -242,17 +261,47 @@ export default function GrowthReports() {
             <button
               type="button"
               className="growth-primary-btn"
-              onClick={handleSendTestEmail}
-              disabled={sendingTest || recipients.length === 0}
+              onClick={isReportsLocked ? () => promptPaywall({ plan: 'pro' }) : handleSendTestEmail}
+              disabled={!isReportsLocked && (sendingTest || recipients.length === 0)}
             >
               {sendingTest ? <Loader2 size={15} className="animate-spin" /> : <Send size={15} />}
               <span>{sendingTest ? 'Sending Email...' : 'Send Test Report Now'}</span>
+              {isReportsLocked && (
+                <span style={{ fontSize: '0.68rem', padding: '1px 5px', borderRadius: '999px', background: 'rgba(255,255,255,0.2)', fontWeight: 700 }}>PRO</span>
+              )}
             </button>
           </div>
         }
       />
 
       <div className="reports-container">
+        {/* Free Plan Locked Notice Banner */}
+        {isReportsLocked && (
+          <div className="growth-pro-feature-banner" style={{ marginBottom: '1.5rem' }}>
+            <div className="pro-banner-left">
+              <div className="pro-banner-icon-box">
+                <Mail size={22} />
+              </div>
+              <div className="pro-banner-text">
+                <div className="pro-banner-title-row">
+                  <h4 className="pro-banner-title">Automated Daily Executive Email Digest (Pro &amp; Unlimited)</h4>
+                  <span className="pro-banner-badge">Pro / Unlimited</span>
+                </div>
+                <p className="pro-banner-desc">
+                  Automated morning email digests summarizing your website's Google Search Console organic traffic, GA4 visitors, and AI (GEO) visibility radar at 09:00 AM are exclusive to Pro and Unlimited plans.
+                </p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => promptPaywall({ plan: 'pro' })}
+              className="pro-banner-btn"
+            >
+              <Sparkles size={14} />
+              <span>Upgrade to Pro</span>
+            </button>
+          </div>
+        )}
         
         {/* ROW 1: 2-Column Grid (Recipients Management + cron-job.org Webhook) */}
         <div className="reports-grid-two-col">
@@ -276,15 +325,15 @@ export default function GrowthReports() {
 
               {/* Active Toggle Switch */}
               <div 
-                className="report-toggle-wrap"
-                onClick={() => setDailyEnabled(prev => !prev)}
-                title="Toggle daily automated reporting"
+                className={`report-toggle-wrap ${isReportsLocked ? 'locked-toggle' : ''}`}
+                onClick={isReportsLocked ? () => promptPaywall({ plan: 'pro' }) : () => setDailyEnabled(prev => !prev)}
+                title={isReportsLocked ? 'Automated digest is available on Pro & Unlimited' : 'Toggle daily automated reporting'}
               >
-                <div className={`report-toggle-switch ${dailyEnabled ? 'is-active' : ''}`}>
+                <div className={`report-toggle-switch ${dailyEnabled && !isReportsLocked ? 'is-active' : ''}`}>
                   <div className="report-toggle-handle" />
                 </div>
                 <span className="report-toggle-label">
-                  {dailyEnabled ? 'Enabled' : 'Disabled'}
+                  {isReportsLocked ? 'Pro Feature' : dailyEnabled ? 'Enabled' : 'Disabled'}
                 </span>
               </div>
             </div>
@@ -442,7 +491,7 @@ export default function GrowthReports() {
                 <div className="topbar-dot green" />
               </div>
               <span className="email-preview-subject-line">
-                Subject: [Cerilas] {activeWorkspace?.name || 'Your Brand'} - Daily Growth &amp; Telemetry Digest ({formattedDate})
+                Subject: [GrowthControl] {activeWorkspace?.name || 'Your Brand'} - Daily Telemetry &amp; Intelligence Digest ({formattedDate})
               </span>
               <span style={{ fontSize: '0.72rem', color: '#64748b' }}>
                 To: {recipients.join(', ') || 'Not specified'}
@@ -454,7 +503,7 @@ export default function GrowthReports() {
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', paddingBottom: '1rem', borderBottom: '1px solid #1e293b' }}>
                 <div>
                   <span style={{ fontSize: '0.7rem', color: '#38bdf8', fontWeight: 800, letterSpacing: '1px' }}>
-                    CERILAS GROWTH RADAR // DAILY EXECUTIVE DIGEST
+                    GROWTHCONTROL RADAR // DAILY EXECUTIVE DIGEST
                   </span>
                   <h2 style={{ margin: '4px 0 2px', fontSize: '1.25rem', color: '#ffffff', fontWeight: 800 }}>
                     {activeWorkspace?.name || 'Cerilas Technologies'}

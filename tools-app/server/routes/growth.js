@@ -25,6 +25,18 @@ import {
   sendWorkspaceDailyReport,
   triggerAllDailyReports
 } from '../utils/growthReportService.js';
+import {
+  getUserPlan,
+  getPlanLimits,
+  checkWorkspaceLimit,
+  checkAddablePromptsLimit,
+  checkTrackablePromptsLimit,
+  checkCompetitorLimit,
+  checkTechnicalAuditAccess,
+  checkDailyEmailReportAccess,
+  checkAndIncrementDailyUsage,
+  getGrowthLimitsSummary
+} from '../utils/growthPlanLimits.js';
 
 const router = express.Router();
 const JWT_SECRET = process.env.JWT_SECRET || 'cerilas_admin_jwt_secret_2026';
@@ -232,6 +244,20 @@ router.get('/workspaces', requireAuth, async (req, res) => {
 router.post('/workspaces', requireAuth, async (req, res) => {
   try {
     const org = await getOrCreateUserOrganization(req.user.id, req.user.first_name);
+
+    // Plan Limit Check: Free: 1, Pro: 3, Unlimited: Unlimited
+    const userPlan = getUserPlan(req.user, org);
+    const wsLimit = await checkWorkspaceLimit(org.id, userPlan);
+    if (!wsLimit.allowed) {
+      return res.status(403).json({
+        error: wsLimit.error,
+        code: 'LIMIT_EXCEEDED',
+        plan: userPlan,
+        limit: wsLimit.limit,
+        current: wsLimit.current
+      });
+    }
+
     const {
       name,
       url,
@@ -1583,6 +1609,23 @@ router.get('/workspaces/:slugOrId/audit', requireAuth, async (req, res) => {
     const authData = await resolveAndAuthorizeWorkspace(req, req.params.slugOrId);
     if (!authData) return res.status(404).json({ error: 'Çalışma alanı bulunamadı.' });
 
+    // Plan Limit Check: Free: 0 (Locked), Pro & Unlimited: Allowed
+    const userPlan = getUserPlan(req.user, authData.organization);
+    const auditAccess = checkTechnicalAuditAccess(userPlan);
+    if (!auditAccess.allowed) {
+      return res.json({
+        success: true,
+        isLocked: true,
+        plan: userPlan,
+        message: auditAccess.error,
+        data: {
+          issues: [],
+          pages: [],
+          lastRun: null
+        }
+      });
+    }
+
     const { workspace } = authData;
 
     const issuesRes = await authPool.query(
@@ -1625,6 +1668,17 @@ router.post('/workspaces/:slugOrId/audit/rescan', requireAuth, async (req, res) 
     const authData = await resolveAndAuthorizeWorkspace(req, req.params.slugOrId);
     if (!authData) return res.status(404).json({ error: 'Çalışma alanı bulunamadı.' });
     
+    // Plan Limit Check: Free: 0 (Locked), Pro & Unlimited: Allowed
+    const userPlan = getUserPlan(req.user, authData.organization);
+    const auditAccess = checkTechnicalAuditAccess(userPlan);
+    if (!auditAccess.allowed) {
+      return res.status(403).json({
+        error: auditAccess.error,
+        code: 'FEATURE_LOCKED',
+        plan: userPlan
+      });
+    }
+
     const { workspace } = authData;
     let url = workspace.canonical_url;
     if (!url) {
@@ -1844,14 +1898,16 @@ router.post('/workspaces/:slugOrId/prompts', requireAuth, async (req, res) => {
     const authData = await resolveAndAuthorizeWorkspace(req, req.params.slugOrId);
     if (!authData) return res.status(404).json({ error: 'Çalışma alanı bulunamadı.' });
 
-    // Enforce max 10 tracked prompts limit
-    const countRes = await authPool.query(
-      `SELECT COUNT(*)::int as count FROM growth_tracked_prompts WHERE workspace_id = $1`,
-      [authData.workspace.id]
-    );
-    if (parseInt(countRes.rows[0]?.count || 0, 10) >= 10) {
-      return res.status(400).json({
-        error: 'Maksimum 10 prompt takip limitine ulaştınız. Yeni prompt eklemek için lütfen mevcut promptlardan birini silin.'
+    // Plan Limit Check: Free: 3, Pro: 5, Unlimited: 10
+    const userPlan = getUserPlan(req.user, authData.organization);
+    const promptLimit = await checkAddablePromptsLimit(authData.workspace.id, userPlan, 1);
+    if (!promptLimit.allowed) {
+      return res.status(403).json({
+        error: promptLimit.error,
+        code: 'LIMIT_EXCEEDED',
+        plan: userPlan,
+        limit: promptLimit.limit,
+        current: promptLimit.current
       });
     }
 
@@ -1910,7 +1966,7 @@ router.delete('/workspaces/:slugOrId/prompts/:promptId', requireAuth, async (req
 
 /**
  * POST /api/growth/workspaces/:slugOrId/prompts/batch
- * Bulk add tracked GEO AI search prompts (up to remaining limit of 10)
+ * Bulk add tracked GEO AI search prompts (up to remaining limit)
  */
 router.post('/workspaces/:slugOrId/prompts/batch', requireAuth, async (req, res) => {
   try {
@@ -1922,16 +1978,18 @@ router.post('/workspaces/:slugOrId/prompts/batch', requireAuth, async (req, res)
       return res.status(400).json({ error: 'Eklenecek prompt listesi boş.' });
     }
 
-    const countRes = await authPool.query(
-      `SELECT COUNT(*)::int as count FROM growth_tracked_prompts WHERE workspace_id = $1`,
-      [authData.workspace.id]
-    );
-    const currentCount = parseInt(countRes.rows[0]?.count || 0, 10);
-    const availableSlots = Math.max(0, 10 - currentCount);
+    // Plan Limit Check: Free: 3, Pro: 5, Unlimited: 10
+    const userPlan = getUserPlan(req.user, authData.organization);
+    const promptLimit = await checkAddablePromptsLimit(authData.workspace.id, userPlan, 0);
+    const availableSlots = promptLimit.availableSlots || 0;
 
     if (availableSlots <= 0) {
-      return res.status(400).json({
-        error: 'Maksimum 10 prompt takip limitine ulaştınız. Yeni prompt eklemek için lütfen mevcut promptlardan birini silin.'
+      return res.status(403).json({
+        error: promptLimit.error || 'You have reached your trackable prompt limit.',
+        code: 'LIMIT_EXCEEDED',
+        plan: userPlan,
+        limit: promptLimit.limit,
+        current: promptLimit.current
       });
     }
 
@@ -1976,16 +2034,24 @@ router.post('/workspaces/:slugOrId/prompts/generate-ai', requireAuth, async (req
     const authData = await resolveAndAuthorizeWorkspace(req, req.params.slugOrId);
     if (!authData) return res.status(404).json({ error: 'Çalışma alanı bulunamadı.' });
 
+    const userPlan = getUserPlan(req.user, authData.organization);
+    const planLimits = getPlanLimits(userPlan);
+    const maxAllowed = planLimits.addablePrompts;
+
     const existingRes = await authPool.query(
       `SELECT id, prompt FROM growth_tracked_prompts WHERE workspace_id = $1`,
       [authData.workspace.id]
     );
     const currentCount = existingRes.rows.length;
-    const remaining = Math.max(0, 10 - currentCount);
+    const remaining = Math.max(0, maxAllowed - currentCount);
 
     if (remaining <= 0) {
-      return res.status(400).json({
-        error: 'Maksimum 10 prompt takip limitine zaten ulaşıldı (10/10). Yeni soru üretmek için lütfen mevcut sorulardan bazılarını silin.'
+      return res.status(403).json({
+        error: `Maksimum ${maxAllowed} prompt takip limitine ulaşıldı (${currentCount}/${maxAllowed}). Yeni soru üretmek için lütfen mevcut sorulardan bazılarını silin veya paketinizi yükseltin.`,
+        code: 'LIMIT_EXCEEDED',
+        plan: userPlan,
+        limit: maxAllowed,
+        current: currentCount
       });
     }
 
@@ -2134,6 +2200,18 @@ router.post('/workspaces/:slugOrId/prompts/:promptId/run', requireAuth, async (r
     const authData = await resolveAndAuthorizeWorkspace(req, req.params.slugOrId);
     if (!authData) return res.status(404).json({ error: 'Çalışma alanı bulunamadı.' });
 
+    // Plan Limit Check: Trackable GEO prompts (Free: 0, Pro: 5, Unlimited: 10)
+    const userPlan = getUserPlan(req.user, authData.organization);
+    const trackCheck = await checkTrackablePromptsLimit(authData.workspace.id, userPlan);
+    if (!trackCheck.allowed) {
+      return res.status(403).json({
+        error: trackCheck.error,
+        code: 'FEATURE_LOCKED',
+        plan: userPlan,
+        feature: 'trackable_prompts'
+      });
+    }
+
     const { workspace } = authData;
     const promptRes = await authPool.query(
       'SELECT * FROM growth_tracked_prompts WHERE id = $1 AND workspace_id = $2',
@@ -2281,7 +2359,7 @@ Cite real brands, websites, and sources if relevant.`;
     });
   } catch (err) {
     console.error('[AI Visibility Run Error]:', err);
-    res.status(500).json({ error: err.message || 'AI görünürlük simülasyonu çalıştırılamadı.' });
+    res.status(500).json({ error: err.message || 'AI visibility simulation could not be executed.' });
   }
 });
 
@@ -2658,7 +2736,7 @@ function getFallbackOpportunities(workspace, domain, geoAudit, dirStats, hasGsc,
       estimated_traffic_upside: 'First-party verified keyword intelligence and live action mapping',
       evidence: { reason: 'Google Search Console integration is not currently connected.' },
       action_steps: [
-        'Navigate to Cerilas Growth > Workspace & Integrations.',
+        'Navigate to GrowthControl > Workspace & Integrations.',
         'Click Connect Google to authorize Search Console property access.',
         'Select your verified property to automatically sync organic queries and rankings.'
       ],
@@ -3062,18 +3140,36 @@ router.get('/workspaces/:slugOrId/opportunities', requireAuth, async (req, res) 
 router.post('/workspaces/:slugOrId/opportunities/sync', requireAuth, async (req, res) => {
   try {
     const authData = await resolveAndAuthorizeWorkspace(req, req.params.slugOrId);
-    if (!authData) return res.status(404).json({ error: 'Çalışma alanı bulunamadı.' });
+    if (!authData) return res.status(404).json({ error: 'Workspace not found or unauthorized.' });
+
+    // Plan Limit Check: Priority Action Feed AI Button (Free: 1/day, Pro: 3/day, Unlimited: Unlimited)
+    const userPlan = getUserPlan(req.user, authData.organization);
+    const dailyUsageCheck = await checkAndIncrementDailyUsage(req.user.id, 'action_feed_ai', userPlan);
+    if (!dailyUsageCheck.allowed) {
+      return res.status(429).json({
+        error: dailyUsageCheck.error,
+        code: 'DAILY_LIMIT_EXCEEDED',
+        plan: userPlan,
+        limit: dailyUsageCheck.limit,
+        used: dailyUsageCheck.used
+      });
+    }
 
     const synced = await syncWorkspaceOpportunities(authData.workspace);
     res.json({
       success: true,
-      message: 'Aksiyon listesi başarıyla tarandı ve güncellendi.',
+      message: 'Action list successfully scanned and updated.',
       count: synced.length,
-      data: synced
+      data: synced,
+      meta: {
+        dailyLimit: dailyUsageCheck.limit,
+        dailyUsed: dailyUsageCheck.used,
+        remaining: dailyUsageCheck.remaining
+      }
     });
   } catch (err) {
     console.error('[Sync Opportunities Error]:', err);
-    res.status(500).json({ error: 'Aksiyonlar taranırken bir hata oluştu.' });
+    res.status(500).json({ error: 'An error occurred while scanning actions.' });
   }
 });
 
@@ -3200,17 +3296,30 @@ router.get('/workspaces/:slugOrId/competitors', requireAuth, async (req, res) =>
       }
     });
   } catch (err) {
-    res.status(500).json({ error: 'Rakipler yüklenemedi.' });
+    res.status(500).json({ error: 'Failed to load competitors.' });
   }
 });
 
 router.post('/workspaces/:slugOrId/competitors', requireAuth, async (req, res) => {
   try {
     const authData = await resolveAndAuthorizeWorkspace(req, req.params.slugOrId);
-    if (!authData) return res.status(404).json({ error: 'Çalışma alanı bulunamadı.' });
+    if (!authData) return res.status(404).json({ error: 'Workspace not found or unauthorized.' });
+
+    // Plan Limit Check: Competitor Radar (Free: 0 - Locked, Pro: 3, Unlimited: Unlimited)
+    const userPlan = getUserPlan(req.user, authData.organization);
+    const compLimit = await checkCompetitorLimit(authData.workspace.id, userPlan);
+    if (!compLimit.allowed) {
+      return res.status(403).json({
+        error: compLimit.error,
+        code: 'LIMIT_EXCEEDED',
+        plan: userPlan,
+        limit: compLimit.limit,
+        current: compLimit.current
+      });
+    }
 
     const { name, domain, type, notes } = req.body;
-    if (!domain) return res.status(400).json({ error: 'Rakip domain adresi zorunludur.' });
+    if (!domain) return res.status(400).json({ error: 'Competitor domain is required.' });
 
     const cleanDomain = String(domain || '').replace(/^https?:\/\//i, '').replace(/^www\./i, '').split('/')[0].trim().toLowerCase();
     const cleanName = name || cleanDomain;
@@ -3225,23 +3334,23 @@ router.post('/workspaces/:slugOrId/competitors', requireAuth, async (req, res) =
 
     res.status(201).json({ success: true, data: insRes.rows[0] });
   } catch (err) {
-    res.status(500).json({ error: 'Rakip eklenemedi.' });
+    res.status(500).json({ error: 'Failed to add competitor.' });
   }
 });
 
 router.delete('/workspaces/:slugOrId/competitors/:compId', requireAuth, async (req, res) => {
   try {
     const authData = await resolveAndAuthorizeWorkspace(req, req.params.slugOrId);
-    if (!authData) return res.status(404).json({ error: 'Çalışma alanı bulunamadı.' });
+    if (!authData) return res.status(404).json({ error: 'Workspace not found or unauthorized.' });
 
     await authPool.query(
       `DELETE FROM growth_competitors WHERE id = $1 AND workspace_id = $2`,
       [req.params.compId, authData.workspace.id]
     );
 
-    res.json({ success: true, message: 'Rakip silindi.' });
+    res.json({ success: true, message: 'Competitor removed successfully.' });
   } catch (err) {
-    res.status(500).json({ error: 'Rakip silinemedi.' });
+    res.status(500).json({ error: 'Failed to remove competitor.' });
   }
 });
 
@@ -3254,10 +3363,24 @@ router.post('/workspaces/:slugOrId/competitors/discover', requireAuth, async (re
     const authData = await resolveAndAuthorizeWorkspace(req, req.params.slugOrId);
     if (!authData) return res.status(404).json({ error: 'Çalışma alanı bulunamadı.' });
 
+    // Plan Limit Check: Discover Competitors AI Button Usage (Free: 1/day, Pro: 3/day, Unlimited: Unlimited)
+    const userPlan = getUserPlan(req.user, authData.organization);
+    const planLimits = getPlanLimits(userPlan);
+    const dailyUsageCheck = await checkAndIncrementDailyUsage(req.user.id, 'discover_competitors_ai', userPlan);
+    if (!dailyUsageCheck.allowed) {
+      return res.status(429).json({
+        error: dailyUsageCheck.error,
+        code: 'DAILY_LIMIT_EXCEEDED',
+        plan: userPlan,
+        limit: dailyUsageCheck.limit,
+        used: dailyUsageCheck.used
+      });
+    }
+
     const workspace = authData.workspace;
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) {
-      return res.status(400).json({ error: 'Gemini API anahtarı yapılandırılmamış.' });
+      return res.status(400).json({ error: 'Gemini API key is not configured.' });
     }
 
     const ai = new GoogleGenAI({ apiKey });
@@ -3314,7 +3437,7 @@ Only return pure JSON, no markdown codeblocks, no extra explanations.`;
     }
 
     if (!Array.isArray(discovered) || discovered.length === 0) {
-      return res.status(500).json({ error: 'Yapay zeka rakipleri analiz edemedi, lütfen tekrar deneyin.' });
+      return res.status(500).json({ error: 'AI failed to analyze competitors, please try again.' });
     }
 
     const existingRes = await authPool.query(
@@ -3324,29 +3447,37 @@ Only return pure JSON, no markdown codeblocks, no extra explanations.`;
     const existingDomains = new Set(existingRes.rows.map(r => String(r.domain || '').toLowerCase()));
     existingDomains.add(domain);
 
-    const addedList = [];
-    for (const item of discovered) {
-      if (!item) continue;
-      const cleanDomain = String(item.domain || item.name || '')
-        .replace(/^https?:\/\//i, '')
-        .replace(/^www\./i, '')
-        .split('/')[0]
-        .trim()
-        .toLowerCase();
-      const cleanName = String(item.name || cleanDomain).trim();
-      const validTypes = ['direct', 'search', 'ai'];
-      const compType = validTypes.includes(item.type) ? item.type : 'direct';
-      const cleanNotes = item.notes ? String(item.notes).trim() : null;
+    const maxRadarAllowed = planLimits.competitors; // 0 for Free, 3 for Pro, Infinity for Unlimited
+    const currentRadarCount = existingRes.rows.length;
+    const availableRadarSlots = maxRadarAllowed === Infinity ? Infinity : Math.max(0, maxRadarAllowed - currentRadarCount);
 
-      if (cleanDomain && !existingDomains.has(cleanDomain)) {
-        existingDomains.add(cleanDomain);
-        const ins = await authPool.query(
-          `INSERT INTO growth_competitors (workspace_id, name, domain, type, notes, created_at)
-           VALUES ($1, $2, $3, $4, $5, NOW())
-           RETURNING *`,
-          [workspace.id, cleanName, cleanDomain, compType, cleanNotes]
-        );
-        addedList.push(ins.rows[0]);
+    const addedList = [];
+    if (availableRadarSlots > 0) {
+      for (const item of discovered) {
+        if (!item) continue;
+        if (maxRadarAllowed !== Infinity && addedList.length >= availableRadarSlots) break;
+
+        const cleanDomain = String(item.domain || item.name || '')
+          .replace(/^https?:\/\//i, '')
+          .replace(/^www\./i, '')
+          .split('/')[0]
+          .trim()
+          .toLowerCase();
+        const cleanName = String(item.name || cleanDomain).trim();
+        const validTypes = ['direct', 'search', 'ai'];
+        const compType = validTypes.includes(item.type) ? item.type : 'direct';
+        const cleanNotes = item.notes ? String(item.notes).trim() : null;
+
+        if (cleanDomain && !existingDomains.has(cleanDomain)) {
+          existingDomains.add(cleanDomain);
+          const ins = await authPool.query(
+            `INSERT INTO growth_competitors (workspace_id, name, domain, type, notes, created_at)
+             VALUES ($1, $2, $3, $4, $5, NOW())
+             RETURNING *`,
+            [workspace.id, cleanName, cleanDomain, compType, cleanNotes]
+          );
+          addedList.push(ins.rows[0]);
+        }
       }
     }
 
@@ -3355,15 +3486,32 @@ Only return pure JSON, no markdown codeblocks, no extra explanations.`;
       [workspace.id]
     );
 
+    let infoMsg = '';
+    if (maxRadarAllowed <= 0) {
+      infoMsg = `Discovered ${discovered.length} market competitors with AI. Continuous radar monitoring is exclusive to Pro and Unlimited plans.`;
+    } else if (addedList.length > 0) {
+      infoMsg = `Discovered and added ${addedList.length} new competitors to your tracking radar with AI.`;
+    } else {
+      infoMsg = `Discovered ${discovered.length} competitors. (Radar quota: ${currentRadarCount}/${maxRadarAllowed})`;
+    }
+
     res.json({
       success: true,
-      message: `${addedList.length} new competitors discovered and added to radar via AI.`,
+      message: infoMsg,
       addedCount: addedList.length,
-      data: allRes.rows
+      suggestions: discovered,
+      data: allRes.rows,
+      meta: {
+        dailyLimit: dailyUsageCheck.limit,
+        dailyUsed: dailyUsageCheck.used,
+        remaining: dailyUsageCheck.remaining,
+        radarLimit: maxRadarAllowed === Infinity ? 'Unlimited' : maxRadarAllowed,
+        radarCount: allRes.rows.length
+      }
     });
   } catch (err) {
     console.error('[Discover Competitors Error]:', err);
-    res.status(500).json({ error: 'Rakipler taranırken hata oluştu.' });
+    res.status(500).json({ error: 'An error occurred while scanning competitors.' });
   }
 });
 
@@ -3792,6 +3940,8 @@ router.get('/workspaces/:slugOrId/reports/config', requireAuth, async (req, res)
     if (!authData) return res.status(404).json({ error: 'Çalışma alanı bulunamadı.' });
 
     const ws = authData.workspace;
+    const userPlan = getUserPlan(req.user, authData.organization);
+    const reportAccess = checkDailyEmailReportAccess(userPlan);
 
     // Fetch or create config
     let cfgRes = await authPool.query(
@@ -3803,9 +3953,9 @@ router.get('/workspaces/:slugOrId/reports/config', requireAuth, async (req, res)
     if (!config) {
       const initRes = await authPool.query(
         `INSERT INTO growth_workspace_report_configs (workspace_id, daily_report_enabled, recipients)
-         VALUES ($1, true, ARRAY[$2])
+         VALUES ($1, $2, ARRAY[$3])
          RETURNING *`,
-        [ws.id, req.user?.email || 'deniz@cerilas.com']
+        [ws.id, reportAccess.allowed, req.user?.email || 'deniz@cerilas.com']
       );
       config = initRes.rows[0];
     }
@@ -3826,7 +3976,9 @@ router.get('/workspaces/:slugOrId/reports/config', requireAuth, async (req, res)
         config,
         webhookUrl,
         cronSecret: CRON_SECRET,
-        logs: logsRes.rows
+        logs: logsRes.rows,
+        isLocked: !reportAccess.allowed,
+        plan: userPlan
       }
     });
   } catch (err) {
@@ -3846,6 +3998,17 @@ router.put('/workspaces/:slugOrId/reports/config', requireAuth, async (req, res)
 
     const ws = authData.workspace;
     const { daily_report_enabled, recipients, send_time, frequency } = req.body;
+
+    // Plan Limit Check: Daily Executive Email Digest (Free: 0 - Locked, Pro & Unlimited: Allowed)
+    const userPlan = getUserPlan(req.user, authData.organization);
+    const reportAccess = checkDailyEmailReportAccess(userPlan);
+    if (!reportAccess.allowed && daily_report_enabled) {
+      return res.status(403).json({
+        error: reportAccess.error,
+        code: 'FEATURE_LOCKED',
+        plan: userPlan
+      });
+    }
 
     // Clean and validate emails
     let cleanRecipients = [];
@@ -3873,7 +4036,7 @@ router.put('/workspaces/:slugOrId/reports/config', requireAuth, async (req, res)
        RETURNING *`,
       [
         ws.id,
-        Boolean(daily_report_enabled !== undefined ? daily_report_enabled : true),
+        Boolean(reportAccess.allowed && (daily_report_enabled !== undefined ? daily_report_enabled : true)),
         cleanRecipients,
         send_time || '09:00',
         frequency || 'daily'
@@ -3899,6 +4062,17 @@ router.post('/workspaces/:slugOrId/reports/send-test', requireAuth, async (req, 
   try {
     const authData = await resolveAndAuthorizeWorkspace(req, req.params.slugOrId);
     if (!authData) return res.status(404).json({ error: 'Çalışma alanı bulunamadı.' });
+
+    // Plan Limit Check: Daily Executive Email Digest (Free: 0 - Locked)
+    const userPlan = getUserPlan(req.user, authData.organization);
+    const reportAccess = checkDailyEmailReportAccess(userPlan);
+    if (!reportAccess.allowed) {
+      return res.status(403).json({
+        error: reportAccess.error,
+        code: 'FEATURE_LOCKED',
+        plan: userPlan
+      });
+    }
 
     const ws = authData.workspace;
     const testEmail = req.body?.testEmail || null;
@@ -4739,6 +4913,33 @@ router.delete('/workspaces/:slugOrId/google-business', requireAuth, async (req, 
   } catch (err) {
     console.error('[Delete Google Business Error]:', err);
     res.status(500).json({ error: 'Bağlantı kaldırılamadı.' });
+  }
+});
+
+/**
+ * GET /api/growth/workspaces/:slugOrId/limits
+ * Get current user & workspace limits & real-time daily usage metrics
+ */
+router.get('/workspaces/:slugOrId/limits', requireAuth, async (req, res) => {
+  try {
+    const authData = await resolveAndAuthorizeWorkspace(req, req.params.slugOrId);
+    if (!authData) return res.status(404).json({ error: 'Çalışma alanı bulunamadı.' });
+
+    const userPlan = getUserPlan(req.user, authData.organization);
+    const summary = await getGrowthLimitsSummary(
+      req.user.id,
+      authData.workspace.id,
+      authData.organization.id,
+      userPlan
+    );
+
+    res.json({
+      success: true,
+      data: summary
+    });
+  } catch (err) {
+    console.error('[Growth Limits Error]:', err);
+    res.status(500).json({ error: 'Limit bilgisi alınamadı.' });
   }
 });
 

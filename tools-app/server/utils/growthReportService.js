@@ -102,7 +102,7 @@ export function buildDailyReportHtml(workspace, metrics, dateStr) {
                 <tr>
                   <td>
                     <div style="font-size: 11px; text-transform: uppercase; font-weight: 800; color: #38bdf8; letter-spacing: 1.5px; margin-bottom: 6px;">
-                      CERILAS GROWTH RADAR // DAILY EXECUTIVE BRIEFING
+                      GROWTHCONTROL RADAR // DAILY EXECUTIVE BRIEFING
                     </div>
                     <h1 style="margin: 0; font-size: 22px; font-weight: 800; color: #ffffff; letter-spacing: -0.3px;">
                       ${workspace.name}
@@ -352,7 +352,7 @@ export async function sendWorkspaceDailyReport(workspaceId, triggerType = 'webho
   const { transporter, sender } = await getEmailSenderTransporter();
 
   const mailOptions = {
-    from: `"${workspace.name} (Cerilas Growth)" <${sender.email}>`,
+    from: `"${workspace.name} (GrowthControl)" <${sender.email}>`,
     to: recipients.join(', '),
     subject,
     html

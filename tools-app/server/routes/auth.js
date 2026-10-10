@@ -1016,8 +1016,9 @@ router.get('/invoices', requireAuth, async (req, res) => {
  */
 router.post('/upgrade-plan', requireAuth, async (req, res) => {
   try {
-    const { plan } = req.body;
-    if (!['free', 'pro', 'enterprise'].includes(plan)) {
+    let { plan } = req.body;
+    if (plan === 'enterprise') plan = 'unlimited';
+    if (!['free', 'pro', 'unlimited'].includes(plan)) {
       return res.status(400).json({ error: 'Geçersiz plan seçimi.' });
     }
 
@@ -1026,8 +1027,16 @@ router.post('/upgrade-plan', requireAuth, async (req, res) => {
       [plan, req.user.id]
     );
 
-    const amount = plan === 'pro' ? 9.00 : (plan === 'enterprise' ? 29.00 : 0.00);
-    const planTitle = plan === 'pro' ? 'Pro Plan' : (plan === 'enterprise' || plan === 'unlimited' ? 'Unlimited Plan' : 'Free Starter Plan');
+    // Also update any organization owned by the user
+    try {
+      await authPool.query(
+        'UPDATE organizations SET plan = $1 WHERE created_by_user_id = $2',
+        [plan, req.user.id]
+      );
+    } catch (_) {}
+
+    const amount = plan === 'pro' ? 9.99 : (plan === 'unlimited' ? 14.99 : 0.00);
+    const planTitle = plan === 'pro' ? 'Pro Plan' : (plan === 'unlimited' ? 'Unlimited Plan' : 'Free Starter Plan');
     const invNum = `INV-${Date.now().toString().slice(-6)}`;
     
     await authPool.query(
@@ -1044,6 +1053,40 @@ router.post('/upgrade-plan', requireAuth, async (req, res) => {
   } catch (err) {
     console.error('Upgrade plan error:', err);
     res.status(500).json({ error: 'Plan güncellenemedi.' });
+  }
+});
+
+/**
+ * POST /api/auth/sync-plan
+ * Sync active plan status with RevenueCat verification
+ */
+router.post('/sync-plan', requireAuth, async (req, res) => {
+  try {
+    let { plan } = req.body;
+    if (plan === 'enterprise') plan = 'unlimited';
+    if (!['free', 'pro', 'unlimited'].includes(plan)) {
+      return res.status(400).json({ error: 'Invalid plan.' });
+    }
+
+    const updated = await authPool.query(
+      'UPDATE users SET plan = $1 WHERE id = $2 RETURNING *',
+      [plan, req.user.id]
+    );
+
+    try {
+      await authPool.query(
+        'UPDATE organizations SET plan = $1 WHERE created_by_user_id = $2',
+        [plan, req.user.id]
+      );
+    } catch (_) {}
+
+    res.json({
+      success: true,
+      user: formatUser(updated.rows[0])
+    });
+  } catch (err) {
+    console.error('Sync plan error:', err);
+    res.status(500).json({ error: 'Failed to synchronize plan.' });
   }
 });
 

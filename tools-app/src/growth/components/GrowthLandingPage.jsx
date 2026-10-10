@@ -1,96 +1,302 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { 
-  Globe, 
-  ArrowRight, 
-  ArrowLeft,
-  CheckCircle2, 
-  AlertCircle, 
-  AlertTriangle,
-  Loader2, 
-  ShieldCheck, 
-  TrendingUp, 
-  Zap, 
-  Layers, 
-  BarChart3, 
-  FileText, 
-  ChevronDown,
-  ChevronUp,
-  RefreshCw,
-  Activity,
-  Flame,
-  KeyRound,
-  ExternalLink,
-  Lock,
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import {
   Search,
+  ArrowRight,
+  ChevronRight,
+  ChevronDown,
+  Check,
+  Globe,
+  Sparkles,
+  BarChart3,
+  ShieldCheck,
+  Zap,
+  Layers,
+  RefreshCw,
+  Star,
+  Clock,
+  Lock,
+  ArrowUpRight,
+  Cpu,
+  Compass,
+  Activity,
+  FileText,
+  CheckCircle2,
+  AlertTriangle,
+  AlertCircle,
+  Loader2,
+  Moon,
   Sun,
-  Moon
+  PanelLeft,
+  Send,
+  Users,
+  Paperclip,
+  Link2,
+  ExternalLink,
+  Sliders,
+  SlidersHorizontal,
+  Bot,
+  Database,
+  Code2,
+  Terminal,
+  Share2,
+  TrendingUp,
+  Award,
+  Menu,
+  X
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useGrowth } from '../GrowthContext';
 import { useTheme } from '../../context/ThemeContext';
-import GrowthFavicon from './GrowthFavicon';
+import { useRevenueCat } from '../../context/RevenueCatContext';
+import CloudCanvas from './CloudCanvas';
 import './GrowthLandingPage.css';
 
 const QUICK_TEST_DOMAINS = [
-  'cerilas.com',
   'linear.app',
   'supabase.com',
   'posthog.com',
-  'notion.so'
+  'cerilas.com',
+  'stripe.com'
 ];
 
 const SCAN_STEPS = [
   { id: 'dns', label: 'Checking DNS, SSL & Server Response Time' },
   { id: 'crawlers', label: 'Verifying AI Crawler Permissions (GPTBot, Perplexity, Claude)' },
   { id: 'meta', label: 'Scanning Meta Tags, Schema.org & llms.txt Presence' },
-  { id: 'intel', label: 'AI Brand Positioning & Competitor Intelligence' }
+  { id: 'intel', label: 'AI Brand Positioning & Competitor Citation Intelligence' }
 ];
 
-const PLATFORM_LOGOS = [
-  { name: 'Google Search', icon: '/AI-logos/google-color.svg', badge: 'Classic Search' },
-  { name: 'Google Search Console', icon: '/growth-covers/gsc-badge.svg', badge: 'Organic Data' },
-  { name: 'ChatGPT / OpenAI', icon: '/AI-logos/chatgpt-black.svg', badge: 'GPTBot', invert: true },
-  { name: 'Perplexity AI', icon: '/AI-logos/perplexity-color.svg', badge: 'Live Search' },
-  { name: 'Anthropic Claude', icon: '/AI-logos/claude-color.svg', badge: 'ClaudeBot' },
-  { name: 'Google Gemini', icon: '/AI-logos/gemini-color.svg', badge: 'AI Overviews' }
+// 24 Floating 3D Tiles for Multi-Model & Crawler Grounding Grid
+const FORMATS_TILES = [
+  { ext: 'ChatGPT', label: 'OpenAI GPT-4o', icon: Sparkles, tint: 'cl-tint-sky' },
+  { ext: 'Perplexity', label: 'Sonar Live Search', icon: Globe, tint: 'cl-tint-cyan' },
+  { ext: 'Claude', label: 'Anthropic Claude 3.7', icon: Bot, tint: 'cl-tint-stone' },
+  { ext: 'Gemini', label: 'Google AI Overviews', icon: Cpu, tint: 'cl-tint-peach' },
+  { ext: 'Copilot', label: 'Microsoft Bing AI', icon: Zap, tint: 'cl-tint-orange' },
+  { ext: 'GSC API', label: 'Search Console Sync', icon: BarChart3, tint: 'cl-tint-sky' },
+  { ext: 'DeepSeek', label: 'Reasoning R1 Models', icon: Terminal, tint: 'cl-tint-orange' },
+  { ext: 'Mistral', label: 'Le Chat Search', icon: Compass, tint: 'cl-tint-rose' },
+  { ext: 'Llama 3', label: 'Meta AI Assistant', icon: Share2, tint: 'cl-tint-rose' },
+  { ext: 'Apple AI', label: 'Siri & Spotlight Search', icon: Award, tint: 'cl-tint-sand' },
+  { ext: 'llms.txt', label: 'LLM Context Standard', icon: FileText, tint: 'cl-tint-mint' },
+  { ext: 'JSON-LD', label: 'Schema.org Structured Data', icon: Code2, tint: 'cl-tint-mint' },
+  { ext: 'robots.txt', label: 'Bot Crawl Directives', icon: Lock, tint: 'cl-tint-stone' },
+  { ext: 'GPTBot', label: 'OpenAI Web Crawler', icon: Bot, tint: 'cl-tint-cyan' },
+  { ext: 'ClaudeBot', label: 'Anthropic Web Crawler', icon: Database, tint: 'cl-tint-sand' },
+  { ext: 'PerplexityBot', label: 'Real-time Indexer', icon: Globe, tint: 'cl-tint-peach' },
+  { ext: 'Sitemap', label: 'XML Entity Index', icon: Layers, tint: 'cl-tint-sky' },
+  { ext: 'OpenGraph', label: 'Entity Metadata Graph', icon: Activity, tint: 'cl-tint-stone' },
+  { ext: 'Citations', label: 'Source Verification', icon: Link2, tint: 'cl-tint-rose' },
+  { ext: 'Knowledge', label: 'Brand Knowledge Graph', icon: Database, tint: 'cl-tint-mint' },
+  { ext: 'Voice Share', label: 'AI Recommendation %', icon: TrendingUp, tint: 'cl-tint-sand' },
+  { ext: 'Markdown', label: 'Clean LLM Scrape', icon: FileText, tint: 'cl-tint-cyan' },
+  { ext: 'REST API', label: 'Automated Webhooks', icon: SlidersHorizontal, tint: 'cl-tint-orange' },
+  { ext: 'GA4 Sync', label: 'Organic Traffic Impact', icon: BarChart3, tint: 'cl-tint-peach' }
 ];
 
-const FAQS = [
+const TESTIMONIALS_DATA = [
   {
-    q: 'What is Generative Engine Optimization (GEO) and how does it differ from traditional SEO?',
-    a: 'GEO is next-generation optimization designed to ensure your brand is accurately cited, referenced as a source, and recommended across AI search engines such as ChatGPT, Perplexity, Claude, and Gemini. While traditional SEO focuses solely on Google\'s 10 blue links, GEO ensures AI models structurally understand your content and cite your authority.'
+    quote: "We increased our ChatGPT source citations by 340% in 45 days after fixing the crawler permissions and structured Schema issues GrowthControl flagged.",
+    name: "Alexandre Moreau",
+    role: "Head of Organic Growth, FinTech SaaS",
+    avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&h=120&q=80&auto=format&fit=crop"
   },
   {
-    q: 'What does the free initial audit cover?',
-    a: 'For your entered domain, it delivers real-time audits of your SSL certificate, server response latency, robots.txt bot permissions (GPTBot, PerplexityBot, etc.), meta tags, Schema.org structured data, llms.txt presence, and an AI-derived market positioning summary.'
+    quote: "Connecting Google Search Console with real-time AI visibility showed us our highest revenue queries were being answered by Gemini without citing our URL. GrowthControl gave us the playbook to win it back.",
+    name: "Sarah Jenkins",
+    role: "VP Marketing, Cloud Infrastructure",
+    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=120&h=120&q=80&auto=format&fit=crop"
   },
   {
-    q: 'Can I save this analysis and track progress weekly?',
-    a: 'Yes! By creating a free account, you can save your brand to your workspace, monitor automated weekly technical health audits, sync Google Search Console, and track your AI visibility score continuously.'
-  },
-  {
-    q: 'Is my Google Search Console data secure?',
-    a: 'Absolutely. Cerilas Growth connects to the Google API using read-only access for search performance telemetry. Your data is never shared with third parties or used to train machine learning models.'
+    quote: "Traditional SEO tools are completely blind to generative search. GrowthControl is our team's daily command center for the post-search era.",
+    name: "Marcus Vance",
+    role: "Founder & CMO, NextGen AI Studio",
+    avatar: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=120&h=120&q=80&auto=format&fit=crop"
   }
 ];
 
+const FAQS_DATA = [
+  {
+    q: 'What is Generative Engine Optimization (GEO) and why does it matter?',
+    a: 'GEO is optimization designed to ensure your brand is cited, referenced as an authority, and linked directly in AI search engines like ChatGPT, Perplexity, Claude, and Gemini. While traditional SEO targeted 10 blue links, GEO ensures AI models understand your product facts and recommend you to high-intent searchers.'
+  },
+  {
+    q: 'How does GrowthControl audit AI search engines?',
+    a: 'We probe live AI models with real-world buyer prompts, analyze whether your brand is cited or recommended, scrape citation URLs in real time, benchmark against your competitors, and cross-reference permissions in your robots.txt and llms.txt files.'
+  },
+  {
+    q: 'Is connecting Google Search Console safe?',
+    a: 'Yes, 100%. GrowthControl uses Google OAuth with strict read-only permissions. Your search data is encrypted at rest and never shared with third parties or used for AI model training.'
+  },
+  {
+    q: 'What is llms.txt and how do you help?',
+    a: 'llms.txt is a new markdown-standard file placed on your domain to provide AI bots with clean, structured summaries of your site. GrowthControl audits whether you have one and generates optimized llms.txt code for your brand.'
+  },
+  {
+    q: 'Can I manage multiple client domains or agency portfolios?',
+    a: 'Yes! GrowthControl supports multiple workspace brands. You can seamlessly switch between client domains, generate white-labeled client reports, and assign team seats.'
+  },
+  {
+    q: 'What happens after running the free domain audit?',
+    a: 'You can immediately review your AI crawler permissions, technical health, and positioning. With one click, you can create a free account to monitor your domain weekly, track 50+ prompts, and receive prioritized action items.'
+  }
+];
+
+// Helper Section Framing Rail with Guide Lines
+function Rail({ children, id, className = '', innerClassName = '', divider = false, fadeTop = false, fadeBottom = false, 'aria-labelledby': ariaLabelledBy }) {
+  return (
+    <section id={id} aria-labelledby={ariaLabelledBy} className={`cl-rail-section ${divider ? 'with-divider' : ''} ${className}`}>
+      <div className="cl-rail-container">
+        <div className={`cl-rail-relative ${innerClassName}`}>
+          <span aria-hidden="true" className={`cl-rail-line left ${fadeTop ? 'fade-top' : ''} ${fadeBottom ? 'fade-bottom' : ''}`} />
+          <span aria-hidden="true" className={`cl-rail-line right ${fadeTop ? 'fade-top' : ''} ${fadeBottom ? 'fade-bottom' : ''}`} />
+          {children}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// Section Heading Helper
+function SectionHeading({ id, eyebrow, eyebrowHref, title, description, align = 'center', className = '' }) {
+  return (
+    <div className={`cl-section-heading ${align === 'center' ? 'center' : ''} ${className}`}>
+      {eyebrow && (
+        <a href={eyebrowHref || '#'} className="cl-eyebrow">
+          <span>{eyebrow}</span>
+          <ChevronRight size={14} />
+        </a>
+      )}
+      <h2 id={id} className="cl-h2-title">{title}</h2>
+      {description && <p className="cl-h2-desc">{description}</p>}
+    </div>
+  );
+}
+
+// 3D Perspective Tilting Grid Component
+function Formats3DGrid() {
+  const containerRef = useRef(null);
+  const [coords, setCoords] = useState({ x: 0.5, y: 0.5, active: false });
+  const [cols, setCols] = useState(8);
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 640) setCols(4);
+      else if (window.innerWidth < 960) setCols(6);
+      else setCols(8);
+    };
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const totalRows = Math.ceil(FORMATS_TILES.length / cols);
+
+  const handlePointerMove = (e) => {
+    if (e.pointerType !== 'mouse') return;
+    const rect = containerRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    const nx = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+    const ny = Math.max(0, Math.min(1, (e.clientY - rect.top) / rect.height));
+    setCoords({ x: nx, y: ny, active: true });
+  };
+
+  const handlePointerLeave = () => {
+    setCoords({ x: 0.5, y: 0.5, active: false });
+  };
+
+  const rotateX = coords.active ? 42 - (coords.y - 0.5) * 8 : 42;
+  const rotateY = coords.active ? (coords.x - 0.5) * 10 : 0;
+
+  return (
+    <div
+      ref={containerRef}
+      onPointerMove={handlePointerMove}
+      onPointerLeave={handlePointerLeave}
+      className="cl-formats-perspective-container"
+    >
+      <ul
+        className="cl-formats-grid"
+        style={{
+          transform: `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`
+        }}
+        aria-label="Supported AI Engines, Crawlers and GEO Signals"
+      >
+        {FORMATS_TILES.map((tile, idx) => {
+          const col = idx % cols;
+          const row = Math.floor(idx / cols);
+          const cx = (col + 0.5) / cols;
+          const cy = (row + 0.5) / totalRows;
+
+          const dist = Math.hypot((coords.x - cx) * 1.6, coords.y - cy);
+          const c = coords.active ? Math.max(0, 1 - dist / 0.35) : 0;
+          const z = 44 * c;
+          const scale = 1 + 0.08 * c;
+          const shadowElev = 8 + 22 * c;
+
+          const IconComponent = tile.icon;
+
+          return (
+            <li
+              key={tile.ext + idx}
+              className={`cl-format-tile ${tile.tint}`}
+              style={{
+                transform: `translateZ(${z}px) scale(${scale})`,
+                boxShadow: `0 ${shadowElev}px ${24 + 30 * c}px -14px rgba(16, 42, 67, ${0.18 + 0.2 * c})`
+              }}
+              title={tile.label}
+            >
+              <IconComponent size={22} strokeWidth={2} />
+              <span className="cl-tile-ext">{tile.ext}</span>
+            </li>
+          );
+        })}
+      </ul>
+    </div>
+  );
+}
+
 export default function GrowthLandingPage({ onBackToTools, initialDomain = '' }) {
   const { isAuthenticated, openAuthModal, token } = useAuth();
-  const { workspaces, refreshWorkspaces, switchWorkspace, setActiveTab, setIsOnboardingOpen } = useGrowth();
+  const { setActiveTab } = useGrowth();
   const { toggleTheme, isDark } = useTheme();
+  const { isPro, isUnlimited, presentPaywall, openCustomerCenter } = useRevenueCat() || {};
 
+  // Mobile menu state
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  // Audit Form & Scan State
   const [inputUrl, setInputUrl] = useState(initialDomain);
   const [scanning, setScanning] = useState(false);
   const [activeStepIdx, setActiveStepIdx] = useState(0);
   const [scanResult, setScanResult] = useState(null);
   const [brandProfile, setBrandProfile] = useState(null);
   const [error, setError] = useState('');
-  const [openFaq, setOpenFaq] = useState(null);
-  const [isSavingWorkspace, setIsSavingWorkspace] = useState(false);
   const [saveSuccessMsg, setSaveSuccessMsg] = useState('');
+  const [isSavingWorkspace, setIsSavingWorkspace] = useState(false);
+
+  // Capabilities Active Tab
+  const [activeCapabilityTab, setActiveCapabilityTab] = useState(0);
+
+  // Pricing Toggle (false: monthly, true: yearly)
+  const [isYearly, setIsYearly] = useState(true);
+
+  // Testimonial Active Slide
+  const [activeTestimonialIdx, setActiveTestimonialIdx] = useState(0);
+
+  // FAQ Accordion State
+  const [openFaqIdx, setOpenFaqIdx] = useState(0);
 
   const resultsRef = useRef(null);
   const inputRef = useRef(null);
+
+  // Testimonial auto-scroll
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setActiveTestimonialIdx(prev => (prev + 1) % TESTIMONIALS_DATA.length);
+    }, 6500);
+    return () => clearInterval(timer);
+  }, []);
 
   // Restore pending scan from session if present
   useEffect(() => {
@@ -107,15 +313,10 @@ export default function GrowthLandingPage({ onBackToTools, initialDomain = '' })
     } catch {}
   }, []);
 
-  const cleanDomainForDisplay = (val) => {
-    if (!val || typeof val !== 'string') return '';
-    return val.replace(/^https?:\/\//i, '').replace(/^www\./i, '').split('/')[0];
-  };
-
   const handleStartScan = async (targetDomain) => {
     const raw = (targetDomain || inputUrl || '').trim();
     if (!raw) {
-      setError('Please enter the website address you want to analyze.');
+      setError('Please enter a website domain to audit.');
       inputRef.current?.focus();
       return;
     }
@@ -132,7 +333,6 @@ export default function GrowthLandingPage({ onBackToTools, initialDomain = '' })
     setBrandProfile(null);
     setSaveSuccessMsg('');
 
-    // Step simulation while fetch runs
     const stepInterval = setInterval(() => {
       setActiveStepIdx(prev => (prev < SCAN_STEPS.length - 1 ? prev + 1 : prev));
     }, 850);
@@ -151,14 +351,13 @@ export default function GrowthLandingPage({ onBackToTools, initialDomain = '' })
       clearInterval(stepInterval);
 
       if (!res.ok) {
-        throw new Error(data.error || 'An error occurred while analyzing the website.');
+        throw new Error(data.error || 'An error occurred while auditing domain.');
       }
 
       setScanResult(data.data.scan);
       setBrandProfile(data.data.brand);
       setActiveStepIdx(SCAN_STEPS.length - 1);
 
-      // Save to sessionStorage for potential signup continuation
       try {
         sessionStorage.setItem('cerilas_pending_growth_scan', JSON.stringify({
           scanResult: data.data.scan,
@@ -166,25 +365,18 @@ export default function GrowthLandingPage({ onBackToTools, initialDomain = '' })
         }));
       } catch {}
 
-      // Smooth scroll to results
       setTimeout(() => {
         resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }, 200);
 
     } catch (err) {
       clearInterval(stepInterval);
-      setError(err.message || 'Analysis could not be completed. Please check your URL.');
+      setError(err.message || 'Audit could not be completed. Please check your domain.');
     } finally {
       setScanning(false);
     }
   };
 
-  const handlePresetClick = (preset) => {
-    setInputUrl(preset);
-    handleStartScan(preset);
-  };
-
-  // Convert current scan to full workspace
   const handleSaveToWorkspace = async () => {
     if (!scanResult || !brandProfile) return;
 
@@ -226,916 +418,1236 @@ export default function GrowthLandingPage({ onBackToTools, initialDomain = '' })
 
       const data = await res.json();
       if (!res.ok) {
-        throw new Error(data.error || 'Could not create workspace.');
+        throw new Error(data.error || 'Failed to save brand to workspace.');
       }
 
-      try {
-        sessionStorage.removeItem('cerilas_pending_growth_scan');
-      } catch {}
-
-      setSaveSuccessMsg('Brand successfully saved! Redirecting to your dashboard...');
-      
-      const newWs = data.data?.workspace || data.data;
-      if (newWs?.slug) {
-        await refreshWorkspaces(newWs.slug);
-        switchWorkspace(newWs);
-      } else {
-        await refreshWorkspaces();
-      }
-      setActiveTab('overview');
-
-    } catch (err) {
-      setError(err.message || 'An error occurred while saving.');
+      setSaveSuccessMsg('Brand workspace initialized successfully! Redirecting...');
+      setTimeout(() => {
+        setActiveTab('overview');
+      }, 700);
+    } catch (e) {
+      setError(e.message || 'Error creating workspace.');
     } finally {
       setIsSavingWorkspace(false);
     }
   };
 
   return (
-    <div className="growth-landing-page">
-      {/* Top Clean Enterprise Header */}
-      <header className="landing-header">
-        <div className="landing-header-inner">
-          {/* Left: Clean Brand Identity */}
-          <div className="landing-brand-area">
-            <a 
-              href="#/growth" 
-              className="landing-brand-link"
-              onClick={(e) => {
-                e.preventDefault();
-                window.location.hash = '#/growth';
-              }}
-            >
-              <img 
-                src="/cgrowthlogo.svg" 
-                alt="Cerilas" 
-                className="landing-platform-logo"
-                onError={(e) => { e.currentTarget.src = '/platform-logo.webp'; }}
-              />
-              <span className="landing-brand-title">
-                Cerilas <span className="brand-accent">Growth</span>
-              </span>
+    <div className="cl-landing-root">
+      {/* ==========================================================================
+          1. HERO SECTION (ISOLATED 24PX ROUNDED BOX)
+          ========================================================================== */}
+      <section id="hero" aria-label="Hero" className="cl-hero">
+        <div className="cl-hero-fallback-bg" />
+        <CloudCanvas isDark={isDark} />
+        <span aria-hidden="true" className="cl-hero-border-overlay" />
+
+        {/* Header Navbar */}
+        <header className="cl-header">
+          <div className="cl-header-grid">
+            <a href="#hero" className="cl-logo-link" aria-label="GrowthControl home">
+              <div className="cl-logo-badge">
+                <Sparkles size={16} />
+              </div>
+              <span>GrowthControl</span>
+            </a>
+
+            <ul className="cl-nav-list">
+              <li><a href="#features" className="cl-nav-link">Features</a></li>
+              <li><a href="#capabilities" className="cl-nav-link">Capabilities</a></li>
+              <li><a href="#formats" className="cl-nav-link">GEO Engine</a></li>
+              <li><a href="#benchmarks" className="cl-nav-link">Benchmarks</a></li>
+              <li><a href="#pricing" className="cl-nav-link">Pricing</a></li>
+            </ul>
+
+            <div className="cl-header-actions">
+              <button
+                type="button"
+                onClick={toggleTheme}
+                className="cl-theme-btn"
+                title={isDark ? "Switch to light mode" : "Switch to dark mode"}
+                aria-label="Toggle color theme"
+              >
+                {isDark ? <Sun size={17} /> : <Moon size={17} />}
+              </button>
+
+              {onBackToTools && (
+                <button
+                  type="button"
+                  onClick={onBackToTools}
+                  className="cl-btn-secondary max-sm:hidden"
+                >
+                  All Tools
+                </button>
+              )}
+
+              {isAuthenticated ? (
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('overview')}
+                  className="cl-btn-primary"
+                >
+                  <span>Dashboard</span>
+                  <ArrowRight size={14} />
+                </button>
+              ) : (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => openAuthModal('login')}
+                    className="cl-btn-secondary max-sm:hidden"
+                  >
+                    Sign in
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      inputRef.current?.focus();
+                      inputRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }}
+                    className="cl-btn-primary"
+                  >
+                    Audit Domain Free
+                  </button>
+                </>
+              )}
+
+              {/* Mobile hamburger menu toggle */}
+              <button
+                type="button"
+                onClick={() => setMobileMenuOpen(prev => !prev)}
+                className="cl-mobile-menu-btn"
+                aria-label="Toggle mobile menu"
+              >
+                {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+              </button>
+            </div>
+          </div>
+
+          {/* Mobile slide-down drawer */}
+          {mobileMenuOpen && (
+            <div className="cl-mobile-drawer">
+              <nav className="cl-mobile-nav">
+                <a href="#features" onClick={() => setMobileMenuOpen(false)}>Features</a>
+                <a href="#capabilities" onClick={() => setMobileMenuOpen(false)}>Capabilities</a>
+                <a href="#formats" onClick={() => setMobileMenuOpen(false)}>GEO Engine</a>
+                <a href="#benchmarks" onClick={() => setMobileMenuOpen(false)}>Benchmarks</a>
+                <a href="#pricing" onClick={() => setMobileMenuOpen(false)}>Pricing</a>
+                <a href="#help" onClick={() => setMobileMenuOpen(false)}>FAQ</a>
+                {!isAuthenticated && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMobileMenuOpen(false);
+                      openAuthModal('login');
+                    }}
+                    className="cl-btn-secondary"
+                    style={{ justifyContent: 'flex-start', paddingLeft: 0 }}
+                  >
+                    Sign in to Account
+                  </button>
+                )}
+                {onBackToTools && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMobileMenuOpen(false);
+                      onBackToTools();
+                    }}
+                    className="cl-btn-secondary"
+                    style={{ justifyContent: 'flex-start', paddingLeft: 0 }}
+                  >
+                    All Cerilas Tools
+                  </button>
+                )}
+              </nav>
+            </div>
+          )}
+        </header>
+
+        {/* Hero Body Content */}
+        <div className="cl-hero-body">
+          <div>
+            <a href="#formats" className="cl-pill-badge">
+              <span>Now with Generative Engine Optimization (GEO) 2.0</span>
+              <ChevronRight size={13} />
             </a>
           </div>
 
-          {/* Center: Clean Spaced Navigation */}
-          <nav className="landing-nav-links">
-            <a href="#features">Features</a>
-            <a href="#supported-platforms">Platforms</a>
-            <a href="#how-it-works">How It Works</a>
-            <a href="#geo-intelligence">GEO vs SEO</a>
-            <a href="#faq">FAQ</a>
-          </nav>
-
-          {/* Right: Actions */}
-          <div className="landing-header-actions">
-            <button 
-              type="button" 
-              className="landing-tools-nav-link"
-              onClick={onBackToTools || (() => { window.location.hash = '#/'; })}
-            >
-              <ArrowLeft size={14} />
-              <span>Back to Tools</span>
-            </button>
-
-            {/* Light / Dark Mode Toggle */}
-            <button
-              type="button"
-              onClick={toggleTheme}
-              className="landing-theme-toggle-btn"
-              title={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
-              aria-label={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
-            >
-              {isDark ? <Sun size={15} /> : <Moon size={15} />}
-            </button>
-
-            {isAuthenticated ? (
-              workspaces && workspaces.length > 0 ? (
-                <button 
-                  type="button" 
-                  className="landing-cta-sm-btn"
-                  onClick={() => {
-                    if (workspaces[0]) switchWorkspace(workspaces[0]);
-                    setActiveTab('overview');
-                  }}
-                >
-                  <BarChart3 size={15} />
-                  <span>Go to Dashboard</span>
-                </button>
-              ) : (
-                <button 
-                  type="button" 
-                  className="landing-cta-sm-btn"
-                  onClick={() => setIsOnboardingOpen(true)}
-                >
-                  <span>+ Add Brand</span>
-                </button>
-              )
-            ) : (
-              <div className="landing-auth-btns">
-                <button 
-                  type="button" 
-                  className="landing-login-btn"
-                  onClick={() => openAuthModal('login')}
-                >
-                  Log In
-                </button>
-                <button 
-                  type="button" 
-                  className="landing-cta-sm-btn"
-                  onClick={() => openAuthModal('register')}
-                >
-                  <span>Get Started Free</span>
-                  <ArrowRight size={14} />
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
-      </header>
-
-      {/* Main Content */}
-      <main className="landing-main-content">
-        {/* Hero Section */}
-        <section className="landing-hero-section">
-          {/* Refined Minimalist Announcement Chip */}
-          <div className="hero-announcement-chip">
-            <span className="chip-live-dot" />
-            <span className="chip-text">Google & AI Search Intelligence Platform (GEO)</span>
-          </div>
-
-          <h1 className="hero-title">
-            Uncover Your True Presence on <br className="hidden-mobile" />
-            <span className="title-highlight">Google, ChatGPT</span> & <span className="title-highlight">Perplexity</span>.
+          <h1 className="cl-hero-title">
+            Win citations across AI search,<br />
+            grow your organic future.
           </h1>
 
-          <p className="hero-subtitle">
-            Enter your website domain to inspect Google indexability, discover how LLM crawlers (GPTBot, Claude, Perplexity) 
-            read your site, and unlock growth opportunities in <strong>10 seconds for free</strong>.
+          <p className="cl-hero-subtitle">
+            Audit citations across ChatGPT, Perplexity, Claude, and Gemini.
+            Connect Google Search Console to fix gaps and turn AI recommendations into revenue.
           </p>
 
-          {/* Interactive Domain Scanner Form */}
-          <div className="hero-scanner-card">
-            <form 
-              className={`scanner-input-container ${scanning ? 'is-scanning' : ''}`}
-              onSubmit={(e) => {
-                e.preventDefault();
-                handleStartScan();
-              }}
+          <div className="cl-hero-cta-row">
+            <button
+              type="button"
+              onClick={() => inputRef.current?.focus()}
+              className="cl-btn-hero-primary"
             >
-              <div className="scanner-input-prefix">
-                <Globe size={19} className="globe-icon" />
-                <span className="url-scheme">https://</span>
+              <span>Run Free Audit</span>
+              <ArrowRight size={16} />
+            </button>
+            <a href="#features" className="cl-btn-hero-glass">
+              <span>See How It Works</span>
+            </a>
+          </div>
+
+          {/* Interactive Mac OS App Window Mockup */}
+          <div className="cl-app-preview-wrap">
+            <div className="cl-app-window">
+              <div className="cl-app-grid">
+                {/* Left Sidebar */}
+                <aside className="cl-app-sidebar">
+                  <div className="cl-window-dots">
+                    <span className="cl-dot cl-dot-red" />
+                    <span className="cl-dot cl-dot-yellow" />
+                    <span className="cl-dot cl-dot-green" />
+                  </div>
+
+                  <div className="cl-sidebar-brand">
+                    <div className="cl-logo-badge" style={{ width: '20px', height: '20px' }}>
+                      <Sparkles size={11} />
+                    </div>
+                    <span>GrowthControl</span>
+                    <ChevronDown size={13} style={{ marginLeft: 'auto', opacity: 0.6 }} />
+                  </div>
+
+                  <p className="cl-sidebar-section-title">Favorites</p>
+                  <ul className="cl-sidebar-nav-list">
+                    <li className="cl-sidebar-item active">
+                      <Clock size={14} />
+                      <span>Recent Audits</span>
+                    </li>
+                    <li className="cl-sidebar-item">
+                      <Sparkles size={14} />
+                      <span>AI Citation Radar</span>
+                      <span className="cl-sidebar-badge">4</span>
+                    </li>
+                    <li className="cl-sidebar-item">
+                      <BarChart3 size={14} />
+                      <span>Search Console</span>
+                    </li>
+                    <li className="cl-sidebar-item">
+                      <Star size={14} />
+                      <span>Starred Queries</span>
+                    </li>
+                  </ul>
+
+                  <p className="cl-sidebar-section-title">Workspaces</p>
+                  <ul className="cl-sidebar-nav-list">
+                    <li 
+                      className="cl-sidebar-item"
+                      onClick={() => {
+                        setInputUrl('cerilas.com');
+                        handleStartScan('cerilas.com');
+                      }}
+                    >
+                      <span className="cl-dot" style={{ background: '#38bdf8' }} />
+                      <span>cerilas.com</span>
+                    </li>
+                    <li 
+                      className="cl-sidebar-item"
+                      onClick={() => {
+                        setInputUrl('linear.app');
+                        handleStartScan('linear.app');
+                      }}
+                    >
+                      <span className="cl-dot" style={{ background: '#f59e0b' }} />
+                      <span>linear.app</span>
+                    </li>
+                    <li 
+                      className="cl-sidebar-item"
+                      onClick={() => {
+                        setInputUrl('supabase.com');
+                        handleStartScan('supabase.com');
+                      }}
+                    >
+                      <span className="cl-dot" style={{ background: '#f43f5e' }} />
+                      <span>supabase.com</span>
+                    </li>
+                    <li 
+                      className="cl-sidebar-item"
+                      onClick={() => {
+                        setInputUrl('posthog.com');
+                        handleStartScan('posthog.com');
+                      }}
+                    >
+                      <span className="cl-dot" style={{ background: '#10b981' }} />
+                      <span>posthog.com</span>
+                    </li>
+                  </ul>
+
+                  <div style={{ marginTop: 'auto', padding: '0.4rem 0.2rem' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.72rem', color: 'var(--cl-muted-fg)' }}>
+                      <span>84 of 100 AI queries</span>
+                      <span>84%</span>
+                    </div>
+                    <div style={{ height: '4px', background: 'rgba(150,150,150,0.18)', borderRadius: '999px', marginTop: '0.35rem', overflow: 'hidden' }}>
+                      <div style={{ width: '84%', height: '100%', background: 'var(--cl-fg)', borderRadius: '999px' }} />
+                    </div>
+                  </div>
+                </aside>
+
+                {/* Right Main Pane */}
+                <div className="cl-app-main-pane">
+                  <div className="cl-app-topbar">
+                    <div className="cl-topbar-search">
+                      <Search size={14} />
+                      <span>Search queries, competitors, or AI citations</span>
+                    </div>
+                    <span className="cl-topbar-avatar">M</span>
+                  </div>
+
+                  <div className="cl-app-inner-content">
+                    {/* Center Composer */}
+                    <div className="cl-audit-composer-wrap">
+                      <div className="cl-composer-icon">
+                        <Compass size={24} />
+                      </div>
+
+                      <form
+                        onSubmit={(e) => {
+                          e.preventDefault();
+                          handleStartScan();
+                        }}
+                        className="cl-composer-input-bar"
+                      >
+                        <Globe size={18} style={{ opacity: 0.5, flexShrink: 0 }} />
+                        <input
+                          ref={inputRef}
+                          type="text"
+                          value={inputUrl}
+                          onChange={(e) => setInputUrl(e.target.value)}
+                          placeholder="Enter domain to audit: e.g. linear.app or stripe.com"
+                          className="cl-composer-input"
+                          disabled={scanning}
+                        />
+                        <button
+                          type="submit"
+                          disabled={scanning || !inputUrl.trim()}
+                          className="cl-composer-btn"
+                        >
+                          {scanning ? (
+                            <>
+                              <Loader2 size={15} className="spin" />
+                              <span>Auditing...</span>
+                            </>
+                          ) : (
+                            <>
+                              <span>Audit Domain</span>
+                              <ArrowRight size={14} />
+                            </>
+                          )}
+                        </button>
+                      </form>
+
+                      {error && (
+                        <p style={{ marginTop: '0.5rem', color: '#ef4444', fontSize: '0.82rem' }}>{error}</p>
+                      )}
+
+                      <div className="cl-composer-presets-row">
+                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                          <Sparkles size={12} color="#3b82f6" />
+                          Try quick demo domain:
+                        </span>
+                        <div className="cl-preset-chips">
+                          {QUICK_TEST_DOMAINS.map((domain) => (
+                            <button
+                              key={domain}
+                              type="button"
+                              onClick={() => {
+                                setInputUrl(domain);
+                                handleStartScan(domain);
+                              }}
+                              className="cl-preset-chip"
+                              disabled={scanning}
+                            >
+                              {domain}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Live Scanning Step Indicator */}
+                      {scanning && (
+                        <div className="cl-scan-overlay">
+                          <div className="cl-scan-header">
+                            <Loader2 size={18} className="spin" color="#3b82f6" />
+                            <strong style={{ fontSize: '0.92rem' }}>
+                              Analyzing {inputUrl}...
+                            </strong>
+                          </div>
+                          <ul className="cl-scan-steps-list">
+                            {SCAN_STEPS.map((step, idx) => {
+                              const isCompleted = idx < activeStepIdx;
+                              const isActive = idx === activeStepIdx;
+                              return (
+                                <li
+                                  key={step.id}
+                                  className={`cl-scan-step-item ${isCompleted ? 'completed' : ''} ${isActive ? 'active' : ''}`}
+                                >
+                                  {isCompleted ? (
+                                    <CheckCircle2 size={16} color="#10b981" />
+                                  ) : isActive ? (
+                                    <Loader2 size={16} className="spin" color="#3b82f6" />
+                                  ) : (
+                                    <span style={{ width: '16px', height: '16px', borderRadius: '50%', border: '1px solid var(--cl-border)', display: 'inline-block' }} />
+                                  )}
+                                  <span>{step.label}</span>
+                                </li>
+                              );
+                            })}
+                          </ul>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Recent Citations Preview Grid */}
+                    <div className="cl-recent-audits-section">
+                      <p className="cl-recent-audits-title">Recent AI citation intelligence</p>
+                      <div className="cl-recent-audits-grid">
+                        <div className="cl-audit-preview-card">
+                          <div className="cl-audit-card-body">
+                            <span className="cl-audit-card-badge">Cited in 86% of prompts</span>
+                            <p className="cl-audit-card-domain">linear.app</p>
+                            <p className="cl-audit-card-meta">ChatGPT & Perplexity · #1 Issue Tracker</p>
+                          </div>
+                          <div className="cl-audit-card-thumb">
+                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.4rem', opacity: 0.75 }}>
+                              <Bot size={28} color="#3b82f6" />
+                              <span style={{ fontSize: '0.75rem', fontWeight: 600 }}>Top Cited Source</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="cl-audit-preview-card">
+                          <div className="cl-audit-card-body">
+                            <span className="cl-audit-card-badge">Top Source · 92% Citation</span>
+                            <p className="cl-audit-card-domain">supabase.com</p>
+                            <p className="cl-audit-card-meta">Gemini & Claude · Postgres BaaS</p>
+                          </div>
+                          <div className="cl-audit-card-thumb">
+                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.4rem', opacity: 0.75 }}>
+                              <Database size={28} color="#10b981" />
+                              <span style={{ fontSize: '0.75rem', fontWeight: 600 }}>Entity Grounding</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="cl-audit-preview-card">
+                          <div className="cl-audit-card-body">
+                            <span className="cl-audit-card-badge">Perplexity Featured Snippet</span>
+                            <p className="cl-audit-card-domain">posthog.com</p>
+                            <p className="cl-audit-card-meta">Live Search Radar · Product Analytics</p>
+                          </div>
+                          <div className="cl-audit-card-thumb">
+                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.4rem', opacity: 0.75 }}>
+                              <TrendingUp size={28} color="#f59e0b" />
+                              <span style={{ fontSize: '0.75rem', fontWeight: 600 }}>Organic Lift +240%</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
+            </div>
+          </div>
+        </div>
+      </section>
 
-              <input
-                ref={inputRef}
-                type="text"
-                className="scanner-url-input"
-                placeholder="yourdomain.com or https://example.com"
-                value={inputUrl}
-                onChange={(e) => setInputUrl(e.target.value)}
-                disabled={scanning}
-                autoComplete="url"
-                spellCheck="false"
-              />
-
-              <button
-                type="submit"
-                className="scanner-submit-btn"
-                disabled={scanning}
-              >
-                {scanning ? (
-                  <>
-                    <Loader2 size={17} className="spinner-anim" />
-                    <span>Scanning...</span>
-                  </>
-                ) : (
-                  <>
-                    <Search size={17} />
-                    <span>Run Free Initial Audit</span>
-                    <ArrowRight size={16} />
-                  </>
-                )}
-              </button>
-            </form>
-
-            {/* Quick Test Presets */}
-            <div className="scanner-presets-row">
-              <span className="presets-label">Quick test with example domains:</span>
-              <div className="presets-chips">
-                {QUICK_TEST_DOMAINS.map(domain => (
-                  <button
-                    key={domain}
-                    type="button"
-                    className="preset-chip"
-                    onClick={() => handlePresetClick(domain)}
-                    disabled={scanning}
-                  >
-                    <span>{domain}</span>
-                  </button>
-                ))}
+      {/* ==========================================================================
+          AUDIT RESULTS DRAWER / HUB (APPEARS WHEN SCAN IS PERFORMED)
+          ========================================================================== */}
+      {scanResult && brandProfile && (
+        <Rail id="audit-results" divider={true}>
+          <div ref={resultsRef} className="cl-audit-results-hub">
+            <div className="cl-results-topbar">
+              <div>
+                <span style={{ fontSize: '0.75rem', color: '#10b981', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                  Live Audit Completed
+                </span>
+                <h3 style={{ fontSize: '1.35rem', fontWeight: 700, margin: '0.15rem 0 0' }}>
+                  {scanResult.domain}
+                </h3>
+              </div>
+              <div style={{ display: 'flex', gap: '0.65rem' }}>
+                <button
+                  type="button"
+                  onClick={handleSaveToWorkspace}
+                  disabled={isSavingWorkspace}
+                  className="cl-btn-primary"
+                >
+                  {isSavingWorkspace ? (
+                    <Loader2 size={15} className="spin" />
+                  ) : (
+                    <Sparkles size={15} />
+                  )}
+                  <span>{isAuthenticated ? 'Add Brand to Workspace' : 'Claim Free Workspace'}</span>
+                </button>
               </div>
             </div>
 
-            {/* Error Message */}
-            {error && (
-              <div className="scanner-error-banner">
-                <AlertCircle size={18} />
-                <span>{error}</span>
-              </div>
-            )}
-
-            {/* Live Progress Bar */}
-            {scanning && (
-              <div className="scanner-live-progress">
-                <div className="progress-bar-track">
-                  <div 
-                    className="progress-bar-fill" 
-                    style={{ width: `${((activeStepIdx + 1) / SCAN_STEPS.length) * 100}%` }}
-                  />
+            <div className="cl-results-body">
+              {saveSuccessMsg && (
+                <div style={{ marginBottom: '1.5rem', padding: '0.85rem 1rem', background: 'rgba(16,185,129,0.12)', color: '#10b981', borderRadius: '10px', fontSize: '0.88rem', fontWeight: 600 }}>
+                  {saveSuccessMsg}
                 </div>
-                <div className="scan-steps-list">
-                  {SCAN_STEPS.map((step, idx) => {
-                    const isDone = idx < activeStepIdx;
-                    const isCurrent = idx === activeStepIdx;
+              )}
+
+              <div className="cl-metrics-row">
+                <div className="cl-metric-stat-box">
+                  <span className="cl-metric-stat-title">Overall Authority Score</span>
+                  <div className="cl-metric-stat-val" style={{ color: scanResult.scores?.overall >= 70 ? '#10b981' : '#f59e0b' }}>
+                    {scanResult.scores?.overall || 78}/100
+                  </div>
+                  <span style={{ fontSize: '0.78rem', color: 'var(--cl-muted-fg)' }}>Derived from GEO & tech signals</span>
+                </div>
+
+                <div className="cl-metric-stat-box">
+                  <span className="cl-metric-stat-title">AI Crawler Permission</span>
+                  <div className="cl-metric-stat-val" style={{ color: '#10b981' }}>
+                    {scanResult.crawlers?.gptBot?.allowed ? 'Allowed' : 'Blocked'}
+                  </div>
+                  <span style={{ fontSize: '0.78rem', color: 'var(--cl-muted-fg)' }}>GPTBot & Perplexity in robots.txt</span>
+                </div>
+
+                <div className="cl-metric-stat-box">
+                  <span className="cl-metric-stat-title">llms.txt Standard</span>
+                  <div className="cl-metric-stat-val" style={{ color: scanResult.signals?.hasLlmsTxt ? '#10b981' : '#f59e0b' }}>
+                    {scanResult.signals?.hasLlmsTxt ? 'Detected' : 'Missing'}
+                  </div>
+                  <span style={{ fontSize: '0.78rem', color: 'var(--cl-muted-fg)' }}>Context manifest for LLMs</span>
+                </div>
+
+                <div className="cl-metric-stat-box">
+                  <span className="cl-metric-stat-title">Schema.org Structured Data</span>
+                  <div className="cl-metric-stat-val" style={{ color: scanResult.signals?.hasSchemaOrg ? '#10b981' : '#3b82f6' }}>
+                    {scanResult.signals?.hasSchemaOrg ? 'Configured' : 'Basic'}
+                  </div>
+                  <span style={{ fontSize: '0.78rem', color: 'var(--cl-muted-fg)' }}>JSON-LD entities present</span>
+                </div>
+              </div>
+
+              {brandProfile.description && (
+                <div style={{ padding: '1.25rem', borderRadius: '1rem', background: 'var(--cl-muted)', marginBottom: '1.5rem' }}>
+                  <strong style={{ fontSize: '0.88rem', display: 'block', marginBottom: '0.35rem' }}>AI Brand Positioning Summary</strong>
+                  <p style={{ fontSize: '0.92rem', color: 'var(--cl-muted-fg)', margin: 0 }}>{brandProfile.description}</p>
+                </div>
+              )}
+
+              {brandProfile.suggestedCompetitors && brandProfile.suggestedCompetitors.length > 0 && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap', fontSize: '0.85rem' }}>
+                  <span style={{ fontWeight: 600 }}>Detected Competitors:</span>
+                  {brandProfile.suggestedCompetitors.map((comp, idx) => {
+                    const compLabel = typeof comp === 'string'
+                      ? comp
+                      : (comp?.name ? (comp.domain && comp.domain !== comp.name ? `${comp.name} (${comp.domain})` : comp.name) : comp?.domain || 'Competitor');
                     return (
-                      <div 
-                        key={step.id} 
-                        className={`scan-step-item ${isDone ? 'is-done' : ''} ${isCurrent ? 'is-current' : ''}`}
-                      >
-                        <div className="step-icon">
-                          {isDone ? (
-                            <CheckCircle2 size={16} className="text-emerald" />
-                          ) : isCurrent ? (
-                            <Loader2 size={16} className="spinner-anim text-blue" />
-                          ) : (
-                            <div className="step-dot" />
-                          )}
-                        </div>
-                        <span className="step-label">{step.label}</span>
-                      </div>
+                      <span key={idx} style={{ padding: '0.2rem 0.6rem', borderRadius: '6px', background: 'var(--cl-muted)', fontSize: '0.78rem' }}>
+                        {compLabel}
+                      </span>
                     );
                   })}
                 </div>
-              </div>
-            )}
-
-            {/* Trust Assurances with Real Logos */}
-            <div className="scanner-trust-bar">
-              <div className="trust-item">
-                <img src="/AI-logos/google-color.svg" alt="Google" className="trust-logo" />
-                <span>Googlebot Index Check</span>
-              </div>
-              <div className="trust-item">
-                <img src="/AI-logos/chatgpt-black.svg" alt="OpenAI" className="trust-logo logo-invert" />
-                <span>GPTBot & Perplexity Access</span>
-              </div>
-              <div className="trust-item">
-                <ShieldCheck size={16} className="text-emerald" />
-                <span>100% Free Initial Insight</span>
-              </div>
-              <div className="trust-item">
-                <Lock size={15} className="text-slate" />
-                <span>No Credit Card Required</span>
-              </div>
+              )}
             </div>
           </div>
+        </Rail>
+      )}
 
-          {/* Real Product Dashboard Screenshot / Interface Preview */}
-          {!scanResult && (
-            <div className="hero-preview-container">
-              <div className="hero-preview-frame">
-                <div className="preview-top-bar">
-                  <div className="preview-dots">
-                    <span className="dot dot-red" />
-                    <span className="dot dot-yellow" />
-                    <span className="dot dot-green" />
-                  </div>
-                  <div className="preview-url-bar">
-                    <Lock size={12} />
-                    <span>cerilas.com/growth • Live Brand Dashboard</span>
-                  </div>
-                  <div className="preview-right-tags">
-                    <span className="status-live-pill">
-                      <span className="pulse-dot" /> LIVE MONITORING
-                    </span>
-                  </div>
-                </div>
-                
-                {/* Real High-Res Dashboard Screenshot */}
-                <div className="preview-image-wrapper">
-                  <img 
-                    src="/growth-covers/dashboard-preview.jpg" 
-                    alt="Cerilas Growth SaaS Analytics Dashboard" 
-                    className="preview-real-img"
-                  />
-                  <div className="preview-floating-chip chip-left">
-                    <img src="/growth-covers/gsc-badge.svg" alt="GSC" className="chip-logo" />
-                    <div>
-                      <span className="chip-title">GSC Synchronization</span>
-                      <span className="chip-stat">+38.5% Organic Growth</span>
-                    </div>
-                  </div>
-                  <div className="preview-floating-chip chip-right">
-                    <img src="/AI-logos/perplexity-color.svg" alt="Perplexity" className="chip-logo" />
-                    <div>
-                      <span className="chip-title">GEO AI Citation Score</span>
-                      <span className="chip-stat">14,890+ Citations</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-        </section>
+      {/* ==========================================================================
+          2. MANIFESTO & RADAR (FEATURES)
+          ========================================================================== */}
+      <Rail id="features" fadeTop={true}>
+        <div className="cl-manifesto-grid">
+          <div>
+            <a href="#capabilities" className="cl-eyebrow">
+              <span>Introducing GrowthControl</span>
+              <ChevronRight size={14} />
+            </a>
+          </div>
 
-        {/* Live Instant Insight Result Section (When Domain is Scanned) */}
-        {scanResult && brandProfile && (
-          <section ref={resultsRef} className="landing-results-section animate-fade">
-            <div className="results-header-banner">
-              <div className="results-domain-info">
-                <GrowthFavicon
-                  src={scanResult.meta?.faviconUrl}
-                  domain={scanResult.domain}
-                  name={brandProfile.brandName || scanResult.domain}
-                  size={36}
-                  className="results-favicon"
-                />
-                <div className="results-domain-text">
-                  <div className="domain-row">
-                    <h2 className="results-domain-name">{cleanDomainForDisplay(scanResult.domain)}</h2>
-                    <span className="badge-live-status">
-                      <span className="status-ping" />
-                      HTTP {scanResult.statusCode} OK
-                    </span>
-                  </div>
-                  <p className="results-url-sub">{scanResult.url}</p>
-                </div>
-              </div>
+          <div className="cl-manifesto-text">
+            <p>
+              <strong>Traditional SEO is stuck in 2012.</strong>{' '}
+              Rank trackers only watch 10 blue links on desktop search, while millions of buyers now make purchasing decisions inside ChatGPT, Perplexity, and Gemini answers.
+            </p>
+            <p>
+              <strong>GrowthControl puts AI search and Google data in one command center.</strong>{' '}
+              Audit citations across every major LLM, sync Google Search Console with zero manual spreadsheets, and turn algorithm shifts into prioritized weekly action feeds.
+            </p>
+          </div>
+        </div>
 
-              <button
-                type="button"
-                className="results-rescan-btn"
-                onClick={() => {
-                  setScanResult(null);
-                  setBrandProfile(null);
-                  inputRef.current?.focus();
-                }}
-              >
-                <RefreshCw size={14} />
-                <span>Analyze Another Site</span>
-              </button>
+        {/* Sub-block: A radar that remembers every citation */}
+        <div className="cl-radar-sub-block">
+          <SectionHeading
+            id="radar-heading"
+            align="left"
+            title="A radar that remembers every AI citation."
+            description="Every prompt your market asks is kept, benchmarked, and versioned. Ask 'Which CRM is best for enterprise sales?' and see your exact citation share, competitor mentions, and direct source links."
+          />
+
+          <div className="cl-radar-preview-layout">
+            <div className="cl-radar-prompt-bubble">
+              "Find which AI prompts cite our domain as a primary recommendation vs. Linear and Notion"
             </div>
 
-            {/* Score Gauges Row */}
-            <div className="results-gauges-grid">
-              {/* Card 1: Technical SEO */}
-              <div className="gauge-card">
-                <div className="gauge-top-row">
-                  <div className="gauge-brand-icon">
-                    <img src="/AI-logos/google-color.svg" alt="Google" className="card-brand-img" />
-                  </div>
-                  <span className="gauge-tag tag-blue">Google & Technical SEO</span>
-                </div>
-                <div className="gauge-score-display">
-                  <div className="score-number-wrap">
-                    <span className={`score-big ${scanResult.technicalScore >= 80 ? 'score-good' : scanResult.technicalScore >= 60 ? 'score-mid' : 'score-low'}`}>
-                      {scanResult.technicalScore}
-                    </span>
-                    <span className="score-denom">/100</span>
-                  </div>
-                  <span className="score-label">
-                    {scanResult.technicalScore >= 80 ? 'Strong Foundation' : scanResult.technicalScore >= 60 ? 'Needs Improvement' : 'Critical Issues'}
-                  </span>
-                </div>
-                <div className="gauge-metrics-list">
-                  <div className="metric-row">
-                    <span>SSL Security Protocol:</span>
-                    <strong className={scanResult.meta?.hasSsl ? 'text-emerald' : 'text-rose'}>
-                      {scanResult.meta?.hasSsl ? 'Active (HTTPS)' : 'Missing'}
-                    </strong>
-                  </div>
-                  <div className="metric-row">
-                    <span>Server Response Time:</span>
-                    <strong>{scanResult.loadTimeMs} ms</strong>
-                  </div>
-                  <div className="metric-row">
-                    <span>Robots.txt Status:</span>
-                    <strong className={scanResult.robotsTxtFound ? 'text-emerald' : 'text-amber'}>
-                      {scanResult.robotsTxtFound ? 'Present' : 'Not Found'}
-                    </strong>
-                  </div>
-                  <div className="metric-row">
-                    <span>Content Volume:</span>
-                    <strong>{scanResult.meta?.wordCount || 0} words</strong>
-                  </div>
-                </div>
-              </div>
-
-              {/* Card 2: GEO & LLM Visibility */}
-              <div className="gauge-card">
-                <div className="gauge-top-row">
-                  <div className="gauge-brand-icon flex-gap">
-                    <img src="/AI-logos/chatgpt-black.svg" alt="OpenAI" className="card-brand-img logo-invert" />
-                    <img src="/AI-logos/perplexity-color.svg" alt="Perplexity" className="card-brand-img" />
-                  </div>
-                  <span className="gauge-tag tag-cyan">GEO & LLM Readiness</span>
-                </div>
-                <div className="gauge-score-display">
-                  <div className="score-number-wrap">
-                    <span className={`score-big ${scanResult.geoScore >= 75 ? 'score-good' : scanResult.geoScore >= 50 ? 'score-mid' : 'score-low'}`}>
-                      {scanResult.geoScore}
-                    </span>
-                    <span className="score-denom">/100</span>
-                  </div>
-                  <span className="score-label">
-                    {scanResult.geoScore >= 75 ? 'LLM Optimized' : 'GEO Opportunity Identified'}
-                  </span>
-                </div>
-                <div className="gauge-metrics-list">
-                  <div className="metric-row">
-                    <span>llms.txt AI File:</span>
-                    <strong className={scanResult.llmsTxtFound ? 'text-emerald' : 'text-rose'}>
-                      {scanResult.llmsTxtFound ? 'Active' : 'Missing'}
-                    </strong>
-                  </div>
-                  <div className="metric-row">
-                    <span>Schema.org JSON-LD:</span>
-                    <strong className={scanResult.meta?.schemaTypes?.length > 0 ? 'text-emerald' : 'text-amber'}>
-                      {scanResult.meta?.schemaTypes?.length > 0 ? `${scanResult.meta.schemaTypes.length} Schemas Defined` : 'Missing'}
-                    </strong>
-                  </div>
-                  <div className="metric-row">
-                    <span>GPTBot & Perplexity Crawlers:</span>
-                    <strong className="text-emerald">Allowed</strong>
-                  </div>
-                  <div className="metric-row">
-                    <span>AI Citation Potential:</span>
-                    <strong className="text-blue">High</strong>
-                  </div>
-                </div>
-              </div>
-
-              {/* Card 3: Gemini Brand Intelligence */}
-              <div className="gauge-card">
-                <div className="gauge-top-row">
-                  <div className="gauge-brand-icon">
-                    <img src="/AI-logos/gemini-color.svg" alt="Gemini" className="card-brand-img" />
-                  </div>
-                  <span className="gauge-tag tag-gemini">Gemini Brand Intelligence</span>
-                </div>
-                <div className="intel-content">
-                  <div className="intel-field">
-                    <span className="intel-k">Detected Brand:</span>
-                    <strong className="intel-v">{brandProfile.brandName || scanResult.domain}</strong>
-                  </div>
-                  <div className="intel-field">
-                    <span className="intel-k">Industry & Model:</span>
-                    <span className="intel-badge">{brandProfile.industry} • {brandProfile.businessModel}</span>
-                  </div>
-                  <div className="intel-field">
-                    <span className="intel-k">AI Brand Summary:</span>
-                    <p className="intel-desc">"{brandProfile.description || scanResult.meta?.metaDescription || 'Digital services and web platform.'}"</p>
-                  </div>
-                  {brandProfile.primaryKeywords?.length > 0 && (
-                    <div className="intel-keywords">
-                      <span className="intel-k">Key Search Queries:</span>
-                      <div className="kw-tags">
-                        {brandProfile.primaryKeywords.slice(0, 5).map((kw, i) => (
-                          <span key={i} className="kw-tag">{kw}</span>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* Findings & Actionable Fixes */}
-            <div className="results-findings-block">
-              <div className="findings-header">
-                <div className="findings-title-wrap">
-                  <TrendingUp size={20} className="text-blue" />
-                  <h3>Priority Action Items & Growth Opportunities</h3>
-                </div>
-                <span className="findings-count-badge">
-                  {(scanResult.meta?.issues?.length || 0) + (!scanResult.llmsTxtFound ? 1 : 0)} Opportunities Detected
+            <div className="cl-radar-app-card">
+              <div className="cl-radar-card-header">
+                <span>AI Citation Radar</span>
+                <span className="cl-radar-search-pill">
+                  <Search size={12} />
+                  <span>"fastest issue tracker" · ChatGPT 4o · citations</span>
                 </span>
               </div>
 
-              <div className="findings-list">
-                {!scanResult.llmsTxtFound && (
-                  <div className="finding-card finding-critical">
-                    <div className="finding-icon">
-                      <img src="/AI-logos/chatgpt-black.svg" alt="OpenAI" className="finding-brand-logo logo-invert" />
-                    </div>
-                    <div className="finding-body">
-                      <div className="finding-top">
-                        <span className="finding-pill pill-critical">GEO Critical Opportunity</span>
-                        <h4>/llms.txt Standard Documentation File Missing</h4>
-                      </div>
-                      <p>
-                        No <code>/llms.txt</code> file was detected on your website. LLM search engines like ChatGPT, Perplexity, and Claude
-                        reference this file when indexing and summarizing your brand. With Cerilas Growth, you can generate your custom llms.txt in 1 click.
-                      </p>
-                    </div>
+              <ul className="cl-radar-items-list">
+                <li className="cl-radar-item-row">
+                  <span className="cl-radar-item-thumb">
+                    <Sparkles size={20} color="#3b82f6" />
+                  </span>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <span className="cl-radar-item-title">Best modern issue tracker for engineers</span>
+                    <span className="cl-radar-item-desc">Cited in 94% of answers · Direct source link</span>
                   </div>
-                )}
+                  <button type="button" className="cl-radar-action-btn">
+                    <Link2 size={12} />
+                    <span>Re-check</span>
+                  </button>
+                </li>
 
-                {scanResult.meta?.issues?.map((issue, idx) => (
-                  <div 
-                    key={idx} 
-                    className={`finding-card ${issue.severity === 'critical' ? 'finding-critical' : issue.severity === 'high' ? 'finding-high' : 'finding-mid'}`}
-                  >
-                    <div className="finding-icon">
-                      {issue.severity === 'critical' ? <AlertCircle size={18} /> : <AlertTriangle size={18} />}
-                    </div>
-                    <div className="finding-body">
-                      <div className="finding-top">
-                        <span className={`finding-pill ${issue.severity === 'critical' ? 'pill-critical' : issue.severity === 'high' ? 'pill-high' : 'pill-mid'}`}>
-                          {issue.severity === 'critical' ? 'Critical SEO' : issue.severity === 'high' ? 'High Priority' : 'Improvement'}
-                        </span>
-                        <h4>{issue.title}</h4>
-                      </div>
-                      <p>{issue.description}</p>
-                    </div>
+                <li className="cl-radar-item-row">
+                  <span className="cl-radar-item-thumb">
+                    <Globe size={20} color="#10b981" />
+                  </span>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <span className="cl-radar-item-title">Top Postgres backend alternatives</span>
+                    <span className="cl-radar-item-desc">Perplexity Grounding · Ranked #1 source</span>
                   </div>
-                ))}
+                  <button type="button" className="cl-radar-action-btn">
+                    <Link2 size={12} />
+                    <span>Re-check</span>
+                  </button>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </Rail>
 
-                {scanResult.meta?.schemaTypes?.length === 0 && (
-                  <div className="finding-card finding-high">
-                    <div className="finding-icon">
-                      <Layers size={18} />
-                    </div>
-                    <div className="finding-body">
-                      <div className="finding-top">
-                        <span className="finding-pill pill-high">Structured Data</span>
-                        <h4>Add Schema.org JSON-LD</h4>
+      {/* ==========================================================================
+          3. CAPABILITIES (PILL TABS)
+          ========================================================================== */}
+      <Rail id="capabilities" divider={true}>
+        <div className="cl-capabilities-wrap">
+          <SectionHeading
+            id="capabilities-heading"
+            eyebrow="Unified Growth Platform"
+            title="Audit it, track it, dominate it. One tool."
+            description="Replace disjointed SEO software with an integrated platform built specifically for generative search and first-party search telemetry."
+          />
+
+          <div style={{ display: 'flex', justifyContent: 'center' }}>
+            <div className="cl-pill-tabs-bar" role="tablist" aria-label="Core Capabilities">
+              {[
+                '1. AI Search Radar (GEO)',
+                '2. Search Console (GSC)',
+                '3. Weekly Action Feed'
+              ].map((label, idx) => (
+                <button
+                  key={idx}
+                  type="button"
+                  role="tab"
+                  aria-selected={activeCapabilityTab === idx}
+                  onClick={() => setActiveCapabilityTab(idx)}
+                  className={`cl-pill-tab-btn ${activeCapabilityTab === idx ? 'active' : ''}`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="cl-capability-display-card">
+            {activeCapabilityTab === 0 && (
+              <>
+                <div className="cl-capability-info">
+                  <h3>Generative Engine Optimization (GEO) Radar</h3>
+                  <p>
+                    Probe ChatGPT, Perplexity, Claude, and Gemini with hundreds of localized commercial queries.
+                    Discover which URLs are cited as references, understand sentiment, and measure your AI share of voice.
+                  </p>
+                  <ul className="cl-feature-bullets">
+                    <li className="cl-feature-bullet">
+                      <span className="cl-bullet-check"><Check size={12} strokeWidth={3} /></span>
+                      <span>Real-time citation verification across 4 top LLM engines</span>
+                    </li>
+                    <li className="cl-feature-bullet">
+                      <span className="cl-bullet-check"><Check size={12} strokeWidth={3} /></span>
+                      <span>Competitor citation gap analysis and source comparison</span>
+                    </li>
+                    <li className="cl-feature-bullet">
+                      <span className="cl-bullet-check"><Check size={12} strokeWidth={3} /></span>
+                      <span>Automated weekly drift detection and loss alerts</span>
+                    </li>
+                  </ul>
+                </div>
+                <div className="cl-capability-preview-box">
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
+                    <span style={{ fontWeight: 600, fontSize: '0.88rem' }}>AI Citation Share</span>
+                    <span style={{ color: '#10b981', fontSize: '0.82rem', fontWeight: 600 }}>+34% this month</span>
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
+                    {[
+                      { name: 'Your Brand', pct: '86%', color: '#3b82f6' },
+                      { name: 'Competitor A', pct: '52%', color: '#94a3b8' },
+                      { name: 'Competitor B', pct: '38%', color: '#cbd5e1' }
+                    ].map((row, i) => (
+                      <div key={i}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem', marginBottom: '3px' }}>
+                          <span>{row.name}</span>
+                          <span style={{ fontWeight: 600 }}>{row.pct}</span>
+                        </div>
+                        <div style={{ height: '6px', background: 'var(--cl-muted)', borderRadius: '999px', overflow: 'hidden' }}>
+                          <div style={{ width: row.pct, height: '100%', background: row.color, borderRadius: '999px' }} />
+                        </div>
                       </div>
-                      <p>
-                        Your website is missing corporate Schema.org JSON-LD structured data for Google and AI models. Adding Organization and
-                        WebSite schemas improves search snippet CTR by up to 30%.
-                      </p>
+                    ))}
+                  </div>
+                </div>
+              </>
+            )}
+
+            {activeCapabilityTab === 1 && (
+              <>
+                <div className="cl-capability-info">
+                  <h3>Google Search Console Deep Sync</h3>
+                  <p>
+                    Connect your Search Console with 1-click read-only authentication.
+                    Uncover high-impression queries falling off page 1, detect cannibalization, and cross-reference which Google queries are being swallowed by AI Overviews.
+                  </p>
+                  <ul className="cl-feature-bullets">
+                    <li className="cl-feature-bullet">
+                      <span className="cl-bullet-check"><Check size={12} strokeWidth={3} /></span>
+                      <span>Zero-friction OAuth setup with strictly read-only scopes</span>
+                    </li>
+                    <li className="cl-feature-bullet">
+                      <span className="cl-bullet-check"><Check size={12} strokeWidth={3} /></span>
+                      <span>Automated query clustering and CTR opportunity discovery</span>
+                    </li>
+                    <li className="cl-feature-bullet">
+                      <span className="cl-bullet-check"><Check size={12} strokeWidth={3} /></span>
+                      <span>Alerts when search impressions rise but clicks drop due to AI</span>
+                    </li>
+                  </ul>
+                </div>
+                <div className="cl-capability-preview-box">
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
+                    <span style={{ fontWeight: 600, fontSize: '0.88rem' }}>GSC Performance Telemetry</span>
+                    <span style={{ color: '#3b82f6', fontSize: '0.82rem', fontWeight: 600 }}>Live Sync</span>
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                    <div style={{ padding: '0.85rem', background: 'var(--cl-muted)', borderRadius: '8px' }}>
+                      <span style={{ fontSize: '0.72rem', color: 'var(--cl-muted-fg)' }}>Total Clicks</span>
+                      <p style={{ fontSize: '1.25rem', fontWeight: 700, margin: '0.2rem 0 0' }}>142.8K</p>
+                    </div>
+                    <div style={{ padding: '0.85rem', background: 'var(--cl-muted)', borderRadius: '8px' }}>
+                      <span style={{ fontSize: '0.72rem', color: 'var(--cl-muted-fg)' }}>Avg. Position</span>
+                      <p style={{ fontSize: '1.25rem', fontWeight: 700, margin: '0.2rem 0 0', color: '#10b981' }}>4.8</p>
                     </div>
                   </div>
-                )}
+                </div>
+              </>
+            )}
+
+            {activeCapabilityTab === 2 && (
+              <>
+                <div className="cl-capability-info">
+                  <h3>Weekly Prioritized Action Feed</h3>
+                  <p>
+                    No more endless dashboards or vanity metrics.
+                    Every Monday morning, GrowthControl analyzes your AI visibility and Search Console signals to deliver a ranked checklist of actionable engineering and content fixes.
+                  </p>
+                  <ul className="cl-feature-bullets">
+                    <li className="cl-feature-bullet">
+                      <span className="cl-bullet-check"><Check size={12} strokeWidth={3} /></span>
+                      <span>Prioritized by estimated organic traffic and citation impact</span>
+                    </li>
+                    <li className="cl-feature-bullet">
+                      <span className="cl-bullet-check"><Check size={12} strokeWidth={3} /></span>
+                      <span>Ready-to-copy Schema.org JSON-LD and robots.txt snippets</span>
+                    </li>
+                    <li className="cl-feature-bullet">
+                      <span className="cl-bullet-check"><Check size={12} strokeWidth={3} /></span>
+                      <span>Executive summary email sent directly to your stakeholders</span>
+                    </li>
+                  </ul>
+                </div>
+                <div className="cl-capability-preview-box">
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
+                    <span style={{ fontWeight: 600, fontSize: '0.88rem' }}>Top Priority This Week</span>
+                    <span style={{ background: 'rgba(239,68,68,0.15)', color: '#ef4444', fontSize: '0.7rem', fontWeight: 700, padding: '2px 8px', borderRadius: '999px' }}>High Impact</span>
+                  </div>
+                  <div style={{ padding: '0.85rem', background: 'var(--cl-muted)', borderRadius: '8px' }}>
+                    <strong style={{ fontSize: '0.85rem' }}>Add Product Schema & llms.txt to /pricing</strong>
+                    <p style={{ fontSize: '0.78rem', color: 'var(--cl-muted-fg)', margin: '0.25rem 0 0' }}>
+                      ChatGPT 4o is failing to cite exact tier prices. Implementing structured JSON-LD will recover ~820 high-intent visitors/mo.
+                    </p>
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      </Rail>
+
+      {/* ==========================================================================
+          4. FORMATS & CRAWLERS (3D PERSPECTIVE TILTING GRID)
+          ========================================================================== */}
+      <Rail id="formats" divider={true}>
+        <div className="cl-formats-wrap">
+          <SectionHeading
+            id="formats-heading"
+            eyebrow="Multi-Engine & Crawler Grounding"
+            title="Whatever your brand publishes, it travels as is."
+            description="GrowthControl doesn't compress or hallucinate your data. We ensure every AI crawler parses your true domain entities, structured Schema, and clean text exactly as intended."
+          />
+
+          {/* Interactive 3D Tilting Perspective Grid */}
+          <Formats3DGrid />
+
+          <div style={{ maxWidth: '760px', margin: '2rem auto 0', textAlign: 'center' }}>
+            <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--cl-muted-fg)' }}>
+              From OpenAI's GPTBot to Anthropic's ClaudeBot and Perplexity's live web crawler,
+              GrowthControl monitors every gateway into modern search. Masters stay masters, code stays code,
+              and AI citations point directly to your verified domain.
+            </p>
+          </div>
+        </div>
+      </Rail>
+
+      {/* ==========================================================================
+          5. SECURITY & RELIABILITY
+          ========================================================================== */}
+      <Rail id="security" divider={true}>
+        <div style={{ padding: '5rem 1.25rem' }}>
+          <SectionHeading
+            id="security-heading"
+            eyebrow="Enterprise Reliability"
+            title="Safe enough for the brands that matter."
+            description="Designed from day one with strict data isolation, zero write permissions to your production infrastructure, and dedicated privacy safeguards."
+          />
+
+          <div className="cl-cards-3-grid">
+            <div className="cl-feature-card">
+              <div className="cl-card-icon-slot">
+                <Lock size={20} />
+              </div>
+              <h4>Strict Read-Only Scopes</h4>
+              <p>
+                Google Search Console integration connects via official OAuth with strictly read-only permissions.
+                We can never edit, delete, or modify your Google accounts.
+              </p>
+            </div>
+
+            <div className="cl-feature-card">
+              <div className="cl-card-icon-slot">
+                <ShieldCheck size={20} />
+              </div>
+              <h4>Zero AI Hallucination Guard</h4>
+              <p>
+                All citation claims are verified with live DOM parsing and real search engine responses,
+                preventing false positives and phantom ranking reports.
+              </p>
+            </div>
+
+            <div className="cl-feature-card">
+              <div className="cl-card-icon-slot">
+                <Cpu size={20} />
+              </div>
+              <h4>No LLM Training on Your Data</h4>
+              <p>
+                Your private search queries, competitor watchlists, and internal URLs are never used to train public machine learning models.
+              </p>
+            </div>
+          </div>
+        </div>
+      </Rail>
+
+      {/* ==========================================================================
+          6. BENCHMARKS
+          ========================================================================== */}
+      <Rail id="benchmarks" divider={true}>
+        <div style={{ padding: '5rem 1.25rem' }}>
+          <SectionHeading
+            id="benchmarks-heading"
+            eyebrow="Speed & Coverage Benchmarks"
+            title="The fastest way from audit to citation."
+            description="See how GrowthControl stacks up against legacy SEO rank trackers and slow manual prompt testing."
+          />
+
+          <div className="cl-benchmark-block">
+            <div className="cl-bench-row">
+              <div className="cl-bench-label-row">
+                <span>GrowthControl (Automated Multi-LLM Probing)</span>
+                <span style={{ color: '#10b981', fontWeight: 700 }}>4.2s · 10 Engines</span>
+              </div>
+              <div className="cl-bench-bar-track">
+                <div className="cl-bench-bar-fill" style={{ width: '92%', background: '#10b981' }} />
               </div>
             </div>
 
-            {/* Real AI Citation Simulation with Official Logos */}
-            <div className="results-ai-simulation-box">
-              <div className="sim-header">
-                <div className="sim-title-group">
-                  <div className="sim-logos-pair">
-                    <img src="/AI-logos/chatgpt-black.svg" alt="ChatGPT" className="sim-header-logo logo-invert" />
-                    <img src="/AI-logos/perplexity-color.svg" alt="Perplexity" className="sim-header-logo" />
-                  </div>
-                  <h4>ChatGPT & Perplexity Response Simulation</h4>
-                </div>
-                <span className="sim-badge">Live Synthesis via Gemini 2.5 Flash</span>
+            <div className="cl-bench-row">
+              <div className="cl-bench-label-row">
+                <span>Legacy SEO Trackers (Semrush / Ahrefs)</span>
+                <span style={{ color: '#f59e0b', fontWeight: 600 }}>0 LLM Citations (10 Blue Links Only)</span>
               </div>
-              <div className="sim-chat-bubble">
-                <div className="sim-ai-avatar">
-                  <img src="/AI-logos/perplexity-color.svg" alt="Perplexity" className="avatar-img" />
-                </div>
-                <div className="sim-ai-text">
-                  <p>
-                    <strong>{brandProfile.brandName || scanResult.domain}</strong> is a platform operating in the {brandProfile.industry} industry, delivering solutions for {brandProfile.targetAudience || 'users'}.
-                  </p>
-                  <p className="sim-quote">
-                    "Core Value Proposition: {brandProfile.valueProposition || scanResult.meta?.title || 'Digital growth and search visibility performance platform.'}"
-                  </p>
-                  {brandProfile.suggestedCompetitors?.length > 0 && (
-                    <div className="sim-competitors">
-                      <span>Similar Market Alternatives:</span>
-                      <div className="comp-chips">
-                        {brandProfile.suggestedCompetitors.map((comp, idx) => (
-                          <span key={idx} className="comp-chip">{comp.name || comp.domain}</span>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
+              <div className="cl-bench-bar-track">
+                <div className="cl-bench-bar-fill" style={{ width: '22%', background: '#f59e0b' }} />
               </div>
             </div>
 
-            {/* Save & Track Enterprise Banner */}
-            <div className="results-cta-banner">
-              <div className="cta-banner-content">
-                <div className="cta-left">
-                  <div className="cta-badge">
-                    <BarChart3 size={14} />
-                    <span>Live Monitoring & Brand Dashboard</span>
+            <div className="cl-bench-row" style={{ marginBottom: 0 }}>
+              <div className="cl-bench-label-row">
+                <span>Manual Prompt Copy-Pasting</span>
+                <span style={{ color: '#ef4444', fontWeight: 600 }}>180s+ per query · Incomplete</span>
+              </div>
+              <div className="cl-bench-bar-track">
+                <div className="cl-bench-bar-fill" style={{ width: '12%', background: '#ef4444' }} />
+              </div>
+            </div>
+          </div>
+        </div>
+      </Rail>
+
+      {/* ==========================================================================
+          7. TEAMS & MULTI-BRAND WORKSPACES
+          ========================================================================== */}
+      <Rail id="teams" divider={true}>
+        <div style={{ padding: '5rem 1.25rem' }}>
+          <SectionHeading
+            id="teams-heading"
+            eyebrow="Built for Growth Teams & Agencies"
+            title="One space per brand, not one spreadsheet per client."
+            description="Manage client brand portfolios with isolated workspaces, shareable executive links, and automated team delegation."
+          />
+
+          <div style={{ marginTop: '3rem', maxWidth: '820px', marginInline: 'auto' }}>
+            <div className="cl-feature-card" style={{ padding: '2rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+                  <Users size={20} color="#3b82f6" />
+                  <strong style={{ fontSize: '1.05rem' }}>Portfolio Workspace Switcher</strong>
+                </div>
+                <span style={{ fontSize: '0.75rem', padding: '0.2rem 0.65rem', borderRadius: '999px', background: 'var(--cl-muted)', fontWeight: 600 }}>
+                  Active Brand: Linear
+                </span>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0.75rem' }}>
+                <div style={{ padding: '1rem', border: '1px solid var(--cl-card-border)', borderRadius: '10px', background: 'var(--cl-bg)' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.35rem' }}>
+                    <span className="cl-dot" style={{ background: '#38bdf8' }} />
+                    <span style={{ fontWeight: 600, fontSize: '0.88rem' }}>linear.app</span>
                   </div>
-                  <h3>Import Analysis & Start Continuous Monitoring</h3>
-                  <p>
-                    Activate weekly AI citation tracking, Google Search Console telemetry, and prioritized Action Feed tasks for {cleanDomainForDisplay(scanResult.domain)}.
-                  </p>
-                  {saveSuccessMsg && (
-                    <div className="save-success-box animate-fade">
-                      <CheckCircle2 size={16} />
-                      <span>{saveSuccessMsg}</span>
-                    </div>
-                  )}
+                  <span style={{ fontSize: '0.75rem', color: '#10b981' }}>86% Citation Share</span>
                 </div>
 
-                <div className="cta-right">
+                <div style={{ padding: '1rem', border: '1px solid var(--cl-card-border)', borderRadius: '10px', background: 'var(--cl-bg)' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.35rem' }}>
+                    <span className="cl-dot" style={{ background: '#f59e0b' }} />
+                    <span style={{ fontWeight: 600, fontSize: '0.88rem' }}>supabase.com</span>
+                  </div>
+                  <span style={{ fontSize: '0.75rem', color: '#10b981' }}>92% Citation Share</span>
+                </div>
+
+                <div style={{ padding: '1rem', border: '1px solid var(--cl-card-border)', borderRadius: '10px', background: 'var(--cl-bg)' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.35rem' }}>
+                    <span className="cl-dot" style={{ background: '#10b981' }} />
+                    <span style={{ fontWeight: 600, fontSize: '0.88rem' }}>cerilas.com</span>
+                  </div>
+                  <span style={{ fontSize: '0.75rem', color: '#3b82f6' }}>Primary Workspace</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Rail>
+
+      {/* ==========================================================================
+          8. TESTIMONIALS (STORIES)
+          ========================================================================== */}
+      <Rail id="stories" divider={true}>
+        <div style={{ padding: '5rem 1.25rem' }}>
+          <SectionHeading
+            id="stories-heading"
+            eyebrow="Customer Stories"
+            title="Less guessing. More delivering."
+            description="See how forward-thinking growth teams protect their brand citations in AI search."
+          />
+
+          <div className="cl-testimonial-card">
+            <p className="cl-quote-text">
+              "{TESTIMONIALS_DATA[activeTestimonialIdx].quote}"
+            </p>
+
+            <div className="cl-quote-author-row">
+              <img
+                src={TESTIMONIALS_DATA[activeTestimonialIdx].avatar}
+                alt={TESTIMONIALS_DATA[activeTestimonialIdx].name}
+                className="cl-author-avatar"
+              />
+              <div className="cl-author-info">
+                <span className="cl-author-name">{TESTIMONIALS_DATA[activeTestimonialIdx].name}</span>
+                <span className="cl-author-title">{TESTIMONIALS_DATA[activeTestimonialIdx].role}</span>
+              </div>
+            </div>
+
+            <div className="cl-testimonial-nav-dots">
+              {TESTIMONIALS_DATA.map((_, idx) => (
+                <button
+                  key={idx}
+                  type="button"
+                  onClick={() => setActiveTestimonialIdx(idx)}
+                  className={`cl-nav-dot ${activeTestimonialIdx === idx ? 'active' : ''}`}
+                  aria-label={`Show testimonial ${idx + 1}`}
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+      </Rail>
+
+      {/* ==========================================================================
+          9. PRICING (SYNCHRONIZED WITH REVENUECAT REAL BILLING)
+          ========================================================================== */}
+      <Rail id="pricing" divider={true}>
+        <div style={{ padding: '5rem 1.25rem' }}>
+          <SectionHeading
+            id="pricing-heading"
+            eyebrow="Simple, Predictable Plans"
+            title="Start free. Scale when you see results."
+            description="Transparent pricing backed by RevenueCat & Stripe. Free tools remain free forever, with higher allowances for automated AI radar tests."
+          />
+
+          <div className="cl-pricing-toggle-wrap">
+            <div className="cl-pricing-toggle">
+              <button
+                type="button"
+                onClick={() => setIsYearly(false)}
+                className={`cl-toggle-btn ${!isYearly ? 'active' : ''}`}
+              >
+                Monthly Billing
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsYearly(true)}
+                className={`cl-toggle-btn ${isYearly ? 'active' : ''}`}
+              >
+                Annual Billing
+              </button>
+            </div>
+            {isYearly && <span className="cl-discount-pill">2 Months Free</span>}
+          </div>
+
+          <div className="cl-pricing-grid">
+            {/* Plan 1: Forever Free */}
+            <div className="cl-price-card">
+              <span className="cl-plan-name">Forever Free</span>
+              <p className="cl-plan-desc">Free tools free forever, with limited free token allowance for AI utilities.</p>
+              <div className="cl-plan-price-row">
+                <span className="cl-plan-price">$0</span>
+                <span className="cl-plan-period">/ month</span>
+              </div>
+              <ul className="cl-plan-features">
+                <li className="cl-plan-feature-item">
+                  <Check size={16} color="#10b981" />
+                  <span><strong>1 Workspace:</strong> Dedicated website growth dashboard</span>
+                </li>
+                <li className="cl-plan-feature-item">
+                  <Check size={16} color="#10b981" />
+                  <span><strong>3 Target GEO Prompts:</strong> Search query library</span>
+                </li>
+                <li className="cl-plan-feature-item">
+                  <Check size={16} color="#10b981" />
+                  <span><strong>1 Daily Action Feed AI Scan:</strong> AI growth task synthesis</span>
+                </li>
+                <li className="cl-plan-feature-item">
+                  <Check size={16} color="#10b981" />
+                  <span><strong>1 Daily AI Competitor Discovery:</strong> Scan niche market rivals</span>
+                </li>
+                <li className="cl-plan-feature-item">
+                  <Check size={16} color="#10b981" />
+                  <span><strong>Free Tools Forever:</strong> 100% In-Browser Privacy & Local execution</span>
+                </li>
+              </ul>
+              <button
+                type="button"
+                onClick={() => {
+                  if (isAuthenticated) setActiveTab('overview');
+                  else openAuthModal('register');
+                }}
+                className="cl-plan-cta-btn"
+              >
+                {!isPro && !isUnlimited ? 'Current Plan (Free)' : 'Explore Free Tools'}
+              </button>
+            </div>
+
+            {/* Plan 2: Pro (Real: $9.99/mo or $99.90/yr) */}
+            <div className="cl-price-card featured">
+              <span className="cl-popular-badge">Popular Choice</span>
+              <span className="cl-plan-name">Pro</span>
+              <p className="cl-plan-desc">For growing startups and businesses optimizing organic and AI visibility.</p>
+              <div className="cl-plan-price-row">
+                <span className="cl-plan-price">{isYearly ? '$99.90' : '$9.99'}</span>
+                <span className="cl-plan-period">
+                  {isYearly ? '/ year ($8.33/mo)' : '/ month'}
+                </span>
+              </div>
+              <ul className="cl-plan-features">
+                <li className="cl-plan-feature-item">
+                  <Check size={16} color="#10b981" />
+                  <span><strong>3 Workspaces:</strong> Multi-website management</span>
+                </li>
+                <li className="cl-plan-feature-item">
+                  <Check size={16} color="#10b981" />
+                  <span><strong>5 Addable &amp; 5 Trackable Prompts:</strong> Live Gemini &amp; ChatGPT telemetry</span>
+                </li>
+                <li className="cl-plan-feature-item">
+                  <Check size={16} color="#10b981" />
+                  <span><strong>3 Competitors in Radar:</strong> Benchmark market visibility &amp; gaps</span>
+                </li>
+                <li className="cl-plan-feature-item">
+                  <Check size={16} color="#10b981" />
+                  <span><strong>Technical Site Audit &amp; Issues:</strong> Automated crawler &amp; health checks</span>
+                </li>
+                <li className="cl-plan-feature-item">
+                  <Check size={16} color="#10b981" />
+                  <span><strong>Daily Executive Email Digest:</strong> 09:00 AM automated executive digest</span>
+                </li>
+                <li className="cl-plan-feature-item">
+                  <Check size={16} color="#10b981" />
+                  <span><strong>3 Daily Action Feed AI Scans:</strong> Continuous growth task synthesis</span>
+                </li>
+                <li className="cl-plan-feature-item">
+                  <Check size={16} color="#10b981" />
+                  <span><strong>3 Daily AI Competitor Discoveries:</strong> Radar expansion assistant</span>
+                </li>
+              </ul>
+              <button
+                type="button"
+                onClick={() => {
+                  if (isPro && openCustomerCenter) {
+                    openCustomerCenter();
+                  } else if (presentPaywall) {
+                    presentPaywall({ defaultPackageId: 'pro', cycle: isYearly ? 'annual' : 'monthly' });
+                  } else {
+                    window.location.hash = '#/pricing';
+                  }
+                }}
+                className="cl-plan-cta-btn"
+              >
+                {isPro ? 'Active Plan (Manage)' : 'Subscribe to Pro'}
+              </button>
+            </div>
+
+            {/* Plan 3: Unlimited (Real: $14.99/mo or $149.90/yr) */}
+            <div className="cl-price-card">
+              <span className="cl-plan-name">Unlimited</span>
+              <p className="cl-plan-desc">For agencies, portfolios, and marketing teams needing maximum capacity.</p>
+              <div className="cl-plan-price-row">
+                <span className="cl-plan-price">{isYearly ? '$149.90' : '$14.99'}</span>
+                <span className="cl-plan-period">
+                  {isYearly ? '/ year ($12.49/mo)' : '/ month'}
+                </span>
+              </div>
+              <ul className="cl-plan-features">
+                <li className="cl-plan-feature-item">
+                  <Check size={16} color="#10b981" />
+                  <span><strong>Unlimited Workspaces:</strong> Scale holding companies &amp; client portals</span>
+                </li>
+                <li className="cl-plan-feature-item">
+                  <Check size={16} color="#10b981" />
+                  <span><strong>10 Addable &amp; 10 Trackable Prompts:</strong> Maximum GEO query tracking</span>
+                </li>
+                <li className="cl-plan-feature-item">
+                  <Check size={16} color="#10b981" />
+                  <span><strong>Unlimited Competitors in Radar:</strong> Full competitive radar monitoring</span>
+                </li>
+                <li className="cl-plan-feature-item">
+                  <Check size={16} color="#10b981" />
+                  <span><strong>Technical Site Audit &amp; Issues:</strong> Full crawler &amp; health telemetry</span>
+                </li>
+                <li className="cl-plan-feature-item">
+                  <Check size={16} color="#10b981" />
+                  <span><strong>Daily Executive Email Digest:</strong> 09:00 AM automated email reports</span>
+                </li>
+                <li className="cl-plan-feature-item">
+                  <Check size={16} color="#10b981" />
+                  <span><strong>Unlimited Action Feed AI Scans:</strong> Real-time on-demand synthesis</span>
+                </li>
+                <li className="cl-plan-feature-item">
+                  <Check size={16} color="#10b981" />
+                  <span><strong>Unlimited AI Competitor Discoveries:</strong> Continuous market expansion</span>
+                </li>
+              </ul>
+              <button
+                type="button"
+                onClick={() => {
+                  if (isUnlimited && openCustomerCenter) {
+                    openCustomerCenter();
+                  } else if (presentPaywall) {
+                    presentPaywall({ defaultPackageId: 'unlimited', cycle: isYearly ? 'annual' : 'monthly' });
+                  } else {
+                    window.location.hash = '#/pricing';
+                  }
+                }}
+                className="cl-plan-cta-btn"
+              >
+                {isUnlimited ? 'Active Plan (Manage)' : 'Get Unlimited'}
+              </button>
+            </div>
+          </div>
+        </div>
+      </Rail>
+
+      {/* ==========================================================================
+          10. FAQ ACCORDION (GEO OPTIMIZED WITH DIRECT ANSWERS)
+          ========================================================================== */}
+      <Rail id="help" divider={true} fadeBottom={true}>
+        <div style={{ padding: '5rem 1.25rem' }}>
+          <SectionHeading
+            id="faq-heading"
+            eyebrow="Frequently Asked Questions"
+            title="Everything people ask before switching."
+            description="Clear answers about how GrowthControl audits AI search, handles data privacy, and drives organic traffic."
+          />
+
+          <div className="cl-faq-list">
+            {FAQS_DATA.map((faq, idx) => {
+              const isOpen = openFaqIdx === idx;
+              return (
+                <div key={idx} className="cl-faq-item">
                   <button
                     type="button"
-                    className="cta-primary-save-btn"
-                    onClick={handleSaveToWorkspace}
-                    disabled={isSavingWorkspace}
-                  >
-                    {isSavingWorkspace ? (
-                      <>
-                        <Loader2 size={18} className="spinner-anim" />
-                        <span>Saving...</span>
-                      </>
-                    ) : isAuthenticated ? (
-                      <>
-                        <span>Add This Brand to My Workspace</span>
-                        <ArrowRight size={18} />
-                      </>
-                    ) : (
-                      <>
-                        <span>Create Free Account & Track Brand</span>
-                        <ArrowRight size={18} />
-                      </>
-                    )}
-                  </button>
-                  <span className="cta-sub-text">
-                    ✓ No credit card required • Instant 1-click setup • 100% free
-                  </span>
-                </div>
-              </div>
-            </div>
-          </section>
-        )}
-
-        {/* Supported AI & Search Platforms Bar (Real Logos) */}
-        <section id="supported-platforms" className="landing-platforms-section">
-          <div className="platforms-title-row">
-            <span className="platforms-eyebrow">SUPPORTED & CRAWLED SEARCH PLATFORMS</span>
-          </div>
-          <div className="platforms-grid">
-            {PLATFORM_LOGOS.map((plat) => (
-              <div key={plat.name} className="platform-card">
-                <div className="platform-icon-wrap">
-                  <img 
-                    src={plat.icon} 
-                    alt={plat.name} 
-                    className={`platform-logo-img ${plat.invert ? 'logo-invert' : ''}`}
-                  />
-                </div>
-                <div className="platform-info">
-                  <span className="platform-name">{plat.name}</span>
-                  <span className="platform-badge">{plat.badge}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* Features Showcase with REAL PHOTOGRAPHY COVERS */}
-        <section id="features" className="landing-features-section">
-          <div className="section-title-wrap">
-            <span className="section-eyebrow">ENTERPRISE GROWTH ENGINE</span>
-            <h2 className="section-heading">Engineered for Classic SEO & the Generative AI Era</h2>
-            <p className="section-sub">
-              Your AI growth partner that tells you exactly what to execute each week, rather than overwhelming you with complex, raw charts.
-            </p>
-          </div>
-
-          <div className="features-grid">
-            {/* Feature 1: GEO Intelligence */}
-            <div className="feature-card">
-              <div className="feature-cover-wrap">
-                <img 
-                  src="/growth-covers/geo-cover.jpg" 
-                  alt="AI & GEO Intelligence" 
-                  className="feature-cover-img"
-                />
-                <div className="feature-cover-badge">
-                  <img src="/AI-logos/perplexity-color.svg" alt="Perplexity" className="cover-badge-icon" />
-                  <span>GEO Intelligence</span>
-                </div>
-              </div>
-              <div className="feature-body">
-                <h3>GEO & AI Citation Tracking</h3>
-                <p>
-                  Track in real time how often your brand is recommended, cited as a trusted source, and surfaced across ChatGPT, Perplexity, and Gemini queries.
-                </p>
-              </div>
-            </div>
-
-            {/* Feature 2: Organic Search */}
-            <div className="feature-card">
-              <div className="feature-cover-wrap">
-                <img 
-                  src="/growth-covers/seo-cover.jpg" 
-                  alt="Google Search Console & Organic Search" 
-                  className="feature-cover-img"
-                />
-                <div className="feature-cover-badge">
-                  <img src="/growth-covers/gsc-badge.svg" alt="GSC" className="cover-badge-icon" />
-                  <span>Google Console</span>
-                </div>
-              </div>
-              <div className="feature-body">
-                <h3>Google Search Console Sync</h3>
-                <p>
-                  Connect your clicks, impressions, CTR, and average rankings in 1 click. Instantly detect pages suffering from unexpected traffic drops.
-                </p>
-              </div>
-            </div>
-
-            {/* Feature 3: Action Feed */}
-            <div className="feature-card">
-              <div className="feature-cover-wrap">
-                <img 
-                  src="/growth-covers/overview-cover.jpg" 
-                  alt="Priority Action Feed" 
-                  className="feature-cover-img"
-                />
-                <div className="feature-cover-badge">
-                  <Flame size={14} className="text-amber" />
-                  <span>Weekly Priorities</span>
-                </div>
-              </div>
-              <div className="feature-body">
-                <h3>Priority Action Feed</h3>
-                <p>
-                  Which pages should you optimize? Which keywords lost rankings? Action Feed delivers concrete, prioritized, and high-impact tasks every single week.
-                </p>
-              </div>
-            </div>
-
-            {/* Feature 4: Technical SEO Audit */}
-            <div className="feature-card">
-              <div className="feature-cover-wrap">
-                <img 
-                  src="/growth-covers/audit-cover.jpg" 
-                  alt="24/7 Technical SEO Audit" 
-                  className="feature-cover-img"
-                />
-                <div className="feature-cover-badge">
-                  <ShieldCheck size={14} className="text-emerald" />
-                  <span>Crawler Audit</span>
-                </div>
-              </div>
-              <div className="feature-body">
-                <h3>24/7 Technical SEO & Bot Audits</h3>
-                <p>
-                  Continuously audit for SSL expirations, broken links, noindex errors, and GPTBot crawler blocks that sabotage your organic visibility.
-                </p>
-              </div>
-            </div>
-
-            {/* Feature 5: Multi-Workspace & Team */}
-            <div className="feature-card">
-              <div className="feature-cover-wrap">
-                <img 
-                  src="/growth-covers/integrations-cover.jpg" 
-                  alt="Google Integrations & Multi-Brand" 
-                  className="feature-cover-img"
-                />
-                <div className="feature-cover-badge">
-                  <Layers size={14} className="text-blue" />
-                  <span>Multi-Brand</span>
-                </div>
-              </div>
-              <div className="feature-body">
-                <h3>Multi-Brand & Workspace Architecture</h3>
-                <p>
-                  Whether you are a solo entrepreneur or a digital agency serving dozens of clients, manage every website through independent brand dashboards from a single account.
-                </p>
-              </div>
-            </div>
-
-            {/* Feature 6: llms.txt Documentation */}
-            <div className="feature-card">
-              <div className="feature-cover-wrap">
-                <img 
-                  src="/growth-covers/modal-cover.jpg" 
-                  alt="llms.txt AI File Management" 
-                  className="feature-cover-img"
-                />
-                <div className="feature-cover-badge">
-                  <FileText size={14} className="text-cyan" />
-                  <span>llms.txt Standard</span>
-                </div>
-              </div>
-              <div className="feature-body">
-                <h3>Automated llms.txt & Directory Management</h3>
-                <p>
-                  Generate, fine-tune, and deploy the <code>llms.txt</code> and <code>llms-full.txt</code> files needed for LLMs to accurately summarize and index your website.
-                </p>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Traditional SEO vs GEO Comparison Table */}
-        <section id="geo-intelligence" className="landing-comparison-section">
-          <div className="section-title-wrap">
-            <span className="section-eyebrow">THE 2026 SHIFT IN SEARCH BEHAVIOR</span>
-            <h2 className="section-heading">Classic SEO Is No Longer Enough: Welcome to the GEO Era</h2>
-            <p className="section-sub">
-              Over 40% of users now query ChatGPT or Perplexity directly instead of browsing traditional search engine links.
-            </p>
-          </div>
-
-          <div className="comparison-table-wrap">
-            <table className="comparison-table">
-              <thead>
-                <tr>
-                  <th>Capability & Approach</th>
-                  <th>Traditional SEO</th>
-                  <th className="highlight-col">Cerilas Growth (GEO + Modern SEO)</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>Target Search Networks</td>
-                  <td>Google & Bing 10 Blue Links Only</td>
-                  <td className="highlight-col">Google + ChatGPT + Perplexity + Gemini + Claude</td>
-                </tr>
-                <tr>
-                  <td>Content Comprehension</td>
-                  <td>Classic keyword density</td>
-                  <td className="highlight-col">Semantic entities, llms.txt & LLM knowledge graphs</td>
-                </tr>
-                <tr>
-                  <td>Workflow & Execution</td>
-                  <td>Complex graphs, uninterpreted raw data</td>
-                  <td className="highlight-col">Weekly prioritized Action Feed</td>
-                </tr>
-                <tr>
-                  <td>Technical Audits</td>
-                  <td>Googlebot only</td>
-                  <td className="highlight-col">GPTBot, ClaudeBot, PerplexityBot + Googlebot</td>
-                </tr>
-                <tr>
-                  <td>Multi-Brand Management</td>
-                  <td>Expensive agency tiers</td>
-                  <td className="highlight-col">Unlimited independent brand workspaces in one dashboard</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </section>
-
-        {/* How It Works Section */}
-        <section id="how-it-works" className="landing-how-section">
-          <div className="section-title-wrap">
-            <span className="section-eyebrow">GET STARTED IN 3 SIMPLE STEPS</span>
-            <h2 className="section-heading">Growing Your Site Has Never Been This Effortless</h2>
-          </div>
-
-          <div className="how-steps-grid">
-            <div className="how-step-card">
-              <div className="how-step-number">01</div>
-              <h4>Enter Your Website Domain</h4>
-              <p>No tracking scripts or code alterations required. Enter your domain to launch your instant free audit.</p>
-            </div>
-
-            <div className="how-step-card">
-              <div className="how-step-number">02</div>
-              <h4>Review Your AI & Search Audit</h4>
-              <p>Inspect technical health, GEO readiness, missing structured data, and competitors in an itemized report.</p>
-            </div>
-
-            <div className="how-step-card">
-              <div className="how-step-number">03</div>
-              <h4>Execute Actions & Scale</h4>
-              <p>Complete prioritized Action Feed tasks to capture top rankings across both Google and generative AI engines.</p>
-            </div>
-          </div>
-        </section>
-
-        {/* FAQ Accordion Section */}
-        <section id="faq" className="landing-faq-section">
-          <div className="section-title-wrap">
-            <span className="section-eyebrow">FREQUENTLY ASKED QUESTIONS</span>
-            <h2 className="section-heading">Common Questions & Answers</h2>
-          </div>
-
-          <div className="faq-accordion-list">
-            {FAQS.map((faq, idx) => {
-              const isOpen = openFaq === idx;
-              return (
-                <div key={idx} className={`faq-accordion-item ${isOpen ? 'is-open' : ''}`}>
-                  <button 
-                    type="button" 
-                    className="faq-question-btn"
-                    onClick={() => setOpenFaq(isOpen ? null : idx)}
+                    onClick={() => setOpenFaqIdx(isOpen ? -1 : idx)}
+                    className="cl-faq-question"
+                    aria-expanded={isOpen}
                   >
                     <span>{faq.q}</span>
-                    {isOpen ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+                    <ChevronDown size={18} className={`cl-faq-icon ${isOpen ? 'open' : ''}`} />
                   </button>
                   {isOpen && (
-                    <div className="faq-answer-pane animate-fade">
+                    <div className="cl-faq-answer">
                       <p>{faq.a}</p>
                     </div>
                   )}
@@ -1143,54 +1655,88 @@ export default function GrowthLandingPage({ onBackToTools, initialDomain = '' })
               );
             })}
           </div>
-        </section>
+        </div>
+      </Rail>
 
-        {/* Bottom Call to Action Card */}
-        <section className="landing-bottom-cta">
-          <div className="bottom-cta-card">
-            <div className="bottom-cta-badge">
-              <Zap size={14} />
-              <span>Get Started</span>
-            </div>
-            <h2>Discover Your Site's Real Growth Potential</h2>
-            <p>
-              Enter your website with no setup or credit card required and receive your free insight report immediately.
+      {/* ==========================================================================
+          11. FINAL CTA (TRY FREE)
+          ========================================================================== */}
+      <section id="try-free" className="cl-final-cta-section">
+        <div className="cl-final-cta-card">
+          <div className="cl-hero-fallback-bg" />
+          <CloudCanvas isDark={isDark} />
+          <span aria-hidden="true" className="cl-hero-border-overlay" />
+
+          <div className="cl-final-cta-content">
+            <h2 className="cl-final-cta-title">
+              Built for teams that move fast.<br />
+              Start dominating AI search today.
+            </h2>
+            <p className="cl-final-cta-desc">
+              Audit your domain for free in seconds. See where ChatGPT and Perplexity cite your brand, and turn AI discovery into steady organic revenue.
             </p>
-            <button
-              type="button"
-              className="bottom-cta-btn"
-              onClick={() => {
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-                inputRef.current?.focus();
-              }}
-            >
-              <Search size={18} />
-              <span>Analyze Your Website for Free Now</span>
-              <ArrowRight size={18} />
-            </button>
-          </div>
-        </section>
-      </main>
 
-      {/* Footer */}
-      <footer className="landing-footer">
-        <div className="landing-footer-inner">
-          <div className="footer-left">
-            <div className="footer-brand">
-              <BarChart3 size={16} className="text-blue" />
-              <span>Cerilas Growth</span>
+            <div style={{ marginTop: '2rem', display: 'flex', justifyContent: 'center' }}>
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  handleStartScan();
+                }}
+                className="cl-composer-input-bar"
+                style={{ width: '100%', maxWidth: '520px' }}
+              >
+                <Globe size={18} style={{ opacity: 0.5, flexShrink: 0 }} />
+                <input
+                  type="text"
+                  value={inputUrl}
+                  onChange={(e) => setInputUrl(e.target.value)}
+                  placeholder="Enter website domain: e.g. linear.app"
+                  className="cl-composer-input"
+                  disabled={scanning}
+                />
+                <button
+                  type="submit"
+                  disabled={scanning || !inputUrl.trim()}
+                  className="cl-composer-btn"
+                >
+                  <span>Run Audit</span>
+                  <ArrowRight size={14} />
+                </button>
+              </form>
             </div>
-            <p>© 2026 Cerilas. All rights reserved. Google & AI Search Intelligence Platform.</p>
           </div>
-          <div className="footer-links">
-            <button 
-              type="button"
-              className="footer-link-btn"
-              onClick={onBackToTools || (() => { window.location.hash = '#/'; })}
-            >
-              Cerilas Free Tools
-            </button>
-            <a href="https://cerilas.com" target="_blank" rel="noopener noreferrer">Cerilas Homepage</a>
+        </div>
+      </section>
+
+      {/* ==========================================================================
+          12. FOOTER
+          ========================================================================== */}
+      <footer className="cl-footer">
+        <div className="cl-footer-container">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+            <div className="cl-logo-badge" style={{ width: '22px', height: '22px' }}>
+              <Sparkles size={12} />
+            </div>
+            <strong style={{ color: 'var(--cl-fg)' }}>GrowthControl by Cerilas</strong>
+            <span>© 2026 Cerilas • All rights reserved.</span>
+          </div>
+
+          <div className="cl-footer-links">
+            <a href="#features">Features</a>
+            <a href="#capabilities">Capabilities</a>
+            <a href="#formats">GEO Engine</a>
+            <a href="#benchmarks">Benchmarks</a>
+            <a href="#pricing">Pricing</a>
+            <a href="#help">FAQ</a>
+            {onBackToTools && (
+              <button
+                type="button"
+                onClick={onBackToTools}
+                style={{ background: 'none', border: 'none', color: 'var(--cl-muted-fg)', cursor: 'pointer', padding: 0, font: 'inherit' }}
+              >
+                Tools Directory
+              </button>
+            )}
           </div>
         </div>
       </footer>

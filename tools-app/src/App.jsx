@@ -557,6 +557,169 @@ export default function App() {
       if (faqScript) faqScript.remove();
     };
 
+    if (isGrowthView) {
+      const pageTitle = 'AI Visibility Checker & GEO Platform – GrowthControl | Cerilas';
+      const pageDesc = 'Free AI Visibility Checker & Generative Engine Optimization (GEO) platform. Audit whether ChatGPT, Perplexity, Claude, and Gemini cite your domain. Track citation share, competitor gaps & Google Search Console.';
+      const pageUrl = window.location.pathname.startsWith('/growth')
+        ? `https://tools.cerilas.com${window.location.pathname}`
+        : 'https://tools.cerilas.com/#/growth';
+      const ogImgUrl = 'https://tools.cerilas.com/og-image.svg';
+
+      document.title = pageTitle;
+      setMeta('description', 'name', pageDesc);
+      setMeta('keywords', 'name', 'ai visibility checker, generative engine optimization, geo audit tool, ai search visibility, chatgpt citation checker, perplexity seo tool, google ai overviews, llms txt validator, growthcontrol');
+      setCanonical(pageUrl);
+
+      // Open Graph
+      setMeta('og:title', 'property', pageTitle);
+      setMeta('og:description', 'property', pageDesc);
+      setMeta('og:url', 'property', pageUrl);
+      setMeta('og:image', 'property', ogImgUrl);
+      setMeta('og:image:width', 'property', '1200');
+      setMeta('og:image:height', 'property', '630');
+      setMeta('og:type', 'property', 'website');
+
+      // Twitter Cards
+      setMeta('twitter:card', 'name', 'summary_large_image');
+      setMeta('twitter:title', 'name', pageTitle);
+      setMeta('twitter:description', 'name', pageDesc);
+      setMeta('twitter:image', 'name', ogImgUrl);
+
+      // Clean up previous tool JSON-LD before injecting GrowthControl schemas
+      cleanupToolJsonLd();
+
+      // 1. WebApplication Schema
+      let webAppScript = document.getElementById('tool-webapp-jsonld');
+      if (!webAppScript) {
+        webAppScript = document.createElement('script');
+        webAppScript.id = 'tool-webapp-jsonld';
+        webAppScript.type = 'application/ld+json';
+        document.head.appendChild(webAppScript);
+      }
+      webAppScript.textContent = JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'WebApplication',
+        'name': 'GrowthControl – AI Search Visibility & GEO Platform',
+        'url': pageUrl,
+        'applicationCategory': 'BusinessApplication',
+        'operatingSystem': 'All (Web Browser)',
+        'description': pageDesc,
+        'offers': {
+          '@type': 'AggregateOffer',
+          'priceCurrency': 'USD',
+          'lowPrice': '0',
+          'highPrice': '149.90',
+          'offerCount': '3'
+        },
+        'aggregateRating': {
+          '@type': 'AggregateRating',
+          'ratingValue': '4.9',
+          'reviewCount': '164',
+          'bestRating': '5',
+          'worstRating': '1'
+        },
+        'featureList': [
+          'Live AI citation tracking across ChatGPT, Perplexity, Claude and Gemini',
+          'Google Search Console read-only deep telemetry sync',
+          'robots.txt AI crawler permission audit (GPTBot, ClaudeBot, PerplexityBot)',
+          'llms.txt standard validation and generator',
+          'Prioritized weekly organic growth action feed'
+        ]
+      });
+
+      // 2. FAQPage Schema (Enables Google Rich Results & AI Answer Engine Grounding)
+      let faqScript = document.getElementById('tool-faq-jsonld');
+      if (!faqScript) {
+        faqScript = document.createElement('script');
+        faqScript.id = 'tool-faq-jsonld';
+        faqScript.type = 'application/ld+json';
+        document.head.appendChild(faqScript);
+      }
+      faqScript.textContent = JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'FAQPage',
+        'mainEntity': [
+          {
+            '@type': 'Question',
+            'name': 'What is Generative Engine Optimization (GEO) and why does it matter?',
+            'acceptedAnswer': {
+              '@type': 'Answer',
+              'text': 'GEO is optimization designed to ensure your brand is cited, referenced as an authority, and linked directly in AI search engines like ChatGPT, Perplexity, Claude, and Gemini.'
+            }
+          },
+          {
+            '@type': 'Question',
+            'name': 'How does GrowthControl audit AI search engines?',
+            'acceptedAnswer': {
+              '@type': 'Answer',
+              'text': 'We probe live AI models with real-world buyer prompts, analyze whether your brand is cited or recommended, scrape citation URLs in real time, benchmark against competitors, and inspect robots.txt and llms.txt.'
+            }
+          },
+          {
+            '@type': 'Question',
+            'name': 'Is connecting Google Search Console safe?',
+            'acceptedAnswer': {
+              '@type': 'Answer',
+              'text': 'Yes, 100%. GrowthControl uses Google OAuth with strict read-only permissions. Your search data is encrypted at rest and never shared with third parties or used for AI model training.'
+            }
+          },
+          {
+            '@type': 'Question',
+            'name': 'What is llms.txt and how do you help?',
+            'acceptedAnswer': {
+              '@type': 'Answer',
+              'text': 'llms.txt is a new markdown-standard file placed on your domain to provide AI bots with clean, structured summaries of your site. GrowthControl audits whether you have one and generates optimized llms.txt code.'
+            }
+          },
+          {
+            '@type': 'Question',
+            'name': 'Can I manage multiple client domains or agency portfolios?',
+            'acceptedAnswer': {
+              '@type': 'Answer',
+              'text': 'Yes! GrowthControl supports multiple workspace brands. You can seamlessly switch between client domains, generate white-labeled client reports, and assign team seats.'
+            }
+          },
+          {
+            '@type': 'Question',
+            'name': 'What happens after running the free domain audit?',
+            'acceptedAnswer': {
+              '@type': 'Answer',
+              'text': 'You can immediately review your AI crawler permissions, technical health, and positioning. With one click, you can create a free account to monitor your domain weekly, track 50+ prompts, and receive prioritized action items.'
+            }
+          }
+        ]
+      });
+
+      // 3. BreadcrumbList Schema
+      let bcScript = document.getElementById('tool-breadcrumbs-jsonld');
+      if (!bcScript) {
+        bcScript = document.createElement('script');
+        bcScript.id = 'tool-breadcrumbs-jsonld';
+        bcScript.type = 'application/ld+json';
+        document.head.appendChild(bcScript);
+      }
+      bcScript.textContent = JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'BreadcrumbList',
+        'itemListElement': [
+          {
+            '@type': 'ListItem',
+            'position': 1,
+            'name': 'Cerilas Tools',
+            'item': 'https://tools.cerilas.com/'
+          },
+          {
+            '@type': 'ListItem',
+            'position': 2,
+            'name': 'GrowthControl (AI Visibility & GEO)',
+            'item': pageUrl
+          }
+        ]
+      });
+
+      return;
+    }
+
     if (isPricing) {
       const pageTitle = 'Pricing & Plans – Cerilas Tools | Transparent Zero-Surprise Pricing';
       const pageDesc = 'Explore flexible, transparent pricing plans for Cerilas Tools. Free forever tier, Pro with 5x higher limits, and Unlimited plans with 2 months free on annual billing.';

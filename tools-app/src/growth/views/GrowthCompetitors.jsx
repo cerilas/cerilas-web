@@ -16,7 +16,9 @@ import {
   Info,
   Layers,
   Building2,
-  FileText
+  FileText,
+  Lock,
+  Crown
 } from 'lucide-react';
 import { useGrowth } from '../GrowthContext';
 import { useAuth } from '../../context/AuthContext';
@@ -25,7 +27,17 @@ import GrowthFavicon from '../components/GrowthFavicon';
 import { SkeletonBlock } from '../components/GrowthSkeleton';
 
 export default function GrowthCompetitors() {
-  const { activeWorkspace } = useGrowth();
+  const { 
+    activeWorkspace, 
+    plan, 
+    planLimits, 
+    isFree, 
+    isPro, 
+    isUnlimited, 
+    promptPaywall,
+    limitsSummary,
+    refreshLimits 
+  } = useGrowth();
   const { token } = useAuth();
 
   const [competitors, setCompetitors] = useState([]);
@@ -209,22 +221,73 @@ export default function GrowthCompetitors() {
               className="growth-secondary-btn"
               onClick={handleAiDiscover}
               disabled={discovering}
-              title="Automatically discover and add 5-8 leading market competitors using AI"
+              title={`Discover competitors with AI (Daily limit: ${limitsSummary?.usage?.discoverCompetitorsAiToday ?? 0}/${planLimits.discoverCompetitorsAiDaily === Infinity ? 'Unlimited' : planLimits.discoverCompetitorsAiDaily})`}
             >
               {discovering ? <Loader2 size={14} className="spin text-primary" /> : <Sparkles size={14} className="text-primary" />}
-              <span>{discovering ? 'Analyzing Competitors...' : 'Discover Competitors with AI'}</span>
+              <span>
+                {discovering ? 'Analyzing Competitors...' : 'Discover Competitors with AI'}
+                <span className="growth-usage-counter-pill">
+                  {limitsSummary?.usage?.discoverCompetitorsAiToday ?? 0}/{planLimits.discoverCompetitorsAiDaily === Infinity ? '∞' : planLimits.discoverCompetitorsAiDaily}
+                </span>
+              </span>
             </button>
             <button
               type="button"
               className="growth-primary-btn"
-              onClick={() => setIsAddOpen(true)}
+              onClick={() => {
+                if (planLimits.competitors <= 0) {
+                  promptPaywall({ plan: 'pro' });
+                } else if (planLimits.competitors !== Infinity && competitors.length >= planLimits.competitors) {
+                  promptPaywall({ plan: 'unlimited' });
+                } else {
+                  setIsAddOpen(true);
+                }
+              }}
+              title={planLimits.competitors <= 0 
+                ? 'Competitor tracking requires Pro or Unlimited plan' 
+                : (planLimits.competitors !== Infinity && competitors.length >= planLimits.competitors)
+                  ? `Pro plan limit reached (${competitors.length}/3 competitors)` 
+                  : 'Add Competitor'}
             >
-              <Plus size={15} />
-              <span>Add Competitor</span>
+              {planLimits.competitors <= 0 ? <Lock size={14} /> : (planLimits.competitors !== Infinity && competitors.length >= planLimits.competitors) ? <Lock size={14} /> : <Plus size={15} />}
+              <span>
+                {planLimits.competitors <= 0 
+                  ? 'Add Competitor (Pro)' 
+                  : (planLimits.competitors !== Infinity && competitors.length >= planLimits.competitors)
+                    ? `Limit (${competitors.length}/3) – Upgrade` 
+                    : 'Add Competitor'}
+              </span>
             </button>
           </div>
         }
       />
+
+      {/* Free Plan Locked Radar Notice Banner */}
+      {isFree && (
+        <div className="growth-radar-locked-banner">
+          <div className="radar-locked-left">
+            <div className="radar-locked-icon">
+              <Lock size={18} />
+            </div>
+            <div>
+              <div className="radar-locked-title">
+                Competitor Tracking Radar is exclusive to Pro (3 competitors) and Unlimited (unlimited) plans.
+              </div>
+              <div className="radar-locked-desc">
+                On the Free plan, you can discover market competitors with AI once daily. Upgrade your plan to track live telemetry, ranking scores, and share of voice continuously.
+              </div>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => promptPaywall({ plan: 'pro' })}
+            className="radar-locked-cta-btn"
+          >
+            <Sparkles size={13} />
+            <span>Upgrade to Pro</span>
+          </button>
+        </div>
+      )}
 
       {/* Discovery Alert Toast */}
       {discoverMessage && (
@@ -337,23 +400,54 @@ export default function GrowthCompetitors() {
       </div>
 
       {/* Low Count Suggestion Banner */}
-      {!loading && totalCount < 5 && (
-        <div className="growth-info-alert animate-fade" style={{ marginBottom: '1.25rem' }}>
-          <Sparkles size={18} className="text-primary" style={{ flexShrink: 0 }} />
-          <div style={{ flex: 1, fontSize: '0.86rem', lineHeight: 1.5 }}>
-            <strong>Expand Your Radar:</strong> You currently have {totalCount} competitors tracked. 
-            Discover direct and search competitors with one click using AI to reach at least 6-8 monitored competitors.
+      {!loading && (isFree || totalCount < (planLimits.competitors === Infinity ? 6 : planLimits.competitors)) && (
+        <div className="growth-radar-suggestion-banner animate-fade">
+          <div className="suggestion-banner-left">
+            <div className="suggestion-banner-icon">
+              <Sparkles size={20} />
+            </div>
+            <div className="suggestion-banner-text">
+              <div className="suggestion-banner-title">
+                <span>Expand Your Radar</span>
+                <span className="suggestion-banner-badge">
+                  {isFree
+                    ? 'Free Plan (Preview Only)'
+                    : planLimits.competitors === Infinity
+                    ? `${totalCount} Monitored (Unlimited)`
+                    : `${totalCount} / ${planLimits.competitors} Slots`}
+                </span>
+              </div>
+              <p className="suggestion-banner-desc">
+                {isFree
+                  ? 'You currently have 0 competitors tracked. Discover direct and search competitors with one click using AI to preview market alternatives, or upgrade to Pro to continuously monitor up to 3 competitors.'
+                  : planLimits.competitors === Infinity
+                  ? `You currently have ${totalCount} competitors tracked. Discover direct and search competitors with one click using AI to reach at least 6-8 monitored competitors.`
+                  : `You currently have ${totalCount} of ${planLimits.competitors} competitors tracked on your Pro plan. Discover direct and search competitors with one click using AI to fill your available radar slots (${Math.max(0, planLimits.competitors - totalCount)} remaining).`}
+              </p>
+            </div>
           </div>
-          <button
-            type="button"
-            className="growth-secondary-btn"
-            onClick={handleAiDiscover}
-            disabled={discovering}
-            style={{ fontSize: '0.8rem', padding: '0.4rem 0.85rem', flexShrink: 0 }}
-          >
-            {discovering ? <Loader2 size={12} className="spin text-primary" /> : <Sparkles size={12} className="text-primary" />}
-            <span>Discover Competitors Now</span>
-          </button>
+          <div className="suggestion-banner-actions">
+            {isFree && (
+              <button
+                type="button"
+                className="growth-secondary-btn"
+                onClick={() => promptPaywall({ plan: 'pro' })}
+                style={{ fontSize: '0.82rem', padding: '0.55rem 0.95rem' }}
+              >
+                <Lock size={13} />
+                <span>Upgrade to Pro</span>
+              </button>
+            )}
+            <button
+              type="button"
+              className="suggestion-banner-btn"
+              onClick={handleAiDiscover}
+              disabled={discovering}
+            >
+              {discovering ? <Loader2 size={13} className="spin" /> : <Sparkles size={13} />}
+              <span>{discovering ? 'Analyzing...' : 'Discover Competitors Now'}</span>
+            </button>
+          </div>
         </div>
       )}
 
@@ -410,10 +504,18 @@ export default function GrowthCompetitors() {
               <button
                 type="button"
                 className="growth-primary-btn"
-                onClick={() => setIsAddOpen(true)}
+                onClick={() => {
+                  if (planLimits.competitors <= 0) {
+                    promptPaywall({ plan: 'pro' });
+                  } else if (planLimits.competitors !== Infinity && competitors.length >= planLimits.competitors) {
+                    promptPaywall({ plan: 'unlimited' });
+                  } else {
+                    setIsAddOpen(true);
+                  }
+                }}
               >
-                <Plus size={15} />
-                <span>Add Competitor</span>
+                {planLimits.competitors <= 0 ? <Lock size={14} /> : <Plus size={15} />}
+                <span>{planLimits.competitors <= 0 ? 'Add Competitor (Pro)' : 'Add Competitor'}</span>
               </button>
             </div>
           </div>
@@ -424,6 +526,8 @@ export default function GrowthCompetitors() {
               const formattedDate = comp.created_at
                 ? new Date(comp.created_at).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' })
                 : null;
+              const compName = typeof comp?.name === 'string' ? comp.name : (typeof comp?.name === 'object' ? (comp.name?.name || comp.name?.domain) : (comp?.domain || 'Competitor'));
+              const compDomain = typeof comp?.domain === 'string' ? comp.domain : (typeof comp?.domain === 'object' ? (comp.domain?.domain || comp.domain?.name) : '');
 
               return (
                 <div key={comp.id} className="growth-competitor-card">
@@ -431,22 +535,22 @@ export default function GrowthCompetitors() {
                     <div className="comp-brand-info">
                       <div className="comp-fav-wrap">
                         <GrowthFavicon
-                          src={`https://www.google.com/s2/favicons?domain=${comp.domain}&sz=64`}
-                          domain={comp.domain}
-                          name={comp.name}
+                          src={`https://www.google.com/s2/favicons?domain=${compDomain}&sz=64`}
+                          domain={compDomain}
+                          name={compName}
                           size={24}
                           className="comp-fav"
                         />
                       </div>
                       <div className="comp-titles">
-                        <h4 className="comp-name">{comp.name}</h4>
+                        <h4 className="comp-name">{compName}</h4>
                         <a 
-                          href={`https://${comp.domain}`} 
+                          href={`https://${compDomain}`} 
                           target="_blank" 
                           rel="noopener noreferrer"
                           className="comp-domain-link"
                         >
-                          <span>{comp.domain}</span>
+                          <span>{compDomain}</span>
                           <ExternalLink size={11} />
                         </a>
                       </div>
@@ -677,41 +781,49 @@ export default function GrowthCompetitors() {
             </div>
 
             <div className="growth-modal-body" style={{ paddingTop: '0.75rem', paddingBottom: '0.5rem' }}>
-              <p style={{ margin: '0 0 1rem 0', fontSize: '0.88rem', color: 'var(--text-muted, #94a3b8)', lineHeight: 1.55 }}>
-                Are you sure you want to remove <strong style={{ color: 'var(--text-main, #f8fafc)' }}>
-                  {deleteTargetComp.name ? `${deleteTargetComp.name} (${deleteTargetComp.domain})` : deleteTargetComp.domain}
-                </strong> from your competitor radar?
-              </p>
+              {(() => {
+                const delName = typeof deleteTargetComp?.name === 'string' ? deleteTargetComp.name : (typeof deleteTargetComp?.name === 'object' ? (deleteTargetComp.name?.name || deleteTargetComp.name?.domain) : '');
+                const delDomain = typeof deleteTargetComp?.domain === 'string' ? deleteTargetComp.domain : (typeof deleteTargetComp?.domain === 'object' ? (deleteTargetComp.domain?.domain || deleteTargetComp.domain?.name) : '');
+                return (
+                  <>
+                    <p style={{ margin: '0 0 1rem 0', fontSize: '0.88rem', color: 'var(--text-muted, #94a3b8)', lineHeight: 1.55 }}>
+                      Are you sure you want to remove <strong style={{ color: 'var(--text-main, #f8fafc)' }}>
+                        {delName ? `${delName} (${delDomain || ''})` : (delDomain || 'this competitor')}
+                      </strong> from your competitor radar?
+                    </p>
 
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.75rem',
-                padding: '0.75rem 1rem',
-                borderRadius: 10,
-                background: 'rgba(255, 255, 255, 0.03)',
-                border: '1px solid var(--border-color, rgba(255, 255, 255, 0.08))',
-                marginBottom: '0.5rem'
-              }}>
-                <GrowthFavicon
-                  src={`https://www.google.com/s2/favicons?domain=${deleteTargetComp.domain}&sz=64`}
-                  domain={deleteTargetComp.domain}
-                  name={deleteTargetComp.name}
-                  size={24}
-                  className="comp-fav"
-                />
-                <div style={{ minWidth: 0, flex: 1 }}>
-                  <div style={{ fontWeight: 600, fontSize: '0.86rem', color: 'var(--text-main, #f8fafc)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                    {deleteTargetComp.name || deleteTargetComp.domain}
-                  </div>
-                  <div style={{ fontSize: '0.76rem', color: 'var(--text-muted, #94a3b8)' }}>
-                    {deleteTargetComp.domain}
-                  </div>
-                </div>
-                <span className={`comp-type-pill pill-${deleteTargetComp.type || 'direct'}`} style={{ margin: 0 }}>
-                  {deleteTargetComp.type === 'direct' ? 'Direct' : deleteTargetComp.type === 'ai' ? 'AI Search' : 'Search'}
-                </span>
-              </div>
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.75rem',
+                      padding: '0.75rem 1rem',
+                      borderRadius: 10,
+                      background: 'rgba(255, 255, 255, 0.03)',
+                      border: '1px solid var(--border-color, rgba(255, 255, 255, 0.08))',
+                      marginBottom: '0.5rem'
+                    }}>
+                      <GrowthFavicon
+                        src={`https://www.google.com/s2/favicons?domain=${delDomain}&sz=64`}
+                        domain={delDomain}
+                        name={delName}
+                        size={24}
+                        className="comp-fav"
+                      />
+                      <div style={{ minWidth: 0, flex: 1 }}>
+                        <div style={{ fontWeight: 600, fontSize: '0.86rem', color: 'var(--text-main, #f8fafc)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                          {delName || delDomain}
+                        </div>
+                        <div style={{ fontSize: '0.76rem', color: 'var(--text-muted, #94a3b8)' }}>
+                          {delDomain}
+                        </div>
+                      </div>
+                      <span className={`comp-type-pill pill-${deleteTargetComp?.type || 'direct'}`} style={{ margin: 0 }}>
+                        {deleteTargetComp?.type === 'direct' ? 'Direct' : deleteTargetComp?.type === 'ai' ? 'AI Search' : 'Search'}
+                      </span>
+                    </div>
+                  </>
+                );
+              })()}
             </div>
 
             <div className="growth-modal-footer" style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.65rem', padding: '1rem 1.25rem' }}>

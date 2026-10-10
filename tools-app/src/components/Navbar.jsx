@@ -193,7 +193,7 @@ export default function Navbar({ activeTool, onNavigateHome, onOpenStats, onSele
                       <TrendingUp size={16} className="nav-item-icon text-primary" />
                       <div className="nav-item-text-wrap">
                         <span className="nav-item-title" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                          Cerilas Growth
+                          GrowthControl
                           <span className="nav-growth-pill-sm">PREMIUM</span>
                         </span>
                         <span className="nav-item-sub">{isTr ? 'Büyüme & AI Arama Paneli' : 'AI Visibility & SEO Suite'}</span>

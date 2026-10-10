@@ -15,7 +15,11 @@ import {
   ChevronLeft,
   ChevronRight,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  Lock,
+  Sparkles,
+  Check,
+  ArrowRight
 } from 'lucide-react';
 import { useGrowth } from '../GrowthContext';
 import { useAuth } from '../../context/AuthContext';
@@ -23,7 +27,7 @@ import GrowthPageCover from '../components/GrowthPageCover';
 import { GrowthTechnicalAuditSkeleton } from '../components/GrowthSkeleton';
 
 export default function GrowthTechnicalAudit() {
-  const { activeWorkspace } = useGrowth();
+  const { activeWorkspace, isFree, promptPaywall } = useGrowth();
   const { token } = useAuth();
 
   const [data, setData] = useState(null);
@@ -226,6 +230,71 @@ export default function GrowthTechnicalAudit() {
 
   if (loading) {
     return <GrowthTechnicalAuditSkeleton />;
+  }
+
+  if (isFree || data?.isLocked) {
+    return (
+      <div className="growth-view-container animate-fade">
+        <GrowthPageCover
+          title="Site Audit & Technical SEO Issues"
+          subtitle="Comprehensive automated crawler and technical health verification engine"
+          badgeText="PRO FEATURE"
+        />
+
+        <div className="growth-locked-gate-container">
+          <div className="growth-locked-gate-icon-wrap">
+            <Lock size={30} />
+          </div>
+
+          <h2 className="growth-locked-gate-title">
+            Technical Site Audit &amp; Issue Crawler
+          </h2>
+          <p className="growth-locked-gate-desc">
+            According to your Pricing Plan, in-depth site crawling and technical indexability audits are exclusive to <strong>Pro</strong> and <strong>Unlimited</strong> plans.
+          </p>
+
+          <div className="growth-locked-gate-grid">
+            <div className="growth-locked-gate-card">
+              <div className="growth-locked-gate-card-header">
+                <Check size={16} /> <span>Deep Crawler &amp; Sitemap</span>
+              </div>
+              <p className="growth-locked-gate-card-body">Automatically crawls all internal URLs, XML sitemaps, and link hierarchies.</p>
+            </div>
+
+            <div className="growth-locked-gate-card">
+              <div className="growth-locked-gate-card-header">
+                <Check size={16} /> <span>404 &amp; Broken Link Detection</span>
+              </div>
+              <p className="growth-locked-gate-card-body">Prioritizes broken redirects, 404 errors, and unreachable endpoints.</p>
+            </div>
+
+            <div className="growth-locked-gate-card">
+              <div className="growth-locked-gate-card-header">
+                <Check size={16} /> <span>Meta, Canonical &amp; SSL</span>
+              </div>
+              <p className="growth-locked-gate-card-body">Flags missing titles, duplicate canonical tags, and security vulnerabilities.</p>
+            </div>
+
+            <div className="growth-locked-gate-card">
+              <div className="growth-locked-gate-card-header">
+                <Check size={16} /> <span>Unlimited Re-Scans</span>
+              </div>
+              <p className="growth-locked-gate-card-body">Perform live on-demand re-scans with a single click after every deployment.</p>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => promptPaywall({ plan: 'pro' })}
+            className="growth-locked-gate-cta-btn"
+          >
+            <Sparkles size={16} />
+            <span>Upgrade to Pro or Unlimited</span>
+            <ArrowRight size={16} />
+          </button>
+        </div>
+      </div>
+    );
   }
 
   const issues = data?.issues || [];
