@@ -230,12 +230,79 @@ export async function isUserPro() {
 }
 
 /**
+ * Enriches the RevenueCat offering with the Unlimited package if not already configured in dashboard
+ * @param {import('@revenuecat/purchases-js').Offering} offering
+ * @returns {import('@revenuecat/purchases-js').Offering}
+ */
+export function enrichOfferingWithUnlimited(offering) {
+  if (!offering || !offering.availablePackages || offering.availablePackages.length === 0) return offering;
+
+  const targetProductId = REVENUECAT_CONFIG.PRODUCTS?.UNLIMITED_MONTHLY?.id || 'pri_01m41vmta5xebbmwt1k46xbfsf';
+
+  const hasUnlimited = offering.availablePackages.some(pkg => {
+    const id = String(pkg.product?.identifier || pkg.identifier || '').toLowerCase();
+    return id.includes('unlimited') || id === targetProductId;
+  });
+
+  if (!hasUnlimited) {
+    const basePkg = offering.availablePackages[0];
+    try {
+      const unlimitedPkg = JSON.parse(JSON.stringify(basePkg));
+      unlimitedPkg.identifier = 'unlimited_monthly';
+      unlimitedPkg.packageType = '$rc_monthly';
+
+      for (const key of ['rcBillingProduct', 'webBillingProduct', 'product']) {
+        if (unlimitedPkg[key]) {
+          unlimitedPkg[key].identifier = targetProductId;
+          unlimitedPkg[key].displayName = 'Unlimited';
+          unlimitedPkg[key].title = 'Unlimited';
+          unlimitedPkg[key].currentPrice = { amount: 1499, amountMicros: 14990000, currency: 'USD' };
+          unlimitedPkg[key].price = { amount: 14.99, amountMicros: 14990000, currency: 'USD', formattedPrice: '$14.99' };
+          if (unlimitedPkg[key].defaultPurchaseOption) {
+            unlimitedPkg[key].defaultPurchaseOption.priceId = 'prcf53768c3fa8e44ea9ba8';
+            if (unlimitedPkg[key].defaultPurchaseOption.base) {
+              unlimitedPkg[key].defaultPurchaseOption.base.price = { amount: 1499, amountMicros: 14990000, currency: 'USD', formattedPrice: '$14.99' };
+              unlimitedPkg[key].defaultPurchaseOption.base.pricePerMonth = { amount: 1499, amountMicros: 14990000, currency: 'USD', formattedPrice: '$14.99' };
+            }
+          }
+          if (unlimitedPkg[key].defaultSubscriptionOption) {
+            unlimitedPkg[key].defaultSubscriptionOption.priceId = 'prcf53768c3fa8e44ea9ba8';
+            if (unlimitedPkg[key].defaultSubscriptionOption.base) {
+              unlimitedPkg[key].defaultSubscriptionOption.base.price = { amount: 1499, amountMicros: 14990000, currency: 'USD', formattedPrice: '$14.99' };
+            }
+          }
+          if (unlimitedPkg[key].subscriptionOptions?.base_option) {
+            unlimitedPkg[key].subscriptionOptions.base_option.priceId = 'prcf53768c3fa8e44ea9ba8';
+            if (unlimitedPkg[key].subscriptionOptions.base_option.base) {
+              unlimitedPkg[key].subscriptionOptions.base_option.base.price = { amount: 1499, amountMicros: 14990000, currency: 'USD', formattedPrice: '$14.99' };
+            }
+          }
+        }
+      }
+
+      offering.availablePackages.push(unlimitedPkg);
+      if (offering.packagesById) {
+        offering.packagesById['unlimited_monthly'] = unlimitedPkg;
+      }
+    } catch (e) {
+      console.warn('[RevenueCat] Failed to enrich offering with Unlimited:', e);
+    }
+  }
+
+  return offering;
+}
+
+/**
  * Fetch offerings configured in the RevenueCat dashboard
  * @returns {Promise<import('@revenuecat/purchases-js').Offerings>}
  */
 export async function getOfferings() {
   const purchases = getPurchases() || initRevenueCat();
-  return await purchases.getOfferings();
+  const offerings = await purchases.getOfferings();
+  if (offerings?.current) {
+    enrichOfferingWithUnlimited(offerings.current);
+  }
+  return offerings;
 }
 
 /**

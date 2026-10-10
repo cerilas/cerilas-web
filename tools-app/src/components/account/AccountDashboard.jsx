@@ -1193,21 +1193,52 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
                         <span>{isTr ? 'Mevcut Planınız (Yönet)' : 'Active Plan (Manage)'}</span>
                       </button>
                     ) : (
-                      <button
-                        type="button"
-                        disabled={upgradingPlan === 'unlimited' || upgradingPlan === 'enterprise'}
-                        onClick={() => handleUpgradePlan('unlimited')}
-                        className="account-plan-action-btn btn-primary-turbo"
-                      >
-                        {upgradingPlan === 'unlimited' || upgradingPlan === 'enterprise' ? (
-                          <Loader2 size={15} className="auth-spinner" />
-                        ) : (
-                          <>
-                            <span>{isTr ? "Unlimited'a Abone Ol" : 'Subscribe to Unlimited'}</span>
-                            <Zap size={14} />
-                          </>
+                      <>
+                        <button
+                          type="button"
+                          disabled={upgradingPlan === 'unlimited' || upgradingPlan === 'enterprise'}
+                          onClick={() => handleUpgradePlan('unlimited')}
+                          className="account-plan-action-btn btn-primary-turbo"
+                        >
+                          {upgradingPlan === 'unlimited' || upgradingPlan === 'enterprise' ? (
+                            <Loader2 size={15} className="auth-spinner" />
+                          ) : (
+                            <>
+                              <span>
+                                {currentPlan === 'pro'
+                                  ? (isTr ? "Unlimited'a Yükselt" : 'Upgrade to Unlimited')
+                                  : (isTr ? "Unlimited'a Abone Ol" : 'Subscribe to Unlimited')}
+                              </span>
+                              <Zap size={14} />
+                            </>
+                          )}
+                        </button>
+
+                        {currentPlan === 'pro' && (
+                          <button
+                            type="button"
+                            onClick={() => openCustomerCenter('overview')}
+                            className="account-portal-shortcut-btn"
+                            style={{
+                              marginTop: '8px',
+                              fontSize: '11px',
+                              background: 'transparent',
+                              border: 'none',
+                              color: '#818cf8',
+                              cursor: 'pointer',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              gap: '4px',
+                              textDecoration: 'underline',
+                              width: '100%'
+                            }}
+                          >
+                            <ExternalLink size={12} />
+                            <span>{isTr ? 'Paddle portalından prorated yükselt' : 'Upgrade via Paddle Portal (Prorated)'}</span>
+                          </button>
                         )}
-                      </button>
+                      </>
                     )}
                   </div>
                 </div>

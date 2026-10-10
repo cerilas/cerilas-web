@@ -1276,12 +1276,27 @@ router.post('/sync-plan', requireAuth, async (req, res) => {
       (!proEntitlement.expires_date || new Date(proEntitlement.expires_date) > new Date())
     );
 
+    const unlimEntitlement = rcSubscriber?.entitlements?.cerilas_tools_unlimited || rcSubscriber?.entitlements?.unlimited;
+    const hasActiveRcUnlimited = !!(
+      unlimEntitlement &&
+      (!unlimEntitlement.expires_date || new Date(unlimEntitlement.expires_date) > new Date())
+    );
+
+    const rcSubscriptions = rcSubscriber?.subscriptions || {};
+    const hasActiveUnlimitedSub = Object.entries(rcSubscriptions).some(([prodId, sub]) => {
+      const isUnlimProd = prodId.toLowerCase().includes('unlimited') || prodId === 'pri_01m41vmta5xebbmwt1k46xbfsf';
+      const isActive = !sub.expires_date || new Date(sub.expires_date) > new Date();
+      return isUnlimProd && isActive;
+    });
+
     const current = await authPool.query('SELECT * FROM users WHERE id = $1', [req.user.id]);
     const currentUser = current.rows[0];
 
     let targetPlan = plan;
-    // If RevenueCat shows active Pro, honor it when requested or forced
-    if (hasActiveRcPro && (force || plan === 'pro')) {
+    // Check Unlimited first, then Pro
+    if (plan === 'unlimited' || hasActiveRcUnlimited || hasActiveUnlimitedSub) {
+      targetPlan = 'unlimited';
+    } else if (hasActiveRcPro && (force || plan === 'pro')) {
       targetPlan = 'pro';
     } else if (currentUser && currentUser.plan === 'free' && plan !== 'free' && !force && !hasActiveRcPro) {
       return res.json({
@@ -1295,7 +1310,7 @@ router.post('/sync-plan', requireAuth, async (req, res) => {
     let subscriptionStatus = currentUser ? currentUser.subscription_status : 'active';
     let planExpiresAt = currentUser ? currentUser.plan_expires_at : null;
 
-    if (targetPlan === 'pro' && force) {
+    if ((targetPlan === 'pro' || targetPlan === 'unlimited') && force) {
       cancelAtPeriodEnd = false;
       subscriptionStatus = 'active';
       planExpiresAt = null;

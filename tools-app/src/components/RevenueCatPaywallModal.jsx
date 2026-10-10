@@ -104,18 +104,11 @@ export default function RevenueCatPaywallModal({
     }
 
     if (planId === 'unlimited') {
-      if (cycle === 'annual') {
-        return availablePackages.find(pkg => {
-          if (!isAnnualPackage(pkg)) return false;
-          const id = String(pkg.product?.identifier || pkg.identifier || '').toLowerCase();
-          return id.includes('unlimited');
-        }) || null;
-      } else {
-        return availablePackages.find(pkg => {
-          const id = String(pkg.product?.identifier || pkg.identifier || '').toLowerCase();
-          return id.includes('unlimited') && isMonthlyPackage(pkg);
-        }) || null;
-      }
+      const targetId = REVENUECAT_CONFIG.PRODUCTS?.UNLIMITED_MONTHLY?.id || 'pri_01m41vmta5xebbmwt1k46xbfsf';
+      return availablePackages.find(pkg => {
+        const id = String(pkg.product?.identifier || pkg.identifier || '').toLowerCase();
+        return id.includes('unlimited') || id === targetId;
+      }) || null;
     }
 
     return null;
@@ -220,7 +213,10 @@ export default function RevenueCatPaywallModal({
       subDetail: billingCycle === 'annual'
         ? (isTr ? 'Yıllık çekim ($12.49/ay)' : 'Billed annually ($12.49/mo)')
         : (isTr ? 'Aylık çekim' : 'Billed monthly'),
-      matchedPkg: billingCycle === 'annual' ? (unlimitedAnnualPkg || unlimitedMonthlyPkg || proAnnualPkg || availablePackages[0]) : (unlimitedMonthlyPkg || proMonthlyPkg || availablePackages[0]),
+      matchedPkg: unlimitedMonthlyPkg || unlimitedAnnualPkg || availablePackages.find(p => {
+        const id = String(p.product?.identifier || p.identifier || '').toLowerCase();
+        return id.includes('unlimited') || id === 'pri_01m41vmta5xebbmwt1k46xbfsf';
+      }),
       features: [
         isTr ? 'Sınırsız Workspace (Tüm markalarınız)' : 'Unlimited Workspaces (All brands)',
         isTr ? '10 Takip Edilebilir GEO / AEO İstemi' : '10 Trackable GEO / AEO Prompts',
@@ -367,9 +363,16 @@ export default function RevenueCatPaywallModal({
       return;
     }
 
-    const pkgToPurchase = planToProcess.matchedPkg || availablePackages[0];
+    const pkgToPurchase = planToProcess.matchedPkg;
 
     if (!pkgToPurchase) {
+      if (planToProcess.id === 'unlimited') {
+        openCustomerCenter('overview');
+        setErrorMessage(isTr 
+          ? 'Paddle Müşteri Portalı açıldı. Mevcut aboneliğinizi Unlimited planına yükseltmek için açılan sekmeden devam edebilirsiniz.' 
+          : 'Paddle Customer Portal opened to complete your Unlimited upgrade.');
+        return;
+      }
       setErrorMessage(isTr 
         ? 'Abonelik paketi hazırlanamadı. Lütfen sayfayı yenileyip tekrar deneyiniz.' 
         : 'Subscription package not available. Please refresh and try again.');
@@ -381,6 +384,13 @@ export default function RevenueCatPaywallModal({
     try {
       const res = await purchasePackage(pkgToPurchase);
       if (res && res.success) {
+        if (planToProcess.id === 'unlimited') {
+          try {
+            if (syncPlan) await syncPlan('unlimited', true);
+            if (clearManualOverride) clearManualOverride();
+            if (refreshCustomerInfo) await refreshCustomerInfo();
+          } catch (_) {}
+        }
         if (res.isAlreadyPurchased) {
           setIsRestoredPro(true);
         }
@@ -397,8 +407,16 @@ export default function RevenueCatPaywallModal({
           err?.errorCode === 6 ||
           rawMsg.toLowerCase().includes('already purchased') ||
           rawMsg.toLowerCase().includes('already has an active subscription') ||
+          rawMsg.toLowerCase().includes('already bought') ||
           rawMsg.toLowerCase().includes('zaten')
         ) {
+          if (planToProcess.id === 'unlimited') {
+            openCustomerCenter('overview');
+            setErrorMessage(isTr 
+              ? 'Paddle, mevcut bir Pro aboneliğiniz bulunduğu için mükerrer fatura kesilmesini önlemek amacıyla plan yükseltmesini doğrudan Paddle Müşteri Portalı üzerinden onaylamanızı istemektedir. Portal yeni sekmede açılmıştır; kullanılmayan Pro günleriniz otomatik mahsup edilecektir.'
+              : 'Paddle requires upgrading active subscriptions directly via the Customer Portal to avoid double billing. The portal has been opened in a new tab.');
+            return;
+          }
           try {
             if (syncPlan) await syncPlan('pro', true);
             if (clearManualOverride) clearManualOverride();
@@ -535,7 +553,9 @@ export default function RevenueCatPaywallModal({
               <h3 className="rc-success-title">
                 {isRestoredPro 
                   ? (isTr ? 'Pro Aboneliğiniz Hesabınızla Eşitlendi!' : 'Pro Subscription Restored!') 
-                  : (isTr ? 'Aboneliğiniz Aktifleştirildi!' : 'Welcome to Cerilas Pro!')}
+                  : selectedPlan.name === 'Unlimited'
+                  ? (isTr ? 'Cerilas Unlimited’a Hoş Geldiniz!' : 'Welcome to Cerilas Unlimited!')
+                  : (isTr ? 'Cerilas Pro’ya Hoş Geldiniz!' : 'Welcome to Cerilas Pro!')}
               </h3>
               <p className="rc-success-desc">
                 {isRestoredPro 
@@ -692,6 +712,28 @@ export default function RevenueCatPaywallModal({
                 </>
               )}
             </button>
+
+            {hasActivePro && selectedPlan.id === 'unlimited' && (
+              <button
+                type="button"
+                onClick={() => openCustomerCenter('overview')}
+                style={{
+                  background: 'transparent',
+                  border: 'none',
+                  color: 'var(--text-muted, #94a3b8)',
+                  fontSize: '0.8rem',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '5px',
+                  marginTop: '0.25rem'
+                }}
+              >
+                <ExternalLink size={13} />
+                <span>{isTr ? 'Veya Paddle Portalında Yükselt (Prorated Mahsup)' : 'Or upgrade in Paddle Portal (Prorated)'}</span>
+              </button>
+            )}
 
             {isPurchasing && (
               <button 
