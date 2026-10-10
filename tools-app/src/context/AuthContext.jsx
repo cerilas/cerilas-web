@@ -376,6 +376,49 @@ export function AuthProvider({ children }) {
     return data.user;
   };
 
+  // Schedule Downgrade (Retain Pro until period end date, then auto-switch to Free)
+  const scheduleDowngrade = async (periodEndDate) => {
+    if (!token) throw new Error('Oturum açılmamış.');
+
+    const res = await fetch('/api/auth/schedule-downgrade', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({ periodEndDate })
+    });
+
+    const data = await res.json();
+    if (!res.ok) {
+      throw new Error(data.error || 'Downgrade işlemi gerçekleştirilemedi.');
+    }
+
+    setUser(data.user);
+    return data;
+  };
+
+  // Resume Subscription (cancel scheduled downgrade)
+  const resumeSubscription = async () => {
+    if (!token) throw new Error('Oturum açılmamış.');
+
+    const res = await fetch('/api/auth/resume-subscription', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      }
+    });
+
+    const data = await res.json();
+    if (!res.ok) {
+      throw new Error(data.error || 'Abonelik sürdürülemedi.');
+    }
+
+    setUser(data.user);
+    return data;
+  };
+
   // Fetch Invoices
   const getInvoices = async () => {
     if (!token) return [];
@@ -422,6 +465,8 @@ export function AuthProvider({ children }) {
     verifyPhoneOtp,
     updateBilling,
     upgradePlan,
+    scheduleDowngrade,
+    resumeSubscription,
     getInvoices,
     refreshUser: () => fetchCurrentUser(token),
     isAuthModalOpen,

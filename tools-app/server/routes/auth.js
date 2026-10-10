@@ -51,6 +51,9 @@ const formatUser = (row) => {
     google_id: row.google_id || null,
     is_google_connected: !!row.google_id,
     plan: row.plan || 'free',
+    cancel_at_period_end: !!row.cancel_at_period_end,
+    plan_expires_at: row.plan_expires_at ? new Date(row.plan_expires_at).toISOString() : null,
+    subscription_status: row.subscription_status || 'active',
     billing_type: row.billing_type || 'individual',
     billing_name: row.billing_name || '',
     billing_tax_id: row.billing_tax_id || '',
@@ -712,9 +715,27 @@ router.get('/me', requireAuth, async (req, res) => {
       return res.status(401).json({ error: 'Kullanıcı hesabı bulunamadı.' });
     }
 
+    const row = result.rows[0];
+
+    // If subscription was scheduled to cancel at period end and expiration date has passed, auto-downgrade to free
+    if (row.cancel_at_period_end && row.plan_expires_at && new Date(row.plan_expires_at) <= new Date()) {
+      const expiredRes = await authPool.query(
+        `UPDATE users 
+         SET plan = 'free', cancel_at_period_end = FALSE, subscription_status = 'expired'
+         WHERE id = $1 RETURNING *`,
+        [req.user.id]
+      );
+      if (expiredRes.rows.length > 0) {
+        return res.json({
+          authenticated: true,
+          user: formatUser(expiredRes.rows[0])
+        });
+      }
+    }
+
     res.json({
       authenticated: true,
-      user: formatUser(result.rows[0])
+      user: formatUser(row)
     });
   } catch (err) {
     console.error('Auth me error:', err);
@@ -1023,7 +1044,12 @@ router.post('/upgrade-plan', requireAuth, async (req, res) => {
     }
 
     const updated = await authPool.query(
-      'UPDATE users SET plan = $1 WHERE id = $2 RETURNING *',
+      `UPDATE users 
+       SET plan = $1, 
+           cancel_at_period_end = FALSE, 
+           plan_expires_at = NULL, 
+           subscription_status = CASE WHEN $1 = 'free' THEN 'free' ELSE 'active' END 
+       WHERE id = $2 RETURNING *`,
       [plan, req.user.id]
     );
 
@@ -1053,6 +1079,73 @@ router.post('/upgrade-plan', requireAuth, async (req, res) => {
   } catch (err) {
     console.error('Upgrade plan error:', err);
     res.status(500).json({ error: 'Plan güncellenemedi.' });
+  }
+});
+
+/**
+ * POST /api/auth/schedule-downgrade
+ * Retain Pro/Unlimited until period end date, then automatically downgrade to Free
+ */
+router.post('/schedule-downgrade', requireAuth, async (req, res) => {
+  try {
+    const { periodEndDate } = req.body;
+    const expiryDate = periodEndDate ? new Date(periodEndDate) : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+
+    const updated = await authPool.query(
+      `UPDATE users 
+       SET cancel_at_period_end = TRUE, 
+           plan_expires_at = $1, 
+           subscription_status = 'canceling' 
+       WHERE id = $2 
+       RETURNING *`,
+      [expiryDate, req.user.id]
+    );
+
+    if (updated.rows.length === 0) {
+      return res.status(404).json({ error: 'Kullanıcı bulunamadı.' });
+    }
+
+    res.json({
+      success: true,
+      scheduled: true,
+      plan_expires_at: expiryDate.toISOString(),
+      message: 'Downgrade işlemi planlandı. Üyeliğiniz dönem sonuna kadar kesintisiz devam edecektir.',
+      user: formatUser(updated.rows[0])
+    });
+  } catch (err) {
+    console.error('Schedule downgrade error:', err);
+    res.status(500).json({ error: 'Downgrade işlemi planlanamadı.' });
+  }
+});
+
+/**
+ * POST /api/auth/resume-subscription
+ * Cancel scheduled downgrade and resume regular renewal
+ */
+router.post('/resume-subscription', requireAuth, async (req, res) => {
+  try {
+    const updated = await authPool.query(
+      `UPDATE users 
+       SET cancel_at_period_end = FALSE, 
+           plan_expires_at = NULL, 
+           subscription_status = 'active' 
+       WHERE id = $1 
+       RETURNING *`,
+      [req.user.id]
+    );
+
+    if (updated.rows.length === 0) {
+      return res.status(404).json({ error: 'Kullanıcı bulunamadı.' });
+    }
+
+    res.json({
+      success: true,
+      message: 'Aboneliğiniz başarıyla sürdürüldü.',
+      user: formatUser(updated.rows[0])
+    });
+  } catch (err) {
+    console.error('Resume subscription error:', err);
+    res.status(500).json({ error: 'Abonelik sürdürülemedi.' });
   }
 });
 

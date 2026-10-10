@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { 
   User, 
   Package, 
@@ -6,6 +7,7 @@ import {
   ShieldCheck, 
   CheckCircle2, 
   AlertCircle, 
+  AlertTriangle,
   Upload, 
   Trash2, 
   ArrowLeft, 
@@ -22,6 +24,9 @@ import {
   Crown,
   Camera,
   RotateCcw,
+  Calendar,
+  Clock,
+  X,
   Image as ImageIcon
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
@@ -53,6 +58,8 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
     verifyPhoneOtp, 
     updateBilling, 
     upgradePlan, 
+    scheduleDowngrade,
+    resumeSubscription,
     getInvoices, 
     initiateGoogleAuth,
     unlinkGoogleAccount,
@@ -70,6 +77,19 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
   const isTr = language === 'tr';
 
   const [activeTab, setActiveTab] = useState(initialTab); // 'profile' | 'package' | 'billing'
+
+  // Custom Modal States
+  const [isDowngradeModalOpen, setIsDowngradeModalOpen] = useState(false);
+  const [dialogModal, setDialogModal] = useState({
+    isOpen: false,
+    type: 'info', // 'warning' | 'danger' | 'success' | 'info'
+    badge: '',
+    title: '',
+    message: '',
+    confirmText: '',
+    cancelText: '',
+    onConfirm: null
+  });
 
   // Profile State
   const [firstName, setFirstName] = useState('');
@@ -239,21 +259,32 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
 
   // Google Account Disconnecting
   const handleUnlinkGoogle = async () => {
-    if (!window.confirm(isTr ? 'Google bağlantısını kaldırmak istediğinize emin misiniz?' : 'Are you sure you want to disconnect Google?')) {
-      return;
-    }
-    setGoogleActionLoading(true);
-    setGoogleSuccessMsg('');
-    setGoogleErrorMsg('');
-    try {
-      await unlinkGoogleAccount();
-      setGoogleSuccessMsg(isTr ? 'Google hesabı bağlantısı başarıyla kaldırıldı.' : 'Google account disconnected successfully.');
-      setTimeout(() => setGoogleSuccessMsg(''), 4500);
-    } catch (err) {
-      setGoogleErrorMsg(err.message || (isTr ? 'Google bağlantısı kaldırılamadı.' : 'Failed to disconnect Google.'));
-    } finally {
-      setGoogleActionLoading(false);
-    }
+    setDialogModal({
+      isOpen: true,
+      type: 'warning',
+      badge: isTr ? 'GÜVENLİK' : 'SECURITY',
+      title: isTr ? 'Google Bağlantısını Kaldır' : 'Disconnect Google Account',
+      message: isTr 
+        ? 'Google hesabınızın bağlantısını kaldırmak istediğinize emin misiniz? Şifreniz ile giriş yapmaya devam edebilirsiniz.' 
+        : 'Are you sure you want to disconnect your Google account? You will still be able to sign in with your password.',
+      confirmText: isTr ? 'Bağlantıyı Kaldır' : 'Disconnect',
+      cancelText: isTr ? 'Vazgeç' : 'Cancel',
+      onConfirm: async () => {
+        setDialogModal(prev => ({ ...prev, isOpen: false }));
+        setGoogleActionLoading(true);
+        setGoogleSuccessMsg('');
+        setGoogleErrorMsg('');
+        try {
+          await unlinkGoogleAccount();
+          setGoogleSuccessMsg(isTr ? 'Google hesabı bağlantısı başarıyla kaldırıldı.' : 'Google account disconnected successfully.');
+          setTimeout(() => setGoogleSuccessMsg(''), 4500);
+        } catch (err) {
+          setGoogleErrorMsg(err.message || (isTr ? 'Google bağlantısı kaldırılamadı.' : 'Failed to disconnect Google.'));
+        } finally {
+          setGoogleActionLoading(false);
+        }
+      }
+    });
   };
 
   // SMS OTP Send
@@ -333,6 +364,35 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
     }
   };
 
+  // Compute the period end date for Pro/Unlimited
+  const proEntitlement = rcCustomerInfo?.entitlements?.active?.['cerilas_tools_pro'] 
+    || rcCustomerInfo?.entitlements?.all?.['cerilas_tools_pro'];
+
+  const getPeriodEndDate = () => {
+    if (proEntitlement?.expirationDate) {
+      const d = new Date(proEntitlement.expirationDate);
+      if (!isNaN(d.getTime())) return d;
+    }
+    if (user?.plan_expires_at) {
+      const d = new Date(user.plan_expires_at);
+      if (!isNaN(d.getTime())) return d;
+    }
+    if (invoices && invoices.length > 0 && invoices[0].invoice_date) {
+      const invDate = new Date(invoices[0].invoice_date);
+      if (!isNaN(invDate.getTime())) {
+        return new Date(invDate.getTime() + 30 * 24 * 60 * 60 * 1000);
+      }
+    }
+    return new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+  };
+
+  const periodEndDate = getPeriodEndDate();
+  const formattedPeriodEndDate = periodEndDate.toLocaleDateString(isTr ? 'tr-TR' : 'en-US', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric'
+  });
+
   // Upgrade / Downgrade Plan handler
   const handleUpgradePlan = async (targetPlan) => {
     if (!isAuthenticated) {
@@ -349,35 +409,114 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
     }
 
     if (targetPlan === 'free') {
-      const confirmMsg = isTr
-        ? 'Hesabınızı Ücretsiz (Free) plana düşürmek istediğinize emin misiniz? Pro özellikler ve genişletilmiş token limitleriniz sıfırlanacaktır.'
-        : 'Are you sure you want to downgrade to the Free plan? Your Pro limits and priority execution will be removed.';
-      if (!window.confirm(confirmMsg)) {
+      if (user?.cancel_at_period_end) {
+        setDialogModal({
+          isOpen: true,
+          type: 'info',
+          badge: isTr ? 'BİLGİ' : 'NOTICE',
+          title: isTr ? 'Downgrade Zaten Planlandı' : 'Downgrade Already Scheduled',
+          message: isTr 
+            ? `Pro üyeliğiniz ${formattedPeriodEndDate} tarihine kadar aktif kalacak ve bu tarihten sonra otomatik olarak Ücretsiz plana geçecektir.` 
+            : `Your Pro membership is already scheduled to end on ${formattedPeriodEndDate}.`,
+          confirmText: isTr ? 'Anladım' : 'Got it',
+          onConfirm: () => setDialogModal(prev => ({ ...prev, isOpen: false }))
+        });
         return;
       }
+      setIsDowngradeModalOpen(true);
+      return;
     }
+  };
 
-    setUpgradingPlan(targetPlan);
+  // Confirm Downgrade Handler (Scheduled Downgrade)
+  const handleConfirmDowngrade = async () => {
+    setIsDowngradeModalOpen(false);
+    setUpgradingPlan('free');
     setPlanSuccessMsg('');
     try {
-      await upgradePlan(targetPlan);
-      if (targetPlan === 'free' && typeof downgradeToFree === 'function') {
-        await downgradeToFree();
-      }
-      const successText = targetPlan === 'free'
-        ? (isTr ? 'Planınız başarıyla Ücretsiz (Free) pakete düşürüldü.' : 'Your plan has been downgraded to Free.')
-        : (isTr ? `Planınız ${targetPlan.toUpperCase()} olarak güncellendi!` : `Plan updated to ${targetPlan.toUpperCase()}!`);
+      await scheduleDowngrade(periodEndDate.toISOString());
+      
+      setDialogModal({
+        isOpen: true,
+        type: 'success',
+        badge: isTr ? 'BAŞARILI' : 'SUCCESS',
+        title: isTr ? 'Downgrade Planlandı' : 'Downgrade Scheduled',
+        message: isTr 
+          ? `Pro üyeliğiniz ${formattedPeriodEndDate} tarihine kadar kesintisiz devam edecektir. Bu tarihten sonra hesabınız otomatik olarak Ücretsiz (Free) plana geçecek ve kartınızdan herhangi bir yenileme ücreti alınmayacaktır.`
+          : `Your Pro membership will remain active until ${formattedPeriodEndDate}. After this date, your account will switch to the Free plan with no renewal charges.`,
+        confirmText: isTr ? 'Harika, Anladım' : 'Got it',
+        onConfirm: () => setDialogModal(prev => ({ ...prev, isOpen: false }))
+      });
+
+      const successText = isTr 
+        ? `Pro üyeliğiniz ${formattedPeriodEndDate} tarihine kadar aktif kalacak, sonrasında Ücretsiz plana geçecektir.` 
+        : `Your Pro membership will remain active until ${formattedPeriodEndDate}.`;
       setPlanSuccessMsg(successText);
       try {
         const updatedInvoices = await getInvoices();
         setInvoices(updatedInvoices);
       } catch (_) {}
-      setTimeout(() => setPlanSuccessMsg(''), 5000);
+      setTimeout(() => setPlanSuccessMsg(''), 6000);
     } catch (err) {
-      alert(err.message || (isTr ? 'Plan güncellenemedi.' : 'Failed to update plan.'));
+      setDialogModal({
+        isOpen: true,
+        type: 'danger',
+        badge: isTr ? 'HATA' : 'ERROR',
+        title: isTr ? 'İşlem Başarısız' : 'Action Failed',
+        message: err.message || (isTr ? 'Downgrade işlemi gerçekleştirilemedi.' : 'Failed to schedule downgrade.'),
+        confirmText: isTr ? 'Tamam' : 'Close',
+        onConfirm: () => setDialogModal(prev => ({ ...prev, isOpen: false }))
+      });
     } finally {
       setUpgradingPlan(null);
     }
+  };
+
+  // Resume Subscription Handler (Cancel Scheduled Downgrade)
+  const handleResumeSubscription = () => {
+    setDialogModal({
+      isOpen: true,
+      type: 'warning',
+      badge: isTr ? 'ABONELİK YENİLEME' : 'SUBSCRIPTION RENEWAL',
+      title: isTr ? 'Aboneliği Sürdür' : 'Resume Subscription',
+      message: isTr 
+        ? 'Pro aboneliğinizi sürdürmek ve otomatik yenilemeyi tekrar aktif etmek istediğinize emin misiniz?' 
+        : 'Are you sure you want to resume your Pro subscription and keep automatic renewal active?',
+      confirmText: isTr ? "Evet, Pro'yu Sürdür" : 'Yes, Keep Pro',
+      cancelText: isTr ? 'Vazgeç' : 'Cancel',
+      onConfirm: async () => {
+        setDialogModal(prev => ({ ...prev, isOpen: false }));
+        setUpgradingPlan('resume');
+        try {
+          await resumeSubscription();
+          setDialogModal({
+            isOpen: true,
+            type: 'success',
+            badge: isTr ? 'BAŞARILI' : 'SUCCESS',
+            title: isTr ? 'Abonelik Sürdürüldü' : 'Subscription Resumed',
+            message: isTr 
+              ? 'Pro aboneliğiniz başarıyla sürdürüldü! Otomatik yenilemeniz aktif kaldı.'
+              : 'Your Pro subscription has been resumed successfully!',
+            confirmText: isTr ? 'Tamam' : 'Close',
+            onConfirm: () => setDialogModal(prev => ({ ...prev, isOpen: false }))
+          });
+          setPlanSuccessMsg(isTr ? 'Pro aboneliğiniz başarıyla sürdürüldü.' : 'Subscription resumed.');
+          setTimeout(() => setPlanSuccessMsg(''), 5000);
+        } catch (err) {
+          setDialogModal({
+            isOpen: true,
+            type: 'danger',
+            badge: isTr ? 'HATA' : 'ERROR',
+            title: isTr ? 'Hata' : 'Error',
+            message: err.message || (isTr ? 'Abonelik sürdürülemedi.' : 'Failed to resume subscription.'),
+            confirmText: isTr ? 'Tamam' : 'Close',
+            onConfirm: () => setDialogModal(prev => ({ ...prev, isOpen: false }))
+          });
+        } finally {
+          setUpgradingPlan(null);
+        }
+      }
+    });
   };
 
   const userInitials = (user?.name || user?.email || 'C')
@@ -542,6 +681,36 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
               <div className="account-alert-banner alert-success">
                 <CheckCircle2 size={16} />
                 <span>{planSuccessMsg}</span>
+              </div>
+            )}
+
+            {/* Scheduled Downgrade Notice Banner */}
+            {user?.cancel_at_period_end && (
+              <div className="account-scheduled-downgrade-banner">
+                <div className="account-scheduled-banner-left">
+                  <div className="account-scheduled-banner-icon">
+                    <Clock size={20} />
+                  </div>
+                  <div>
+                    <h4 className="account-scheduled-banner-title">
+                      {isTr ? 'Abonelik İptali Planlandı (Dönem Sonunda Sona Erecek)' : 'Subscription Cancels at Period End'}
+                    </h4>
+                    <p className="account-scheduled-banner-desc">
+                      {isTr 
+                        ? `Pro üyeliğiniz ${formattedPeriodEndDate} tarihine kadar kesintisiz aktiftir. Bu tarihten sonra otomatik olarak Ücretsiz plana geçeceksiniz (Kartınızdan yeni ücret çekilmeyecektir).`
+                        : `Your Pro membership is active until ${formattedPeriodEndDate}. After this date, your account will switch to Free with no renewal charges.`}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleResumeSubscription}
+                  disabled={upgradingPlan === 'resume'}
+                  className="account-scheduled-resume-btn"
+                >
+                  <RotateCcw size={14} />
+                  <span>{isTr ? 'Aboneliği Sürdür (İptali Geri Al)' : 'Resume Subscription'}</span>
+                </button>
               </div>
             )}
 
@@ -772,6 +941,11 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
                   <div className="account-upgrade-card-footer">
                     {currentPlan === 'free' ? (
                       <div className="account-current-plan-pill">{isTr ? 'Mevcut Planınız' : 'Current Plan'}</div>
+                    ) : user?.cancel_at_period_end ? (
+                      <div className="account-scheduled-plan-pill">
+                        <Clock size={13} />
+                        <span>{isTr ? 'Dönem Sonunda Aktif' : 'Active at Period End'}</span>
+                      </div>
                     ) : (
                       <button
                         type="button"
@@ -838,14 +1012,26 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
 
                   <div className="account-upgrade-card-footer">
                     {currentPlan === 'pro' ? (
-                      <button
-                        type="button"
-                        onClick={openCustomerCenter}
-                        className="account-current-plan-pill is-manage-btn"
-                      >
-                        <Check size={14} />
-                        <span>{isTr ? 'Mevcut Planınız (Yönet)' : 'Active Plan (Manage)'}</span>
-                      </button>
+                      user?.cancel_at_period_end ? (
+                        <button
+                          type="button"
+                          onClick={handleResumeSubscription}
+                          className="account-plan-action-btn btn-primary-featured"
+                          title={isTr ? 'Aboneliği Sürdür' : 'Resume Subscription'}
+                        >
+                          <RotateCcw size={14} />
+                          <span>{isTr ? 'Aboneliği Sürdür' : 'Resume Plan'}</span>
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={openCustomerCenter}
+                          className="account-current-plan-pill is-manage-btn"
+                        >
+                          <Check size={14} />
+                          <span>{isTr ? 'Mevcut Planınız (Yönet)' : 'Active Plan (Manage)'}</span>
+                        </button>
+                      )
                     ) : (
                       <button
                         type="button"
@@ -1647,7 +1833,15 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
                           <td style={{ textAlign: 'right' }}>
                             <button
                               type="button"
-                              onClick={() => alert(isTr ? `Fatura (${inv.invoice_number}) hazırlanıyor...` : 'Generating PDF...')}
+                              onClick={() => setDialogModal({
+                                isOpen: true,
+                                type: 'info',
+                                badge: 'PDF',
+                                title: isTr ? 'Fatura Hazırlanıyor' : 'Generating Invoice',
+                                message: isTr ? `${inv.invoice_number} numaralı faturanız hazırlanıyor...` : `Generating PDF invoice ${inv.invoice_number}...`,
+                                confirmText: isTr ? 'Tamam' : 'OK',
+                                onConfirm: () => setDialogModal(prev => ({ ...prev, isOpen: false }))
+                              })}
                               className="invoice-download-btn"
                               title={isTr ? 'Fatura PDF İndir' : 'Download Invoice'}
                             >
@@ -1671,6 +1865,190 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
           </div>
         )}
       </div>
+
+      {/* Downgrade Confirmation Modal */}
+      {isDowngradeModalOpen && typeof document !== 'undefined' && createPortal(
+        <div 
+          className="account-dialog-backdrop"
+          onClick={() => setIsDowngradeModalOpen(false)}
+          role="dialog"
+          aria-modal="true"
+        >
+          <div 
+            className="account-dialog-card"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              type="button"
+              className="account-dialog-close-btn"
+              onClick={() => setIsDowngradeModalOpen(false)}
+              aria-label="Close"
+            >
+              <X size={16} />
+            </button>
+
+            <div className="account-dialog-icon-wrap type-warning">
+              <Calendar size={26} />
+            </div>
+
+            <div className="account-dialog-badge badge-amber">
+              <span>{isTr ? 'Plan Değişikliği' : 'Subscription Update'}</span>
+            </div>
+
+            <h3 className="account-dialog-title">
+              {isTr ? 'Ücretsiz Plana Geçiş (Downgrade)' : 'Downgrade to Free Plan'}
+            </h3>
+
+            <p className="account-dialog-desc">
+              {isTr 
+                ? 'Aboneliğinizi ücretsiz plana düşürmek üzeresiniz. Mevcut ödeme döneminiz korunacaktır.'
+                : 'You are about to downgrade to the free plan. Your active paid period will be preserved.'}
+            </p>
+
+            {/* Highlighted Period End Box */}
+            <div className="account-dialog-period-box">
+              <div className="account-dialog-period-headline">
+                <Clock size={17} />
+                <span>
+                  {isTr 
+                    ? `Pro Üyeliğiniz ${formattedPeriodEndDate} Tarihine Kadar Devam Edecektir`
+                    : `Your Pro Membership Will Continue Until ${formattedPeriodEndDate}`}
+                </span>
+              </div>
+
+              <div className="account-dialog-period-list">
+                <div className="account-dialog-period-row">
+                  <span className="row-label">
+                    <Calendar size={13} />
+                    <span>{isTr ? 'Geçerlilik Bitiş Tarihi:' : 'Access Valid Until:'}</span>
+                  </span>
+                  <span className="row-value val-highlight">{formattedPeriodEndDate}</span>
+                </div>
+                <div className="account-dialog-period-row">
+                  <span className="row-label">
+                    <CreditCard size={13} />
+                    <span>{isTr ? 'Otomatik Yenileme:' : 'Auto-Renewal:'}</span>
+                  </span>
+                  <span className="row-value">{isTr ? 'Durdurulacak ($0.00)' : 'Cancelled ($0.00)'}</span>
+                </div>
+                <div className="account-dialog-period-row">
+                  <span className="row-label">
+                    <ShieldCheck size={13} />
+                    <span>{isTr ? 'Sonraki Plan:' : 'Future Plan:'}</span>
+                  </span>
+                  <span className="row-value">{isTr ? 'Forever Free (Ücretsiz)' : 'Forever Free'}</span>
+                </div>
+              </div>
+            </div>
+
+            <ul className="account-dialog-perks">
+              <li className="account-dialog-perk-item">
+                <div className="account-dialog-perk-icon"><Check size={11} /></div>
+                <span><strong>{formattedPeriodEndDate}</strong> {isTr ? 'tarihine kadar tüm Pro ayrıcalıklarınız ve token limitleriniz kesintisiz aktiftir.' : 'until this date, all Pro features and quotas remain fully active.'}</span>
+              </li>
+              <li className="account-dialog-perk-item">
+                <div className="account-dialog-perk-icon"><Check size={11} /></div>
+                <span>{isTr ? 'Belirtilen tarihe kadar kartınızdan herhangi bir ek yenileme ücreti çekilmeyecektir.' : 'No recurring renewal charges will be made to your payment method.'}</span>
+              </li>
+              <li className="account-dialog-perk-item">
+                <div className="account-dialog-perk-icon"><Check size={11} /></div>
+                <span>{isTr ? 'Dönem sonunda hesabınız otomatik olarak ücretsiz plana geçecektir.' : 'At period end, your account will smoothly switch to the Free plan.'}</span>
+              </li>
+            </ul>
+
+            <div className="account-dialog-actions">
+              <button
+                type="button"
+                onClick={() => setIsDowngradeModalOpen(false)}
+                className="account-dialog-btn btn-cancel"
+              >
+                {isTr ? "Vazgeç (Pro'da Kal)" : 'Keep Pro Plan'}
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmDowngrade}
+                disabled={upgradingPlan === 'free'}
+                className="account-dialog-btn btn-confirm-warning"
+              >
+                {upgradingPlan === 'free' ? <Loader2 size={15} className="auth-spinner" /> : (isTr ? "Downgrade'i Onayla" : 'Confirm Downgrade')}
+              </button>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {/* Custom Universal Alert / Confirm Modal */}
+      {dialogModal.isOpen && typeof document !== 'undefined' && createPortal(
+        <div 
+          className="account-dialog-backdrop"
+          onClick={() => setDialogModal(prev => ({ ...prev, isOpen: false }))}
+          role="dialog"
+          aria-modal="true"
+        >
+          <div 
+            className="account-dialog-card"
+            style={{ maxWidth: 460 }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              type="button"
+              className="account-dialog-close-btn"
+              onClick={() => setDialogModal(prev => ({ ...prev, isOpen: false }))}
+              aria-label="Close"
+            >
+              <X size={16} />
+            </button>
+
+            <div className={`account-dialog-icon-wrap type-${dialogModal.type || 'info'}`}>
+              {dialogModal.type === 'success' ? <CheckCircle2 size={26} /> :
+               dialogModal.type === 'danger' ? <AlertCircle size={26} /> :
+               dialogModal.type === 'warning' ? <AlertTriangle size={26} /> :
+               <ShieldCheck size={26} />}
+            </div>
+
+            {dialogModal.badge && (
+              <div className={`account-dialog-badge badge-${dialogModal.type === 'warning' ? 'amber' : 'cyan'}`}>
+                <span>{dialogModal.badge}</span>
+              </div>
+            )}
+
+            <h3 className="account-dialog-title">
+              {dialogModal.title}
+            </h3>
+
+            <p className="account-dialog-desc">
+              {dialogModal.message}
+            </p>
+
+            <div className="account-dialog-actions">
+              {dialogModal.cancelText && (
+                <button
+                  type="button"
+                  onClick={() => setDialogModal(prev => ({ ...prev, isOpen: false }))}
+                  className="account-dialog-btn btn-cancel"
+                >
+                  {dialogModal.cancelText}
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={() => {
+                  if (typeof dialogModal.onConfirm === 'function') {
+                    dialogModal.onConfirm();
+                  } else {
+                    setDialogModal(prev => ({ ...prev, isOpen: false }));
+                  }
+                }}
+                className={`account-dialog-btn btn-confirm-${dialogModal.type === 'warning' ? 'warning' : dialogModal.type === 'danger' ? 'danger' : 'primary'}`}
+              >
+                {dialogModal.confirmText || (isTr ? 'Tamam' : 'OK')}
+              </button>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
     </div>
   );
 }
