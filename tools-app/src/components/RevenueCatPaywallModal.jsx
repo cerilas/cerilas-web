@@ -522,8 +522,8 @@ export default function RevenueCatPaywallModal({
                 <CheckCircle2 size={16} color="#10b981" />
                 <span className="rc-active-pro-banner-text">
                   {isTr 
-                    ? 'Aktif cerilas_tools_pro aboneliğiniz bulunmaktadır.' 
-                    : 'Active subscription detected.'}
+                    ? 'Zaten aktif bir aboneliğiniz bulunmaktadır.' 
+                    : 'You already have a subscription.'}
                 </span>
               </div>
               <button 
