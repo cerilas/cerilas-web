@@ -254,6 +254,8 @@ export function RevenueCatProvider({ children }) {
     }
   }, [isAuthenticated, user?.id, user?.plan, effectivePlan, manualPlanOverride]);
 
+  const managementUrl = customerInfo?.managementURL || null;
+
   const cancelUrl = useMemo(() => {
     return managementUrl ? managementUrl.replace('action=overview', 'action=cancel') : null;
   }, [managementUrl]);
