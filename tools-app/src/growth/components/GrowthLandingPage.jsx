@@ -1013,11 +1013,13 @@ export default function GrowthLandingPage({ onBackToTools, initialDomain = '' })
           <div className="cl-communities-grid">
             {/* 1. Product Hunt */}
             <div className="cl-community-card" title="Product Hunt">
-              <div className="cl-community-icon-box">
-                <svg viewBox="0 0 24 24" width="24" height="24" fill="none">
-                  <rect width="24" height="24" rx="12" fill="#DA552F" />
-                  <path d="M13.5 10.2H10.5V7.5H13.5C14.25 7.5 14.85 8.1 14.85 8.85C14.85 9.6 14.25 10.2 13.5 10.2ZM13.5 6H9V18H10.5V11.7H13.5C15.07 11.7 16.35 10.42 16.35 8.85C16.35 7.28 15.07 6 13.5 6Z" fill="white" />
-                </svg>
+              <div className="cl-community-logo-box">
+                <img 
+                  src="/platform-logos/phunt.png" 
+                  alt="Product Hunt" 
+                  className="cl-community-logo-img"
+                  loading="lazy"
+                />
               </div>
               <div className="cl-community-meta">
                 <span className="cl-community-name">Product Hunt</span>
@@ -1027,39 +1029,45 @@ export default function GrowthLandingPage({ onBackToTools, initialDomain = '' })
 
             {/* 2. F6S */}
             <div className="cl-community-card" title="F6S Network">
-              <div className="cl-community-icon-box">
-                <svg viewBox="0 0 24 24" width="24" height="24" fill="none">
-                  <rect width="24" height="24" rx="6" fill="#D32F2F" />
-                  <text x="12" y="16.5" fontFamily="system-ui, -apple-system, sans-serif" fontSize="10" fontWeight="900" fill="white" textAnchor="middle" letterSpacing="-0.5">F6S</text>
-                </svg>
+              <div className="cl-community-logo-box">
+                <img 
+                  src="/platform-logos/f6s-badge.png" 
+                  alt="F6S Top AI Companies" 
+                  className="cl-community-logo-img"
+                  loading="lazy"
+                />
               </div>
               <div className="cl-community-meta">
                 <span className="cl-community-name">F6S</span>
-                <span className="cl-community-role">Top Tech Network</span>
+                <span className="cl-community-role">Top AI Company 2026</span>
               </div>
             </div>
 
-            {/* 3. BetaList */}
-            <div className="cl-community-card" title="BetaList">
-              <div className="cl-community-icon-box">
-                <svg viewBox="0 0 24 24" width="24" height="24" fill="none">
-                  <rect width="24" height="24" rx="6" fill="#1A73E8" />
-                  <path d="M8 6h5a3 3 0 0 1 2.4 4.8A3.2 3.2 0 0 1 14 18H8V6zm2.2 2v3.2h2.5a1.6 1.6 0 0 0 0-3.2h-2.5zm0 5.2V16h3a1.8 1.8 0 0 0 0-3.6h-3z" fill="white" />
-                </svg>
+            {/* 3. Crunchbase */}
+            <div className="cl-community-card" title="Crunchbase">
+              <div className="cl-community-logo-box">
+                <img 
+                  src="/platform-logos/crunchbase.svg" 
+                  alt="Crunchbase" 
+                  className="cl-community-logo-img"
+                  loading="lazy"
+                />
               </div>
               <div className="cl-community-meta">
-                <span className="cl-community-name">BetaList</span>
-                <span className="cl-community-role">Early Adopter Hub</span>
+                <span className="cl-community-name">Crunchbase</span>
+                <span className="cl-community-role">Verified Profile</span>
               </div>
             </div>
 
             {/* 4. Indie Hackers */}
             <div className="cl-community-card" title="Indie Hackers">
-              <div className="cl-community-icon-box">
-                <svg viewBox="0 0 24 24" width="24" height="24" fill="none">
-                  <rect width="24" height="24" rx="6" fill="#0E2439" />
-                  <path d="M7 7h2.2v10H7V7zm7.8 0H17v10h-2.2V7zm-4.8 4.2h2.8v1.6H10v-1.6z" fill="#0080FF" />
-                </svg>
+              <div className="cl-community-logo-box">
+                <img 
+                  src="/platform-logos/indiehackers.png" 
+                  alt="Indie Hackers" 
+                  className="cl-community-logo-img"
+                  loading="lazy"
+                />
               </div>
               <div className="cl-community-meta">
                 <span className="cl-community-name">Indie Hackers</span>
@@ -1069,11 +1077,13 @@ export default function GrowthLandingPage({ onBackToTools, initialDomain = '' })
 
             {/* 5. G2 */}
             <div className="cl-community-card" title="G2">
-              <div className="cl-community-icon-box">
-                <svg viewBox="0 0 24 24" width="24" height="24" fill="none">
-                  <rect width="24" height="24" rx="6" fill="#FF492C" />
-                  <path d="M12.5 11.5h3.2v3.6c-0.9 0.9-2.2 1.4-3.5 1.4-2.8 0-4.7-2-4.7-4.5s1.9-4.5 4.7-4.5c1.3 0 2.4 0.5 3.2 1.3l-1.4 1.4c-0.5-0.5-1.1-0.8-1.8-0.8-1.7 0-2.8 1.2-2.8 2.6s1.1 2.6 2.8 2.6c0.8 0 1.5-0.3 2-0.7v-0.9H12.5v-1.5z" fill="white" />
-                </svg>
+              <div className="cl-community-logo-box">
+                <img 
+                  src="/platform-logos/g2.png" 
+                  alt="G2 Verified Software" 
+                  className="cl-community-logo-img"
+                  loading="lazy"
+                />
               </div>
               <div className="cl-community-meta">
                 <span className="cl-community-name">G2</span>
@@ -1081,31 +1091,35 @@ export default function GrowthLandingPage({ onBackToTools, initialDomain = '' })
               </div>
             </div>
 
-            {/* 6. Y Combinator */}
-            <div className="cl-community-card" title="Y Combinator Startup School">
-              <div className="cl-community-icon-box">
-                <svg viewBox="0 0 24 24" width="24" height="24" fill="none">
-                  <rect width="24" height="24" rx="5" fill="#FF6600" />
-                  <path d="M7.5 7L11 13V17H13V13L16.5 7H14.2L12 11.2L9.8 7H7.5Z" fill="white" />
-                </svg>
-              </div>
-              <div className="cl-community-meta">
-                <span className="cl-community-name">Y Combinator</span>
-                <span className="cl-community-role">Startup Community</span>
-              </div>
-            </div>
-
-            {/* 7. Trustpilot */}
+            {/* 6. Trustpilot */}
             <div className="cl-community-card" title="Trustpilot">
-              <div className="cl-community-icon-box">
-                <svg viewBox="0 0 24 24" width="24" height="24" fill="none">
-                  <rect width="24" height="24" rx="6" fill="#00B67A" />
-                  <path d="M12 5.5l1.8 3.8 4.2.6-3 3 .7 4.1-3.7-2-3.7 2 .7-4.1-3-3 4.2-.6z" fill="white" />
-                </svg>
+              <div className="cl-community-logo-box">
+                <img 
+                  src="/platform-logos/tpilot.png" 
+                  alt="Trustpilot 5 Stars" 
+                  className="cl-community-logo-img"
+                  loading="lazy"
+                />
               </div>
               <div className="cl-community-meta">
                 <span className="cl-community-name">Trustpilot</span>
-                <span className="cl-community-role">Verified Reviews</span>
+                <span className="cl-community-role">5-Star Community</span>
+              </div>
+            </div>
+
+            {/* 7. Gumroad */}
+            <div className="cl-community-card" title="Gumroad">
+              <div className="cl-community-logo-box">
+                <img 
+                  src="/platform-logos/gumroad-inc-logo-vector-2023.png" 
+                  alt="Gumroad" 
+                  className="cl-community-logo-img"
+                  loading="lazy"
+                />
+              </div>
+              <div className="cl-community-meta">
+                <span className="cl-community-name">Gumroad</span>
+                <span className="cl-community-role">Creator Ecosystem</span>
               </div>
             </div>
           </div>

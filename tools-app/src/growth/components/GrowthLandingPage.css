@@ -2094,14 +2094,35 @@
   box-shadow: 0 12px 28px -8px rgba(0, 0, 0, 0.16);
 }
 
-.cl-community-icon-box {
-  width: 34px;
-  height: 34px;
+.cl-community-logo-box {
+  height: 38px;
+  min-width: 48px;
+  max-width: 90px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 8px;
+  border-radius: 9px;
+  background: #ffffff;
+  padding: 4px 8px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
   flex-shrink: 0;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.dark .cl-community-logo-box,
+[data-theme='dark'] .cl-community-logo-box {
+  background: #ffffff;
+  border-color: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.45);
+}
+
+.cl-community-logo-img {
+  max-height: 24px;
+  max-width: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  display: block;
 }
 
 .cl-community-meta {
@@ -2315,13 +2336,15 @@
     min-width: 130px;
     box-sizing: border-box;
   }
-  .cl-community-icon-box {
-    width: 28px;
-    height: 28px;
+  .cl-community-logo-box {
+    height: 32px;
+    min-width: 42px;
+    max-width: 76px;
+    padding: 3px 6px;
+    border-radius: 7px;
   }
-  .cl-community-icon-box svg {
-    width: 20px;
-    height: 20px;
+  .cl-community-logo-img {
+    max-height: 20px;
   }
 }
 
