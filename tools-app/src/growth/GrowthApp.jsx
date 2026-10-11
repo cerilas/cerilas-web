@@ -44,6 +44,13 @@ function GrowthInner({ onBackToTools }) {
 
     const handleHash = () => {
       const hash = window.location.hash;
+      if (hash === '#/growth' || hash === '#/growth/') {
+        if (activeWorkspace?.slug) {
+          setActiveTab('overview');
+          window.location.hash = `#/growth/${activeWorkspace.slug}/overview`;
+        }
+        return;
+      }
       const match = hash.match(/^#\/growth\/([a-zA-Z0-9_-]+)(?:\/([a-zA-Z0-9_-]+))?/);
       if (match) {
         const target = match[2] || match[1];
@@ -63,7 +70,25 @@ function GrowthInner({ onBackToTools }) {
     handleHash();
     window.addEventListener('hashchange', handleHash);
     return () => window.removeEventListener('hashchange', handleHash);
-  }, [setActiveTab]);
+  }, [setActiveTab, activeWorkspace]);
+
+  // Handle post-login redirection to Growth Dashboard / Onboarding
+  useEffect(() => {
+    if (isAuthenticated) {
+      const postAction = sessionStorage.getItem('cerilas_post_login_action');
+      if (postAction === 'growth_dashboard') {
+        sessionStorage.removeItem('cerilas_post_login_action');
+        if (activeWorkspace || (workspaces && workspaces.length > 0)) {
+          const ws = activeWorkspace || workspaces[0];
+          switchWorkspace(ws, 'overview');
+          setActiveTab('overview');
+          window.location.hash = ws.slug ? `#/growth/${ws.slug}/overview` : '#/growth/overview';
+        } else if (!loading) {
+          setIsOnboardingOpen(true);
+        }
+      }
+    }
+  }, [isAuthenticated, activeWorkspace, workspaces, loading, switchWorkspace, setActiveTab, setIsOnboardingOpen]);
 
   // Auto-provision pending scan if user just authenticated with a pending scan from landing
   useEffect(() => {

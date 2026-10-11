@@ -55,7 +55,8 @@ export default function GrowthOnboardingModal({ isOpen, onClose }) {
     switchWorkspace,
     canAddWorkspace,
     promptPaywall,
-    plan
+    plan,
+    setActiveTab
   } = useGrowth();
 
   const [step, setStep] = useState(1); // 1: URL input, 2: Scanning, 3: Review & Launch
@@ -287,11 +288,20 @@ export default function GrowthOnboardingModal({ isOpen, onClose }) {
       }
 
       const created = data.data?.workspace || data.data;
-      if (created?.slug) {
-        await refreshWorkspaces(created.slug);
-        switchWorkspace(created);
+      if (created) {
+        await refreshWorkspaces(created.slug || created.id);
+        if (typeof switchWorkspace === 'function') {
+          switchWorkspace(created, 'overview');
+        }
+        if (typeof setActiveTab === 'function') {
+          setActiveTab('overview');
+        }
+        window.location.hash = created.slug ? `#/growth/${created.slug}/overview` : '#/growth/overview';
       } else {
         await refreshWorkspaces();
+        if (typeof setActiveTab === 'function') {
+          setActiveTab('overview');
+        }
       }
       handleClose();
     } catch (err) {

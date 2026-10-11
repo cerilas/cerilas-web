@@ -49,7 +49,6 @@ import { useGrowth } from '../GrowthContext';
 import { useTheme } from '../../context/ThemeContext';
 import { useRevenueCat } from '../../context/RevenueCatContext';
 import CloudCanvas from './CloudCanvas';
-import GrowthOnboardingModal from './GrowthOnboardingModal';
 import './GrowthLandingPage.css';
 
 const QUICK_TEST_DOMAINS = [
@@ -285,22 +284,25 @@ export default function GrowthLandingPage({ onBackToTools, initialDomain = '' })
 
   // Dashboard button handler in navbar
   const handleGoToDashboard = useCallback(() => {
+    // 1. If not authenticated, prompt login and set flag to redirect to Growth Dashboard post-login
     if (!isAuthenticated) {
-      openAuthModal('login');
+      sessionStorage.setItem('cerilas_post_login_action', 'growth_dashboard');
+      openAuthModal('login', 'growth');
       return;
     }
-    if (activeWorkspace?.slug) {
+
+    // 2. If authenticated and has active workspace or any workspace, switch to overview
+    const ws = activeWorkspace || (workspaces && workspaces.length > 0 ? workspaces[0] : null);
+    if (ws) {
+      if (typeof switchWorkspace === 'function') {
+        switchWorkspace(ws, 'overview');
+      }
       setActiveTab('overview');
-      window.location.hash = `#/growth/${activeWorkspace.slug}/overview`;
+      window.location.hash = ws.slug ? `#/growth/${ws.slug}/overview` : '#/growth/overview';
       return;
     }
-    if (workspaces && workspaces.length > 0) {
-      const target = workspaces[0];
-      switchWorkspace(target);
-      setActiveTab('overview');
-      window.location.hash = target.slug ? `#/growth/${target.slug}/overview` : '#/growth/overview';
-      return;
-    }
+
+    // 3. If authenticated but has NO website/workspace, prompt user to add their first site
     setIsOnboardingOpen(true);
   }, [isAuthenticated, activeWorkspace, workspaces, setActiveTab, switchWorkspace, setIsOnboardingOpen, openAuthModal]);
 
@@ -557,7 +559,10 @@ export default function GrowthLandingPage({ onBackToTools, initialDomain = '' })
                 <>
                   <button
                     type="button"
-                    onClick={() => openAuthModal('login')}
+                    onClick={() => {
+                      sessionStorage.setItem('cerilas_post_login_action', 'growth_dashboard');
+                      openAuthModal('login', 'growth');
+                    }}
                     className="cl-btn-secondary max-sm:hidden"
                   >
                     Sign in
@@ -600,7 +605,8 @@ export default function GrowthLandingPage({ onBackToTools, initialDomain = '' })
                     type="button"
                     onClick={() => {
                       setMobileMenuOpen(false);
-                      openAuthModal('login');
+                      sessionStorage.setItem('cerilas_post_login_action', 'growth_dashboard');
+                      openAuthModal('login', 'growth');
                     }}
                     className="cl-btn-secondary"
                     style={{ justifyContent: 'flex-start', paddingLeft: 0 }}
@@ -2065,11 +2071,6 @@ export default function GrowthLandingPage({ onBackToTools, initialDomain = '' })
         </div>
       </footer>
 
-      {/* Onboarding Wizard Modal if triggered from landing */}
-      <GrowthOnboardingModal
-        isOpen={isOnboardingOpen}
-        onClose={() => setIsOnboardingOpen(false)}
-      />
     </div>
   );
 }

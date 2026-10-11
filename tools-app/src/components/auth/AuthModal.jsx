@@ -73,6 +73,10 @@ export default function AuthModal() {
     setGoogleLoading(true);
     try {
       await initiateGoogleAuth({ mode: 'signin' });
+      if (authRedirectTab === 'growth' || window.location.hash.startsWith('#/growth') || window.location.pathname.startsWith('/growth')) {
+        closeAuthModal();
+        return;
+      }
       if (authRedirectTab) {
         window.location.hash = `#/account?tab=${authRedirectTab}`;
       } else {
@@ -114,7 +118,11 @@ export default function AuthModal() {
         });
       }
 
-      // If user came from a specific tab request (e.g. #/account?tab=billing), route them there
+      // If user came from Growth, keep them on the Growth tool
+      if (authRedirectTab === 'growth' || window.location.hash.startsWith('#/growth') || window.location.pathname.startsWith('/growth')) {
+        closeAuthModal();
+        return;
+      }
       if (authRedirectTab) {
         window.location.hash = `#/account?tab=${authRedirectTab}`;
       } else {

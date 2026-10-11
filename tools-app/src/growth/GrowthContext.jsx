@@ -140,7 +140,7 @@ export function GrowthProvider({ children }) {
   }, [activeWorkspace?.id, fetchLimitsSummary, plan]);
 
   // Switch workspace
-  const switchWorkspace = (workspaceOrSlug) => {
+  const switchWorkspace = (workspaceOrSlug, targetTab = null) => {
     let ws = null;
     if (typeof workspaceOrSlug === 'string') {
       ws = workspaces.find(w => w.slug === workspaceOrSlug || String(w.id) === workspaceOrSlug);
@@ -153,7 +153,9 @@ export function GrowthProvider({ children }) {
       try {
         localStorage.setItem('cerilas_growth_active_workspace', ws.slug);
       } catch (e) {}
-      window.location.hash = `#/growth/${ws.slug}/${activeTab}`;
+      const destTab = targetTab || (activeTab === 'landing' ? 'overview' : activeTab);
+      setActiveTab(destTab);
+      window.location.hash = `#/growth/${ws.slug || ws.id}/${destTab}`;
     }
   };
 
