@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
-import { useAuth } from '../context/AuthContext';
+import { useAuth, getStoredToken } from '../context/AuthContext';
 import { useRevenueCat } from '../context/RevenueCatContext';
 import { getClientPlanLimits, GROWTH_PLAN_CONFIG } from './utils/growthPlanConfig';
 
@@ -18,6 +18,7 @@ export function GrowthProvider({ children }) {
   const [activeWorkspace, setActiveWorkspace] = useState(null);
   const [activeTab, setActiveTab] = useState('overview');
   const [loading, setLoading] = useState(true);
+  const [hasLoadedWorkspaces, setHasLoadedWorkspaces] = useState(false);
   const [isOnboardingOpen, setIsOnboardingOpen] = useState(false);
   const [error, setError] = useState('');
 
@@ -27,18 +28,18 @@ export function GrowthProvider({ children }) {
 
   // Compute effective user plan ('free' | 'pro' | 'unlimited')
   const plan = useMemo(() => {
-    // 1. RevenueCat derived plan
-    if (rcEffectivePlan) return rcEffectivePlan;
-    if (isRcUnlimited) return 'unlimited';
-    if (isRcPro) return 'pro';
-
-    // 2. Database user object
+    // 1. Database user object (source of truth for web)
     const userPlan = (user?.plan || '').toLowerCase();
     if (userPlan === 'unlimited' || userPlan === 'enterprise') return 'unlimited';
     if (userPlan === 'pro') return 'pro';
 
+    // 2. RevenueCat – only trust if it's a paid tier
+    if (rcEffectivePlan === 'unlimited' || isRcUnlimited) return 'unlimited';
+    if (rcEffectivePlan === 'pro' || isRcPro) return 'pro';
+
     return 'free';
   }, [rcEffectivePlan, isRcUnlimited, isRcPro, user?.plan]);
+
 
   const planLimits = useMemo(() => {
     return getClientPlanLimits(plan);
@@ -56,10 +57,12 @@ export function GrowthProvider({ children }) {
 
   // Fetch workspaces for current user
   const fetchWorkspaces = useCallback(async (preferSlug = null) => {
-    if (!token) {
+    const activeToken = token || getStoredToken();
+    if (!activeToken) {
       setWorkspaces([]);
       setActiveWorkspace(null);
       setLoading(false);
+      setHasLoadedWorkspaces(false);
       return [];
     }
 
@@ -67,7 +70,7 @@ export function GrowthProvider({ children }) {
     setError('');
     try {
       const res = await fetch('/api/growth/workspaces', {
-        headers: { 'Authorization': `Bearer ${token}` }
+        headers: { 'Authorization': `Bearer ${activeToken}` }
       });
       const data = await res.json();
 
@@ -105,6 +108,7 @@ export function GrowthProvider({ children }) {
       return [];
     } finally {
       setLoading(false);
+      setHasLoadedWorkspaces(true);
     }
   }, [token]);
 
@@ -176,6 +180,7 @@ export function GrowthProvider({ children }) {
     activeWorkspace,
     activeTab,
     loading,
+    hasLoadedWorkspaces,
     error,
     isOnboardingOpen,
     plan,

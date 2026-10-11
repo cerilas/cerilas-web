@@ -26,6 +26,7 @@ function GrowthInner({ onBackToTools }) {
     activeTab, 
     setActiveTab, 
     loading: growthLoading, 
+    hasLoadedWorkspaces,
     isOnboardingOpen, 
     setIsOnboardingOpen,
     workspaces,
@@ -81,16 +82,27 @@ function GrowthInner({ onBackToTools }) {
     }
   }, [activeTab, setActiveTab]);
 
-  // Automatically prompt to add website if authenticated user has no website yet
+  // If user already has any workspace/website, NEVER show onboarding modal
   useEffect(() => {
-    if (isAuthenticated && !growthLoading && (!workspaces || workspaces.length === 0)) {
-      setIsOnboardingOpen(true);
+    if (activeWorkspace || (workspaces && workspaces.length > 0)) {
+      setIsOnboardingOpen(false);
     }
-  }, [isAuthenticated, growthLoading, workspaces?.length, setIsOnboardingOpen]);
+  }, [activeWorkspace, workspaces?.length, setIsOnboardingOpen]);
+
+  // Prompt to add website ONLY if authenticated, fully loaded, and definitely has ZERO websites
+  useEffect(() => {
+    if (isAuthenticated && !authLoading && !growthLoading && hasLoadedWorkspaces) {
+      if (!activeWorkspace && (!workspaces || workspaces.length === 0)) {
+        setIsOnboardingOpen(true);
+      } else {
+        setIsOnboardingOpen(false);
+      }
+    }
+  }, [isAuthenticated, authLoading, growthLoading, hasLoadedWorkspaces, activeWorkspace, workspaces?.length, setIsOnboardingOpen]);
 
   // Handle post-login redirection to Growth Dashboard / Onboarding
   useEffect(() => {
-    if (isAuthenticated && !growthLoading) {
+    if (isAuthenticated && !growthLoading && hasLoadedWorkspaces) {
       const postAction = sessionStorage.getItem('cerilas_post_login_action');
       if (postAction === 'growth_dashboard') {
         sessionStorage.removeItem('cerilas_post_login_action');
@@ -99,12 +111,13 @@ function GrowthInner({ onBackToTools }) {
           switchWorkspace(ws, 'overview');
           setActiveTab('overview');
           window.location.hash = ws.slug ? `#/growth/${ws.slug}/overview` : '#/growth/overview';
+          setIsOnboardingOpen(false);
         } else {
           setIsOnboardingOpen(true);
         }
       }
     }
-  }, [isAuthenticated, growthLoading, activeWorkspace, workspaces, switchWorkspace, setActiveTab, setIsOnboardingOpen]);
+  }, [isAuthenticated, growthLoading, hasLoadedWorkspaces, activeWorkspace, workspaces, switchWorkspace, setActiveTab, setIsOnboardingOpen]);
 
   // Auto-provision pending scan if user just authenticated with a pending scan from landing
   useEffect(() => {
@@ -176,12 +189,12 @@ function GrowthInner({ onBackToTools }) {
   }, [activeTab, activeWorkspace]);
 
   // 1. While auth status is loading (verifying existing session token), display clean skeleton, NEVER landing
-  if (authLoading) {
+  if (authLoading && !isAuthenticated && !token) {
     return <GrowthOverviewSkeleton />;
   }
 
   // 2. If user is NOT signed in, show the premier landing page with instant domain audit
-  if (!isAuthenticated) {
+  if (!isAuthenticated && !token) {
     return (
       <>
         <GrowthLandingPage onBackToTools={onBackToTools} />

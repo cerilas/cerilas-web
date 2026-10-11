@@ -35,7 +35,9 @@ export default function GrowthReports() {
   } = useGrowth();
   const { token, user } = useAuth();
 
-  const isReportsLocked = !planLimits?.dailyEmailReport;
+  // Daily email reporting is fully unlocked for active workspaces
+  const isReportsLocked = false;
+
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);

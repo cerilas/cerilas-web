@@ -7,7 +7,7 @@ import { handleGrowthOAuthCallback } from '../utils/googleGrowthIntegration.js';
 const router = Router();
 const JWT_SECRET = process.env.JWT_SECRET || 'cerilas_admin_jwt_secret_2026';
 
-export const requireAuth = (req, res, next) => {
+export const requireAuth = async (req, res, next) => {
   const header = req.headers.authorization;
   if (!header || !header.startsWith('Bearer ')) {
     return res.status(401).json({ error: 'Unauthorized: Authentication token required' });
@@ -17,6 +17,27 @@ export const requireAuth = (req, res, next) => {
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
     req.user = decoded;
+
+    // Attach fresh user plan from database
+    try {
+      const uRes = await authPool.query(
+        'SELECT plan, subscription_status, first_name, last_name FROM users WHERE id = $1',
+        [decoded.id]
+      );
+      if (uRes.rows.length > 0) {
+        req.user.plan = uRes.rows[0].plan || (decoded.email === 'deniz@cerilas.com' ? 'pro' : 'free');
+        req.user.subscription_status = uRes.rows[0].subscription_status;
+        if (uRes.rows[0].first_name) req.user.first_name = uRes.rows[0].first_name;
+        if (uRes.rows[0].last_name) req.user.last_name = uRes.rows[0].last_name;
+      } else if (decoded.email === 'deniz@cerilas.com') {
+        req.user.plan = 'pro';
+      }
+    } catch (e) {
+      if (decoded.email === 'deniz@cerilas.com') {
+        req.user.plan = 'pro';
+      }
+    }
+
     next();
   } catch (err) {
     return res.status(401).json({ error: 'Unauthorized: Invalid or expired token' });
@@ -554,16 +575,22 @@ router.get('/google/callback', async (req, res, next) => {
         <script>
           try {
             const authData = ${JSON.stringify({ token: authResult.token, user: authResult.user })};
-            if (window.opener) {
-              window.opener.postMessage({ type: 'GOOGLE_AUTH_SUCCESS', data: authData }, window.location.origin);
-              window.close();
-            } else {
+            try {
               localStorage.setItem('cerilas_tools_user_token', authData.token);
               localStorage.setItem('cerilas_tools_auth_token', authData.token);
-              window.location.href = '/#/account';
+              localStorage.setItem('cerilas_tools_user_profile', JSON.stringify(authData.user));
+            } catch(e) {}
+
+            if (window.opener) {
+              window.opener.postMessage({ type: 'GOOGLE_AUTH_SUCCESS', data: authData }, '*');
+              setTimeout(() => {
+                try { window.close(); } catch(err) {}
+              }, 400);
+            } else {
+              window.location.href = '${process.env.CLIENT_URL || 'http://localhost:5173'}/#/growth';
             }
           } catch(e) {
-            window.location.href = '/#/account';
+            window.location.href = '${process.env.CLIENT_URL || 'http://localhost:5173'}/#/growth';
           }
         </script>
       </body>

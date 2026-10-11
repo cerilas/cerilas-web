@@ -342,6 +342,7 @@ export default function GrowthLandingPage({ onBackToTools, initialDomain = '' })
       if (typeof switchWorkspace === 'function') {
         switchWorkspace(ws, 'overview');
       }
+      setIsOnboardingOpen(false);
       setActiveTab('overview');
       window.location.hash = ws.slug ? `#/growth/${ws.slug}/overview` : '#/growth/overview';
       return;
