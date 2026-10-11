@@ -94,6 +94,51 @@ const FORMATS_TILES = [
   { ext: 'GA4 Sync', label: 'Organic Traffic Impact', icon: BarChart3, tint: 'cl-tint-peach' }
 ];
 
+const COMMUNITIES_LOGOS = [
+  {
+    name: 'Product Hunt',
+    role: 'Featured Product',
+    logo: '/platform-logos/phunt.png',
+    alt: 'Product Hunt'
+  },
+  {
+    name: 'G2',
+    role: 'Verified Software',
+    logo: '/platform-logos/g2.png',
+    alt: 'G2 Verified Software'
+  },
+  {
+    name: 'Trustpilot',
+    role: '5-Star Reviews',
+    logo: '/platform-logos/tpilot.png',
+    alt: 'Trustpilot'
+  },
+  {
+    name: 'Crunchbase',
+    role: 'Verified Profile',
+    logo: '/platform-logos/crunchbase.svg',
+    alt: 'Crunchbase'
+  },
+  {
+    name: 'Indie Hackers',
+    role: 'Founder Community',
+    logo: '/platform-logos/indiehackers.png',
+    alt: 'Indie Hackers'
+  },
+  {
+    name: 'F6S Network',
+    role: 'Top AI Company 2026',
+    logo: '/platform-logos/f6s-badge.png',
+    alt: 'F6S Top AI Companies'
+  },
+  {
+    name: 'Gumroad',
+    role: 'Creator Ecosystem',
+    logo: '/platform-logos/gumroad-inc-logo-vector-2023.png',
+    alt: 'Gumroad'
+  }
+];
+
 const TESTIMONIALS_DATA = [
   {
     quote: "We increased our ChatGPT source citations by 340% in 45 days after fixing the crawler permissions and structured Schema issues GrowthControl flagged.",
@@ -1016,117 +1061,42 @@ export default function GrowthLandingPage({ onBackToTools, initialDomain = '' })
             </p>
           </div>
 
-          <div className="cl-communities-grid">
-            {/* 1. Product Hunt */}
-            <div className="cl-community-card" title="Product Hunt">
-              <div className="cl-community-logo-box">
-                <img 
-                  src="/platform-logos/phunt.png" 
-                  alt="Product Hunt" 
-                  className="cl-community-logo-img"
-                  loading="lazy"
-                />
-              </div>
-              <div className="cl-community-meta">
-                <span className="cl-community-name">Product Hunt</span>
-                <span className="cl-community-role">Featured Product</span>
-              </div>
-            </div>
-
-            {/* 2. F6S */}
-            <div className="cl-community-card" title="F6S Network">
-              <div className="cl-community-logo-box">
-                <img 
-                  src="/platform-logos/f6s-badge.png" 
-                  alt="F6S Top AI Companies" 
-                  className="cl-community-logo-img"
-                  loading="lazy"
-                />
-              </div>
-              <div className="cl-community-meta">
-                <span className="cl-community-name">F6S</span>
-                <span className="cl-community-role">Top AI Company 2026</span>
-              </div>
-            </div>
-
-            {/* 3. Crunchbase */}
-            <div className="cl-community-card" title="Crunchbase">
-              <div className="cl-community-logo-box">
-                <img 
-                  src="/platform-logos/crunchbase.svg" 
-                  alt="Crunchbase" 
-                  className="cl-community-logo-img"
-                  loading="lazy"
-                />
-              </div>
-              <div className="cl-community-meta">
-                <span className="cl-community-name">Crunchbase</span>
-                <span className="cl-community-role">Verified Profile</span>
-              </div>
-            </div>
-
-            {/* 4. Indie Hackers */}
-            <div className="cl-community-card" title="Indie Hackers">
-              <div className="cl-community-logo-box">
-                <img 
-                  src="/platform-logos/indiehackers.png" 
-                  alt="Indie Hackers" 
-                  className="cl-community-logo-img"
-                  loading="lazy"
-                />
-              </div>
-              <div className="cl-community-meta">
-                <span className="cl-community-name">Indie Hackers</span>
-                <span className="cl-community-role">Founder Community</span>
-              </div>
-            </div>
-
-            {/* 5. G2 */}
-            <div className="cl-community-card" title="G2">
-              <div className="cl-community-logo-box">
-                <img 
-                  src="/platform-logos/g2.png" 
-                  alt="G2 Verified Software" 
-                  className="cl-community-logo-img"
-                  loading="lazy"
-                />
-              </div>
-              <div className="cl-community-meta">
-                <span className="cl-community-name">G2</span>
-                <span className="cl-community-role">Verified Software</span>
-              </div>
-            </div>
-
-            {/* 6. Trustpilot */}
-            <div className="cl-community-card" title="Trustpilot">
-              <div className="cl-community-logo-box">
-                <img 
-                  src="/platform-logos/tpilot.png" 
-                  alt="Trustpilot 5 Stars" 
-                  className="cl-community-logo-img"
-                  loading="lazy"
-                />
-              </div>
-              <div className="cl-community-meta">
-                <span className="cl-community-name">Trustpilot</span>
-                <span className="cl-community-role">5-Star Community</span>
-              </div>
-            </div>
-
-            {/* 7. Gumroad */}
-            <div className="cl-community-card" title="Gumroad">
-              <div className="cl-community-logo-box">
-                <img 
-                  src="/platform-logos/gumroad-inc-logo-vector-2023.png" 
-                  alt="Gumroad" 
-                  className="cl-community-logo-img"
-                  loading="lazy"
-                />
-              </div>
-              <div className="cl-community-meta">
-                <span className="cl-community-name">Gumroad</span>
-                <span className="cl-community-role">Creator Ecosystem</span>
-              </div>
+          <div className="cl-communities-marquee-wrapper">
+            <div className="cl-communities-marquee-track">
+              {/* First sequence */}
+              {COMMUNITIES_LOGOS.map((item, idx) => (
+                <div key={`comm-1-${idx}`} className="cl-community-card" title={item.name}>
+                  <div className="cl-community-logo-box">
+                    <img 
+                      src={item.logo} 
+                      alt={item.alt} 
+                      className="cl-community-logo-img"
+                      loading="lazy"
+                    />
+                  </div>
+                  <div className="cl-community-meta">
+                    <span className="cl-community-name">{item.name}</span>
+                    <span className="cl-community-role">{item.role}</span>
+                  </div>
+                </div>
+              ))}
+              {/* Duplicate sequence for seamless infinite loop */}
+              {COMMUNITIES_LOGOS.map((item, idx) => (
+                <div key={`comm-2-${idx}`} className="cl-community-card" title={item.name} aria-hidden="true">
+                  <div className="cl-community-logo-box">
+                    <img 
+                      src={item.logo} 
+                      alt={item.alt} 
+                      className="cl-community-logo-img"
+                      loading="lazy"
+                    />
+                  </div>
+                  <div className="cl-community-meta">
+                    <span className="cl-community-name">{item.name}</span>
+                    <span className="cl-community-role">{item.role}</span>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </div>
