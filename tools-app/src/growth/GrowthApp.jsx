@@ -15,9 +15,9 @@ import GrowthDirectories from './views/GrowthDirectories';
 import GrowthReports from './views/GrowthReports';
 import GrowthSettings from './views/GrowthSettings';
 import { useAuth } from '../context/AuthContext';
-import { Sparkles, ShieldCheck, ArrowRight, ArrowLeft, Lock, Loader2 } from 'lucide-react';
 import { GrowthOverviewSkeleton } from './components/GrowthSkeleton';
 import GrowthLandingPage from './components/GrowthLandingPage';
+import GrowthConnectWebsitePrompt from './components/GrowthConnectWebsitePrompt';
 import './GrowthApp.css';
 
 function GrowthInner({ onBackToTools }) {
@@ -25,29 +25,31 @@ function GrowthInner({ onBackToTools }) {
     activeWorkspace, 
     activeTab, 
     setActiveTab, 
-    loading, 
+    loading: growthLoading, 
     isOnboardingOpen, 
     setIsOnboardingOpen,
     workspaces,
     refreshWorkspaces,
     switchWorkspace
   } = useGrowth();
-  const { isAuthenticated, openAuthModal, token } = useAuth();
+  const { isAuthenticated, openAuthModal, token, loading: authLoading } = useAuth();
+
+  const VALID_TABS = [
+    'overview', 'action-feed', 'search', 'analytics',
+    'ai-visibility', 'google-business', 'competitors',
+    'technical', 'directories', 'reports', 'settings'
+  ];
 
   // Handle URL hash changes like #/growth/technical or #/growth/myslug/technical
   useEffect(() => {
-    const VALID_TABS = [
-      'overview', 'landing', 'action-feed', 'search', 'analytics',
-      'ai-visibility', 'google-business', 'competitors',
-      'technical', 'directories', 'reports', 'settings'
-    ];
-
     const handleHash = () => {
       const hash = window.location.hash;
-      if (hash === '#/growth' || hash === '#/growth/') {
+      if (hash === '#/growth' || hash === '#/growth/' || hash === '#/growth/landing') {
         if (activeWorkspace?.slug) {
           setActiveTab('overview');
           window.location.hash = `#/growth/${activeWorkspace.slug}/overview`;
+        } else {
+          setActiveTab('overview');
         }
         return;
       }
@@ -58,7 +60,7 @@ function GrowthInner({ onBackToTools }) {
           setActiveTab('ai-visibility');
         } else if (target === 'keywords') {
           setActiveTab('search');
-        } else if (target === 'content') {
+        } else if (target === 'content' || target === 'landing') {
           setActiveTab('overview');
         } else if (match[2] && VALID_TABS.includes(match[2])) {
           setActiveTab(match[2]);
@@ -72,9 +74,23 @@ function GrowthInner({ onBackToTools }) {
     return () => window.removeEventListener('hashchange', handleHash);
   }, [setActiveTab, activeWorkspace]);
 
+  // Ensure active tab is never 'landing' when inside the platform
+  useEffect(() => {
+    if (activeTab === 'landing' || !VALID_TABS.includes(activeTab)) {
+      setActiveTab('overview');
+    }
+  }, [activeTab, setActiveTab]);
+
+  // Automatically prompt to add website if authenticated user has no website yet
+  useEffect(() => {
+    if (isAuthenticated && !growthLoading && (!workspaces || workspaces.length === 0)) {
+      setIsOnboardingOpen(true);
+    }
+  }, [isAuthenticated, growthLoading, workspaces?.length, setIsOnboardingOpen]);
+
   // Handle post-login redirection to Growth Dashboard / Onboarding
   useEffect(() => {
-    if (isAuthenticated) {
+    if (isAuthenticated && !growthLoading) {
       const postAction = sessionStorage.getItem('cerilas_post_login_action');
       if (postAction === 'growth_dashboard') {
         sessionStorage.removeItem('cerilas_post_login_action');
@@ -83,12 +99,12 @@ function GrowthInner({ onBackToTools }) {
           switchWorkspace(ws, 'overview');
           setActiveTab('overview');
           window.location.hash = ws.slug ? `#/growth/${ws.slug}/overview` : '#/growth/overview';
-        } else if (!loading) {
+        } else {
           setIsOnboardingOpen(true);
         }
       }
     }
-  }, [isAuthenticated, activeWorkspace, workspaces, loading, switchWorkspace, setActiveTab, setIsOnboardingOpen]);
+  }, [isAuthenticated, growthLoading, activeWorkspace, workspaces, switchWorkspace, setActiveTab, setIsOnboardingOpen]);
 
   // Auto-provision pending scan if user just authenticated with a pending scan from landing
   useEffect(() => {
@@ -141,7 +157,6 @@ function GrowthInner({ onBackToTools }) {
   useEffect(() => {
     const tabTitles = {
       overview: 'Overview & Authority Score',
-      landing: 'AI Search Visibility & GEO Audit',
       'action-feed': 'Action Feed & Priorities',
       search: 'Search Performance (GSC)',
       analytics: 'Web Analytics (GA4)',
@@ -160,7 +175,12 @@ function GrowthInner({ onBackToTools }) {
     document.title = `${wsPrefix}${currentTabName} | GrowthControl – Cerilas`;
   }, [activeTab, activeWorkspace]);
 
-  // If user is not signed in, show the premier landing page with instant domain audit
+  // 1. While auth status is loading (verifying existing session token), display clean skeleton, NEVER landing
+  if (authLoading) {
+    return <GrowthOverviewSkeleton />;
+  }
+
+  // 2. If user is NOT signed in, show the premier landing page with instant domain audit
   if (!isAuthenticated) {
     return (
       <>
@@ -173,19 +193,7 @@ function GrowthInner({ onBackToTools }) {
     );
   }
 
-  // If user is signed in, but has no workspace yet and isn't loading, show the landing page so they can immediately audit & add their first domain
-  if (!loading && !activeWorkspace && (!workspaces || workspaces.length === 0)) {
-    return (
-      <>
-        <GrowthLandingPage onBackToTools={onBackToTools} />
-        <GrowthOnboardingModal
-          isOpen={isOnboardingOpen}
-          onClose={() => setIsOnboardingOpen(false)}
-        />
-      </>
-    );
-  }
-
+  // 3. Authenticated users: ALWAYS open the platform shell, NEVER the sales landing page!
   return (
     <div className="growth-app-shell">
       {/* Top Application Header with Brand Switcher */}
@@ -197,11 +205,12 @@ function GrowthInner({ onBackToTools }) {
 
         {/* Dynamic Main Workspace Content */}
         <main className="growth-main-viewport">
-          {loading && !activeWorkspace ? (
+          {growthLoading ? (
             <GrowthOverviewSkeleton />
+          ) : !activeWorkspace && (!workspaces || workspaces.length === 0) ? (
+            <GrowthConnectWebsitePrompt />
           ) : (
             <>
-              {activeTab === 'landing' && <GrowthLandingPage onBackToTools={onBackToTools} />}
               {activeTab === 'overview' && <GrowthOverview />}
               {activeTab === 'action-feed' && <GrowthActionFeed />}
               {activeTab === 'search' && <GrowthSearch />}

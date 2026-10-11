@@ -347,7 +347,9 @@ export default function GrowthLandingPage({ onBackToTools, initialDomain = '' })
       return;
     }
 
-    // 3. If authenticated but has NO website/workspace, prompt user to add their first site
+    // 3. If authenticated but has NO website/workspace, navigate directly into platform shell and prompt to add site
+    setActiveTab('overview');
+    window.location.hash = '#/growth/overview';
     setIsOnboardingOpen(true);
   }, [isAuthenticated, activeWorkspace, workspaces, setActiveTab, switchWorkspace, setIsOnboardingOpen, openAuthModal]);
 

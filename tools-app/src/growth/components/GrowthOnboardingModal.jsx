@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   X, 
   ArrowRight, 
@@ -95,6 +95,18 @@ export default function GrowthOnboardingModal({ isOpen, onClose }) {
     setScanResult(null);
     onClose();
   };
+
+  useEffect(() => {
+    if (isOpen) {
+      try {
+        const stored = sessionStorage.getItem('cerilas_onboarding_domain');
+        if (stored) {
+          setUrl(stored);
+          sessionStorage.removeItem('cerilas_onboarding_domain');
+        }
+      } catch (err) {}
+    }
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
