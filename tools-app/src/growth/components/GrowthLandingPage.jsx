@@ -588,7 +588,7 @@ export default function GrowthLandingPage({ onBackToTools, initialDomain = '' })
                 <button
                   type="button"
                   onClick={onBackToTools}
-                  className="cl-btn-secondary max-sm:hidden"
+                  className="cl-btn-secondary cl-header-desktop-btn"
                 >
                   All Tools
                 </button>
@@ -598,7 +598,7 @@ export default function GrowthLandingPage({ onBackToTools, initialDomain = '' })
                 <button
                   type="button"
                   onClick={handleGoToDashboard}
-                  className="cl-btn-primary"
+                  className="cl-btn-primary cl-header-cta"
                 >
                   <span>Dashboard</span>
                   <ArrowRight size={14} />
@@ -611,14 +611,14 @@ export default function GrowthLandingPage({ onBackToTools, initialDomain = '' })
                       sessionStorage.setItem('cerilas_post_login_action', 'growth_dashboard');
                       openAuthModal('login', 'growth');
                     }}
-                    className="cl-btn-secondary max-sm:hidden"
+                    className="cl-btn-secondary cl-header-desktop-btn"
                   >
                     Sign in
                   </button>
                   <button
                     type="button"
                     onClick={handleGoToDashboard}
-                    className="cl-btn-primary"
+                    className="cl-btn-primary cl-header-cta"
                   >
                     <span>Dashboard</span>
                     <ArrowRight size={14} />
@@ -648,6 +648,9 @@ export default function GrowthLandingPage({ onBackToTools, initialDomain = '' })
                 <a href="#benchmarks" onClick={(e) => { setMobileMenuOpen(false); scrollToSection(e, 'benchmarks'); }}>Benchmarks</a>
                 <a href="#pricing" onClick={(e) => { setMobileMenuOpen(false); scrollToSection(e, 'pricing'); }}>Pricing</a>
                 <a href="#help" onClick={(e) => { setMobileMenuOpen(false); scrollToSection(e, 'help'); }}>FAQ</a>
+                
+                <div className="cl-mobile-divider" />
+                
                 {!isAuthenticated && (
                   <button
                     type="button"
@@ -656,8 +659,7 @@ export default function GrowthLandingPage({ onBackToTools, initialDomain = '' })
                       sessionStorage.setItem('cerilas_post_login_action', 'growth_dashboard');
                       openAuthModal('login', 'growth');
                     }}
-                    className="cl-btn-secondary"
-                    style={{ justifyContent: 'flex-start', paddingLeft: 0 }}
+                    className="cl-btn-secondary cl-mobile-action-btn"
                   >
                     Sign in to Account
                   </button>
@@ -668,10 +670,9 @@ export default function GrowthLandingPage({ onBackToTools, initialDomain = '' })
                     setMobileMenuOpen(false);
                     handleGoToDashboard();
                   }}
-                  className="cl-btn-primary"
-                  style={{ width: '100%', justifyContent: 'center', marginTop: '0.4rem' }}
+                  className="cl-btn-primary cl-mobile-action-btn"
                 >
-                  <span>Dashboard</span>
+                  <span>Open Dashboard</span>
                   <ArrowRight size={14} />
                 </button>
                 {onBackToTools && (
@@ -681,8 +682,7 @@ export default function GrowthLandingPage({ onBackToTools, initialDomain = '' })
                       setMobileMenuOpen(false);
                       onBackToTools();
                     }}
-                    className="cl-btn-secondary"
-                    style={{ justifyContent: 'flex-start', paddingLeft: 0 }}
+                    className="cl-btn-secondary cl-mobile-action-btn"
                   >
                     All Cerilas Tools
                   </button>
