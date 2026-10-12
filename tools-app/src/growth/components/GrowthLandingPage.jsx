@@ -1814,7 +1814,7 @@ export default function GrowthLandingPage({ onBackToTools, initialDomain = '' })
                 </li>
                 <li className="cl-plan-feature-item">
                   <Check size={16} color="#10b981" />
-                  <span><strong>5 Addable &amp; 5 Trackable Prompts:</strong> Live Gemini &amp; ChatGPT telemetry</span>
+                  <span><strong>15 Addable &amp; 15 Trackable Prompts:</strong> Live Gemini &amp; ChatGPT telemetry</span>
                 </li>
                 <li className="cl-plan-feature-item">
                   <Check size={16} color="#10b981" />
@@ -1871,7 +1871,7 @@ export default function GrowthLandingPage({ onBackToTools, initialDomain = '' })
                 </li>
                 <li className="cl-plan-feature-item">
                   <Check size={16} color="#10b981" />
-                  <span><strong>10 Addable &amp; 10 Trackable Prompts:</strong> Maximum GEO query tracking</span>
+                  <span><strong>30 Addable &amp; 30 Trackable Prompts:</strong> Maximum GEO query tracking</span>
                 </li>
                 <li className="cl-plan-feature-item">
                   <Check size={16} color="#10b981" />

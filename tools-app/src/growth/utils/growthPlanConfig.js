@@ -1,9 +1,9 @@
 /**
- * Growth Tool Plan Limits Configuration strictly matching Pricing Plan.xlsx:
+ * Growth Tool Plan Limits Configuration strictly matching Pricing Plan:
  * 
  * 1. Number of addable workspaces (websites): Free: 1, Pro: 3, Unlimited: Unlimited
- * 2. Addable GEO prompts: Free: 3, Pro: 5, Unlimited: 10
- * 3. Trackable GEO prompts: Free: 0 (Locked), Pro: 5, Unlimited: 10
+ * 2. Addable GEO prompts: Free: 3, Pro: 15, Unlimited: 30
+ * 3. Trackable GEO prompts: Free: 0 (Locked), Pro: 15, Unlimited: 30
  * 4. Competitor Tracking Radar: Free: 0 (Locked), Pro: 3, Unlimited: Unlimited
  * 5. Technical Site Audit & Issues: Free: 0 (Locked), Pro: Unlimited, Unlimited: Unlimited
  * 6. Daily Executive Email Digest: Free: 0 (Locked), Pro: Unlimited, Unlimited: Unlimited
@@ -30,8 +30,8 @@ export const GROWTH_PLAN_CONFIG = {
     name: 'Pro',
     badge: 'Pro Tier',
     workspaces: 3,
-    addablePrompts: 5,
-    trackablePrompts: 5,
+    addablePrompts: 15,
+    trackablePrompts: 15,
     competitors: 3,
     technicalAudit: true,
     dailyEmailDigest: true,
@@ -43,8 +43,8 @@ export const GROWTH_PLAN_CONFIG = {
     name: 'Unlimited',
     badge: 'Unlimited Power',
     workspaces: Infinity,
-    addablePrompts: 10,
-    trackablePrompts: 10,
+    addablePrompts: 30,
+    trackablePrompts: 30,
     competitors: Infinity,
     technicalAudit: true,
     dailyEmailDigest: true,

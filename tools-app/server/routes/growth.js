@@ -2200,7 +2200,7 @@ router.post('/workspaces/:slugOrId/prompts/:promptId/run', requireAuth, async (r
     const authData = await resolveAndAuthorizeWorkspace(req, req.params.slugOrId);
     if (!authData) return res.status(404).json({ error: 'Çalışma alanı bulunamadı.' });
 
-    // Plan Limit Check: Trackable GEO prompts (Free: 0, Pro: 5, Unlimited: 10)
+    // Plan Limit Check: Trackable GEO prompts (Free: 0, Pro: 15, Unlimited: 30)
     const userPlan = getUserPlan(req.user, authData.organization);
     const trackCheck = await checkTrackablePromptsLimit(authData.workspace.id, userPlan);
     if (!trackCheck.allowed) {

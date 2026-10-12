@@ -197,7 +197,7 @@ export default function RevenueCatPaywallModal({
       matchedPkg: billingCycle === 'annual' ? (proAnnualPkg || proMonthlyPkg || availablePackages[0]) : (proMonthlyPkg || availablePackages[0]),
       features: [
         isTr ? '3 Workspace (Web sitesi / Marka)' : '3 Workspaces (Websites / Brands)',
-        isTr ? '5 Takip Edilebilir GEO / AEO İstemi' : '5 Trackable GEO / AEO Prompts',
+        isTr ? '15 Takip Edilebilir GEO / AEO İstemi' : '15 Trackable GEO / AEO Prompts',
         isTr ? '3 Rakip Takip Radarı' : '3 Competitor Tracking Radar',
         isTr ? 'Sınırsız Teknik Site Denetimi (Audit)' : 'Unlimited Technical Site Audit & Issues',
         isTr ? 'Günlük Yönetici E-Posta Özeti (Digest)' : 'Daily Executive Email Digest Reports',
@@ -223,7 +223,7 @@ export default function RevenueCatPaywallModal({
       }),
       features: [
         isTr ? 'Sınırsız Workspace (Tüm markalarınız)' : 'Unlimited Workspaces (All brands)',
-        isTr ? '10 Takip Edilebilir GEO / AEO İstemi' : '10 Trackable GEO / AEO Prompts',
+        isTr ? '30 Takip Edilebilir GEO / AEO İstemi' : '30 Trackable GEO / AEO Prompts',
         isTr ? 'Sınırsız Rakip Takip Radarı' : 'Unlimited Competitor Tracking Radar',
         isTr ? 'Tam Kapsamlı Teknik Denetim & Raporlar' : 'Full Technical Site Audit & Reports',
         isTr ? 'Sınırsız AI Aksiyon & Rakip Keşfi' : 'Unlimited AI Actions & Discovery Runs',

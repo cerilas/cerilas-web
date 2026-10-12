@@ -1,10 +1,10 @@
 import { authPool } from '../db.js';
 
 /**
- * Plan definitions and limits strictly aligned with Pricing Plan.xlsx:
+ * Plan definitions and limits strictly aligned with Pricing Plan:
  * 1. Number of addable workspaces (websites): Free: 1, Pro: 3, Unlimited: Unlimited
- * 2. Addable GEO prompts: Free: 3, Pro: 5, Unlimited: 10
- * 3. Trackable GEO prompts: Free: 0, Pro: 5, Unlimited: 10
+ * 2. Addable GEO prompts: Free: 3, Pro: 15, Unlimited: 30
+ * 3. Trackable GEO prompts: Free: 0, Pro: 15, Unlimited: 30
  * 4. Competitor Tracking Radar: Free: 0, Pro: 3, Unlimited: Unlimited
  * 5. Technical Site Audit & Issues: Free: 0 (Locked), Pro: Unlimited, Unlimited: Unlimited
  * 6. Daily Executive Email Digest: Free: 0 (Locked), Pro: Unlimited, Unlimited: Unlimited
@@ -28,8 +28,8 @@ export const GROWTH_PLAN_LIMITS = {
     key: 'pro',
     name: 'Pro',
     workspaces: 3,
-    addablePrompts: 5,
-    trackablePrompts: 5,
+    addablePrompts: 15,
+    trackablePrompts: 15,
     competitors: 3,
     technicalAudit: true,
     dailyEmailDigest: true,
@@ -40,8 +40,8 @@ export const GROWTH_PLAN_LIMITS = {
     key: 'unlimited',
     name: 'Unlimited',
     workspaces: Infinity,
-    addablePrompts: 10,
-    trackablePrompts: 10,
+    addablePrompts: 30,
+    trackablePrompts: 30,
     competitors: Infinity,
     technicalAudit: true,
     dailyEmailDigest: true,
@@ -152,9 +152,9 @@ export async function checkAddablePromptsLimit(workspaceId, userPlan, additional
       limit: maxAllowed,
       plan: userPlan,
       error: isFree
-        ? `On the Free plan, you can add up to ${maxAllowed} GEO prompts. Upgrade to Pro (5 prompts) or Unlimited (10 prompts) to add more queries.`
+        ? `On the Free plan, you can add up to ${maxAllowed} GEO prompts. Upgrade to Pro (15 prompts) or Unlimited (30 prompts) to add more queries.`
         : isPro
-          ? `On the Pro plan, you can add up to ${maxAllowed} GEO prompts. Upgrade to Unlimited for 10 prompts.`
+          ? `On the Pro plan, you can add up to ${maxAllowed} GEO prompts. Upgrade to Unlimited for 30 prompts.`
           : `You have reached the maximum limit of ${maxAllowed} prompts.`
     };
   }
@@ -175,7 +175,7 @@ export async function checkTrackablePromptsLimit(workspaceId, userPlan) {
       current: 0,
       limit: 0,
       plan: userPlan,
-      error: 'Live AI visibility prompt simulations and telemetry tracking are exclusive to Pro (5 prompts) and Unlimited (10 prompts) plans. Please upgrade your plan.'
+      error: 'Live AI visibility prompt simulations and telemetry tracking are exclusive to Pro (15 prompts) and Unlimited (30 prompts) plans. Please upgrade your plan.'
     };
   }
 

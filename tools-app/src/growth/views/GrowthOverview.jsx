@@ -1259,10 +1259,10 @@ export default function GrowthOverview() {
             </div>
 
             <div className="station-metric-pod pod-primary">
-              <span className="pod-label">Citation Rate ({aiVisibility?.totalPrompts || 3} Prompts)</span>
+              <span className="pod-label">Citation Rate ({aiVisibility?.totalPrompts || 0} Prompts)</span>
               <div className="pod-val-row">
                 <span className="pod-val">{aiVisibility?.citationRate ?? 0}%</span>
-                <span className="pod-tag-fraction">({aiVisibility?.citedPromptsCount || 0} / {aiVisibility?.totalPrompts || 3} Prompts)</span>
+                <span className="pod-tag-fraction">({aiVisibility?.citedPromptsCount || 0} / {aiVisibility?.totalPrompts || 0} Prompts)</span>
               </div>
               <span className="pod-sub">
                 {aiVisibility?.citedPromptsCount > 0 

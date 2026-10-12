@@ -226,7 +226,7 @@ export default function GrowthHeader({ onBackToTools }) {
             type="button"
             onClick={() => promptPaywall({ plan: 'pro' })}
             className="growth-plan-badge-btn pro"
-            title="Upgrade to Pro (3 Websites, 5 GEO Prompts)"
+            title="Upgrade to Pro (3 Websites, 15 GEO Prompts)"
           >
             <Sparkles size={13} />
             <span>Upgrade to Pro</span>

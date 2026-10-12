@@ -167,7 +167,7 @@ export default function GrowthSidebar() {
     if (itemId === 'search') return !integrations.gsc;
     if (itemId === 'analytics') return !integrations.ga4;
     if (itemId === 'google-business') return !integrations.gbp;
-    if (itemId === 'ai-visibility') return promptsCount < 10;
+    if (itemId === 'ai-visibility') return promptsCount < 1;
     return false;
   };
 

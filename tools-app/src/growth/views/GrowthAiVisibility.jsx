@@ -87,8 +87,8 @@ export default function GrowthAiVisibility() {
   } = useGrowth();
   const { token } = useAuth();
 
-  const maxAddablePrompts = planLimits?.addablePrompts ?? 10;
-  const trackablePrompts = planLimits?.trackablePrompts ?? 10;
+  const maxAddablePrompts = planLimits?.addablePrompts ?? 15;
+  const trackablePrompts = planLimits?.trackablePrompts ?? 15;
   const isSimulationLocked = trackablePrompts === 0;
 
   const [prompts, setPrompts] = useState([]);
