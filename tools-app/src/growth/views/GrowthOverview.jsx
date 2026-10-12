@@ -1565,79 +1565,54 @@ export default function GrowthOverview() {
             </div>
           </div>
 
-          <div className="station-metrics-row compact">
-            <div className="station-metric-pod pod-amber">
-              <span className="pod-label">Google Rating</span>
-              <div className="pod-val-row">
-                <span className="pod-val text-amber">{business?.rating?.toFixed(1) || '4.9'} ★</span>
-                <span className="pod-sub-grade">/ 5.0</span>
-              </div>
-              <span className="pod-sub">High customer satisfaction</span>
-            </div>
-
-            <div className="station-metric-pod">
-              <span className="pod-label">Total Reviews</span>
-              <div className="pod-val-row">
-                <span className="pod-val">{business?.totalReviews || 48} Reviews</span>
-                <span className="pod-delta text-emerald">
-                  <TrendingUp size={13} />
-                  <span>+{business?.reviewsGrowth || 6} New</span>
-                </span>
-              </div>
-              <span className="pod-sub">Verified customer reviews</span>
-            </div>
-
-            <div className="station-metric-pod">
-              <span className="pod-label">Customer Sentiment Score</span>
-              <div className="pod-val-row">
-                <span className="pod-val text-emerald">{business?.sentimentScore || 97}%</span>
-              </div>
-              <span className="pod-sub">AI Sentiment Analysis: Positive</span>
-            </div>
-          </div>
-
-          {/* Reviews Growth Chart */}
-          <div className="station-chart-wrapper">
-            <div className="station-chart-legend-row">
-              <span className="chart-legend-title">CUMULATIVE REVIEW GROWTH OVER TIME:</span>
-              <div className="chart-legend-items">
-                <span className="legend-item">
-                  <span className="legend-dot" style={{ background: '#fbbf24' }} />
-                  <span>Total Reviews</span>
-                </span>
-              </div>
-            </div>
-
-            <HudTimeSeriesChart
-              chartId="chart_gbp_reviews"
-              data={business?.timeline || []}
-              series={[
-                { key: 'totalReviews', label: 'Review Count', color: '#fbbf24', fill: true, fillOpacity: 0.2, valueSuffix: ' Reviews' }
-              ]}
-              height={170}
-              loading={isRangeLoading || refreshing}
-            />
-          </div>
-
-          {/* Star Rating Breakdown Meter */}
-          <div className="station-rating-histogram">
-            <span className="hist-title">Star Rating Breakdown:</span>
-            {[5, 4, 3, 2, 1].map((star) => {
-              const count = business?.ratingBreakdown?.[String(star)] || (star === 5 ? 44 : star === 4 ? 3 : star === 3 ? 1 : 0);
-              const total = business?.totalReviews || 48;
-              const pct = Math.round((count / (total || 1)) * 100);
-              return (
-                <div key={star} className="hist-row">
-                  <span className="hist-star">{star} ★</span>
-                  <div className="hist-bar-track">
-                    <div className="hist-bar-fill" style={{ width: `${pct}%` }} />
+          {business?.connected ? (
+            <>
+              <div className="station-metrics-row compact">
+                <div className="station-metric-pod pod-amber">
+                  <span className="pod-label">Google Rating</span>
+                  <div className="pod-val-row">
+                    <span className="pod-val text-amber">{Number(business.rating || 0).toFixed(1)} ★</span>
+                    <span className="pod-sub-grade">/ 5.0</span>
                   </div>
-                  <span className="hist-count">{count}</span>
-                  <span className="hist-pct">{pct}%</span>
+                  <span className="pod-sub">Source: Google Maps</span>
                 </div>
-              );
-            })}
-          </div>
+
+                <div className="station-metric-pod">
+                  <span className="pod-label">Total Ratings</span>
+                  <div className="pod-val-row">
+                    <span className="pod-val">{business.totalReviews}</span>
+                  </div>
+                  <span className="pod-sub">Google Maps rating count</span>
+                </div>
+
+                <div className="station-metric-pod">
+                  <span className="pod-label">Low-Star in Latest Reviews</span>
+                  <div className="pod-val-row">
+                    <span className={`pod-val ${business.sampleLowStar > 0 ? 'text-amber' : 'text-emerald'}`}>
+                      {business.sampleLowStar} / {business.sampleSize}
+                    </span>
+                  </div>
+                  <span className="pod-sub">Reviews returned by Google</span>
+                </div>
+              </div>
+
+              {business.sentimentSummary && (
+                <p className="station-card-sub" style={{ marginTop: '0.75rem', lineHeight: 1.5 }}>
+                  {business.sentimentSummary}
+                </p>
+              )}
+            </>
+          ) : (
+            <div className="station-metrics-row compact">
+              <div className="station-metric-pod">
+                <span className="pod-label">Google Business Profile</span>
+                <div className="pod-val-row">
+                  <span className="pod-val">Not connected</span>
+                </div>
+                <span className="pod-sub">Connect your Google Maps listing to see real ratings and reviews.</span>
+              </div>
+            </div>
+          )}
         </section>
 
         {/* --------------------------------------------------------- */}

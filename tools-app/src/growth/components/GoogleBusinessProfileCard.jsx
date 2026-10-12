@@ -68,13 +68,9 @@ export default function GoogleBusinessProfileCard({ onProfileChange }) {
     return () => clearInterval(interval);
   }, [isSearching]);
 
-  // Manual fallback state
-  const [showManualForm, setShowManualForm] = useState(false);
-  const [manualName, setManualName] = useState('');
-  const [manualUrl, setManualUrl] = useState('');
-  const [manualCity, setManualCity] = useState('');
-  const [manualRating, setManualRating] = useState('4.8');
-  const [manualReviews, setManualReviews] = useState('25');
+  const [hasSearched, setHasSearched] = useState(false);
+  const [searchError, setSearchError] = useState('');
+  const [actionError, setActionError] = useState('');
 
   // Review list state & pagination
   const [reviewTab, setReviewTab] = useState('all'); // 'all', 'low_star', 'unanswered', 'with_reply'
@@ -98,9 +94,9 @@ export default function GoogleBusinessProfileCard({ onProfileChange }) {
   }, [isSearchModalOpen]);
 
   // 1. Fetch current profile status
-  const fetchProfile = async () => {
+  const fetchProfile = async ({ silent = false } = {}) => {
     if (!activeWorkspace?.id || !token) return;
-    setLoading(true);
+    if (!silent) setLoading(true);
     try {
       const res = await fetch(`/api/growth/workspaces/${activeWorkspace.id}/google-business`, {
         headers: { 'Authorization': `Bearer ${token}` }
@@ -127,6 +123,23 @@ export default function GoogleBusinessProfileCard({ onProfileChange }) {
     fetchProfile();
   }, [activeWorkspace?.id, token]);
 
+  // Poll while the background review analysis is running
+  const [pollTimedOut, setPollTimedOut] = useState(false);
+  const isAnalysisPending = isConnected && profile?.ai_summary?.status === 'pending' && !pollTimedOut;
+
+  useEffect(() => {
+    if (!isAnalysisPending) return;
+    const startedAt = Date.now();
+    const interval = setInterval(() => {
+      if (Date.now() - startedAt > 3 * 60 * 1000) {
+        setPollTimedOut(true);
+        return;
+      }
+      fetchProfile({ silent: true });
+    }, 4000);
+    return () => clearInterval(interval);
+  }, [isAnalysisPending, activeWorkspace?.id, token]);
+
   // 2. Search businesses
   const handleSearch = async (e) => {
     if (e) e.preventDefault();
@@ -134,7 +147,8 @@ export default function GoogleBusinessProfileCard({ onProfileChange }) {
 
     setIsSearching(true);
     setSearchResults([]);
-    setShowManualForm(false);
+    setSearchError('');
+    setActionError('');
     try {
       const res = await fetch(`/api/growth/workspaces/${activeWorkspace.id}/google-business/search`, {
         method: 'POST',
@@ -147,11 +161,15 @@ export default function GoogleBusinessProfileCard({ onProfileChange }) {
       const data = await res.json();
       if (res.ok && data.places) {
         setSearchResults(data.places);
+      } else {
+        setSearchError(data.error || 'Google Maps search failed.');
       }
     } catch (err) {
       console.error('Search places error:', err);
+      setSearchError('Google Maps search failed.');
     } finally {
       setIsSearching(false);
+      setHasSearched(true);
     }
   };
 
@@ -159,6 +177,7 @@ export default function GoogleBusinessProfileCard({ onProfileChange }) {
   const handleConnect = async (place) => {
     setIsConnecting(true);
     setConnectingId(place.place_id);
+    setActionError('');
     try {
       const res = await fetch(`/api/growth/workspaces/${activeWorkspace.id}/google-business/connect`, {
         method: 'POST',
@@ -166,65 +185,25 @@ export default function GoogleBusinessProfileCard({ onProfileChange }) {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({
-          placeId: place.place_id,
-          businessName: place.business_name,
-          formattedAddress: place.formatted_address,
-          googleMapsUrl: place.google_maps_url,
-          rating: place.rating,
-          totalReviews: place.user_ratings_total
-        })
+        body: JSON.stringify({ placeId: place.place_id })
       });
       const data = await res.json();
       if (res.ok && data.profile) {
+        setPollTimedOut(false);
         setProfile(data.profile);
         setIsConnected(true);
         setSearchResults([]);
         setIsSearchModalOpen(false);
         if (onProfileChange) onProfileChange(data.profile);
+      } else {
+        setActionError(data.error || 'Could not connect this business.');
       }
     } catch (err) {
       console.error('Connect place error:', err);
+      setActionError('Could not connect this business.');
     } finally {
       setIsConnecting(false);
       setConnectingId(null);
-    }
-  };
-
-  // 3.1 Connect manually entered business profile
-  const handleConnectManual = async (e) => {
-    if (e) e.preventDefault();
-    if (!manualName.trim() || isConnecting) return;
-    setIsConnecting(true);
-    try {
-      const res = await fetch(`/api/growth/workspaces/${activeWorkspace.id}/google-business/connect`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          placeId: `manual_${Date.now()}`,
-          businessName: manualName.trim(),
-          formattedAddress: manualCity.trim() || 'Global',
-          googleMapsUrl: manualUrl.trim() || '',
-          rating: parseFloat(manualRating) || 4.8,
-          totalReviews: parseInt(manualReviews, 10) || 15
-        })
-      });
-      const data = await res.json();
-      if (res.ok && data.profile) {
-        setProfile(data.profile);
-        setIsConnected(true);
-        setShowManualForm(false);
-        setSearchResults([]);
-        setIsSearchModalOpen(false);
-        if (onProfileChange) onProfileChange(data.profile);
-      }
-    } catch (err) {
-      console.error('Manual connect place error:', err);
-    } finally {
-      setIsConnecting(false);
     }
   };
 
@@ -232,6 +211,7 @@ export default function GoogleBusinessProfileCard({ onProfileChange }) {
   const handleSync = async () => {
     if (isSyncing) return;
     setIsSyncing(true);
+    setActionError('');
     try {
       const res = await fetch(`/api/growth/workspaces/${activeWorkspace.id}/google-business/sync`, {
         method: 'POST',
@@ -239,11 +219,15 @@ export default function GoogleBusinessProfileCard({ onProfileChange }) {
       });
       const data = await res.json();
       if (res.ok && data.profile) {
+        setPollTimedOut(false);
         setProfile(data.profile);
         if (onProfileChange) onProfileChange(data.profile);
+      } else {
+        setActionError(data.error || 'Could not refresh Google data.');
       }
     } catch (err) {
       console.error('Sync business error:', err);
+      setActionError('Could not refresh Google data.');
     } finally {
       setIsSyncing(false);
     }
@@ -417,9 +401,9 @@ export default function GoogleBusinessProfileCard({ onProfileChange }) {
                     <input
                       type="text"
                       className="gbp-search-input"
-                      placeholder="Google Maps business name, brand, or city..."
+                      placeholder="Business name or Google Maps link..."
                       value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
+                      onChange={(e) => { setSearchQuery(e.target.value); setHasSearched(false); }}
                       autoFocus
                     />
                   </div>
@@ -488,11 +472,13 @@ export default function GoogleBusinessProfileCard({ onProfileChange }) {
                                 <span className="gbp-rating-pill">
                                   <Star size={12} fill="#eab308" color="#eab308" />
                                   <span>{place.rating}</span>
-                                  <span style={{ color: '#94a3b8' }}>({place.user_ratings_total} reviews)</span>
+                                  <span style={{ color: '#94a3b8' }}>({place.user_ratings_total} ratings)</span>
                                 </span>
                               )}
                             </div>
-                            <span className="gbp-result-addr">{place.formatted_address || 'Address available'}</span>
+                            {place.formatted_address && (
+                              <span className="gbp-result-addr">{place.formatted_address}</span>
+                            )}
                           </div>
 
                           <button
@@ -519,199 +505,26 @@ export default function GoogleBusinessProfileCard({ onProfileChange }) {
                   </div>
                 )}
 
-                {/* No results banner with manual connect toggle */}
-                {searchResults.length === 0 && searchQuery && !isSearching && !showManualForm && (
+                {/* Search / connect errors */}
+                {(searchError || actionError) && !isSearching && (
+                  <div style={{ padding: '0.85rem 1rem', background: 'rgba(248, 113, 113, 0.08)', border: '1px solid rgba(248, 113, 113, 0.3)', borderRadius: 10, display: 'flex', alignItems: 'flex-start', gap: '0.65rem' }}>
+                    <AlertTriangle size={16} color="#f87171" style={{ flexShrink: 0, marginTop: 2 }} />
+                    <span style={{ fontSize: '0.84rem', color: 'var(--text-main, #f8fafc)', lineHeight: 1.5 }}>
+                      {searchError || actionError}
+                    </span>
+                  </div>
+                )}
+
+                {/* No results banner */}
+                {hasSearched && searchResults.length === 0 && !searchError && !isSearching && (
                   <div style={{ padding: '1.15rem 1.25rem', background: 'rgba(255, 255, 255, 0.03)', borderRadius: 12, border: '1px dashed var(--border-color, rgba(255, 255, 255, 0.15))' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }}>
-                      <div style={{ flex: 1, minWidth: 240 }}>
-                        <span style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--text-main, #f8fafc)', display: 'block', marginBottom: 4 }}>
-                          No direct Google Maps match found for "{searchQuery}"
-                        </span>
-                        <span style={{ fontSize: '0.82rem', color: '#94a3b8', lineHeight: 1.4 }}>
-                          If your business is digital/online or you know your Google Maps link, you can enter the details directly.
-                        </span>
-                      </div>
-
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setManualName(searchQuery || activeWorkspace?.name || '');
-                          setShowManualForm(true);
-                        }}
-                        className="growth-secondary-btn"
-                        style={{ height: '42px', padding: '0 1.25rem', fontSize: '0.88rem', fontWeight: 600, color: '#38bdf8', borderColor: 'rgba(56, 189, 248, 0.35)', display: 'inline-flex', alignItems: 'center', gap: '8px' }}
-                      >
-                        <Building2 size={15} />
-                        <span>Enter Details Manually</span>
-                      </button>
-                    </div>
+                    <span style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--text-main, #f8fafc)', display: 'block', marginBottom: 4 }}>
+                      No Google Maps match found for &quot;{searchQuery}&quot;
+                    </span>
+                    <span style={{ fontSize: '0.82rem', color: '#94a3b8', lineHeight: 1.4 }}>
+                      Open your business on Google Maps, tap Share, and paste the link here. Only businesses listed on Google Maps can be connected.
+                    </span>
                   </div>
-                )}
-
-                {/* Quick toggle if hasn't searched yet */}
-                {!showManualForm && searchResults.length === 0 && !searchQuery && (
-                  <div style={{ textAlign: 'center', paddingTop: '0.5rem' }}>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setManualName(activeWorkspace?.name || '');
-                        setShowManualForm(true);
-                      }}
-                      style={{
-                        background: 'rgba(56, 189, 248, 0.08)',
-                        border: '1px solid rgba(56, 189, 248, 0.25)',
-                        color: '#38bdf8',
-                        fontSize: '0.84rem',
-                        fontWeight: 600,
-                        padding: '0.55rem 1.15rem',
-                        borderRadius: '8px',
-                        cursor: 'pointer',
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: '8px'
-                      }}
-                    >
-                      <Building2 size={14} />
-                      <span>Click here to define your business profile manually →</span>
-                    </button>
-                  </div>
-                )}
-
-                {/* Manual Profile Entry Form */}
-                {showManualForm && (
-                  <form onSubmit={handleConnectManual} className="gbp-manual-form animate-fade" style={{ padding: '1.25rem', background: 'rgba(255, 255, 255, 0.03)', borderRadius: 14, border: '1px solid var(--border-color, rgba(255, 255, 255, 0.14))' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
-                        <div style={{ width: 28, height: 28, borderRadius: 6, background: 'rgba(56, 189, 248, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                          <Building2 size={16} color="#38bdf8" />
-                        </div>
-                        <strong style={{ fontSize: '0.98rem', color: 'var(--text-main, #f8fafc)', fontWeight: 700 }}>
-                          Define Manual Business Profile
-                        </strong>
-                      </div>
-                      <span className="growth-badge blue" style={{ fontSize: '0.74rem', padding: '0.2rem 0.6rem' }}>
-                        Analyze Now
-                      </span>
-                    </div>
-
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem', marginBottom: '1.25rem' }}>
-                      <div>
-                        <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#94a3b8', marginBottom: 6 }}>
-                          Business / Brand Name *
-                        </label>
-                        <input
-                          type="text"
-                          required
-                          value={manualName}
-                          onChange={(e) => setManualName(e.target.value)}
-                          placeholder="e.g. Cerilas Web Studio"
-                          className="gbp-search-input"
-                          style={{ paddingLeft: '1rem', height: 44, fontSize: '0.9rem' }}
-                        />
-                      </div>
-
-                      <div>
-                        <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#94a3b8', marginBottom: 6 }}>
-                          Google Maps URL or Website
-                        </label>
-                        <input
-                          type="text"
-                          value={manualUrl}
-                          onChange={(e) => setManualUrl(e.target.value)}
-                          placeholder="https://maps.app.goo.gl/... or domain"
-                          className="gbp-search-input"
-                          style={{ paddingLeft: '1rem', height: 44, fontSize: '0.9rem' }}
-                        />
-                      </div>
-
-                      <div>
-                        <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#94a3b8', marginBottom: 6 }}>
-                          City / Region
-                        </label>
-                        <input
-                          type="text"
-                          value={manualCity}
-                          onChange={(e) => setManualCity(e.target.value)}
-                          placeholder="e.g. New York, USA"
-                          className="gbp-search-input"
-                          style={{ paddingLeft: '1rem', height: 44, fontSize: '0.9rem' }}
-                        />
-                      </div>
-
-                      <div style={{ display: 'flex', gap: '0.75rem' }}>
-                        <div style={{ flex: 1 }}>
-                          <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#94a3b8', marginBottom: 6 }}>
-                            Google Rating
-                          </label>
-                          <input
-                            type="number"
-                            step="0.1"
-                            min="1"
-                            max="5"
-                            value={manualRating}
-                            onChange={(e) => setManualRating(e.target.value)}
-                            className="gbp-search-input"
-                            style={{ paddingLeft: '1rem', height: 44, fontSize: '0.9rem' }}
-                          />
-                        </div>
-
-                        <div style={{ flex: 1 }}>
-                          <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#94a3b8', marginBottom: 6 }}>
-                            Total Reviews
-                          </label>
-                          <input
-                            type="number"
-                            min="0"
-                            value={manualReviews}
-                            onChange={(e) => setManualReviews(e.target.value)}
-                            className="gbp-search-input"
-                            style={{ paddingLeft: '1rem', height: 44, fontSize: '0.9rem' }}
-                          />
-                        </div>
-                      </div>
-                    </div>
-
-                    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem' }}>
-                      <button
-                        type="button"
-                        onClick={() => setShowManualForm(false)}
-                        className="growth-secondary-btn"
-                        style={{ height: '44px', padding: '0 1.35rem', fontSize: '0.88rem', fontWeight: 600, borderRadius: '10px' }}
-                      >
-                        Cancel
-                      </button>
-
-                      <button
-                        type="submit"
-                        disabled={isConnecting || !manualName.trim()}
-                        className="growth-primary-btn"
-                        style={{
-                          height: '44px',
-                          padding: '0 1.6rem',
-                          fontSize: '0.925rem',
-                          fontWeight: 700,
-                          borderRadius: '10px',
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: '8px',
-                          boxShadow: '0 4px 14px rgba(2, 132, 199, 0.35)',
-                          background: 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)'
-                        }}
-                      >
-                        {isConnecting ? (
-                          <>
-                            <Loader2 size={15} className="animate-spin" />
-                            <span>Analyzing... (20-30s)</span>
-                          </>
-                        ) : (
-                          <>
-                            <CheckCircle2 size={16} />
-                            <span>Connect Profile &amp; Analyze</span>
-                          </>
-                        )}
-                      </button>
-                    </div>
-                  </form>
                 )}
               </div>
             </div>
@@ -722,20 +535,42 @@ export default function GoogleBusinessProfileCard({ onProfileChange }) {
     );
   }
 
+  // Profiles saved before Google Places verification contain estimated data
+  if (!profile.is_verified) {
+    return (
+      <div className="growth-panel-card gbp-connected-card animate-fade">
+        <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem' }}>
+          <AlertTriangle size={20} color="#fb923c" style={{ flexShrink: 0, marginTop: 2 }} />
+          <div style={{ flex: 1 }}>
+            <h3 className="growth-panel-title" style={{ margin: 0, fontSize: '1.05rem' }}>
+              {profile.business_name}: reconnect required
+            </h3>
+            <p className="growth-panel-desc" style={{ margin: '0.35rem 0 0.85rem 0', fontSize: '0.84rem', color: '#94a3b8', lineHeight: 1.5 }}>
+              This profile was added before ratings and reviews were verified against Google Maps, so its data is not shown. Reconnect your business to load real Google data.
+            </p>
+            <button
+              type="button"
+              className="growth-primary-btn"
+              onClick={async () => {
+                await handleDisconnectConfirm();
+                setIsSearchModalOpen(true);
+              }}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}
+            >
+              <MapPin size={14} />
+              <span>Reconnect via Google Maps</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   // Connected State
   const reviews = Array.isArray(profile.reviews) ? profile.reviews : [];
   const lowStarReviews = reviews.filter(r => Number(r.rating) <= 2);
-  const unansweredReviews = lowStarReviews.filter(r => !r.has_owner_response && !r.owner_response);
-  const withReplyReviews = reviews.filter(r => r.has_owner_response || Boolean(r.owner_response));
 
-  let baseFilteredReviews = reviews;
-  if (reviewTab === 'low_star') {
-    baseFilteredReviews = lowStarReviews;
-  } else if (reviewTab === 'unanswered') {
-    baseFilteredReviews = unansweredReviews;
-  } else if (reviewTab === 'with_reply') {
-    baseFilteredReviews = withReplyReviews;
-  }
+  const baseFilteredReviews = reviewTab === 'low_star' ? lowStarReviews : reviews;
 
   const finalFilteredReviews = starFilter === 'all'
     ? baseFilteredReviews
@@ -747,6 +582,7 @@ export default function GoogleBusinessProfileCard({ onProfileChange }) {
   const paginatedReviews = finalFilteredReviews.slice(startIndex, startIndex + pageSize);
 
   const aiSummary = profile.ai_summary || {};
+  const isAnalysisFailed = aiSummary.status === 'failed';
   const riskClass = (profile.ai_recommendation_risk === 'Yüksek Risk' || profile.ai_recommendation_risk === 'High Risk') ? 'red' : (profile.ai_recommendation_risk === 'Orta Risk' || profile.ai_recommendation_risk === 'Medium Risk') ? 'yellow' : 'green';
   const riskLabel = (profile.ai_recommendation_risk === 'Yüksek Risk' || profile.ai_recommendation_risk === 'High Risk') ? 'High Risk' : (profile.ai_recommendation_risk === 'Orta Risk' || profile.ai_recommendation_risk === 'Medium Risk') ? 'Medium Risk' : 'Low Risk';
   const chronicThemes = Array.isArray(aiSummary.chronic_complaint_themes)
@@ -800,13 +636,13 @@ export default function GoogleBusinessProfileCard({ onProfileChange }) {
           <button
             type="button"
             onClick={handleSync}
-            disabled={isSyncing}
+            disabled={isSyncing || isAnalysisPending}
             className="growth-secondary-btn"
             title="Update Reviews and Ratings"
             style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '0.4rem 0.75rem' }}
           >
-            <RefreshCw size={13} className={isSyncing ? 'animate-spin' : ''} />
-            <span>{isSyncing ? 'Refreshing... (20-30s)' : 'Refresh'}</span>
+            <RefreshCw size={13} className={isSyncing || isAnalysisPending ? 'animate-spin' : ''} />
+            <span>{isSyncing ? 'Refreshing...' : isAnalysisPending ? 'Analyzing reviews...' : 'Refresh'}</span>
           </button>
 
           <button
@@ -831,6 +667,12 @@ export default function GoogleBusinessProfileCard({ onProfileChange }) {
         </div>
       </div>
 
+      {actionError && (
+        <div style={{ padding: '0.75rem 1rem', marginBottom: '1rem', background: 'rgba(248, 113, 113, 0.08)', border: '1px solid rgba(248, 113, 113, 0.3)', borderRadius: 10, fontSize: '0.84rem', color: 'var(--text-main, #f8fafc)' }}>
+          {actionError}
+        </div>
+      )}
+
       {!isCollapsed && (
         <>
           {/* 4 Metric Cards */}
@@ -849,8 +691,8 @@ export default function GoogleBusinessProfileCard({ onProfileChange }) {
 
             <div className="gbp-metric-card">
               <span className="gbp-metric-label" style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                Total Reviews 
-                <span title="Total review and rating count on Google. Includes star-only ratings without text." style={{ cursor: 'help', color: '#94a3b8' }}>
+                Total Ratings
+                <span title="Total rating count on Google Maps, including star-only ratings without text." style={{ cursor: 'help', color: '#94a3b8' }}>
                   <AlertTriangle size={12} />
                 </span>
               </span>
@@ -863,22 +705,22 @@ export default function GoogleBusinessProfileCard({ onProfileChange }) {
             </div>
 
             <div className="gbp-metric-card">
-              <span className="gbp-metric-label">Low-Star Reviews (1-2★)</span>
-              <div className="gbp-metric-val text-danger" style={{ color: profile.low_rating_count > 0 ? '#f87171' : '#34d399' }}>
-                {profile.low_rating_count} Reviews
+              <span className="gbp-metric-label">Low-Star in Latest Reviews</span>
+              <div className="gbp-metric-val text-danger" style={{ color: lowStarReviews.length > 0 ? '#f87171' : '#34d399' }}>
+                {lowStarReviews.length} / {reviews.length}
               </div>
               <span className="gbp-metric-sub">
-                {Math.round(((profile.low_rating_count || 0) / (profile.total_reviews || 1)) * 100)}% Negative complaint rate
+                1-2★ among the reviews Google returned
               </span>
             </div>
 
             <div className="gbp-metric-card">
-              <span className="gbp-metric-label">Unanswered Negative Reviews</span>
-              <div className="gbp-metric-val" style={{ color: profile.unanswered_low_count > 0 ? '#fb923c' : '#34d399' }}>
-                {profile.unanswered_low_count} Reviews
+              <span className="gbp-metric-label">Last Synced</span>
+              <div className="gbp-metric-val" style={{ fontSize: '1rem' }}>
+                {profile.last_synced_at ? new Date(profile.last_synced_at).toLocaleString() : '—'}
               </div>
               <span className="gbp-metric-sub">
-                {profile.unanswered_low_count > 0 ? '⚠️ Threatens AI Recommendations' : '✓ All complaints resolved'}
+                Source: Google Maps
               </span>
             </div>
           </div>
@@ -897,6 +739,19 @@ export default function GoogleBusinessProfileCard({ onProfileChange }) {
                 <ShieldAlert size={12} /> {riskLabel}
               </span>
             </div>
+
+            {isAnalysisPending && (
+              <p style={{ display: 'flex', alignItems: 'center', gap: 6, margin: '0.5rem 0', fontSize: '0.84rem', color: '#38bdf8', lineHeight: 1.5 }}>
+                <Loader2 size={14} className="animate-spin" />
+                Analyzing customer reviews and owner replies in the background. This card updates automatically.
+              </p>
+            )}
+
+            {isAnalysisFailed && (
+              <p style={{ margin: '0.5rem 0', fontSize: '0.84rem', color: '#fb923c', lineHeight: 1.5 }}>
+                Review analysis could not be completed. Use Refresh to try again.
+              </p>
+            )}
 
             {aiSummary.sentiment_summary && (
               <p style={{ margin: '0.5rem 0', fontSize: '0.84rem', color: '#cbd5e1', lineHeight: 1.5 }}>
@@ -970,7 +825,7 @@ export default function GoogleBusinessProfileCard({ onProfileChange }) {
           <div className="gbp-reviews-section" style={{ marginTop: '1.25rem' }}>
             <div style={{ padding: '0.85rem 1rem', background: 'rgba(255, 255, 255, 0.03)', borderRadius: 10, border: '1px solid rgba(255, 255, 255, 0.08)', marginBottom: '1rem' }}>
               <p style={{ fontSize: '0.82rem', color: '#94a3b8', margin: 0, lineHeight: 1.5 }}>
-                <strong style={{ color: '#f8fafc' }}>Notice:</strong> The official Google API returns only the 5 newest reviews for businesses. For deeper analysis, our AI crawls the web to retrieve <strong style={{ color: '#38bdf8' }}>the 20-50 most relevant reviews</strong>. Star-only ratings without text and reviews hidden by Google cannot be listed.
+                <strong style={{ color: '#f8fafc' }}>Notice:</strong> All reviews below come directly from Google Maps. Google&apos;s public API returns <strong style={{ color: '#38bdf8' }}>up to 5 of the most relevant reviews</strong> per business and does not include owner replies. The AI analysis is based only on these reviews.
               </p>
             </div>
             <div className="gbp-reviews-toolbar">
@@ -991,28 +846,6 @@ export default function GoogleBusinessProfileCard({ onProfileChange }) {
                 >
                   <AlertTriangle size={13} />
                   <span>Low-Star (1-2★) ({lowStarReviews.length})</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => { setReviewTab('unanswered'); setCurrentPage(1); }}
-                  className={`gbp-tab-btn ${reviewTab === 'unanswered' ? 'active warning' : ''}`}
-                >
-                  <AlertTriangle size={13} />
-                  <span>Unanswered ({unansweredReviews.length})</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => { setReviewTab('with_reply'); setCurrentPage(1); }}
-                  className={`gbp-tab-btn ${reviewTab === 'with_reply' ? 'active' : ''}`}
-                  style={{
-                    borderColor: reviewTab === 'with_reply' ? 'rgba(16, 185, 129, 0.4)' : undefined,
-                    color: reviewTab === 'with_reply' ? '#34d399' : undefined
-                  }}
-                >
-                  <CheckCircle2 size={13} />
-                  <span>With Owner Reply ({withReplyReviews.length})</span>
                 </button>
               </div>
 
@@ -1046,8 +879,8 @@ export default function GoogleBusinessProfileCard({ onProfileChange }) {
               <div className="gbp-empty-reviews">
                 <CheckCircle2 size={24} color="#34d399" />
                 <span style={{ fontWeight: 600, color: '#f8fafc', marginTop: 6 }}>
-                  {reviewTab === 'unanswered' 
-                    ? 'Great job! There are no unanswered low-star complaints.' 
+                  {reviews.length === 0
+                    ? 'Google did not return any written reviews for this business.'
                     : 'No reviews found matching the selected filters.'}
                 </span>
                 <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>
@@ -1082,22 +915,17 @@ export default function GoogleBusinessProfileCard({ onProfileChange }) {
                         </div>
 
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
-                          {hasReply ? (
-                            <span className="growth-badge green" style={{ fontSize: '0.72rem', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
-                              <CheckCircle2 size={11} />
-                              <span>✓ Replied by Owner</span>
-                            </span>
-                          ) : isLow ? (
-                            <span className="growth-badge red" style={{ fontSize: '0.72rem', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
-                              <AlertTriangle size={11} />
-                              <span>⚠️ Unanswered Complaint</span>
-                            </span>
-                          ) : null}
-
-                          {rev.issue_category && (
-                            <span className="growth-badge neutral" style={{ fontSize: '0.72rem' }}>
-                              {rev.issue_category}
-                            </span>
+                          {rev.google_maps_uri && (
+                            <a
+                              href={rev.google_maps_uri}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="growth-badge neutral"
+                              style={{ fontSize: '0.72rem', display: 'inline-flex', alignItems: 'center', gap: 4 }}
+                            >
+                              <ExternalLink size={11} />
+                              <span>View on Google</span>
+                            </a>
                           )}
                         </div>
                       </div>

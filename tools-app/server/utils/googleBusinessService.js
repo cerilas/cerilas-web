@@ -2,336 +2,369 @@ import { GoogleGenAI } from '@google/genai';
 
 /**
  * Google Business Profile & Places Review Service
- * Supports Google Places API (New) with Gemini Search Grounding fallback.
+ * All business data (name, address, rating, rating count, reviews) comes only
+ * from Google Places API (New). Gemini is used solely to analyze those reviews.
  */
 
 const PLACES_SEARCH_URL = 'https://places.googleapis.com/v1/places:searchText';
 const PLACES_DETAILS_URL = 'https://places.googleapis.com/v1/places';
 
+const PLACES_TIMEOUT_MS = 8000;
+const LINK_RESOLVE_TIMEOUT_MS = 6000;
+const GEMINI_ANALYSIS_TIMEOUT_MS = 30000;
+
+const SEARCH_CACHE_TTL_MS = 10 * 60 * 1000;
+const SEARCH_CACHE_MAX = 200;
+const searchCache = new Map();
+
+export const GOOGLE_PLACES_SOURCE = 'google_places';
+
+export class GoogleBusinessError extends Error {
+  constructor(code, message, status = 400) {
+    super(message);
+    this.code = code;
+    this.status = status;
+  }
+}
+
+function requirePlacesApiKey() {
+  const apiKey = process.env.GOOGLE_MAPS_API_KEY;
+  if (!apiKey) {
+    throw new GoogleBusinessError(
+      'GOOGLE_MAPS_NOT_CONFIGURED',
+      'Google Maps API anahtarı (GOOGLE_MAPS_API_KEY) yapılandırılmamış. Gerçek Google verisi alınamıyor.',
+      503
+    );
+  }
+  return apiKey;
+}
+
 /**
- * Search for a business on Google Maps / Places
+ * Place IDs issued by Google Places; legacy rows used generated "manual_" / "place_" ids.
+ */
+export function isGooglePlaceId(value) {
+  const id = String(value || '');
+  return /^[A-Za-z0-9_-]{16,}$/.test(id) && !/^(manual|place)_/.test(id);
+}
+
+function withTimeout(promise, ms, label) {
+  let timer;
+  const timeout = new Promise((_, reject) => {
+    timer = setTimeout(() => reject(new Error(`${label} timed out after ${ms}ms`)), ms);
+  });
+  return Promise.race([promise, timeout]).finally(() => clearTimeout(timer));
+}
+
+function readSearchCache(key) {
+  const hit = searchCache.get(key);
+  if (!hit) return null;
+  if (Date.now() - hit.at > SEARCH_CACHE_TTL_MS) {
+    searchCache.delete(key);
+    return null;
+  }
+  return hit.places;
+}
+
+function writeSearchCache(key, places) {
+  if (!places || places.length === 0) return;
+  if (searchCache.size >= SEARCH_CACHE_MAX) {
+    searchCache.delete(searchCache.keys().next().value);
+  }
+  searchCache.set(key, { at: Date.now(), places });
+}
+
+const isUrl = (value) => /^https?:\/\//i.test(String(value || '').trim());
+
+function decodePathName(segment) {
+  try {
+    return decodeURIComponent(segment.replace(/\+/g, ' ')).trim();
+  } catch {
+    return segment.replace(/\+/g, ' ').trim();
+  }
+}
+
+/**
+ * Extract business name, coordinates and Place ID from a full Google Maps URL.
+ */
+export function parseGoogleMapsUrl(rawUrl) {
+  const result = { url: rawUrl, name: '', lat: null, lng: null, placeId: '' };
+  let url;
+  try {
+    url = new URL(rawUrl);
+  } catch {
+    return result;
+  }
+
+  // Google consent interstitial wraps the real Maps URL in ?continue=
+  const continueUrl = url.searchParams.get('continue');
+  if (url.hostname.startsWith('consent.') && continueUrl) {
+    return parseGoogleMapsUrl(continueUrl);
+  }
+
+  const placeIdMatch = rawUrl.match(/(?:query_place_id=|place_id[:=])(ChI[\w-]+)/);
+  if (placeIdMatch) result.placeId = placeIdMatch[1];
+
+  const placeNameMatch = url.pathname.match(/\/maps\/place\/([^/]+)/);
+  if (placeNameMatch) result.name = decodePathName(placeNameMatch[1]);
+
+  if (!result.name) {
+    const q = url.searchParams.get('q') || url.searchParams.get('query');
+    if (q && !/^-?\d+(\.\d+)?,\s*-?\d+(\.\d+)?$/.test(q.trim())) {
+      result.name = q.replace(/^place_id:\S+/, '').trim();
+    }
+  }
+
+  const pinMatch = rawUrl.match(/!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/);
+  const viewportMatch = decodePathName(url.pathname).match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
+  const coords = pinMatch || viewportMatch;
+  if (coords) {
+    result.lat = Number(coords[1]);
+    result.lng = Number(coords[2]);
+  }
+
+  return result;
+}
+
+/**
+ * Follow short links (maps.app.goo.gl, goo.gl/maps) and parse the final Maps URL.
+ */
+export async function resolveGoogleMapsLink(rawUrl) {
+  const trimmed = String(rawUrl || '').trim();
+  const direct = parseGoogleMapsUrl(trimmed);
+  if (direct.placeId || direct.name) return direct;
+
+  try {
+    const res = await fetch(trimmed, {
+      redirect: 'follow',
+      signal: AbortSignal.timeout(LINK_RESOLVE_TIMEOUT_MS),
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36',
+        'Accept-Language': 'en-US,en;q=0.9'
+      }
+    });
+    const finalUrl = res.url || trimmed;
+    res.body?.cancel?.().catch(() => {});
+    return parseGoogleMapsUrl(finalUrl);
+  } catch (err) {
+    console.warn('[Google Maps link resolve error]:', err.message);
+    return direct;
+  }
+}
+
+function mapSearchResult(p) {
+  return {
+    place_id: p.id,
+    business_name: p.displayName?.text || '',
+    formatted_address: p.formattedAddress || '',
+    rating: Number(p.rating) || 0,
+    user_ratings_total: Number(p.userRatingCount) || 0,
+    google_maps_url: p.googleMapsUri || '',
+    website_url: p.websiteUri || '',
+    phone_number: p.nationalPhoneNumber || '',
+    types: p.types || [],
+    source: GOOGLE_PLACES_SOURCE
+  };
+}
+
+const SEARCH_FIELD_MASK = 'places.id,places.displayName,places.formattedAddress,places.rating,places.userRatingCount,places.googleMapsUri,places.websiteUri,places.nationalPhoneNumber,places.types';
+const DETAILS_FIELD_MASK = 'id,displayName,formattedAddress,rating,userRatingCount,googleMapsUri,websiteUri,nationalPhoneNumber,types,reviews';
+
+async function placesTextSearch(apiKey, textQuery, { language, country, lat, lng }) {
+  const body = { textQuery, languageCode: language, regionCode: country };
+  if (Number.isFinite(lat) && Number.isFinite(lng)) {
+    body.locationBias = { circle: { center: { latitude: lat, longitude: lng }, radius: 500 } };
+  }
+
+  const res = await fetch(PLACES_SEARCH_URL, {
+    method: 'POST',
+    signal: AbortSignal.timeout(PLACES_TIMEOUT_MS),
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Goog-Api-Key': apiKey,
+      'X-Goog-FieldMask': SEARCH_FIELD_MASK
+    },
+    body: JSON.stringify(body)
+  });
+  if (!res.ok) {
+    const detail = await res.text().catch(() => '');
+    console.warn('[Google Places search HTTP]:', res.status, detail.slice(0, 300));
+    throw new GoogleBusinessError('GOOGLE_PLACES_ERROR', 'Google Maps araması başarısız oldu.', 502);
+  }
+  const data = await res.json();
+  return (data.places || []).map(mapSearchResult);
+}
+
+async function placesDetails(apiKey, placeId, language) {
+  const url = `${PLACES_DETAILS_URL}/${encodeURIComponent(placeId)}${language ? `?languageCode=${encodeURIComponent(language)}` : ''}`;
+  const res = await fetch(url, {
+    signal: AbortSignal.timeout(PLACES_TIMEOUT_MS),
+    headers: {
+      'X-Goog-Api-Key': apiKey,
+      'X-Goog-FieldMask': DETAILS_FIELD_MASK
+    }
+  });
+  if (res.status === 404 || res.status === 400) return null;
+  if (!res.ok) {
+    const detail = await res.text().catch(() => '');
+    console.warn('[Google Places details HTTP]:', res.status, detail.slice(0, 300));
+    throw new GoogleBusinessError('GOOGLE_PLACES_ERROR', 'Google Maps işletme detayları alınamadı.', 502);
+  }
+  return res.json();
+}
+
+/**
+ * Search for a business on Google Maps (name, address or Google Maps link).
  */
 export async function searchGoogleBusiness(query, options = {}) {
-  const apiKey = process.env.GOOGLE_MAPS_API_KEY;
+  const apiKey = requirePlacesApiKey();
   const { country = 'TR', language = 'tr' } = options;
+  const rawQuery = String(query || '').trim();
+  if (!rawQuery) return [];
 
-  // 1. Try Google Places API (New) if API key is present
-  if (apiKey) {
-    try {
-      const res = await fetch(PLACES_SEARCH_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Goog-Api-Key': apiKey,
-          'X-Goog-FieldMask': 'places.id,places.displayName,places.formattedAddress,places.rating,places.userRatingCount,places.googleMapsUri,places.websiteUri,places.nationalPhoneNumber,places.types'
-        },
-        body: JSON.stringify({
-          textQuery: query,
-          languageCode: language,
-          regionCode: country
-        })
-      });
+  const cacheKey = `${country}|${language}|${rawQuery.toLowerCase()}`;
+  const cached = readSearchCache(cacheKey);
+  if (cached) return cached;
 
-      if (res.ok) {
-        const data = await res.json();
-        if (data.places && data.places.length > 0) {
-          return data.places.map(p => ({
-            place_id: p.id,
-            business_name: p.displayName?.text || query,
-            formatted_address: p.formattedAddress || '',
-            rating: p.rating || 0,
-            user_ratings_total: p.userRatingCount || 0,
-            google_maps_url: p.googleMapsUri || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`,
-            website_url: p.websiteUri || '',
-            phone_number: p.nationalPhoneNumber || '',
-            types: p.types || [],
-            source: 'places_api'
-          }));
-        }
+  let textQuery = rawQuery;
+  let lat = null;
+  let lng = null;
+  if (isUrl(rawQuery)) {
+    const link = await resolveGoogleMapsLink(rawQuery);
+    if (link.placeId) {
+      const d = await placesDetails(apiKey, link.placeId, language);
+      if (d) {
+        const places = [mapSearchResult(d)];
+        writeSearchCache(cacheKey, places);
+        return places;
       }
-    } catch (err) {
-      console.warn('[Google Places API error, falling back to Gemini Search]:', err.message);
     }
+    if (!link.name) return [];
+    textQuery = link.name;
+    lat = link.lat;
+    lng = link.lng;
   }
 
-  // 2. Gemini Grounding Search Fallback (Gemini 3.8 Flash with Google Search)
-  const geminiKey = process.env.GEMINI_API_KEY;
-  if (geminiKey) {
-    try {
-      const ai = new GoogleGenAI({ apiKey: geminiKey });
-      const prompt = `You are an expert Google Maps and Google Business Profile discovery system.
-Target query or URL: "${query}"
-Target region: ${country} (${language}).
-
-Instructions:
-1. Search Google Maps and Google Search for matching business profiles, branches, storefronts, or official listings.
-2. If the query is a Google Maps link (e.g. goo.gl, maps.google.com, maps.app.goo.gl), resolve the business at that URL.
-3. Return matching businesses with their verified Google Maps data.
-
-Return JSON in this exact structure:
-{
-  "places": [
-    {
-      "place_id": "Google Place ID or slug identifier",
-      "business_name": "Official Business Name on Google Maps",
-      "formatted_address": "City, District, Country or street address",
-      "rating": 4.5,
-      "user_ratings_total": 85,
-      "google_maps_url": "https://maps.google.com/...",
-      "website_url": "https://...",
-      "phone_number": "+90...",
-      "types": ["business"]
-    }
-  ]
-}
-If absolutely no matching business profile exists, return {"places": []}. Return pure valid JSON only.`;
-
-      const response = await ai.models.generateContent({
-        model: 'gemini-3.8-flash',
-        contents: prompt,
-        config: {
-          tools: [{ googleSearch: {} }]
-        }
-      });
-
-      const text = response.text || '';
-      const match = text.match(/\{[\s\S]*\}/);
-      if (match) {
-        const parsed = JSON.parse(match[0]);
-        if (parsed.places && Array.isArray(parsed.places) && parsed.places.length > 0) {
-          return parsed.places.map((p, idx) => ({
-            place_id: p.place_id || `place_${Date.now()}_${idx}`,
-            business_name: p.business_name || query,
-            formatted_address: p.formatted_address || '',
-            rating: Number(p.rating) || 0,
-            user_ratings_total: Number(p.user_ratings_total) || 0,
-            google_maps_url: p.google_maps_url || (query.startsWith('http') ? query : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(p.business_name || query)}`),
-            website_url: p.website_url || '',
-            phone_number: p.phone_number || '',
-            types: p.types || ['business'],
-            source: 'gemini_grounding'
-          }));
-        } else if (parsed.found && parsed.business_name) {
-          return [{
-            place_id: parsed.place_id || `place_${Date.now()}`,
-            business_name: parsed.business_name || query,
-            formatted_address: parsed.formatted_address || '',
-            rating: Number(parsed.rating) || 0,
-            user_ratings_total: Number(parsed.user_ratings_total) || 0,
-            google_maps_url: parsed.google_maps_url || (query.startsWith('http') ? query : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(parsed.business_name || query)}`),
-            website_url: parsed.website_url || '',
-            phone_number: parsed.phone_number || '',
-            types: parsed.types || ['business'],
-            source: 'gemini_grounding'
-          }];
-        }
-      }
-    } catch (err) {
-      console.warn('[Gemini Search Place error]:', err.message);
-    }
-  }
-
-  return [];
+  const places = await placesTextSearch(apiKey, textQuery, { language, country, lat, lng });
+  writeSearchCache(cacheKey, places);
+  return places;
 }
 
 /**
- * Fetch detailed reviews, analyze low-star reviews, and generate AI insights
+ * Fetch the current Google Maps profile and its Google-provided reviews.
+ * Google Places returns at most 5 reviews and does not expose owner replies.
  */
-export async function getDetailedBusinessProfile(placeIdentifier, businessName, options = {}) {
-  const apiKey = process.env.GOOGLE_MAPS_API_KEY;
-  const geminiKey = process.env.GEMINI_API_KEY;
-  const { country = 'TR', language = 'tr', manualData = {} } = options;
+export async function fetchGoogleBusinessProfile(placeId, options = {}) {
+  const apiKey = requirePlacesApiKey();
+  const { language = 'tr' } = options;
 
-  let baseData = {
-    place_id: placeIdentifier || `place_${Date.now()}`,
-    business_name: businessName,
-    formatted_address: manualData.formattedAddress || '',
-    rating: Number(manualData.rating) || 0,
-    total_reviews: Number(manualData.totalReviews) || 0,
-    google_maps_url: manualData.googleMapsUrl || '',
-    website_url: manualData.websiteUrl || '',
-    phone_number: manualData.phoneNumber || '',
-    photos: [],
-    reviews: []
-  };
-
-  // 1. If we have a Google Maps Place ID and Google Maps API Key
-  if (apiKey && placeIdentifier && placeIdentifier.startsWith('ChI')) {
-    try {
-      const res = await fetch(`${PLACES_DETAILS_URL}/${placeIdentifier}`, {
-        headers: {
-          'X-Goog-Api-Key': apiKey,
-          'X-Goog-FieldMask': 'id,displayName,formattedAddress,rating,userRatingCount,googleMapsUri,websiteUri,nationalPhoneNumber,reviews,types,photos'
-        }
-      });
-      if (res.ok) {
-        const d = await res.json();
-        baseData.business_name = d.displayName?.text || businessName;
-        baseData.formatted_address = d.formattedAddress || '';
-        baseData.rating = d.rating || 0;
-        baseData.total_reviews = d.userRatingCount || 0;
-        baseData.google_maps_url = d.googleMapsUri || '';
-        baseData.website_url = d.websiteUri || '';
-        baseData.phone_number = d.nationalPhoneNumber || '';
-        
-        if (d.photos && Array.isArray(d.photos)) {
-          baseData.photos = d.photos.slice(0, 10).map(photo => {
-            return `https://places.googleapis.com/v1/${photo.name}/media?maxHeightPx=400&maxWidthPx=400&key=${apiKey}`;
-          });
-        }
-        
-        if (d.reviews && Array.isArray(d.reviews)) {
-          baseData.reviews = d.reviews.map(r => ({
-            author_name: r.authorAttribution?.displayName || 'Google Kullanıcısı',
-            author_photo: r.authorAttribution?.photoUri || null,
-            rating: r.rating || 5,
-            text: r.text?.text || '',
-            relative_time: r.relativePublishTimeDescription || '',
-            publish_time: r.publishTime || new Date().toISOString(),
-            has_owner_response: false,
-            owner_response: null,
-            is_low_rating: Number(r.rating) <= 2
-          }));
-        }
-      }
-    } catch (err) {
-      console.warn('[Places API Details error]:', err.message);
-    }
+  if (!isGooglePlaceId(placeId)) {
+    throw new GoogleBusinessError('INVALID_PLACE_ID', 'Geçerli bir Google Maps işletmesi seçilmedi.', 400);
   }
 
-  // 2. Enrich with Gemini Grounding for comprehensive review analysis & low-star detection
-  if (geminiKey) {
-    try {
-      const ai = new GoogleGenAI({ apiKey: geminiKey });
-      const prompt = `Perform an in-depth Google Business Profile and Google Maps Reviews Audit for:
-Business Name: "${businessName}"
-Place / Address Context: "${baseData.formatted_address || country}"
-
-Search Google Maps and review sources for this exact business. 
-Extract as many real customer reviews as possible (aim for 40 to 50 detailed reviews covering 5-star, 4-star, 3-star, 2-star, and 1-star ratings).
-CRITICAL: For every review, check whether the business owner or management replied ("İşletme Yanıtı", "Sahibin Yanıtı", "Owner response").
-- If there is an owner response:
-  "has_owner_response": true,
-  "owner_response": "Exact text of the owner/manager response"
-- If there is no owner response:
-  "has_owner_response": false,
-  "owner_response": null
-
-Return JSON in this exact structure:
-{
-  "rating": 4.6,
-  "total_reviews": 120,
-  "formatted_address": "City, Street, Country",
-  "google_maps_url": "https://maps.google.com/...",
-  "website_url": "Website url",
-  "phone_number": "Phone number",
-  "rating_breakdown": {
-    "1": 4,
-    "2": 2,
-    "3": 8,
-    "4": 26,
-    "5": 80
-  },
-  "reviews": [
-    {
-      "author_name": "Reviewer Name",
-      "rating": 5,
-      "text": "Exact customer review text",
-      "relative_time": "2 hafta önce",
-      "has_owner_response": true,
-      "owner_response": "Değerli müşterimiz, güzel geri bildiriminiz için teşekkür ederiz...",
-      "issue_category": "Hizmet / Lezzet / Destek / Fiyat / Genel"
-    }
-  ],
-  "ai_analysis": {
-    "chronic_complaint_themes": [
-      {
-        "theme": "Kısa şikayet başlığı (örn: İade ve Değişim Süreci)",
-        "count": 3,
-        "severity": "high/medium/low",
-        "description": "Müşterilerin şikayetçi olduğu spesifik durum özeti"
-      }
-    ],
-    "ai_recommendation_risk": "Düşük Risk" | "Orta Risk" | "Yüksek Risk",
-    "ai_risk_explanation": "Gemini, Perplexity ve ChatGPT Search bu yorumları okuduğunda işletmeyi tavsiye eder mi? Neden?",
-    "sentiment_summary": "İşletmenin Google profilindeki müşteri algısı ve puan dağılımının 2 cümlelik özeti.",
-    "actionable_recommendations": [
-      "1. Yanıtsız kalan 1 yıldızlı yorumlara hemen telafi odaklı yanıt verilmesi.",
-      "2. Düzenli memnun müşterilerden Google yorumu toplanması."
-    ]
+  const d = await placesDetails(apiKey, placeId, language);
+  if (!d) {
+    throw new GoogleBusinessError('PLACE_NOT_FOUND', 'İşletme Google Maps üzerinde bulunamadı.', 404);
   }
+
+  const reviews = (Array.isArray(d.reviews) ? d.reviews : []).map(r => ({
+    author_name: r.authorAttribution?.displayName || '',
+    author_photo: r.authorAttribution?.photoUri || null,
+    author_url: r.authorAttribution?.uri || null,
+    rating: Number(r.rating) || 0,
+    text: r.text?.text || r.originalText?.text || '',
+    relative_time: r.relativePublishTimeDescription || '',
+    publish_time: r.publishTime || null,
+    google_maps_uri: r.googleMapsUri || null,
+    is_low_rating: Number(r.rating) <= 2
+  }));
+
+  return finalizeBusinessProfile({
+    place_id: d.id || placeId,
+    business_name: d.displayName?.text || '',
+    formatted_address: d.formattedAddress || '',
+    rating: Number(d.rating) || 0,
+    total_reviews: Number(d.userRatingCount) || 0,
+    google_maps_url: d.googleMapsUri || '',
+    website_url: d.websiteUri || '',
+    phone_number: d.nationalPhoneNumber || '',
+    reviews
+  });
 }
-Return pure valid JSON only.`;
 
-      const response = await ai.models.generateContent({
-        model: 'gemini-3.8-flash',
-        contents: prompt,
-        config: {
-          tools: [{ googleSearch: {} }]
-        }
-      });
+function riskFromRating(rating, totalReviews) {
+  if (!totalReviews) return 'Orta Risk';
+  return rating >= 4.3 ? 'Düşük Risk' : rating >= 3.8 ? 'Orta Risk' : 'Yüksek Risk';
+}
 
-      const text = response.text || '';
-      const match = text.match(/\{[\s\S]*\}/);
-      const enriched = match ? JSON.parse(match[0]) : null;
+/**
+ * Derive review statistics strictly from the reviews Google returned.
+ */
+export function finalizeBusinessProfile(profile) {
+  const reviews = profile.reviews || [];
+  const lowStarReviews = reviews.filter(r => Number(r.rating) <= 2);
+  return {
+    ...profile,
+    rating_breakdown: {},
+    ai_recommendation_risk: profile.ai_recommendation_risk || riskFromRating(profile.rating || 0, profile.total_reviews || 0),
+    low_rating_count: lowStarReviews.length,
+    unanswered_low_count: 0,
+    low_star_reviews: lowStarReviews
+  };
+}
 
-      if (enriched) {
-        if (!baseData.rating && enriched.rating) baseData.rating = Number(enriched.rating);
-        if (!baseData.total_reviews && enriched.total_reviews) baseData.total_reviews = Number(enriched.total_reviews);
-        if (!baseData.formatted_address && enriched.formatted_address) baseData.formatted_address = enriched.formatted_address;
-        if (!baseData.google_maps_url && enriched.google_maps_url) baseData.google_maps_url = enriched.google_maps_url;
-        if (!baseData.website_url && enriched.website_url) baseData.website_url = enriched.website_url;
-        if (!baseData.phone_number && enriched.phone_number) baseData.phone_number = enriched.phone_number;
+/**
+ * Gemini analysis of the Google-provided reviews only. No web search, no new data.
+ */
+export async function analyzeBusinessReviews(profile) {
+  const geminiKey = process.env.GEMINI_API_KEY;
+  const reviews = (profile.reviews || []).filter(r => r.text);
+  const baseSummary = { data_source: GOOGLE_PLACES_SOURCE, review_sample_size: (profile.reviews || []).length };
 
-        // Merge reviews
-        if (enriched.reviews && Array.isArray(enriched.reviews) && enriched.reviews.length > 0) {
-          const merged = [...baseData.reviews];
-          for (const er of enriched.reviews) {
-            const exists = merged.some(m => m.text && er.text && m.text.slice(0, 30) === er.text.slice(0, 30));
-            if (!exists) {
-              merged.push({
-                author_name: er.author_name || 'Müşteri',
-                author_photo: null,
-                rating: Number(er.rating) || 1,
-                text: er.text || '',
-                relative_time: er.relative_time || 'Yakın zamanda',
-                publish_time: new Date().toISOString(),
-                has_owner_response: Boolean(er.has_owner_response),
-                owner_response: er.owner_response || null,
-                issue_category: er.issue_category || 'Genel Geri Bildirim',
-                is_low_rating: Number(er.rating) <= 2
-              });
-            }
-          }
-          baseData.reviews = merged;
-        }
-
-        baseData.rating_breakdown = enriched.rating_breakdown || {
-          "1": Math.round(baseData.total_reviews * 0.05),
-          "2": Math.round(baseData.total_reviews * 0.03),
-          "3": Math.round(baseData.total_reviews * 0.07),
-          "4": Math.round(baseData.total_reviews * 0.25),
-          "5": Math.round(baseData.total_reviews * 0.60)
-        };
-
-        baseData.ai_summary = enriched.ai_analysis || {};
-        baseData.ai_recommendation_risk = enriched.ai_analysis?.ai_recommendation_risk || (baseData.rating >= 4.3 ? 'Düşük Risk' : baseData.rating >= 3.8 ? 'Orta Risk' : 'Yüksek Risk');
-      }
-    } catch (err) {
-      console.warn('[Gemini Enrich Review Audit error]:', err.message);
-    }
+  if (!geminiKey || reviews.length === 0) {
+    return {
+      ai_summary: { ...baseSummary, status: 'ready' },
+      ai_recommendation_risk: riskFromRating(profile.rating || 0, profile.total_reviews || 0)
+    };
   }
 
-  // Filter low star reviews
-  const lowStarReviews = (baseData.reviews || []).filter(r => Number(r.rating) <= 2);
-  const lowRatingCount = lowStarReviews.length;
-  const unansweredLowCount = lowStarReviews.filter(r => !r.has_owner_response).length;
+  const reviewLines = reviews
+    .map((r, i) => `${i + 1}. [${r.rating}★] ${r.text.replace(/\s+/g, ' ').slice(0, 1200)}`)
+    .join('\n');
+
+  const prompt = `You analyze Google Maps reviews for a business. Use ONLY the reviews below; do not search, assume or invent anything else.
+
+Business: "${profile.business_name}"
+Google rating: ${profile.rating} / 5 from ${profile.total_reviews} ratings
+Reviews returned by Google (${reviews.length}):
+${reviewLines}
+
+Return JSON in this exact structure (write the text fields in Turkish):
+{
+  "chronic_complaint_themes": [
+    { "theme": "Short complaint title", "count": 1, "severity": "high/medium/low", "description": "What customers complain about" }
+  ],
+  "ai_recommendation_risk": "Düşük Risk" | "Orta Risk" | "Yüksek Risk",
+  "ai_risk_explanation": "Would AI answer engines recommend this business based on this rating and these reviews? Why?",
+  "sentiment_summary": "Two-sentence summary of customer perception in these reviews.",
+  "actionable_recommendations": ["..."]
+}
+Only list complaint themes that actually appear in the reviews above; "count" is the number of those reviews mentioning it. Return pure valid JSON only.`;
+
+  const ai = new GoogleGenAI({ apiKey: geminiKey });
+  const response = await withTimeout(
+    ai.models.generateContent({ model: 'gemini-3.8-flash', contents: prompt }),
+    GEMINI_ANALYSIS_TIMEOUT_MS,
+    'Gemini review analysis'
+  );
+
+  const text = response.text || '';
+  const match = text.match(/\{[\s\S]*\}/);
+  const analysis = match ? JSON.parse(match[0]) : null;
+  if (!analysis) throw new Error('Gemini review analysis returned no JSON');
 
   return {
-    ...baseData,
-    low_rating_count: lowRatingCount,
-    unanswered_low_count: unansweredLowCount,
-    low_star_reviews: lowStarReviews
+    ai_summary: { ...analysis, ...baseSummary, status: 'ready' },
+    ai_recommendation_risk: analysis.ai_recommendation_risk || riskFromRating(profile.rating || 0, profile.total_reviews || 0)
   };
 }
 

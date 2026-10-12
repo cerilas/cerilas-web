@@ -43,11 +43,12 @@ export default function GrowthGoogleBusiness() {
       .catch(() => {});
   }, [activeWorkspace?.id, token]);
 
-  const coverStats = profile ? [
-    { label: 'Google Rating', value: `⭐ ${Number(profile.rating || 0).toFixed(1)} / 5.0`, sub: 'Customer Satisfaction', positive: true },
-    { label: 'Total Reviews', value: `${profile.total_reviews} Reviews`, sub: 'Google Maps Volume' },
-    { label: 'Low Rating (1-2★)', value: `${profile.low_rating_count || 0} Total`, sub: profile.unanswered_low_count > 0 ? `${profile.unanswered_low_count} Unanswered` : 'All Answered' },
-    { label: 'AI Recommendation Risk', value: profile.ai_recommendation_risk || 'Low Risk', sub: 'Local GEO Score' }
+  const sampleReviews = Array.isArray(profile?.reviews) ? profile.reviews : [];
+  const coverStats = profile?.is_verified ? [
+    { label: 'Google Rating', value: `⭐ ${Number(profile.rating || 0).toFixed(1)} / 5.0`, sub: 'Source: Google Maps', positive: true },
+    { label: 'Total Ratings', value: `${profile.total_reviews}`, sub: 'Google Maps rating count' },
+    { label: 'Low-Star (1-2★)', value: `${sampleReviews.filter(r => Number(r.rating) <= 2).length} / ${sampleReviews.length}`, sub: 'In latest Google reviews' },
+    { label: 'AI Recommendation Risk', value: profile.ai_recommendation_risk || '—', sub: 'Based on Google data' }
   ] : null;
 
   return (
