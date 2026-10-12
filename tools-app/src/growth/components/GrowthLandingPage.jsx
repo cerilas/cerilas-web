@@ -890,10 +890,6 @@ export default function GrowthLandingPage({ onBackToTools, initialDomain = '' })
                   <div className="cl-app-inner-content">
                     {/* Center Composer */}
                     <div className="cl-audit-composer-wrap">
-                      <div className="cl-composer-icon">
-                        <Compass size={24} />
-                      </div>
-
                       <form
                         onSubmit={(e) => {
                           e.preventDefault();
@@ -902,7 +898,9 @@ export default function GrowthLandingPage({ onBackToTools, initialDomain = '' })
                         className="cl-composer-input-bar"
                       >
                         <div className="cl-composer-input-field">
-                          <Globe size={18} className="cl-composer-globe-icon" />
+                          <div className="cl-composer-globe-badge">
+                            <Globe size={19} />
+                          </div>
                           <input
                             ref={inputRef}
                             type="text"

@@ -860,56 +860,71 @@
 /* Audit Input Composer */
 .cl-audit-composer-wrap {
   margin-inline: auto;
-  max-width: 680px;
+  max-width: 720px;
   width: 100%;
-}
-
-.cl-composer-icon {
-  display: flex;
-  width: 48px;
-  height: 48px;
-  margin-inline: auto;
-  align-items: center;
-  justify-content: center;
-  border-radius: 9999px;
-  border: 1px solid var(--cl-card-border);
-  color: var(--cl-muted-fg);
-  background: rgba(0, 0, 0, 0.02);
 }
 
 .cl-composer-input-bar {
-  margin-top: 1.5rem;
+  margin-top: 0.75rem;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  height: 3.35rem;
-  border-radius: 1rem;
-  border: 1px solid var(--cl-card-border);
+  gap: 0.75rem;
+  height: 4.15rem;
+  border-radius: 1.25rem;
+  border: 1.5px solid rgba(0, 0, 0, 0.1);
   background: var(--cl-bg);
-  padding: 0.35rem 0.45rem 0.35rem 0.85rem;
-  box-shadow: 0 1px 3px rgba(16,42,67,0.04), 0 10px 30px -12px rgba(16,42,67,0.18);
+  padding: 0.45rem 0.55rem 0.45rem 0.95rem;
+  box-shadow: 0 4px 12px rgba(16, 42, 67, 0.05), 0 20px 48px -12px rgba(16, 42, 67, 0.16);
   box-sizing: border-box;
   width: 100%;
+  transition: all 0.2s ease;
+}
+
+.cl-composer-input-bar:focus-within {
+  border-color: #0284c7;
+  box-shadow: 0 0 0 4px rgba(2, 132, 199, 0.14), 0 24px 50px -14px rgba(2, 132, 199, 0.22);
 }
 
 .dark .cl-composer-input-bar,
 [data-theme='dark'] .cl-composer-input-bar {
-  box-shadow: 0 10px 30px -12px rgba(0, 0, 0, 0.6);
+  border-color: rgba(255, 255, 255, 0.14);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4), 0 24px 56px -12px rgba(0, 0, 0, 0.75);
+}
+
+.dark .cl-composer-input-bar:focus-within,
+[data-theme='dark'] .cl-composer-input-bar:focus-within {
+  border-color: #38bdf8;
+  box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.2), 0 24px 56px -12px rgba(0, 0, 0, 0.85);
 }
 
 .cl-composer-input-field {
   display: flex;
   align-items: center;
-  gap: 0.65rem;
+  gap: 0.75rem;
   flex: 1;
   min-width: 0;
   height: 100%;
 }
 
-.cl-composer-globe-icon {
+.cl-composer-globe-badge {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(2, 132, 199, 0.08);
+  color: #0284c7;
+  border: 1px solid rgba(2, 132, 199, 0.18);
   flex-shrink: 0;
-  opacity: 0.5;
-  color: var(--cl-fg);
+  transition: all 0.2s ease;
+}
+
+.dark .cl-composer-globe-badge,
+[data-theme='dark'] .cl-composer-globe-badge {
+  background: rgba(56, 189, 248, 0.12);
+  color: #38bdf8;
+  border-color: rgba(56, 189, 248, 0.25);
 }
 
 .cl-composer-input {
@@ -918,41 +933,49 @@
   border: none;
   background: transparent;
   outline: none;
-  font-size: 0.95rem;
+  font-size: 1.05rem;
+  font-weight: 500;
+  letter-spacing: -0.01em;
   color: var(--cl-fg);
   height: 100%;
 }
 
 .cl-composer-input::placeholder {
   color: var(--cl-muted-fg);
+  font-weight: 400;
   text-overflow: ellipsis;
 }
 
 .cl-composer-btn {
   display: inline-flex;
-  height: 2.55rem;
+  height: 3.2rem;
   align-items: center;
-  gap: 0.4rem;
-  padding-inline: 1.25rem;
-  border-radius: 0.75rem;
+  gap: 0.45rem;
+  padding-inline: 1.5rem;
+  border-radius: 0.95rem;
   background: var(--cl-fg);
   color: var(--cl-bg);
   border: none;
-  font-size: 0.88rem;
-  font-weight: 600;
+  font-size: 0.95rem;
+  font-weight: 700;
   cursor: pointer;
-  transition: opacity 0.15s ease, transform 0.15s ease;
+  transition: all 0.18s ease;
   white-space: nowrap;
   flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
 }
 
 .cl-composer-btn:hover:not(:disabled) {
-  opacity: 0.88;
+  opacity: 0.92;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
 }
 
 .cl-composer-btn:disabled {
-  opacity: 0.6;
+  opacity: 0.55;
   cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
 }
 
 .cl-composer-presets-row {
@@ -2470,48 +2493,54 @@
     height: auto !important;
     flex-direction: column !important;
     align-items: stretch !important;
-    padding: 0.55rem !important;
-    gap: 0.55rem !important;
-    border-radius: 1rem !important;
+    padding: 0.7rem !important;
+    gap: 0.65rem !important;
+    border-radius: 1.25rem !important;
     box-sizing: border-box !important;
     width: 100% !important;
   }
   .cl-composer-input-field {
     width: 100% !important;
-    height: 2.85rem !important;
-    padding: 0 0.75rem !important;
-    border-radius: 0.75rem !important;
+    height: 3.25rem !important;
+    padding: 0 0.85rem !important;
+    border-radius: 0.95rem !important;
     background: rgba(0, 0, 0, 0.03) !important;
     border: 1px solid var(--cl-card-border) !important;
     box-sizing: border-box !important;
     display: flex !important;
     align-items: center !important;
-    gap: 0.6rem !important;
+    gap: 0.75rem !important;
   }
   .dark .cl-composer-input-field,
   [data-theme='dark'] .cl-composer-input-field {
-    background: rgba(255, 255, 255, 0.04) !important;
-    border-color: rgba(255, 255, 255, 0.1) !important;
+    background: rgba(255, 255, 255, 0.05) !important;
+    border-color: rgba(255, 255, 255, 0.12) !important;
+  }
+  .cl-composer-globe-badge {
+    width: 36px !important;
+    height: 36px !important;
+    border-radius: 9px !important;
   }
   .cl-composer-input {
     width: 100% !important;
     height: 100% !important;
-    font-size: 0.88rem !important;
+    font-size: 0.95rem !important;
+    font-weight: 500 !important;
     padding: 0 !important;
   }
   .cl-composer-btn {
     width: 100% !important;
-    height: 2.75rem !important;
+    height: 3.15rem !important;
     justify-content: center !important;
-    font-size: 0.92rem !important;
-    font-weight: 600 !important;
-    border-radius: 0.75rem !important;
+    font-size: 0.96rem !important;
+    font-weight: 700 !important;
+    border-radius: 0.95rem !important;
   }
   .cl-composer-presets-row {
     flex-direction: column !important;
     align-items: flex-start !important;
     gap: 0.5rem !important;
-    margin-top: 0.75rem !important;
+    margin-top: 0.85rem !important;
   }
   .cl-pill-tabs-bar {
     max-width: 100%;
@@ -2663,19 +2692,23 @@
     padding-inline: 0.55rem;
   }
   .cl-composer-input-bar {
-    padding: 0.5rem !important;
-    gap: 0.5rem !important;
+    padding: 0.65rem !important;
+    gap: 0.6rem !important;
   }
   .cl-composer-input-field {
-    height: 2.65rem !important;
-    padding: 0 0.65rem !important;
+    height: 3.1rem !important;
+    padding: 0 0.75rem !important;
+  }
+  .cl-composer-globe-badge {
+    width: 32px !important;
+    height: 32px !important;
   }
   .cl-composer-input {
-    font-size: 0.84rem !important;
+    font-size: 0.92rem !important;
   }
   .cl-composer-btn {
-    height: 2.65rem !important;
-    font-size: 0.88rem !important;
+    height: 3.05rem !important;
+    font-size: 0.94rem !important;
   }
   .cl-formats-grid {
     width: 96%;
