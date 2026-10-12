@@ -169,7 +169,7 @@ export function buildDailyReportHtml(workspace, metrics, dateStr) {
                   <td width="24%" style="background: #111827; border: 1px solid #1f2937; border-radius: 10px; padding: 12px; vertical-align: top;">
                     <div style="font-size: 10px; color: #94a3b8; text-transform: uppercase; font-weight: 700;">Technical Health</div>
                     <div style="font-size: 18px; font-weight: 800; color: #10b981; margin: 4px 0 2px;">${technical.score || 90}/100</div>
-                    <div style="font-size: 11px; color: #64748b;">${technical.pagesCrawled || 251} Pages Crawled</div>
+                    <div style="font-size: 11px; color: #64748b;">${technical.pagesCrawled || 1} Pages Crawled</div>
                   </td>
                 </tr>
               </table>

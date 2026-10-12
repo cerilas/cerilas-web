@@ -377,7 +377,7 @@
 .cl-hero-title {
   margin-top: 1rem;
   font-size: 2.15rem;
-  line-height: 1.08;
+  line-height: 1.25;
   font-weight: 400;
   letter-spacing: -0.02em;
   color: var(--cl-fg);
@@ -386,12 +386,100 @@
 @media (min-width: 640px) {
   .cl-hero-title {
     font-size: 2.75rem;
+    line-height: 1.2;
   }
 }
 
 @media (min-width: 960px) {
   .cl-hero-title {
     font-size: 3.25rem;
+    line-height: 1.18;
+  }
+}
+
+/* Inline Overlapping AI Logos in Main Hero Title */
+.cl-inline-logos-stack {
+  display: inline-flex;
+  vertical-align: middle;
+  align-items: center;
+  margin: 0 0.45rem 0.2rem 0.45rem;
+  user-select: none;
+}
+
+.cl-inline-logo-bubble {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 3px solid var(--cl-bg, #ffffff);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: -12px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.12);
+  transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.22s ease, z-index 0.22s ease;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.dark .cl-inline-logo-bubble,
+[data-theme='dark'] .cl-inline-logo-bubble {
+  background: #ffffff;
+  border-color: #0a0a0a;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.6);
+}
+
+.cl-inline-logo-bubble:first-child {
+  margin-left: 0;
+}
+
+.cl-inline-logo-bubble:hover {
+  transform: translateY(-5px) scale(1.24);
+  z-index: 10;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.25);
+}
+
+.cl-inline-logo-bubble img {
+  display: block;
+  object-fit: contain;
+  pointer-events: none;
+}
+
+.cl-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+@media (max-width: 768px) {
+  .cl-inline-logos-stack {
+    margin: 0 0.25rem 0.15rem 0.25rem;
+  }
+  .cl-inline-logo-bubble {
+    width: 33px;
+    height: 33px;
+    border-width: 2px;
+    margin-left: -9px;
+  }
+  .cl-inline-logo-bubble img {
+    max-width: 65%;
+    max-height: 65%;
+  }
+}
+
+@media (max-width: 480px) {
+  .cl-inline-logo-bubble {
+    width: 27px;
+    height: 27px;
+    border-width: 1.5px;
+    margin-left: -8px;
   }
 }
 
@@ -2225,7 +2313,7 @@
   }
   .cl-hero-title {
     font-size: clamp(1.65rem, 6.5vw, 2.15rem);
-    line-height: 1.15;
+    line-height: 1.25;
     margin-top: 0.75rem;
   }
   .cl-hero-subtitle {

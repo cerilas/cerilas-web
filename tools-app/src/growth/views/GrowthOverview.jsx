@@ -335,6 +335,105 @@ export default function GrowthOverview() {
       </div>
 
       {/* ========================================================= */}
+      {/* 5-PILLAR DIAGNOSTIC SUBSCORES TELEMETRY STRIP */}
+      {/* ========================================================= */}
+      <div className="station-subscores-strip">
+        {[
+          {
+            id: 'technical',
+            label: 'Technical Health',
+            score: subscores?.technical ?? technicalAudit?.healthScore ?? 80,
+            weight: '25% Weight',
+            tab: 'audit',
+            color: '#10b981',
+            bgGlow: 'rgba(16, 185, 129, 0.12)',
+            icon: ShieldCheck,
+            status: (subscores?.technical ?? 80) >= 80 ? 'Optimal' : (subscores?.technical ?? 80) >= 60 ? 'Warning' : 'Critical'
+          },
+          {
+            id: 'ai',
+            label: 'AI & GEO Visibility',
+            score: subscores?.ai ?? aiVisibility?.score ?? 60,
+            weight: '25% Weight',
+            tab: 'ai-visibility',
+            color: '#818cf8',
+            bgGlow: 'rgba(129, 140, 248, 0.12)',
+            icon: Bot,
+            status: (subscores?.ai ?? 60) >= 70 ? 'High' : (subscores?.ai ?? 60) >= 40 ? 'Moderate' : 'Low'
+          },
+          {
+            id: 'search',
+            label: 'Search Momentum',
+            score: subscores?.search ?? 50,
+            weight: '20% Weight',
+            tab: 'search',
+            color: '#f59e0b',
+            bgGlow: 'rgba(245, 158, 11, 0.12)',
+            icon: Search,
+            status: isGscConnected ? 'GSC Synced' : 'Baseline'
+          },
+          {
+            id: 'authority',
+            label: 'Authority & Citations',
+            score: subscores?.authority ?? directories?.coverageRate ?? 50,
+            weight: '15% Weight',
+            tab: 'directories',
+            color: '#38bdf8',
+            bgGlow: 'rgba(56, 189, 248, 0.12)',
+            icon: Globe,
+            status: `${directories?.verified || 0}/${directories?.total || 16} Claimed`
+          },
+          {
+            id: 'content',
+            label: 'Content Indexability',
+            score: subscores?.content ?? 65,
+            weight: '15% Weight',
+            tab: 'audit',
+            color: '#c084fc',
+            bgGlow: 'rgba(192, 132, 252, 0.12)',
+            icon: Layers,
+            status: (subscores?.content ?? 65) >= 75 ? 'Healthy' : 'Needs Depth'
+          }
+        ].map((item) => {
+          const IconComp = item.icon;
+          return (
+            <div
+              key={item.id}
+              className="subscore-station-pod"
+              onClick={() => setActiveTab(item.tab)}
+              role="button"
+              tabIndex={0}
+              title={`View ${item.label} details`}
+            >
+              <div className="ssp-head">
+                <div className="ssp-icon-wrap" style={{ color: item.color, background: item.bgGlow }}>
+                  <IconComp size={14} />
+                </div>
+                <span className="ssp-status-badge" style={{ color: item.color }}>{item.status}</span>
+              </div>
+              <div className="ssp-body">
+                <span className="ssp-label">{item.label}</span>
+                <div className="ssp-score-row">
+                  <span className="ssp-score-num" style={{ color: item.color }}>{item.score}</span>
+                  <span className="ssp-score-max">/100</span>
+                </div>
+              </div>
+              <div className="ssp-track">
+                <div
+                  className="ssp-fill"
+                  style={{ width: `${Math.min(100, item.score)}%`, backgroundColor: item.color }}
+                />
+              </div>
+              <div className="ssp-footer">
+                <span className="ssp-weight">{item.weight}</span>
+                <span className="ssp-link">Details &rarr;</span>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* ========================================================= */}
       {/* THE 7 MODULAR SPACE STATION CARDS GRID */}
       {/* ========================================================= */}
       <div className="station-modules-grid">

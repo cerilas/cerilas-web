@@ -706,8 +706,29 @@ export default function GrowthLandingPage({ onBackToTools, initialDomain = '' })
           </div>
 
           <h1 className="cl-hero-title">
-            Win citations across AI search,<br />
-            grow your organic future.
+            Is your website cited by{' '}
+            <span className="cl-inline-logos-stack" aria-label="AI search">
+              <span className="cl-sr-only">AI search </span>
+              <span className="cl-inline-logo-bubble" title="Google Gemini">
+                <img src="/AI-logos/gemini-color.svg" alt="Google Gemini" width={24} height={24} loading="eager" />
+              </span>
+              <span className="cl-inline-logo-bubble" title="ChatGPT Search">
+                <img src="/AI-logos/chatgpt-black.svg" alt="ChatGPT Search" width={22} height={22} loading="eager" />
+              </span>
+              <span className="cl-inline-logo-bubble" title="Perplexity AI">
+                <img src="/AI-logos/perplexity-color.svg" alt="Perplexity AI" width={22} height={22} loading="eager" />
+              </span>
+              <span className="cl-inline-logo-bubble" title="Claude (Anthropic)">
+                <img src="/AI-logos/claude-color.svg" alt="Claude" width={22} height={22} loading="eager" />
+              </span>
+              <span className="cl-inline-logo-bubble" title="Grok (xAI)">
+                <img src="/AI-logos/grok-black.svg" alt="Grok" width={20} height={20} loading="eager" />
+              </span>
+              <span className="cl-inline-logo-bubble" title="Google Search Grounding">
+                <img src="/AI-logos/google-color.svg" alt="Google Grounding" width={22} height={22} loading="eager" />
+              </span>
+            </span>{' '}
+            engines?
           </h1>
 
           <p className="cl-hero-subtitle">
@@ -1147,8 +1168,8 @@ export default function GrowthLandingPage({ onBackToTools, initialDomain = '' })
               <div className="cl-metrics-row">
                 <div className="cl-metric-stat-box">
                   <span className="cl-metric-stat-title">Overall Authority Score</span>
-                  <div className="cl-metric-stat-val" style={{ color: scanResult.scores?.overall >= 70 ? '#10b981' : '#f59e0b' }}>
-                    {scanResult.scores?.overall || 78}/100
+                  <div className="cl-metric-stat-val" style={{ color: (scanResult.scores?.overall || (scanResult.technicalScore ? Math.round((scanResult.technicalScore * 0.5) + ((scanResult.geoScore || 65) * 0.5)) : 78)) >= 70 ? '#10b981' : '#f59e0b' }}>
+                    {scanResult.scores?.overall || (scanResult.technicalScore ? Math.round((scanResult.technicalScore * 0.5) + ((scanResult.geoScore || 65) * 0.5)) : 78)}/100
                   </div>
                   <span style={{ fontSize: '0.78rem', color: 'var(--cl-muted-fg)' }}>Derived from GEO & tech signals</span>
                 </div>

@@ -617,7 +617,7 @@ export default function GrowthReports() {
                 </div>
                 <div style={{ background: 'rgba(56, 189, 248, 0.1)', border: '1px solid rgba(56, 189, 248, 0.3)', borderRadius: '10px', padding: '6px 12px', textAlign: 'center' }}>
                   <div style={{ fontSize: '0.65rem', color: '#94a3b8', fontWeight: 700 }}>GROWTH SCORE</div>
-                  <div style={{ fontSize: '1.35rem', fontWeight: 900, color: '#38bdf8' }}>{activeWorkspace?.growth_score || 92}</div>
+                  <div style={{ fontSize: '1.35rem', fontWeight: 900, color: '#38bdf8' }}>{previewData?.growthScore || activeWorkspace?.growth_score || 80}</div>
                   <div style={{ fontSize: '0.65rem', color: '#10b981', fontWeight: 600 }}>/ 100 Pts</div>
                 </div>
               </div>
@@ -626,23 +626,23 @@ export default function GrowthReports() {
               <div className="preview-kpi-grid">
                 <div className="preview-kpi-pod">
                   <div className="pk-label">Unique Visitors</div>
-                  <div className="pk-val text-cyan">{(previewData?.analytics?.uniqueVisitors || 85).toLocaleString('en-US')}</div>
-                  <div className="pk-sub">{previewData?.analytics?.sessions || 258} Sessions (GA4)</div>
+                  <div className="pk-val text-cyan">{(previewData?.analytics?.uniqueVisitors || 0).toLocaleString('en-US')}</div>
+                  <div className="pk-sub">{previewData?.analytics?.sessions || 0} Sessions (GA4)</div>
                 </div>
                 <div className="preview-kpi-pod">
                   <div className="pk-label">Organic Search</div>
-                  <div className="pk-val text-amber">{previewData?.search?.clicks || 7} Clicks</div>
-                  <div className="pk-sub">{previewData?.search?.impressions || 362} Impressions (GSC)</div>
+                  <div className="pk-val text-amber">{previewData?.search?.clicks || 0} Clicks</div>
+                  <div className="pk-sub">{previewData?.search?.impressions || 0} Impressions (GSC)</div>
                 </div>
                 <div className="preview-kpi-pod">
                   <div className="pk-label">AI Engine (GEO)</div>
-                  <div className="pk-val text-indigo">67% Citations</div>
-                  <div className="pk-sub">Gemini 3.8 Flash</div>
+                  <div className="pk-val text-indigo">{previewData?.aiVisibility?.citationRate ?? previewData?.subscores?.ai ?? 0}% Citations</div>
+                  <div className="pk-sub">{previewData?.aiVisibility?.activeModel || 'Gemini 3.8 Flash'}</div>
                 </div>
                 <div className="preview-kpi-pod">
                   <div className="pk-label">Technical Health</div>
-                  <div className="pk-val text-emerald">{previewData?.technicalAudit?.score || 90}/100</div>
-                  <div className="pk-sub">{previewData?.technicalAudit?.pagesCrawled || 251} Pages Crawled</div>
+                  <div className="pk-val text-emerald">{previewData?.technicalAudit?.score || previewData?.technicalAudit?.healthScore || previewData?.subscores?.technical || 85}/100</div>
+                  <div className="pk-sub">{previewData?.technicalAudit?.pagesCrawled || previewData?.websites?.[0]?.pages_crawled || 1} Pages Crawled</div>
                 </div>
               </div>
 

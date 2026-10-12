@@ -250,6 +250,55 @@ function GrowthInner({ onBackToTools }) {
 }
 
 export default function GrowthApp({ onBackToTools }) {
+  // Synchronize browser tab favicon with GrowthControl platform logo (/cgrowthlogo.svg)
+  useEffect(() => {
+    const iconLinks = Array.from(document.querySelectorAll("link[rel*='icon']"));
+    iconLinks.forEach((link) => {
+      if (!link.dataset.origHref) {
+        link.dataset.origHref = link.getAttribute('href') || '';
+        link.dataset.origSizes = link.getAttribute('sizes') || '';
+        link.dataset.origType = link.getAttribute('type') || '';
+      }
+      link.setAttribute('href', '/cgrowthlogo.svg');
+      link.setAttribute('type', 'image/svg+xml');
+      if (link.hasAttribute('sizes')) {
+        link.removeAttribute('sizes');
+      }
+    });
+
+    let svgIcon = document.querySelector("link[rel='icon'][type='image/svg+xml']");
+    if (!svgIcon) {
+      svgIcon = document.createElement('link');
+      svgIcon.rel = 'icon';
+      svgIcon.type = 'image/svg+xml';
+      svgIcon.href = '/cgrowthlogo.svg';
+      document.head.appendChild(svgIcon);
+    } else {
+      svgIcon.setAttribute('href', '/cgrowthlogo.svg');
+    }
+
+    return () => {
+      // Restore default favicon links when exiting GrowthControl
+      const currentIcons = Array.from(document.querySelectorAll("link[rel*='icon']"));
+      currentIcons.forEach((link) => {
+        if (link.dataset.origHref) {
+          link.setAttribute('href', link.dataset.origHref);
+          if (link.dataset.origSizes) {
+            link.setAttribute('sizes', link.dataset.origSizes);
+          } else {
+            link.removeAttribute('sizes');
+          }
+          if (link.dataset.origType) {
+            link.setAttribute('type', link.dataset.origType);
+          }
+          delete link.dataset.origHref;
+          delete link.dataset.origSizes;
+          delete link.dataset.origType;
+        }
+      });
+    };
+  }, []);
+
   return (
     <GrowthProvider>
       <GrowthInner onBackToTools={onBackToTools} />

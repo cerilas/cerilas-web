@@ -37,6 +37,10 @@ import {
   checkAndIncrementDailyUsage,
   getGrowthLimitsSummary
 } from '../utils/growthPlanLimits.js';
+import {
+  calculateWorkspaceScores,
+  calculateQuickScanScores
+} from '../utils/growthScoreService.js';
 
 const router = express.Router();
 const JWT_SECRET = process.env.JWT_SECRET || 'cerilas_admin_jwt_secret_2026';
@@ -191,6 +195,7 @@ router.post('/scan', async (req, res) => {
 
     const scanResult = await scanDomain(check.url);
     if (!scanResult.domain) scanResult.domain = check.domain;
+    scanResult.scores = calculateQuickScanScores(scanResult);
     const brandProfile = await extractBrandProfileWithAi(scanResult);
 
     res.json({
@@ -1318,6 +1323,8 @@ function buildOverviewTelemetry(workspace, range = '30d', extra = {}) {
 
   const technicalAudit = {
     healthScore,
+    score: healthScore,
+    pagesCrawled: latestCrawl?.pages_crawled || 1,
     criticalIssuesCount: criticalCount,
     highIssuesCount: highCount,
     mediumIssuesCount: mediumCount,
@@ -1581,13 +1588,26 @@ router.get('/workspaces/:slugOrId/overview', requireAuth, async (req, res) => {
       gaPerf: gaPerfRes.rows[0] || null
     });
 
+    // Dynamically recalculate and persist live subscores & overall workspace growth score
+    let dynamicScores = { 
+      growthScore: workspace.growth_score || 75, 
+      subscores: workspace.subscores || { search: 50, technical: 75, content: 60, ai: 60, authority: 50 },
+      workspace
+    };
+    try {
+      const calcResult = await calculateWorkspaceScores(authPool, workspace.id, workspace);
+      dynamicScores = calcResult;
+    } catch (scoreErr) {
+      console.warn('[Overview calculateWorkspaceScores Warning]:', scoreErr.message);
+    }
+
     res.json({
       success: true,
       data: {
-        workspace,
+        workspace: dynamicScores.workspace || workspace,
         websites: websitesRes.rows,
-        growthScore: workspace.growth_score || 92,
-        subscores: workspace.subscores || { search: 82, technical: 96, content: 78, ai: 80, authority: 74 },
+        growthScore: dynamicScores.growthScore,
+        subscores: dynamicScores.subscores,
         opportunities: oppsRes.rows,
         competitors: compRes.rows,
         integrations: integrationsRes.rows,
@@ -1656,6 +1676,26 @@ router.get('/workspaces/:slugOrId/audit', requireAuth, async (req, res) => {
   } catch (err) {
     console.error('[Growth Audit Error]:', err);
     res.status(500).json({ error: 'Denetim verileri alınamadı.' });
+  }
+});
+
+/**
+ * POST /api/growth/workspaces/:slugOrId/recalculate-scores
+ * Recalculate dynamic subscores and composite growth score on demand
+ */
+router.post('/workspaces/:slugOrId/recalculate-scores', requireAuth, async (req, res) => {
+  try {
+    const authData = await resolveAndAuthorizeWorkspace(req, req.params.slugOrId);
+    if (!authData) return res.status(404).json({ error: 'Çalışma alanı bulunamadı.' });
+
+    const result = await calculateWorkspaceScores(authPool, authData.workspace.id, authData.workspace);
+    res.json({
+      success: true,
+      data: result
+    });
+  } catch (err) {
+    console.error('[Recalculate Scores Error]:', err);
+    res.status(500).json({ error: 'Skorlar hesaplanamadı.' });
   }
 });
 
@@ -1789,12 +1829,21 @@ router.post('/workspaces/:slugOrId/audit/rescan', requireAuth, async (req, res) 
       [crawlRunId]
     );
 
+    // Recalculate workspace scores
+    let updatedScores = null;
+    try {
+      updatedScores = await calculateWorkspaceScores(authPool, workspace.id);
+    } catch (e) {
+      console.warn('[Audit Rescan Score Calc Error]:', e.message);
+    }
+
     res.json({
       success: true,
       data: {
         issues: issuesRes.rows,
         pages: pagesRes.rows,
-        lastRun: runRes.rows[0] || null
+        lastRun: runRes.rows[0] || null,
+        scores: updatedScores
       }
     });
 
@@ -2459,9 +2508,18 @@ router.post('/workspaces/:slugOrId/ai-reports', requireAuth, async (req, res) =>
       ]
     );
 
+    // Recalculate workspace scores
+    let updatedScores = null;
+    try {
+      updatedScores = await calculateWorkspaceScores(authPool, workspace.id);
+    } catch (e) {
+      console.warn('[AI Report Score Calc Error]:', e.message);
+    }
+
     res.json({
       success: true,
-      data: insertRes.rows[0]
+      data: insertRes.rows[0],
+      scores: updatedScores
     });
   } catch (err) {
     console.error('Save AI report error:', err);
@@ -2622,9 +2680,20 @@ router.post('/workspaces/:slugOrId/geo-readiness/scan', requireAuth, async (req,
       ]
     );
 
+    // Recalculate workspace scores
+    let updatedScores = null;
+    try {
+      updatedScores = await calculateWorkspaceScores(authPool, workspace.id);
+    } catch (e) {
+      console.warn('[GEO Rescan Score Calc Error]:', e.message);
+    }
+
     res.json({
       success: true,
-      data: auditData
+      data: {
+        ...auditData,
+        scores: updatedScores
+      }
     });
   } catch (err) {
     console.error('[POST GEO Readiness Scan Error]:', err);
@@ -3815,7 +3884,15 @@ router.patch('/workspaces/:slugOrId/directories/:dirId', requireAuth, async (req
       [authData.workspace.id, dirId, newStatus, submission_url || '']
     );
 
-    res.json({ success: true, message: 'Dizin durumu güncellendi.', status: newStatus });
+    // Recalculate workspace scores
+    let updatedScores = null;
+    try {
+      updatedScores = await calculateWorkspaceScores(authPool, authData.workspace.id);
+    } catch (e) {
+      console.warn('[Directory Status Score Calc Error]:', e.message);
+    }
+
+    res.json({ success: true, message: 'Dizin durumu güncellendi.', status: newStatus, scores: updatedScores });
   } catch (err) {
     console.error('Patch directory status error:', err);
     res.status(500).json({ error: 'Dizin güncellenemedi.' });

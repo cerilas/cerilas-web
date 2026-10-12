@@ -933,7 +933,7 @@ export default function App() {
         page_path: window.location.pathname + window.location.hash
       });
     }
-  }, [currentSlug, currentLegalSlug, isPricing, tools, language]);
+  }, [currentSlug, currentLegalSlug, isPricing, isGrowthView, tools, language]);
 
   // Fetch active tools from database
   useEffect(() => {

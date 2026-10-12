@@ -31,17 +31,19 @@ const NAV_GROUPS = [
     ]
   },
   {
+    title: 'AI SEARCH (GEO)',
+    isFeatured: true,
+    badge: 'NEXT-GEN',
+    items: [
+      { id: 'ai-visibility', label: 'AI Visibility Engine', icon: BrainCircuit, requiresSetup: true, specialBadge: 'LLM Radar' },
+      { id: 'google-business', label: 'Google Business Radar', icon: MapPin, requiresSetup: true }
+    ]
+  },
+  {
     title: 'SEARCH & TRAFFIC',
     items: [
       { id: 'search', label: 'Search Performance (GSC)', icon: Search, requiresSetup: true },
       { id: 'analytics', label: 'Web Analytics (GA4)', icon: Activity, requiresSetup: true }
-    ]
-  },
-  {
-    title: 'AI SEARCH (GEO)',
-    items: [
-      { id: 'ai-visibility', label: 'AI Visibility Engine', icon: BrainCircuit, requiresSetup: true },
-      { id: 'google-business', label: 'Google Business Radar', icon: MapPin, requiresSetup: true }
     ]
   },
   {
@@ -232,13 +234,27 @@ export default function GrowthSidebar() {
       {/* Navigation Sections */}
       <div className="growth-sidebar-nav">
         {NAV_GROUPS.map((group, groupIdx) => (
-          <div key={group.title} className="growth-nav-group">
+          <div 
+            key={group.title} 
+            className={`growth-nav-group ${group.isFeatured ? 'is-featured-ai-group' : ''}`}
+          >
             {!isCollapsed ? (
-              <span className="growth-group-title">{group.title}</span>
+              <div className={`growth-group-header-row ${group.isFeatured ? 'is-featured-header' : ''}`}>
+                <span className={`growth-group-title ${group.isFeatured ? 'is-featured-title' : ''}`}>
+                  {group.isFeatured && <Sparkles size={11} className="ai-title-sparkle" />}
+                  <span>{group.title}</span>
+                </span>
+                {group.badge && (
+                  <span className="growth-group-featured-badge">
+                    <span className="ai-pulse-dot" />
+                    <span>{group.badge}</span>
+                  </span>
+                )}
+              </div>
             ) : (
               groupIdx > 0 && <div className="growth-nav-divider" />
             )}
-            <div className="growth-group-items">
+            <div className={`growth-group-items ${group.isFeatured ? 'is-featured-items' : ''}`}>
               {group.items.map((item) => {
                 const Icon = item.icon;
                 const isActive = activeTab === item.id;
@@ -247,7 +263,7 @@ export default function GrowthSidebar() {
                   <button
                     key={item.id}
                     type="button"
-                    className={`growth-nav-item ${isActive ? 'is-active' : ''} ${needsSetup ? 'requires-setup' : ''} ${isCollapsed ? 'is-collapsed' : ''}`}
+                    className={`growth-nav-item ${isActive ? 'is-active' : ''} ${needsSetup ? 'requires-setup' : ''} ${isCollapsed ? 'is-collapsed' : ''} ${group.isFeatured ? 'is-featured-ai-item' : ''} ${item.id === 'ai-visibility' ? 'is-hero-ai-item' : ''}`}
                     onClick={() => {
                       setActiveTab(item.id);
                       if (activeWorkspace) {
@@ -280,6 +296,10 @@ export default function GrowthSidebar() {
                           <span className="growth-nav-setup-tag" title="Setup / Connection Action Required">
                             <Plug size={11} strokeWidth={2.2} />
                             <span>Setup</span>
+                          </span>
+                        ) : item.specialBadge ? (
+                          <span className="growth-nav-ai-glow-badge">
+                            {item.specialBadge}
                           </span>
                         ) : (
                           <>
