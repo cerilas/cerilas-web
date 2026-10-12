@@ -9,7 +9,6 @@ import {
   Check, 
   Bell, 
   ShieldCheck,
-  Calendar,
   Globe,
   Sun,
   Moon,
@@ -277,12 +276,6 @@ export default function GrowthHeader({ onBackToTools }) {
             <ExternalLink size={12} />
           </a>
         )}
-
-        {/* Date Filter Badge */}
-        <div className="growth-header-date-badge">
-          <Calendar size={13} />
-          <span>Last 28 Days</span>
-        </div>
 
         {/* Light / Dark Mode Toggle */}
         <button
