@@ -2505,7 +2505,7 @@
   }
   .cl-composer-input-field {
     width: 100% !important;
-    height: 5rem !important;
+    height: 6.5rem !important;
     padding: 0 1.1rem !important;
     border-radius: 1.25rem !important;
     background: rgba(0, 0, 0, 0.03) !important;
@@ -2701,7 +2701,7 @@
     border-radius: 1.4rem !important;
   }
   .cl-composer-input-field {
-    height: 4.75rem !important;
+    height: 6rem !important;
     padding: 0 1rem !important;
     border-radius: 1.2rem !important;
   }
