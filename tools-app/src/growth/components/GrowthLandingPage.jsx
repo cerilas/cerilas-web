@@ -1998,17 +1998,21 @@ export default function GrowthLandingPage({ onBackToTools, initialDomain = '' })
                   handleStartScan();
                 }}
                 className="cl-composer-input-bar"
-                style={{ width: '100%', maxWidth: '520px' }}
+                style={{ width: '100%', maxWidth: '640px' }}
               >
-                <Globe size={18} style={{ opacity: 0.5, flexShrink: 0 }} />
-                <input
-                  type="text"
-                  value={inputUrl}
-                  onChange={(e) => setInputUrl(e.target.value)}
-                  placeholder="Enter website domain: e.g. linear.app"
-                  className="cl-composer-input"
-                  disabled={scanning}
-                />
+                <div className="cl-composer-input-field">
+                  <div className="cl-composer-globe-badge">
+                    <Globe size={19} />
+                  </div>
+                  <input
+                    type="text"
+                    value={inputUrl}
+                    onChange={(e) => setInputUrl(e.target.value)}
+                    placeholder="Enter website domain: e.g. linear.app"
+                    className="cl-composer-input"
+                    disabled={scanning}
+                  />
+                </div>
                 <button
                   type="submit"
                   disabled={scanning || !inputUrl.trim()}
