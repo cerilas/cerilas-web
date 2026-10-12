@@ -2534,9 +2534,9 @@
   }
   .cl-composer-btn {
     width: 100% !important;
-    height: 4.5rem !important;
+    height: 3.25rem !important;
     justify-content: center !important;
-    font-size: 1.1rem !important;
+    font-size: 1rem !important;
     font-weight: 700 !important;
     border-radius: 1.25rem !important;
   }
@@ -2713,8 +2713,8 @@
     font-size: 1.1rem !important;
   }
   .cl-composer-btn {
-    height: 4.4rem !important;
-    font-size: 1.05rem !important;
+    height: 3rem !important;
+    font-size: 0.98rem !important;
   }
   .cl-formats-grid {
     width: 96%;
