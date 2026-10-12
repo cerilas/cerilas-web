@@ -100,7 +100,7 @@ export default function GrowthReports() {
     const urlToCopy = webhookUrl || `${window.location.origin}/api/growth/webhooks/daily-report?token=cerilas_growth_cron_2026_x89a`;
     navigator.clipboard.writeText(urlToCopy);
     setCopiedUrl(true);
-    showToast('Tetikleyici Webhook URL panoya kopyalandı!');
+    showToast('Webhook trigger URL copied to clipboard!');
     setTimeout(() => setCopiedUrl(false), 2500);
   };
 
@@ -112,13 +112,13 @@ export default function GrowthReports() {
       });
       const data = await res.json();
       if (res.ok && data.success) {
-        showToast(`Tetikleme Başarılı! İşlenen: ${data.processed_count ?? data.processed ?? 0}, Gönderilen: ${data.sent_count ?? 0}, Kapsam Dışı: ${data.skipped_count ?? 0}`);
+        showToast(`Trigger Successful! Processed: ${data.processed_count ?? data.processed ?? 0}, Sent: ${data.sent_count ?? 0}, Ineligible/Skipped: ${data.skipped_count ?? 0}`);
         fetchConfig();
       } else {
-        showToast(data.error || 'Webhook tetiklenemedi.', 'error');
+        showToast(data.error || 'Failed to trigger daily report webhook.', 'error');
       }
     } catch (e) {
-      showToast('Bağlantı hatası: Webhook tetiklenemedi.', 'error');
+      showToast('Network error: Failed to trigger webhook.', 'error');
     } finally {
       setTriggeringCron(false);
     }
@@ -510,9 +510,9 @@ export default function GrowthReports() {
                   <Terminal size={18} />
                 </div>
                 <div>
-                  <h3 className="reports-card-title">3. Sistem Yöneticisi Tekil Tetikleme Bağlantısı (Admin Cron URL)</h3>
+                  <h3 className="reports-card-title">3. Administrator Single Trigger Endpoint (Cron Webhook URL)</h3>
                   <span className="reports-card-sub">
-                    Sistem yöneticisi olarak yalnızca bu 1 URL'yi tetiklemeniz yeterlidir. Sistem otomatik olarak kontrol eder:
+                    As a system administrator, you only need to trigger this single URL. The engine automatically handles:
                   </span>
                 </div>
               </div>
@@ -524,16 +524,16 @@ export default function GrowthReports() {
 
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '16px' }}>
             <span style={{ background: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.25)', color: '#10b981', padding: '4px 10px', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 600 }}>
-              ✓ Yalnızca Pro ve Unlimited Planlar
+              ✓ Pro &amp; Unlimited Plans Only
             </span>
             <span style={{ background: 'rgba(56, 189, 248, 0.1)', border: '1px solid rgba(56, 189, 248, 0.25)', color: '#38bdf8', padding: '4px 10px', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 600 }}>
-              ✓ E-posta Gönderimi Aktif Olanlar (Enabled)
+              ✓ Active Reports Enabled Only
             </span>
             <span style={{ background: 'rgba(245, 158, 11, 0.1)', border: '1px solid rgba(245, 158, 11, 0.25)', color: '#f59e0b', padding: '4px 10px', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 600 }}>
-              ✓ En Az 1 Geçerli E-posta Girilmiş Olanlar
+              ✓ Minimum 1 Valid Recipient Email Configured
             </span>
             <span style={{ background: 'rgba(129, 140, 248, 0.1)', border: '1px solid rgba(129, 140, 248, 0.25)', color: '#818cf8', padding: '4px 10px', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 600 }}>
-              ✓ 100% Güncel Canlı Telemetri (GSC, GA4, AI, Audit)
+              ✓ 100% Live Telemetry Compiled (GSC, GA4, AI, Audit)
             </span>
           </div>
 
@@ -549,20 +549,20 @@ export default function GrowthReports() {
                 type="button"
                 onClick={handleCopyWebhookUrl}
                 style={{ background: '#1e293b', color: '#f8fafc', border: '1px solid #334155', padding: '8px 14px', borderRadius: '8px', fontSize: '0.8rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}
-                title="Tetikleyici URL'yi kopyala"
+                title="Copy Trigger URL to clipboard"
               >
                 {copiedUrl ? <Check size={14} color="#10b981" /> : <Copy size={14} />}
-                <span>{copiedUrl ? 'Kopyalandı!' : 'URL Kopyala'}</span>
+                <span>{copiedUrl ? 'Copied!' : 'Copy URL'}</span>
               </button>
               <button
                 type="button"
                 onClick={handleTriggerAllAsAdmin}
                 disabled={triggeringCron}
                 style={{ background: '#0284c7', color: '#ffffff', border: 'none', padding: '8px 16px', borderRadius: '8px', fontSize: '0.8rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', opacity: triggeringCron ? 0.7 : 1 }}
-                title="Şimdi Yönetici Olarak Çalıştır"
+                title="Trigger automated batch dispatch now"
               >
                 {triggeringCron ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />}
-                <span>{triggeringCron ? 'Tetikleniyor...' : 'Tüm Raporları Şimdi Tetikle'}</span>
+                <span>{triggeringCron ? 'Triggering...' : 'Trigger All Reports Now'}</span>
               </button>
             </div>
           </div>

@@ -196,8 +196,8 @@ export default function GrowthSidebar() {
               type="button"
               className="growth-sidebar-toggle-btn"
               onClick={toggleCollapse}
-              title="Menüyü Daralt (Collapse)"
-              aria-label="Menüyü Daralt"
+              title="Collapse Sidebar"
+              aria-label="Collapse Sidebar"
             >
               <PanelLeftClose size={16} />
             </button>
@@ -220,8 +220,8 @@ export default function GrowthSidebar() {
               type="button"
               className="growth-sidebar-toggle-btn collapsed"
               onClick={toggleCollapse}
-              title="Menüyü Genişlet (Expand)"
-              aria-label="Menüyü Genişlet"
+              title="Expand Sidebar"
+              aria-label="Expand Sidebar"
             >
               <PanelLeftOpen size={16} />
             </button>
@@ -254,7 +254,7 @@ export default function GrowthSidebar() {
                         window.location.hash = `#/growth/${activeWorkspace.slug}/${item.id}`;
                       }
                     }}
-                    title={isCollapsed ? `${item.label}${needsSetup ? ' (Setup Gerekiyor)' : ''}` : undefined}
+                    title={isCollapsed ? `${item.label}${needsSetup ? ' (Setup Required)' : ''}` : undefined}
                   >
                     <Icon size={17} strokeWidth={isActive ? 2.2 : 1.8} className="growth-nav-icon" />
                     {!isCollapsed && (

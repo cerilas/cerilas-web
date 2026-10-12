@@ -3920,7 +3920,7 @@ const handleDailyReportWebhook = async (req, res) => {
     if (!isAuthorized) {
       return res.status(401).json({
         success: false,
-        error: 'Geçersiz veya eksik cron güvenlik anahtarı (token/key). Lütfen ?token=... parametresini ekleyin.'
+        error: 'Invalid or missing cron security token (token/key). Please provide ?token=... parameter.'
       });
     }
 
@@ -3929,7 +3929,7 @@ const handleDailyReportWebhook = async (req, res) => {
 
     return res.json({
       success: true,
-      message: 'Günlük e-posta raporları başarıyla tetiklendi.',
+      message: 'Daily email reports triggered successfully.',
       timestamp: new Date().toISOString(),
       ...result
     });
@@ -3937,7 +3937,7 @@ const handleDailyReportWebhook = async (req, res) => {
     console.error('[Daily Report Webhook Error]:', err);
     return res.status(500).json({
       success: false,
-      error: 'Günlük rapor webhook yürütülürken hata oluştu: ' + err.message
+      error: 'Error executing daily report webhook: ' + err.message
     });
   }
 };
@@ -3954,7 +3954,7 @@ router.post('/cron/daily-report', handleDailyReportWebhook);
 router.get('/workspaces/:slugOrId/reports/config', requireAuth, async (req, res) => {
   try {
     const authData = await resolveAndAuthorizeWorkspace(req, req.params.slugOrId);
-    if (!authData) return res.status(404).json({ error: 'Çalışma alanı bulunamadı.' });
+    if (!authData) return res.status(404).json({ error: 'Workspace not found.' });
 
     const ws = authData.workspace;
     const userPlan = getUserPlan(req.user, authData.organization);
@@ -4000,7 +4000,7 @@ router.get('/workspaces/:slugOrId/reports/config', requireAuth, async (req, res)
     });
   } catch (err) {
     console.error('Get report config error:', err);
-    res.status(500).json({ error: 'Rapor ayarları alınamadı.' });
+    res.status(500).json({ error: 'Failed to retrieve report configuration.' });
   }
 });
 
@@ -4011,7 +4011,7 @@ router.get('/workspaces/:slugOrId/reports/config', requireAuth, async (req, res)
 router.put('/workspaces/:slugOrId/reports/config', requireAuth, async (req, res) => {
   try {
     const authData = await resolveAndAuthorizeWorkspace(req, req.params.slugOrId);
-    if (!authData) return res.status(404).json({ error: 'Çalışma alanı bulunamadı.' });
+    if (!authData) return res.status(404).json({ error: 'Workspace not found.' });
 
     const ws = authData.workspace;
     const { daily_report_enabled, recipients, send_time, frequency } = req.body;
@@ -4062,12 +4062,12 @@ router.put('/workspaces/:slugOrId/reports/config', requireAuth, async (req, res)
 
     res.json({
       success: true,
-      message: 'Rapor ayarları ve e-posta alıcı listesi başarıyla kaydedildi.',
+      message: 'Report settings and recipient email list saved successfully.',
       data: updateRes.rows[0]
     });
   } catch (err) {
     console.error('Update report config error:', err);
-    res.status(500).json({ error: 'Rapor ayarları kaydedilemedi: ' + err.message });
+    res.status(500).json({ error: 'Failed to save report configuration: ' + err.message });
   }
 });
 
@@ -4078,7 +4078,7 @@ router.put('/workspaces/:slugOrId/reports/config', requireAuth, async (req, res)
 router.post('/workspaces/:slugOrId/reports/send-test', requireAuth, async (req, res) => {
   try {
     const authData = await resolveAndAuthorizeWorkspace(req, req.params.slugOrId);
-    if (!authData) return res.status(404).json({ error: 'Çalışma alanı bulunamadı.' });
+    if (!authData) return res.status(404).json({ error: 'Workspace not found.' });
 
     // Plan Limit Check: Daily Executive Email Digest (Free: 0 - Locked)
     const userPlan = getUserPlan(req.user, authData.organization);
@@ -4098,12 +4098,12 @@ router.post('/workspaces/:slugOrId/reports/send-test', requireAuth, async (req, 
 
     res.json({
       success: true,
-      message: 'Test e-posta raporu başarıyla gönderildi.',
+      message: 'Test report email sent successfully.',
       data: result
     });
   } catch (err) {
     console.error('Send test report error:', err);
-    res.status(500).json({ error: 'Test e-postası gönderilemedi: ' + err.message });
+    res.status(500).json({ error: 'Failed to send test email: ' + err.message });
   }
 });
 

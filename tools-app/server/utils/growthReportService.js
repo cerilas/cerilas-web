@@ -37,7 +37,7 @@ async function getEmailSenderTransporter() {
     'SELECT * FROM email_senders WHERE is_active = true ORDER BY id ASC LIMIT 1'
   );
   if (res.rows.length === 0) {
-    throw new Error('Aktif bir e-posta göndericisi (email_senders) bulunamadı.');
+    throw new Error('No active email sender (email_senders) found in database.');
   }
   const sender = res.rows[0];
 
@@ -271,7 +271,7 @@ export async function sendWorkspaceDailyReport(workspaceId, triggerType = 'webho
     [workspaceId]
   );
   if (wsRes.rows.length === 0) {
-    throw new Error(`Workspace ${workspaceId} bulunamadı.`);
+    throw new Error(`Workspace ${workspaceId} not found.`);
   }
   const workspace = wsRes.rows[0];
 
@@ -310,7 +310,7 @@ export async function sendWorkspaceDailyReport(workspaceId, triggerType = 'webho
       success: false,
       workspaceId,
       workspaceName: workspace.name,
-      reason: 'E-posta alıcısı tanımlanmamış.'
+      reason: 'No recipient email addresses configured.'
     };
   }
 
@@ -486,7 +486,7 @@ export async function triggerAllDailyReports(triggerType = 'webhook', specificWo
         workspaceId: row.workspace_id,
         workspaceName: row.workspace_name,
         plan: effectivePlan,
-        reason: `Abonelik paketi yetersiz (${effectivePlan}). Günlük e-posta raporu Pro veya Unlimited paket gerektirir.`
+        reason: `Subscription plan insufficient (${effectivePlan}). Daily executive email digest requires Pro or Unlimited plan.`
       });
       continue;
     }
@@ -501,7 +501,7 @@ export async function triggerAllDailyReports(triggerType = 'webhook', specificWo
         workspaceId: row.workspace_id,
         workspaceName: row.workspace_name,
         plan: effectivePlan,
-        reason: 'Geçerli bir e-posta alıcısı tanımlanmamış.'
+        reason: 'No valid recipient email address configured.'
       });
       continue;
     }
