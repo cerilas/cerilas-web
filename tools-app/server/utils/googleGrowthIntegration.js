@@ -8,7 +8,8 @@ import {
   inspectSearchConsoleUrl,
   getGa4Properties,
   queryGa4Traffic,
-  queryGa4Realtime
+  queryGa4Realtime,
+  fetchGa4RealtimeSnapshot
 } from './googleAuth.js';
 
 const GOOGLE_AUTH_ENDPOINT = 'https://accounts.google.com/o/oauth2/v2/auth';
@@ -920,7 +921,6 @@ export async function syncGrowthAnalytics(workspaceId, explicitAccessToken = nul
   }
 
   const endpoint = `https://analyticsdata.googleapis.com/v1beta/properties/${cleanPropId}:runReport`;
-  const realtimeEndpoint = `https://analyticsdata.googleapis.com/v1beta/properties/${cleanPropId}:runRealtimeReport`;
 
   const runGa4Query = async (body) => {
     const res = await fetch(endpoint, {
@@ -1050,18 +1050,7 @@ export async function syncGrowthAnalytics(workspaceId, explicitAccessToken = nul
       orderBys: [{ metric: { metricName: 'eventCount' }, desc: true }],
       limit: 25
     }),
-    // Realtime
-    fetch(realtimeEndpoint, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        dimensions: [{ name: 'unifiedScreenName' }],
-        metrics: [{ name: 'activeUsers' }]
-      })
-    }).then(async r => (r.ok ? r.json() : { rows: [] })).catch(() => ({ rows: [] }))
+    fetchGa4RealtimeSnapshot(accessToken, cleanPropId)
   ]);
 
   if (totalsRes.status !== 'fulfilled') {
@@ -1169,19 +1158,9 @@ export async function syncGrowthAnalytics(workspaceId, explicitAccessToken = nul
     totalUsers: Number(r.metricValues?.[1]?.value || 0)
   }));
 
-  // Parse Realtime
-  const rtData = realtimeRes.status === 'fulfilled' ? realtimeRes.value : { rows: [] };
-  const rtTotalUsers = (rtData.rows || []).reduce((acc, r) => acc + Number(r.metricValues?.[0]?.value || 0), 0);
-  const rtActivePages = (rtData.rows || []).map(r => ({
-    screenName: r.dimensionValues?.[0]?.value || '/',
-    activeUsers: Number(r.metricValues?.[0]?.value || 0)
-  }));
-
-  const realtime = {
-    activeUsers: rtTotalUsers,
-    activePages: rtActivePages,
-    updatedAt: new Date().toISOString()
-  };
+  const realtime = realtimeRes.status === 'fulfilled'
+    ? realtimeRes.value
+    : { activeUsers: null, activePages: [], updatedAt: null };
 
   // Upsert into growth_analytics_performance
   await authPool.query(
@@ -1301,37 +1280,6 @@ export async function getGrowthAnalyticsRealtime(workspaceId) {
   const propertyId = connection.external_property_id;
   if (!propertyId) return { activeUsers: 0, activePages: [] };
 
-  const cleanPropId = String(propertyId).replace('properties/', '').trim();
   const accessToken = await getValidGrowthAccessToken(connection);
-  const realtimeEndpoint = `https://analyticsdata.googleapis.com/v1beta/properties/${cleanPropId}:runRealtimeReport`;
-
-  const res = await fetch(realtimeEndpoint, {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      dimensions: [{ name: 'unifiedScreenName' }],
-      metrics: [{ name: 'activeUsers' }]
-    })
-  });
-
-  if (!res.ok) {
-    return { activeUsers: 0, activePages: [] };
-  }
-
-  const data = await res.json();
-  const totalActive = (data.rows || []).reduce((acc, r) => acc + Number(r.metricValues?.[0]?.value || 0), 0);
-  const activePages = (data.rows || []).map(r => ({
-    screenName: r.dimensionValues?.[0]?.value || '/',
-    activeUsers: Number(r.metricValues?.[0]?.value || 0)
-  }));
-
-  return {
-    propertyId: cleanPropId,
-    activeUsers: totalActive,
-    activePages,
-    updatedAt: new Date().toISOString()
-  };
+  return fetchGa4RealtimeSnapshot(accessToken, propertyId);
 }

@@ -2282,45 +2282,62 @@ Answer the following question as an objective AI search assistant tailored for u
 
 Cite real brands, websites, and sources if relevant.`;
       
+      // Low thinking roughly halves latency with grounded answers of the same length.
+      const attempts = [
+        { tools: [{ googleSearch: {} }], thinkingConfig: { thinkingLevel: 'low' } },
+        { tools: [{ googleSearch: {} }] },
+        undefined
+      ];
       let response;
-      try {
-        response = await ai.models.generateContent({
-          model: 'gemini-3.8-flash',
-          contents: promptQuery,
-          config: {
-            tools: [{ googleSearch: {} }]
-          }
-        });
-      } catch (toolErr) {
-        console.warn('[Gemini Grounding fallback]:', toolErr.message);
-        response = await ai.models.generateContent({
-          model: 'gemini-3.8-flash',
-          contents: promptQuery
-        });
+      for (let i = 0; i < attempts.length; i++) {
+        try {
+          response = await ai.models.generateContent({
+            model: 'gemini-3.8-flash',
+            contents: promptQuery,
+            ...(attempts[i] ? { config: attempts[i] } : {})
+          });
+          break;
+        } catch (genErr) {
+          if (i === attempts.length - 1) throw genErr;
+          console.warn('[Gemini fallback]:', genErr.message);
+        }
       }
 
       responseText = response.text || '';
 
+      const normalizeBrandText = (s) => String(s || '')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/ı/g, 'i')
+        .toLowerCase();
+
       const brandKeywords = [
-        workspace.name.toLowerCase(),
-        workspace.primary_domain?.toLowerCase()
-      ].filter(Boolean);
+        workspace.name,
+        workspace.primary_domain?.replace(/^(https?:\/\/)?(www\.)?/i, '').split('/')[0]
+      ].map(normalizeBrandText).filter(Boolean);
 
-      const lowerResponse = responseText.toLowerCase();
-      brandMentioned = brandKeywords.some(bk => lowerResponse.includes(bk));
+      const normalizedResponse = normalizeBrandText(responseText);
+      brandMentioned = brandKeywords.some(bk => normalizedResponse.includes(bk));
 
-      // Extract sources from Google Grounding metadata
+      // Grounding chunk URIs are vertexaisearch redirect links; the source domain is in `title`.
       const candidate = response?.candidates?.[0];
       const chunks = candidate?.groundingMetadata?.groundingChunks || [];
       for (const chunk of chunks) {
         if (chunk.web && chunk.web.uri) {
           try {
-            const parsedUrl = new URL(chunk.web.uri);
-            const domain = parsedUrl.hostname.replace(/^www\./, '');
+            const uriHost = new URL(chunk.web.uri).hostname.replace(/^www\./, '');
+            const isRedirect = uriHost.endsWith('vertexaisearch.cloud.google.com');
+            const titleDomain = String(chunk.web.domain || chunk.web.title || '')
+              .trim()
+              .toLowerCase()
+              .replace(/^(https?:\/\/)?(www\.)?/, '')
+              .split('/')[0];
+            const domain = isRedirect ? titleDomain : uriHost;
+            if (!domain || !domain.includes('.')) continue;
             if (!citations.some(c => c.domain === domain)) {
               citations.push({
                 url: chunk.web.uri,
-                domain: domain,
+                domain,
                 title: chunk.web.title || domain
               });
             }
@@ -2373,17 +2390,23 @@ Cite real brands, websites, and sources if relevant.`;
 
     // Save individual citations to growth_ai_citations table
     if (citations && citations.length > 0) {
-      for (const cit of citations) {
+      const values = [];
+      const placeholders = citations.map((cit, idx) => {
         const cd = (cit.domain || '').toLowerCase().replace(/^(https?:\/\/)?(www\.)?/, '');
         const isUserBrand = Boolean(cleanPrimary && (cd === cleanPrimary || cd.endsWith('.' + cleanPrimary)));
-        try {
-          await authPool.query(
-            `INSERT INTO growth_ai_citations (
-              workspace_id, run_id, source_url, domain, page_title, is_user_brand, discovered_at
-            ) VALUES ($1, $2, $3, $4, $5, $6, NOW())`,
-            [workspace.id, runInsert.rows[0].id, cit.url || '', cit.domain || '', cit.title || '', isUserBrand]
-          );
-        } catch {}
+        values.push(workspace.id, runInsert.rows[0].id, cit.url || '', cit.domain || '', cit.title || '', isUserBrand);
+        const b = idx * 6;
+        return `($${b + 1}, $${b + 2}, $${b + 3}, $${b + 4}, $${b + 5}, $${b + 6}, NOW())`;
+      });
+      try {
+        await authPool.query(
+          `INSERT INTO growth_ai_citations (
+            workspace_id, run_id, source_url, domain, page_title, is_user_brand, discovered_at
+          ) VALUES ${placeholders.join(', ')}`,
+          values
+        );
+      } catch (citErr) {
+        console.warn('[AI citations insert warning]:', citErr.message);
       }
     }
 

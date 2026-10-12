@@ -327,41 +327,66 @@ export async function queryGa4Traffic(accessToken, propertyId, options = {}) {
   return { propertyId: cleanPropId, startDate, endDate, rows };
 }
 
-/**
- * Runs real-time visitor query on GA4.
- */
-export async function queryGa4Realtime(accessToken, propertyId) {
-  const cleanPropId = String(propertyId || '').replace('properties/', '').trim();
+async function runGa4RealtimeReport(accessToken, cleanPropId, body) {
   const endpoint = `https://analyticsdata.googleapis.com/v1beta/properties/${cleanPropId}:runRealtimeReport`;
-
-  const requestBody = {
-    dimensions: [{ name: 'unifiedScreenName' }],
-    metrics: [{ name: 'activeUsers' }]
-  };
-
   const response = await fetch(endpoint, {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${accessToken}`,
       'Content-Type': 'application/json'
     },
-    body: JSON.stringify(requestBody)
+    body: JSON.stringify(body)
   });
 
   if (!response.ok) {
     const errText = await response.text();
     throw new Error(`GA4 realtime query failed (${response.status}): ${errText}`);
   }
+  return response.json();
+}
 
-  const data = await response.json();
-  const totalActive = (data.rows || []).reduce((acc, r) => acc + Number(r.metricValues?.[0]?.value || 0), 0);
+/**
+ * Real-time snapshot (last 30 minutes) from GA4.
+ * activeUsers is not additive across dimensions: a visitor on two pages appears in both
+ * page rows, so the site-wide total must come from a dimensionless query.
+ */
+export async function fetchGa4RealtimeSnapshot(accessToken, propertyId) {
+  const cleanPropId = String(propertyId || '').replace('properties/', '').trim();
+
+  const [totalsData, pagesData] = await Promise.all([
+    runGa4RealtimeReport(accessToken, cleanPropId, {
+      metrics: [{ name: 'activeUsers' }]
+    }),
+    runGa4RealtimeReport(accessToken, cleanPropId, {
+      dimensions: [{ name: 'unifiedScreenName' }],
+      metrics: [{ name: 'activeUsers' }],
+      orderBys: [{ metric: { metricName: 'activeUsers' }, desc: true }],
+      limit: 50
+    })
+  ]);
 
   return {
     propertyId: cleanPropId,
-    totalActiveUsers: totalActive,
-    activePages: (data.rows || []).slice(0, 10).map((r) => ({
-      page: r.dimensionValues?.[0]?.value,
+    activeUsers: Number(totalsData.rows?.[0]?.metricValues?.[0]?.value || 0),
+    activePages: (pagesData.rows || []).map((r) => ({
+      screenName: r.dimensionValues?.[0]?.value || '/',
       activeUsers: Number(r.metricValues?.[0]?.value || 0)
+    })),
+    updatedAt: new Date().toISOString()
+  };
+}
+
+/**
+ * Runs real-time visitor query on GA4.
+ */
+export async function queryGa4Realtime(accessToken, propertyId) {
+  const snapshot = await fetchGa4RealtimeSnapshot(accessToken, propertyId);
+  return {
+    propertyId: snapshot.propertyId,
+    totalActiveUsers: snapshot.activeUsers,
+    activePages: snapshot.activePages.slice(0, 10).map((p) => ({
+      page: p.screenName,
+      activeUsers: p.activeUsers
     }))
   };
 }

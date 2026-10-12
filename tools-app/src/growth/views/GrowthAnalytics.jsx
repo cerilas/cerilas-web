@@ -183,8 +183,10 @@ export default function GrowthAnalytics() {
   const dateDropdownRef = useRef(null);
 
   // Realtime Polling
-  const [realtimeData, setRealtimeData] = useState({ activeUsers: 0, activePages: [] });
+  const [realtimeData, setRealtimeData] = useState({ activeUsers: null, activePages: [], updatedAt: null });
   const [realtimeUpdating, setRealtimeUpdating] = useState(false);
+  const [realtimeError, setRealtimeError] = useState(false);
+  const realtimeRequestRef = useRef(0);
 
   // Main Analytics Data
   const [analyticsData, setAnalyticsData] = useState({
@@ -266,9 +268,6 @@ export default function GrowthAnalytics() {
       if (!res.ok) throw new Error(data.error || 'Failed to fetch Analytics data.');
 
       setAnalyticsData(data);
-      if (data.realtime) {
-        setRealtimeData(data.realtime);
-      }
     } catch (err) {
       console.warn('Analytics performance fetch warning:', err.message);
     } finally {
@@ -280,19 +279,22 @@ export default function GrowthAnalytics() {
   // Fetch Realtime Visitors
   const fetchRealtime = useCallback(async () => {
     if (!activeWorkspace?.id || !token) return;
+    const requestId = ++realtimeRequestRef.current;
     setRealtimeUpdating(true);
     try {
       const res = await fetch(`/api/growth/workspaces/${activeWorkspace.id}/analytics-realtime`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       const data = await res.json();
-      if (res.ok && data.realtime) {
-        setRealtimeData(data.realtime);
-      }
+      if (!res.ok || !data.realtime) throw new Error(data.error || 'Realtime data unavailable');
+      if (requestId !== realtimeRequestRef.current) return;
+      setRealtimeData(data.realtime);
+      setRealtimeError(false);
     } catch (err) {
       console.warn('Realtime fetch warning:', err.message);
+      if (requestId === realtimeRequestRef.current) setRealtimeError(true);
     } finally {
-      setRealtimeUpdating(false);
+      if (requestId === realtimeRequestRef.current) setRealtimeUpdating(false);
     }
   }, [activeWorkspace?.id, token]);
 
@@ -300,14 +302,23 @@ export default function GrowthAnalytics() {
     fetchAnalytics(dateRange);
   }, [activeWorkspace?.id, token]);
 
-  // Poll Realtime every 25 seconds
+  // Fetch immediately, then poll every 25 seconds while the tab is visible
   useEffect(() => {
     if (!analyticsData.connected) return;
+    setRealtimeData({ activeUsers: null, activePages: [], updatedAt: null });
+    fetchRealtime();
     const interval = setInterval(() => {
-      fetchRealtime();
+      if (document.visibilityState === 'visible') fetchRealtime();
     }, 25000);
-    return () => clearInterval(interval);
-  }, [analyticsData.connected, fetchRealtime]);
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible') fetchRealtime();
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener('visibilitychange', handleVisibility);
+    };
+  }, [analyticsData.connected, analyticsData.propertyId, fetchRealtime]);
 
   const handleSelectDateRange = (optionId) => {
     if (optionId === 'custom') {
@@ -702,10 +713,17 @@ export default function GrowthAnalytics() {
               </div>
               <div className="realtime-title-group">
                 <h3 className="realtime-main-title">
-                  Live Visitor Pulse: <strong>{realtimeData.activeUsers || 0} Users</strong>
+                  Live Visitor Pulse:{' '}
+                  <strong>
+                    {realtimeData.activeUsers == null
+                      ? (realtimeError ? 'Unavailable' : '…')
+                      : `${realtimeData.activeUsers.toLocaleString()} ${realtimeData.activeUsers === 1 ? 'User' : 'Users'}`}
+                  </strong>
                 </h3>
                 <span className="realtime-sub">
-                  Unique users currently active on the site (Last 30 minutes)
+                  Unique users active on the site in the last 30 minutes (GA4 Realtime)
+                  {realtimeData.updatedAt && ` · Updated ${new Date(realtimeData.updatedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}`}
+                  {realtimeError && realtimeData.activeUsers != null && ' · Last refresh failed, showing previous value'}
                 </span>
               </div>
               <button 
@@ -727,12 +745,12 @@ export default function GrowthAnalytics() {
                   {realtimeData.activePages.map((pg, idx) => (
                     <div key={idx} className="realtime-page-chip">
                       <span className="page-chip-path">{pg.screenName}</span>
-                      <span className="page-chip-badge">{pg.activeUsers} users</span>
+                      <span className="page-chip-badge">{pg.activeUsers} {pg.activeUsers === 1 ? 'user' : 'users'}</span>
                     </div>
                   ))}
                 </div>
               </div>
-            ) : (
+            ) : realtimeData.activeUsers === 0 && (
               <div className="realtime-idle-note">
                 <Radio size={14} style={{ opacity: 0.6 }} />
                 <span>No live active sessions detected. A new user will appear here in real-time when they visit the site.</span>

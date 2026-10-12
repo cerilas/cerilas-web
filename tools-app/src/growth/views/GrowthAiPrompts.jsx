@@ -29,6 +29,7 @@ import { useAuth } from '../../context/AuthContext';
 import GrowthPageCover from '../components/GrowthPageCover';
 import AiEngineBadge, { AiEngineGroup } from '../components/AiEngineBadge';
 import { SkeletonBlock } from '../components/GrowthSkeleton';
+import AiResponseMarkdown from '../components/AiResponseMarkdown';
 import AiVisibilityDropdown from '../../tools/ai-visibility-checker/components/AiVisibilityDropdown';
 import FlagIcon from '../../tools/ai-visibility-checker/components/FlagIcon';
 import { MARKET_OPTIONS, LANGUAGE_OPTIONS, getMarketOption, getLanguageOption } from '../../tools/ai-visibility-checker/options';
@@ -406,7 +407,7 @@ export default function GrowthAiPrompts() {
           <div className="sim-result-body">
             <div className="sim-text-box">
               <span className="sim-box-title">Generated Live AI Response:</span>
-              <p className="sim-answer-text">{activeSimulationResult.response_text}</p>
+              <AiResponseMarkdown text={activeSimulationResult.response_text} className="sim-answer-text" />
             </div>
 
             {/* Citations Detected */}

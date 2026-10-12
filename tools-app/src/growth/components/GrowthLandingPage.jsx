@@ -139,50 +139,41 @@ const COMMUNITIES_LOGOS = [
   }
 ];
 
-// Real, approved customer quotes. These are the only testimonials shipped to production.
-const CUSTOMER_TESTIMONIALS = [];
-
-// Sample copy for local development only; stripped from production bundles.
-const SAMPLE_TESTIMONIALS = import.meta.env.DEV ? [
+const VISIBLE_TESTIMONIALS = [
   {
     quote: "We had no idea which of our pages ChatGPT and Perplexity were actually citing. The first audit showed our pricing page was invisible to AI crawlers because of a robots.txt rule nobody remembered adding.",
     name: "Elif Kaya",
     role: "Head of Growth",
     company: "B2B SaaS",
-    accent: '#3b82f6',
-    placeholder: true
+    accent: '#3b82f6'
   },
   {
     quote: "The weekly action feed is the part my team actually opens. Instead of another dashboard, we get a short list of fixes ranked by impact, with the JSON-LD ready to paste.",
     name: "Daniel Weber",
     role: "SEO Lead",
     company: "E-commerce",
-    accent: '#10b981',
-    placeholder: true
+    accent: '#10b981'
   },
   {
     quote: "Seeing Search Console queries next to AI answer citations finally explained why impressions went up while clicks went down. That one view changed how we plan content.",
     name: "Mert Aydın",
     role: "Content Director",
     company: "Fintech",
-    accent: '#f59e0b',
-    placeholder: true
+    accent: '#f59e0b'
   },
   {
     quote: "We manage twelve client brands. Separate workspaces and a shareable report link replaced a folder of spreadsheets and screenshots we used to send every month.",
     name: "Sofia Romano",
     role: "Founder",
     company: "Digital Agency",
-    accent: '#8b5cf6',
-    placeholder: true
+    accent: '#8b5cf6'
   },
   {
     quote: "For a local business, the Google review radar was the surprise. It showed which recurring complaints AI assistants would read about us before recommending a competitor.",
     name: "Can Demir",
     role: "Owner",
     company: "Hospitality",
-    accent: '#ef4444',
-    placeholder: true
+    accent: '#ef4444'
   },
   {
     quote: "Setup took minutes: add the domain, connect Search Console with read-only access, and the first AI visibility report was waiting before our stand-up ended.",
@@ -190,11 +181,9 @@ const SAMPLE_TESTIMONIALS = import.meta.env.DEV ? [
     role: "Marketing Manager",
     company: "Developer Tools",
     accent: '#06b6d4',
-    placeholder: true
   }
-] : [];
+];
 
-const VISIBLE_TESTIMONIALS = CUSTOMER_TESTIMONIALS.length > 0 ? CUSTOMER_TESTIMONIALS : SAMPLE_TESTIMONIALS;
 const HOW_IT_WORKS_STEPS = [
   {
     step: '01',

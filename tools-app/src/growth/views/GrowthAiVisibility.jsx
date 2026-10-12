@@ -42,6 +42,9 @@ import { useAuth } from '../../context/AuthContext';
 import GrowthPageCover from '../components/GrowthPageCover';
 import AiEngineBadge, { AiEngineGroup } from '../components/AiEngineBadge';
 import { SkeletonBlock } from '../components/GrowthSkeleton';
+import AiResponseMarkdown from '../components/AiResponseMarkdown';
+
+const BATCH_SCAN_CONCURRENCY = 3;
 import AiVisibilityDropdown from '../../tools/ai-visibility-checker/components/AiVisibilityDropdown';
 import FlagIcon from '../../tools/ai-visibility-checker/components/FlagIcon';
 import { MARKET_OPTIONS, LANGUAGE_OPTIONS, getMarketOption, getLanguageOption } from '../../tools/ai-visibility-checker/options';
@@ -125,7 +128,7 @@ export default function GrowthAiVisibility() {
 
   // Batch Scan State
   const [isBatchScanning, setIsBatchScanning] = useState(false);
-  const [batchProgress, setBatchProgress] = useState({ current: 0, total: 0, activePromptId: null });
+  const [batchProgress, setBatchProgress] = useState({ current: 0, total: 0, activePromptIds: [] });
   const [batchResultsMap, setBatchResultsMap] = useState({});
   const abortScanRef = useRef(false);
   const progressCardRef = useRef(null);
@@ -528,20 +531,27 @@ export default function GrowthAiVisibility() {
 
     setIsBatchScanning(true);
     abortScanRef.current = false;
-    setBatchProgress({ current: 0, total: prompts.length, activePromptId: prompts[0].id });
+    setBatchProgress({ current: 0, total: prompts.length, activePromptIds: [] });
     setBatchResultsMap({});
 
-    const collectedResults = [];
+    const resultsByIndex = new Array(prompts.length);
     const primaryDomain = String(activeWorkspace?.primary_domain || '')
       .toLowerCase()
       .replace(/^(https?:\/\/)?(www\.)?/, '')
       .split('/')[0]
       .trim();
 
-    for (let i = 0; i < prompts.length; i++) {
-      if (abortScanRef.current) break;
+    let nextIndex = 0;
+    let completedCount = 0;
+    const activeIds = new Set();
+    const publishProgress = () => setBatchProgress({
+      current: completedCount,
+      total: prompts.length,
+      activePromptIds: [...activeIds]
+    });
+
+    const scanPrompt = async (i) => {
       const p = prompts[i];
-      setBatchProgress({ current: i, total: prompts.length, activePromptId: p.id });
 
       try {
         const res = await fetch(`/api/growth/workspaces/${activeWorkspace.id}/prompts/${p.id}/run`, {
@@ -564,7 +574,7 @@ export default function GrowthAiVisibility() {
             model: data.data.model || 'gemini-3.8-flash',
             checkedAt: data.data.checked_at || new Date().toISOString()
           };
-          collectedResults.push(itemResult);
+          resultsByIndex[i] = itemResult;
           setBatchResultsMap(prev => ({ ...prev, [p.id]: itemResult }));
         } else {
           const errResult = {
@@ -580,7 +590,7 @@ export default function GrowthAiVisibility() {
             responseText: 'Scan failed: ' + (data.error || 'Unknown error'),
             isError: true
           };
-          collectedResults.push(errResult);
+          resultsByIndex[i] = errResult;
           setBatchResultsMap(prev => ({ ...prev, [p.id]: errResult }));
         }
       } catch (err) {
@@ -597,20 +607,37 @@ export default function GrowthAiVisibility() {
           responseText: 'Connection error: ' + err.message,
           isError: true
         };
-        collectedResults.push(errResult);
+        resultsByIndex[i] = errResult;
         setBatchResultsMap(prev => ({ ...prev, [p.id]: errResult }));
       }
+    };
 
-      setBatchProgress({ current: i + 1, total: prompts.length, activePromptId: null });
-      // Brief pause between requests for UI clarity & polite pacing
-      await new Promise(r => setTimeout(r, 600));
-    }
+    const worker = async () => {
+      while (!abortScanRef.current && nextIndex < prompts.length) {
+        const i = nextIndex++;
+        activeIds.add(prompts[i].id);
+        publishProgress();
+        await scanPrompt(i);
+        activeIds.delete(prompts[i].id);
+        completedCount++;
+        publishProgress();
+      }
+    };
+
+    await Promise.all(
+      Array.from({ length: Math.min(BATCH_SCAN_CONCURRENCY, prompts.length) }, worker)
+    );
+
+    const collectedResults = resultsByIndex.filter(Boolean);
 
     if (!abortScanRef.current && collectedResults.length > 0) {
       const total = collectedResults.length;
+      const scoredCount = collectedResults.filter(r => !r.isError).length;
       const mentionedCount = collectedResults.filter(r => r.brandMentioned).length;
       const citedCount = collectedResults.filter(r => r.domainCited).length;
-      const score = Math.round(((mentionedCount * 0.5 + citedCount * 0.5) / total) * 100);
+      const score = scoredCount > 0
+        ? Math.round(((mentionedCount * 0.5 + citedCount * 0.5) / scoredCount) * 100)
+        : 0;
 
       // Aggregate all citations & top domains
       const domainCounts = {};
@@ -834,7 +861,7 @@ export default function GrowthAiVisibility() {
           <div className="ai-batch-prompts-list">
             {prompts.map((p, idx) => {
               const res = batchResultsMap[p.id];
-              const isProbing = batchProgress.activePromptId === p.id;
+              const isProbing = (batchProgress.activePromptIds || []).includes(p.id);
               const isDone = !!res;
 
               return (
@@ -1129,7 +1156,7 @@ export default function GrowthAiVisibility() {
                     <div className="animate-fade" style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginTop: '0.25rem' }}>
                       <div className="ai-result-text-box">
                         <span className="ai-box-sub">Response Generated by Gemini 3.8:</span>
-                        <p className="ai-response-content">{item.responseText}</p>
+                        <AiResponseMarkdown text={item.responseText} />
                       </div>
 
                       {item.citations && item.citations.length > 0 && (
@@ -1193,7 +1220,7 @@ export default function GrowthAiVisibility() {
 
           <div className="ai-result-text-box">
             <span className="ai-box-sub">Response Generated by AI:</span>
-            <p className="ai-response-content">{lastRunResult.response_text}</p>
+            <AiResponseMarkdown text={lastRunResult.response_text} />
           </div>
 
           {lastRunResult.citations && lastRunResult.citations.length > 0 && (
