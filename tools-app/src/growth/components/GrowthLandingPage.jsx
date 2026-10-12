@@ -139,24 +139,83 @@ const COMMUNITIES_LOGOS = [
   }
 ];
 
-const TESTIMONIALS_DATA = [
+// Real, approved customer quotes. These are the only testimonials shipped to production.
+const CUSTOMER_TESTIMONIALS = [];
+
+// Sample copy for local development only; stripped from production bundles.
+const SAMPLE_TESTIMONIALS = import.meta.env.DEV ? [
   {
-    quote: "We increased our ChatGPT source citations by 340% in 45 days after fixing the crawler permissions and structured Schema issues GrowthControl flagged.",
-    name: "Alexandre Moreau",
-    role: "Head of Organic Growth, FinTech SaaS",
-    avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&h=120&q=80&auto=format&fit=crop"
+    quote: "We had no idea which of our pages ChatGPT and Perplexity were actually citing. The first audit showed our pricing page was invisible to AI crawlers because of a robots.txt rule nobody remembered adding.",
+    name: "Elif Kaya",
+    role: "Head of Growth",
+    company: "B2B SaaS",
+    accent: '#3b82f6',
+    placeholder: true
   },
   {
-    quote: "Connecting Google Search Console with real-time AI visibility showed us our highest revenue queries were being answered by Gemini without citing our URL. GrowthControl gave us the playbook to win it back.",
-    name: "Sarah Jenkins",
-    role: "VP Marketing, Cloud Infrastructure",
-    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=120&h=120&q=80&auto=format&fit=crop"
+    quote: "The weekly action feed is the part my team actually opens. Instead of another dashboard, we get a short list of fixes ranked by impact, with the JSON-LD ready to paste.",
+    name: "Daniel Weber",
+    role: "SEO Lead",
+    company: "E-commerce",
+    accent: '#10b981',
+    placeholder: true
   },
   {
-    quote: "Traditional SEO tools are completely blind to generative search. GrowthControl is our team's daily command center for the post-search era.",
-    name: "Marcus Vance",
-    role: "Founder & CMO, NextGen AI Studio",
-    avatar: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=120&h=120&q=80&auto=format&fit=crop"
+    quote: "Seeing Search Console queries next to AI answer citations finally explained why impressions went up while clicks went down. That one view changed how we plan content.",
+    name: "Mert Aydın",
+    role: "Content Director",
+    company: "Fintech",
+    accent: '#f59e0b',
+    placeholder: true
+  },
+  {
+    quote: "We manage twelve client brands. Separate workspaces and a shareable report link replaced a folder of spreadsheets and screenshots we used to send every month.",
+    name: "Sofia Romano",
+    role: "Founder",
+    company: "Digital Agency",
+    accent: '#8b5cf6',
+    placeholder: true
+  },
+  {
+    quote: "For a local business, the Google review radar was the surprise. It showed which recurring complaints AI assistants would read about us before recommending a competitor.",
+    name: "Can Demir",
+    role: "Owner",
+    company: "Hospitality",
+    accent: '#ef4444',
+    placeholder: true
+  },
+  {
+    quote: "Setup took minutes: add the domain, connect Search Console with read-only access, and the first AI visibility report was waiting before our stand-up ended.",
+    name: "Hannah Lewis",
+    role: "Marketing Manager",
+    company: "Developer Tools",
+    accent: '#06b6d4',
+    placeholder: true
+  }
+] : [];
+
+const VISIBLE_TESTIMONIALS = CUSTOMER_TESTIMONIALS.length > 0 ? CUSTOMER_TESTIMONIALS : SAMPLE_TESTIMONIALS;
+const HOW_IT_WORKS_STEPS = [
+  {
+    step: '01',
+    title: 'Add your domain',
+    description: 'Enter your website and optionally connect Google Search Console and Analytics with read-only OAuth. No code or tracking script required.',
+    image: '/growth-landing/how-step-connect.jpg',
+    alt: 'Domain input connected to a search analytics card'
+  },
+  {
+    step: '02',
+    title: 'Audit AI answer engines',
+    description: 'GrowthControl asks ChatGPT, Gemini, Perplexity and Claude the questions your buyers ask, then records who gets cited, mentioned and linked.',
+    image: '/growth-landing/how-step-audit.jpg',
+    alt: 'Website card connected to four AI engine nodes'
+  },
+  {
+    step: '03',
+    title: 'Ship the fixes that matter',
+    description: 'Every week you get a ranked list of technical, content and schema fixes, with ready-to-paste snippets and progress you can track over time.',
+    image: '/growth-landing/how-step-act.jpg',
+    alt: 'Stack of prioritized task cards next to a rising chart'
   }
 ];
 
@@ -373,22 +432,11 @@ export default function GrowthLandingPage({ onBackToTools, initialDomain = '' })
   // Pricing Toggle (false: monthly, true: yearly)
   const [isYearly, setIsYearly] = useState(true);
 
-  // Testimonial Active Slide
-  const [activeTestimonialIdx, setActiveTestimonialIdx] = useState(0);
-
   // FAQ Accordion State
   const [openFaqIdx, setOpenFaqIdx] = useState(0);
 
   const resultsRef = useRef(null);
   const inputRef = useRef(null);
-
-  // Testimonial auto-scroll
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setActiveTestimonialIdx(prev => (prev + 1) % TESTIMONIALS_DATA.length);
-    }, 6500);
-    return () => clearInterval(timer);
-  }, []);
 
   // Restore pending scan from session if present
   useEffect(() => {
@@ -750,7 +798,7 @@ export default function GrowthLandingPage({ onBackToTools, initialDomain = '' })
             </button>
             <button 
               type="button" 
-              onClick={(e) => scrollToSection(e, 'features')} 
+              onClick={(e) => scrollToSection(e, 'how-it-works')} 
               className="cl-btn-hero-glass"
             >
               <span>See How It Works</span>
@@ -993,7 +1041,7 @@ export default function GrowthLandingPage({ onBackToTools, initialDomain = '' })
 
                     {/* Recent Citations Preview Grid */}
                     <div className="cl-recent-audits-section">
-                      <p className="cl-recent-audits-title">Recent AI citation intelligence</p>
+                      <p className="cl-recent-audits-title">Try an example audit</p>
                       <div className="cl-recent-audits-grid">
                         <div 
                           className="cl-audit-preview-card"
@@ -1005,14 +1053,14 @@ export default function GrowthLandingPage({ onBackToTools, initialDomain = '' })
                           title="Click to audit linear.app"
                         >
                           <div className="cl-audit-card-body">
-                            <span className="cl-audit-card-badge">Cited in 86% of prompts</span>
+                            <span className="cl-audit-card-badge">Issue tracking · SaaS</span>
                             <p className="cl-audit-card-domain">linear.app</p>
-                            <p className="cl-audit-card-meta">ChatGPT & Perplexity · #1 Issue Tracker</p>
+                            <p className="cl-audit-card-meta">ChatGPT & Perplexity citation check</p>
                           </div>
                           <div className="cl-audit-card-thumb">
                             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.4rem', opacity: 0.75 }}>
                               <Bot size={28} color="#3b82f6" />
-                              <span style={{ fontSize: '0.75rem', fontWeight: 600 }}>Top Cited Source</span>
+                              <span style={{ fontSize: '0.75rem', fontWeight: 600 }}>Run live audit</span>
                             </div>
                           </div>
                         </div>
@@ -1027,14 +1075,14 @@ export default function GrowthLandingPage({ onBackToTools, initialDomain = '' })
                           title="Click to audit supabase.com"
                         >
                           <div className="cl-audit-card-body">
-                            <span className="cl-audit-card-badge">Top Source · 92% Citation</span>
+                            <span className="cl-audit-card-badge">Developer tools · Database</span>
                             <p className="cl-audit-card-domain">supabase.com</p>
-                            <p className="cl-audit-card-meta">Gemini & Claude · Postgres BaaS</p>
+                            <p className="cl-audit-card-meta">Gemini & Claude citation check</p>
                           </div>
                           <div className="cl-audit-card-thumb">
                             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.4rem', opacity: 0.75 }}>
                               <Database size={28} color="#10b981" />
-                              <span style={{ fontSize: '0.75rem', fontWeight: 600 }}>Entity Grounding</span>
+                              <span style={{ fontSize: '0.75rem', fontWeight: 600 }}>Run live audit</span>
                             </div>
                           </div>
                         </div>
@@ -1049,14 +1097,14 @@ export default function GrowthLandingPage({ onBackToTools, initialDomain = '' })
                           title="Click to audit posthog.com"
                         >
                           <div className="cl-audit-card-body">
-                            <span className="cl-audit-card-badge">Perplexity Featured Snippet</span>
+                            <span className="cl-audit-card-badge">Product analytics</span>
                             <p className="cl-audit-card-domain">posthog.com</p>
-                            <p className="cl-audit-card-meta">Live Search Radar · Product Analytics</p>
+                            <p className="cl-audit-card-meta">Perplexity live search check</p>
                           </div>
                           <div className="cl-audit-card-thumb">
                             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.4rem', opacity: 0.75 }}>
                               <TrendingUp size={28} color="#f59e0b" />
-                              <span style={{ fontSize: '0.75rem', fontWeight: 600 }}>Organic Lift +240%</span>
+                              <span style={{ fontSize: '0.75rem', fontWeight: 600 }}>Run live audit</span>
                             </div>
                           </div>
                         </div>
@@ -1227,6 +1275,35 @@ export default function GrowthLandingPage({ onBackToTools, initialDomain = '' })
       )}
 
       {/* ==========================================================================
+          HOW IT WORKS (3 STEPS)
+          ========================================================================== */}
+      <Rail id="how-it-works" divider={true}>
+        <div style={{ padding: '5rem 1.25rem' }}>
+          <SectionHeading
+            id="how-it-works-heading"
+            eyebrow="How It Works"
+            title="From domain to AI visibility plan in three steps."
+            description="No tracking scripts, no spreadsheets. Connect once and GrowthControl keeps watching how AI search engines talk about your brand."
+          />
+
+          <ol className="cl-how-grid">
+            {HOW_IT_WORKS_STEPS.map((s) => (
+              <li key={s.step} className="cl-how-card">
+                <div className="cl-how-media">
+                  <img src={s.image} alt={s.alt} loading="lazy" width={1200} height={900} />
+                </div>
+                <div className="cl-how-body">
+                  <span className="cl-how-step">Step {s.step}</span>
+                  <h3>{s.title}</h3>
+                  <p>{s.description}</p>
+                </div>
+              </li>
+            ))}
+          </ol>
+        </div>
+      </Rail>
+
+      {/* ==========================================================================
           2. MANIFESTO & RADAR (FEATURES)
           ========================================================================== */}
       <Rail id="features" fadeTop={true}>
@@ -1278,7 +1355,10 @@ export default function GrowthLandingPage({ onBackToTools, initialDomain = '' })
 
             <div className="cl-radar-app-card">
               <div className="cl-radar-card-header">
-                <span>AI Citation Radar</span>
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
+                  AI Citation Radar
+                  <span className="cl-sample-badge">Sample data</span>
+                </span>
                 <span className="cl-radar-search-pill">
                   <Search size={12} />
                   <span>"fastest issue tracker" · ChatGPT 4o · citations</span>
@@ -1352,7 +1432,8 @@ export default function GrowthLandingPage({ onBackToTools, initialDomain = '' })
               {[
                 '1. AI Search Radar (GEO)',
                 '2. Search Console (GSC)',
-                '3. Weekly Action Feed'
+                '3. Weekly Action Feed',
+                '4. Google Reviews Radar'
               ].map((label, idx) => (
                 <button
                   key={idx}
@@ -1395,7 +1476,7 @@ export default function GrowthLandingPage({ onBackToTools, initialDomain = '' })
                 <div className="cl-capability-preview-box">
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
                     <span style={{ fontWeight: 600, fontSize: '0.88rem' }}>AI Citation Share</span>
-                    <span style={{ color: '#10b981', fontSize: '0.82rem', fontWeight: 600 }}>+34% this month</span>
+                    <span className="cl-sample-badge">Sample data</span>
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
                     {[
@@ -1444,7 +1525,7 @@ export default function GrowthLandingPage({ onBackToTools, initialDomain = '' })
                 <div className="cl-capability-preview-box">
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
                     <span style={{ fontWeight: 600, fontSize: '0.88rem' }}>GSC Performance Telemetry</span>
-                    <span style={{ color: '#3b82f6', fontSize: '0.82rem', fontWeight: 600 }}>Live Sync</span>
+                    <span className="cl-sample-badge">Sample data</span>
                   </div>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
                     <div style={{ padding: '0.85rem', background: 'var(--cl-muted)', borderRadius: '8px' }}>
@@ -1486,7 +1567,10 @@ export default function GrowthLandingPage({ onBackToTools, initialDomain = '' })
                 <div className="cl-capability-preview-box">
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
                     <span style={{ fontWeight: 600, fontSize: '0.88rem' }}>Top Priority This Week</span>
-                    <span style={{ background: 'rgba(239,68,68,0.15)', color: '#ef4444', fontSize: '0.7rem', fontWeight: 700, padding: '2px 8px', borderRadius: '999px' }}>High Impact</span>
+                    <span style={{ display: 'inline-flex', gap: '0.4rem', alignItems: 'center' }}>
+                      <span className="cl-sample-badge">Sample data</span>
+                      <span style={{ background: 'rgba(239,68,68,0.15)', color: '#ef4444', fontSize: '0.7rem', fontWeight: 700, padding: '2px 8px', borderRadius: '999px' }}>High Impact</span>
+                    </span>
                   </div>
                   <div style={{ padding: '0.85rem', background: 'var(--cl-muted)', borderRadius: '8px' }}>
                     <strong style={{ fontSize: '0.85rem' }}>Add Product Schema & llms.txt to /pricing</strong>
@@ -1494,6 +1578,35 @@ export default function GrowthLandingPage({ onBackToTools, initialDomain = '' })
                       ChatGPT 4o is failing to cite exact tier prices. Implementing structured JSON-LD will recover ~820 high-intent visitors/mo.
                     </p>
                   </div>
+                </div>
+              </>
+            )}
+
+            {activeCapabilityTab === 3 && (
+              <>
+                <div className="cl-capability-info">
+                  <h3>Google Business Profile &amp; Review Radar</h3>
+                  <p>
+                    AI assistants read your Google Maps rating and reviews before recommending a local business.
+                    Connect your listing to see the real rating, rating count and latest reviews straight from Google, with an AI summary of recurring complaints.
+                  </p>
+                  <ul className="cl-feature-bullets">
+                    <li className="cl-feature-bullet">
+                      <span className="cl-bullet-check"><Check size={12} strokeWidth={3} /></span>
+                      <span>Find your listing by name or by pasting a Google Maps link</span>
+                    </li>
+                    <li className="cl-feature-bullet">
+                      <span className="cl-bullet-check"><Check size={12} strokeWidth={3} /></span>
+                      <span>Rating and reviews pulled directly from Google Places</span>
+                    </li>
+                    <li className="cl-feature-bullet">
+                      <span className="cl-bullet-check"><Check size={12} strokeWidth={3} /></span>
+                      <span>One-click AI drafts for professional replies to low-star reviews</span>
+                    </li>
+                  </ul>
+                </div>
+                <div className="cl-capability-preview-box cl-capability-media">
+                  <img src="/growth-landing/feature-local-reviews.jpg" alt="Map pin next to star-rated review cards" loading="lazy" width={1200} height={900} />
                 </div>
               </>
             )}
@@ -1583,14 +1696,14 @@ export default function GrowthLandingPage({ onBackToTools, initialDomain = '' })
             id="benchmarks-heading"
             eyebrow="Speed & Coverage Benchmarks"
             title="The fastest way from audit to citation."
-            description="See how GrowthControl stacks up against legacy SEO rank trackers and slow manual prompt testing."
+            description="An illustrative comparison of how AI citation coverage is measured with GrowthControl, classic rank trackers and manual prompt testing."
           />
 
           <div className="cl-benchmark-block">
             <div className="cl-bench-row">
               <div className="cl-bench-label-row">
                 <span>GrowthControl (Automated Multi-LLM Probing)</span>
-                <span style={{ color: '#10b981', fontWeight: 700 }}>4.2s · 10 Engines</span>
+                <span style={{ color: '#10b981', fontWeight: 700 }}>Automated · 4 AI engines</span>
               </div>
               <div className="cl-bench-bar-track">
                 <div className="cl-bench-bar-fill" style={{ width: '92%', background: '#10b981' }} />
@@ -1610,7 +1723,7 @@ export default function GrowthLandingPage({ onBackToTools, initialDomain = '' })
             <div className="cl-bench-row" style={{ marginBottom: 0 }}>
               <div className="cl-bench-label-row">
                 <span>Manual Prompt Copy-Pasting</span>
-                <span style={{ color: '#ef4444', fontWeight: 600 }}>180s+ per query · Incomplete</span>
+                <span style={{ color: '#ef4444', fontWeight: 600 }}>Minutes per query · Hard to repeat</span>
               </div>
               <div className="cl-bench-bar-track">
                 <div className="cl-bench-bar-fill" style={{ width: '12%', background: '#ef4444' }} />
@@ -1698,46 +1811,42 @@ export default function GrowthLandingPage({ onBackToTools, initialDomain = '' })
       {/* ==========================================================================
           8. TESTIMONIALS (STORIES)
           ========================================================================== */}
+      {VISIBLE_TESTIMONIALS.length > 0 && (
       <Rail id="stories" divider={true}>
         <div style={{ padding: '5rem 1.25rem' }}>
           <SectionHeading
             id="stories-heading"
             eyebrow="Customer Stories"
             title="Less guessing. More delivering."
-            description="See how forward-thinking growth teams protect their brand citations in AI search."
+            description="How growth teams, agencies and local businesses use GrowthControl to stay visible in AI search."
           />
 
-          <div className="cl-testimonial-card">
-            <p className="cl-quote-text">
-              "{TESTIMONIALS_DATA[activeTestimonialIdx].quote}"
-            </p>
-
-            <div className="cl-quote-author-row">
-              <img
-                src={TESTIMONIALS_DATA[activeTestimonialIdx].avatar}
-                alt={TESTIMONIALS_DATA[activeTestimonialIdx].name}
-                className="cl-author-avatar"
-              />
-              <div className="cl-author-info">
-                <span className="cl-author-name">{TESTIMONIALS_DATA[activeTestimonialIdx].name}</span>
-                <span className="cl-author-title">{TESTIMONIALS_DATA[activeTestimonialIdx].role}</span>
-              </div>
-            </div>
-
-            <div className="cl-testimonial-nav-dots">
-              {TESTIMONIALS_DATA.map((_, idx) => (
-                <button
-                  key={idx}
-                  type="button"
-                  onClick={() => setActiveTestimonialIdx(idx)}
-                  className={`cl-nav-dot ${activeTestimonialIdx === idx ? 'active' : ''}`}
-                  aria-label={`Show testimonial ${idx + 1}`}
-                />
-              ))}
-            </div>
+          <div className="cl-testimonial-grid">
+            {VISIBLE_TESTIMONIALS.map((t) => (
+              <figure key={t.name} className="cl-testimonial-tile">
+                <div className="cl-testimonial-stars" aria-label="5 out of 5 stars">
+                  {[0, 1, 2, 3, 4].map(i => (
+                    <Star key={i} size={14} fill="#f59e0b" color="#f59e0b" />
+                  ))}
+                </div>
+                <blockquote className="cl-testimonial-quote">
+                  &ldquo;{t.quote}&rdquo;
+                </blockquote>
+                <figcaption className="cl-quote-author-row">
+                  <span className="cl-author-initials" style={{ background: t.accent }} aria-hidden="true">
+                    {t.name.split(' ').map(part => part[0]).join('').slice(0, 2)}
+                  </span>
+                  <span className="cl-author-info">
+                    <span className="cl-author-name">{t.name}</span>
+                    <span className="cl-author-title">{t.role} · {t.company}</span>
+                  </span>
+                </figcaption>
+              </figure>
+            ))}
           </div>
         </div>
       </Rail>
+      )}
 
       {/* ==========================================================================
           9. PRICING (SYNCHRONIZED WITH REVENUECAT REAL BILLING)

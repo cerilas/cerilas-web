@@ -2776,3 +2776,191 @@
     min-width: 100%;
   }
 }
+
+/* ==========================================================================
+   SAMPLE DATA LABELS
+   ========================================================================== */
+.cl-sample-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px dashed var(--cl-border);
+  background: var(--cl-muted);
+  color: var(--cl-muted-fg);
+  font-size: 0.66rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* ==========================================================================
+   HOW IT WORKS
+   ========================================================================== */
+.cl-how-grid {
+  list-style: none;
+  margin: 3rem 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1.25rem;
+}
+
+.cl-how-card {
+  display: flex;
+  flex-direction: column;
+  border-radius: 1.25rem;
+  border: 1px solid var(--cl-card-border);
+  background: var(--cl-card-bg);
+  box-shadow: var(--cl-shadow-card);
+  overflow: hidden;
+  transition: transform 0.2s ease;
+}
+
+.cl-how-card:hover {
+  transform: translateY(-3px);
+}
+
+.cl-how-media {
+  aspect-ratio: 4 / 3;
+  background: #d8f1fd;
+  overflow: hidden;
+}
+
+.cl-how-media img,
+.cl-capability-media img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.cl-how-body {
+  padding: 1.35rem 1.4rem 1.6rem;
+}
+
+.cl-how-step {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--cl-ring);
+}
+
+.cl-how-body h3 {
+  margin: 0.45rem 0 0;
+  font-size: 1.12rem;
+  font-weight: 600;
+  color: var(--cl-fg);
+}
+
+.cl-how-body p {
+  margin: 0.5rem 0 0;
+  font-size: 0.88rem;
+  line-height: 1.6;
+  color: var(--cl-muted-fg);
+}
+
+.cl-capability-media {
+  padding: 0;
+  overflow: hidden;
+  aspect-ratio: 4 / 3;
+}
+
+/* ==========================================================================
+   TESTIMONIAL GRID
+   ========================================================================== */
+.cl-testimonial-grid {
+  margin-top: 2.5rem;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1.25rem;
+}
+
+.cl-testimonial-tile {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 1.6rem;
+  border-radius: 1.25rem;
+  border: 1px solid var(--cl-card-border);
+  background: var(--cl-card-bg);
+  box-shadow: var(--cl-shadow-card);
+}
+
+.cl-testimonial-stars {
+  display: flex;
+  gap: 2px;
+}
+
+.cl-testimonial-quote {
+  margin: 0.9rem 0 0;
+  flex: 1;
+  font-size: 0.95rem;
+  line-height: 1.65;
+  color: var(--cl-fg);
+}
+
+.cl-testimonial-tile .cl-quote-author-row {
+  justify-content: flex-start;
+  margin-top: 1.35rem;
+}
+
+.cl-author-initials {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  color: #ffffff;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.cl-testimonial-tile .cl-author-info {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+}
+
+@media (max-width: 1024px) {
+  .cl-testimonial-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 900px) {
+  .cl-how-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .cl-how-card {
+    flex-direction: row;
+  }
+  .cl-how-media {
+    flex: 0 0 42%;
+    aspect-ratio: auto;
+  }
+  .cl-how-body {
+    align-self: center;
+  }
+}
+
+@media (max-width: 640px) {
+  .cl-testimonial-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .cl-how-card {
+    flex-direction: column;
+  }
+  .cl-how-media {
+    flex: none;
+    aspect-ratio: 4 / 3;
+  }
+  .cl-testimonial-tile {
+    padding: 1.3rem;
+  }
+}
