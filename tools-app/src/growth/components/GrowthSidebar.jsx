@@ -80,6 +80,21 @@ export default function GrowthSidebar() {
     }
   });
 
+  const [isNarrow, setIsNarrow] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    return window.matchMedia('(max-width: 768px)').matches;
+  });
+
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 768px)');
+    const update = () => setIsNarrow(mq.matches);
+    update();
+    mq.addEventListener('change', update);
+    return () => mq.removeEventListener('change', update);
+  }, []);
+
+  const layoutCollapsed = isCollapsed && !isNarrow;
+
   const toggleCollapse = () => {
     setIsCollapsed(prev => {
       const next = !prev;
@@ -174,10 +189,10 @@ export default function GrowthSidebar() {
   };
 
   return (
-    <aside className={`growth-app-sidebar ${isCollapsed ? 'is-collapsed' : ''}`}>
+    <aside className={`growth-app-sidebar ${layoutCollapsed ? 'is-collapsed' : ''}`}>
       {/* Platform Branding Mini + Collapse Toggle */}
       <div className="growth-sidebar-brand-box">
-        {!isCollapsed ? (
+        {!layoutCollapsed ? (
           <>
             <div className="growth-brand-titles-row">
               <div className="growth-logo-glow-wrap" title="GrowthControl">
@@ -238,7 +253,7 @@ export default function GrowthSidebar() {
             key={group.title} 
             className={`growth-nav-group ${group.isFeatured ? 'is-featured-ai-group' : ''}`}
           >
-            {!isCollapsed ? (
+            {!layoutCollapsed ? (
               <div className="growth-group-header-row">
                 <span className={`growth-group-title ${group.isFeatured ? 'is-featured-title' : ''}`}>
                   {group.title}
@@ -259,17 +274,17 @@ export default function GrowthSidebar() {
                   <button
                     key={item.id}
                     type="button"
-                    className={`growth-nav-item ${isActive ? 'is-active' : ''} ${needsSetup ? 'requires-setup' : ''} ${isCollapsed ? 'is-collapsed' : ''} ${group.isFeatured ? 'is-featured-ai-item' : ''}`}
+                    className={`growth-nav-item ${isActive ? 'is-active' : ''} ${needsSetup ? 'requires-setup' : ''} ${layoutCollapsed ? 'is-collapsed' : ''} ${group.isFeatured ? 'is-featured-ai-item' : ''}`}
                     onClick={() => {
                       setActiveTab(item.id);
                       if (activeWorkspace) {
                         window.location.hash = `#/growth/${activeWorkspace.slug}/${item.id}`;
                       }
                     }}
-                    title={isCollapsed ? `${item.label}${needsSetup ? ' (Setup Required)' : ''}` : undefined}
+                    title={layoutCollapsed ? `${item.label}${needsSetup ? ' (Setup Required)' : ''}` : undefined}
                   >
                     <Icon size={17} strokeWidth={isActive ? 2.2 : 1.8} className="growth-nav-icon" />
-                    {!isCollapsed && (
+                    {!layoutCollapsed && (
                       <>
                         <span className="growth-nav-label">{item.label}</span>
                         {isFree && (item.id === 'technical' || item.id === 'competitors') ? (
@@ -312,10 +327,10 @@ export default function GrowthSidebar() {
       {/* Sidebar Footer (Active workspace status card) */}
       {activeWorkspace && (
         <div 
-          className={`growth-sidebar-footer ${isCollapsed ? 'is-collapsed' : ''}`}
-          title={isCollapsed ? `Growth Score: ${activeWorkspace.growth_score || 72}/100 • ${activeWorkspace.primary_domain}` : undefined}
+          className={`growth-sidebar-footer ${layoutCollapsed ? 'is-collapsed' : ''}`}
+          title={layoutCollapsed ? `Growth Score: ${activeWorkspace.growth_score || 72}/100 • ${activeWorkspace.primary_domain}` : undefined}
         >
-          {!isCollapsed ? (
+          {!layoutCollapsed ? (
             <>
               <div className="growth-footer-score-pill">
                 <div className="growth-footer-dot" />

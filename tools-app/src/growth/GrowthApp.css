@@ -4288,8 +4288,8 @@ html.light .comp-visit-link:hover {
     border-right: none;
     border-bottom: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
     padding: 0.45rem 0.65rem !important;
-    position: sticky;
-    top: 56px;
+    position: relative;
+    top: auto;
     z-index: 40;
     background: rgba(9, 9, 11, 0.95);
     backdrop-filter: blur(16px);
@@ -18303,13 +18303,14 @@ body.light .growth-info-alert {
     overflow-x: hidden !important;
     overflow-y: visible !important;
     flex-direction: column !important;
+    gap: 1rem !important;
     width: 100% !important;
     max-width: 100vw !important;
     box-sizing: border-box !important;
   }
 
   .growth-main-viewport {
-    padding: 0.85rem 0.65rem 2.5rem !important;
+    padding: 0.15rem 0.7rem 2.5rem !important;
     width: 100% !important;
     max-width: 100vw !important;
     box-sizing: border-box !important;
@@ -18325,10 +18326,14 @@ body.light .growth-info-alert {
 
   /* 2. Application Header */
   .growth-app-header {
-    height: 56px !important;
-    padding: 0 0.65rem !important;
-    gap: 0.4rem !important;
-    overflow-x: clip !important;
+    height: 40px !important;
+    min-height: 40px !important;
+    margin: 0 !important;
+    padding: 0 0.5rem !important;
+    gap: 0.35rem !important;
+    flex-wrap: nowrap !important;
+    align-items: center !important;
+    overflow: visible !important;
     max-width: 100vw !important;
     box-sizing: border-box !important;
   }
@@ -18340,21 +18345,23 @@ body.light .growth-info-alert {
   }
 
   .growth-header-back-btn {
-    padding: 0.35rem 0.55rem !important;
-    font-size: 0.75rem !important;
-    gap: 0.3rem !important;
+    padding: 0 !important;
+    width: 32px !important;
+    height: 32px !important;
+    justify-content: center !important;
     border-radius: 8px !important;
     flex-shrink: 0 !important;
   }
 
+  .growth-header-back-btn span,
   .growth-header-sep {
-    margin: 0 0.1rem !important;
-    opacity: 0.5 !important;
+    display: none !important;
   }
 
   .growth-workspace-switcher {
     min-width: 0 !important;
-    max-width: 160px !important;
+    max-width: none !important;
+    flex: 1 1 auto !important;
   }
 
   .growth-ws-select-btn {
@@ -18375,7 +18382,7 @@ body.light .growth-info-alert {
   }
 
   .growth-ws-title {
-    max-width: 90px !important;
+    max-width: 100% !important;
     overflow: hidden !important;
     text-overflow: ellipsis !important;
     white-space: nowrap !important;
@@ -18396,11 +18403,17 @@ body.light .growth-info-alert {
     display: none !important;
   }
 
+  .growth-plan-badge-btn span {
+    display: none !important;
+  }
+
   .growth-plan-badge-btn {
-    padding: 0.32rem 0.55rem !important;
-    font-size: 0.75rem !important;
-    gap: 0.3rem !important;
+    padding: 0 !important;
+    width: 32px !important;
+    height: 32px !important;
+    justify-content: center !important;
     border-radius: 8px !important;
+    flex-shrink: 0 !important;
   }
 
   .growth-header-theme-btn {
@@ -18411,8 +18424,13 @@ body.light .growth-info-alert {
   }
 
   .nav-user-trigger-btn {
-    padding: 0.25rem 0.35rem !important;
-    gap: 0.25rem !important;
+    padding: 0.15rem 0.3rem 0.15rem 0.15rem !important;
+    gap: 0.15rem !important;
+    height: 32px !important;
+  }
+
+  .nav-user-chevron {
+    display: none !important;
   }
 
   .nav-user-display-name {
@@ -18437,23 +18455,63 @@ body.light .growth-info-alert {
 
   /* 3. Sticky Horizontal Sidebar Navigation */
   .growth-app-sidebar {
-    top: 56px !important;
-    padding: 0.4rem 0.5rem !important;
+    position: relative !important;
+    top: auto !important;
+    margin: 0 !important;
+    padding: 0.35rem 0.55rem !important;
     width: 100% !important;
     max-width: 100vw !important;
+    height: auto !important;
+    min-height: 0 !important;
     box-sizing: border-box !important;
   }
 
   .growth-sidebar-nav {
-    gap: 0.35rem !important;
-    padding: 0.15rem 0 !important;
+    margin: 0 !important;
+    flex: none !important;
+    align-items: center !important;
+    gap: 0.3rem !important;
+    padding: 0 !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
   }
 
-  .growth-nav-item {
-    padding: 0.38rem 0.7rem !important;
+  .growth-group-header-row {
+    display: none !important;
+  }
+
+  .growth-nav-group,
+  .growth-nav-group.is-featured-ai-group {
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    background: transparent !important;
+    align-items: center !important;
+    flex: 0 0 auto !important;
+    gap: 0.3rem !important;
+  }
+
+  .growth-group-items {
+    align-items: center !important;
+    flex-wrap: nowrap !important;
+    gap: 0.3rem !important;
+  }
+
+  .growth-nav-item,
+  .growth-app-sidebar.is-collapsed .growth-nav-item {
+    width: auto !important;
+    height: 32px !important;
+    min-height: 32px !important;
+    max-height: 32px !important;
+    padding: 0 0.7rem !important;
+    align-self: center !important;
+    flex: 0 0 auto !important;
     font-size: 0.76rem !important;
     border-radius: 999px !important;
-    gap: 0.35rem !important;
+    gap: 0.3rem !important;
+    line-height: 1 !important;
+    align-items: center !important;
+    overflow: hidden !important;
   }
 
   .growth-nav-icon {
@@ -18522,63 +18580,89 @@ body.light .growth-info-alert {
 
   /* 5. Mission Control HUD (GrowthOverview) */
   .station-hud-bar {
-    flex-direction: column !important;
-    align-items: stretch !important;
-    padding: 0.85rem 0.95rem !important;
-    gap: 0.75rem !important;
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) auto !important;
+    align-items: center !important;
+    padding: 0.7rem 0.75rem !important;
+    gap: 0.65rem 0.5rem !important;
     width: 100% !important;
+    margin: 0 !important;
     box-sizing: border-box !important;
   }
 
-  .station-hud-left {
-    flex-direction: column !important;
-    align-items: flex-start !important;
-    gap: 0.45rem !important;
-    width: 100% !important;
+  .station-status-indicator {
+    display: none !important;
   }
 
-  .station-status-indicator {
+  .station-hud-left {
+    grid-column: 1 / -1 !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 0.5rem !important;
     width: 100% !important;
-    justify-content: flex-start !important;
+    min-width: 0 !important;
   }
 
   .station-brand-meta-inline {
-    flex-wrap: wrap !important;
-    gap: 0.4rem !important;
-    width: 100% !important;
+    flex: 1 1 auto !important;
+    width: auto !important;
+    min-width: 0 !important;
+    flex-wrap: nowrap !important;
+    gap: 0.35rem !important;
+    padding: 0 !important;
+    border: none !important;
+  }
+
+  .station-brand-name {
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+    min-width: 0 !important;
   }
 
   .station-growth-score-chip {
-    align-self: flex-start !important;
+    align-self: center !important;
+    flex-shrink: 0 !important;
+    margin: 0 !important;
   }
 
   .station-hud-center {
-    width: 100% !important;
-    overflow-x: auto !important;
-    -webkit-overflow-scrolling: touch !important;
-    padding-bottom: 2px !important;
+    grid-column: 1 !important;
+    width: auto !important;
+    min-width: 0 !important;
+    overflow: hidden !important;
+    padding: 0 !important;
   }
 
   .station-range-selector {
     width: 100% !important;
+    min-width: 0 !important;
     justify-content: space-between !important;
-    min-width: 280px !important;
   }
 
   .station-range-btn {
-    flex: 1 1 auto !important;
+    flex: 1 1 0 !important;
     justify-content: center !important;
-    padding: 5px 8px !important;
-    font-size: 0.7rem !important;
+    padding: 5px 4px !important;
+    font-size: 0.68rem !important;
+    min-width: 0 !important;
   }
 
   .station-hud-right {
-    width: 100% !important;
+    grid-column: 2 !important;
+    width: auto !important;
   }
 
   .station-refresh-btn {
-    width: 100% !important;
+    width: auto !important;
     justify-content: center !important;
+    padding: 6px 10px !important;
+  }
+
+  .station-refresh-btn span {
+    display: none !important;
   }
 
   /* 6. Space Station Modules Grid & Cards */
@@ -18824,12 +18908,7 @@ body.light .growth-info-alert {
     display: none !important;
   }
 
-  .growth-workspace-switcher {
-    max-width: 130px !important;
-  }
-
   .growth-ws-title {
-    max-width: 70px !important;
     font-size: 0.75rem !important;
   }
 
@@ -18877,12 +18956,7 @@ body.light .growth-info-alert {
 }
 
 @media (max-width: 480px) {
-  .growth-workspace-switcher {
-    max-width: 110px !important;
-  }
-
   .growth-ws-title {
-    max-width: 58px !important;
     font-size: 0.72rem !important;
   }
 
@@ -19045,6 +19119,40 @@ body.light .growth-info-alert {
 
   .growth-page-container {
     gap: 2.25rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .hero-banner-actions,
+  .hero-banner-actions > div {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    align-items: stretch !important;
+    gap: 0.5rem !important;
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  .hero-banner-actions button,
+  .hero-banner-actions a {
+    flex: 1 1 calc(50% - 0.25rem) !important;
+    min-width: 0 !important;
+    height: 38px !important;
+    padding: 0 0.75rem !important;
+    justify-content: center !important;
+    white-space: nowrap !important;
+    font-size: 0.8rem !important;
+    box-sizing: border-box !important;
+  }
+
+  .hero-banner-actions button > span,
+  .hero-banner-actions a > span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .hero-banner-actions .growth-primary-btn {
+    flex-basis: 100% !important;
   }
 }
 
