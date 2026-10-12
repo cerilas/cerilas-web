@@ -502,7 +502,7 @@ export default function GrowthReports() {
         </div>
 
         {/* ROW 1.5: ADMINISTRATOR SINGLE TRIGGER WEBHOOK / CRON */}
-        <div className="reports-card" style={{ borderColor: 'rgba(56, 189, 248, 0.3)', background: 'linear-gradient(180deg, rgba(15, 23, 42, 0.8) 0%, rgba(11, 15, 25, 0.95) 100%)' }}>
+        <div className="reports-card admin-trigger-card">
           <div className="reports-card-header">
             <div className="reports-card-title-group">
               <div className="reports-card-title-row">
@@ -522,33 +522,33 @@ export default function GrowthReports() {
             </span>
           </div>
 
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '16px' }}>
-            <span style={{ background: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.25)', color: '#10b981', padding: '4px 10px', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 600 }}>
+          <div className="admin-trigger-badges-row">
+            <span className="admin-trigger-badge badge-green">
               ✓ Pro &amp; Unlimited Plans Only
             </span>
-            <span style={{ background: 'rgba(56, 189, 248, 0.1)', border: '1px solid rgba(56, 189, 248, 0.25)', color: '#38bdf8', padding: '4px 10px', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 600 }}>
+            <span className="admin-trigger-badge badge-sky">
               ✓ Active Reports Enabled Only
             </span>
-            <span style={{ background: 'rgba(245, 158, 11, 0.1)', border: '1px solid rgba(245, 158, 11, 0.25)', color: '#f59e0b', padding: '4px 10px', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 600 }}>
+            <span className="admin-trigger-badge badge-amber">
               ✓ Minimum 1 Valid Recipient Email Configured
             </span>
-            <span style={{ background: 'rgba(129, 140, 248, 0.1)', border: '1px solid rgba(129, 140, 248, 0.25)', color: '#818cf8', padding: '4px 10px', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 600 }}>
+            <span className="admin-trigger-badge badge-indigo">
               ✓ 100% Live Telemetry Compiled (GSC, GA4, AI, Audit)
             </span>
           </div>
 
-          <div style={{ background: '#030712', border: '1px solid #1e293b', borderRadius: '10px', padding: '12px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', overflow: 'hidden', minWidth: '260px', flex: 1 }}>
-              <span style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>GET / POST</span>
-              <code style={{ fontSize: '0.8rem', color: '#38bdf8', fontFamily: 'monospace', wordBreak: 'break-all' }}>
+          <div className="admin-trigger-url-box">
+            <div className="admin-trigger-url-code-wrap">
+              <span className="admin-trigger-method-tag">GET / POST</span>
+              <code className="admin-trigger-code">
                 {webhookUrl || `${typeof window !== 'undefined' ? window.location.origin : ''}/api/growth/webhooks/daily-report?token=cerilas_growth_cron_2026_x89a`}
               </code>
             </div>
-            <div style={{ display: 'flex', gap: '8px' }}>
+            <div className="admin-trigger-actions">
               <button
                 type="button"
                 onClick={handleCopyWebhookUrl}
-                style={{ background: '#1e293b', color: '#f8fafc', border: '1px solid #334155', padding: '8px 14px', borderRadius: '8px', fontSize: '0.8rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}
+                className="admin-trigger-btn copy-btn"
                 title="Copy Trigger URL to clipboard"
               >
                 {copiedUrl ? <Check size={14} color="#10b981" /> : <Copy size={14} />}
@@ -558,7 +558,7 @@ export default function GrowthReports() {
                 type="button"
                 onClick={handleTriggerAllAsAdmin}
                 disabled={triggeringCron}
-                style={{ background: '#0284c7', color: '#ffffff', border: 'none', padding: '8px 16px', borderRadius: '8px', fontSize: '0.8rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', opacity: triggeringCron ? 0.7 : 1 }}
+                className="admin-trigger-btn dispatch-btn"
                 title="Trigger automated batch dispatch now"
               >
                 {triggeringCron ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />}

@@ -1292,7 +1292,7 @@ export default function GrowthAnalytics() {
                   </div>
                 </div>
 
-                <div className="growth-two-col-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1.5rem' }}>
+                <div className="growth-two-col-grid">
                   {/* Device Categories */}
                   <div className="growth-subcard">
                     <h4 style={{ margin: '0 0 1rem', fontSize: '0.95rem', color: 'var(--text-main, #ffffff)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>

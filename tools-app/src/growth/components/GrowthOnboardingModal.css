@@ -982,6 +982,23 @@
   }
 }
 
+@media (max-width: 480px) {
+  .growth-modal-backdrop {
+    padding: 0.5rem !important;
+  }
+  .growth-modal-container {
+    width: 100% !important;
+    max-width: calc(100vw - 1rem) !important;
+    border-radius: 16px !important;
+  }
+  .growth-modal-banner-cover {
+    padding: 1rem 0.85rem !important;
+  }
+  .growth-modal-content-body {
+    padding: 1rem 0.85rem !important;
+  }
+}
+
 /* ============================================================
    LIGHT MODE OVERRIDES FOR ONBOARDING MODAL
    ============================================================ */

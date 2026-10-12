@@ -283,3 +283,16 @@ html.light .growth-empty-hl-info h4 {
     justify-content: center;
   }
 }
+
+@media (max-width: 480px) {
+  .growth-empty-setup-container {
+    padding: 1.25rem 0.5rem;
+  }
+  .growth-empty-setup-card {
+    padding: 1.5rem 0.85rem;
+    border-radius: 18px;
+  }
+  .growth-empty-title {
+    font-size: 1.3rem;
+  }
+}

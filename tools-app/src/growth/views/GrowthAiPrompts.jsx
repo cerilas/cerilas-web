@@ -708,7 +708,7 @@ export default function GrowthAiPrompts() {
                   />
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))', gap: '1rem', marginTop: '1rem' }}>
+                <div className="prompt-modal-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))', gap: '1rem', marginTop: '1rem' }}>
                   <div>
                     <AiVisibilityDropdown
                       id="modal-prompt-country"
