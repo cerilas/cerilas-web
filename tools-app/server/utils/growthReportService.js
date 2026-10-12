@@ -1,5 +1,6 @@
 import nodemailer from 'nodemailer';
 import { authPool } from '../db.js';
+import { getUserPlan, normalizeUserPlan } from './growthPlanLimits.js';
 
 export const CRON_SECRET = process.env.CRON_SECRET || 'cerilas_growth_cron_2026_x89a';
 
@@ -17,7 +18,15 @@ export function isValidCronSecret(candidate) {
 export function getRequestCronSecret(req) {
   const auth = req.get('authorization') || '';
   const bearer = auth.startsWith('Bearer ') ? auth.slice(7).trim() : '';
-  return String(req.get('x-cron-secret') || bearer || req.query.token || req.query.key || '');
+  return String(
+    req.get('x-cron-secret') || 
+    bearer || 
+    req.query.token || 
+    req.query.key || 
+    req.query.secret || 
+    req.query.cron_secret || 
+    ''
+  );
 }
 
 /**
@@ -79,6 +88,13 @@ export function buildDailyReportHtml(workspace, metrics, dateStr) {
       <div style="font-size: 13px; font-weight: 600; color: #f3f4f6; margin-bottom: 4px;">${opp.title}</div>
       <div style="font-size: 12px; color: #9ca3af; line-height: 1.4;">${opp.description || opp.action_summary || ''}</div>
     </div>
+  `).join('');
+
+  // Competitor benchmarking
+  const competitorsHtml = (metrics.competitors || []).slice(0, 5).map(c => `
+    <span style="display: inline-block; background: #111827; border: 1px solid #1f2937; color: #cbd5e1; padding: 5px 10px; border-radius: 6px; font-size: 11px; margin-right: 6px; margin-bottom: 6px;">
+      <strong style="color: #f3f4f6;">${c.name}</strong> <span style="color: #64748b;">(${c.domain || 'Radar'})</span>
+    </span>
   `).join('');
 
   return `
@@ -195,6 +211,22 @@ export function buildDailyReportHtml(workspace, metrics, dateStr) {
             </td>
           </tr>
 
+          <!-- SECTION 3: COMPETITOR RADAR BENCHMARKING -->
+          ${competitorsHtml ? `
+          <tr>
+            <td style="padding: 0 32px 24px 32px;">
+              <div style="background: #0b111e; border: 1px solid #1e293b; border-radius: 12px; padding: 14px 16px;">
+                <div style="font-size: 11px; font-weight: 800; color: #a78bfa; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;">
+                  3. ACTIVE COMPETITOR RADAR (TRACKED MARKET BENCHMARKS)
+                </div>
+                <div style="display: flex; flex-wrap: wrap;">
+                  ${competitorsHtml}
+                </div>
+              </div>
+            </td>
+          </tr>
+          ` : ''}
+
           <!-- CTA BUTTON -->
           <tr>
             <td style="padding: 12px 32px 32px 32px; text-align: center;">
@@ -289,25 +321,39 @@ export async function sendWorkspaceDailyReport(workspaceId, triggerType = 'webho
     crawlRes,
     issuesRes,
     promptsRes,
-    aiRunsRes,
-    oppsRes
+    distinctAiRunsRes,
+    latestBatchRes,
+    oppsRes,
+    competitorsRes
   ] = await Promise.all([
     authPool.query('SELECT * FROM growth_search_performance WHERE workspace_id = $1 ORDER BY synced_at DESC LIMIT 1', [workspaceId]),
     authPool.query('SELECT * FROM growth_analytics_performance WHERE workspace_id = $1 ORDER BY synced_at DESC LIMIT 1', [workspaceId]),
     authPool.query('SELECT * FROM growth_crawl_runs WHERE workspace_id = $1 ORDER BY id DESC LIMIT 1', [workspaceId]),
     authPool.query('SELECT COUNT(*)::int as count FROM growth_audit_issues WHERE workspace_id = $1 AND is_resolved = false', [workspaceId]),
-    authPool.query('SELECT COUNT(*)::int as count FROM growth_tracked_prompts WHERE workspace_id = $1 AND is_active = true', [workspaceId]),
-    authPool.query('SELECT COUNT(*)::int as count FROM growth_ai_visibility_runs WHERE workspace_id = $1 AND brand_mentioned = true', [workspaceId]),
-    authPool.query("SELECT * FROM growth_opportunities WHERE workspace_id = $1 AND status = 'open' ORDER BY priority_score DESC LIMIT 4", [workspaceId])
+    authPool.query('SELECT id, prompt, topic FROM growth_tracked_prompts WHERE workspace_id = $1 AND is_active = true ORDER BY id ASC', [workspaceId]),
+    authPool.query('SELECT COUNT(DISTINCT prompt_id)::int as count FROM growth_ai_visibility_runs WHERE workspace_id = $1 AND brand_mentioned = true', [workspaceId]),
+    authPool.query('SELECT * FROM growth_ai_visibility_batch_reports WHERE workspace_id = $1 ORDER BY id DESC LIMIT 1', [workspaceId]),
+    authPool.query("SELECT * FROM growth_opportunities WHERE workspace_id = $1 AND status = 'open' ORDER BY priority_score DESC LIMIT 4", [workspaceId]),
+    authPool.query('SELECT name, domain, type FROM growth_competitors WHERE workspace_id = $1 AND is_active = true ORDER BY id ASC LIMIT 5', [workspaceId])
   ]);
 
   const gscRow = gscRes.rows[0] || {};
   const ga4Row = ga4Res.rows[0] || {};
   const crawlRow = crawlRes.rows[0] || {};
+  const latestBatch = latestBatchRes.rows[0] || null;
 
-  const totalPrompts = promptsRes.rows[0]?.count || 0;
-  const citedRuns = aiRunsRes.rows[0]?.count || 0;
-  const citationRate = totalPrompts > 0 ? Math.min(100, Math.round((citedRuns / totalPrompts) * 100)) : 67;
+  const totalPrompts = promptsRes.rows.length;
+  let citedCount = distinctAiRunsRes.rows[0]?.count || 0;
+  let citationRate = totalPrompts > 0 ? Math.min(100, Math.round((citedCount / totalPrompts) * 100)) : 0;
+
+  if (latestBatch) {
+    if (latestBatch.mentioned_count != null) citedCount = Number(latestBatch.mentioned_count);
+    if (latestBatch.total_prompts != null && Number(latestBatch.total_prompts) > 0) {
+      citationRate = Math.min(100, Math.round((citedCount / Number(latestBatch.total_prompts)) * 100));
+    } else if (latestBatch.visibility_score != null) {
+      citationRate = Math.min(100, Number(latestBatch.visibility_score));
+    }
+  }
 
   const strikingQueries = Array.isArray(gscRow.striking_queries) ? gscRow.striking_queries : [];
   const topQueries = Array.isArray(gscRow.top_queries) ? gscRow.top_queries : [];
@@ -315,28 +361,31 @@ export async function sendWorkspaceDailyReport(workspaceId, triggerType = 'webho
 
   const metrics = {
     gsc: {
-      totalClicks: gscRow.total_clicks || 7,
-      totalImpressions: gscRow.total_impressions || 362,
-      avgPosition: gscRow.average_position || 15.0,
+      hasData: Boolean(gscRow.total_clicks != null || gscRow.total_impressions != null),
+      totalClicks: gscRow.total_clicks ?? 0,
+      totalImpressions: gscRow.total_impressions ?? 0,
+      avgPosition: gscRow.average_position != null ? Number(gscRow.average_position).toFixed(1) : null,
       strikingQueries: combinedQueries
     },
     ga4: {
-      activeUsers: ga4Row.active_users || ga4Row.total_users || 85,
-      sessions: ga4Row.sessions || 258,
-      pageViews: ga4Row.screen_page_views || 1639,
-      bounceRate: ga4Row.bounce_rate ? `${parseFloat(ga4Row.bounce_rate).toFixed(1)}%` : '39.5%'
+      hasData: Boolean(ga4Row.active_users != null || ga4Row.sessions != null),
+      activeUsers: ga4Row.active_users || ga4Row.total_users || 0,
+      sessions: ga4Row.sessions || 0,
+      pageViews: ga4Row.screen_page_views || 0,
+      bounceRate: ga4Row.bounce_rate ? `${parseFloat(ga4Row.bounce_rate).toFixed(1)}%` : null
     },
     geo: {
       totalPrompts: totalPrompts || 3,
-      citedCount: citedRuns || 2,
+      citedCount,
       citationRate
     },
     technical: {
-      score: crawlRow.technical_score || 90,
-      pagesCrawled: crawlRow.pages_crawled || 251,
-      activeIssuesCount: issuesRes.rows[0]?.count || 1
+      score: crawlRow.technical_score ?? 85,
+      pagesCrawled: crawlRow.pages_crawled ?? 1,
+      activeIssuesCount: issuesRes.rows[0]?.count || 0
     },
-    opportunities: oppsRes.rows
+    opportunities: oppsRes.rows,
+    competitors: competitorsRes.rows
   };
 
   const dateStr = new Date().toLocaleDateString('en-US', {
@@ -386,12 +435,27 @@ export async function sendWorkspaceDailyReport(workspaceId, triggerType = 'webho
 
 /**
  * Triggers daily report for all active workspaces with enabled daily reports
+ * EXCLUSIVELY for users on Pro or Unlimited plans.
  */
 export async function triggerAllDailyReports(triggerType = 'webhook', specificWorkspaceId = null) {
   let query = `
-    SELECT w.id, w.name, c.recipients, c.daily_report_enabled
+    SELECT 
+      w.id AS workspace_id,
+      w.name AS workspace_name,
+      w.primary_domain,
+      c.recipients,
+      c.daily_report_enabled,
+      o.id AS org_id,
+      o.plan AS org_plan,
+      COALESCE(u.id, om_u.id) AS user_id,
+      COALESCE(u.email, om_u.email) AS user_email,
+      COALESCE(u.plan, om_u.plan) AS user_plan
     FROM workspaces w
     JOIN growth_workspace_report_configs c ON c.workspace_id = w.id
+    LEFT JOIN organizations o ON o.id = w.organization_id
+    LEFT JOIN users u ON u.id = o.created_by_user_id
+    LEFT JOIN organization_members om ON om.organization_id = o.id AND om.role = 'owner'
+    LEFT JOIN users om_u ON om_u.id = om.user_id
     WHERE c.daily_report_enabled = true
       AND array_length(c.recipients, 1) > 0
   `;
@@ -402,28 +466,68 @@ export async function triggerAllDailyReports(triggerType = 'webhook', specificWo
     params.push(specificWorkspaceId);
   }
 
+  query += ' ORDER BY w.id ASC';
+
   const res = await authPool.query(query, params);
-  const eligibleWorkspaces = res.rows;
+  const candidates = res.rows;
 
   const results = [];
-  for (const ws of eligibleWorkspaces) {
+  const skipped = [];
+
+  for (const row of candidates) {
+    // 1. Check Plan Eligibility (Must be 'pro' or 'unlimited')
+    const effectivePlan = getUserPlan(
+      { id: row.user_id, email: row.user_email, plan: row.user_plan },
+      { id: row.org_id, plan: row.org_plan }
+    );
+
+    if (effectivePlan !== 'pro' && effectivePlan !== 'unlimited') {
+      skipped.push({
+        workspaceId: row.workspace_id,
+        workspaceName: row.workspace_name,
+        plan: effectivePlan,
+        reason: `Abonelik paketi yetersiz (${effectivePlan}). Günlük e-posta raporu Pro veya Unlimited paket gerektirir.`
+      });
+      continue;
+    }
+
+    // 2. Validate Recipients
+    const validRecipients = (row.recipients || [])
+      .map(r => String(r).trim().toLowerCase())
+      .filter(r => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(r));
+
+    if (validRecipients.length === 0) {
+      skipped.push({
+        workspaceId: row.workspace_id,
+        workspaceName: row.workspace_name,
+        plan: effectivePlan,
+        reason: 'Geçerli bir e-posta alıcısı tanımlanmamış.'
+      });
+      continue;
+    }
+
+    // 3. Send Daily Report
     try {
-      const result = await sendWorkspaceDailyReport(ws.id, triggerType);
-      results.push(result);
+      const result = await sendWorkspaceDailyReport(row.workspace_id, triggerType, validRecipients);
+      results.push({
+        ...result,
+        plan: effectivePlan
+      });
     } catch (err) {
-      console.error(`[Daily Report Error for ws ${ws.id}]:`, err.message);
-      // Log failure
+      console.error(`[Daily Report Error for ws ${row.workspace_id}]:`, err.message);
       await authPool.query(
         `UPDATE growth_workspace_report_configs
          SET last_sent_at = NOW(), last_sent_status = 'failed', last_error = $2, updated_at = NOW()
          WHERE workspace_id = $1`,
-        [ws.id, err.message]
+        [row.workspace_id, err.message]
       ).catch(() => {});
 
       results.push({
         success: false,
-        workspaceId: ws.id,
-        workspaceName: ws.name,
+        workspaceId: row.workspace_id,
+        workspaceName: row.workspace_name,
+        plan: effectivePlan,
+        recipients: validRecipients,
         error: err.message
       });
     }
@@ -431,8 +535,11 @@ export async function triggerAllDailyReports(triggerType = 'webhook', specificWo
 
   return {
     success: true,
-    total_eligible: eligibleWorkspaces.length,
-    processed: results.length,
+    total_candidates: candidates.length,
+    processed_count: results.length,
+    sent_count: results.filter(r => r.success).length,
+    skipped_count: skipped.length,
+    skipped,
     results
   };
 }

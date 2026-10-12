@@ -42,6 +42,8 @@ export default function GrowthReports() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [sendingTest, setSendingTest] = useState(false);
+  const [triggeringCron, setTriggeringCron] = useState(false);
+  const [copiedUrl, setCopiedUrl] = useState(false);
   const [toastMessage, setToastMessage] = useState(null);
 
   // Report config state
@@ -52,6 +54,7 @@ export default function GrowthReports() {
   const [logs, setLogs] = useState([]);
   const [lastSentAt, setLastSentAt] = useState(null);
   const [lastSentStatus, setLastSentStatus] = useState(null);
+  const [webhookUrl, setWebhookUrl] = useState('');
 
   // Live telemetry for visual preview
   const [previewData, setPreviewData] = useState(null);
@@ -77,6 +80,9 @@ export default function GrowthReports() {
         setLogs(cfgJson.data.logs || []);
         setLastSentAt(c.last_sent_at);
         setLastSentStatus(c.last_sent_status);
+        if (cfgJson.data.webhookUrl) {
+          setWebhookUrl(cfgJson.data.webhookUrl);
+        }
       }
 
       const ovJson = await ovRes.json();
@@ -87,6 +93,34 @@ export default function GrowthReports() {
       console.error('Fetch report config error:', err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleCopyWebhookUrl = () => {
+    const urlToCopy = webhookUrl || `${window.location.origin}/api/growth/webhooks/daily-report?token=cerilas_growth_cron_2026_x89a`;
+    navigator.clipboard.writeText(urlToCopy);
+    setCopiedUrl(true);
+    showToast('Tetikleyici Webhook URL panoya kopyalandı!');
+    setTimeout(() => setCopiedUrl(false), 2500);
+  };
+
+  const handleTriggerAllAsAdmin = async () => {
+    setTriggeringCron(true);
+    try {
+      const res = await fetch('/api/growth/webhooks/daily-report?token=cerilas_growth_cron_2026_x89a', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        showToast(`Tetikleme Başarılı! İşlenen: ${data.processed_count ?? data.processed ?? 0}, Gönderilen: ${data.sent_count ?? 0}, Kapsam Dışı: ${data.skipped_count ?? 0}`);
+        fetchConfig();
+      } else {
+        showToast(data.error || 'Webhook tetiklenemedi.', 'error');
+      }
+    } catch (e) {
+      showToast('Bağlantı hatası: Webhook tetiklenemedi.', 'error');
+    } finally {
+      setTriggeringCron(false);
     }
   };
 
@@ -465,6 +499,73 @@ export default function GrowthReports() {
             </div>
           </div>
 
+        </div>
+
+        {/* ROW 1.5: ADMINISTRATOR SINGLE TRIGGER WEBHOOK / CRON */}
+        <div className="reports-card" style={{ borderColor: 'rgba(56, 189, 248, 0.3)', background: 'linear-gradient(180deg, rgba(15, 23, 42, 0.8) 0%, rgba(11, 15, 25, 0.95) 100%)' }}>
+          <div className="reports-card-header">
+            <div className="reports-card-title-group">
+              <div className="reports-card-title-row">
+                <div className="reports-card-icon sky">
+                  <Terminal size={18} />
+                </div>
+                <div>
+                  <h3 className="reports-card-title">3. Sistem Yöneticisi Tekil Tetikleme Bağlantısı (Admin Cron URL)</h3>
+                  <span className="reports-card-sub">
+                    Sistem yöneticisi olarak yalnızca bu 1 URL'yi tetiklemeniz yeterlidir. Sistem otomatik olarak kontrol eder:
+                  </span>
+                </div>
+              </div>
+            </div>
+            <span className="webhook-badge" style={{ background: 'rgba(56, 189, 248, 0.12)', color: '#38bdf8', borderColor: 'rgba(56, 189, 248, 0.25)' }}>
+              1 URL // GLOBAL DISPATCHER
+            </span>
+          </div>
+
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '16px' }}>
+            <span style={{ background: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.25)', color: '#10b981', padding: '4px 10px', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 600 }}>
+              ✓ Yalnızca Pro ve Unlimited Planlar
+            </span>
+            <span style={{ background: 'rgba(56, 189, 248, 0.1)', border: '1px solid rgba(56, 189, 248, 0.25)', color: '#38bdf8', padding: '4px 10px', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 600 }}>
+              ✓ E-posta Gönderimi Aktif Olanlar (Enabled)
+            </span>
+            <span style={{ background: 'rgba(245, 158, 11, 0.1)', border: '1px solid rgba(245, 158, 11, 0.25)', color: '#f59e0b', padding: '4px 10px', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 600 }}>
+              ✓ En Az 1 Geçerli E-posta Girilmiş Olanlar
+            </span>
+            <span style={{ background: 'rgba(129, 140, 248, 0.1)', border: '1px solid rgba(129, 140, 248, 0.25)', color: '#818cf8', padding: '4px 10px', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 600 }}>
+              ✓ 100% Güncel Canlı Telemetri (GSC, GA4, AI, Audit)
+            </span>
+          </div>
+
+          <div style={{ background: '#030712', border: '1px solid #1e293b', borderRadius: '10px', padding: '12px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', overflow: 'hidden', minWidth: '260px', flex: 1 }}>
+              <span style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>GET / POST</span>
+              <code style={{ fontSize: '0.8rem', color: '#38bdf8', fontFamily: 'monospace', wordBreak: 'break-all' }}>
+                {webhookUrl || `${typeof window !== 'undefined' ? window.location.origin : ''}/api/growth/webhooks/daily-report?token=cerilas_growth_cron_2026_x89a`}
+              </code>
+            </div>
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <button
+                type="button"
+                onClick={handleCopyWebhookUrl}
+                style={{ background: '#1e293b', color: '#f8fafc', border: '1px solid #334155', padding: '8px 14px', borderRadius: '8px', fontSize: '0.8rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}
+                title="Tetikleyici URL'yi kopyala"
+              >
+                {copiedUrl ? <Check size={14} color="#10b981" /> : <Copy size={14} />}
+                <span>{copiedUrl ? 'Kopyalandı!' : 'URL Kopyala'}</span>
+              </button>
+              <button
+                type="button"
+                onClick={handleTriggerAllAsAdmin}
+                disabled={triggeringCron}
+                style={{ background: '#0284c7', color: '#ffffff', border: 'none', padding: '8px 16px', borderRadius: '8px', fontSize: '0.8rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', opacity: triggeringCron ? 0.7 : 1 }}
+                title="Şimdi Yönetici Olarak Çalıştır"
+              >
+                {triggeringCron ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />}
+                <span>{triggeringCron ? 'Tetikleniyor...' : 'Tüm Raporları Şimdi Tetikle'}</span>
+              </button>
+            </div>
+          </div>
         </div>
 
         {/* ROW 2: LIVE EMAIL DIGEST PREVIEW MOCKUP */}
