@@ -2505,15 +2505,15 @@
   }
   .cl-composer-input-field {
     width: 100% !important;
-    height: 6.5rem !important;
-    padding: 0 1.1rem !important;
-    border-radius: 1.25rem !important;
+    height: 8rem !important;
+    padding: 0 1.25rem !important;
+    border-radius: 1.35rem !important;
     background: rgba(0, 0, 0, 0.03) !important;
     border: 1.5px solid var(--cl-card-border) !important;
     box-sizing: border-box !important;
     display: flex !important;
     align-items: center !important;
-    gap: 0.85rem !important;
+    gap: 1rem !important;
   }
   .dark .cl-composer-input-field,
   [data-theme='dark'] .cl-composer-input-field {
@@ -2521,9 +2521,11 @@
     border-color: rgba(255, 255, 255, 0.14) !important;
   }
   .cl-composer-globe-badge {
-    width: 48px !important;
-    height: 48px !important;
-    border-radius: 12px !important;
+    width: 52px !important;
+    height: 52px !important;
+    border-radius: 14px !important;
+    padding: 0.75rem !important;
+    flex-shrink: 0 !important;
   }
   .cl-composer-input {
     width: 100% !important;
@@ -2701,13 +2703,15 @@
     border-radius: 1.4rem !important;
   }
   .cl-composer-input-field {
-    height: 6rem !important;
-    padding: 0 1rem !important;
-    border-radius: 1.2rem !important;
+    height: 7.5rem !important;
+    padding: 0 1.1rem !important;
+    border-radius: 1.3rem !important;
   }
   .cl-composer-globe-badge {
-    width: 44px !important;
-    height: 44px !important;
+    width: 48px !important;
+    height: 48px !important;
+    padding: 0.65rem !important;
+    flex-shrink: 0 !important;
   }
   .cl-composer-input {
     font-size: 1.1rem !important;
