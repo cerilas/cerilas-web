@@ -3,24 +3,62 @@ import React, { createContext, useContext, useState, useEffect, useCallback } fr
 const AuthContext = createContext(null);
 
 const TOKEN_KEY = 'cerilas_tools_user_token';
+const USER_KEY = 'cerilas_tools_user_profile';
+const ALL_TOKEN_KEYS = [
+  'cerilas_tools_user_token',
+  'cerilas_tools_auth_token',
+  'admin_token',
+  'cerilas_user_token',
+  'cerilas_auth_token',
+  'token'
+];
+
+export function getStoredToken() {
+  if (typeof window === 'undefined') return null;
+  for (const k of ALL_TOKEN_KEYS) {
+    try {
+      const val = localStorage.getItem(k);
+      if (val && typeof val === 'string' && val.trim().length > 15) {
+        return val.trim();
+      }
+    } catch (e) {}
+  }
+  return null;
+}
+
+export function getStoredUser() {
+  if (typeof window === 'undefined') return null;
+  try {
+    const raw = localStorage.getItem(USER_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (parsed && (parsed.id || parsed.email)) {
+        return parsed;
+      }
+    }
+  } catch (e) {}
+  return null;
+}
+
+const isAllowedAuthOrigin = (origin) => {
+  if (!origin) return true;
+  if (origin === window.location.origin) return true;
+  if (origin.startsWith('http://localhost:') || origin.startsWith('http://127.0.0.1:')) return true;
+  if (origin.endsWith('.cerilas.com') || origin === 'https://cerilas.com') return true;
+  return false;
+};
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null);
-  const [token, setToken] = useState(() => {
-    try {
-      return localStorage.getItem(TOKEN_KEY) || null;
-    } catch (e) {
-      return null;
-    }
-  });
-  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState(() => getStoredUser());
+  const [token, setToken] = useState(() => getStoredToken());
+  const [loading, setLoading] = useState(() => Boolean(getStoredToken() && !getStoredUser()));
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [authModalMode, setAuthModalMode] = useState('login'); // 'login' | 'register'
   const [authRedirectTab, setAuthRedirectTab] = useState(null);
 
   // Fetch current user from server using stored token
   const fetchCurrentUser = useCallback(async (jwtToken) => {
-    const activeToken = jwtToken || token;
+    const activeToken = jwtToken || getStoredToken();
     if (!activeToken) {
       setUser(null);
       setLoading(false);
@@ -34,29 +72,42 @@ export function AuthProvider({ children }) {
         }
       });
 
+      if (res.status === 401) {
+        // Token is truly expired or invalid
+        ALL_TOKEN_KEYS.forEach(k => {
+          try { localStorage.removeItem(k); } catch (e) {}
+        });
+        try { localStorage.removeItem(USER_KEY); } catch (e) {}
+        setToken(null);
+        setUser(null);
+        return null;
+      }
+
       if (!res.ok) {
-        throw new Error('Token expired or invalid');
+        // Temporary server / network issue: retain session, do not wipe token or user!
+        return null;
       }
 
       const data = await res.json();
-      if (data.authenticated && data.user) {
-        setUser(data.user);
-        return data.user;
-      } else {
-        throw new Error('User not found');
+      const verifiedUser = data.user || (data.authenticated ? data.user : null);
+      if (verifiedUser) {
+        setUser(verifiedUser);
+        setToken(activeToken);
+        ALL_TOKEN_KEYS.forEach(k => {
+          try { localStorage.setItem(k, activeToken); } catch (e) {}
+        });
+        try {
+          localStorage.setItem(USER_KEY, JSON.stringify(verifiedUser));
+        } catch (e) {}
+        return verifiedUser;
       }
     } catch (err) {
-      console.warn('Auth check failed:', err.message);
-      try {
-        localStorage.removeItem(TOKEN_KEY);
-      } catch (e) {}
-      setToken(null);
-      setUser(null);
-      return null;
+      console.warn('Auth check warning:', err.message);
+      // DO NOT wipe out user session on network / timeout errors
     } finally {
       setLoading(false);
     }
-  }, [token]);
+  }, []);
 
   useEffect(() => {
     fetchCurrentUser();
@@ -76,9 +127,12 @@ export function AuthProvider({ children }) {
     }
 
     if (data.token) {
-      try {
-        localStorage.setItem(TOKEN_KEY, data.token);
-      } catch (e) {}
+      ALL_TOKEN_KEYS.forEach(k => {
+        try { localStorage.setItem(k, data.token); } catch (e) {}
+      });
+      if (data.user) {
+        try { localStorage.setItem(USER_KEY, JSON.stringify(data.user)); } catch (e) {}
+      }
       setToken(data.token);
       setUser(data.user);
       setIsAuthModalOpen(false);
@@ -102,9 +156,12 @@ export function AuthProvider({ children }) {
     }
 
     if (data.token) {
-      try {
-        localStorage.setItem(TOKEN_KEY, data.token);
-      } catch (e) {}
+      ALL_TOKEN_KEYS.forEach(k => {
+        try { localStorage.setItem(k, data.token); } catch (e) {}
+      });
+      if (data.user) {
+        try { localStorage.setItem(USER_KEY, JSON.stringify(data.user)); } catch (e) {}
+      }
       setToken(data.token);
       setUser(data.user);
       setIsAuthModalOpen(false);
@@ -128,9 +185,12 @@ export function AuthProvider({ children }) {
     }
 
     if (data.token) {
-      try {
-        localStorage.setItem(TOKEN_KEY, data.token);
-      } catch (e) {}
+      ALL_TOKEN_KEYS.forEach(k => {
+        try { localStorage.setItem(k, data.token); } catch (e) {}
+      });
+      if (data.user) {
+        try { localStorage.setItem(USER_KEY, JSON.stringify(data.user)); } catch (e) {}
+      }
       setToken(data.token);
       setUser(data.user);
       setIsAuthModalOpen(false);
@@ -170,15 +230,18 @@ export function AuthProvider({ children }) {
 
         let cleanupTimer = null;
         const messageListener = (event) => {
-          if (event.origin !== window.location.origin) return;
+          if (!isAllowedAuthOrigin(event.origin)) return;
           if (event.data?.type === 'GOOGLE_AUTH_SUCCESS') {
             window.removeEventListener('message', messageListener);
             if (cleanupTimer) clearInterval(cleanupTimer);
             const { token: receivedToken, user: receivedUser } = event.data.data || {};
             if (receivedToken) {
-              try {
-                localStorage.setItem(TOKEN_KEY, receivedToken);
-              } catch (e) {}
+              ALL_TOKEN_KEYS.forEach(k => {
+                try { localStorage.setItem(k, receivedToken); } catch (e) {}
+              });
+              if (receivedUser) {
+                try { localStorage.setItem(USER_KEY, JSON.stringify(receivedUser)); } catch (e) {}
+              }
               setToken(receivedToken);
               setUser(receivedUser);
               setIsAuthModalOpen(false);
@@ -198,7 +261,7 @@ export function AuthProvider({ children }) {
             clearInterval(cleanupTimer);
             window.removeEventListener('message', messageListener);
             setTimeout(() => {
-              const currentStored = localStorage.getItem(TOKEN_KEY);
+              const currentStored = getStoredToken();
               if (currentStored) {
                 fetchCurrentUser(currentStored).then((u) => {
                   if (u) resolve(u);
@@ -231,21 +294,27 @@ export function AuthProvider({ children }) {
     }
 
     setUser(data.user);
+    try {
+      localStorage.setItem(USER_KEY, JSON.stringify(data.user));
+    } catch (e) {}
     return data.user;
   };
 
   // Auto-listen to global window postMessage for Google Auth
   useEffect(() => {
     const handleAuthMessage = (event) => {
-      if (event.origin !== window.location.origin) return;
+      if (!isAllowedAuthOrigin(event.origin)) return;
       if (event.data?.type === 'GOOGLE_AUTH_SUCCESS') {
         const { token: receivedToken, user: receivedUser } = event.data.data || {};
-        if (receivedToken && receivedUser) {
-          try {
-            localStorage.setItem(TOKEN_KEY, receivedToken);
-          } catch (e) {}
+        if (receivedToken) {
+          ALL_TOKEN_KEYS.forEach(k => {
+            try { localStorage.setItem(k, receivedToken); } catch (e) {}
+          });
+          if (receivedUser) {
+            try { localStorage.setItem(USER_KEY, JSON.stringify(receivedUser)); } catch (e) {}
+            setUser(receivedUser);
+          }
           setToken(receivedToken);
-          setUser(receivedUser);
           setIsAuthModalOpen(false);
         }
       }
@@ -257,9 +326,10 @@ export function AuthProvider({ children }) {
 
   // Logout handler
   const logout = () => {
-    try {
-      localStorage.removeItem(TOKEN_KEY);
-    } catch (e) {}
+    ALL_TOKEN_KEYS.forEach(k => {
+      try { localStorage.removeItem(k); } catch (e) {}
+    });
+    try { localStorage.removeItem(USER_KEY); } catch (e) {}
     setToken(null);
     setUser(null);
     if (window.location.hash.startsWith('#/account') || window.location.hash.startsWith('#/profile') || window.location.hash.startsWith('#/billing')) {
@@ -491,7 +561,7 @@ export function AuthProvider({ children }) {
     user,
     token,
     loading,
-    isAuthenticated: !!user,
+    isAuthenticated: Boolean(user || token),
     login,
     register,
     loginWithGoogle,

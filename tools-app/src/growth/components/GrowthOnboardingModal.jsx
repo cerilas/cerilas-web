@@ -418,7 +418,7 @@ export default function GrowthOnboardingModal({ isOpen, onClose }) {
                     required
                     autoFocus
                     className="growth-url-input"
-                    placeholder="ornekmarka.com"
+                    placeholder="yourbrand.com"
                     value={url.replace(/^https?:\/\//i, '')}
                     onChange={(e) => {
                       setUrl(e.target.value);

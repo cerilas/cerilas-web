@@ -16,9 +16,7 @@ import crawlerCheckerRouter from './routes/crawlerChecker.js';
 import llmsTxtRouter from './routes/llmsTxt.js';
 import htmlToMarkdownRouter from './routes/htmlToMarkdown.js';
 import scrapersRouter from './routes/scrapers.js';
-import emailExtractorRouter from './routes/emailExtractor.js';
 import authRouter from './routes/auth.js';
-import visibilityCheckerRouter from './routes/visibilityChecker.js';
 import { detectBot } from './utils/botDetector.js';
 import { initScrapersDb } from './migrations/init-scrapers-db.js';
 import { initMcpDb } from './migrations/init-mcp-db.js';
@@ -776,8 +774,22 @@ app.use(['/api/tools/ai-link-hallucination-checker', '/api/link-checker'], linkC
 app.use(['/api/tools/ai-crawler-checker', '/api/crawler-checker'], crawlerCheckerRouter);
 app.use(['/api/tools/llms-txt', '/api/llms-txt'], llmsTxtRouter);
 app.use(['/api/tools/html-to-markdown', '/api/html-to-markdown', '/api/tools/html-to-llm-markdown'], htmlToMarkdownRouter);
-app.use(['/api/tools/website-email-extractor', '/api/email-extractor'], emailExtractorRouter);
-app.use(['/api/tools/ai-visibility-checker', '/api/visibility-checker'], visibilityCheckerRouter);
+app.use(['/api/tools/website-email-extractor', '/api/email-extractor'], async (req, res, next) => {
+  try {
+    const mod = await import('./routes/emailExtractor.js');
+    return mod.default(req, res, next);
+  } catch (err) {
+    next(err);
+  }
+});
+app.use(['/api/tools/ai-visibility-checker', '/api/visibility-checker'], async (req, res, next) => {
+  try {
+    const mod = await import('./routes/visibilityChecker.js');
+    return mod.default(req, res, next);
+  } catch (err) {
+    next(err);
+  }
+});
 
 // Generic AI tool quota check endpoint
 app.get('/api/tools/:slug/ai-quota', async (req, res) => {
