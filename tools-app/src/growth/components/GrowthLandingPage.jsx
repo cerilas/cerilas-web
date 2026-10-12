@@ -901,16 +901,18 @@ export default function GrowthLandingPage({ onBackToTools, initialDomain = '' })
                         }}
                         className="cl-composer-input-bar"
                       >
-                        <Globe size={18} style={{ opacity: 0.5, flexShrink: 0 }} />
-                        <input
-                          ref={inputRef}
-                          type="text"
-                          value={inputUrl}
-                          onChange={(e) => setInputUrl(e.target.value)}
-                          placeholder="Enter domain to audit: e.g. linear.app or stripe.com"
-                          className="cl-composer-input"
-                          disabled={scanning}
-                        />
+                        <div className="cl-composer-input-field">
+                          <Globe size={18} className="cl-composer-globe-icon" />
+                          <input
+                            ref={inputRef}
+                            type="text"
+                            value={inputUrl}
+                            onChange={(e) => setInputUrl(e.target.value)}
+                            placeholder="Enter domain to audit: e.g. linear.app or stripe.com"
+                            className="cl-composer-input"
+                            disabled={scanning}
+                          />
+                        </div>
                         <button
                           type="submit"
                           disabled={scanning || !inputUrl.trim()}
