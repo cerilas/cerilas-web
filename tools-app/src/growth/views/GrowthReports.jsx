@@ -517,7 +517,7 @@ export default function GrowthReports() {
                 </div>
               </div>
             </div>
-            <span className="webhook-badge" style={{ background: 'rgba(56, 189, 248, 0.12)', color: '#38bdf8', borderColor: 'rgba(56, 189, 248, 0.25)' }}>
+            <span className="webhook-badge admin-dispatcher-badge">
               1 URL // GLOBAL DISPATCHER
             </span>
           </div>
