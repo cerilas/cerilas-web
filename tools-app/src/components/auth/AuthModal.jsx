@@ -11,7 +11,8 @@ import {
   Loader2, 
   AlertCircle, 
   ShieldCheck, 
-  Sparkles 
+  Sparkles,
+  MailCheck
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useTranslation } from '../../i18n';
@@ -25,6 +26,7 @@ export default function AuthModal() {
     setAuthModalMode, 
     login, 
     register,
+    requestPasswordReset,
     initiateGoogleAuth,
     authRedirectTab 
   } = useAuth();
@@ -41,10 +43,13 @@ export default function AuthModal() {
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [error, setError] = useState('');
+  const [resetNotice, setResetNotice] = useState('');
+  const isForgot = authModalMode === 'forgot';
 
   useEffect(() => {
     if (isAuthModalOpen) {
       setError('');
+      setResetNotice('');
       // Lock background scroll
       document.body.style.overflow = 'hidden';
     } else {
@@ -88,6 +93,30 @@ export default function AuthModal() {
     } finally {
       setGoogleLoading(false);
     }
+  };
+
+  const handleForgotSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+    if (!email.trim()) {
+      setError(isTr ? 'Lütfen e-posta adresinizi girin.' : 'Please enter your email address.');
+      return;
+    }
+    setLoading(true);
+    try {
+      const data = await requestPasswordReset(email.trim(), language);
+      setResetNotice(data.message || (isTr ? 'Sıfırlama bağlantısı gönderildi.' : 'Reset link sent.'));
+    } catch (err) {
+      setError(err.message || (isTr ? 'İşlem sırasında bir hata oluştu.' : 'An error occurred.'));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const switchMode = (mode) => {
+    setAuthModalMode(mode);
+    setError('');
+    setResetNotice('');
   };
 
   const handleSubmit = async (e) => {
@@ -165,16 +194,20 @@ export default function AuthModal() {
             />
           </div>
           <h2 className="auth-modal-title">
-            {authModalMode === 'login' ? (isTr ? 'Tekrar Hoş Geldiniz' : 'Welcome Back') : (isTr ? 'Cerilas Hesabı Oluşturun' : 'Create Cerilas Account')}
+            {isForgot
+              ? (isTr ? 'Şifrenizi mi unuttunuz?' : 'Forgot your password?')
+              : authModalMode === 'login' ? (isTr ? 'Tekrar Hoş Geldiniz' : 'Welcome Back') : (isTr ? 'Cerilas Hesabı Oluşturun' : 'Create Cerilas Account')}
           </h2>
           <p className="auth-modal-subtitle">
-            {authModalMode === 'login' 
+            {isForgot
+              ? (isTr ? 'Hesabınızın e-posta adresini girin, size şifre sıfırlama bağlantısı gönderelim.' : "Enter your account email and we'll send you a link to reset your password.")
+              : authModalMode === 'login' 
               ? (isTr ? 'Araçlarınıza ve üyeliğinize erişmek için giriş yapın.' : 'Sign in to access your tools, profile, and subscription.') 
               : (isTr ? 'Gelişmiş araçlar ve sınırsız limitler için hemen katılın.' : 'Join to manage your plan, verify your phone, and access billing.')}
           </p>
 
           {/* Mode Switcher Tabs */}
-          <div className="auth-modal-tabs">
+          {!isForgot && <div className="auth-modal-tabs">
             <button
               type="button"
               className={`auth-modal-tab ${authModalMode === 'login' ? 'is-active' : ''}`}
@@ -195,7 +228,7 @@ export default function AuthModal() {
             >
               {isTr ? 'Kayıt Ol' : 'Sign Up'}
             </button>
-          </div>
+          </div>}
         </div>
 
         {/* Error Banner */}
@@ -206,6 +239,46 @@ export default function AuthModal() {
           </div>
         )}
 
+        {isForgot ? (
+          resetNotice ? (
+            <div className="auth-reset-notice" role="status">
+              <MailCheck size={20} className="auth-reset-notice-icon" />
+              <p>{resetNotice}</p>
+            </div>
+          ) : (
+            <form onSubmit={handleForgotSubmit} className="auth-modal-form">
+              <div className="auth-input-group">
+                <label className="auth-input-label">{isTr ? 'E-posta Adresi' : 'Email Address'}</label>
+                <div className="auth-input-wrapper">
+                  <Mail size={16} className="auth-field-icon" />
+                  <input
+                    type="email"
+                    required
+                    className="auth-input"
+                    placeholder="ornek@cerilas.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    autoComplete="email"
+                    autoFocus
+                  />
+                </div>
+              </div>
+              <button type="submit" disabled={loading} className="auth-submit-btn">
+                {loading ? (
+                  <>
+                    <Loader2 size={16} className="auth-spinner" />
+                    <span>{isTr ? 'Gönderiliyor...' : 'Sending...'}</span>
+                  </>
+                ) : (
+                  <>
+                    <span>{isTr ? 'Sıfırlama Bağlantısı Gönder' : 'Send Reset Link'}</span>
+                    <ArrowRight size={16} />
+                  </>
+                )}
+              </button>
+            </form>
+          )
+        ) : (<>
         {/* Google Authentication Button */}
         <div className="auth-social-area">
           <button
@@ -311,6 +384,11 @@ export default function AuthModal() {
           <div className="auth-input-group">
             <div className="auth-label-row">
               <label className="auth-input-label">{isTr ? 'Şifre' : 'Password'}</label>
+              {authModalMode === 'login' && (
+                <button type="button" className="auth-forgot-btn" onClick={() => switchMode('forgot')}>
+                  {isTr ? 'Şifremi unuttum' : 'Forgot password?'}
+                </button>
+              )}
             </div>
             <div className="auth-input-wrapper">
               <Lock size={16} className="auth-field-icon" />
@@ -355,6 +433,7 @@ export default function AuthModal() {
             )}
           </button>
         </form>
+        </>)}
 
         {/* Modal Footer */}
         <div className="auth-modal-footer">
@@ -364,7 +443,14 @@ export default function AuthModal() {
           </div>
 
           <p className="auth-switch-text">
-            {authModalMode === 'login' ? (
+            {isForgot ? (
+              <>
+                {isTr ? 'Şifrenizi hatırladınız mı?' : 'Remembered your password?'}{' '}
+                <button type="button" className="auth-inline-switch-btn" onClick={() => switchMode('login')}>
+                  {isTr ? 'Giriş Yapın' : 'Sign in'}
+                </button>
+              </>
+            ) : authModalMode === 'login' ? (
               <>
                 {isTr ? 'Henüz bir hesabınız yok mu?' : "Don't have an account?"}{' '}
                 <button

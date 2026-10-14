@@ -142,6 +142,54 @@ export function AuthProvider({ children }) {
     }
   };
 
+  const requestPasswordReset = async (email, language = 'en') => {
+    const res = await fetch('/api/auth/password/forgot', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, language })
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      throw new Error(data.error || 'Request failed.');
+    }
+    return data;
+  };
+
+  const validateResetToken = async (resetToken, language = 'en') => {
+    const res = await fetch('/api/auth/password/validate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token: resetToken, language })
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || !data.valid) {
+      throw new Error(data.error || 'Invalid reset link.');
+    }
+    return data;
+  };
+
+  const resetPassword = async (resetToken, password, language = 'en') => {
+    const res = await fetch('/api/auth/password/reset', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token: resetToken, password, language })
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || !data.token) {
+      throw new Error(data.error || 'Password reset failed.');
+    }
+
+    ALL_TOKEN_KEYS.forEach(k => {
+      try { localStorage.setItem(k, data.token); } catch (e) {}
+    });
+    if (data.user) {
+      try { localStorage.setItem(USER_KEY, JSON.stringify(data.user)); } catch (e) {}
+    }
+    setToken(data.token);
+    setUser(data.user);
+    return data.user;
+  };
+
   // Register handler
   const register = async ({ email, password, first_name, last_name, phone }) => {
     const res = await fetch('/api/auth/register', {
@@ -564,6 +612,9 @@ export function AuthProvider({ children }) {
     isAuthenticated: Boolean(user || token),
     login,
     register,
+    requestPasswordReset,
+    validateResetToken,
+    resetPassword,
     loginWithGoogle,
     initiateGoogleAuth,
     unlinkGoogleAccount,

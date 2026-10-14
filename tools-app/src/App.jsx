@@ -38,6 +38,7 @@ import AdminDashboard from './admin/AdminDashboard';
 import LegalView from './legal/LegalView';
 import PricingView from './pricing/PricingView';
 import AuthModal from './components/auth/AuthModal';
+import ResetPasswordPage from './components/auth/ResetPasswordPage';
 import AccountDashboard from './components/account/AccountDashboard';
 import GrowthApp from './growth/GrowthApp';
 import { useAuth } from './context/AuthContext';
@@ -272,6 +273,7 @@ export default function App() {
     const h = window.location.hash;
     return p === '/admin' || p.startsWith('/admin/') || h === '#/admin' || h.startsWith('#/admin/');
   });
+  const [isResetPassword] = useState(() => typeof window !== 'undefined' && window.location.pathname === '/reset-password');
   const [isStatsOpen, setIsStatsOpen] = useState(false);
   const [isPricing, setIsPricing] = useState(() => {
     if (typeof window === 'undefined') return false;
@@ -422,6 +424,8 @@ export default function App() {
         openAuthModal('login');
       } else if (hash === '#/register' || hash.startsWith('#/register')) {
         openAuthModal('register');
+      } else if (hash === '#/forgot-password') {
+        openAuthModal('forgot');
       }
 
       // 1. Legal compliance routes matching (/terms, /privacy, /refund, /cookies, /legal/:slug, #/legal/:slug)
@@ -524,6 +528,7 @@ export default function App() {
 
   // Dynamic SEO Title, Open Graph, Twitter, Canonical & Breadcrumbs Management
   useEffect(() => {
+    if (isResetPassword) return;
     const setMeta = (nameOrProp, keyAttr, value) => {
       let el = document.querySelector(`meta[${keyAttr}="${nameOrProp}"]`);
       if (!el) {
@@ -884,6 +889,14 @@ export default function App() {
     return (
       <ErrorBoundary>
         <AdminDashboard />
+      </ErrorBoundary>
+    );
+  }
+
+  if (isResetPassword) {
+    return (
+      <ErrorBoundary>
+        <ResetPasswordPage />
       </ErrorBoundary>
     );
   }

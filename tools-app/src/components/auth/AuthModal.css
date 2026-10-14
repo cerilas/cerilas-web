@@ -456,3 +456,56 @@ html.light .auth-submit-btn {
 .auth-inline-switch-btn:hover {
   opacity: 0.8;
 }
+
+.auth-forgot-btn {
+  background: transparent;
+  border: none;
+  padding: 0;
+  font-size: 0.75rem;
+  color: var(--text-muted, #a1a1aa);
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+
+.auth-forgot-btn:hover {
+  color: var(--text-main, #ffffff);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.auth-reset-notice {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+  padding: 1rem;
+  border-radius: 12px;
+  background: rgba(16, 185, 129, 0.08);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  color: var(--text-main, #e4e4e7);
+  font-size: 0.85rem;
+  line-height: 1.55;
+}
+
+.auth-reset-notice p {
+  margin: 0;
+}
+
+.auth-reset-notice-icon {
+  flex-shrink: 0;
+  color: #10b981;
+  margin-top: 1px;
+}
+
+/* Standalone reset-password page reuses the modal card */
+.auth-page-shell {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.25rem;
+  background: var(--bg-color, #09090b);
+}
+
+.auth-page-shell .auth-modal-container {
+  animation: none;
+}

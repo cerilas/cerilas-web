@@ -4,6 +4,8 @@ import jwt from 'jsonwebtoken';
 import { authPool } from '../db.js';
 import { handleGrowthOAuthCallback } from '../utils/googleGrowthIntegration.js';
 import { resolveGoogleRedirectUri } from '../utils/googleRedirect.js';
+import { isTokenRevoked } from '../utils/sessionRevocation.js';
+import { createPasswordResetRouter } from './passwordReset.js';
 
 const router = Router();
 const JWT_SECRET = process.env.JWT_SECRET || 'cerilas_admin_jwt_secret_2026';
@@ -22,9 +24,12 @@ export const requireAuth = async (req, res, next) => {
     // Attach fresh user plan from database
     try {
       const uRes = await authPool.query(
-        'SELECT plan, subscription_status, first_name, last_name FROM users WHERE id = $1',
+        'SELECT plan, subscription_status, first_name, last_name, password_changed_at FROM users WHERE id = $1',
         [decoded.id]
       );
+      if (uRes.rows.length > 0 && isTokenRevoked(decoded, uRes.rows[0].password_changed_at)) {
+        return res.status(401).json({ error: 'Unauthorized: Session expired after password change' });
+      }
       if (uRes.rows.length > 0) {
         req.user.plan = uRes.rows[0].plan || (decoded.email === 'deniz@cerilas.com' ? 'pro' : 'free');
         req.user.subscription_status = uRes.rows[0].subscription_status;
@@ -184,6 +189,15 @@ export async function findOrCreateOrLinkGoogleUser({ googleId, email, firstName,
 }
 
 /**
+ * POST /api/auth/password/forgot | /validate | /reset
+ * Email-based password reset
+ */
+router.use('/password', createPasswordResetRouter({
+  issueToken: (user) => jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, { expiresIn: '30d' }),
+  formatUser
+}));
+
+/**
  * POST /api/auth/register
  * New user registration
  */
@@ -264,7 +278,7 @@ router.post('/login', async (req, res) => {
 
     const user = result.rows[0];
     if (!user.password_hash && user.google_id) {
-      return res.status(400).json({ error: 'Bu hesaba Google ile kayıt olunmuş. Lütfen "Google ile Giriş Yap" seçeneğini kullanın.' });
+      return res.status(400).json({ error: 'Bu hesaba Google ile kayıt olunmuş. "Google ile Giriş Yap" seçeneğini kullanın ya da "Şifremi unuttum" ile bir şifre belirleyin.' });
     }
 
     const isValid = await bcrypt.compare(password, user.password_hash);

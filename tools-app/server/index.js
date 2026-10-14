@@ -881,8 +881,9 @@ app.get('{*path}', async (req, res) => {
     let html = await fs.promises.readFile(indexPath, 'utf-8');
 
     // 1. Admin routes: Strictly noindex, nofollow
-    if (req.path === '/admin' || req.path.startsWith('/admin/')) {
+    if (req.path === '/admin' || req.path.startsWith('/admin/') || req.path === '/reset-password') {
       res.setHeader('X-Robots-Tag', 'noindex, nofollow');
+      res.setHeader('Referrer-Policy', 'no-referrer');
       html = html.replace('</head>', '    <meta name="robots" content="noindex, nofollow" />\n  </head>');
       return res.send(html);
     }
