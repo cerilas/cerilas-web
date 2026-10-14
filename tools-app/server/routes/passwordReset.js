@@ -111,6 +111,8 @@ function buildResetEmail({ lang, name, resetUrl, isGoogleOnly }) {
         ],
         buttonText: 'Yeni şifre belirle',
         buttonUrl: resetUrl,
+        preheader: `Şifre sıfırlama bağlantınız ${TOKEN_TTL_MINUTES} dakika geçerlidir.`,
+        linkHint: 'Buton çalışmazsa bu bağlantıyı tarayıcınıza yapıştırın:',
         footnote: 'Bu talebi siz yapmadıysanız bu e-postayı yok sayabilirsiniz; şifreniz değişmeyecektir.'
       }),
       text: `Merhaba ${name},\n\nYeni şifrenizi belirlemek için bu bağlantıyı açın (${TOKEN_TTL_MINUTES} dakika geçerli):\n${resetUrl}\n\nBu talebi siz yapmadıysanız bu e-postayı yok sayabilirsiniz.`
@@ -129,6 +131,7 @@ function buildResetEmail({ lang, name, resetUrl, isGoogleOnly }) {
       ],
       buttonText: 'Set a new password',
       buttonUrl: resetUrl,
+      preheader: `Your password reset link is valid for ${TOKEN_TTL_MINUTES} minutes.`,
       footnote: "If you didn't request this, you can safely ignore this email. Your password won't change."
     }),
     text: `Hi ${name},\n\nOpen this link to set a new password (valid for ${TOKEN_TTL_MINUTES} minutes):\n${resetUrl}\n\nIf you didn't request this, you can ignore this email.`
