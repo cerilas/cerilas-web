@@ -5,7 +5,7 @@ export const cacCalculatorManifest = {
   category: 'Startup & Finance',
   iconName: 'Users',
   badge: 'Acquisition Cost',
-  targetUrl: '#/tool/cac-calculator',
+  targetUrl: '/tool/cac-calculator',
   seoTitle: 'CAC Calculator - Customer Acquisition Cost & Blended CAC | Cerilas Tools',
   seoDescription: 'Free SaaS CAC Calculator. Calculate Customer Acquisition Cost, compare Paid vs Blended CAC, track marketing payroll and ad spend efficiency with SaaS benchmarks.',
   features: [

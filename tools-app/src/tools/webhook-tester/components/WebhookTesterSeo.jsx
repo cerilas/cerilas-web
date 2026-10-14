@@ -62,7 +62,7 @@ export default function WebhookTesterSeo() {
     '@graph': [
       {
         '@type': 'WebApplication',
-        '@id': 'https://tools.cerilas.com/#/tool/webhook-tester',
+        '@id': 'https://tools.cerilas.com/tool/webhook-tester',
         name: 'Cerilas Free Online Webhook Tester & Sender',
         alternateName: [
           'Online Webhook Sender',
@@ -72,7 +72,7 @@ export default function WebhookTesterSeo() {
           'Webhook Dispatcher with HMAC',
           'Postman Alternative for Webhooks'
         ],
-        url: 'https://tools.cerilas.com/#/tool/webhook-tester',
+        url: 'https://tools.cerilas.com/tool/webhook-tester',
         applicationCategory: 'DeveloperApplication',
         operatingSystem: 'Any',
         offers: {
@@ -89,13 +89,7 @@ export default function WebhookTesterSeo() {
           'Deep response inspector with HTTP status, roundtrip latency (ms), and body',
           '1-click cURL export command for terminal automation',
           '100% free with zero signup or API keys required'
-        ],
-        aggregateRating: {
-          '@type': 'AggregateRating',
-          ratingValue: '4.98',
-          ratingCount: '1580'
-        }
-      },
+        ]      },
       {
         '@type': 'BreadcrumbList',
         itemListElement: [
@@ -115,7 +109,7 @@ export default function WebhookTesterSeo() {
             '@type': 'ListItem',
             position: 3,
             name: 'Webhook Tester & Sender',
-            item: 'https://tools.cerilas.com/#/tool/webhook-tester'
+            item: 'https://tools.cerilas.com/tool/webhook-tester'
           }
         ]
       },

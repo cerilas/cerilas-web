@@ -6,7 +6,7 @@ export const websiteEmailExtractorManifest = {
   iconName: 'Mail',
   badge: 'Rule-Based Engine',
   isAi: false,
-  targetUrl: '#/tool/website-email-extractor',
+  targetUrl: '/tool/website-email-extractor',
   features: [
     'Deterministic Non-AI Crawler: Uses high-performance HTML parsing, RFC 5322 regex, and DOM heuristics without relying on language models',
     'Automatic Department & Unit Mapping: Categorizes emails into Executive, Sales, HR, Engineering, Support, Finance, Legal, and Press',

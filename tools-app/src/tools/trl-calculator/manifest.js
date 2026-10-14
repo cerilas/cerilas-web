@@ -6,7 +6,7 @@ export const trlCalculatorManifest = {
   iconName: 'GitCommit',
   badge: 'Scientific R&D',
   isAi: false,
-  targetUrl: '#/tool/trl-calculator',
+  targetUrl: '/tool/trl-calculator',
   features: [
     'Standardized Multi-Framework Assessment: Support for Horizon Europe (EC), NASA / Aerospace (ISO 16290), Software SRL, and TÜBİTAK Ar-Ge frameworks',
     'Deterministic TRL 1–9 Evaluation: Strict milestone gating algorithms and overall percentage readiness scoring',

@@ -5,7 +5,7 @@ export const pdfSplitterManifest = {
   category: 'Document Utility',
   iconName: 'Scissors',
   badge: '100% Private',
-  targetUrl: '#/tool/pdf-splitter',
+  targetUrl: '/tool/pdf-splitter',
   seoTitle: 'Split PDF Online Free – Extract Pages & Split into Custom Ranges | Cerilas Tools',
   seoDescription: 'Split PDF files online for free with 100% in-browser privacy. Extract specific pages, divide into custom page ranges, or separate every page into individual PDF files with zero server uploads.',
   features: [

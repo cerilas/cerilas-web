@@ -8,7 +8,7 @@ export const pdfEditorManifest = {
   icon_name: 'PenTool',
   iconName: 'PenTool',
   badge: '100% In-Browser Privacy',
-  targetUrl: '#/tool/pdf-editor',
+  targetUrl: '/tool/pdf-editor',
   features: [
     'Add text, notes, and callouts with custom fonts, colors, and sizes',
     'Sign documents with mouse, touchscreen, or uploaded PNG signatures',

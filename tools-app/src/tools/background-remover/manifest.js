@@ -6,7 +6,7 @@ export const backgroundRemoverManifest = {
   iconName: 'Sparkles',
   badge: 'AI Powered',
   isAi: true,
-  targetUrl: '#/tool/background-remover',
+  targetUrl: '/tool/background-remover',
   features: [
     '100% Client-Side Neural AI: Segmentation executes locally in browser memory without sending files to any server',
     'High-Precision Edge Detection: Preserves delicate hair strands, product silhouettes, and transparent boundaries',

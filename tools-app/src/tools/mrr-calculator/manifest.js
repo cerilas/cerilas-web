@@ -5,7 +5,7 @@ export const mrrCalculatorManifest = {
   category: 'Startup & Finance',
   iconName: 'TrendingUp',
   badge: 'SaaS Metrics',
-  targetUrl: '#/tool/mrr-calculator',
+  targetUrl: '/tool/mrr-calculator',
   seoTitle: 'MRR Calculator - Monthly Recurring Revenue & Quick Ratio | Cerilas Tools',
   seoDescription: 'Free SaaS MRR Calculator. Calculate Net New Monthly Recurring Revenue, Expansion MRR, Churn rate, and SaaS Quick Ratio with investor benchmarks.',
   features: [

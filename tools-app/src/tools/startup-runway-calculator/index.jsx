@@ -149,7 +149,7 @@ export default function StartupRunwayCalculator({ onBack, toolMeta }) {
 🗓 Zero Cash Date: ${runwayData.zeroCashDateStr}
 🎯 Health Verdict: ${runwayData.verdictLabel}
 ---------------------------------------------
-Generated via https://tools.cerilas.com/#/tool/startup-runway-calculator`;
+Generated via https://tools.cerilas.com/tool/startup-runway-calculator`;
 
     navigator.clipboard.writeText(report);
     setCopied(true);

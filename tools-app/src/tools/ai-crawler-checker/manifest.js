@@ -6,7 +6,7 @@ export const aiCrawlerCheckerManifest = {
   iconName: 'Radar',
   badge: 'AI Assisted',
   isAi: true,
-  targetUrl: '#/tool/ai-crawler-checker',
+  targetUrl: '/tool/ai-crawler-checker',
   features: [
     'Comprehensive AI Crawler Audit: Tests OAI-SearchBot, Claude-SearchBot, PerplexityBot, GPTBot, ClaudeBot, and Google-Extended',
     'Clear Search vs. Training Differentiation: Isolates real-time AI search discovery permissions from foundation model training crawlers',

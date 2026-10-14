@@ -6,7 +6,7 @@ export const aiLinkHallucinationCheckerManifest = {
   iconName: 'Link2',
   badge: 'AI Assisted',
   isAi: true,
-  targetUrl: '#/tool/ai-link-hallucination-checker',
+  targetUrl: '/tool/ai-link-hallucination-checker',
   features: [
     'Automated Multi-Format URL Extraction: Detects Markdown [links](url), HTML <a href>, raw URLs, DOI academic citations, and package references',
     'Real-Time DNS & HTTP Probing: Differentiates between non-existent domains (NXDOMAIN), dead 404 paths, redirects, and verified 200 OK links',

@@ -6,7 +6,7 @@ export const llmsTxtManifest = {
   iconName: 'FileText',
   badge: 'AI Assisted',
   isAi: true,
-  targetUrl: '#/tool/llms-txt',
+  targetUrl: '/tool/llms-txt',
   features: [
     '3-in-1 Integrated Suite: Includes LLMs.txt Generator, Checker, and RFC v2 Validator in a unified workspace',
     'Deterministic Website Scanner: Discovers sitemap URLs, navigation links, and generates curated markdown resource entries',

@@ -59,7 +59,7 @@ export default function VideoCompressorSeo() {
     '@graph': [
       {
         '@type': 'WebApplication',
-        '@id': 'https://tools.cerilas.com/#/tool/video-compressor',
+        '@id': 'https://tools.cerilas.com/tool/video-compressor',
         name: 'Cerilas Free Online Video Compressor – Compress MP4, MOV & WebM',
         alternateName: [
           'Compress MP4 Online',
@@ -69,7 +69,7 @@ export default function VideoCompressorSeo() {
           'Make Video Smaller Free',
           'Private In-Browser Video Reducer'
         ],
-        url: 'https://tools.cerilas.com/#/tool/video-compressor',
+        url: 'https://tools.cerilas.com/tool/video-compressor',
         applicationCategory: 'MultimediaApplication',
         operatingSystem: 'Any',
         offers: {
@@ -85,13 +85,7 @@ export default function VideoCompressorSeo() {
           'Side-by-side original vs compressed video comparison preview',
           'Interactive video trimming to cut intro and outro sections',
           'Audio mute toggle for maximum byte reduction'
-        ],
-        aggregateRating: {
-          '@type': 'AggregateRating',
-          ratingValue: '4.96',
-          ratingCount: '1840'
-        }
-      },
+        ]      },
       {
         '@type': 'BreadcrumbList',
         itemListElement: [
@@ -111,7 +105,7 @@ export default function VideoCompressorSeo() {
             '@type': 'ListItem',
             position: 3,
             name: 'Compress MP4 & Video',
-            item: 'https://tools.cerilas.com/#/tool/video-compressor'
+            item: 'https://tools.cerilas.com/tool/video-compressor'
           }
         ]
       },

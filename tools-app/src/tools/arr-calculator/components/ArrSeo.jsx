@@ -63,7 +63,7 @@ export default function ArrSeo() {
       '@graph': [
         {
           '@type': 'WebApplication',
-          '@id': 'https://tools.cerilas.com/#/tool/arr-calculator#software',
+          '@id': 'https://tools.cerilas.com/tool/arr-calculator#software',
           'name': 'Cerilas Free SaaS Annual Recurring Revenue (ARR) & Rule of 40 Calculator',
           'alternateName': [
             'ARR Calculator',
@@ -88,7 +88,7 @@ export default function ArrSeo() {
         },
         {
           '@type': 'HowTo',
-          '@id': 'https://tools.cerilas.com/#/tool/arr-calculator#howto',
+          '@id': 'https://tools.cerilas.com/tool/arr-calculator#howto',
           'name': 'How to Calculate ARR & the Rule of 40 for Venture Capital Valuation',
           'description': 'A 4-step financial guide for SaaS founders and CFOs.',
           'step': [
@@ -120,7 +120,7 @@ export default function ArrSeo() {
         },
         {
           '@type': 'FAQPage',
-          '@id': 'https://tools.cerilas.com/#/tool/arr-calculator#faq',
+          '@id': 'https://tools.cerilas.com/tool/arr-calculator#faq',
           'mainEntity': FAQ_ITEMS.map((item) => ({
             '@type': 'Question',
             'name': item.q,

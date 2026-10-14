@@ -63,7 +63,7 @@ export default function LtvCacSeo() {
       '@graph': [
         {
           '@type': 'WebApplication',
-          '@id': 'https://tools.cerilas.com/#/tool/ltv-cac-calculator#software',
+          '@id': 'https://tools.cerilas.com/tool/ltv-cac-calculator#software',
           'name': 'Cerilas Free SaaS LTV:CAC Ratio & Unit Economics Calculator',
           'alternateName': [
             'LTV to CAC Calculator',
@@ -88,7 +88,7 @@ export default function LtvCacSeo() {
         },
         {
           '@type': 'HowTo',
-          '@id': 'https://tools.cerilas.com/#/tool/ltv-cac-calculator#howto',
+          '@id': 'https://tools.cerilas.com/tool/ltv-cac-calculator#howto',
           'name': 'How to Calculate Your SaaS LTV:CAC Ratio & Unit Economics',
           'description': 'A 4-step framework for founders to evaluate capital efficiency and venture readiness.',
           'step': [
@@ -120,7 +120,7 @@ export default function LtvCacSeo() {
         },
         {
           '@type': 'FAQPage',
-          '@id': 'https://tools.cerilas.com/#/tool/ltv-cac-calculator#faq',
+          '@id': 'https://tools.cerilas.com/tool/ltv-cac-calculator#faq',
           'mainEntity': FAQ_ITEMS.map((item) => ({
             '@type': 'Question',
             'name': item.q,

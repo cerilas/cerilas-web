@@ -63,7 +63,7 @@ export default function LtvSeo() {
       '@graph': [
         {
           '@type': 'WebApplication',
-          '@id': 'https://tools.cerilas.com/#/tool/ltv-calculator#software',
+          '@id': 'https://tools.cerilas.com/tool/ltv-calculator#software',
           'name': 'Cerilas Free SaaS Customer Lifetime Value (LTV) Calculator',
           'alternateName': [
             'SaaS LTV Calculator',
@@ -88,7 +88,7 @@ export default function LtvSeo() {
         },
         {
           '@type': 'HowTo',
-          '@id': 'https://tools.cerilas.com/#/tool/ltv-calculator#howto',
+          '@id': 'https://tools.cerilas.com/tool/ltv-calculator#howto',
           'name': 'How to Calculate True Margin-Adjusted Customer Lifetime Value (LTV)',
           'description': 'A 4-step framework to determine gross profit per customer account.',
           'step': [
@@ -120,7 +120,7 @@ export default function LtvSeo() {
         },
         {
           '@type': 'FAQPage',
-          '@id': 'https://tools.cerilas.com/#/tool/ltv-calculator#faq',
+          '@id': 'https://tools.cerilas.com/tool/ltv-calculator#faq',
           'mainEntity': FAQ_ITEMS.map((item) => ({
             '@type': 'Question',
             'name': item.q,

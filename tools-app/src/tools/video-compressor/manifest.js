@@ -5,7 +5,7 @@ export const videoCompressorManifest = {
   category: 'Optimizer',
   iconName: 'Video',
   badge: '100% Private',
-  targetUrl: '#/tool/video-compressor',
+  targetUrl: '/tool/video-compressor',
   seoTitle: 'Compress MP4, MOV & WebM Online Free (Reduce Video Size in MB) | Cerilas Tools',
   seoDescription: 'Compress MP4, MOV, and WebM video files directly in your web browser. Reduce MP4 file size in MB for Discord (<25MB), WhatsApp (<16MB), and email with 100% private in-browser compression and zero watermarks.',
   features: [

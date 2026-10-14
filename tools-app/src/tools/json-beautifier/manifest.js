@@ -8,7 +8,7 @@ export const jsonBeautifierManifest = {
   icon_name: 'Braces',
   iconName: 'Braces',
   badge: 'Formatter & Tree',
-  targetUrl: '#/tool/json-beautifier',
+  targetUrl: '/tool/json-beautifier',
   seoTitle: 'Free Online JSON Beautifier, Formatter & Validator (2026) | Cerilas Tools',
   seoDescription: 'Format, beautify, minify, and validate JSON online for free. Auto-repair malformed JSON, interactive tree viewer, copy JSONPath, sort keys, and convert JSON to TypeScript, YAML, or CSV with 100% in-browser privacy.',
   features: [

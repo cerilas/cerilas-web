@@ -66,7 +66,7 @@ export default function AiLinkHallucinationSeo() {
       '@context': 'https://schema.org',
       '@type': 'WebApplication',
       'name': 'Cerilas AI Link Hallucination Checker',
-      'url': 'https://tools.cerilas.com/#/tool/ai-link-hallucination-checker',
+      'url': 'https://tools.cerilas.com/tool/ai-link-hallucination-checker',
       'applicationCategory': 'UtilitiesApplication',
       'operatingSystem': 'All',
       'description': 'Free online audit tool to detect hallucinated URLs, fake domain names, 404 broken links, and slopsquatting security threats in AI-generated text.',

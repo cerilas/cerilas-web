@@ -64,7 +64,7 @@ export default function ChurnSeo() {
       '@graph': [
         {
           '@type': 'WebApplication',
-          '@id': 'https://tools.cerilas.com/#/tool/churn-calculator#software',
+          '@id': 'https://tools.cerilas.com/tool/churn-calculator#software',
           'name': 'Cerilas Free SaaS Churn Rate & Net Revenue Retention (NRR) Calculator',
           'alternateName': [
             'SaaS Churn Calculator',
@@ -89,7 +89,7 @@ export default function ChurnSeo() {
         },
         {
           '@type': 'HowTo',
-          '@id': 'https://tools.cerilas.com/#/tool/churn-calculator#howto',
+          '@id': 'https://tools.cerilas.com/tool/churn-calculator#howto',
           'name': 'How to Calculate Customer Churn and Net Revenue Retention (NRR)',
           'description': 'A 4-step framework for subscription founders to audit customer attrition and cohort health.',
           'step': [
@@ -121,7 +121,7 @@ export default function ChurnSeo() {
         },
         {
           '@type': 'FAQPage',
-          '@id': 'https://tools.cerilas.com/#/tool/churn-calculator#faq',
+          '@id': 'https://tools.cerilas.com/tool/churn-calculator#faq',
           'mainEntity': FAQ_ITEMS.map((item) => ({
             '@type': 'Question',
             'name': item.q,

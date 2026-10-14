@@ -1,12 +1,14 @@
+import { CHECKER_SEO, CHECKER_FAQ } from '../../seo/aiVisibilityCheckerContent.js';
+
 export const aiVisibilityCheckerManifest = {
   slug: 'ai-visibility-checker',
-  title: 'AI Visibility Checker by GrowthControl',
-  shortDescription: 'Audit your website visibility in AI search engines (Gemini, ChatGPT, Perplexity). Automatically extracts top 10 search queries from your content and tests live citation grounding.',
+  title: CHECKER_SEO.h1,
+  shortDescription: CHECKER_SEO.shortDescription,
   category: 'AI Assisted',
   iconName: 'Eye',
   badge: 'AI Assisted',
   isAi: true,
-  targetUrl: '#/tool/ai-visibility-checker',
+  targetUrl: '/tool/ai-visibility-checker',
   features: [
     'Automated Content Scraping (Zero-AI Initial Extraction): Fetches title, meta tags, key headings, and main body text securely',
     'Top 10 High-Intent Search Query Extraction: Leverages advanced frontier AI models to model realistic commercial, informational, and local queries users ask AI search engines',
@@ -18,37 +20,12 @@ export const aiVisibilityCheckerManifest = {
     'Actionable AEO Recommendations: Concrete steps to optimize schema markup, Q&A architecture, and digital entity authority'
   ],
   seo: {
-    title: "AI Visibility Checker by GrowthControl – Gemini & ChatGPT | Cerilas Tools",
-    description: "Audit if your brand and website are cited in AI search engines. Test live Gemini, ChatGPT, and Perplexity answer grounding with actionable GEO suggestions.",
-    keywords: "ai visibility checker, geo audit tool, check if gemini cites my website, chatgpt search citation checker, perplexity citation audit, test ai search citations free, generative engine optimization tool",
-    ogImage: 'https://tools.cerilas.com/tool-icons/ai-visibility-checker.webp',
-    ogImageAlt: "AI Visibility Checker by GrowthControl – Gemini & ChatGPT | Cerilas Tools",
-    breadcrumbsName: "AI Visibility Checker by GrowthControl",
-    faq: [
-        {
-            "q": "What is an AI Visibility Score and how is it calculated?",
-            "a": "It is a composite 0-100 metric measuring how frequently, prominently, and accurately your domain is cited when users ask conversational questions to AI search engines."
-        },
-        {
-            "q": "What is Generative Engine Optimization (GEO)?",
-            "a": "GEO is the modern evolution of SEO focused on optimizing content, structure, and entity authority so AI answer engines (ChatGPT, Gemini, Perplexity) cite your website."
-        },
-        {
-            "q": "How does Gemini decide which websites to cite in Search Grounding?",
-            "a": "Gemini evaluates top Google organic results, information gain, concise authoritative definitions, schema markup, and domain citation frequency across trusted web sources."
-        },
-        {
-            "q": "Why are competitor domains cited instead of my official website?",
-            "a": "Competitors frequently provide structured comparison tables, third-party review coverage, and direct answers to user pricing questions that AI models easily parse."
-        },
-        {
-            "q": "Can a newer website with low domain authority still get cited by AI models?",
-            "a": "Yes. If a new page offers unique proprietary data, original research, or the clearest direct answer to a long-tail query, AI models frequently cite it over legacy brands."
-        },
-        {
-            "q": "How do AI search engines handle paywalled or gated content?",
-            "a": "AI search crawlers generally ignore gated content, meaning paywalled assets cannot generate search citations. Providing summary excerpts ensures indexability."
-        }
-    ]
+    title: CHECKER_SEO.title,
+    description: CHECKER_SEO.description,
+    keywords: CHECKER_SEO.keywords,
+    ogImage: 'https://tools.cerilas.com/og/ai-visibility-checker.png',
+    ogImageAlt: CHECKER_SEO.title,
+    breadcrumbsName: CHECKER_SEO.name,
+    faq: CHECKER_FAQ
   }
 };

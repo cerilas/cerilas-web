@@ -63,11 +63,6 @@ export default function YoutubeSeoSection() {
           'price': '0',
           'priceCurrency': 'USD'
         },
-        'aggregateRating': {
-          '@type': 'AggregateRating',
-          'ratingValue': '4.9',
-          'ratingCount': '1850'
-        },
         'description': 'Free online YouTube Thumbnail Downloader. Download 4K Ultra HD (1920x1080), 720p HD, and WebP cover images from any YouTube video or Shorts link.'
       },
       {

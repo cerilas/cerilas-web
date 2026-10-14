@@ -50,12 +50,12 @@ const FAQ_ITEMS = [
 ];
 
 const RELATED_TOOLS = [
-  { name: 'AI Link Hallucination Checker', desc: 'Scan AI text for fabricated URLs, 404 links, and slopsquatting risks.', href: '#/tool/ai-link-hallucination-checker' },
-  { name: 'AI Content Detector', desc: 'Enterprise multi-model detection evaluating burstiness and perplexity.', href: '#/tool/ai-content-detector' },
-  { name: 'PDF → RAG Cleaner', desc: 'Clean headers, footers, and noise from PDFs for vector embeddings.', href: '#/tool/pdf-rag-cleaner' },
-  { name: 'Webhook Tester', desc: 'Inspect real-time HTTP webhooks and payload headers with live tunnels.', href: '#/tool/webhook-tester' },
-  { name: 'JSON Beautifier & Formatter', desc: 'Clean, validate, and format JSON structures with zero data leak.', href: '#/tool/json-beautifier' },
-  { name: 'QR Code Generator', desc: 'Create permanent vector QR codes for URLs, WiFi, and vCards.', href: '#/tool/qr-code-generator' }
+  { name: 'AI Link Hallucination Checker', desc: 'Scan AI text for fabricated URLs, 404 links, and slopsquatting risks.', href: '/tool/ai-link-hallucination-checker' },
+  { name: 'AI Content Detector', desc: 'Enterprise multi-model detection evaluating burstiness and perplexity.', href: '/tool/ai-content-detector' },
+  { name: 'PDF → RAG Cleaner', desc: 'Clean headers, footers, and noise from PDFs for vector embeddings.', href: '/tool/pdf-rag-cleaner' },
+  { name: 'Webhook Tester', desc: 'Inspect real-time HTTP webhooks and payload headers with live tunnels.', href: '/tool/webhook-tester' },
+  { name: 'JSON Beautifier & Formatter', desc: 'Clean, validate, and format JSON structures with zero data leak.', href: '/tool/json-beautifier' },
+  { name: 'QR Code Generator', desc: 'Create permanent vector QR codes for URLs, WiFi, and vCards.', href: '/tool/qr-code-generator' }
 ];
 
 export default function AiCrawlerCheckerSeo() {
@@ -70,7 +70,7 @@ export default function AiCrawlerCheckerSeo() {
       '@context': 'https://schema.org',
       '@type': 'WebApplication',
       name: 'Cerilas AI Crawler Checker',
-      url: 'https://tools.cerilas.com/#/tool/ai-crawler-checker',
+      url: 'https://tools.cerilas.com/tool/ai-crawler-checker',
       applicationCategory: 'UtilitiesApplication',
       operatingSystem: 'All',
       description: 'Free online tool to check whether ChatGPT, Claude, Perplexity, Gemini, and other AI systems can access your website. Evaluates robots.txt, sitemaps, indexability, and crawler permissions.',

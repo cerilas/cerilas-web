@@ -5,7 +5,7 @@ export const youtubeThumbnailDownloaderManifest = {
   category: 'Media & Video',
   iconName: 'Video',
   badge: '4K Ultra HD',
-  targetUrl: '#/tool/youtube-thumbnail-downloader',
+  targetUrl: '/tool/youtube-thumbnail-downloader',
   seoTitle: 'Free YouTube Thumbnail Downloader (4K, 1080p HD, Shorts & WebP) | Cerilas Tools',
   seoDescription: 'Download YouTube video and Shorts thumbnails in maximum 4K (1920x1080), High Definition (1280x720), and WebP resolution for free. No watermark, instant one-click download, and responsive HTML embed generator.',
   features: [

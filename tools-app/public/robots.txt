@@ -1,69 +1,44 @@
-# Cerilas Tools Platform - Advanced Robots & AI Search Configuration (2026)
+# Cerilas' Tools & GrowthControl: robots and AI crawler policy
 # https://tools.cerilas.com
+#
+# Search engines and AI answer engines are welcome to crawl, index and cite
+# every public page. Private API and admin routes are excluded; signed-in
+# GrowthControl app routes (/growth/*) are served with a noindex meta tag.
+# A crawler that matches a named group ignores the * group, so every group
+# repeats the same Disallow rules.
 
-# 1. Global Search Engines
+# Search engines and AI search / answer engines
 User-agent: *
+User-agent: Googlebot
+User-agent: Googlebot-Image
+User-agent: Google-Extended
+User-agent: Bingbot
+User-agent: DuckDuckBot
+User-agent: DuckAssistBot
+User-agent: Applebot
+User-agent: Applebot-Extended
+User-agent: GPTBot
+User-agent: OAI-SearchBot
+User-agent: ChatGPT-User
+User-agent: ClaudeBot
+User-agent: Claude-SearchBot
+User-agent: Claude-User
+User-agent: anthropic-ai
+User-agent: PerplexityBot
+User-agent: Perplexity-User
+User-agent: Amazonbot
+User-agent: Meta-ExternalAgent
+User-agent: FacebookBot
+User-agent: cohere-ai
+User-agent: MistralAI-User
+User-agent: CCBot
 Allow: /
 Disallow: /api/
 Disallow: /admin
 Disallow: /server/
 
-# 2. Google Search & Google Gemini (Google-Extended)
-User-agent: Googlebot
-Allow: /
-
-User-agent: Googlebot-Image
-Allow: /
-
-User-agent: Google-Extended
-Allow: /
-
-# 3. OpenAI (ChatGPT Search & Browsing)
-User-agent: GPTBot
-Allow: /
-
-User-agent: ChatGPT-User
-Allow: /
-
-# 4. Perplexity AI Search Engine
-User-agent: PerplexityBot
-Allow: /
-
-# 5. Anthropic (Claude AI Assistant & Research)
-User-agent: ClaudeBot
-Allow: /
-
-User-agent: anthropic-ai
-Allow: /
-
-# 6. Apple Intelligence & Siri
-User-agent: Applebot
-Allow: /
-
-User-agent: Applebot-Extended
-Allow: /
-
-# 7. Microsoft Bing & Copilot
-User-agent: Bingbot
-Allow: /
-
-# 8. Meta / Facebook
-User-agent: FacebookBot
-Allow: /
-
-# 9. Cohere AI
-User-agent: cohere-ai
-Allow: /
-
-# 10. Common Crawl Open Web Archive
-User-agent: CCBot
-Allow: /
-
-# Host
-Host: https://tools.cerilas.com
-
-# Sitemaps & LLM Manifest
+# Sitemaps
 Sitemap: https://tools.cerilas.com/sitemap.xml
 Sitemap: https://tools.cerilas.com/sitemap-grants.xml
-# LLMs discovery standard
-# https://tools.cerilas.com/llms.txt
+
+# LLM-friendly site summary: https://tools.cerilas.com/llms.txt

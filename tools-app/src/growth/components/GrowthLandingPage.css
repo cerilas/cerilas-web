@@ -2055,6 +2055,146 @@
   color: var(--cl-muted-fg);
 }
 
+.cl-faq-answer[hidden] {
+  display: none;
+}
+
+.cl-faq-heading {
+  margin: 0;
+  font: inherit;
+}
+
+/* ==========================================================================
+   SEO CONTENT SECTIONS (definition, use cases, comparison)
+   ========================================================================== */
+.cl-seo-body {
+  max-width: 760px;
+  margin: 1.5rem auto 0;
+  text-align: center;
+  font-size: 1rem;
+  line-height: 1.7;
+  color: var(--cl-muted-fg);
+}
+
+.cl-seo-metrics,
+.cl-seo-usecases {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+  max-width: 1080px;
+  margin: 2.5rem auto 0;
+  padding: 0;
+  list-style: none;
+}
+
+@media (min-width: 768px) {
+  .cl-seo-metrics,
+  .cl-seo-usecases {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1100px) {
+  .cl-seo-metrics,
+  .cl-seo-usecases {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.cl-seo-metric,
+.cl-seo-usecase {
+  padding: 1.5rem;
+  border: 1px solid var(--cl-card-border);
+  border-radius: 14px;
+  background: var(--cl-card-bg);
+  box-shadow: var(--cl-shadow-card);
+}
+
+.cl-seo-metric dt,
+.cl-seo-usecase h3 {
+  margin: 0 0 0.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--cl-fg);
+}
+
+.cl-seo-metric dd,
+.cl-seo-usecase p {
+  margin: 0;
+  font-size: 0.92rem;
+  line-height: 1.6;
+  color: var(--cl-muted-fg);
+}
+
+.cl-seo-table-wrap {
+  max-width: 1000px;
+  margin: 2.5rem auto 0;
+  overflow-x: auto;
+  border: 1px solid var(--cl-card-border);
+  border-radius: 14px;
+  background: var(--cl-card-bg);
+}
+
+.cl-seo-table {
+  width: 100%;
+  min-width: 620px;
+  border-collapse: collapse;
+  font-size: 0.92rem;
+}
+
+.cl-seo-table th,
+.cl-seo-table td {
+  padding: 0.9rem 1.1rem;
+  text-align: left;
+  vertical-align: top;
+  border-bottom: 1px solid var(--cl-card-border);
+  color: var(--cl-muted-fg);
+}
+
+.cl-seo-table thead th,
+.cl-seo-table th[scope="row"] {
+  color: var(--cl-fg);
+  font-weight: 600;
+}
+
+.cl-seo-table td:last-child {
+  color: var(--cl-fg);
+}
+
+.cl-seo-table tbody tr:last-child th,
+.cl-seo-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.cl-seo-cta-line {
+  margin: 1.5rem 0 0;
+  text-align: center;
+  color: var(--cl-muted-fg);
+}
+
+.cl-seo-cta-line a,
+.cl-footer-resources a {
+  color: var(--cl-fg);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.cl-footer-container.cl-footer-resources {
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  gap: 0.5rem 1.25rem;
+  margin-top: 1.5rem;
+  font-size: 0.85rem;
+  color: var(--cl-muted-fg);
+}
+
+.cl-footer-resources a {
+  font-weight: 500;
+  text-decoration: none;
+}
+
 /* ==========================================================================
    10. TRY FREE / FINAL CTA
    ========================================================================== */

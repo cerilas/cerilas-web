@@ -113,7 +113,7 @@ export default function ChurnCalculator({ onBack, toolMeta }) {
 🛡 Gross Revenue Retention (GRR): ${metrics.grr}%
 ⏳ Avg Customer Lifetime: ${metrics.avgLifetimeMonths} Months
 ---------------------------------------------
-Generated via https://tools.cerilas.com/#/tool/churn-calculator`;
+Generated via https://tools.cerilas.com/tool/churn-calculator`;
 
     navigator.clipboard.writeText(report);
     setCopied(true);

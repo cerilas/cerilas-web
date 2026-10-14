@@ -63,7 +63,7 @@ export default function CacSeo() {
       '@graph': [
         {
           '@type': 'WebApplication',
-          '@id': 'https://tools.cerilas.com/#/tool/cac-calculator#software',
+          '@id': 'https://tools.cerilas.com/tool/cac-calculator#software',
           'name': 'Cerilas Free Customer Acquisition Cost (CAC) & Payback Calculator',
           'alternateName': [
             'CAC Calculator',
@@ -88,7 +88,7 @@ export default function CacSeo() {
         },
         {
           '@type': 'HowTo',
-          '@id': 'https://tools.cerilas.com/#/tool/cac-calculator#howto',
+          '@id': 'https://tools.cerilas.com/tool/cac-calculator#howto',
           'name': 'How to Calculate Fully-Loaded Customer Acquisition Cost (CAC)',
           'description': 'A 4-step framework to accurately quantify your customer acquisition economics.',
           'step': [
@@ -120,7 +120,7 @@ export default function CacSeo() {
         },
         {
           '@type': 'FAQPage',
-          '@id': 'https://tools.cerilas.com/#/tool/cac-calculator#faq',
+          '@id': 'https://tools.cerilas.com/tool/cac-calculator#faq',
           'mainEntity': FAQ_ITEMS.map((item) => ({
             '@type': 'Question',
             'name': item.q,

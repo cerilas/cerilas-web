@@ -38,7 +38,7 @@ export default function PdfCompressorSeo({ onSelectPreset }) {
       "@graph": [
         {
           "@type": "WebApplication",
-          "@id": "https://tools.cerilas.com/#/tool/pdf-compressor#software",
+          "@id": "https://tools.cerilas.com/tool/pdf-compressor#software",
           "name": "Cerilas Free Online PDF Compressor & Document Size Reducer",
           "alternateName": [
             "Cerilas PDF Compressor",
@@ -63,13 +63,6 @@ export default function PdfCompressorSeo({ onSelectPreset }) {
             "price": "0",
             "priceCurrency": "USD",
             "availability": "https://schema.org/InStock"
-          },
-          "aggregateRating": {
-            "@type": "AggregateRating",
-            "ratingValue": "4.96",
-            "reviewCount": "2340",
-            "bestRating": "5",
-            "worstRating": "1"
           },
           "author": {
             "@type": "Organization",
@@ -99,7 +92,7 @@ export default function PdfCompressorSeo({ onSelectPreset }) {
         },
         {
           "@type": "BreadcrumbList",
-          "@id": "https://tools.cerilas.com/#/tool/pdf-compressor#breadcrumbs",
+          "@id": "https://tools.cerilas.com/tool/pdf-compressor#breadcrumbs",
           "itemListElement": [
             {
               "@type": "ListItem",
@@ -117,13 +110,13 @@ export default function PdfCompressorSeo({ onSelectPreset }) {
               "@type": "ListItem",
               "position": 3,
               "name": "Free PDF Compressor",
-              "item": "https://tools.cerilas.com/#/tool/pdf-compressor"
+              "item": "https://tools.cerilas.com/tool/pdf-compressor"
             }
           ]
         },
         {
           "@type": "HowTo",
-          "@id": "https://tools.cerilas.com/#/tool/pdf-compressor#howto",
+          "@id": "https://tools.cerilas.com/tool/pdf-compressor#howto",
           "name": "How to Compress PDF Files Online Without Uploading to Cloud Servers",
           "description": "A secure, step-by-step framework to reduce PDF file size locally in your web browser while preserving maximum document readability.",
           "totalTime": "PT1M",
@@ -133,34 +126,34 @@ export default function PdfCompressorSeo({ onSelectPreset }) {
               "position": 1,
               "name": "Select or Drag & Drop PDF Documents",
               "text": "Drag your PDF files into the upload zone or click to select from your device. You can add single files or multiple PDFs simultaneously.",
-              "url": "https://tools.cerilas.com/#/tool/pdf-compressor"
+              "url": "https://tools.cerilas.com/tool/pdf-compressor"
             },
             {
               "@type": "HowToStep",
               "position": 2,
               "name": "Choose Your Target Compression Preset",
               "text": "Select Extreme Compression for tight portal upload limits (under 1MB/2MB), Balanced for general email and sharing, or High Quality for print documents.",
-              "url": "https://tools.cerilas.com/#/tool/pdf-compressor"
+              "url": "https://tools.cerilas.com/tool/pdf-compressor"
             },
             {
               "@type": "HowToStep",
               "position": 3,
               "name": "Execute In-Browser Local Compression",
               "text": "Click 'Compress All PDFs'. The engine downsamples embedded raster images and optimizes object streams directly in local browser memory without uploading any data.",
-              "url": "https://tools.cerilas.com/#/tool/pdf-compressor"
+              "url": "https://tools.cerilas.com/tool/pdf-compressor"
             },
             {
               "@type": "HowToStep",
               "position": 4,
               "name": "Download Individual PDFs or Full ZIP Archive",
               "text": "Review your compression ratio and size savings. Download each compressed PDF individually or click 'Download All as ZIP' to export all files at once.",
-              "url": "https://tools.cerilas.com/#/tool/pdf-compressor"
+              "url": "https://tools.cerilas.com/tool/pdf-compressor"
             }
           ]
         },
         {
           "@type": "FAQPage",
-          "@id": "https://tools.cerilas.com/#/tool/pdf-compressor#faq",
+          "@id": "https://tools.cerilas.com/tool/pdf-compressor#faq",
           "mainEntity": [
             {
               "@type": "Question",

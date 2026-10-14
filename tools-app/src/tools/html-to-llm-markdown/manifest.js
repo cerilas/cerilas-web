@@ -6,7 +6,7 @@ export const htmlToMarkdownManifest = {
   iconName: 'FileCode',
   badge: 'AI Assisted',
   isAi: true,
-  targetUrl: '#/tool/html-to-llm-markdown',
+  targetUrl: '/tool/html-to-llm-markdown',
   features: [
     'Dual Input Engines: Convert live webpages via URL or paste raw HTML snippets directly',
     'Boilerplate & Noise Elimination: Automatically removes navbars, footers, cookie banners, tracking scripts, and modals',

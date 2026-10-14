@@ -101,15 +101,7 @@ export default function PdfEditorSeo() {
           'Official business stamp overlays (APPROVED, CONFIDENTIAL, DRAFT)',
           'Automated page numbering (Page X of Y)',
           '100% Client-Side execution – zero files transmitted over the internet'
-        ],
-        aggregateRating: {
-          '@type': 'AggregateRating',
-          ratingValue: '4.98',
-          reviewCount: '5840',
-          bestRating: '5',
-          worstRating: '1'
-        }
-      },
+        ]      },
       {
         '@type': 'BreadcrumbList',
         '@id': 'https://cerilas.com/tools/pdf-editor#breadcrumbs',

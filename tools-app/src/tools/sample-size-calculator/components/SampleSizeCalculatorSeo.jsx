@@ -56,7 +56,7 @@ export default function SampleSizeCalculatorSeo() {
       '@context': 'https://schema.org',
       '@type': 'WebApplication',
       'name': 'Cerilas Sample Size Calculator',
-      'url': 'https://tools.cerilas.com/#/tool/sample-size-calculator',
+      'url': 'https://tools.cerilas.com/tool/sample-size-calculator',
       'applicationCategory': 'EducationalApplication',
       'operatingSystem': 'All modern web browsers',
       'offers': {

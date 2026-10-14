@@ -64,7 +64,7 @@ export default function MrrSeo() {
       '@graph': [
         {
           '@type': 'WebApplication',
-          '@id': 'https://tools.cerilas.com/#/tool/mrr-calculator#software',
+          '@id': 'https://tools.cerilas.com/tool/mrr-calculator#software',
           'name': 'Cerilas Free SaaS Monthly Recurring Revenue (MRR) Calculator',
           'alternateName': [
             'MRR Calculator',
@@ -89,7 +89,7 @@ export default function MrrSeo() {
         },
         {
           '@type': 'HowTo',
-          '@id': 'https://tools.cerilas.com/#/tool/mrr-calculator#howto',
+          '@id': 'https://tools.cerilas.com/tool/mrr-calculator#howto',
           'name': 'How to Calculate Monthly Recurring Revenue (MRR) & Net New Growth',
           'description': 'A 4-step framework to accurately quantify your subscription cash momentum.',
           'step': [
@@ -121,7 +121,7 @@ export default function MrrSeo() {
         },
         {
           '@type': 'FAQPage',
-          '@id': 'https://tools.cerilas.com/#/tool/mrr-calculator#faq',
+          '@id': 'https://tools.cerilas.com/tool/mrr-calculator#faq',
           'mainEntity': FAQ_ITEMS.map((item) => ({
             '@type': 'Question',
             'name': item.q,

@@ -5,7 +5,7 @@ export const churnCalculatorManifest = {
   category: 'Startup & Finance',
   iconName: 'RotateCcw',
   badge: 'Retention & NRR',
-  targetUrl: '#/tool/churn-calculator',
+  targetUrl: '/tool/churn-calculator',
   seoTitle: 'Churn Calculator - Customer & Revenue Churn Rate, NRR | Cerilas Tools',
   seoDescription: 'Free SaaS Churn Calculator. Calculate Logo Churn Rate, Gross vs Net Revenue Churn, Net Revenue Retention (NRR), and average customer lifetime in months.',
   features: [

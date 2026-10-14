@@ -35,7 +35,7 @@ export default function PomodoroSeo({ onSelectMode }) {
       "@graph": [
         {
           "@type": "WebApplication",
-          "@id": "https://tools.cerilas.com/#/tool/pomodoro-timer#software",
+          "@id": "https://tools.cerilas.com/tool/pomodoro-timer#software",
           "name": "Cerilas Free Online Pomodoro Timer & Deep Work Focus Clock",
           "alternateName": [
             "Cerilas Pomodoro Timer",
@@ -59,13 +59,6 @@ export default function PomodoroSeo({ onSelectMode }) {
             "price": "0",
             "priceCurrency": "USD",
             "availability": "https://schema.org/InStock"
-          },
-          "aggregateRating": {
-            "@type": "AggregateRating",
-            "ratingValue": "4.95",
-            "reviewCount": "1840",
-            "bestRating": "5",
-            "worstRating": "1"
           },
           "author": {
             "@type": "Organization",
@@ -95,7 +88,7 @@ export default function PomodoroSeo({ onSelectMode }) {
         },
         {
           "@type": "BreadcrumbList",
-          "@id": "https://tools.cerilas.com/#/tool/pomodoro-timer#breadcrumbs",
+          "@id": "https://tools.cerilas.com/tool/pomodoro-timer#breadcrumbs",
           "itemListElement": [
             {
               "@type": "ListItem",
@@ -113,13 +106,13 @@ export default function PomodoroSeo({ onSelectMode }) {
               "@type": "ListItem",
               "position": 3,
               "name": "Free Pomodoro Timer",
-              "item": "https://tools.cerilas.com/#/tool/pomodoro-timer"
+              "item": "https://tools.cerilas.com/tool/pomodoro-timer"
             }
           ]
         },
         {
           "@type": "HowTo",
-          "@id": "https://tools.cerilas.com/#/tool/pomodoro-timer#howto",
+          "@id": "https://tools.cerilas.com/tool/pomodoro-timer#howto",
           "name": "How to Master Deep Work with the Pomodoro Technique: The 5-Step Protocol",
           "description": "A scientifically verified 5-step framework to maximize cognitive focus, overcome procrastination, and prevent mental burnout using structured interval timeboxing.",
           "totalTime": "PT30M",
@@ -129,41 +122,41 @@ export default function PomodoroSeo({ onSelectMode }) {
               "position": 1,
               "name": "Define a Single Unambiguous Task",
               "text": "Select one concrete deliverable (e.g., 'Refactor Auth Service' or 'Outline Section 3 of Dissertation'). Type it into the goal note field to activate psychological commitment. Multitasking dilutes cognitive executive function.",
-              "url": "https://tools.cerilas.com/#/tool/pomodoro-timer"
+              "url": "https://tools.cerilas.com/tool/pomodoro-timer"
             },
             {
               "@type": "HowToStep",
               "position": 2,
               "name": "Initiate the 25-Minute Deep Focus Sprint",
               "text": "Press Start (or hit Spacebar) and dedicate 100% of your attention to the selected task until the gentle acoustic chime rings. If intrusive thoughts or secondary tasks arise, write them down on a scrap paper and return immediately to your focal task.",
-              "url": "https://tools.cerilas.com/#/tool/pomodoro-timer"
+              "url": "https://tools.cerilas.com/tool/pomodoro-timer"
             },
             {
               "@type": "HowToStep",
               "position": 3,
               "name": "Shield Against Internal and External Interruptions",
               "text": "Treat the 25-minute Pomodoro as an indivisible unit of atomic time. If interrupted externally, apply the 'Inform, Negotiate, Schedule, and Call Back' protocol to defer interruptions until your break.",
-              "url": "https://tools.cerilas.com/#/tool/pomodoro-timer"
+              "url": "https://tools.cerilas.com/tool/pomodoro-timer"
             },
             {
               "@type": "HowToStep",
               "position": 4,
               "name": "Take a 5-Minute Screen-Free Restorative Break",
               "text": "When the harmonic chime alerts you, stop working immediately. Step away from your computer, hydrate, stretch your neck and shoulders, and look at distant objects to release optical muscle tension. Do not check social media feeds or email.",
-              "url": "https://tools.cerilas.com/#/tool/pomodoro-timer"
+              "url": "https://tools.cerilas.com/tool/pomodoro-timer"
             },
             {
               "@type": "HowToStep",
               "position": 5,
               "name": "Complete 4 Cycles and Enjoy a 15-Minute Macro Recharge",
               "text": "After 4 consecutive focus sprints (100 minutes of pure deep work), take a longer 15-30 minute break. This window matches human Ultradian rest cycles, allowing the prefrontal cortex to replenish glycogen and dopamine reserves.",
-              "url": "https://tools.cerilas.com/#/tool/pomodoro-timer"
+              "url": "https://tools.cerilas.com/tool/pomodoro-timer"
             }
           ]
         },
         {
           "@type": "FAQPage",
-          "@id": "https://tools.cerilas.com/#/tool/pomodoro-timer#faq",
+          "@id": "https://tools.cerilas.com/tool/pomodoro-timer#faq",
           "mainEntity": [
             {
               "@type": "Question",

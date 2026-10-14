@@ -6,7 +6,7 @@ export const aiContentDetectorManifest = {
   iconName: 'Cpu',
   badge: 'AI Assisted',
   isAi: true,
-  targetUrl: '#/tool/ai-content-detector',
+  targetUrl: '/tool/ai-content-detector',
   features: [
     '0 to 100% Probability Scoring: Instant classification across Human-Written (0–25%), Mixed (26–65%), and Highly Likely AI (66–100%)',
     'Pros & Cons Indicator Breakdown: Compares Organic Human Writing Markers (pros) against Synthetic AI Markers (cons)',

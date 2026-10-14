@@ -6,7 +6,7 @@ export const pdfRagCleanerManifest = {
   iconName: 'Database',
   badge: 'AI Assisted',
   isAi: true,
-  targetUrl: '#/tool/pdf-rag-cleaner',
+  targetUrl: '/tool/pdf-rag-cleaner',
   features: [
     'Header & Footer Elimination: Automatically strips running page headers, footers, and page numbers across pages',
     'Hyphenation & Wrap Repair: Fixes line-split words (e.g. transfor- mation) and awkward PDF line breaks',

@@ -113,7 +113,7 @@ export default function CacCalculator({ onBack, toolMeta }) {
 🎯 Paid CAC: $${metrics.paidCac.toLocaleString()} / customer
 🏷 Market Tier: ${metrics.tierLabel}
 ---------------------------------------------
-Generated via https://tools.cerilas.com/#/tool/cac-calculator`;
+Generated via https://tools.cerilas.com/tool/cac-calculator`;
 
     navigator.clipboard.writeText(report);
     setCopied(true);

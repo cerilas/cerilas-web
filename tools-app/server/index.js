@@ -25,7 +25,7 @@ import googleMcpRouter from './routes/googleMcp.js';
 import growthRouter from './routes/growth.js';
 import { checkAiRateLimit, getClientIp } from './utils/aiRateLimit.js';
 import { CATEGORIES, TOOLS_SEO_REGISTRY, getAllToolSlugs, TOOL_CANONICAL_ALIASES } from './seo/toolsSeoRegistry.js';
-import { renderToolPageHtml, renderCategoryPageHtml, renderHomePageHtml, renderLegalPageHtml, renderPricingPageHtml } from './seo/ssrRenderer.js';
+import { renderToolPageHtml, renderCategoryPageHtml, renderHomePageHtml, renderLegalPageHtml, renderPricingPageHtml, renderGrowthPageHtml } from './seo/ssrRenderer.js';
 
 dotenv.config();
 
@@ -74,7 +74,16 @@ app.use((req, res, next) => {
     }
   }
 
-  // 3. Category alias /category/:slug -> /:slug
+  // 3. Bare tool slug links (/ai-visibility-checker) -> canonical /tool/:slug
+  const bareSlug = p.replace(/^\/+|\/+$/g, '').toLowerCase();
+  if (bareSlug && !bareSlug.includes('/') && !CATEGORIES[bareSlug]) {
+    const target = TOOL_CANONICAL_ALIASES[bareSlug] || bareSlug;
+    if (TOOLS_SEO_REGISTRY[target]) {
+      return res.redirect(301, `/tool/${target}`);
+    }
+  }
+
+  // 3b. Category alias /category/:slug -> /:slug
   if (p.startsWith('/category/')) {
     const catSlug = p.replace(/^\/category\//, '').replace(/\/+$/, '').toLowerCase();
     if (CATEGORIES[catSlug]) {
@@ -90,76 +99,41 @@ app.use((req, res, next) => {
   next();
 });
 
-// Explicit SEO robots.txt
+// robots.txt is maintained as a static file so AI crawler rules live in one place
+const ROBOTS_TXT_PATH = [path.join(distPath, 'robots.txt'), path.join(publicPath, 'robots.txt')].find(p => fs.existsSync(p));
 app.get('/robots.txt', (req, res) => {
   res.type('text/plain');
-  res.send(`User-agent: *
-Allow: /
-Disallow: /admin
-Disallow: /api/
-
-Sitemap: https://tools.cerilas.com/sitemap.xml
-Sitemap: https://tools.cerilas.com/sitemap-grants.xml
-`);
+  if (ROBOTS_TXT_PATH) return res.sendFile(ROBOTS_TXT_PATH);
+  res.send('User-agent: *\nAllow: /\nDisallow: /admin\nDisallow: /api/\n\nSitemap: https://tools.cerilas.com/sitemap.xml\n');
 });
 
-// Dynamic XML Sitemap for Homepage, Categories & All 31 Tools
+// lastmod must reflect real content changes; a per-request date teaches crawlers to ignore it
+const SITEMAP_LASTMOD = (() => {
+  try {
+    return fs.statSync(path.join(distPath, 'index.html')).mtime.toISOString().slice(0, 10);
+  } catch {
+    return new Date().toISOString().slice(0, 10);
+  }
+})();
+
 app.get('/sitemap.xml', (req, res) => {
-  const today = new Date().toISOString().slice(0, 10);
-  let xml = `<?xml version="1.0" encoding="UTF-8"?>\n`;
-  xml += `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n`;
+  const urls = [
+    { loc: '/', changefreq: 'weekly', priority: '1.0' },
+    { loc: '/growth', changefreq: 'weekly', priority: '1.0' },
+    { loc: '/pricing', changefreq: 'monthly', priority: '0.6' },
+    ...Object.values(CATEGORIES).map(cat => ({ loc: `/${cat.slug}`, changefreq: 'weekly', priority: '0.8' })),
+    ...Object.values(TOOLS_SEO_REGISTRY).map(tool => ({
+      loc: `/tool/${tool.slug}`,
+      changefreq: 'weekly',
+      priority: tool.slug === 'ai-visibility-checker' ? '0.95' : '0.8'
+    })),
+    ...['terms', 'privacy', 'refund', 'cookies'].map(slug => ({ loc: `/${slug}`, changefreq: 'yearly', priority: '0.3' }))
+  ];
 
-  // 1. Homepage & Flagship Growth Platform
-  xml += `  <url>\n`;
-  xml += `    <loc>https://tools.cerilas.com/</loc>\n`;
-  xml += `    <lastmod>${today}</lastmod>\n`;
-  xml += `    <changefreq>daily</changefreq>\n`;
-  xml += `    <priority>1.0</priority>\n`;
-  xml += `  </url>\n`;
-  xml += `  <url>\n`;
-  xml += `    <loc>https://tools.cerilas.com/growth</loc>\n`;
-  xml += `    <lastmod>${today}</lastmod>\n`;
-  xml += `    <changefreq>daily</changefreq>\n`;
-  xml += `    <priority>1.0</priority>\n`;
-  xml += `  </url>\n`;
-  xml += `  <url>\n`;
-  xml += `    <loc>https://tools.cerilas.com/ai-visibility-checker</loc>\n`;
-  xml += `    <lastmod>${today}</lastmod>\n`;
-  xml += `    <changefreq>daily</changefreq>\n`;
-  xml += `    <priority>0.95</priority>\n`;
-  xml += `  </url>\n`;
-
-  // 2. Category Pages
-  for (const cat of Object.values(CATEGORIES)) {
-    xml += `  <url>\n`;
-    xml += `    <loc>https://tools.cerilas.com/${cat.slug}</loc>\n`;
-    xml += `    <lastmod>${today}</lastmod>\n`;
-    xml += `    <changefreq>weekly</changefreq>\n`;
-    xml += `    <priority>0.85</priority>\n`;
-    xml += `  </url>\n`;
+  let xml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n`;
+  for (const u of urls) {
+    xml += `  <url>\n    <loc>https://tools.cerilas.com${u.loc}</loc>\n    <lastmod>${SITEMAP_LASTMOD}</lastmod>\n    <changefreq>${u.changefreq}</changefreq>\n    <priority>${u.priority}</priority>\n  </url>\n`;
   }
-
-  // 3. All Tool Pages
-  for (const tool of Object.values(TOOLS_SEO_REGISTRY)) {
-    xml += `  <url>\n`;
-    xml += `    <loc>https://tools.cerilas.com/tool/${tool.slug}</loc>\n`;
-    xml += `    <lastmod>${today}</lastmod>\n`;
-    xml += `    <changefreq>weekly</changefreq>\n`;
-    xml += `    <priority>0.9</priority>\n`;
-    xml += `  </url>\n`;
-  }
-
-  // 4. Official Legal & Compliance Pages
-  const legalPages = ['terms', 'privacy', 'refund', 'cookies'];
-  for (const legalSlug of legalPages) {
-    xml += `  <url>\n`;
-    xml += `    <loc>https://tools.cerilas.com/${legalSlug}</loc>\n`;
-    xml += `    <lastmod>${today}</lastmod>\n`;
-    xml += `    <changefreq>monthly</changefreq>\n`;
-    xml += `    <priority>0.7</priority>\n`;
-    xml += `  </url>\n`;
-  }
-
   xml += `</urlset>`;
   res.header('Content-Type', 'application/xml');
   res.send(xml);
@@ -1016,8 +990,14 @@ app.get('{*path}', async (req, res) => {
       return res.send(html);
     }
 
-    // 4b. Pricing page SSR pre-rendering (/pricing)
+    // 4a. GrowthControl landing SSR (/growth); signed-in app routes are noindex
     const normalizedPath = req.path.replace(/^\/+|\/+$/g, '').toLowerCase();
+    if (normalizedPath === 'growth' || normalizedPath.startsWith('growth/')) {
+      html = renderGrowthPageHtml(html, { isAppRoute: normalizedPath !== 'growth' });
+      return res.send(html);
+    }
+
+    // 4b. Pricing page SSR pre-rendering (/pricing)
     if (normalizedPath === 'pricing') {
       html = renderPricingPageHtml(html);
       return res.send(html);

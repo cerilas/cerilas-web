@@ -5,7 +5,7 @@ export const startupRunwayCalculatorManifest = {
   category: 'Startup & Finance',
   iconName: 'Clock',
   badge: 'VC Benchmark',
-  targetUrl: '#/tool/startup-runway-calculator',
+  targetUrl: '/tool/startup-runway-calculator',
   seoTitle: 'Startup Runway Calculator - Net Burn & Cash Out Date | Cerilas Tools',
   seoDescription: 'Free startup cash runway calculator. Calculate net burn rate, months of runway left, zero cash date, and dynamic revenue growth projections with B2B SaaS benchmarks.',
   features: [

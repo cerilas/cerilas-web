@@ -6,7 +6,7 @@ export const euFundingManifest = {
   iconName: 'Compass',
   badge: 'Live EU Grants',
   isAi: false,
-  targetUrl: '#/tool/eu-funding-opportunities',
+  targetUrl: '/tool/eu-funding-opportunities',
   features: [
     'Live EU Grants Database: Real-time synchronization with official European Commission SEDIA & Cascade Funding Hub directories',
     'Zero Expired Calls: Strict automated pruning of closed deadlines ensures 100% actionable and currently open opportunities',

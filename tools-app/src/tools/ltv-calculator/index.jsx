@@ -107,7 +107,7 @@ export default function LtvCalculator({ onBack, toolMeta }) {
 🏦 Discounted LTV (${discountRate}% WACC): $${metrics.discountedLtv.toLocaleString()}
 🎯 Verdict: ${metrics.verdictLabel}
 ---------------------------------------------
-Generated via https://tools.cerilas.com/#/tool/ltv-calculator`;
+Generated via https://tools.cerilas.com/tool/ltv-calculator`;
 
     navigator.clipboard.writeText(report);
     setCopied(true);

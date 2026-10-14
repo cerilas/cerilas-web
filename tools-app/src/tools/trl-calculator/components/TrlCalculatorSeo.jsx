@@ -226,32 +226,32 @@ const RELATED_TOOLS = [
   { 
     name: 'Startup Runway Calculator', 
     desc: 'Simulate gross burn, revenue inflection, and fundraising timelines for R&D ventures.', 
-    href: '#/tool/startup-runway-calculator' 
+    href: '/tool/startup-runway-calculator' 
   },
   { 
     name: 'Universal Token Counter', 
     desc: 'Calculate exact token costs, context usage, and pricing for AI & DeepTech models.', 
-    href: '#/tool/token-counter-universal' 
+    href: '/tool/token-counter-universal' 
   },
   { 
     name: 'PDF → RAG Cleaner', 
     desc: 'Extract and clean patent documents and scientific papers into clean text for AI analysis.', 
-    href: '#/tool/pdf-rag-cleaner' 
+    href: '/tool/pdf-rag-cleaner' 
   },
   { 
     name: 'JSON Beautifier & Validator', 
     desc: 'Inspect and validate complex API payloads and telemetry schemas for software pilots.', 
-    href: '#/tool/json-beautifier' 
+    href: '/tool/json-beautifier' 
   },
   { 
     name: 'Webhook Tester', 
     desc: 'Debug real-time IoT, telemetry, and external API webhooks with zero server setup.', 
-    href: '#/tool/webhook-tester' 
+    href: '/tool/webhook-tester' 
   },
   { 
     name: 'HTML to LLM Markdown', 
     desc: 'Convert research websites and academic docs into clean Markdown for AI digestion.', 
-    href: '#/tool/html-to-llm-markdown' 
+    href: '/tool/html-to-llm-markdown' 
   }
 ];
 
@@ -280,7 +280,7 @@ export default function TrlCalculatorSeo() {
       'name': 'Cerilas TRL Calculator (Technology Readiness Level Assessment)',
       'operatingSystem': 'All',
       'applicationCategory': 'BusinessApplication',
-      'url': 'https://tools.cerilas.com/#/tool/trl-calculator',
+      'url': 'https://tools.cerilas.com/tool/trl-calculator',
       'offers': {
         '@type': 'Offer',
         'price': '0',

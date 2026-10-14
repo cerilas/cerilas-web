@@ -6,7 +6,7 @@ export const sampleSizeCalculatorManifest = {
   icon_name: 'Scale',
   badge: 'Scientific R&D',
   isAi: false,
-  targetUrl: '#/tool/sample-size-calculator',
+  targetUrl: '/tool/sample-size-calculator',
   features: [
     '7 Specialized Calculation Modes: Survey/Population, Single Proportion, Continuous Mean, Two Means (Cohen\'s d), Two Proportions, Pearson Correlation (Fisher\'s z), and A/B Testing',
     'Deterministic Mathematical Rigor: High-precision Acklam inverse normal quantiles, exact power analysis, and Cochran finite population corrections',

@@ -6,7 +6,7 @@ export const googleMarketingMcpManifest = {
   iconName: 'Database',
   badge: 'AI / MCP Server',
   isAi: true,
-  targetUrl: '#/tool/google-marketing-mcp',
+  targetUrl: '/tool/google-marketing-mcp',
   features: [
     'Connect Your ChatGPT to Google Analytics & Search Console: Ask ChatGPT questions about real-time traffic, top landing pages, and search queries with 0 CSV exports',
     'Universal Model Context Protocol (MCP) Bridge: Seamless connection to Claude Desktop, Cursor, Windsurf, Antigravity, and custom agentic runtimes',

@@ -142,9 +142,9 @@ export default function AiDetectorSeo() {
       '@graph': [
         {
           '@type': 'WebApplication',
-          '@id': 'https://tools.cerilas.com/#/tool/ai-content-detector#webapp',
+          '@id': 'https://tools.cerilas.com/tool/ai-content-detector#webapp',
           name: 'Cerilas Free AI Content Detector & PDF Scanner',
-          url: 'https://tools.cerilas.com/#/tool/ai-content-detector',
+          url: 'https://tools.cerilas.com/tool/ai-content-detector',
           applicationCategory: 'ContentAnalysisApplication',
           applicationSubCategory: 'Plagiarism & AI Detection Tool',
           operatingSystem: 'All modern web browsers (Chrome, Safari, Firefox, Edge)',
@@ -153,13 +153,6 @@ export default function AiDetectorSeo() {
             '@type': 'Offer',
             price: '0',
             priceCurrency: 'USD'
-          },
-          aggregateRating: {
-            '@type': 'AggregateRating',
-            ratingValue: '4.98',
-            reviewCount: '3850',
-            bestRating: '5',
-            worstRating: '1'
           },
           featureList: [
             '0 to 100% AI probability scoring with instant visual verdict',
@@ -173,7 +166,7 @@ export default function AiDetectorSeo() {
         },
         {
           '@type': 'HowTo',
-          '@id': 'https://tools.cerilas.com/#/tool/ai-content-detector#howto',
+          '@id': 'https://tools.cerilas.com/tool/ai-content-detector#howto',
           name: 'How to Detect AI-Generated Text from a Document or PDF',
           description: 'Step-by-step guide to scanning text and PDF essays for ChatGPT, Claude, and Gemini content.',
           step: [
@@ -205,7 +198,7 @@ export default function AiDetectorSeo() {
         },
         {
           '@type': 'BreadcrumbList',
-          '@id': 'https://tools.cerilas.com/#/tool/ai-content-detector#breadcrumbs',
+          '@id': 'https://tools.cerilas.com/tool/ai-content-detector#breadcrumbs',
           itemListElement: [
             {
               '@type': 'ListItem',
@@ -223,13 +216,13 @@ export default function AiDetectorSeo() {
               '@type': 'ListItem',
               position: 3,
               name: 'AI Content Detector',
-              item: 'https://tools.cerilas.com/#/tool/ai-content-detector'
+              item: 'https://tools.cerilas.com/tool/ai-content-detector'
             }
           ]
         },
         {
           '@type': 'FAQPage',
-          '@id': 'https://tools.cerilas.com/#/tool/ai-content-detector#faq',
+          '@id': 'https://tools.cerilas.com/tool/ai-content-detector#faq',
           mainEntity: FAQ_ITEMS.map((item) => ({
             '@type': 'Question',
             name: item.q,

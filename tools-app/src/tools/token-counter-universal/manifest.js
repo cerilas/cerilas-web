@@ -6,7 +6,7 @@ export const tokenCounterUniversalManifest = {
   iconName: 'Binary',
   badge: 'AI Assisted',
   isAi: true,
-  targetUrl: '#/tool/token-counter-universal',
+  targetUrl: '/tool/token-counter-universal',
   features: [
     'Universal Multi-Model Support: Count tokens for GPT-6 Astra, GPT-4o, o1, o3-mini, Claude 3.7/3.5, Gemini 3.8 Flash, Gemini 3.1 Pro, DeepSeek-V3/R1, Grok 3, and Llama 3.3',
     'Interactive Token Visualizer: Color-coded token stream showing exact token boundaries, Token IDs, and whitespace markers',

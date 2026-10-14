@@ -59,7 +59,7 @@ export default function LiveResultCard({
       '',
       `Interpretation: ${summary}`,
       '',
-      `Generated at: https://tools.cerilas.com/#/tool/sample-size-calculator`
+      `Generated at: https://tools.cerilas.com/tool/sample-size-calculator`
     ].join('\n');
 
     navigator.clipboard.writeText(text);

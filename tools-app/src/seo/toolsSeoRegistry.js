@@ -7,6 +7,7 @@
  * - Client-Side SPA Dynamic Head Updates in App.jsx
  * - XML Sitemap generation and Category clustering
  */
+import { CHECKER_SEO, CHECKER_FAQ, CHECKER_HOW_TO } from './aiVisibilityCheckerContent.js';
 
 export const CATEGORIES = {
   'research-tools': {
@@ -155,8 +156,6 @@ export const TOOLS_SEO_REGISTRY = {
         a: 'Yes. The tool generates an itemized methodology breakdown including equations, z-scores, effect sizes, and attrition adjustments ready to paste directly into your ethics committee protocol or grant proposal.'
       }
     ],
-    rating: '4.9',
-    ratingCount: '1380',
     keywords: 'sample size calculator, calculate sample size, survey sample size, power analysis calculator, margin of error calculator, cohen d sample size, finite population correction'
   },
 
@@ -193,8 +192,6 @@ export const TOOLS_SEO_REGISTRY = {
         a: 'Yes. The calculator generates an executive summary report with audit checklists, milestone gap analyses, and grant recommendations ready for submission.'
       }
     ],
-    rating: '4.9',
-    ratingCount: '920',
     keywords: 'trl calculator, technology readiness level, horizon europe trl, nasa trl assessment, deeptech trl, r&d readiness scale, software readiness level'
   },
 
@@ -231,8 +228,6 @@ export const TOOLS_SEO_REGISTRY = {
         a: 'Yes. Entities established in Horizon Europe Associated Countries have the exact same grant eligibility and funding rates as EU Member State applicants.'
       }
     ],
-    rating: '4.9',
-    ratingCount: '1680',
     keywords: 'eu funding opportunities, cascade funding, horizon europe grants, fstp grants, european commission tenders, startup grants europe, non dilutive funding'
   },
 
@@ -269,8 +264,6 @@ export const TOOLS_SEO_REGISTRY = {
         a: 'Static QR codes embed information directly into the matrix, requiring no servers, no subscriptions, and never expiring. Dynamic codes route through a third-party server that can be shut down or billed monthly.'
       }
     ],
-    rating: '4.9',
-    ratingCount: '2150',
     keywords: 'free qr code generator, qr code generator no sign up, permanent qr code, vector svg qr code, wifi qr code generator, vcard qr code, commercial qr code'
   },
 
@@ -307,8 +300,6 @@ export const TOOLS_SEO_REGISTRY = {
         a: 'Optimized WebP and compressed PNGs load significantly faster on mobile networks, reducing Largest Contentful Paint (LCP) times and boosting Google rankings.'
       }
     ],
-    rating: '4.9',
-    ratingCount: '1890',
     keywords: 'image compressor, compress png, compress jpeg, convert to webp, reduce image size, lossless image compression, in-browser image compressor, web vitals image'
   },
 
@@ -345,8 +336,6 @@ export const TOOLS_SEO_REGISTRY = {
         a: 'Yes. Because processing runs on your own device hardware rather than expensive cloud GPUs, there are no subscriptions or paywalls.'
       }
     ],
-    rating: '4.9',
-    ratingCount: '1430',
     keywords: 'background remover, remove bg free, transparent png maker, in-browser ai cutout, product background remover, portrait cutout, remove photo background'
   },
 
@@ -383,8 +372,6 @@ export const TOOLS_SEO_REGISTRY = {
         a: 'There are no arbitrary cloud limits. You can compress multi-hundred-page documents as long as your device has sufficient RAM.'
       }
     ],
-    rating: '4.9',
-    ratingCount: '2410',
     keywords: 'pdf compressor, compress pdf online, reduce pdf size, shrink pdf for email, compress pdf to 200kb, private pdf compressor, client side pdf compression'
   },
 
@@ -421,8 +408,6 @@ export const TOOLS_SEO_REGISTRY = {
         a: 'No. There is no sign-up, no software installation, and no trial period. Open the page and edit documents immediately.'
       }
     ],
-    rating: '4.9',
-    ratingCount: '2180',
     keywords: 'pdf editor, edit pdf online, sign pdf free, redact pdf, annotate pdf, fill pdf form, in browser pdf editor, private pdf editing'
   },
 
@@ -459,8 +444,6 @@ export const TOOLS_SEO_REGISTRY = {
         a: 'No. All concatenation occurs locally on your computer inside the browser runtime. Your files remain 100% private.'
       }
     ],
-    rating: '4.9',
-    ratingCount: '1940',
     keywords: 'pdf merger, merge pdf online free, combine pdf files, join pdf pages, combine multiple pdfs, free pdf combiner, private pdf merger'
   },
 
@@ -497,8 +480,6 @@ export const TOOLS_SEO_REGISTRY = {
         a: 'No. The entire extraction and file generation process takes place locally inside your browser memory with complete privacy.'
       }
     ],
-    rating: '4.9',
-    ratingCount: '1720',
     keywords: 'pdf splitter, split pdf online free, extract pdf pages, separate pdf files, split pdf into single pages, private pdf splitter, pdf page extractor'
   },
 
@@ -535,8 +516,6 @@ export const TOOLS_SEO_REGISTRY = {
         a: 'Yes. Stereo audio tracks are re-encoded with high-efficiency AAC at 128 kbps, preserving crystal clear voice and music while minimizing size.'
       }
     ],
-    rating: '4.9',
-    ratingCount: '1540',
     keywords: 'video compressor, compress mp4 online, reduce video size, compress video for discord, in-browser video compressor, ffmpeg webassembly, private video compressor'
   },
 
@@ -573,8 +552,6 @@ export const TOOLS_SEO_REGISTRY = {
         a: 'Incorporate the missing hard skills and certifications highlighted in our report into your bullet points, demonstrating quantifiable results with active verbs.'
       }
     ],
-    rating: '4.9',
-    ratingCount: '2760',
     keywords: 'ats resume checker, resume score ai, job match calculator, applicant tracking system test, cv keyword checker, ats resume scanner, free resume review'
   },
 
@@ -611,8 +588,6 @@ export const TOOLS_SEO_REGISTRY = {
         a: 'Perplexity measures how predictable words are in sequence (LLMs are predictable). Burstiness measures variance in sentence length and structure (humans are varied).'
       }
     ],
-    rating: '4.9',
-    ratingCount: '3120',
     keywords: 'ai content detector, detect chatgpt text, free ai detector, ai text scanner, claude detector, perplexity checker, check if text is ai, ai essay checker'
   },
 
@@ -649,8 +624,6 @@ export const TOOLS_SEO_REGISTRY = {
         a: 'Yes. Table structures are extracted and formatted as standard GitHub-flavored Markdown tables, maintaining column relationships for retrieval.'
       }
     ],
-    rating: '4.9',
-    ratingCount: '1240',
     keywords: 'pdf to rag cleaner, rag chunking tool, pdf to markdown for llm, clean pdf for vector database, langchain pdf cleaner, llamaindex chunker, embedding preprocessor'
   },
 
@@ -687,8 +660,6 @@ export const TOOLS_SEO_REGISTRY = {
         a: 'Yes. Upload TXT, MD, JSON, CSV, or PDF documents to inspect token counts and costs instantly.'
       }
     ],
-    rating: '4.9',
-    ratingCount: '2890',
     keywords: 'token counter, universal token counter, count tokens gpt-4o, claude 3.7 tokens, gemini token counter, llm api pricing calculator, bpe tokenizer online'
   },
 
@@ -725,8 +696,6 @@ export const TOOLS_SEO_REGISTRY = {
         a: 'Yes. Paste raw text, Markdown, or HTML from any AI assistant or chatbot to audit all embedded references.'
       }
     ],
-    rating: '4.9',
-    ratingCount: '1180',
     keywords: 'ai link hallucination checker, broken link checker, verify ai links, detect fake urls, check llm citations, ai seo link audit, hallucinated url detector'
   },
 
@@ -763,55 +732,29 @@ export const TOOLS_SEO_REGISTRY = {
         a: 'Yes. The tool provides ready-to-paste robots.txt snippets tailored to your preference for search citations versus training protection.'
       }
     ],
-    rating: '4.9',
-    ratingCount: '1320',
     keywords: 'ai crawler checker, test gptbot access, claudebot robots txt, perplexitybot blocker, ai seo audit, robots txt ai bots, generative engine optimization'
   },
 
   // 18. AI Visibility Checker
   'ai-visibility-checker': {
-    slug: 'ai-visibility-checker',
-    name: 'AI Visibility Checker by GrowthControl',
-    h1: 'AI Visibility Checker by GrowthControl – Test Gemini & ChatGPT Citations',
+    slug: CHECKER_SEO.slug,
+    name: CHECKER_SEO.name,
+    h1: CHECKER_SEO.h1,
     category: 'SEO Tools',
     categorySlug: 'seo-tools',
-    title: 'AI Visibility Checker by GrowthControl – Gemini & ChatGPT | Cerilas Tools',
-    description: 'Audit if your brand and website are cited in AI search engines. Test live Gemini, ChatGPT, and Perplexity answer grounding with actionable GEO suggestions.',
-    shortDescription: 'Audit your brand\'s visibility and citation share across AI search engines. Analyzes Google Gemini Search Grounding, ChatGPT Search, and Perplexity AI citations.',
-    howItWorks: 'Submits real user commercial queries to Gemini with live Google Search grounding enabled. Analyzes grounded sources, citation indices, and competitor mentions to generate a comprehensive AI Visibility Score.',
-    formula: 'AI Visibility Score = (Citation Presence Rate · 0.45) + (Position Weight in Answer · 0.30) + (Sentiment & Context Quality · 0.15) + (Competitor Share of Voice · 0.10).',
-    whenToUse: 'Use to measure your Generative Engine Optimization (GEO) performance, protect market share against competitors in AI answers, and uncover citation gaps.',
-    example: 'Testing an email marketing SaaS reveals that competitors are cited in 8 out of 10 buying queries, identifying missing comparison tables and FAQ schemas as the primary cause.',
-    relatedTools: ['google-marketing-mcp', 'llms-txt', 'ai-crawler-checker'],
-    faq: [
-      {
-        q: 'What is an AI Visibility Score and how is it calculated?',
-        a: 'It is a composite 0-100 metric measuring how frequently, prominently, and accurately your domain is cited when users ask conversational questions to AI search engines.'
-      },
-      {
-        q: 'What is Generative Engine Optimization (GEO)?',
-        a: 'GEO is the modern evolution of SEO focused on optimizing content, structure, and entity authority so AI answer engines (ChatGPT, Gemini, Perplexity) cite your website.'
-      },
-      {
-        q: 'How does Gemini decide which websites to cite in Search Grounding?',
-        a: 'Gemini evaluates top Google organic results, information gain, concise authoritative definitions, schema markup, and domain citation frequency across trusted web sources.'
-      },
-      {
-        q: 'Why are competitor domains cited instead of my official website?',
-        a: 'Competitors frequently provide structured comparison tables, third-party review coverage, and direct answers to user pricing questions that AI models easily parse.'
-      },
-      {
-        q: 'Can a newer website with low domain authority still get cited by AI models?',
-        a: 'Yes. If a new page offers unique proprietary data, original research, or the clearest direct answer to a long-tail query, AI models frequently cite it over legacy brands.'
-      },
-      {
-        q: 'How do AI search engines handle paywalled or gated content?',
-        a: 'AI search crawlers generally ignore gated content, meaning paywalled assets cannot generate search citations. Providing summary excerpts ensures indexability.'
-      }
-    ],
-    rating: '4.9',
-    ratingCount: '2100',
-    keywords: 'ai visibility checker, geo audit tool, check if gemini cites my website, chatgpt search citation checker, perplexity citation audit, test ai search citations free, generative engine optimization tool'
+    title: CHECKER_SEO.title,
+    description: CHECKER_SEO.description,
+    shortDescription: CHECKER_SEO.shortDescription,
+    howItWorks: 'The checker reads your homepage, writes 10 realistic questions a customer in your target country would ask an AI assistant, and runs each one with live web search. It then records which answers cite your domain, which only mention your brand, and which competitor domains are cited instead.',
+    whenToUse: 'Use it to get a baseline before investing in Generative Engine Optimization (GEO), after a redesign or new pricing page, or when you suspect competitors are being recommended by AI instead of you. For weekly tracking, use GrowthControl.',
+    example: 'A project management SaaS in the US finds it is cited in 2 of 10 buyer questions, while a review site and two competitors are cited in the rest. The cited pages all have comparison tables and transparent pricing, which becomes the first fix.',
+    relatedTools: ['ai-crawler-checker', 'llms-txt', 'google-marketing-mcp'],
+    faq: CHECKER_FAQ,
+    howTo: CHECKER_HOW_TO,
+    ssrSections: 'ai-visibility-checker',
+    centralFaqSchema: true,
+    ogImage: 'https://tools.cerilas.com/og/ai-visibility-checker.png',
+    keywords: CHECKER_SEO.keywords
   },
 
   // 19. Google Marketing MCP Server
@@ -855,8 +798,6 @@ export const TOOLS_SEO_REGISTRY = {
         a: 'Claude Desktop, Cursor IDE, Windsurf, ChatGPT (via Custom Actions or MCP bridges), and local open-source LLM agents.'
       }
     ],
-    rating: '4.9',
-    ratingCount: '1980',
     keywords: 'connect your chatgpt to google analytics, connect chatgpt to google analytics, chatgpt google analytics 4 integration, connect chatgpt to google search console, google analytics mcp server, model context protocol marketing'
   },
 
@@ -893,8 +834,6 @@ export const TOOLS_SEO_REGISTRY = {
         a: 'llms.txt contains a curated index of links and summaries. llms-full.txt aggregates the full markdown text of all documentation pages into a single file for comprehensive agent context.'
       }
     ],
-    rating: '4.9',
-    ratingCount: '1670',
     keywords: 'llms txt generator, llms txt validator, create llms txt, generative engine optimization, geo tools, cursor llms txt, ai agent documentation'
   },
 
@@ -931,8 +870,6 @@ export const TOOLS_SEO_REGISTRY = {
         a: 'Yes. You can copy the clean Markdown with one click or download it as a .md file ready for your knowledge base or RAG vector database.'
       }
     ],
-    rating: '4.9',
-    ratingCount: '1580',
     keywords: 'html to markdown, convert html to md, clean markdown for llm, html to llm markdown, strip html for rag, html to text ai prompt, reduce token cost'
   },
 
@@ -969,8 +906,6 @@ export const TOOLS_SEO_REGISTRY = {
         a: 'Yes. Endpoints are protected with random cryptographic UUIDs, and event payloads are stored ephemerally in memory without permanent persistence.'
       }
     ],
-    rating: '4.9',
-    ratingCount: '1850',
     keywords: 'webhook tester, test webhooks online, debug webhook, stripe webhook tester, webhook simulator, http request inspector, test api callbacks'
   },
 
@@ -1007,8 +942,6 @@ export const TOOLS_SEO_REGISTRY = {
         a: 'Yes. All parsing, validation, and tree rendering takes place 100% locally in your browser memory for complete data privacy.'
       }
     ],
-    rating: '4.9',
-    ratingCount: '2340',
     keywords: 'json beautifier, json formatter, validate json, json to typescript, format json online, json tree viewer, json repair online, jsonpath tester'
   },
 
@@ -1045,8 +978,6 @@ export const TOOLS_SEO_REGISTRY = {
         a: 'Yes, 100% free with zero watermarks or promotional footer links added to your emails.'
       }
     ],
-    rating: '4.9',
-    ratingCount: '1610',
     keywords: 'email signature generator, html email signature, free email signature, gmail signature template, outlook email signature, apple mail signature, professional signature maker'
   },
 
@@ -1083,8 +1014,6 @@ export const TOOLS_SEO_REGISTRY = {
         a: 'Yes, downloading public thumbnails for fair use, research, and design reference is standard practice.'
       }
     ],
-    rating: '4.9',
-    ratingCount: '2650',
     keywords: 'youtube thumbnail downloader, download youtube thumbnail 4k, youtube shorts thumbnail download, hd youtube thumbnail grabber, maxresdefault downloader, get youtube thumbnail'
   },
 
@@ -1121,8 +1050,6 @@ export const TOOLS_SEO_REGISTRY = {
         a: 'Choose between serene Tibetan singing bowl chimes, classic digital beeps, or silent visual notification pulses.'
       }
     ],
-    rating: '4.9',
-    ratingCount: '1980',
     keywords: 'pomodoro timer, online pomodoro timer, focus timer, study timer, productivity timer, aesthetic pomodoro, pomodoro technique app, deep work timer'
   },
 
@@ -1159,8 +1086,6 @@ export const TOOLS_SEO_REGISTRY = {
         a: 'Our calculator lets you add projected headcount costs and milestone spend to model exact drop-offs in runway before committing to hiring.'
       }
     ],
-    rating: '4.9',
-    ratingCount: '1420',
     keywords: 'startup runway calculator, burn rate calculator, cash runway saas, zero cash date, startup financial model, venture capital runway, net burn calculator'
   },
 
@@ -1197,8 +1122,6 @@ export const TOOLS_SEO_REGISTRY = {
         a: 'Even a 3% monthly churn rate compounds to losing nearly 31% of your customer base annually, requiring constant new sales just to keep revenue flat.'
       }
     ],
-    rating: '4.9',
-    ratingCount: '1590',
     keywords: 'mrr calculator, monthly recurring revenue, saas mrr calculator, net new mrr, subscription revenue calculator, saas quick ratio, expansion mrr'
   },
 
@@ -1235,8 +1158,6 @@ export const TOOLS_SEO_REGISTRY = {
         a: 'Committed ARR (CARR) includes signed contracts awaiting deployment, while Recognized ARR only counts revenue currently being delivered and billed.'
       }
     ],
-    rating: '4.9',
-    ratingCount: '1360',
     keywords: 'arr calculator, annual recurring revenue, saas arr calculator, arr run rate, startup valuation calculator, enterprise acv calculator, b2b saas metrics'
   },
 
@@ -1273,8 +1194,6 @@ export const TOOLS_SEO_REGISTRY = {
         a: 'Annual Churn = 1 - (1 - Monthly Churn)^12. For example, a 3% monthly churn rate compounds to 30.6% annual churn.'
       }
     ],
-    rating: '4.9',
-    ratingCount: '1670',
     keywords: 'churn calculator, churn rate calculator, customer churn rate, revenue churn calculator, saas retention, logo churn, net revenue retention calculator'
   },
 
@@ -1311,8 +1230,6 @@ export const TOOLS_SEO_REGISTRY = {
         a: 'By reducing churn through better onboarding, expanding account revenue with tier upgrades and add-ons, and increasing gross profit margins.'
       }
     ],
-    rating: '4.9',
-    ratingCount: '1510',
     keywords: 'ltv calculator, customer lifetime value, cltv calculator, saas ltv calculation, arpu ltv, customer lifespan calculator, unit economics calculator'
   },
 
@@ -1349,8 +1266,6 @@ export const TOOLS_SEO_REGISTRY = {
         a: 'Faster payback recycles customer cash flow back into marketing and hiring months earlier, dramatically extending startup cash runway.'
       }
     ],
-    rating: '4.9',
-    ratingCount: '1480',
     keywords: 'cac calculator, customer acquisition cost, cac payback period, marketing cac, unit economics calculator, blended cac vs paid cac, saas acquisition cost'
   },
 
@@ -1387,8 +1302,6 @@ export const TOOLS_SEO_REGISTRY = {
         a: 'VCs examine the ratio alongside CAC payback periods to ensure that capital injected into paid acquisition will yield predictable, compounding returns.'
       }
     ],
-    rating: '4.9',
-    ratingCount: '1720',
     keywords: 'ltv cac calculator, ltv to cac ratio, saas unit economics, ltv cac benchmark, startup valuation metrics, venture capital unit economics, customer roi'
   },
 
@@ -1425,8 +1338,6 @@ export const TOOLS_SEO_REGISTRY = {
         a: 'Executive, Sales, Human Resources, Engineering, Customer Support, Legal, and Press/Media based on page context and role prefix patterns.'
       }
     ],
-    rating: '4.9',
-    ratingCount: '1620',
     keywords: 'website email extractor, site email crawler, find emails on website, extract emails from domain, email scraper no ai, department email finder, company email extractor, lead extractor'
   }
 };
@@ -1466,8 +1377,6 @@ export function getToolSeo(slug) {
         a: 'Yes, it is 100% free with no sign-up or subscription required.'
       }
     ],
-    rating: '4.9',
-    ratingCount: '1000',
     keywords: `${cleanTitle.toLowerCase()}, free online ${cleanTitle.toLowerCase()}, cerilas tools`
   };
 }

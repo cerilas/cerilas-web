@@ -45,13 +45,6 @@ export default function QrSeoSection({ onApplyPreset }) {
             "price": "0",
             "priceCurrency": "USD"
           },
-          "aggregateRating": {
-            "@type": "AggregateRating",
-            "ratingValue": "4.9",
-            "reviewCount": "2410",
-            "bestRating": "5",
-            "worstRating": "1"
-          },
           "description": "100% free permanent QR code generator that never expires. Zero sign-up, unlimited high-speed camera scans, vector SVG and 2048px Ultra-HD PNG downloads for URLs, Wi-Fi, vCard, Google reviews, and AI art.",
           "featureList": [
             "Permanent static QR codes that never expire",
@@ -75,21 +68,21 @@ export default function QrSeoSection({ onApplyPreset }) {
               "position": 1,
               "name": "Select your data type",
               "text": "Choose from Website URL, Plain Text, Guest Wi-Fi (WPA3/WPA2), vCard Contact, or Email message and enter your content.",
-              "url": "https://tools.cerilas.com/#/tool/qr-code-generator"
+              "url": "https://tools.cerilas.com/tool/qr-code-generator"
             },
             {
               "@type": "HowToStep",
               "position": 2,
               "name": "Configure resolution and error correction",
               "text": "Select your desired color palette and error correction level. Use Level H (30%) if you plan to overlay logos or AI art.",
-              "url": "https://tools.cerilas.com/#/tool/qr-code-generator"
+              "url": "https://tools.cerilas.com/tool/qr-code-generator"
             },
             {
               "@type": "HowToStep",
               "position": 3,
               "name": "Download print-ready vector SVG or PNG",
               "text": "Click Download SVG for infinite resolution commercial printing, or Download PNG for instant digital publishing with unlimited lifetime scans.",
-              "url": "https://tools.cerilas.com/#/tool/qr-code-generator"
+              "url": "https://tools.cerilas.com/tool/qr-code-generator"
             }
           ]
         },

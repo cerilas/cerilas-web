@@ -61,7 +61,7 @@ export default function EmailSignatureSeo() {
     '@graph': [
       {
         '@type': 'WebApplication',
-        '@id': 'https://tools.cerilas.com/#/tool/email-signature-generator',
+        '@id': 'https://tools.cerilas.com/tool/email-signature-generator',
         name: 'Cerilas Free Online Email Signature Generator',
         alternateName: [
           'Email Signature Generator',
@@ -71,7 +71,7 @@ export default function EmailSignatureSeo() {
           'Apple Mail Signature Template',
           'Professional Business Email Signature'
         ],
-        url: 'https://tools.cerilas.com/#/tool/email-signature-generator',
+        url: 'https://tools.cerilas.com/tool/email-signature-generator',
         applicationCategory: 'BusinessApplication',
         operatingSystem: 'Any',
         offers: {
@@ -88,13 +88,7 @@ export default function EmailSignatureSeo() {
           'Legal disclaimer text generator for corporate compliance',
           '1-Click rich visual text copy for Gmail, Outlook, and Apple Mail',
           'Raw HTML export and standalone .html file download'
-        ],
-        aggregateRating: {
-          '@type': 'AggregateRating',
-          ratingValue: '4.98',
-          ratingCount: '1840'
-        }
-      },
+        ]      },
       {
         '@type': 'BreadcrumbList',
         itemListElement: [
@@ -114,7 +108,7 @@ export default function EmailSignatureSeo() {
             '@type': 'ListItem',
             position: 3,
             name: 'Email Signature Generator',
-            item: 'https://tools.cerilas.com/#/tool/email-signature-generator'
+            item: 'https://tools.cerilas.com/tool/email-signature-generator'
           }
         ]
       },

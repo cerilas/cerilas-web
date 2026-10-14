@@ -53,12 +53,12 @@ const FAQ_ITEMS = [
 ];
 
 const RELATED_TOOLS = [
-  { name: 'LLMs.txt Tools', desc: 'Create, check, and validate your /llms.txt site guide for AI agents.', href: '#/tool/llms-txt' },
-  { name: 'PDF → RAG Cleaner', desc: 'Transform raw, messy PDFs into clean Markdown and structured RAG chunks.', href: '#/tool/pdf-rag-cleaner' },
-  { name: 'AI Crawler Checker', desc: 'Verify if ChatGPT, Claude, and Perplexity can access your website.', href: '#/tool/ai-crawler-checker' },
-  { name: 'AI Link Hallucination Checker', desc: 'Audit AI drafts for fabricated URLs and broken link risks.', href: '#/tool/ai-link-hallucination-checker' },
-  { name: 'JSON Beautifier & Formatter', desc: 'Format, repair, and convert JSON structures for developer APIs.', href: '#/tool/json-beautifier' },
-  { name: 'AI Content Detector', desc: 'Detect AI-generated text using burstiness and perplexity analysis.', href: '#/tool/ai-content-detector' }
+  { name: 'LLMs.txt Tools', desc: 'Create, check, and validate your /llms.txt site guide for AI agents.', href: '/tool/llms-txt' },
+  { name: 'PDF → RAG Cleaner', desc: 'Transform raw, messy PDFs into clean Markdown and structured RAG chunks.', href: '/tool/pdf-rag-cleaner' },
+  { name: 'AI Crawler Checker', desc: 'Verify if ChatGPT, Claude, and Perplexity can access your website.', href: '/tool/ai-crawler-checker' },
+  { name: 'AI Link Hallucination Checker', desc: 'Audit AI drafts for fabricated URLs and broken link risks.', href: '/tool/ai-link-hallucination-checker' },
+  { name: 'JSON Beautifier & Formatter', desc: 'Format, repair, and convert JSON structures for developer APIs.', href: '/tool/json-beautifier' },
+  { name: 'AI Content Detector', desc: 'Detect AI-generated text using burstiness and perplexity analysis.', href: '/tool/ai-content-detector' }
 ];
 
 export default function HtmlToMarkdownSeo() {

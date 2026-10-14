@@ -49,6 +49,14 @@ import { useGrowth } from '../GrowthContext';
 import { useTheme } from '../../context/ThemeContext';
 import { useRevenueCat } from '../../context/RevenueCatContext';
 import CloudCanvas from './CloudCanvas';
+import {
+  GROWTH_SEO,
+  GROWTH_FAQ,
+  GROWTH_DEFINITION,
+  GROWTH_USE_CASES,
+  GROWTH_COMPARISON,
+  GROWTH_FREE_TOOLS
+} from '../../seo/growthControlSeo';
 import './GrowthLandingPage.css';
 
 const QUICK_TEST_DOMAINS = [
@@ -205,33 +213,6 @@ const HOW_IT_WORKS_STEPS = [
     description: 'Every week you get a ranked list of technical, content and schema fixes, with ready-to-paste snippets and progress you can track over time.',
     image: '/growth-landing/how-step-act.jpg',
     alt: 'Stack of prioritized task cards next to a rising chart'
-  }
-];
-
-const FAQS_DATA = [
-  {
-    q: 'What is Generative Engine Optimization (GEO) and why does it matter?',
-    a: 'GEO is optimization designed to ensure your brand is cited, referenced as an authority, and linked directly in AI search engines like ChatGPT, Perplexity, Claude, and Gemini. While traditional SEO targeted 10 blue links, GEO ensures AI models understand your product facts and recommend you to high-intent searchers.'
-  },
-  {
-    q: 'How does GrowthControl audit AI search engines?',
-    a: 'We probe live AI models with real-world buyer prompts, analyze whether your brand is cited or recommended, scrape citation URLs in real time, benchmark against your competitors, and cross-reference permissions in your robots.txt and llms.txt files.'
-  },
-  {
-    q: 'Is connecting Google Search Console safe?',
-    a: 'Yes, 100%. GrowthControl uses Google OAuth with strict read-only permissions. Your search data is encrypted at rest and never shared with third parties or used for AI model training.'
-  },
-  {
-    q: 'What is llms.txt and how do you help?',
-    a: 'llms.txt is a new markdown-standard file placed on your domain to provide AI bots with clean, structured summaries of your site. GrowthControl audits whether you have one and generates optimized llms.txt code for your brand.'
-  },
-  {
-    q: 'Can I manage multiple client domains or agency portfolios?',
-    a: 'Yes! GrowthControl supports multiple workspace brands. You can seamlessly switch between client domains, generate white-labeled client reports, and assign team seats.'
-  },
-  {
-    q: 'What happens after running the free domain audit?',
-    a: 'You can immediately review your AI crawler permissions, technical health, and positioning. With one click, you can create a free account to monitor your domain weekly, track 50+ prompts, and receive prioritized action items.'
   }
 ];
 
@@ -768,10 +749,7 @@ export default function GrowthLandingPage({ onBackToTools, initialDomain = '' })
             engines?
           </h1>
 
-          <p className="cl-hero-subtitle">
-            Audit citations across ChatGPT, Perplexity, Claude, and Gemini.
-            Connect Google Search Console to fix gaps and turn AI recommendations into revenue.
-          </p>
+          <p className="cl-hero-subtitle">{GROWTH_SEO.subtitle}</p>
 
           <div className="cl-hero-cta-row">
             <button
@@ -1837,6 +1815,81 @@ export default function GrowthLandingPage({ onBackToTools, initialDomain = '' })
       </Rail>
       )}
 
+      <Rail id="what-is-ai-visibility" divider={true} aria-labelledby="ai-visibility-definition-heading">
+        <div style={{ padding: '5rem 1.25rem' }}>
+          <SectionHeading
+            id="ai-visibility-definition-heading"
+            eyebrow={GROWTH_DEFINITION.eyebrow}
+            eyebrowHref="#what-is-ai-visibility"
+            title={GROWTH_DEFINITION.title}
+            description={GROWTH_DEFINITION.lead}
+          />
+          <p className="cl-seo-body">{GROWTH_DEFINITION.body}</p>
+          <dl className="cl-seo-metrics">
+            {GROWTH_DEFINITION.metrics.map((m) => (
+              <div key={m.term} className="cl-seo-metric">
+                <dt>{m.term}</dt>
+                <dd>{m.definition}</dd>
+              </div>
+            ))}
+          </dl>
+        </div>
+      </Rail>
+
+      <Rail id="use-cases" divider={true} aria-labelledby="use-cases-heading">
+        <div style={{ padding: '5rem 1.25rem' }}>
+          <SectionHeading
+            id="use-cases-heading"
+            eyebrow={GROWTH_USE_CASES.eyebrow}
+            eyebrowHref="#use-cases"
+            title={GROWTH_USE_CASES.title}
+            description={GROWTH_USE_CASES.description}
+          />
+          <ul className="cl-seo-usecases">
+            {GROWTH_USE_CASES.items.map((item) => (
+              <li key={item.title} className="cl-seo-usecase">
+                <h3>{item.title}</h3>
+                <p>{item.text}</p>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </Rail>
+
+      <Rail id="comparison" divider={true} aria-labelledby="comparison-heading">
+        <div style={{ padding: '5rem 1.25rem' }}>
+          <SectionHeading
+            id="comparison-heading"
+            eyebrow={GROWTH_COMPARISON.eyebrow}
+            eyebrowHref="#comparison"
+            title={GROWTH_COMPARISON.title}
+            description={GROWTH_COMPARISON.description}
+          />
+          <div className="cl-seo-table-wrap">
+            <table className="cl-seo-table">
+              <thead>
+                <tr>
+                  {GROWTH_COMPARISON.columns.map((col, i) => (
+                    <th key={col || i} scope="col">{col || <span className="cl-sr-only">Criteria</span>}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {GROWTH_COMPARISON.rows.map(([label, ...cells]) => (
+                  <tr key={label}>
+                    <th scope="row">{label}</th>
+                    {cells.map((cell, i) => <td key={i}>{cell}</td>)}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <p className="cl-seo-cta-line">
+            Want a quick snapshot first? <a href="/tool/ai-visibility-checker">Run the free AI Visibility Checker</a>.
+          </p>
+        </div>
+      </Rail>
+
       {/* ==========================================================================
           9. PRICING (SYNCHRONIZED WITH REVENUECAT REAL BILLING)
           ========================================================================== */}
@@ -2041,29 +2094,37 @@ export default function GrowthLandingPage({ onBackToTools, initialDomain = '' })
           <SectionHeading
             id="faq-heading"
             eyebrow="Frequently Asked Questions"
-            title="Everything people ask before switching."
-            description="Clear answers about how GrowthControl audits AI search, handles data privacy, and drives organic traffic."
+            title="AI visibility tracking: frequently asked questions"
+            description="Clear answers about AI visibility, Generative Engine Optimization (GEO), data privacy and how GrowthControl works."
           />
 
           <div className="cl-faq-list">
-            {FAQS_DATA.map((faq, idx) => {
+            {GROWTH_FAQ.map((faq, idx) => {
               const isOpen = openFaqIdx === idx;
               return (
-                <div key={idx} className="cl-faq-item">
-                  <button
-                    type="button"
-                    onClick={() => setOpenFaqIdx(isOpen ? -1 : idx)}
-                    className="cl-faq-question"
-                    aria-expanded={isOpen}
+                <div key={faq.q} className="cl-faq-item">
+                  <h3 className="cl-faq-heading">
+                    <button
+                      type="button"
+                      id={`cl-faq-q-${idx}`}
+                      onClick={() => setOpenFaqIdx(isOpen ? -1 : idx)}
+                      className="cl-faq-question"
+                      aria-expanded={isOpen}
+                      aria-controls={`cl-faq-a-${idx}`}
+                    >
+                      <span>{faq.q}</span>
+                      <ChevronDown size={18} className={`cl-faq-icon ${isOpen ? 'open' : ''}`} />
+                    </button>
+                  </h3>
+                  <div
+                    id={`cl-faq-a-${idx}`}
+                    role="region"
+                    aria-labelledby={`cl-faq-q-${idx}`}
+                    className="cl-faq-answer"
+                    hidden={!isOpen}
                   >
-                    <span>{faq.q}</span>
-                    <ChevronDown size={18} className={`cl-faq-icon ${isOpen ? 'open' : ''}`} />
-                  </button>
-                  {isOpen && (
-                    <div className="cl-faq-answer">
-                      <p>{faq.a}</p>
-                    </div>
-                  )}
+                    <p>{faq.a}</p>
+                  </div>
                 </div>
               );
             })}
@@ -2165,6 +2226,12 @@ export default function GrowthLandingPage({ onBackToTools, initialDomain = '' })
             )}
           </div>
         </div>
+        <nav className="cl-footer-container cl-footer-resources" aria-label="Free AI visibility tools">
+          <span>Free tools:</span>
+          {GROWTH_FREE_TOOLS.map((t) => (
+            <a key={t.href} href={t.href}>{t.name}</a>
+          ))}
+        </nav>
       </footer>
 
     </div>

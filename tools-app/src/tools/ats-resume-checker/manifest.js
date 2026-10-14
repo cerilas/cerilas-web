@@ -6,7 +6,7 @@ export const atsResumeCheckerManifest = {
   iconName: 'FileCheck',
   badge: 'AI Assisted',
   isAi: true,
-  targetUrl: '#/tool/ats-resume-checker',
+  targetUrl: '/tool/ats-resume-checker',
   seoTitle: 'Free AI ATS Resume Checker (2026) – Test CV Bot Readability & Job Match | Cerilas Tools',
   seoDescription: '100% free AI ATS resume checker & PDF bot scanner. Upload your CV to inspect machine readability, calculate job description match percentage, and discover missing keywords without server uploads.',
   features: [

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import {
   Eye,
   Search,
@@ -25,8 +25,15 @@ import {
   Check,
   Zap,
   BookOpen,
-  ArrowRight
+  ArrowRight,
+  ListChecks
 } from 'lucide-react';
+import {
+  CHECKER_FAQ,
+  CHECKER_HOW_TO,
+  CHECKER_RESULTS_GLOSSARY,
+  CHECKER_VS_TRACKER
+} from '../../../seo/aiVisibilityCheckerContent.js';
 import './AiVisibilityCheckerSeo.css';
 
 const CHECKLIST_ITEMS = [
@@ -93,72 +100,13 @@ const SCHEMA_SNIPPET = `{
   ]
 }`;
 
-const FAQ_ITEMS = [
-  {
-    q: 'What is an AI Visibility Score and how is it calculated?',
-    a: 'An AI Visibility Score measures the percentage of high-intent user queries where artificial intelligence models (such as Google Gemini, ChatGPT Search, and Perplexity) directly cite your website as an authoritative reference or name your brand in their synthesized answers. The score is computed by extracting the top 10 realistic search queries from your content, executing them with live search grounding, and grading your citation frequency from A+ (90%+ cited) down to F (0% presence).'
-  },
-  {
-    q: 'What is Generative Engine Optimization (GEO) and why is it essential in 2026?',
-    a: 'Generative Engine Optimization (GEO) is the practice of optimizing digital content so that Large Language Models (LLMs) and conversational search engines retrieve, trust, and cite your domain in AI-generated answers. With over 60% of modern informational and commercial queries answered directly by AI overviews without a traditional click to a search results page, GEO ensures your brand remains visible where user decisions are made.'
-  },
-  {
-    q: 'How does Gemini AI decide which websites to cite in Google Search Grounding?',
-    a: 'Google Gemini utilizes Google Search Grounding to anchor its neural responses in real-time web documents. The grounding algorithm favors pages that demonstrate high information gain, transparent author credentials, valid Schema.org structured data, direct answers to conversational questions, and consistent entity consensus across authoritative external platforms like Wikipedia and industry directories.'
-  },
-  {
-    q: 'What is the difference between "Cited" and "Brand Mentioned"?',
-    a: '"Cited" means the AI search engine explicitly included a clickable hyperlinked source pill or footnote leading directly to a specific URL on your domain within its grounding metadata chunks. "Brand Mentioned" means the AI recognized and named your company or service in the text of the answer, but cited a third-party aggregator, review platform, or directory instead of linking to your official site.'
-  },
-  {
-    q: 'Why are competitor domains cited instead of my official website?',
-    a: 'AI search engines frequently favor competitor websites or third-party review directories when those domains offer clearer structured data, concise bullet-point comparisons, transparent pricing tables, or stronger domain entity authority. Running an AI Visibility audit reveals the exact competitor domains that dominate your niche so you can replicate and surpass their content architecture.'
-  },
-  {
-    q: 'How does Schema.org structured data affect AI search citations?',
-    a: 'Schema.org JSON-LD markup (such as Organization, Product, FAQPage, MedicalBusiness, and Article) acts as an unambiguous translation layer for AI crawlers. It explicitly defines entities, attributes, relationships, pricing, and FAQs, eliminating ambiguities and dramatically increasing the probability that an LLM will select your page as a ground-truth citation source.'
-  },
-  {
-    q: 'Can I test my website without providing an API key or registering an account?',
-    a: 'Yes. Cerilas AI Visibility Checker is 100% free and requires zero registration or API key input. Raw website metadata extraction and live search grounding calls powered by advanced frontier AI infrastructure are handled securely server-side without user friction.'
-  },
-  {
-    q: 'What is Answer Engine Optimization (AEO) and how does it relate to GEO?',
-    a: 'Answer Engine Optimization (AEO) focuses specifically on structuring content into concise, direct answers (e.g., definitions, step-by-step lists, price summaries) so that conversational answer engines can extract them easily. Generative Engine Optimization (GEO) is the broader discipline encompassing AEO, brand entity verification, knowledge graph integration, and LLM citation mechanics.'
-  },
-  {
-    q: 'How often should I run an AI Visibility audit on my website?',
-    a: 'We recommend running an AI Visibility audit at least once per month or whenever you publish new flagship service pages, rebrand, or modify your Schema.org architecture. Because LLM search grounding indices update continuously, tracking citation fluctuations helps you proactively defend your organic brand footprint.'
-  },
-  {
-    q: 'Does blocking AI crawlers in robots.txt prevent my site from being cited by AI search engines?',
-    a: 'Yes. If your robots.txt file blocks search discovery crawlers like OAI-SearchBot (OpenAI) or PerplexityBot, or if you block Googlebot, AI search engines will not be able to retrieve your web pages during live retrieval-augmented generation (RAG) queries, reducing your citation rate to zero.'
-  },
-  {
-    q: 'Can a new website or domain with low domain authority still get cited by AI search engines?',
-    a: 'Yes. Unlike legacy Google PageRank which required months or years of backlink acquisition to rank, generative AI retrieval engines prioritize information gain, schema completeness, and specific factual density. A brand-new domain that provides the clearest structured pricing table, definitive technical benchmark, or unique case study can immediately win primary citation pills in Gemini, ChatGPT, and Perplexity over legacy high-DA blogs that only contain generic fluff.'
-  },
-  {
-    q: 'What is the commercial difference between direct citation clicks and zero-click brand impressions?',
-    a: 'In modern conversational search, brand impressions build passive category awareness when an AI recommends your company by name. However, direct hyperlinked citations drive the highest-converting traffic on the internet because users clicking the footnote pill have already read the AI synthesized summary and are seeking immediate purchase confirmation, live demo signup, or contact details.'
-  },
-  {
-    q: 'How do AI search engines handle paywalled, client-side rendered, or gated content?',
-    a: 'Most AI search crawlers (such as OAI-SearchBot and Google-Extended) do not execute heavy client-side JavaScript frameworks or bypass authentication paywalls. If your key answers, pricing data, or documentation are hidden behind login gates or require extensive asynchronous rendering, AI retrieval bots will classify the page as empty or thin, ceding citation opportunities to open competitor documentation.'
-  },
-  {
-    q: 'How can I fix AI hallucinations if an AI model outputs inaccurate pricing or false claims about my business?',
-    a: 'AI models hallucinate when web consensus is fragmented or ambiguous. To overwrite outdated or false training data, publish unambiguous Schema.org JSON-LD (such as Product offers with exact price specifications or Organization with official founding and leadership details), link your verified sameAs Wikipedia/Wikidata entity URLs, and deploy an authoritative /llms.txt file that anchors retrieval models to your canonical source documents.'
-  }
-];
-
 const RELATED_TOOLS = [
-  { name: 'AI Crawler Checker', desc: 'Inspect robots.txt directives and HTTP permissions for AI search crawlers.', href: '#/tool/ai-crawler-checker' },
-  { name: 'LLMs.txt Tools & Validator', desc: 'Build and validate /llms.txt files for AI agents and LLM ingestion.', href: '#/tool/llms-txt' },
-  { name: 'AI Link Hallucination Checker', desc: 'Detect fabricated URLs and 404 links generated by LLMs with live DNS checks.', href: '#/tool/ai-link-hallucination-checker' },
-  { name: 'AI Content Detector', desc: 'Enterprise multi-model detection evaluating burstiness and perplexity.', href: '#/tool/ai-content-detector' },
-  { name: 'HTML to Markdown Converter', desc: 'Convert web pages to clean, structured markdown for LLM context windows.', href: '#/tool/html-to-llm-markdown' },
-  { name: 'Website Email Extractor', desc: 'Extract contact emails, phone numbers, and social links from company websites.', href: '#/tool/website-email-extractor' }
+  { name: 'GrowthControl AI Visibility Tracker', desc: 'Track the same AI questions every week, monitor competitors and connect Search Console.', href: '/growth' },
+  { name: 'AI Crawler Checker', desc: 'Test whether robots.txt lets GPTBot, OAI-SearchBot, ClaudeBot and PerplexityBot read your site.', href: '/tool/ai-crawler-checker' },
+  { name: 'LLMs.txt Tools & Validator', desc: 'Build and validate an /llms.txt file so AI systems find your canonical pages.', href: '/tool/llms-txt' },
+  { name: 'AI Link Hallucination Checker', desc: 'Find fabricated or broken links in AI-generated answers with live HTTP checks.', href: '/tool/ai-link-hallucination-checker' },
+  { name: 'HTML to Markdown Converter', desc: 'Convert web pages to clean Markdown for LLM context windows.', href: '/tool/html-to-llm-markdown' },
+  { name: 'Connect ChatGPT to Search Console (MCP)', desc: 'Ask ChatGPT or Claude about your GA4 and Search Console data with read-only access.', href: '/tool/google-marketing-mcp' }
 ];
 
 export default function AiVisibilityCheckerSeo() {
@@ -208,112 +156,88 @@ export default function AiVisibilityCheckerSeo() {
 
   const scoreTier = getScoreTier();
 
-  useEffect(() => {
-    const webAppSchema = {
-      '@context': 'https://schema.org',
-      '@type': 'WebApplication',
-      name: 'AI Visibility Checker by GrowthControl',
-      url: 'https://tools.cerilas.com/#/tool/ai-visibility-checker',
-      applicationCategory: 'UtilitiesApplication',
-      operatingSystem: 'All',
-      description: 'Free AI Visibility Checker and Generative Engine Optimization (GEO) audit suite. Evaluates live citations, brand mentions, and competitor rankings across Gemini AI and Google Search Grounding.',
-      offers: {
-        '@type': 'Offer',
-        price: '0',
-        priceCurrency: 'USD'
-      },
-      featureList: [
-        'Automated zero-AI website content scraping (title, meta, headings, clean body)',
-        'Top 10 high-intent search query modeling powered by advanced frontier AI infrastructure',
-        'Live Google Search Grounding citation verification',
-        'Direct citation backlink detection vs. brand-only mention attribution',
-        'Quantitative AI Visibility Score & Grade (A+ to F)',
-        'Competitor citation gap analysis and domain aggregation',
-        'Generative Engine Optimization (GEO) and AEO action recommendations'
-      ]
-    };
-
-    const techArticleSchema = {
-      '@context': 'https://schema.org',
-      '@type': 'TechArticle',
-      headline: 'The Generative Engine Optimization (GEO) Technical Guide & Citation Audit Architecture',
-      description: 'Comprehensive engineering guide detailing how modern LLMs (Gemini, ChatGPT, Perplexity) retrieve, anchor, and cite web pages via Search Grounding in 2026.',
-      author: {
-        '@type': 'Organization',
-        name: 'Cerilas Tools Engineering Team'
-      },
-      publisher: {
-        '@type': 'Organization',
-        name: 'Cerilas',
-        logo: {
-          '@type': 'ImageObject',
-          url: 'https://tools.cerilas.com/platform-logo.png'
-        }
-      },
-      datePublished: '2026-01-15',
-      dateModified: '2026-09-25'
-    };
-
-    const howToSchema = {
-      '@context': 'https://schema.org',
-      '@type': 'HowTo',
-      name: 'How to Audit and Improve Your Website AI Search Visibility (GEO)',
-      step: [
-        {
-          '@type': 'HowToStep',
-          name: 'Enter Target Domain URL',
-          text: 'Type your website URL into the input field and click Audit AI Visibility.'
-        },
-        {
-          '@type': 'HowToStep',
-          name: 'Extract Raw Content & Model Real Queries',
-          text: 'The server retrieves your clean text without AI bias, then models the top 10 questions real users ask AI models about your products or services.'
-        },
-        {
-          '@type': 'HowToStep',
-          name: 'Probe Live Search Grounding',
-          text: 'Each query is executed against advanced frontier AI search grounding models with live web retrieval to evaluate retrieval-augmented generation (RAG) source chunks.'
-        },
-        {
-          '@type': 'HowToStep',
-          name: 'Review Citations & Competitor Gaps',
-          text: 'Inspect your AI Visibility Score, review direct backlinks vs. brand mentions, and examine competitor domains cited in place of your site.'
-        },
-        {
-          '@type': 'HowToStep',
-          name: 'Apply GEO Recommendations',
-          text: 'Implement Schema.org JSON-LD structured data and Q&A formatting to claim high-authority AI citations.'
-        }
-      ]
-    };
-
-    const faqSchema = {
-      '@context': 'https://schema.org',
-      '@type': 'FAQPage',
-      mainEntity: FAQ_ITEMS.map((item) => ({
-        '@type': 'Question',
-        name: item.q,
-        acceptedAnswer: {
-          '@type': 'Answer',
-          text: item.a
-        }
-      }))
-    };
-
-    const script = document.createElement('script');
-    script.type = 'application/ld+json';
-    script.id = 'ai-visibility-checker-jsonld';
-    script.text = JSON.stringify([webAppSchema, techArticleSchema, howToSchema, faqSchema]);
-    document.head.appendChild(script);
-
-    return () => {
-      const existing = document.getElementById('ai-visibility-checker-jsonld');
-      if (existing) existing.remove();
-    };
-  }, []);
-
   return (
     <div className="aivc-seo-wrapper">
+      {/* How to check (answer-first, mirrors the HowTo schema) */}
+      <section className="aivc-seo-section" aria-labelledby="aivc-howto-heading">
+        <div className="aivc-seo-header">
+          <span className="aivc-seo-badge-tag">
+            <ListChecks size={14} /> Step by Step
+          </span>
+          <h2 id="aivc-howto-heading" className="aivc-seo-title">{CHECKER_HOW_TO.title}</h2>
+          <p className="aivc-seo-lead">{CHECKER_HOW_TO.lead}</p>
+        </div>
+
+        <ol className="aivc-steps-timeline aivc-steps-ordered">
+          {CHECKER_HOW_TO.steps.map((step, idx) => (
+            <li key={step.name} className="aivc-step-row">
+              <div className="aivc-step-num">{idx + 1}</div>
+              <div className="aivc-step-content">
+                <h3 className="aivc-step-title">{step.name}</h3>
+                <p className="aivc-step-desc">{step.text}</p>
+              </div>
+            </li>
+          ))}
+        </ol>
+      </section>
+
+      {/* Results glossary */}
+      <section className="aivc-seo-section" aria-labelledby="aivc-results-heading">
+        <div className="aivc-seo-header">
+          <span className="aivc-seo-badge-tag">
+            <BarChart3 size={14} /> Reading Your Report
+          </span>
+          <h2 id="aivc-results-heading" className="aivc-seo-title">{CHECKER_RESULTS_GLOSSARY.title}</h2>
+          <p className="aivc-seo-lead">{CHECKER_RESULTS_GLOSSARY.lead}</p>
+        </div>
+
+        <dl className="aivc-seo-grid aivc-glossary">
+          {CHECKER_RESULTS_GLOSSARY.items.map((item) => (
+            <div key={item.term} className="aivc-seo-card">
+              <dt className="aivc-card-icon-title"><span>{item.term}</span></dt>
+              <dd><p>{item.definition}</p></dd>
+            </div>
+          ))}
+        </dl>
+      </section>
+
+      {/* Checker vs tracker: hands ongoing-tracking intent to GrowthControl */}
+      <section className="aivc-seo-section" aria-labelledby="aivc-vs-heading">
+        <div className="aivc-seo-header">
+          <span className="aivc-seo-badge-tag">
+            <TrendingUp size={14} /> Snapshot vs. Monitoring
+          </span>
+          <h2 id="aivc-vs-heading" className="aivc-seo-title">{CHECKER_VS_TRACKER.title}</h2>
+          <p className="aivc-seo-lead">{CHECKER_VS_TRACKER.lead}</p>
+        </div>
+
+        <div className="aivc-table-container">
+          <table className="aivc-compare-table">
+            <thead>
+              <tr>
+                {CHECKER_VS_TRACKER.columns.map((col, idx) => (
+                  <th key={idx} scope="col">{col}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {CHECKER_VS_TRACKER.rows.map(([label, checker, tracker]) => (
+                <tr key={label}>
+                  <th scope="row"><strong>{label}</strong></th>
+                  <td>{checker}</td>
+                  <td>{tracker}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        <a href={CHECKER_VS_TRACKER.ctaHref} className="aivc-seo-cta-link">
+          <span>{CHECKER_VS_TRACKER.ctaLabel}</span>
+          <ArrowRight size={16} />
+        </a>
+      </section>
+
       {/* 1. Core Technical Pillar Overview */}
       <section className="aivc-seo-section">
         <div className="aivc-seo-header">
@@ -321,13 +245,13 @@ export default function AiVisibilityCheckerSeo() {
             <Eye size={14} /> Free AI Search Visibility &amp; Citations Audit
           </span>
           <h2 className="aivc-seo-title">
-            The Generative Engine Optimization (GEO) Revolution in 2026
+            Why AI visibility matters: Generative Engine Optimization (GEO)
           </h2>
           <p className="aivc-seo-lead">
-            Traditional Search Engine Optimization (SEO) was built for a world of ten blue links on a desktop monitor. In 2026, 
-            over half of all search queries are resolved directly inside <strong>generative AI answer engines</strong>—including 
-            Google Gemini, ChatGPT Search, Perplexity AI, and Claude. To capture traffic, brands must shift from keyword density to 
-            <strong> citation grounding authority</strong>.
+            Traditional SEO was built for ten blue links. Today a growing share of questions is answered directly inside{' '}
+            <strong>generative AI answer engines</strong> such as Google Gemini and AI Overviews, ChatGPT Search, Perplexity and Claude.
+            When the answer is written for the user, the brands that get named and linked are the ones that win the click, so
+            GEO focuses on <strong>being cited as a source</strong>, not just ranking.
           </p>
         </div>
 
@@ -592,13 +516,13 @@ export default function AiVisibilityCheckerSeo() {
       <section className="aivc-seo-section">
         <div className="aivc-seo-header">
           <span className="aivc-seo-badge-tag">
-            <BookOpen size={14} /> Empirical Proof
+            <BookOpen size={14} /> Illustrative Example
           </span>
           <h2 className="aivc-seo-title">
-            Case Study: Before vs. After Generative Engine Optimization
+            Example: a pricing page before and after GEO
           </h2>
           <p className="aivc-seo-lead">
-            How restructuring a B2B SaaS pricing and service page transformed an invisible domain into a primary AI citation:
+            An illustrative B2B SaaS example showing which page patterns AI engines tend to skip and which they cite:
           </p>
         </div>
 
@@ -607,13 +531,13 @@ export default function AiVisibilityCheckerSeo() {
             <span className="aivc-case-badge">Before: Legacy Keyword Architecture</span>
             <h3 className="aivc-case-title">Keyword-Dense Blog Post with Hidden Pricing</h3>
             <p className="aivc-case-desc">
-              Published a 2,500-word SEO article targeting "enterprise cloud backup pricing". Used generic marketing fluff and required 
+              A 2,500-word SEO article targeting "enterprise cloud backup pricing" with generic marketing copy, requiring 
               users to fill out a "Contact Sales" form to receive pricing details. Lacked Schema.org JSON-LD.
             </p>
             <div className="aivc-case-metrics">
               <div className="aivc-case-metric-row">
                 <span className="aivc-metric-label">AI Citation Frequency:</span>
-                <span className="aivc-metric-val bad">8% (Ignored by AI)</span>
+                <span className="aivc-metric-val bad">Rarely cited</span>
               </div>
               <div className="aivc-case-metric-row">
                 <span className="aivc-metric-label">AI Footnote Source:</span>
@@ -621,7 +545,7 @@ export default function AiVisibilityCheckerSeo() {
               </div>
               <div className="aivc-case-metric-row">
                 <span className="aivc-metric-label">AI Referral Clicks:</span>
-                <span className="aivc-metric-val bad">Near Zero</span>
+                <span className="aivc-metric-val bad">Clicks go to aggregators</span>
               </div>
             </div>
           </div>
@@ -630,13 +554,13 @@ export default function AiVisibilityCheckerSeo() {
             <span className="aivc-case-badge">After: Modern GEO Architecture</span>
             <h3 className="aivc-case-title">Transparent Q&amp;A Chunks + Nested JSON-LD</h3>
             <p className="aivc-case-desc">
-              Rebuilt page with an explicit H2 ("How much does cloud backup cost in 2026?"), a transparent pricing comparison table, 
+              The same page rebuilt with an explicit H2 ("How much does cloud backup cost?"), a transparent pricing comparison table, 
               concise 50-word answer block, and nested <code>Product</code> + <code>FAQPage</code> Schema.org graphs.
             </p>
             <div className="aivc-case-metrics">
               <div className="aivc-case-metric-row">
                 <span className="aivc-metric-label">AI Citation Frequency:</span>
-                <span className="aivc-metric-val good">84% (Primary Source)</span>
+                <span className="aivc-metric-val good">Cited as a primary source</span>
               </div>
               <div className="aivc-case-metric-row">
                 <span className="aivc-metric-label">AI Footnote Source:</span>
@@ -644,7 +568,7 @@ export default function AiVisibilityCheckerSeo() {
               </div>
               <div className="aivc-case-metric-row">
                 <span className="aivc-metric-label">AI Referral Clicks:</span>
-                <span className="aivc-metric-val good">+340% High-Intent Traffic</span>
+                <span className="aivc-metric-val good">Clicks land on the official site</span>
               </div>
             </div>
           </div>
@@ -705,7 +629,7 @@ export default function AiVisibilityCheckerSeo() {
               Buyers ask AI to compare software tiers, identify enterprise API limitations, and find cost-effective alternatives.
             </p>
             <div className="aivc-use-case-example">
-              "What is the most secure open-source alternative to [Competitor] for HIPAA compliance in 2026?"
+              "What is the most secure open-source alternative to [Competitor] for HIPAA compliance?"
             </div>
           </div>
 
@@ -716,7 +640,7 @@ export default function AiVisibilityCheckerSeo() {
               Shoppers consult conversational assistants to filter products by technical criteria, user reviews, and budget brackets.
             </p>
             <div className="aivc-use-case-example">
-              "Best wireless noise-cancelling headphones for small ears under $150 with multipoint Bluetooth."
+              "Best wireless noise-cancelling headphones under AU$250 for small ears, shipped in Australia?"
             </div>
           </div>
 
@@ -727,7 +651,7 @@ export default function AiVisibilityCheckerSeo() {
               Patients research doctor qualifications, recovery timelines, and transparent out-of-pocket costs for specialized treatments.
             </p>
             <div className="aivc-use-case-example">
-              "How much does sapphire FUE hair transplant cost in Istanbul 2026 and which clinics include doctor surgery?"
+              "How much does Invisalign cost in Toronto, and which orthodontists offer free consultations?"
             </div>
           </div>
 
@@ -738,7 +662,7 @@ export default function AiVisibilityCheckerSeo() {
               Founders and investors seek verified legal frameworks, tax incentive structures, and regional statutory compliance.
             </p>
             <div className="aivc-use-case-example">
-              "Step-by-step Delaware C-Corp vs Wyoming LLC tax comparison for non-US SaaS founders."
+              "Best small business accountant in Manchester for VAT returns and Making Tax Digital?"
             </div>
           </div>
         </div>
@@ -843,24 +767,26 @@ export default function AiVisibilityCheckerSeo() {
         </div>
 
         <div className="aivc-faq-list">
-          {FAQ_ITEMS.map((item, idx) => (
+          {CHECKER_FAQ.map((item, idx) => (
             <div key={idx} className="aivc-faq-item">
-              <button
-                type="button"
-                className="aivc-faq-question"
-                onClick={() => toggleFaq(idx)}
-              >
-                <span>{item.q}</span>
-                <ChevronDown
-                  size={18}
-                  className={`aivc-faq-chevron ${openFaq === idx ? 'open' : ''}`}
-                />
-              </button>
-              {openFaq === idx && (
-                <div className="aivc-faq-answer">
-                  {item.a}
-                </div>
-              )}
+              <h3 className="aivc-faq-heading">
+                <button
+                  type="button"
+                  className="aivc-faq-question"
+                  onClick={() => toggleFaq(idx)}
+                  aria-expanded={openFaq === idx}
+                  aria-controls={`aivc-faq-answer-${idx}`}
+                >
+                  <span>{item.q}</span>
+                  <ChevronDown
+                    size={18}
+                    className={`aivc-faq-chevron ${openFaq === idx ? 'open' : ''}`}
+                  />
+                </button>
+              </h3>
+              <div id={`aivc-faq-answer-${idx}`} className="aivc-faq-answer" hidden={openFaq !== idx}>
+                {item.a}
+              </div>
             </div>
           ))}
         </div>

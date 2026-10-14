@@ -59,7 +59,7 @@ export default function BackgroundRemoverSeo() {
       '@graph': [
         {
           '@type': 'WebApplication',
-          '@id': 'https://tools.cerilas.com/#/tool/background-remover#software',
+          '@id': 'https://tools.cerilas.com/tool/background-remover#software',
           'name': 'Cerilas Free AI Background Remover (100% Private In-Browser)',
           'alternateName': [
             'Cerilas Background Remover',
@@ -82,13 +82,6 @@ export default function BackgroundRemoverSeo() {
             'price': '0',
             'priceCurrency': 'USD',
             'availability': 'https://schema.org/InStock'
-          },
-          'aggregateRating': {
-            '@type': 'AggregateRating',
-            'ratingValue': '4.98',
-            'reviewCount': '3120',
-            'bestRating': '5',
-            'worstRating': '1'
           },
           'author': {
             '@type': 'Organization',
@@ -116,7 +109,7 @@ export default function BackgroundRemoverSeo() {
         },
         {
           '@type': 'BreadcrumbList',
-          '@id': 'https://tools.cerilas.com/#/tool/background-remover#breadcrumbs',
+          '@id': 'https://tools.cerilas.com/tool/background-remover#breadcrumbs',
           'itemListElement': [
             {
               '@type': 'ListItem',
@@ -134,13 +127,13 @@ export default function BackgroundRemoverSeo() {
               '@type': 'ListItem',
               'position': 3,
               'name': 'Free AI Background Remover',
-              'item': 'https://tools.cerilas.com/#/tool/background-remover'
+              'item': 'https://tools.cerilas.com/tool/background-remover'
             }
           ]
         },
         {
           '@type': 'HowTo',
-          '@id': 'https://tools.cerilas.com/#/tool/background-remover#howto',
+          '@id': 'https://tools.cerilas.com/tool/background-remover#howto',
           'name': 'How to Remove Background from Any Image Online for Free',
           'description': 'A fast 3-step guide to removing photo backgrounds and creating transparent PNGs client-side.',
           'totalTime': 'PT1M',
@@ -150,27 +143,27 @@ export default function BackgroundRemoverSeo() {
               'position': 1,
               'name': 'Upload or Drop Photo',
               'text': 'Drag and drop any JPG, PNG, WebP, or AVIF image into the dropzone or choose from your device.',
-              'url': 'https://tools.cerilas.com/#/tool/background-remover'
+              'url': 'https://tools.cerilas.com/tool/background-remover'
             },
             {
               '@type': 'HowToStep',
               'position': 2,
               'name': 'Automatic AI Segmentation',
               'text': 'The in-browser neural network automatically isolates the foreground subject and removes background noise in seconds.',
-              'url': 'https://tools.cerilas.com/#/tool/background-remover'
+              'url': 'https://tools.cerilas.com/tool/background-remover'
             },
             {
               '@type': 'HowToStep',
               'position': 3,
               'name': 'Customize Backdrop & Download',
               'text': 'Keep it transparent, apply pure white (#FFF) for e-commerce, or add studio gradients, then click Download HD PNG or Copy to Clipboard.',
-              'url': 'https://tools.cerilas.com/#/tool/background-remover'
+              'url': 'https://tools.cerilas.com/tool/background-remover'
             }
           ]
         },
         {
           '@type': 'FAQPage',
-          '@id': 'https://tools.cerilas.com/#/tool/background-remover#faq',
+          '@id': 'https://tools.cerilas.com/tool/background-remover#faq',
           'mainEntity': FAQ_ITEMS.map((item) => ({
             '@type': 'Question',
             'name': item.q,

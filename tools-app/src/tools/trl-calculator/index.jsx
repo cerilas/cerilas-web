@@ -139,7 +139,7 @@ ${assessment.gaps.length === 0 ? '- No critical bottlenecks identified. Ready fo
 ${assessment.eligibleGrants.map((gr) => `- **${gr.name}** (${gr.provider}) - ${gr.grantType} [Budget: ${gr.budget}]`).join('\n')}
 
 ---
-*Evaluated with Cerilas TRL Calculator (https://tools.cerilas.com/#/tool/trl-calculator)*
+*Evaluated with Cerilas TRL Calculator (https://tools.cerilas.com/tool/trl-calculator)*
 `;
 
     navigator.clipboard.writeText(report);

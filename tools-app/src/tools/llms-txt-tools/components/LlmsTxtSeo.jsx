@@ -51,12 +51,12 @@ const FAQ_ITEMS = [
 ];
 
 const RELATED_TOOLS = [
-  { name: 'AI Crawler Checker', desc: 'Verify if ChatGPT, Claude, and Perplexity can crawl your site.', href: '#/tool/ai-crawler-checker' },
-  { name: 'AI Link Hallucination Checker', desc: 'Scan AI drafts for fabricated URLs, 404 links, and slopsquatting risks.', href: '#/tool/ai-link-hallucination-checker' },
-  { name: 'AI Content Detector', desc: 'Enterprise multi-model detection evaluating perplexity and burstiness.', href: '#/tool/ai-content-detector' },
-  { name: 'PDF → RAG Cleaner', desc: 'Clean headers, footers, and noise from PDFs for vector embeddings.', href: '#/tool/pdf-rag-cleaner' },
-  { name: 'JSON Beautifier & Formatter', desc: 'Validate, clean, and format JSON structures without data leaks.', href: '#/tool/json-beautifier' },
-  { name: 'QR Code Generator', desc: 'Generate vector QR codes for websites, vCards, and credentials.', href: '#/tool/qr-code-generator' }
+  { name: 'AI Crawler Checker', desc: 'Verify if ChatGPT, Claude, and Perplexity can crawl your site.', href: '/tool/ai-crawler-checker' },
+  { name: 'AI Link Hallucination Checker', desc: 'Scan AI drafts for fabricated URLs, 404 links, and slopsquatting risks.', href: '/tool/ai-link-hallucination-checker' },
+  { name: 'AI Content Detector', desc: 'Enterprise multi-model detection evaluating perplexity and burstiness.', href: '/tool/ai-content-detector' },
+  { name: 'PDF → RAG Cleaner', desc: 'Clean headers, footers, and noise from PDFs for vector embeddings.', href: '/tool/pdf-rag-cleaner' },
+  { name: 'JSON Beautifier & Formatter', desc: 'Validate, clean, and format JSON structures without data leaks.', href: '/tool/json-beautifier' },
+  { name: 'QR Code Generator', desc: 'Generate vector QR codes for websites, vCards, and credentials.', href: '/tool/qr-code-generator' }
 ];
 
 export default function LlmsTxtSeo() {
@@ -71,7 +71,7 @@ export default function LlmsTxtSeo() {
       '@context': 'https://schema.org',
       '@type': 'WebApplication',
       name: 'Cerilas LLMs.txt Generator, Checker & Validator',
-      url: 'https://tools.cerilas.com/#/tool/llms-txt',
+      url: 'https://tools.cerilas.com/tool/llms-txt',
       applicationCategory: 'DeveloperApplication',
       operatingSystem: 'All',
       description: 'Free online tool suite to create, inspect, and validate llms.txt files under the latest v2 specification. Test link health, detect rel=describedby discovery, and audit markdown alternatives.',

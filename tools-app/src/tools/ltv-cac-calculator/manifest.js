@@ -5,7 +5,7 @@ export const ltvCacCalculatorManifest = {
   category: 'Startup & Finance',
   iconName: 'Scale',
   badge: 'Golden Ratio',
-  targetUrl: '#/tool/ltv-cac-calculator',
+  targetUrl: '/tool/ltv-cac-calculator',
   seoTitle: 'LTV:CAC Ratio & Payback Period Calculator | Cerilas Tools',
   seoDescription: 'Free SaaS LTV:CAC Calculator. Calculate your LTV to CAC ratio, CAC payback period in months, and evaluate unit economics against top venture capital benchmarks.',
   features: [

@@ -76,12 +76,12 @@ const SEMANTIC_KEYWORDS = [
 ];
 
 const RELATED_TOOLS = [
-  { name: 'HTML to LLM Markdown', desc: 'Convert web pages to token-efficient clean Markdown for LLMs.', href: '#/tool/html-to-llm-markdown' },
-  { name: 'PDF → RAG Cleaner', desc: 'Extract and clean messy PDFs into structured vector chunks.', href: '#/tool/pdf-rag-cleaner' },
-  { name: 'LLMs.txt Tools', desc: 'Generate and validate /llms.txt site guides for AI crawlers.', href: '#/tool/llms-txt' },
-  { name: 'AI Link Hallucination Checker', desc: 'Audit AI generated drafts for broken or hallucinated URLs.', href: '#/tool/ai-link-hallucination-checker' },
-  { name: 'AI Crawler Checker', desc: 'Verify if GPTBot, ClaudeBot, and Perplexity can access your site.', href: '#/tool/ai-crawler-checker' },
-  { name: 'JSON Beautifier', desc: 'Format and inspect JSON payloads for AI API endpoints.', href: '#/tool/json-beautifier' }
+  { name: 'HTML to LLM Markdown', desc: 'Convert web pages to token-efficient clean Markdown for LLMs.', href: '/tool/html-to-llm-markdown' },
+  { name: 'PDF → RAG Cleaner', desc: 'Extract and clean messy PDFs into structured vector chunks.', href: '/tool/pdf-rag-cleaner' },
+  { name: 'LLMs.txt Tools', desc: 'Generate and validate /llms.txt site guides for AI crawlers.', href: '/tool/llms-txt' },
+  { name: 'AI Link Hallucination Checker', desc: 'Audit AI generated drafts for broken or hallucinated URLs.', href: '/tool/ai-link-hallucination-checker' },
+  { name: 'AI Crawler Checker', desc: 'Verify if GPTBot, ClaudeBot, and Perplexity can access your site.', href: '/tool/ai-crawler-checker' },
+  { name: 'JSON Beautifier', desc: 'Format and inspect JSON payloads for AI API endpoints.', href: '/tool/json-beautifier' }
 ];
 
 export default function TokenCounterSeo() {
@@ -109,7 +109,7 @@ export default function TokenCounterSeo() {
       'name': 'Universal Token Counter & LLM Cost Calculator',
       'operatingSystem': 'All',
       'applicationCategory': 'DeveloperApplication',
-      'url': 'https://tools.cerilas.com/#/tool/token-counter-universal',
+      'url': 'https://tools.cerilas.com/tool/token-counter-universal',
       'offers': {
         '@type': 'Offer',
         'price': '0',

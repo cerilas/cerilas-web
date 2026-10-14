@@ -371,6 +371,61 @@
   padding-top: 1rem;
 }
 
+.aivc-faq-answer[hidden] {
+  display: none;
+}
+
+.aivc-faq-heading {
+  margin: 0;
+  font: inherit;
+}
+
+.aivc-steps-ordered {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.aivc-glossary {
+  margin: 0;
+}
+
+.aivc-glossary dd {
+  margin: 0;
+}
+
+.aivc-glossary dd p {
+  margin: 0;
+  font-size: 0.92rem;
+  line-height: 1.6;
+  color: var(--text-muted);
+}
+
+.aivc-compare-table th[scope="row"] {
+  text-align: left;
+  font-weight: 400;
+}
+
+.aivc-seo-cta-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1.5rem;
+  padding: 0.8rem 1.25rem;
+  border-radius: 12px;
+  background: #3b82f6;
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 0.95rem;
+  text-decoration: none;
+  transition: background 0.15s ease, transform 0.15s ease;
+}
+
+.aivc-seo-cta-link:hover {
+  background: #2563eb;
+  transform: translateY(-1px);
+}
+
 /* Related Tools Grid */
 .aivc-tools-grid {
   display: grid;

@@ -108,7 +108,7 @@ export default function LtvCacCalculator({ onBack, toolMeta }) {
 ⏱ CAC Payback Period: ${metrics.paybackMonths} Months
 💵 Monthly Gross Profit: $${Math.round(metrics.monthlyGrossProfit).toLocaleString()}/customer
 ---------------------------------------------
-Generated via https://tools.cerilas.com/#/tool/ltv-cac-calculator`;
+Generated via https://tools.cerilas.com/tool/ltv-cac-calculator`;
 
     navigator.clipboard.writeText(report);
     setCopied(true);

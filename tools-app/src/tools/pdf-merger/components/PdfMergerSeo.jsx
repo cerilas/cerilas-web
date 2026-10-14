@@ -27,7 +27,7 @@ export default function PdfMergerSeo() {
       "@graph": [
         {
           "@type": "WebApplication",
-          "@id": "https://tools.cerilas.com/#/tool/pdf-merger#software",
+          "@id": "https://tools.cerilas.com/tool/pdf-merger#software",
           "name": "Cerilas Free In-Browser PDF Merger",
           "alternateName": [
             "Cerilas PDF Merger",
@@ -47,7 +47,7 @@ export default function PdfMergerSeo() {
         },
         {
           "@type": "FAQPage",
-          "@id": "https://tools.cerilas.com/#/tool/pdf-merger#faq",
+          "@id": "https://tools.cerilas.com/tool/pdf-merger#faq",
           "mainEntity": [
             {
               "@type": "Question",

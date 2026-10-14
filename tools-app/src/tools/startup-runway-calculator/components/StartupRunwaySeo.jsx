@@ -63,7 +63,7 @@ export default function StartupRunwaySeo() {
       '@graph': [
         {
           '@type': 'WebApplication',
-          '@id': 'https://tools.cerilas.com/#/tool/startup-runway-calculator#software',
+          '@id': 'https://tools.cerilas.com/tool/startup-runway-calculator#software',
           'name': 'Cerilas Free Startup Runway & Cash Burn Rate Calculator',
           'alternateName': [
             'Startup Runway Calculator',
@@ -90,7 +90,7 @@ export default function StartupRunwaySeo() {
         },
         {
           '@type': 'HowTo',
-          '@id': 'https://tools.cerilas.com/#/tool/startup-runway-calculator#howto',
+          '@id': 'https://tools.cerilas.com/tool/startup-runway-calculator#howto',
           'name': 'How to Calculate Your Startup Runway and Zero-Cash Date',
           'description': 'A 4-step framework for founders to forecast survival months and avoid emergency fundraising.',
           'step': [
@@ -122,7 +122,7 @@ export default function StartupRunwaySeo() {
         },
         {
           '@type': 'FAQPage',
-          '@id': 'https://tools.cerilas.com/#/tool/startup-runway-calculator#faq',
+          '@id': 'https://tools.cerilas.com/tool/startup-runway-calculator#faq',
           'mainEntity': FAQ_ITEMS.map((item) => ({
             '@type': 'Question',
             'name': item.q,

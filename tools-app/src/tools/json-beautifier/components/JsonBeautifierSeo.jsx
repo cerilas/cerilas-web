@@ -61,7 +61,7 @@ export default function JsonBeautifierSeo() {
     '@graph': [
       {
         '@type': 'WebApplication',
-        '@id': 'https://tools.cerilas.com/#/tool/json-beautifier',
+        '@id': 'https://tools.cerilas.com/tool/json-beautifier',
         name: 'Cerilas Free Online JSON Beautifier & Formatter',
         alternateName: [
           'JSON Formatter Online',
@@ -71,7 +71,7 @@ export default function JsonBeautifierSeo() {
           'JSON to TypeScript Converter',
           'JSON Tree Viewer'
         ],
-        url: 'https://tools.cerilas.com/#/tool/json-beautifier',
+        url: 'https://tools.cerilas.com/tool/json-beautifier',
         applicationCategory: 'DeveloperApplication',
         operatingSystem: 'Any',
         offers: {
@@ -88,13 +88,7 @@ export default function JsonBeautifierSeo() {
           'Convert JSON to TypeScript interfaces, YAML, and CSV tables',
           'Live statistics: byte reduction savings, node count, max depth',
           '100% in-browser privacy with zero server uploads'
-        ],
-        aggregateRating: {
-          '@type': 'AggregateRating',
-          ratingValue: '4.97',
-          ratingCount: '2190'
-        }
-      },
+        ]      },
       {
         '@type': 'BreadcrumbList',
         itemListElement: [
@@ -114,7 +108,7 @@ export default function JsonBeautifierSeo() {
             '@type': 'ListItem',
             position: 3,
             name: 'JSON Beautifier & Formatter',
-            item: 'https://tools.cerilas.com/#/tool/json-beautifier'
+            item: 'https://tools.cerilas.com/tool/json-beautifier'
           }
         ]
       },

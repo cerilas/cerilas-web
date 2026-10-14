@@ -52,12 +52,12 @@ const FAQ_ITEMS = [
 ];
 
 const RELATED_TOOLS = [
-  { name: 'HTML to LLM Markdown', desc: 'Convert webpages into clean, token-efficient Markdown for RAG and AI prompts.', href: '#/tool/html-to-llm-markdown' },
-  { name: 'AI Crawler Checker', desc: 'Audit whether ChatGPT, Claude, and Perplexity bots can crawl your website.', href: '#/tool/ai-crawler-checker' },
-  { name: 'AI Link Hallucination Checker', desc: 'Verify URLs and detect broken or hallucinated links in generated content.', href: '#/tool/ai-link-hallucination-checker' },
-  { name: 'LLMs.txt Tools', desc: 'Generate and validate /llms.txt manifests for AI search indexing.', href: '#/tool/llms-txt' },
-  { name: 'Webhook Tester', desc: 'Inspect and debug real-time HTTP webhooks and payload headers.', href: '#/tool/webhook-tester' },
-  { name: 'JSON Beautifier', desc: 'Format, validate, and clean JSON payloads for developer workflows.', href: '#/tool/json-beautifier' }
+  { name: 'HTML to LLM Markdown', desc: 'Convert webpages into clean, token-efficient Markdown for RAG and AI prompts.', href: '/tool/html-to-llm-markdown' },
+  { name: 'AI Crawler Checker', desc: 'Audit whether ChatGPT, Claude, and Perplexity bots can crawl your website.', href: '/tool/ai-crawler-checker' },
+  { name: 'AI Link Hallucination Checker', desc: 'Verify URLs and detect broken or hallucinated links in generated content.', href: '/tool/ai-link-hallucination-checker' },
+  { name: 'LLMs.txt Tools', desc: 'Generate and validate /llms.txt manifests for AI search indexing.', href: '/tool/llms-txt' },
+  { name: 'Webhook Tester', desc: 'Inspect and debug real-time HTTP webhooks and payload headers.', href: '/tool/webhook-tester' },
+  { name: 'JSON Beautifier', desc: 'Format, validate, and clean JSON payloads for developer workflows.', href: '/tool/json-beautifier' }
 ];
 
 export default function WebsiteEmailExtractorSeo() {

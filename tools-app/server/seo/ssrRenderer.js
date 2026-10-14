@@ -1,5 +1,89 @@
 import { getToolSeo, CATEGORIES, TOOLS_SEO_REGISTRY } from './toolsSeoRegistry.js';
 import { COMPANY_INFO, LEGAL_DOCS } from '../../src/legal/legalContent.js';
+import { buildToolJsonLdBlocks } from '../../src/seo/structuredData.js';
+import {
+  CHECKER_HOW_TO,
+  CHECKER_RESULTS_GLOSSARY,
+  CHECKER_VS_TRACKER
+} from '../../src/seo/aiVisibilityCheckerContent.js';
+import {
+  GROWTH_SEO,
+  GROWTH_FAQ,
+  GROWTH_DEFINITION,
+  GROWTH_USE_CASES,
+  GROWTH_COMPARISON,
+  GROWTH_PLANS,
+  GROWTH_HOW_IT_WORKS,
+  GROWTH_FREE_TOOLS,
+  CHECKER_URL,
+  buildGrowthJsonLd
+} from '../../src/seo/growthControlSeo.js';
+
+const ROBOTS_INDEX = 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1';
+const SSR_H2 = 'font-size: 1.4rem; font-weight: 600; margin: 0 0 0.75rem 0; color: #f8fafc;';
+const SSR_P = 'margin: 0 0 0.75rem 0; color: #94a3b8; font-size: 1rem; line-height: 1.65;';
+const SSR_LINK = 'color: #38bdf8; text-decoration: none;';
+const SSR_TABLE = 'width: 100%; border-collapse: collapse; font-size: 0.92rem; color: #cbd5e1;';
+const SSR_CELL = 'border: 1px solid rgba(255,255,255,0.1); padding: 0.55rem 0.75rem; text-align: left; vertical-align: top;';
+
+function jsonLdScript(data, id) {
+  const idAttr = id ? ` id="${id}"` : '';
+  return `<script type="application/ld+json"${idAttr}>\n${JSON.stringify(data, null, 2).replace(/</g, '\\u003c')}\n</script>`;
+}
+
+function renderComparisonTableHtml({ columns, rows }) {
+  return `
+    <div style="overflow-x: auto;">
+      <table style="${SSR_TABLE}">
+        <thead><tr>${columns.map(c => `<th scope="col" style="${SSR_CELL}">${escapeHtml(c)}</th>`).join('')}</tr></thead>
+        <tbody>
+          ${rows.map(([label, ...cells]) => `
+            <tr>
+              <th scope="row" style="${SSR_CELL}">${escapeHtml(label)}</th>
+              ${cells.map(c => `<td style="${SSR_CELL}">${escapeHtml(c)}</td>`).join('')}
+            </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>`;
+}
+
+function renderFaqHtml(faq) {
+  return `
+    <dl style="display: grid; gap: 1.25rem; margin: 0;">
+      ${faq.map(item => `
+        <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem;">
+          <dt style="font-weight: 600; color: #f1f5f9; font-size: 1.05rem; margin-bottom: 0.5rem;">${escapeHtml(item.q)}</dt>
+          <dd style="margin: 0; color: #94a3b8; font-size: 0.95rem; line-height: 1.6;">${escapeHtml(item.a)}</dd>
+        </div>
+      `).join('')}
+    </dl>`;
+}
+
+function renderCheckerExtraSectionsHtml() {
+  return `
+        <section class="ssr-section">
+          <h2 style="${SSR_H2}">${escapeHtml(CHECKER_HOW_TO.title)}</h2>
+          <p style="${SSR_P}">${escapeHtml(CHECKER_HOW_TO.lead)}</p>
+          <ol style="margin: 0; padding-left: 1.25rem; color: #cbd5e1;">
+            ${CHECKER_HOW_TO.steps.map(s => `<li style="margin-bottom: 0.6rem;"><strong>${escapeHtml(s.name)}.</strong> ${escapeHtml(s.text)}</li>`).join('')}
+          </ol>
+        </section>
+
+        <section class="ssr-section">
+          <h2 style="${SSR_H2}">${escapeHtml(CHECKER_RESULTS_GLOSSARY.title)}</h2>
+          <p style="${SSR_P}">${escapeHtml(CHECKER_RESULTS_GLOSSARY.lead)}</p>
+          <dl style="margin: 0; color: #cbd5e1;">
+            ${CHECKER_RESULTS_GLOSSARY.items.map(i => `<dt style="font-weight: 600; margin-top: 0.75rem;">${escapeHtml(i.term)}</dt><dd style="margin: 0.25rem 0 0; color: #94a3b8;">${escapeHtml(i.definition)}</dd>`).join('')}
+          </dl>
+        </section>
+
+        <section class="ssr-section">
+          <h2 style="${SSR_H2}">${escapeHtml(CHECKER_VS_TRACKER.title)}</h2>
+          <p style="${SSR_P}">${escapeHtml(CHECKER_VS_TRACKER.lead)}</p>
+          ${renderComparisonTableHtml(CHECKER_VS_TRACKER)}
+          <p style="margin: 1rem 0 0;"><a href="${CHECKER_VS_TRACKER.ctaHref}" style="${SSR_LINK} font-weight: 600;">${escapeHtml(CHECKER_VS_TRACKER.ctaLabel)} &rarr;</a></p>
+        </section>`;
+}
 
 function escapeHtml(str) {
   if (!str) return '';
@@ -30,72 +114,8 @@ export function stripOldMetaTags(html) {
 export function renderToolPageHtml(templateHtml, slug) {
   const tool = getToolSeo(slug);
   const canonicalUrl = `https://tools.cerilas.com/tool/${tool.slug}`;
-  const ogImg = `https://tools.cerilas.com/tool-icons/${tool.slug}.webp`;
-  const fallbackOgImg = 'https://tools.cerilas.com/og-image.svg';
-
-  // Build JSON-LD structured data
-  const webAppSchema = {
-    '@context': 'https://schema.org',
-    '@type': 'WebApplication',
-    name: tool.name,
-    headline: tool.h1,
-    description: tool.description,
-    applicationCategory: tool.category || 'Utilities',
-    operatingSystem: 'All (Modern Web Browser)',
-    url: canonicalUrl,
-    browserRequirements: 'Requires JavaScript and HTML5 Canvas / WebAssembly support',
-    offers: {
-      '@type': 'Offer',
-      price: '0',
-      priceCurrency: 'USD',
-      availability: 'https://schema.org/InStock'
-    },
-    aggregateRating: {
-      '@type': 'AggregateRating',
-      ratingValue: tool.rating || '4.9',
-      ratingCount: tool.ratingCount || '1000',
-      bestRating: '5',
-      worstRating: '1'
-    }
-  };
-
-  const breadcrumbSchema = {
-    '@context': 'https://schema.org',
-    '@type': 'BreadcrumbList',
-    itemListElement: [
-      {
-        '@type': 'ListItem',
-        position: 1,
-        name: 'Cerilas Tools',
-        item: 'https://tools.cerilas.com/'
-      },
-      {
-        '@type': 'ListItem',
-        position: 2,
-        name: tool.category,
-        item: `https://tools.cerilas.com/${tool.categorySlug}`
-      },
-      {
-        '@type': 'ListItem',
-        position: 3,
-        name: tool.name,
-        item: canonicalUrl
-      }
-    ]
-  };
-
-  const faqSchema = tool.faq && tool.faq.length > 0 ? {
-    '@context': 'https://schema.org',
-    '@type': 'FAQPage',
-    mainEntity: tool.faq.map(item => ({
-      '@type': 'Question',
-      name: item.q,
-      acceptedAnswer: {
-        '@type': 'Answer',
-        text: item.a
-      }
-    }))
-  } : null;
+  const ogImg = tool.ogImage || `https://tools.cerilas.com/tool-icons/${tool.slug}.webp`;
+  const jsonLdBlocks = buildToolJsonLdBlocks(tool);
 
   // Build Related Tools semantic links
   const relatedToolsHtml = (tool.relatedTools || [])
@@ -174,16 +194,11 @@ export function renderToolPageHtml(templateHtml, slug) {
         </section>
         ` : ''}
 
+        ${tool.ssrSections === 'ai-visibility-checker' ? renderCheckerExtraSectionsHtml() : ''}
+
         <section class="ssr-section ssr-faq">
           <h2 style="font-size: 1.4rem; font-weight: 600; margin: 0 0 1rem 0; color: #f8fafc;">Frequently Asked Questions</h2>
-          <dl style="display: grid; gap: 1.25rem; margin: 0;">
-            ${tool.faq.map(item => `
-              <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1rem 1.25rem;">
-                <dt style="font-weight: 600; color: #f1f5f9; font-size: 1.05rem; margin-bottom: 0.5rem;">${escapeHtml(item.q)}</dt>
-                <dd style="margin: 0; color: #94a3b8; font-size: 0.95rem; line-height: 1.6;">${escapeHtml(item.a)}</dd>
-              </div>
-            `).join('')}
-          </dl>
+          ${renderFaqHtml(tool.faq || [])}
         </section>
 
         <section class="ssr-section ssr-related-tools">
@@ -204,9 +219,11 @@ export function renderToolPageHtml(templateHtml, slug) {
     `<title>${escapeHtml(tool.title)}</title>`,
     `<meta name="description" content="${escapeHtml(tool.description)}" />`,
     `<meta name="keywords" content="${escapeHtml(tool.keywords)}" />`,
-    `<meta name="robots" content="index, follow" />`,
+    `<meta name="robots" content="${ROBOTS_INDEX}" />`,
     `<link rel="canonical" href="${canonicalUrl}" />`,
     `<meta property="og:type" content="website" />`,
+    `<meta property="og:site_name" content="Cerilas' Tools" />`,
+    `<meta property="og:locale" content="en_US" />`,
     `<meta property="og:title" content="${escapeHtml(tool.title)}" />`,
     `<meta property="og:description" content="${escapeHtml(tool.description)}" />`,
     `<meta property="og:url" content="${canonicalUrl}" />`,
@@ -216,9 +233,7 @@ export function renderToolPageHtml(templateHtml, slug) {
     `<meta name="twitter:title" content="${escapeHtml(tool.title)}" />`,
     `<meta name="twitter:description" content="${escapeHtml(tool.description)}" />`,
     `<meta name="twitter:image" content="${ogImg}" />`,
-    `<script type="application/ld+json">\n${JSON.stringify(webAppSchema, null, 2)}\n</script>`,
-    `<script type="application/ld+json">\n${JSON.stringify(breadcrumbSchema, null, 2)}\n</script>`,
-    faqSchema ? `<script type="application/ld+json">\n${JSON.stringify(faqSchema, null, 2)}\n</script>` : ''
+    ...jsonLdBlocks.map(block => jsonLdScript(block.data, block.id))
   ].filter(Boolean).join('\n    ');
 
   html = html.replace('</head>', `    ${metaTags}\n  </head>`);
@@ -649,3 +664,119 @@ export function renderPricingPageHtml(templateHtml) {
 }
 
 
+/**
+ * Pre-renders the GrowthControl landing (/growth) so crawlers that do not run
+ * JavaScript (GPTBot, ClaudeBot, PerplexityBot) receive the full page content.
+ * Signed-in app routes under /growth/* are rendered with noindex and no body.
+ */
+export function renderGrowthPageHtml(templateHtml, { isAppRoute = false } = {}) {
+  const canonicalUrl = GROWTH_SEO.url;
+  const ogImg = 'https://tools.cerilas.com/og/growthcontrol.png';
+
+  const ssrBodyHtml = `
+    <div id="ssr-seo-content" class="ssr-seo-wrapper" style="max-width: 1040px; margin: 0 auto; padding: 2rem 1.25rem; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #f1f5f9; line-height: 1.6;">
+      <nav aria-label="Breadcrumb" style="margin-bottom: 1.5rem; font-size: 0.85rem; color: #94a3b8;">
+        <a href="/" style="${SSR_LINK}">Cerilas' Tools</a>
+        <span style="margin: 0 0.5rem;">/</span>
+        <span aria-current="page" style="color: #cbd5e1;">GrowthControl</span>
+      </nav>
+
+      <header style="margin-bottom: 2.5rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 1.5rem;">
+        <p style="margin: 0 0 0.5rem; color: #38bdf8; font-weight: 600; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em;">GrowthControl · AI Visibility Tracker</p>
+        <h1 style="font-size: 2.4rem; font-weight: 700; margin: 0 0 1rem 0; letter-spacing: -0.025em; line-height: 1.2;">${escapeHtml(GROWTH_SEO.h1)}</h1>
+        <p style="font-size: 1.15rem; color: #cbd5e1; margin: 0 0 1.25rem;">${escapeHtml(GROWTH_SEO.subtitle)}</p>
+        <p style="margin: 0;">
+          <a href="#pricing" style="${SSR_LINK} font-weight: 600;">Start free</a>
+          <span style="color: #475569; margin: 0 0.6rem;">·</span>
+          <a href="${CHECKER_URL}" style="${SSR_LINK} font-weight: 600;">Run the free AI Visibility Checker</a>
+        </p>
+      </header>
+
+      <main style="display: grid; gap: 2.5rem;">
+        <section id="what-is-ai-visibility">
+          <h2 style="${SSR_H2}">${escapeHtml(GROWTH_DEFINITION.title)}</h2>
+          <p style="${SSR_P}">${escapeHtml(GROWTH_DEFINITION.lead)}</p>
+          <p style="${SSR_P}">${escapeHtml(GROWTH_DEFINITION.body)}</p>
+          <dl style="margin: 0; color: #cbd5e1;">
+            ${GROWTH_DEFINITION.metrics.map(m => `<dt style="font-weight: 600; margin-top: 0.75rem;">${escapeHtml(m.term)}</dt><dd style="margin: 0.25rem 0 0; color: #94a3b8;">${escapeHtml(m.definition)}</dd>`).join('')}
+          </dl>
+        </section>
+
+        <section id="how-it-works">
+          <h2 style="${SSR_H2}">How GrowthControl works</h2>
+          <ol style="margin: 0; padding-left: 1.25rem; color: #cbd5e1;">
+            ${GROWTH_HOW_IT_WORKS.map(s => `<li style="margin-bottom: 0.6rem;"><strong>${escapeHtml(s.title)}.</strong> ${escapeHtml(s.description)}</li>`).join('')}
+          </ol>
+        </section>
+
+        <section id="use-cases">
+          <h2 style="${SSR_H2}">${escapeHtml(GROWTH_USE_CASES.title)}</h2>
+          <p style="${SSR_P}">${escapeHtml(GROWTH_USE_CASES.description)}</p>
+          ${GROWTH_USE_CASES.items.map(i => `
+            <article style="margin-bottom: 1rem;">
+              <h3 style="margin: 0 0 0.25rem; font-size: 1.05rem; color: #f1f5f9;">${escapeHtml(i.title)}</h3>
+              <p style="margin: 0; color: #94a3b8;">${escapeHtml(i.text)}</p>
+            </article>`).join('')}
+        </section>
+
+        <section id="comparison">
+          <h2 style="${SSR_H2}">${escapeHtml(GROWTH_COMPARISON.title)}</h2>
+          <p style="${SSR_P}">${escapeHtml(GROWTH_COMPARISON.description)}</p>
+          ${renderComparisonTableHtml(GROWTH_COMPARISON)}
+        </section>
+
+        <section id="pricing">
+          <h2 style="${SSR_H2}">GrowthControl pricing</h2>
+          <p style="${SSR_P}">Start free. Annual billing includes 2 months free. All prices in USD.</p>
+          <ul style="margin: 0; padding-left: 1.25rem; color: #cbd5e1;">
+            ${GROWTH_PLANS.map(p => `<li style="margin-bottom: 0.5rem;"><strong>${escapeHtml(p.name)}: $${escapeHtml(p.price)}/month${p.yearlyPrice ? ` or $${escapeHtml(p.yearlyPrice)}/year` : ''}.</strong> ${escapeHtml(p.description)}</li>`).join('')}
+          </ul>
+        </section>
+
+        <section id="help">
+          <h2 style="${SSR_H2}">Frequently asked questions</h2>
+          ${renderFaqHtml(GROWTH_FAQ)}
+        </section>
+
+        <section>
+          <h2 style="${SSR_H2}">Free AI visibility tools</h2>
+          <ul style="margin: 0; padding-left: 1.25rem; color: #cbd5e1;">
+            ${GROWTH_FREE_TOOLS.map(t => `<li style="margin-bottom: 0.4rem;"><a href="${t.href}" style="${SSR_LINK}">${escapeHtml(t.name)}</a>: ${escapeHtml(t.text)}</li>`).join('')}
+          </ul>
+        </section>
+      </main>
+    </div>
+  `;
+
+  let html = stripOldMetaTags(templateHtml);
+
+  const metaTags = [
+    `<title>${escapeHtml(GROWTH_SEO.title)}</title>`,
+    `<meta name="description" content="${escapeHtml(GROWTH_SEO.description)}" />`,
+    `<meta name="keywords" content="${escapeHtml(GROWTH_SEO.keywords)}" />`,
+    `<meta name="robots" content="${isAppRoute ? 'noindex, follow' : ROBOTS_INDEX}" />`,
+    `<link rel="canonical" href="${canonicalUrl}" />`,
+    `<meta property="og:type" content="website" />`,
+    `<meta property="og:site_name" content="GrowthControl by Cerilas" />`,
+    `<meta property="og:locale" content="en_US" />`,
+    `<meta property="og:title" content="${escapeHtml(GROWTH_SEO.title)}" />`,
+    `<meta property="og:description" content="${escapeHtml(GROWTH_SEO.description)}" />`,
+    `<meta property="og:url" content="${canonicalUrl}" />`,
+    `<meta property="og:image" content="${ogImg}" />`,
+    `<meta property="og:image:width" content="1200" />`,
+    `<meta property="og:image:height" content="630" />`,
+    `<meta property="og:image:alt" content="GrowthControl AI visibility tracker" />`,
+    `<meta name="twitter:card" content="summary_large_image" />`,
+    `<meta name="twitter:title" content="${escapeHtml(GROWTH_SEO.title)}" />`,
+    `<meta name="twitter:description" content="${escapeHtml(GROWTH_SEO.description)}" />`,
+    `<meta name="twitter:image" content="${ogImg}" />`,
+    jsonLdScript(buildGrowthJsonLd(), 'growth-jsonld')
+  ].join('\n    ');
+
+  html = html.replace('</head>', `    ${metaTags}\n  </head>`);
+  if (!isAppRoute) {
+    html = html.replace('<div id="root"></div>', `<div id="root">${ssrBodyHtml}</div>`);
+  }
+
+  return html;
+}

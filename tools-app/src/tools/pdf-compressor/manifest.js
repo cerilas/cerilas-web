@@ -5,7 +5,7 @@ export const pdfCompressorManifest = {
   category: 'Document Utility',
   iconName: 'FileText',
   badge: '100% Private',
-  targetUrl: '#/tool/pdf-compressor',
+  targetUrl: '/tool/pdf-compressor',
   seoTitle: 'Compress PDF Online Free – Reduce PDF Size in MB & KB (100KB, 200KB, 1MB) | Cerilas Tools',
   seoDescription: 'Compress PDF files online with 100% in-browser privacy. Reduce PDF size in MB & KB to meet strict email, job portal, and government limits (under 200KB, 500KB, 1MB) with zero server uploads.',
   features: [

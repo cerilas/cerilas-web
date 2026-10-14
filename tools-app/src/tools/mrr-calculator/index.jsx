@@ -113,7 +113,7 @@ export default function MrrCalculator({ onBack, toolMeta }) {
 💰 Run-Rate ARR: $${metrics.annualizedArr.toLocaleString()}
 🎯 SaaS Quick Ratio: ${metrics.quickRatio}x (${metrics.quickLabel})
 ---------------------------------------------
-Generated via https://tools.cerilas.com/#/tool/mrr-calculator`;
+Generated via https://tools.cerilas.com/tool/mrr-calculator`;
 
     navigator.clipboard.writeText(report);
     setCopied(true);

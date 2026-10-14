@@ -1,39 +1,55 @@
-# Cerilas Tools
+# Cerilas' Tools & GrowthControl
 
-> Cerilas Tools (https://tools.cerilas.com) is a suite of 100% free, privacy-first, client-side web utilities built for developers, creators, and professionals. All data processing (image compression, PDF editing, video compression, AI background removal, ATS resume checking, QR generation) executes locally inside the user's browser sandbox via WebAssembly and HTML5 APIs. Zero files or sensitive data are uploaded to third-party servers.
+> Cerilas' Tools (https://tools.cerilas.com) is a collection of free web utilities for marketers, developers and creators, plus GrowthControl, an AI visibility tracker and Generative Engine Optimization (GEO) platform. Most file tools (image, PDF and video compression, PDF editing, background removal) run locally in the browser. Built by Cerilas (CERİLAS Yüksek Teknoloji San. ve Tic. AŞ). Content is in English and aimed at the United States, Canada, the United Kingdom and Australia.
 
-## Flagship Platform: GrowthControl (AI Visibility & GEO)
+## GrowthControl: AI visibility tracker & GEO platform
 
-- [GrowthControl](https://tools.cerilas.com/growth): Autonomous Generative Engine Optimization (GEO) & AI Search Visibility platform. Audit whether ChatGPT Search, Perplexity AI, Claude 3.7, and Google Gemini cite your domain. Features automated weekly prompt radars, Google Search Console deep sync, robots.txt AI bot directives (GPTBot, ClaudeBot, PerplexityBot), llms.txt validation, and prioritized weekly organic action feeds.
-- [AI Visibility Checker by GrowthControl](https://tools.cerilas.com/tool/ai-visibility-checker): Instant free AI search visibility and citation checker. Probes live Google Gemini and ChatGPT citation grounding with real-time GEO scoring.
+- [GrowthControl](https://tools.cerilas.com/growth): AI visibility tracking software. It runs the questions buyers ask in ChatGPT, Google Gemini, Perplexity and Claude, records whether a brand is mentioned or its website is cited as a source, and shows which competitors appear instead.
+- Key features: AI citation and brand mention tracking, competitor AI share of voice, read-only Google Search Console and Google Analytics 4 integration, AI crawler access audit (GPTBot, OAI-SearchBot, ClaudeBot, PerplexityBot, Google-Extended), llms.txt and Schema.org checks, Google Business Profile review radar, and a weekly prioritized action feed with ready-to-paste fixes.
+- Target markets: per-prompt country and language targeting for the United States, Canada, the United Kingdom and Australia (other countries are also supported).
+- Pricing (USD): Forever Free, $0 (1 workspace, 3 tracked prompts). Pro, $9.99/month or $99.90/year (3 workspaces, 15 tracked prompts, 3 competitors). Unlimited, $14.99/month or $149.90/year (unlimited workspaces and competitors, 30 tracked prompts).
+- Best for: SaaS and B2B software companies, marketing and SEO agencies managing multiple clients, e-commerce and DTC brands, and local service businesses.
 
-## Tools & Capabilities
+## AI Visibility Checker (free)
 
-- [GrowthControl Platform](https://tools.cerilas.com/growth): All-in-one Generative Engine Optimization (GEO) suite. Audit, track, and optimize brand citations across LLM search engines.
+- [AI Visibility Checker](https://tools.cerilas.com/tool/ai-visibility-checker): Free, no-signup AI visibility checker. Enter a website URL and target country; the tool generates 10 realistic buyer questions from the site's content, asks AI search, and reports for each question whether the site is cited, only mentioned, or not visible. Returns an AI visibility score (A+ to F), the competing sources cited instead, and recommended fixes. Fair-use limit of a few checks per hour.
+- Checker vs. tracker: the checker is a one-time snapshot; GrowthControl re-runs the same prompts on a schedule, tracks competitors and stores history.
 
-- [PDF Editor](https://tools.cerilas.com/tool/pdf-editor): Free in-browser PDF editor. Add text annotations, insert legal digital signatures, permanently redact sensitive PII/numbers with destructive vector blackout, and organize, rotate, and reorder pages with zero watermark.
-- [QR Code Generator](https://tools.cerilas.com/tool/qr-code-generator): Free permanent QR code generator that never expires. Generate high-resolution SVG vector and 2048px PNG QR codes for URLs, Wi-Fi, vCard, Plain Text, and Email with Apple-minimalist styling and zero signup.
-- [Image Compressor](https://tools.cerilas.com/tool/image-compressor): Lossless & high-efficiency client-side image compression. Batch compress JPG, PNG, WebP, AVIF, and SVG files with visual side-by-side comparison slider and ZIP download.
-- [PDF Compressor](https://tools.cerilas.com/tool/pdf-compressor): Multi-level compression presets (Extreme, Recommended, High Quality) for PDF documents with zero server upload and batch export.
-- [Email Signature Generator](https://tools.cerilas.com/tool/email-signature-generator): Professional HTML email signature creator. Supports company logo, phone, address, social media badges, disclaimer, and 1-click install for Gmail, Apple Mail, and Outlook.
-- [ATS Resume Checker](https://tools.cerilas.com/tool/ats-resume-checker): Upload CV/Resume (PDF) to test bot readability, detect missing hard and soft keywords, and get AI ATS match scores against any target job description.
-- [Background Remover](https://tools.cerilas.com/tool/background-remover): 100% client-side AI portrait and product cutout using local ONNX / WebAssembly neural network models. Exports transparent HD PNG.
-- [PDF → RAG Cleaner](https://tools.cerilas.com/tool/pdf-rag-cleaner): Transform messy PDFs into clean Markdown, structured JSON chunks, and rich metadata optimized for LangChain, LlamaIndex, OpenAI, and vector database embeddings.
-- [AI Content Detector](https://tools.cerilas.com/tool/ai-content-detector): Free AI text and PDF detector. Computes 0-100% probability scores, perplexity, burstiness metrics, and itemized Pros & Cons (Human vs AI markers).
-- [Video Compressor](https://tools.cerilas.com/tool/video-compressor): Compress MP4, WebM, and MOV videos locally with zero uploads. Multi-level quality presets, trimming, audio muting, and side-by-side comparison player.
-- [Webhook Tester](https://tools.cerilas.com/tool/webhook-tester): Test, inspect, and debug incoming webhooks with unique live URLs. Inspect headers, payloads, query parameters, replay requests, and simulate mock Stripe/GitHub webhooks.
-- [JSON Beautifier & Formatter](https://tools.cerilas.com/tool/json-beautifier): Format, beautify, validate, minify, and repair JSON in your browser. Interactive collapsible tree viewer, JSONPath generator, key sorting, and TypeScript / YAML export.
-- [Pomodoro Timer](https://tools.cerilas.com/tool/pomodoro-timer): Minimalist in-browser Pomodoro timer with fluid wave animation, acoustic alert sounds, and customizable focus & break intervals.
-- [YouTube Thumbnail Downloader](https://tools.cerilas.com/tool/youtube-thumbnail-downloader): Download full-resolution 4K, HD (1080p), and WebP thumbnails from any YouTube video or Shorts URL with zero watermarks, instant copy to clipboard, and responsive embed generator.
-- [AI Visibility Checker](https://tools.cerilas.com/tool/ai-visibility-checker): Free AI search visibility and citation checker. Automatically extracts top 10 search queries from your website content and audits live citation grounding across Google Gemini and ChatGPT Search with GEO/AEO scoring.
-- [AI Crawler Checker](https://tools.cerilas.com/tool/ai-crawler-checker): Audit robots.txt directives and HTTP access rules for major AI crawlers (GPTBot, ClaudeBot, PerplexityBot, Google-Extended).
-- [AI Link Hallucination Checker](https://tools.cerilas.com/tool/ai-link-hallucination-checker): Scan LLM outputs for fabricated links, broken citations, and 404 dead-ends with real-time HTTP validation.
-- [LLMs.txt Tools & Validator](https://tools.cerilas.com/tool/llms-txt): Build, parse, and validate /llms.txt and /llms-full.txt files to optimize site content for AI agent consumption and GEO.
-- [Universal Token Counter](https://tools.cerilas.com/tool/token-counter-universal): Multi-model token counter, visualizer, and cost auditor across GPT-4o, Claude 3.7, Gemini 2.0, DeepSeek, and Llama 3.
-- [EU Funding & Cascade Grants](https://tools.cerilas.com/tool/eu-funding-opportunities): Live searchable database of Horizon Europe research calls and Cascade Funding (FSTP) equity-free lump-sum sub-grants.
-- [Connect ChatGPT to Google Analytics & Search Console (MCP Server)](https://tools.cerilas.com/tool/google-marketing-mcp): Connect Google Analytics 4, Search Console, and Google Ads directly to ChatGPT, Claude Desktop, and Cursor via Model Context Protocol (MCP). 100% read-only OAuth, zero CSV exports, ask questions about traffic, search queries, and conversions in plain English.
+## Key definitions
 
-## Privacy & Security Guarantees
-- Zero-Upload Architecture: Files never touch Cerilas servers; processing runs inside client WebAssembly and Web Worker threads.
-- Compliance: Full compliance with GDPR, HIPAA, and corporate confidentiality guidelines.
-- Cost: 100% free with unlimited lifetime usage and zero watermarks.
+- AI visibility: how often AI assistants mention a brand, cite its website as a source, or recommend competitors, across the questions customers ask.
+- Generative Engine Optimization (GEO): making a brand easy for AI answer engines to understand, trust and cite, through answer-first content, structured data, open AI crawler access, llms.txt and third-party mentions.
+- Citation rate: share of tracked prompts where the AI links to the brand's own domain.
+- AI share of voice: how often a brand appears compared with tracked competitors across the same prompts.
+
+## AI search & GEO tools
+
+- [AI Crawler Checker](https://tools.cerilas.com/tool/ai-crawler-checker): Audit robots.txt directives and HTTP access rules for AI crawlers (GPTBot, ClaudeBot, PerplexityBot, Google-Extended).
+- [LLMs.txt Generator & Validator](https://tools.cerilas.com/tool/llms-txt): Build, parse and validate /llms.txt and /llms-full.txt files.
+- [AI Link Hallucination Checker](https://tools.cerilas.com/tool/ai-link-hallucination-checker): Scan LLM outputs for fabricated links, broken citations and 404s with live HTTP validation.
+- [Connect ChatGPT to Google Analytics & Search Console (MCP Server)](https://tools.cerilas.com/tool/google-marketing-mcp): Connect Google Analytics 4, Search Console and Google Ads to ChatGPT, Claude Desktop and Cursor via the Model Context Protocol with read-only OAuth.
+- [Universal Token Counter](https://tools.cerilas.com/tool/token-counter-universal): Count tokens and estimate cost across OpenAI, Anthropic, Google, DeepSeek and Llama models.
+- [AI Content Detector](https://tools.cerilas.com/tool/ai-content-detector): Estimate the probability that text or a PDF was AI-generated, with perplexity and burstiness metrics.
+- [PDF → RAG Cleaner](https://tools.cerilas.com/tool/pdf-rag-cleaner): Turn PDFs into clean Markdown, JSON chunks and metadata for LangChain, LlamaIndex and vector databases.
+
+## File, media & productivity tools
+
+- [PDF Editor](https://tools.cerilas.com/tool/pdf-editor): Edit PDFs in the browser: add text, sign, redact, rotate and reorder pages, without watermarks.
+- [PDF Compressor](https://tools.cerilas.com/tool/pdf-compressor): Compress PDFs with Extreme, Recommended and High Quality presets, locally in the browser.
+- [Image Compressor](https://tools.cerilas.com/tool/image-compressor): Batch compress JPG, PNG, WebP, AVIF and SVG files in the browser with a comparison slider and ZIP download.
+- [Video Compressor](https://tools.cerilas.com/tool/video-compressor): Compress MP4, WebM and MOV locally with quality presets, trimming and audio muting.
+- [Background Remover](https://tools.cerilas.com/tool/background-remover): Remove image backgrounds in the browser with an on-device model; exports transparent PNG.
+- [QR Code Generator](https://tools.cerilas.com/tool/qr-code-generator): Static QR codes that never expire, exported as SVG or high-resolution PNG, for URLs, Wi-Fi, vCard, text and email.
+- [Email Signature Generator](https://tools.cerilas.com/tool/email-signature-generator): HTML email signatures for Gmail, Apple Mail and Outlook.
+- [ATS Resume Checker](https://tools.cerilas.com/tool/ats-resume-checker): Test resume readability for applicant tracking systems and keyword match against a job description.
+- [Webhook Tester](https://tools.cerilas.com/tool/webhook-tester): Inspect and debug incoming webhooks with unique live URLs.
+- [JSON Beautifier & Formatter](https://tools.cerilas.com/tool/json-beautifier): Format, validate, minify and repair JSON with a tree viewer.
+- [YouTube Thumbnail Downloader](https://tools.cerilas.com/tool/youtube-thumbnail-downloader): Download HD thumbnails from any YouTube video or Shorts URL.
+- [Pomodoro Timer](https://tools.cerilas.com/tool/pomodoro-timer): Minimal in-browser Pomodoro timer with customizable intervals.
+- [EU Funding & Cascade Grants](https://tools.cerilas.com/tool/eu-funding-opportunities): Searchable database of Horizon Europe calls and cascade funding (FSTP) sub-grants.
+
+## Company & policies
+
+- Publisher: Cerilas (CERİLAS Yüksek Teknoloji San. ve Tic. AŞ), https://cerilas.com, support@cerilas.com
+- [Pricing](https://tools.cerilas.com/pricing) · [Terms](https://tools.cerilas.com/terms) · [Privacy](https://tools.cerilas.com/privacy) · [Refund policy](https://tools.cerilas.com/refund)
+- Google integrations use read-only OAuth scopes; access tokens are encrypted at rest and can be disconnected at any time.

@@ -5,7 +5,7 @@ export const arrCalculatorManifest = {
   category: 'Startup & Finance',
   iconName: 'Database',
   badge: 'Valuation Metric',
-  targetUrl: '#/tool/arr-calculator',
+  targetUrl: '/tool/arr-calculator',
   seoTitle: 'ARR Calculator - Annual Recurring Revenue & Rule of 40 | Cerilas Tools',
   seoDescription: 'Free SaaS ARR Calculator. Convert MRR to ARR, project multi-year revenue compounding, measure ACV (Average Contract Value), and calculate Rule of 40 score.',
   features: [

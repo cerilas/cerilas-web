@@ -5,7 +5,7 @@ export const pdfMergerManifest = {
   category: 'Document Utility',
   iconName: 'Layers',
   badge: '100% Private',
-  targetUrl: '#/tool/pdf-merger',
+  targetUrl: '/tool/pdf-merger',
   seoTitle: 'Merge PDF Online Free – Combine Multiple PDF Files In-Browser | Cerilas Tools',
   seoDescription: 'Combine multiple PDF files into one document in seconds. 100% private, free, and processed entirely in your browser with zero server uploads. Reorder pages, sort files, and preview before merging.',
   features: [

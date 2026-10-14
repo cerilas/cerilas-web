@@ -7,7 +7,7 @@ export const webhookTesterManifest = {
   icon_name: 'Webhook',
   iconName: 'Webhook',
   badge: 'Sender & Tester',
-  targetUrl: '#/tool/webhook-tester',
+  targetUrl: '/tool/webhook-tester',
   seoTitle: 'Free Online Webhook Tester & Sender (2026) – Test Discord, Slack & Custom Webhooks | Cerilas Tools',
   seoDescription: 'Send and test requests to external webhooks online. Built-in templates for Discord, Slack, Telegram, Stripe, and Zapier. Custom HTTP methods, headers, HMAC-SHA256 signature generator, response inspector, and cURL replay.',
   features: [

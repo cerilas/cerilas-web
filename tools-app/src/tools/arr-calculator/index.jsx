@@ -108,7 +108,7 @@ export default function ArrCalculator({ onBack, toolMeta }) {
   • Year 2 ARR: $${metrics.year2Arr.toLocaleString()}
   • Year 3 ARR: $${metrics.year3Arr.toLocaleString()}
 ---------------------------------------------
-Generated via https://tools.cerilas.com/#/tool/arr-calculator`;
+Generated via https://tools.cerilas.com/tool/arr-calculator`;
 
     navigator.clipboard.writeText(report);
     setCopied(true);

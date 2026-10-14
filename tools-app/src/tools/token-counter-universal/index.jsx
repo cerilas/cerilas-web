@@ -764,7 +764,7 @@ export default function TokenCounterUniversal({ onBack, toolMeta }) {
           <button
             type="button"
             className="tc-icon-btn"
-            onClick={() => handleCopy(`=== Token Count Summary ===\nText: ${textStats.chars} chars, ${textStats.words} words\nActive Model (${activeModel.name}): ${activeModel.tokenCount.toLocaleString()} tokens\nContext Usage: ${activeModel.contextPercentage}%\nInput Cost: $${activeModel.inputCost.toFixed(6)} USD\n\nAudited with Cerilas Universal Token Counter (https://tools.cerilas.com/#/tool/token-counter-universal)`)}
+            onClick={() => handleCopy(`=== Token Count Summary ===\nText: ${textStats.chars} chars, ${textStats.words} words\nActive Model (${activeModel.name}): ${activeModel.tokenCount.toLocaleString()} tokens\nContext Usage: ${activeModel.contextPercentage}%\nInput Cost: $${activeModel.inputCost.toFixed(6)} USD\n\nAudited with Cerilas Universal Token Counter (https://tools.cerilas.com/tool/token-counter-universal)`)}
             disabled={!inputText}
           >
             <Share2 size={13} />

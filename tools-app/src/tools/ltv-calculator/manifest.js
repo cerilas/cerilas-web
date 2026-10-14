@@ -5,7 +5,7 @@ export const ltvCalculatorManifest = {
   category: 'Startup & Finance',
   iconName: 'DollarSign',
   badge: 'Unit Economics',
-  targetUrl: '#/tool/ltv-calculator',
+  targetUrl: '/tool/ltv-calculator',
   seoTitle: 'Customer Lifetime Value (LTV) Calculator | Cerilas Tools',
   seoDescription: 'Free SaaS LTV Calculator. Calculate Customer Lifetime Value from ARPU, Gross Margin %, and Monthly Churn with discounted cohort modeling.',
   features: [

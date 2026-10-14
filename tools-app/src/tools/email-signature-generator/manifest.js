@@ -8,7 +8,7 @@ export const emailSignatureGeneratorManifest = {
   icon_name: 'Mail',
   iconName: 'Mail',
   badge: 'Email & HTML',
-  targetUrl: '#/tool/email-signature-generator',
+  targetUrl: '/tool/email-signature-generator',
   seoTitle: 'Free Email Signature Generator (2026) | Gmail, Outlook & Apple Mail Ready | Cerilas Tools',
   seoDescription: 'Create a professional HTML email signature in seconds for free. Upload company logos, add job titles, social profiles, custom fields, and disclaimer text. 100% private in-browser tool.',
   features: [

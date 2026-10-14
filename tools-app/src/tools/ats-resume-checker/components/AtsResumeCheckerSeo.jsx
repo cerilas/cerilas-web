@@ -66,7 +66,7 @@ export default function AtsResumeCheckerSeo() {
       '@graph': [
         {
           '@type': 'WebApplication',
-          '@id': 'https://tools.cerilas.com/#/tool/ats-resume-checker#software',
+          '@id': 'https://tools.cerilas.com/tool/ats-resume-checker#software',
           'name': 'Cerilas Free AI ATS Resume Checker & Job Match Scanner',
           'alternateName': [
             'Cerilas ATS Checker',
@@ -90,13 +90,6 @@ export default function AtsResumeCheckerSeo() {
             'price': '0',
             'priceCurrency': 'USD',
             'availability': 'https://schema.org/InStock'
-          },
-          'aggregateRating': {
-            '@type': 'AggregateRating',
-            'ratingValue': '4.97',
-            'reviewCount': '1840',
-            'bestRating': '5',
-            'worstRating': '1'
           },
           'author': {
             '@type': 'Organization',
@@ -124,7 +117,7 @@ export default function AtsResumeCheckerSeo() {
         },
         {
           '@type': 'BreadcrumbList',
-          '@id': 'https://tools.cerilas.com/#/tool/ats-resume-checker#breadcrumbs',
+          '@id': 'https://tools.cerilas.com/tool/ats-resume-checker#breadcrumbs',
           'itemListElement': [
             {
               '@type': 'ListItem',
@@ -142,13 +135,13 @@ export default function AtsResumeCheckerSeo() {
               '@type': 'ListItem',
               'position': 3,
               'name': 'Free ATS Resume Checker',
-              'item': 'https://tools.cerilas.com/#/tool/ats-resume-checker'
+              'item': 'https://tools.cerilas.com/tool/ats-resume-checker'
             }
           ]
         },
         {
           '@type': 'HowTo',
-          '@id': 'https://tools.cerilas.com/#/tool/ats-resume-checker#howto',
+          '@id': 'https://tools.cerilas.com/tool/ats-resume-checker#howto',
           'name': 'How to Optimize Your Resume for Applicant Tracking Systems (ATS)',
           'description': 'A proven 4-step workflow to verify bot readability, align keywords, and achieve an 80%+ ATS match score.',
           'totalTime': 'PT3M',
@@ -158,34 +151,34 @@ export default function AtsResumeCheckerSeo() {
               'position': 1,
               'name': 'Upload Resume PDF & Check Bot Readability',
               'text': 'Upload your CV in PDF format. Inspect the Raw Bot View to verify that your contact info, experience, and education extract cleanly without scrambled text.',
-              'url': 'https://tools.cerilas.com/#/tool/ats-resume-checker'
+              'url': 'https://tools.cerilas.com/tool/ats-resume-checker'
             },
             {
               '@type': 'HowToStep',
               'position': 2,
               'name': 'Paste Target Job Description',
               'text': 'Copy and paste the full job posting requirements and responsibilities for the specific role you are targeting.',
-              'url': 'https://tools.cerilas.com/#/tool/ats-resume-checker'
+              'url': 'https://tools.cerilas.com/tool/ats-resume-checker'
             },
             {
               '@type': 'HowToStep',
               'position': 3,
               'name': 'Run AI ATS Semantic Match Analysis',
               'text': 'Execute the scanner to receive an instant compatibility score, identifying missing hard skills, keywords, and structural formatting warnings.',
-              'url': 'https://tools.cerilas.com/#/tool/ats-resume-checker'
+              'url': 'https://tools.cerilas.com/tool/ats-resume-checker'
             },
             {
               '@type': 'HowToStep',
               'position': 4,
               'name': 'Incorporate Missing Keywords & Re-Scan',
               'text': 'Update your bullet points with the identified keywords and quantifiable metrics, then re-scan to confirm your score exceeds 80%.',
-              'url': 'https://tools.cerilas.com/#/tool/ats-resume-checker'
+              'url': 'https://tools.cerilas.com/tool/ats-resume-checker'
             }
           ]
         },
         {
           '@type': 'FAQPage',
-          '@id': 'https://tools.cerilas.com/#/tool/ats-resume-checker#faq',
+          '@id': 'https://tools.cerilas.com/tool/ats-resume-checker#faq',
           'mainEntity': FAQ_ITEMS.map((item) => ({
             '@type': 'Question',
             'name': item.q,

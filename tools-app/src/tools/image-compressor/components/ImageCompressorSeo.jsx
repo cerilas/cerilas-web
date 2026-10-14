@@ -27,7 +27,7 @@ export default function ImageCompressorSeo({ onApplyPreset }) {
       "@graph": [
         {
           "@type": "SoftwareApplication",
-          "@id": "https://tools.cerilas.com/#/tool/image-compressor#software",
+          "@id": "https://tools.cerilas.com/tool/image-compressor#software",
           "name": "Cerilas Free Image Compressor – Compress JPEG, Make PNG Smaller in KB, WebP Converter",
           "alternateName": [
             "Compress JPEG Online",
@@ -50,13 +50,6 @@ export default function ImageCompressorSeo({ onApplyPreset }) {
             "price": "0",
             "priceCurrency": "USD",
             "availability": "https://schema.org/InStock"
-          },
-          "aggregateRating": {
-            "@type": "AggregateRating",
-            "ratingValue": "4.9",
-            "reviewCount": "1920",
-            "bestRating": "5",
-            "worstRating": "1"
           },
           "author": {
             "@type": "Organization",
@@ -84,7 +77,7 @@ export default function ImageCompressorSeo({ onApplyPreset }) {
         },
         {
           "@type": "BreadcrumbList",
-          "@id": "https://tools.cerilas.com/#/tool/image-compressor#breadcrumbs",
+          "@id": "https://tools.cerilas.com/tool/image-compressor#breadcrumbs",
           "itemListElement": [
             {
               "@type": "ListItem",
@@ -102,14 +95,14 @@ export default function ImageCompressorSeo({ onApplyPreset }) {
               "@type": "ListItem",
               "position": 3,
               "name": "Free Image Compressor & WebP Converter",
-              "item": "https://tools.cerilas.com/#/tool/image-compressor"
+              "item": "https://tools.cerilas.com/tool/image-compressor"
             }
           ]
         },
         {
           "@type": "WebPage",
-          "@id": "https://tools.cerilas.com/#/tool/image-compressor#webpage",
-          "url": "https://tools.cerilas.com/#/tool/image-compressor",
+          "@id": "https://tools.cerilas.com/tool/image-compressor#webpage",
+          "url": "https://tools.cerilas.com/tool/image-compressor",
           "name": "Free Image Compressor – Reduce JPG, PNG & WebP Without Losing Quality",
           "inLanguage": ["en"],
           "speakable": {
@@ -119,7 +112,7 @@ export default function ImageCompressorSeo({ onApplyPreset }) {
         },
         {
           "@type": "HowTo",
-          "@id": "https://tools.cerilas.com/#/tool/image-compressor#howto",
+          "@id": "https://tools.cerilas.com/tool/image-compressor#howto",
           "name": "How to Compress Images Online Without Server Uploads",
           "description": "Step-by-step guide to compressing images in bulk directly in your browser with zero privacy risk.",
           "totalTime": "PT1M",
@@ -129,27 +122,27 @@ export default function ImageCompressorSeo({ onApplyPreset }) {
               "position": 1,
               "name": "Upload or Drag & Drop Images",
               "text": "Drop single or multiple images (JPG, PNG, WebP, AVIF, SVG) into the compressor box. Files are processed entirely in memory on your device.",
-              "url": "https://tools.cerilas.com/#/tool/image-compressor"
+              "url": "https://tools.cerilas.com/tool/image-compressor"
             },
             {
               "@type": "HowToStep",
               "position": 2,
               "name": "Adjust Quality and Format Settings",
               "text": "Choose your desired compression strength (e.g. 80% balanced) or convert to modern WebP for maximum web speed.",
-              "url": "https://tools.cerilas.com/#/tool/image-compressor"
+              "url": "https://tools.cerilas.com/tool/image-compressor"
             },
             {
               "@type": "HowToStep",
               "position": 3,
               "name": "Download Compressed Images or ZIP",
               "text": "Compare results side-by-side using the visual slider and download individual files or download all compressed files in a single ZIP archive.",
-              "url": "https://tools.cerilas.com/#/tool/image-compressor"
+              "url": "https://tools.cerilas.com/tool/image-compressor"
             }
           ]
         },
         {
           "@type": "FAQPage",
-          "@id": "https://tools.cerilas.com/#/tool/image-compressor#faq",
+          "@id": "https://tools.cerilas.com/tool/image-compressor#faq",
           "mainEntity": [
             {
               "@type": "Question",

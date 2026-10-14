@@ -114,9 +114,9 @@ export default function PdfRagCleanerSeo() {
       '@graph': [
         {
           '@type': 'WebApplication',
-          '@id': 'https://tools.cerilas.com/#/tool/pdf-rag-cleaner#webapp',
+          '@id': 'https://tools.cerilas.com/tool/pdf-rag-cleaner#webapp',
           name: 'Cerilas PDF to RAG Cleaner & Markdown Converter',
-          url: 'https://tools.cerilas.com/#/tool/pdf-rag-cleaner',
+          url: 'https://tools.cerilas.com/tool/pdf-rag-cleaner',
           applicationCategory: 'DeveloperApplication',
           operatingSystem: 'All modern web browsers (Chrome, Safari, Firefox, Edge)',
           browserRequirements: 'Requires JavaScript and HTML5 Canvas support',
@@ -124,13 +124,6 @@ export default function PdfRagCleanerSeo() {
             '@type': 'Offer',
             price: '0',
             priceCurrency: 'USD'
-          },
-          aggregateRating: {
-            '@type': 'AggregateRating',
-            ratingValue: '4.98',
-            reviewCount: '1840',
-            bestRating: '5',
-            worstRating: '1'
           },
           featureList: [
             'Automatic header, footer, and running page number noise removal',
@@ -145,7 +138,7 @@ export default function PdfRagCleanerSeo() {
         },
         {
           '@type': 'HowTo',
-          '@id': 'https://tools.cerilas.com/#/tool/pdf-rag-cleaner#howto',
+          '@id': 'https://tools.cerilas.com/tool/pdf-rag-cleaner#howto',
           name: 'How to Convert a PDF into Clean RAG Chunks for Vector Embeddings',
           description: 'Step-by-step guide to transforming raw PDFs into embedding-ready Markdown and JSON chunks with metadata.',
           step: [
@@ -177,7 +170,7 @@ export default function PdfRagCleanerSeo() {
         },
         {
           '@type': 'BreadcrumbList',
-          '@id': 'https://tools.cerilas.com/#/tool/pdf-rag-cleaner#breadcrumbs',
+          '@id': 'https://tools.cerilas.com/tool/pdf-rag-cleaner#breadcrumbs',
           itemListElement: [
             {
               '@type': 'ListItem',
@@ -195,13 +188,13 @@ export default function PdfRagCleanerSeo() {
               '@type': 'ListItem',
               position: 3,
               name: 'PDF to RAG Cleaner',
-              item: 'https://tools.cerilas.com/#/tool/pdf-rag-cleaner'
+              item: 'https://tools.cerilas.com/tool/pdf-rag-cleaner'
             }
           ]
         },
         {
           '@type': 'FAQPage',
-          '@id': 'https://tools.cerilas.com/#/tool/pdf-rag-cleaner#faq',
+          '@id': 'https://tools.cerilas.com/tool/pdf-rag-cleaner#faq',
           mainEntity: FAQ_ITEMS.map((item) => ({
             '@type': 'Question',
             name: item.q,

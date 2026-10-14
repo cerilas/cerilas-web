@@ -27,7 +27,7 @@ export default function PdfSplitterSeo() {
       "@graph": [
         {
           "@type": "WebApplication",
-          "@id": "https://tools.cerilas.com/#/tool/pdf-splitter#software",
+          "@id": "https://tools.cerilas.com/tool/pdf-splitter#software",
           "name": "Cerilas Free In-Browser PDF Splitter",
           "alternateName": [
             "Cerilas PDF Splitter",
@@ -48,7 +48,7 @@ export default function PdfSplitterSeo() {
         },
         {
           "@type": "FAQPage",
-          "@id": "https://tools.cerilas.com/#/tool/pdf-splitter#faq",
+          "@id": "https://tools.cerilas.com/tool/pdf-splitter#faq",
           "mainEntity": [
             {
               "@type": "Question",
