@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { authPool } from '../db.js';
 import { handleGrowthOAuthCallback } from '../utils/googleGrowthIntegration.js';
+import { resolveGoogleRedirectUri } from '../utils/googleRedirect.js';
 
 const router = Router();
 const JWT_SECRET = process.env.JWT_SECRET || 'cerilas_admin_jwt_secret_2026';
@@ -315,7 +316,7 @@ router.post('/google/signin', async (req, res) => {
     } else if (code) {
       const clientId = process.env.GOOGLE_CLIENT_ID;
       const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
-      const redirectUri = process.env.GOOGLE_REDIRECT_URI || `${req.protocol}://${req.get('host')}/api/auth/google/callback`;
+      const redirectUri = resolveGoogleRedirectUri(req);
 
       const tokenRes = await fetch('https://oauth2.googleapis.com/token', {
         method: 'POST',
@@ -378,7 +379,7 @@ router.post('/google/signin', async (req, res) => {
  */
 router.get('/google/url', (req, res) => {
   const clientId = process.env.GOOGLE_CLIENT_ID;
-  const redirectUri = process.env.GOOGLE_REDIRECT_URI || `${req.protocol}://${req.get('host')}/api/auth/google/callback`;
+  const redirectUri = resolveGoogleRedirectUri(req);
 
   const params = new URLSearchParams({
     client_id: clientId,
@@ -430,7 +431,7 @@ router.get('/google/callback', async (req, res, next) => {
     }
 
     try {
-      const growthResult = await handleGrowthOAuthCallback({ code, state });
+      const growthResult = await handleGrowthOAuthCallback({ code, state, redirectUri: resolveGoogleRedirectUri(req) });
       return res.send(`
         <!DOCTYPE html>
         <html>
@@ -503,7 +504,7 @@ router.get('/google/callback', async (req, res, next) => {
   try {
     const clientId = process.env.GOOGLE_CLIENT_ID;
     const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
-    const redirectUri = process.env.GOOGLE_REDIRECT_URI || `${req.protocol}://${req.get('host')}/api/auth/google/callback`;
+    const redirectUri = resolveGoogleRedirectUri(req);
 
     const tokenRes = await fetch('https://oauth2.googleapis.com/token', {
       method: 'POST',
@@ -587,10 +588,10 @@ router.get('/google/callback', async (req, res, next) => {
                 try { window.close(); } catch(err) {}
               }, 400);
             } else {
-              window.location.href = '${process.env.CLIENT_URL || 'http://localhost:5173'}/#/growth';
+              window.location.href = '/growth';
             }
           } catch(e) {
-            window.location.href = '${process.env.CLIENT_URL || 'http://localhost:5173'}/#/growth';
+            window.location.href = '/growth';
           }
         </script>
       </body>
@@ -634,7 +635,7 @@ router.post('/google/link', requireAuth, async (req, res) => {
     } else if (code) {
       const clientId = process.env.GOOGLE_CLIENT_ID;
       const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
-      const redirectUri = process.env.GOOGLE_REDIRECT_URI || `${req.protocol}://${req.get('host')}/api/auth/google/callback`;
+      const redirectUri = resolveGoogleRedirectUri(req);
 
       const tokenRes = await fetch('https://oauth2.googleapis.com/token', {
         method: 'POST',

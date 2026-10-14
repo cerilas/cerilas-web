@@ -14,9 +14,8 @@ const SCOPES = [
 /**
  * Builds the Google OAuth 2.0 authorization URL.
  */
-export function getGoogleAuthUrl(state = '') {
+export function getGoogleAuthUrl(state = '', redirectUri = process.env.GOOGLE_REDIRECT_URI) {
   const clientId = process.env.GOOGLE_CLIENT_ID;
-  const redirectUri = process.env.GOOGLE_REDIRECT_URI;
 
   if (!clientId || !redirectUri) {
     throw new Error('Google OAuth credentials (GOOGLE_CLIENT_ID, GOOGLE_REDIRECT_URI) are not configured.');
@@ -39,10 +38,9 @@ export function getGoogleAuthUrl(state = '') {
 /**
  * Exchanges the authorization code received from Google for tokens.
  */
-export async function exchangeCodeForTokens(code) {
+export async function exchangeCodeForTokens(code, redirectUri = process.env.GOOGLE_REDIRECT_URI) {
   const clientId = process.env.GOOGLE_CLIENT_ID;
   const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
-  const redirectUri = process.env.GOOGLE_REDIRECT_URI;
 
   const bodyParams = new URLSearchParams({
     code,

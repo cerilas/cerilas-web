@@ -2,6 +2,7 @@ import { Router } from 'express';
 import crypto from 'crypto';
 import pool from '../db.js';
 import { encryptText } from '../utils/crypto.js';
+import { resolveGoogleRedirectUri } from '../utils/googleRedirect.js';
 import {
   getGoogleAuthUrl,
   exchangeCodeForTokens,
@@ -41,7 +42,7 @@ function extractMcpKey(req) {
 const handleAuth = (req, res) => {
   try {
     const returnTo = req.query.returnTo || '/#/tool/google-marketing-mcp';
-    const authUrl = getGoogleAuthUrl(returnTo);
+    const authUrl = getGoogleAuthUrl(returnTo, resolveGoogleRedirectUri(req));
     res.redirect(authUrl);
   } catch (error) {
     console.error('Google auth initiation error:', error);
@@ -71,7 +72,7 @@ const handleCallback = async (req, res) => {
 
   try {
     // 1. Exchange code for access & refresh tokens
-    const tokens = await exchangeCodeForTokens(code);
+    const tokens = await exchangeCodeForTokens(code, resolveGoogleRedirectUri(req));
     if (!tokens.refresh_token) {
       console.warn('Google did not return a refresh_token. User may need to revoke prior consent.');
     }
@@ -240,7 +241,7 @@ export const handleOAuthAuthorize = async (req, res) => {
     );
 
     // Redirect user to Google OAuth with our stateId
-    const googleAuthUrl = getGoogleAuthUrl(`cerilas_oauth_${stateId}`);
+    const googleAuthUrl = getGoogleAuthUrl(`cerilas_oauth_${stateId}`, resolveGoogleRedirectUri(req));
     return res.redirect(googleAuthUrl);
   } catch (err) {
     console.error('OAuth authorization endpoint error:', err);

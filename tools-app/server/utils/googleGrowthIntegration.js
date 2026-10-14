@@ -24,9 +24,8 @@ const GROWTH_SCOPES = [
 /**
  * Builds the Google OAuth URL specifically for Growth SaaS with required Search Console & GA4 scopes.
  */
-export function getGrowthGoogleAuthUrl(workspaceId, userId) {
+export function getGrowthGoogleAuthUrl(workspaceId, userId, redirectUri = process.env.GOOGLE_REDIRECT_URI) {
   const clientId = process.env.GOOGLE_CLIENT_ID;
-  const redirectUri = process.env.GOOGLE_REDIRECT_URI;
 
   if (!clientId || !redirectUri) {
     throw new Error('Google OAuth kimlik bilgileri (.env GOOGLE_CLIENT_ID / GOOGLE_REDIRECT_URI) yapılandırılmamış.');
@@ -110,7 +109,7 @@ export async function getValidGrowthAccessToken(connection) {
  * Handles the Google OAuth callback for Growth SaaS.
  * Saves credentials, auto-matches properties, and triggers initial sync.
  */
-export async function handleGrowthOAuthCallback({ code, state }) {
+export async function handleGrowthOAuthCallback({ code, state, redirectUri }) {
   const parts = (state || '').split('_');
   const workspaceId = parseInt(parts[1], 10);
   const userId = parts[2] ? parseInt(parts[2], 10) : null;
@@ -131,7 +130,7 @@ export async function handleGrowthOAuthCallback({ code, state }) {
   const orgId = workspace.organization_id;
 
   // 2. Exchange authorization code for tokens
-  const tokenData = await exchangeCodeForTokens(code);
+  const tokenData = await exchangeCodeForTokens(code, redirectUri);
   const accessToken = tokenData.access_token;
   const refreshToken = tokenData.refresh_token || null;
   const expiresAt = Date.now() + (tokenData.expires_in || 3600) * 1000;

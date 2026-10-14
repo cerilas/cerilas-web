@@ -13,6 +13,7 @@ import {
   getValidGrowthAccessToken
 } from '../utils/googleGrowthIntegration.js';
 import { inspectSearchConsoleUrl } from '../utils/googleAuth.js';
+import { resolveGoogleRedirectUri } from '../utils/googleRedirect.js';
 import {
   searchGoogleBusiness,
   fetchGoogleBusinessProfile,
@@ -4269,7 +4270,7 @@ router.get('/workspaces/:slugOrId/integrations/google/url', requireAuth, async (
     const authData = await resolveAndAuthorizeWorkspace(req, req.params.slugOrId);
     if (!authData) return res.status(404).json({ error: 'Çalışma alanı bulunamadı.' });
 
-    const url = getGrowthGoogleAuthUrl(authData.workspace.id, req.user.id);
+    const url = getGrowthGoogleAuthUrl(authData.workspace.id, req.user.id, resolveGoogleRedirectUri(req));
     res.json({ success: true, url });
   } catch (err) {
     console.error('[Google Auth URL Error]:', err);
