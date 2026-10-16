@@ -190,6 +190,18 @@ export const GROWTH_FAQ = [
   }
 ];
 
+export const GROWTH_DEMO_VIDEO = {
+  title: 'GrowthControl product demo: AI visibility tracking in 35 seconds',
+  description: 'A short walkthrough of GrowthControl: run the prompts buyers ask ChatGPT and other AI engines, see whether your brand is mentioned or cited, review the AI Visibility & Citation Report, and follow Search Console and Analytics trends in one dashboard.',
+  src: '/videos/growthcontrol-intro.mp4',
+  poster: '/videos/growthcontrol-intro-poster.jpg',
+  durationIso: 'PT35S',
+  durationLabel: '0:35',
+  uploadDate: '2026-10-17',
+  width: 1920,
+  height: 1080
+};
+
 export function buildGrowthJsonLd() {
   return {
     '@context': 'https://schema.org',
@@ -220,7 +232,25 @@ export function buildGrowthJsonLd() {
         inLanguage: 'en',
         isPartOf: { '@id': WEBSITE_ID },
         about: { '@id': `${GROWTH_URL}#software` },
-        breadcrumb: { '@id': `${GROWTH_URL}#breadcrumb` }
+        breadcrumb: { '@id': `${GROWTH_URL}#breadcrumb` },
+        video: { '@id': `${GROWTH_URL}#demo-video` }
+      },
+      {
+        '@type': 'VideoObject',
+        '@id': `${GROWTH_URL}#demo-video`,
+        name: GROWTH_DEMO_VIDEO.title,
+        description: GROWTH_DEMO_VIDEO.description,
+        thumbnailUrl: `${SITE_ORIGIN}${GROWTH_DEMO_VIDEO.poster}`,
+        contentUrl: `${SITE_ORIGIN}${GROWTH_DEMO_VIDEO.src}`,
+        embedUrl: `${GROWTH_URL}#demo`,
+        uploadDate: GROWTH_DEMO_VIDEO.uploadDate,
+        duration: GROWTH_DEMO_VIDEO.durationIso,
+        width: GROWTH_DEMO_VIDEO.width,
+        height: GROWTH_DEMO_VIDEO.height,
+        inLanguage: 'en',
+        isFamilyFriendly: true,
+        publisher: { '@id': ORGANIZATION_ID },
+        about: { '@id': `${GROWTH_URL}#software` }
       },
       {
         '@type': 'SoftwareApplication',

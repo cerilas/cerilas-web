@@ -17,6 +17,7 @@ import {
   GROWTH_HOW_IT_WORKS,
   GROWTH_FREE_TOOLS,
   CHECKER_URL,
+  GROWTH_DEMO_VIDEO,
   buildGrowthJsonLd
 } from '../../src/seo/growthControlSeo.js';
 
@@ -728,6 +729,14 @@ export function renderGrowthPageHtml(templateHtml, { isAppRoute = false } = {}) 
           </dl>
         </section>
 
+        <section id="demo">
+          <h2 style="${SSR_H2}">${escapeHtml(GROWTH_DEMO_VIDEO.title)}</h2>
+          <video controls preload="none" playsinline width="${GROWTH_DEMO_VIDEO.width}" height="${GROWTH_DEMO_VIDEO.height}" poster="${GROWTH_DEMO_VIDEO.poster}" style="width: 100%; height: auto; border-radius: 12px; background: #000;">
+            <source src="${GROWTH_DEMO_VIDEO.src}" type="video/mp4" />
+          </video>
+          <p style="${SSR_P}">${escapeHtml(GROWTH_DEMO_VIDEO.description)}</p>
+        </section>
+
         <section id="how-it-works">
           <h2 style="${SSR_H2}">How GrowthControl works</h2>
           <ol style="margin: 0; padding-left: 1.25rem; color: #cbd5e1;">
@@ -792,6 +801,11 @@ export function renderGrowthPageHtml(templateHtml, { isAppRoute = false } = {}) 
     `<meta property="og:image:width" content="1200" />`,
     `<meta property="og:image:height" content="630" />`,
     `<meta property="og:image:alt" content="GrowthControl AI visibility tracker" />`,
+    `<meta property="og:video" content="https://tools.cerilas.com${GROWTH_DEMO_VIDEO.src}" />`,
+    `<meta property="og:video:secure_url" content="https://tools.cerilas.com${GROWTH_DEMO_VIDEO.src}" />`,
+    `<meta property="og:video:type" content="video/mp4" />`,
+    `<meta property="og:video:width" content="${GROWTH_DEMO_VIDEO.width}" />`,
+    `<meta property="og:video:height" content="${GROWTH_DEMO_VIDEO.height}" />`,
     `<meta name="twitter:card" content="summary_large_image" />`,
     `<meta name="twitter:title" content="${escapeHtml(GROWTH_SEO.title)}" />`,
     `<meta name="twitter:description" content="${escapeHtml(GROWTH_SEO.description)}" />`,

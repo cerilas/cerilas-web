@@ -9,6 +9,7 @@
 - Target markets: per-prompt country and language targeting for the United States, Canada, the United Kingdom and Australia (other countries are also supported).
 - Pricing (USD): Forever Free, $0 (1 workspace, 3 tracked prompts). Pro, $9.99/month or $99.90/year (3 workspaces, 15 tracked prompts, 3 competitors). Unlimited, $14.99/month or $149.90/year (unlimited workspaces and competitors, 30 tracked prompts).
 - Best for: SaaS and B2B software companies, marketing and SEO agencies managing multiple clients, e-commerce and DTC brands, and local service businesses.
+- [Product demo video (35 s, MP4)](https://tools.cerilas.com/videos/growthcontrol-intro.mp4): walkthrough of an AI prompt run, the AI Visibility & Citation Report, and the Search Console and Analytics dashboards.
 
 ## AI Visibility Checker (free)
 

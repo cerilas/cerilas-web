@@ -42,13 +42,15 @@ import {
   TrendingUp,
   Award,
   Menu,
-  X
+  X,
+  Play
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useGrowth } from '../GrowthContext';
 import { useTheme } from '../../context/ThemeContext';
 import { useRevenueCat } from '../../context/RevenueCatContext';
 import CloudCanvas from './CloudCanvas';
+import GrowthDemoVideo from './GrowthDemoVideo';
 import {
   GROWTH_SEO,
   GROWTH_FAQ,
@@ -343,6 +345,13 @@ export default function GrowthLandingPage({ onBackToTools, initialDomain = '' })
   } = useGrowth();
   const { toggleTheme, isDark } = useTheme();
   const { isPro, isUnlimited, presentPaywall, openCustomerCenter } = useRevenueCat() || {};
+
+  const demoVideoRef = useRef(null);
+
+  const watchDemo = useCallback(() => {
+    document.getElementById('demo')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    demoVideoRef.current?.play();
+  }, []);
 
   // Smooth scroll helper without breaking hash route
   const scrollToSection = useCallback((e, sectionId) => {
@@ -765,10 +774,11 @@ export default function GrowthLandingPage({ onBackToTools, initialDomain = '' })
             </button>
             <button 
               type="button" 
-              onClick={(e) => scrollToSection(e, 'how-it-works')} 
+              onClick={watchDemo} 
               className="cl-btn-hero-glass"
             >
-              <span>See How It Works</span>
+              <Play size={14} fill="currentColor" aria-hidden="true" />
+              <span>Watch the demo</span>
             </button>
           </div>
 
@@ -1240,6 +1250,22 @@ export default function GrowthLandingPage({ onBackToTools, initialDomain = '' })
           </div>
         </Rail>
       )}
+
+      {/* ==========================================================================
+          PRODUCT DEMO VIDEO
+          ========================================================================== */}
+      <Rail id="demo" divider={true} aria-labelledby="demo-heading">
+        <div style={{ padding: '5rem 1.25rem 4rem' }}>
+          <SectionHeading
+            id="demo-heading"
+            eyebrow="Product Demo"
+            eyebrowHref="#demo"
+            title="See GrowthControl in action."
+            description="From the first AI prompt to the citation report and your Search Console trends, in under a minute."
+          />
+          <GrowthDemoVideo ref={demoVideoRef} />
+        </div>
+      </Rail>
 
       {/* ==========================================================================
           HOW IT WORKS (3 STEPS)
