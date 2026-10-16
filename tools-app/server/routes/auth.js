@@ -1156,6 +1156,9 @@ router.post('/upgrade-plan', requireAuth, async (req, res) => {
     if (!['free', 'pro', 'unlimited'].includes(plan)) {
       return res.status(400).json({ error: 'Geçersiz plan seçimi.' });
     }
+    if (plan !== 'free') {
+      return res.status(402).json({ error: 'Ücretli planlar yalnızca ödeme sayfası üzerinden etkinleştirilebilir.' });
+    }
 
     const updated = await authPool.query(
       `UPDATE users 
@@ -1382,41 +1385,48 @@ router.post('/sync-plan', requireAuth, async (req, res) => {
       return res.status(400).json({ error: 'Invalid plan.' });
     }
 
-    // Verify live RevenueCat subscriber entitlements
-    const rcSubscriber = await fetchRevenueCatSubscriber(req.user.id);
-    const proEntitlement = rcSubscriber?.entitlements?.cerilas_tools_pro;
-    const hasActiveRcPro = !!(
-      proEntitlement &&
-      (!proEntitlement.expires_date || new Date(proEntitlement.expires_date) > new Date())
-    );
+    const isActive = (item) => !!item && (!item.expires_date || new Date(item.expires_date) > new Date());
+    const readEntitlements = (subscriber) => {
+      const unlimEntitlement = subscriber?.entitlements?.cerilas_tools_unlimited || subscriber?.entitlements?.unlimited;
+      const hasActiveUnlimitedSub = Object.entries(subscriber?.subscriptions || {}).some(([prodId, sub]) => {
+        const isUnlimProd = prodId.toLowerCase().includes('unlimited') || prodId === 'pri_01m41vmta5xebbmwt1k46xbfsf';
+        return isUnlimProd && isActive(sub);
+      });
+      return {
+        pro: isActive(subscriber?.entitlements?.cerilas_tools_pro),
+        unlimited: isActive(unlimEntitlement) || hasActiveUnlimitedSub
+      };
+    };
 
-    const unlimEntitlement = rcSubscriber?.entitlements?.cerilas_tools_unlimited || rcSubscriber?.entitlements?.unlimited;
-    const hasActiveRcUnlimited = !!(
-      unlimEntitlement &&
-      (!unlimEntitlement.expires_date || new Date(unlimEntitlement.expires_date) > new Date())
-    );
-
-    const rcSubscriptions = rcSubscriber?.subscriptions || {};
-    const hasActiveUnlimitedSub = Object.entries(rcSubscriptions).some(([prodId, sub]) => {
-      const isUnlimProd = prodId.toLowerCase().includes('unlimited') || prodId === 'pri_01m41vmta5xebbmwt1k46xbfsf';
-      const isActive = !sub.expires_date || new Date(sub.expires_date) > new Date();
-      return isUnlimProd && isActive;
-    });
+    // Paid plans are only granted when RevenueCat confirms them; retry briefly
+    // because a fresh checkout can take a moment to appear on the subscriber.
+    let rcSubscriber = await fetchRevenueCatSubscriber(req.user.id);
+    let entitlements = readEntitlements(rcSubscriber);
+    for (let attempt = 0; plan !== 'free' && !entitlements.pro && !entitlements.unlimited && attempt < 2; attempt++) {
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+      rcSubscriber = await fetchRevenueCatSubscriber(req.user.id);
+      entitlements = readEntitlements(rcSubscriber);
+    }
+    const hasActiveRcPro = entitlements.pro;
 
     const current = await authPool.query('SELECT * FROM users WHERE id = $1', [req.user.id]);
     const currentUser = current.rows[0];
 
-    let targetPlan = plan;
-    // Check Unlimited first, then Pro
-    if (plan === 'unlimited' || hasActiveRcUnlimited || hasActiveUnlimitedSub) {
+    let targetPlan;
+    if (entitlements.unlimited) {
       targetPlan = 'unlimited';
-    } else if (hasActiveRcPro && (force || plan === 'pro')) {
+    } else if (hasActiveRcPro && (force || plan !== 'free')) {
       targetPlan = 'pro';
-    } else if (currentUser && currentUser.plan === 'free' && plan !== 'free' && !force && !hasActiveRcPro) {
+    } else if (plan === 'free') {
+      targetPlan = 'free';
+    } else {
       return res.json({
         success: true,
-        message: 'Plan is free; background auto-upgrade skipped.',
-        user: formatUser(currentUser)
+        verified: false,
+        message: 'No active RevenueCat subscription found; plan unchanged.',
+        user: currentUser ? formatUser(currentUser) : null,
+        hasRcPro: false,
+        management_url: rcSubscriber?.management_url || null
       });
     }
 
