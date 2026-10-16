@@ -193,8 +193,8 @@ export const GROWTH_FAQ = [
 export const GROWTH_DEMO_VIDEO = {
   title: 'GrowthControl product demo: AI visibility tracking in 35 seconds',
   description: 'A short walkthrough of GrowthControl: run the prompts buyers ask ChatGPT and other AI engines, see whether your brand is mentioned or cited, review the AI Visibility & Citation Report, and follow Search Console and Analytics trends in one dashboard.',
-  src: '/videos/growthcontrol-intro.mp4',
-  poster: '/videos/growthcontrol-intro-poster.jpg',
+  src: '/videos/growthcontrol-intro.mp4?v=2',
+  poster: '/videos/growthcontrol-intro-poster.jpg?v=2',
   durationIso: 'PT35S',
   durationLabel: '0:35',
   uploadDate: '2026-10-17',

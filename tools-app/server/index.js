@@ -469,6 +469,14 @@ app.get(['/llms.txt', '/llm.txt'], (req, res) => {
   res.status(404).send('llms.txt not found');
 });
 
+// A missing static file must not fall through to the SPA shell: the CDN caches
+// asset extensions, so a 200 HTML response would be served for hours.
+const STATIC_ASSET_EXT = /\.(?:js|mjs|css|map|png|jpe?g|gif|webp|avif|svg|ico|mp4|webm|mov|m4v|mp3|wav|ogg|woff2?|ttf|otf|eot|wasm|pdf|zip)$/i;
+app.get(STATIC_ASSET_EXT, (req, res) => {
+  res.setHeader('Cache-Control', 'no-store');
+  res.status(404).type('text/plain').send('Not found');
+});
+
 // Full SSR Pre-rendering Engine for Tool Pages, Category Hubs & Googlebot Crawlers
 app.get('{*path}', async (req, res) => {
   const indexPath = path.join(distPath, 'index.html');
