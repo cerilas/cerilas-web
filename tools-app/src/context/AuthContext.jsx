@@ -7,7 +7,6 @@ const USER_KEY = 'cerilas_tools_user_profile';
 const ALL_TOKEN_KEYS = [
   'cerilas_tools_user_token',
   'cerilas_tools_auth_token',
-  'admin_token',
   'cerilas_user_token',
   'cerilas_auth_token',
   'token'

@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { GoogleGenAI } from '@google/genai';
 import pool from '../db.js';
+import { recordServerToolEvent } from '../utils/toolAnalytics.js';
 import { getClientIp, checkAiRateLimit } from '../utils/aiRateLimit.js';
 
 const router = Router();
@@ -59,16 +60,7 @@ ${rawText.slice(0, 15000)}
     const polishedMarkdown = (response.text || '').trim();
 
     // Insert usage event
-    await pool.query(
-      'INSERT INTO tool_usage_events (tool_slug, event_type, visitor_id, metadata) VALUES ($1, $2, $3, $4)',
-      ['pdf-rag-cleaner', 'ai_scan', visitorId || null, JSON.stringify({ ip: clientIp, length: rawText.length })]
-    );
-
-    // Increment tool use count
-    await pool.query(
-      'UPDATE cerilas_tools SET use_count = COALESCE(use_count, 0) + 1, last_used_at = NOW() WHERE slug = $1',
-      ['pdf-rag-cleaner']
-    );
+    await recordServerToolEvent(req, 'pdf-rag-cleaner', 'ai_scan', visitorId, { ip: clientIp, length: rawText.length });
 
     const updatedQuota = {
       allowed: quota.remaining - 1 > 0,

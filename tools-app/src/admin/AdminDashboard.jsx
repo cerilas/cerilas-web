@@ -11,6 +11,7 @@ import ScrapersView from './views/ScrapersView';
 import UsersView from './views/users/UsersView';
 import UserDetailView from './views/users/UserDetailView';
 import AdminLogin from './AdminLogin';
+import { INTERNAL_TRAFFIC_KEY } from '../hooks/useToolAnalytics';
 import { getAllRegisteredTools } from '../tools/registry';
 import './AdminDashboard.css';
 
@@ -88,6 +89,7 @@ export default function AdminDashboard() {
         const json = await res.json();
         if (isMounted) {
           if (res.ok && json.user) {
+            try { localStorage.setItem(INTERNAL_TRAFFIC_KEY, '1'); } catch { /* storage unavailable */ }
             setAuthUser(json.user);
           } else {
             localStorage.removeItem('admin_token');
@@ -115,6 +117,7 @@ export default function AdminDashboard() {
 
   // Fetch telemetry and stats with optional time range
   const fetchStats = useCallback(async (range = timeRange, start = customStartDate, end = customEndDate) => {
+    if (!authUser) return;
     try {
       setLoading(true);
       const params = new URLSearchParams();
@@ -125,8 +128,10 @@ export default function AdminDashboard() {
           if (end) params.set('endDate', end);
         }
       }
-      const url = `/api/tools/stats/overview${params.toString() ? '?' + params.toString() : ''}`;
-      const res = await fetch(url);
+      const url = `/api/admin/analytics/overview${params.toString() ? '?' + params.toString() : ''}`;
+      const res = await fetch(url, {
+        headers: { Authorization: `Bearer ${localStorage.getItem('admin_token') || ''}` }
+      });
       const json = await res.json();
       if (json.status === 'success' && json.data) {
         setStatsOverview(json.data);
@@ -136,7 +141,7 @@ export default function AdminDashboard() {
     } finally {
       setLoading(false);
     }
-  }, [timeRange, customStartDate, customEndDate]);
+  }, [timeRange, customStartDate, customEndDate, authUser]);
 
   useEffect(() => {
     fetchStats(timeRange, customStartDate, customEndDate);
@@ -222,7 +227,7 @@ export default function AdminDashboard() {
     }
   }, [selectedTool, currentTab, selectedUserId]);
 
-  const liveVisitors = statsOverview?.liveVisitors || 1;
+  const liveVisitors = statsOverview?.summary?.live_visitors ?? 0;
 
   const handleSelectTool = (slug) => {
     setSelectedToolSlug(slug);
@@ -353,7 +358,14 @@ export default function AdminDashboard() {
 
   // 2. Unauthenticated state: Render Apple minimalist login page
   if (!authUser) {
-    return <AdminLogin onLoginSuccess={(user) => setAuthUser(user)} />;
+    return (
+      <AdminLogin
+        onLoginSuccess={(user) => {
+          try { localStorage.setItem(INTERNAL_TRAFFIC_KEY, '1'); } catch { /* storage unavailable */ }
+          setAuthUser(user);
+        }}
+      />
+    );
   }
 
   return (

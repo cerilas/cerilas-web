@@ -41,8 +41,9 @@ export default function SystemHealthView() {
   const endpoints = [
     { path: '/api/health', method: 'GET', description: 'Core application health check probe', auth: 'Public' },
     { path: '/api/tools', method: 'GET', description: 'Full registry and tool database catalog', auth: 'Public' },
-    { path: '/api/tools/stats/overview', method: 'GET', description: 'Real-time telemetry and visitor counters', auth: 'Public' },
-    { path: '/api/tools/:slug/event', method: 'POST', description: 'Action logger (view, download, copy, use)', auth: 'Cookie Token' },
+    { path: '/api/tools/stats/overview', method: 'GET', description: 'Aggregate telemetry and visitor counters', auth: 'Public' },
+    { path: '/api/admin/analytics/overview', method: 'GET', description: 'Visitor-level analytics, feeds and bot intelligence', auth: 'Admin JWT' },
+    { path: '/api/tools/:slug/event', method: 'POST', description: 'Action logger with bot classification (view, download, copy, use)', auth: 'Visitor Cookie' },
     { path: '/api/tools/:slug/consume-ai-quota', method: 'POST', description: 'Rate limit enforcer for Gemini AI engines', auth: 'IP + Cookie' },
     { path: '/api/ats/analyze', method: 'POST', description: 'ATS Resume parser and semantic keyword scoring', auth: 'Quota Token' },
     { path: '/api/crawler-checker/analyze', method: 'POST', description: 'AI crawler inspection & robots.txt generator', auth: 'Quota Token' }

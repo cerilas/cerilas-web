@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { GoogleGenAI } from '@google/genai';
 import pool from '../db.js';
+import { recordServerToolEvent } from '../utils/toolAnalytics.js';
 import { getClientIp, checkAiRateLimit } from '../utils/aiRateLimit.js';
 
 const router = Router();
@@ -96,16 +97,7 @@ ${text.slice(0, 14000)}
     }
 
     // Insert usage event into tool_usage_events
-    await pool.query(
-      'INSERT INTO tool_usage_events (tool_slug, event_type, visitor_id, metadata) VALUES ($1, $2, $3, $4)',
-      ['ai-content-detector', 'ai_scan', visitorId || null, JSON.stringify({ ip: clientIp, aiScore: analysis.aiScore })]
-    );
-
-    // Increment tool use count
-    await pool.query(
-      'UPDATE cerilas_tools SET use_count = COALESCE(use_count, 0) + 1, last_used_at = NOW() WHERE slug = $1',
-      ['ai-content-detector']
-    );
+    await recordServerToolEvent(req, 'ai-content-detector', 'ai_scan', visitorId, { ip: clientIp, aiScore: analysis.aiScore });
 
     const updatedQuota = {
       allowed: quota.remaining - 1 > 0,

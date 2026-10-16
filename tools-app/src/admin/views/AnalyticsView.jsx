@@ -1,63 +1,213 @@
-import React, { useState } from 'react';
-import { 
-  TrendingUp, 
-  BarChart2, 
-  PieChart, 
-  Activity, 
-  Download, 
-  Copy, 
-  Eye, 
-  Play, 
-  Users, 
-  Bot, 
-  ShieldCheck, 
-  Globe, 
-  Search, 
-  Clock 
+import React, { useMemo, useState } from 'react';
+import {
+  Activity,
+  Bot,
+  CheckCircle2,
+  Eye,
+  Globe,
+  Info,
+  Monitor,
+  Search,
+  ShieldCheck,
+  Smartphone,
+  Tablet,
+  Users,
+  Zap
 } from 'lucide-react';
+import { countryFlag, countryName, relativeTime } from './users/userAdminUtils';
+import './AnalyticsView.css';
+
+const BOT_CATEGORY_LABELS = {
+  ai_crawler: 'AI crawlers',
+  search_engine: 'Search engines',
+  seo_crawler: 'SEO tools',
+  social_preview: 'Link previews',
+  monitoring: 'Monitoring & scanners',
+  automated_browser: 'Automated browsers',
+  script_scraper: 'Scripts & scrapers',
+  cli_tool: 'CLI tools',
+  generic_bot: 'Other bots'
+};
+
+const EVENT_LABELS = {
+  view: 'Page views',
+  use: 'Tool runs',
+  ai_scan: 'AI scans',
+  download: 'Downloads',
+  copy: 'Copies'
+};
+
+const DEVICE_ICONS = { mobile: Smartphone, tablet: Tablet, desktop: Monitor };
+
+const num = (value) => Number(value || 0).toLocaleString();
+const capitalize = (text) => text.charAt(0).toUpperCase() + text.slice(1);
+const shortVisitor = (id) => (id ? `${id.replace(/^vid_/, '').slice(0, 10)}…` : 'Anonymous');
+
+function eventColor(type = '') {
+  if (type === 'view') return '#3b82f6';
+  if (type.startsWith('download') || type === 'pdf_export') return '#10b981';
+  if (type.startsWith('copy')) return '#ec4899';
+  if (type === 'ai_scan') return '#f59e0b';
+  return '#a855f7';
+}
+
+function Kpi({ label, value, sub, icon: Icon, color }) {
+  return (
+    <div className="admin-kpi-card">
+      <div className="admin-kpi-header">
+        <span className="admin-kpi-label">{label}</span>
+        <div className="admin-kpi-icon-wrap" style={{ background: `${color}1a`, color }}>
+          <Icon size={16} />
+        </div>
+      </div>
+      <div className="admin-kpi-val" style={{ color }}>{value}</div>
+      <div className="admin-kpi-sub"><span>{sub}</span></div>
+    </div>
+  );
+}
+
+function Panel({ title, subtitle, children, className = '' }) {
+  return (
+    <section className={`an-panel ${className}`}>
+      <header className="an-panel-head">
+        <h3>{title}</h3>
+        {subtitle && <span>{subtitle}</span>}
+      </header>
+      {children}
+    </section>
+  );
+}
+
+function BarList({ rows, empty, color }) {
+  const max = Math.max(1, ...rows.map((r) => r.value));
+  if (rows.length === 0) return <div className="an-empty">{empty}</div>;
+  return (
+    <div className="an-barlist">
+      {rows.map((row) => (
+        <div key={row.key} className="an-barlist-row">
+          <div className="an-barlist-label">
+            <span className="an-barlist-name" title={row.title || row.label}>{row.label}</span>
+            <span className="an-barlist-val">{row.display ?? num(row.value)}</span>
+          </div>
+          <div className="an-track">
+            <div className="an-fill" style={{ width: `${Math.max(2, (row.value / max) * 100)}%`, background: row.color || color }} />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function DailyChart({ daily = [], mode }) {
+  const series = daily.map((d) => ({ ...d, value: mode === 'bots' ? d.bots : d.humans }));
+  const max = Math.max(1, ...series.map((d) => d.value));
+  if (series.length === 0) return <div className="an-empty">No traffic recorded in this period.</div>;
+  return (
+    <div className="an-chart">
+      {series.map((d) => (
+        <div
+          key={d.day}
+          className="an-chart-col"
+          title={mode === 'bots'
+            ? `${d.day}: ${num(d.bots)} bot hits`
+            : `${d.day}: ${num(d.humans)} unique humans · ${num(d.views)} views · ${num(d.bots)} bot hits`}
+        >
+          <div className={`an-chart-bar ${mode === 'bots' ? 'is-bot' : ''}`} style={{ height: `${(d.value / max) * 100}%` }} />
+        </div>
+      ))}
+      <div className="an-chart-axis">
+        <span>{series[0].day}</span>
+        <span>{series[series.length - 1].day}</span>
+      </div>
+    </div>
+  );
+}
+
+function Feed({ rows, empty, renderMain, renderMeta }) {
+  if (rows.length === 0) return <div className="an-empty">{empty}</div>;
+  return (
+    <div className="an-feed">
+      {rows.map((row) => (
+        <div key={row.id} className="an-feed-row">
+          <div className="an-feed-main">{renderMain(row)}</div>
+          <div className="an-feed-meta">
+            {renderMeta(row)}
+            <span title={new Date(row.created_at).toLocaleString()}>{relativeTime(row.created_at)}</span>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
 
 export default function AnalyticsView({ statsOverview = null, tools = [] }) {
-  const [activeTab, setActiveTab] = useState('human'); // 'human' | 'bots'
+  const [activeTab, setActiveTab] = useState('human');
+  const titleBySlug = useMemo(() => Object.fromEntries(tools.map((t) => [t.slug, t.title])), [tools]);
+  const toolTitle = (row) => row.tool_title || titleBySlug[row.tool_slug] || row.tool_slug;
 
-  const totals = statsOverview?.summary || statsOverview?.totals || {};
-  const eventBreakdown = statsOverview?.eventTypes || statsOverview?.eventBreakdown || [
-    { event_type: 'view', count: totals.total_views || 0 },
-    { event_type: 'download', count: totals.total_downloads || 0 },
-    { event_type: 'copy', count: totals.total_copies || 0 },
-    { event_type: 'use', count: totals.total_uses || 0 }
-  ];
-
-  const recentEvents = statsOverview?.recentEvents || [];
+  const summary = statsOverview?.summary || {};
   const botAnalytics = statsOverview?.botAnalytics || {};
-  const botBreakdown = botAnalytics.botBreakdown || [];
-  const recentBotEvents = botAnalytics.recentBotEvents || [];
+  const eventTypes = statsOverview?.eventTypes || [];
+  const daily = statsOverview?.daily || [];
+  const rangeLabel = statsOverview?.timeFilter?.label || 'All Time';
+  const isAllTime = (statsOverview?.timeFilter?.range || 'all') === 'all';
 
-  const totalHumanEvents = eventBreakdown.reduce((acc, curr) => acc + (parseInt(curr.count, 10) || 0), 0) || 1;
+  const topTools = useMemo(() => (statsOverview?.tools || [])
+    .filter((t) => t.unique_visitors_count > 0 || t.view_count > 0)
+    .sort((a, b) => b.unique_visitors_count - a.unique_visitors_count || b.view_count - a.view_count)
+    .slice(0, 8)
+    .map((t) => ({
+      key: t.slug,
+      label: t.title || titleBySlug[t.slug] || t.slug,
+      value: t.unique_visitors_count,
+      display: `${num(t.unique_visitors_count)} humans · ${num(t.view_count)} views · ${num(t.download_count + t.copy_count + t.use_count)} tasks`
+    })), [statsOverview, titleBySlug]);
+
+  const eventRows = eventTypes.map((e) => ({
+    key: e.event_type,
+    label: EVENT_LABELS[e.event_type] || capitalize(e.event_type.replace(/_/g, ' ')),
+    value: e.count,
+    color: eventColor(e.event_type)
+  }));
+
+  const countryRows = (statsOverview?.countries || []).map((c) => ({
+    key: c.country,
+    label: `${countryFlag(c.country)} ${countryName(c.country)}`,
+    value: c.visitors,
+    display: `${num(c.visitors)} visitors`
+  }));
+
+  const deviceRows = (statsOverview?.devices || []).map((d) => ({
+    key: d.device_type,
+    label: capitalize(d.device_type),
+    value: d.visitors,
+    display: `${num(d.visitors)} visitors`
+  }));
+
+  const botRows = (botAnalytics.botBreakdown || []).map((b) => ({
+    key: b.bot_name,
+    label: b.bot_name,
+    title: `${BOT_CATEGORY_LABELS[b.category] || 'Bot'} · last seen ${relativeTime(b.last_seen_at)}`,
+    value: b.count,
+    display: `${num(b.count)} · ${BOT_CATEGORY_LABELS[b.category] || 'Bot'}`
+  }));
+
+  const botCategoryRows = (botAnalytics.botCategories || []).map((c) => ({
+    key: c.category,
+    label: BOT_CATEGORY_LABELS[c.category] || c.category,
+    value: c.count
+  }));
+
   const totalBotHits = botAnalytics.totalBotViews || 0;
-  const totalBotBreakdownCount = botBreakdown.reduce((acc, curr) => acc + (parseInt(curr.count, 10) || 0), 0) || 1;
-
-  // Category counts
-  const categoryMap = {};
-  tools.forEach(t => {
-    const cat = t.category || 'General';
-    categoryMap[cat] = (categoryMap[cat] || 0) + 1;
-  });
+  const visitors = summary.total_unique_visitors || 0;
 
   return (
-    <div className="admin-body">
-      {/* Top Segmented Controls: Real Humans vs Bots */}
-      <div style={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        flexWrap: 'wrap',
-        gap: '1rem',
-        marginBottom: '2rem'
-      }}>
+    <div className="admin-body an-root">
+      <div className="an-top">
         <div>
-          <h2 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 700 }}>Telemetry & Traffic Intelligence</h2>
-          <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-            Real human interactions and automated crawler telemetry are strictly segregated.
+          <h2>Telemetry & Traffic Intelligence</h2>
+          <span>
+            {rangeLabel} · humans and bots are classified per event (user agent, headless signals and behavior) and never mixed.
           </span>
         </div>
 
@@ -68,323 +218,189 @@ export default function AnalyticsView({ statsOverview = null, tools = [] }) {
             onClick={() => setActiveTab('human')}
           >
             <Users size={14} />
-            <span className="admin-tab-text-desktop">Human Analytics (Real Users)</span>
-            <span className="admin-tab-text-mobile">Humans (Real)</span>
+            <span className="admin-tab-text-desktop">Real Humans ({num(visitors)})</span>
+            <span className="admin-tab-text-mobile">Humans ({num(visitors)})</span>
           </button>
-
           <button
             type="button"
             className={`admin-analytics-tab-btn ${activeTab === 'bots' ? 'active-bots' : ''}`}
             onClick={() => setActiveTab('bots')}
           >
             <Bot size={14} />
-            <span className="admin-tab-text-desktop">Bot & Crawler Intelligence ({totalBotHits})</span>
-            <span className="admin-tab-text-mobile">Bots ({totalBotHits})</span>
+            <span className="admin-tab-text-desktop">Bots & Crawlers ({num(totalBotHits)})</span>
+            <span className="admin-tab-text-mobile">Bots ({num(totalBotHits)})</span>
           </button>
         </div>
       </div>
 
       {activeTab === 'human' ? (
-        /* ================= HUMAN ANALYTICS TAB ================= */
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-          <div className="admin-two-col-grid">
-            {/* Event Volume Distribution */}
-            <div style={{
-              background: 'var(--card-bg, #ffffff)',
-              border: '1px solid var(--card-border, rgba(0,0,0,0.07))',
-              borderRadius: 18,
-              padding: '1.5rem'
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
-                <Users size={18} style={{ color: '#3b82f6' }} />
-                <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 700 }}>Human Action Distribution</h3>
-              </div>
-              <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: '1.5rem', display: 'block' }}>
-                Real user action volume across all 30 tools (crawlers excluded)
-              </span>
-
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                {eventBreakdown.map(ev => {
-                  const count = parseInt(ev.count, 10) || 0;
-                  const percent = Math.round((count / totalHumanEvents) * 100);
-                  const isView = ev.event_type === 'view';
-                  const isDownload = ev.event_type.startsWith('download') || ev.event_type === 'session_complete';
-                  const isCopy = ev.event_type === 'copy';
-
-                  const color = isView ? '#3b82f6' : (isDownload ? '#10b981' : (isCopy ? '#ec4899' : '#a855f7'));
-
-                  return (
-                    <div key={ev.event_type}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem', marginBottom: '0.35rem' }}>
-                        <span style={{ fontWeight: 600, textTransform: 'capitalize' }}>
-                          {ev.event_type} Actions
-                        </span>
-                        <span style={{ color: 'var(--text-muted)' }}>
-                          {count.toLocaleString()} ({percent}%)
-                        </span>
-                      </div>
-                      <div style={{ height: 8, borderRadius: 999, background: 'rgba(150, 150, 150, 0.1)', overflow: 'hidden' }}>
-                        <div 
-                          style={{ 
-                            height: '100%', 
-                            width: `${percent}%`, 
-                            borderRadius: 999, 
-                            background: color
-                          }} 
-                        />
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Category Representation */}
-            <div style={{
-              background: 'var(--card-bg, #ffffff)',
-              border: '1px solid var(--card-border, rgba(0,0,0,0.07))',
-              borderRadius: 18,
-              padding: '1.5rem'
-            }}>
-              <h3 style={{ margin: '0 0 0.25rem 0', fontSize: '1.05rem', fontWeight: 700 }}>Category Inventory</h3>
-              <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: '1.5rem', display: 'block' }}>
-                Distribution of production tools across domains
-              </span>
-
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
-                {Object.entries(categoryMap).map(([category, count]) => {
-                  const percent = Math.round((count / tools.length) * 100);
-                  return (
-                    <div key={category} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.65rem 0.85rem', background: 'rgba(150, 150, 150, 0.04)', borderRadius: 12 }}>
-                      <span style={{ fontWeight: 600, fontSize: '0.86rem' }}>{category}</span>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-                        <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>{percent}%</span>
-                        <span style={{ fontSize: '0.78rem', fontWeight: 700, padding: '0.15rem 0.5rem', borderRadius: 999, background: 'rgba(59, 130, 246, 0.12)', color: '#3b82f6' }}>
-                          {count} tools
-                        </span>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
+        <div className="an-stack">
+          <div className="admin-kpi-grid">
+            <Kpi
+              label="Unique Humans"
+              value={num(visitors)}
+              sub={isAllTime
+                ? `${num(summary.avg_tools_per_visitor)} tools per visitor on average`
+                : `${num(summary.new_visitors)} new · ${num(summary.returning_visitors)} returning`}
+              icon={Users}
+              color="#3b82f6"
+            />
+            <Kpi
+              label="Human Page Views"
+              value={num(summary.total_views)}
+              sub={`${num(summary.avg_views_per_visitor)} views per visitor`}
+              icon={Eye}
+              color="#6366f1"
+            />
+            <Kpi
+              label="Tasks Completed"
+              value={num(summary.total_tasks_completed)}
+              sub={`${num(summary.total_uses)} runs · ${num(summary.total_downloads)} downloads · ${num(summary.total_copies)} copies · ${summary.overall_total_cvr || 0}% of visitors converted`}
+              icon={CheckCircle2}
+              color="#10b981"
+            />
+            <Kpi
+              label="Live Humans (30m)"
+              value={num(summary.live_visitors)}
+              sub="Distinct visitors active in the last 30 minutes"
+              icon={Zap}
+              color="#f59e0b"
+            />
           </div>
 
-          {/* Recent Real User Events Stream */}
-          <div style={{
-            background: 'var(--card-bg, #ffffff)',
-            border: '1px solid var(--card-border, rgba(0,0,0,0.07))',
-            borderRadius: 18,
-            padding: '1.5rem'
-          }}>
-            <h3 style={{ margin: '0 0 0.25rem 0', fontSize: '1.05rem', fontWeight: 700 }}>Live Human Interaction Feed</h3>
-            <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: '1.25rem', display: 'block' }}>
-              Real-time user sessions and conversions (last 15 events)
-            </span>
+          <Panel
+            title="Unique humans per day"
+            subtitle={isAllTime ? 'Last 30 days' : rangeLabel}
+          >
+            <DailyChart daily={daily} mode="humans" />
+          </Panel>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
-              {recentEvents.length === 0 ? (
-                <div style={{ padding: '1.5rem', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
-                  No recent human interaction events logged yet.
-                </div>
+          <div className="admin-two-col-grid">
+            <Panel title="Top tools by unique humans" subtitle="Distinct visitors, views and completed tasks">
+              <BarList rows={topTools} empty="No human visits in this period." color="#3b82f6" />
+            </Panel>
+            <Panel title="Human action distribution" subtitle="Every event type sent by real visitors">
+              <BarList rows={eventRows} empty="No human events in this period." />
+            </Panel>
+          </div>
+
+          <div className="admin-two-col-grid">
+            <Panel title="Countries" subtitle="Distinct human visitors by country">
+              <BarList rows={countryRows} empty="Country data is collected for new visits from now on." color="#0ea5e9" />
+            </Panel>
+            <Panel title="Devices" subtitle="Distinct human visitors by device">
+              {deviceRows.length === 0 ? (
+                <div className="an-empty">Device data is collected for new visits from now on.</div>
               ) : (
-                recentEvents.map(ev => (
-                  <div 
-                    key={ev.id}
-                    className="admin-event-row"
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      padding: '0.75rem 1rem',
-                      borderRadius: 12,
-                      background: 'rgba(150, 150, 150, 0.04)',
-                      fontSize: '0.82rem'
-                    }}
-                  >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                      <span style={{
-                        padding: '0.2rem 0.55rem',
-                        borderRadius: 999,
-                        fontWeight: 600,
-                        fontSize: '0.74rem',
-                        textTransform: 'uppercase',
-                        background: ev.event_type === 'view' ? 'rgba(59, 130, 246, 0.12)' : 'rgba(16, 185, 129, 0.12)',
-                        color: ev.event_type === 'view' ? '#3b82f6' : '#10b981'
-                      }}>
-                        {ev.event_type}
-                      </span>
-                      <strong style={{ color: 'var(--text-main)' }}>{ev.tool_title || ev.tool_slug}</strong>
-                    </div>
-
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', color: 'var(--text-muted)', fontSize: '0.75rem' }}>
-                      <span>Visitor: {ev.visitor_id ? `${ev.visitor_id.slice(0, 14)}...` : 'Anonymous'}</span>
-                      <span>{new Date(ev.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}</span>
-                    </div>
-                  </div>
-                ))
+                <div className="an-devices">
+                  {deviceRows.map((d) => {
+                    const Icon = DEVICE_ICONS[d.key] || Monitor;
+                    return (
+                      <div key={d.key} className="an-device">
+                        <Icon size={18} />
+                        <strong>{num(d.value)}</strong>
+                        <span>{d.label}</span>
+                      </div>
+                    );
+                  })}
+                </div>
               )}
-            </div>
+            </Panel>
+          </div>
+
+          <div className="admin-two-col-grid">
+            <Panel title="Most engaged visitors" subtitle="Anonymous visitor ids ranked by activity">
+              <Feed
+                rows={(statsOverview?.topVisitors || []).map((v) => ({ ...v, id: v.visitor_id, created_at: v.last_seen_at }))}
+                empty="No identified visitors in this period."
+                renderMain={(v) => (
+                  <>
+                    <span className="an-mono">{shortVisitor(v.visitor_id)}</span>
+                    <span className="an-muted">{num(v.views)} views · {num(v.events)} events · {num(v.tools)} tools</span>
+                  </>
+                )}
+                renderMeta={(v) => (v.country ? <span title={countryName(v.country)}>{countryFlag(v.country)}</span> : null)}
+              />
+            </Panel>
+            <Panel title="Live human feed" subtitle="Latest events from real visitors">
+              <Feed
+                rows={statsOverview?.recentEvents || []}
+                empty="No human events in this period."
+                renderMain={(ev) => (
+                  <>
+                    <span className="an-chip" style={{ color: eventColor(ev.event_type), background: `${eventColor(ev.event_type)}1f` }}>
+                      {ev.event_type}
+                    </span>
+                    <strong>{toolTitle(ev)}</strong>
+                  </>
+                )}
+                renderMeta={(ev) => (
+                  <>
+                    {ev.country && <span title={countryName(ev.country)}>{countryFlag(ev.country)}</span>}
+                    {ev.device_type && <span className="an-muted">{ev.device_type}</span>}
+                    <span className="an-mono an-muted">{shortVisitor(ev.visitor_id)}</span>
+                  </>
+                )}
+              />
+            </Panel>
+          </div>
+
+          <div className="an-note">
+            <Info size={14} />
+            <span>
+              Excluded from human numbers: {num(summary.internal_events)} events from browsers signed in to this admin panel.
+              {' '}{num(summary.anonymous_human_events)} server-side events had no visitor id, so they count toward tasks but not unique visitors.
+            </span>
           </div>
         </div>
       ) : (
-        /* ================= BOT & CRAWLER INTELLIGENCE TAB ================= */
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-          {/* Bot KPI summary cards */}
+        <div className="an-stack">
           <div className="admin-kpi-grid">
-            <div className="admin-kpi-card">
-              <div className="admin-kpi-header">
-                <span className="admin-kpi-label">Total Bot & Crawler Hits</span>
-                <div className="admin-kpi-icon-wrap" style={{ background: 'rgba(168, 85, 247, 0.1)', color: '#a855f7' }}>
-                  <Bot size={16} />
-                </div>
-              </div>
-              <div className="admin-kpi-val" style={{ color: '#a855f7' }}>
-                {totalBotHits.toLocaleString()}
-              </div>
-              <div className="admin-kpi-sub">
-                <span>Isolated from human analytics</span>
-              </div>
-            </div>
-
-            <div className="admin-kpi-card">
-              <div className="admin-kpi-header">
-                <span className="admin-kpi-label">Unique Crawler Engines</span>
-                <div className="admin-kpi-icon-wrap" style={{ background: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6' }}>
-                  <Search size={16} />
-                </div>
-              </div>
-              <div className="admin-kpi-val">
-                {botBreakdown.length}
-              </div>
-              <div className="admin-kpi-sub">
-                <span>Distinct search & AI spiders</span>
-              </div>
-            </div>
-
-            <div className="admin-kpi-card">
-              <div className="admin-kpi-header">
-                <span className="admin-kpi-label">Active Crawlers (30m)</span>
-                <div className="admin-kpi-icon-wrap" style={{ background: 'rgba(234, 179, 8, 0.1)', color: '#eab308' }}>
-                  <Activity size={16} />
-                </div>
-              </div>
-              <div className="admin-kpi-val" style={{ color: '#eab308' }}>
-                {botAnalytics.liveBots30m || 0}
-              </div>
-              <div className="admin-kpi-sub">
-                <span>Spiders crawling right now</span>
-              </div>
-            </div>
-
-            <div className="admin-kpi-card">
-              <div className="admin-kpi-header">
-                <span className="admin-kpi-label">Human Traffic Ratio</span>
-                <div className="admin-kpi-icon-wrap" style={{ background: 'rgba(16, 185, 129, 0.1)', color: '#10b981' }}>
-                  <ShieldCheck size={16} />
-                </div>
-              </div>
-              <div className="admin-kpi-val" style={{ color: '#10b981' }}>
-                {botAnalytics.humanTrafficRatio || 100}%
-              </div>
-              <div className="admin-kpi-sub">
-                <span>Verified human visitors</span>
-              </div>
-            </div>
+            <Kpi label="Bot & Crawler Hits" value={num(totalBotHits)} sub={`${num(botAnalytics.totalBotEvents)} bot events in total`} icon={Bot} color="#a855f7" />
+            <Kpi label="Distinct Crawlers" value={num(botAnalytics.totalUniqueBots)} sub="Identified bot engines and clients" icon={Search} color="#3b82f6" />
+            <Kpi label="Active Crawlers (30m)" value={num(botAnalytics.liveBots30m)} sub="Engines seen in the last 30 minutes" icon={Activity} color="#eab308" />
+            <Kpi label="Human Traffic Share" value={`${botAnalytics.humanTrafficRatio ?? 100}%`} sub="Human views vs all page hits" icon={ShieldCheck} color="#10b981" />
           </div>
 
+          <Panel title="Bot hits per day" subtitle={isAllTime ? 'Last 30 days' : rangeLabel}>
+            <DailyChart daily={daily} mode="bots" />
+          </Panel>
+
           <div className="admin-two-col-grid">
-            {/* Crawler Engine Breakdown */}
-            <div style={{
-              background: 'var(--card-bg, #ffffff)',
-              border: '1px solid var(--card-border, rgba(0,0,0,0.07))',
-              borderRadius: 18,
-              padding: '1.5rem'
-            }}>
-              <h3 style={{ margin: '0 0 0.25rem 0', fontSize: '1.05rem', fontWeight: 700 }}>Crawler Engine Breakdown</h3>
-              <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: '1.5rem', display: 'block' }}>
-                Activity volume by AI crawler and search spider
-              </span>
+            <Panel title="Crawler engines" subtitle="Hits by identified bot">
+              <BarList rows={botRows} empty="No automated requests detected yet." color="linear-gradient(90deg, #a855f7, #ec4899)" />
+            </Panel>
+            <Panel title="Bot categories" subtitle="What kind of automation is visiting">
+              <BarList rows={botCategoryRows} empty="No automated requests detected yet." color="#a855f7" />
+            </Panel>
+          </div>
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                {botBreakdown.length === 0 ? (
-                  <div style={{ padding: '1rem', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
-                    No automated bot requests detected yet.
-                  </div>
-                ) : (
-                  botBreakdown.map(b => {
-                    const count = parseInt(b.count, 10) || 0;
-                    const percent = Math.round((count / totalBotBreakdownCount) * 100);
-                    return (
-                      <div key={b.bot_name}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem', marginBottom: '0.35rem' }}>
-                          <span style={{ fontWeight: 600 }}>{b.bot_name}</span>
-                          <span style={{ color: 'var(--text-muted)' }}>
-                            {count} hits ({percent}%)
-                          </span>
-                        </div>
-                        <div style={{ height: 8, borderRadius: 999, background: 'rgba(150, 150, 150, 0.1)', overflow: 'hidden' }}>
-                          <div 
-                            style={{ 
-                              height: '100%', 
-                              width: `${percent}%`, 
-                              borderRadius: 999, 
-                              background: 'linear-gradient(90deg, #a855f7, #ec4899)'
-                            }} 
-                          />
-                        </div>
-                      </div>
-                    );
-                  })
-                )}
-              </div>
-            </div>
+          <Panel title="Live crawler feed" subtitle="Latest bot requests with their user agent">
+            <Feed
+              rows={botAnalytics.recentBotEvents || []}
+              empty="No crawler events recorded yet."
+              renderMain={(ev) => (
+                <>
+                  <strong className="an-bot-name">{ev.bot_name || 'Unknown bot'}</strong>
+                  <span className="an-muted">{toolTitle(ev)} · {ev.event_type}</span>
+                  {ev.user_agent && <span className="an-ua" title={ev.user_agent}>{ev.user_agent}</span>}
+                </>
+              )}
+              renderMeta={(ev) => (
+                <>
+                  {ev.country && <span title={countryName(ev.country)}>{countryFlag(ev.country)}</span>}
+                  <span className="an-muted"><Globe size={12} /> {BOT_CATEGORY_LABELS[ev.client_type] || 'Bot'}</span>
+                </>
+              )}
+            />
+          </Panel>
 
-            {/* Live Crawler Feed */}
-            <div style={{
-              background: 'var(--card-bg, #ffffff)',
-              border: '1px solid var(--card-border, rgba(0,0,0,0.07))',
-              borderRadius: 18,
-              padding: '1.5rem'
-            }}>
-              <h3 style={{ margin: '0 0 0.25rem 0', fontSize: '1.05rem', fontWeight: 700 }}>Live Crawler Feed</h3>
-              <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: '1.5rem', display: 'block' }}>
-                Recent search and AI crawler scans
-              </span>
-
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
-                {recentBotEvents.length === 0 ? (
-                  <div style={{ padding: '1rem', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
-                    No crawler events recorded yet.
-                  </div>
-                ) : (
-                  recentBotEvents.map(ev => (
-                    <div 
-                      key={ev.id}
-                      className="admin-event-row"
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                        padding: '0.65rem 0.85rem',
-                        borderRadius: 12,
-                        background: 'rgba(168, 85, 247, 0.04)',
-                        border: '1px solid rgba(168, 85, 247, 0.1)',
-                        fontSize: '0.82rem'
-                      }}
-                    >
-                      <div>
-                        <div style={{ fontWeight: 600, color: '#a855f7' }}>{ev.bot_name}</div>
-                        <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Target: {ev.tool_title || ev.tool_slug}</div>
-                      </div>
-                      <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
-                        {new Date(ev.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
-            </div>
+          <div className="an-note">
+            <Info size={14} />
+            <span>
+              Bots are detected from known crawler signatures, non-browser clients, headless browser signals and
+              machine-regular request timing. Detected bots never touch human visitor, view or conversion numbers.
+            </span>
           </div>
         </div>
       )}

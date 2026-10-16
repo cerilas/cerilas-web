@@ -4,6 +4,7 @@ import net from 'net';
 import * as cheerio from 'cheerio';
 import { GoogleGenAI } from '@google/genai';
 import pool from '../db.js';
+import { recordServerToolEvent } from '../utils/toolAnalytics.js';
 import { getClientIp, checkAiRateLimit } from '../utils/aiRateLimit.js';
 
 const router = Router();
@@ -728,14 +729,7 @@ Please provide an accurate, objective, and informative answer to this user searc
 
     // Track usage in database
     try {
-      await pool.query(
-        'INSERT INTO tool_usage_events (tool_slug, event_type, visitor_id, metadata) VALUES ($1, $2, $3, $4)',
-        ['ai-visibility-checker', 'ai_scan', visitorId || null, JSON.stringify({ ip: clientIp, domain: hostname, score: visibilityScore })]
-      );
-      await pool.query(
-        'UPDATE cerilas_tools SET use_count = COALESCE(use_count, 0) + 1, last_used_at = NOW() WHERE slug = $1',
-        ['ai-visibility-checker']
-      );
+      await recordServerToolEvent(req, 'ai-visibility-checker', 'ai_scan', visitorId, { ip: clientIp, domain: hostname, score: visibilityScore });
     } catch (dbErr) {
       console.warn('Tool usage event record failed:', dbErr.message);
     }
@@ -1200,14 +1194,7 @@ Please provide an accurate, objective, and informative answer to this user searc
       .slice(0, 5);
 
     try {
-      await pool.query(
-        'INSERT INTO tool_usage_events (tool_slug, event_type, visitor_id, metadata) VALUES ($1, $2, $3, $4)',
-        ['ai-visibility-checker', 'ai_scan', visitorId || null, JSON.stringify({ ip: clientIp, domain: hostname, score: visibilityScore })]
-      );
-      await pool.query(
-        'UPDATE cerilas_tools SET use_count = COALESCE(use_count, 0) + 1, last_used_at = NOW() WHERE slug = $1',
-        ['ai-visibility-checker']
-      );
+      await recordServerToolEvent(req, 'ai-visibility-checker', 'ai_scan', visitorId, { ip: clientIp, domain: hostname, score: visibilityScore });
     } catch (dbErr) {
       console.warn('Tool usage event record failed:', dbErr.message);
     }

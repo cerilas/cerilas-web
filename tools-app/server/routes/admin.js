@@ -5,6 +5,7 @@ import { isTokenRevoked } from '../utils/sessionRevocation.js';
 import { ensureUserActivitySchema } from '../utils/userActivity.js';
 import { fetchRevenueCatSubscriber } from './auth.js';
 import { sendPasswordResetEmail } from './passwordReset.js';
+import { buildStatsOverview } from '../utils/toolStatsOverview.js';
 
 const router = Router();
 const JWT_SECRET = process.env.JWT_SECRET || 'cerilas_admin_jwt_secret_2026';
@@ -48,6 +49,16 @@ router.use(requireAdmin);
 
 router.get('/session', (req, res) => {
   res.json({ success: true, user: req.admin });
+});
+
+router.get('/analytics/overview', async (req, res) => {
+  try {
+    const data = await buildStatsOverview(req.query, { detailed: true });
+    res.json({ status: 'success', data });
+  } catch (err) {
+    console.error('[Admin] Analytics overview failed:', err);
+    res.status(500).json({ status: 'error', message: 'Failed to fetch analytics' });
+  }
 });
 
 // --- RevenueCat (Paddle store) subscription summary ---------------------------------------

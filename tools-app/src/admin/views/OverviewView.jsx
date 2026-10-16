@@ -16,7 +16,7 @@ import {
 
 export default function OverviewView({ statsOverview = null, tools = [], onSelectToolTab }) {
   const totals = statsOverview?.summary || statsOverview?.totals || {};
-  const liveVisitors = totals.live_visitors !== undefined ? totals.live_visitors : (statsOverview?.liveVisitors || 1);
+  const liveVisitors = totals.live_visitors ?? 0;
   const botAnalytics = statsOverview?.botAnalytics || {};
 
   // Sort tools by total human usage

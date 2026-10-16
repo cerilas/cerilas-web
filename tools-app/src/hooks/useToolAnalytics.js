@@ -2,6 +2,27 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { getOrCreateVisitorId } from '../utils/visitorId';
 import { getConversionCount, getConversionLabel } from '../utils/toolMetrics';
 
+// Headless browsers typically expose no languages, no plugins and a 0x0 outer window.
+function getClientSignals() {
+  if (typeof window === 'undefined' || typeof navigator === 'undefined') return null;
+  return {
+    languages: Array.isArray(navigator.languages) ? navigator.languages.length : 0,
+    zeroWindow: window.outerWidth === 0 && window.outerHeight === 0,
+    noPlugins: navigator.plugins ? navigator.plugins.length === 0 : false
+  };
+}
+
+// Set once an admin session is verified on this browser, so the team's own browsing is excluded.
+export const INTERNAL_TRAFFIC_KEY = 'cerilas_internal_traffic';
+
+function isInternalBrowser() {
+  try {
+    return localStorage.getItem(INTERNAL_TRAFFIC_KEY) === '1';
+  } catch {
+    return false;
+  }
+}
+
 /**
  * Shared analytics and real-time conversion stats hook for all tools.
  * Automatically tracks unique views using persistent visitor cookies,
@@ -54,7 +75,9 @@ export function useToolAnalytics(toolSlug, initialMeta = null) {
           visitorId,
           metadata: {
             ...metadata,
-            isWebDriver
+            isWebDriver,
+            clientSignals: getClientSignals(),
+            ...(isInternalBrowser() ? { internal: true } : {})
           }
         })
       });

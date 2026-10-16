@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { GoogleGenAI } from '@google/genai';
 import pool from '../db.js';
+import { recordServerToolEvent } from '../utils/toolAnalytics.js';
 import { getClientIp, checkAiRateLimit } from '../utils/aiRateLimit.js';
 
 const router = Router();
@@ -95,15 +96,7 @@ ${resumeText}
 
     // Record tool usage and rate limit event in background
     try {
-      await pool.query(`
-        UPDATE cerilas_tools 
-        SET use_count = COALESCE(use_count, 0) + 1, last_used_at = NOW() 
-        WHERE slug = 'ats-resume-checker'
-      `);
-      await pool.query(`
-        INSERT INTO tool_usage_events (tool_slug, event_type, visitor_id, metadata)
-        VALUES ('ats-resume-checker', 'ai_scan', $1, $2)
-      `, [visitorId || null, JSON.stringify({ score: result.score, ip: clientIp })]);
+      await recordServerToolEvent(req, 'ats-resume-checker', 'ai_scan', visitorId, { score: result.score, ip: clientIp });
     } catch (dbErr) {
       console.warn('Could not record ATS event in DB:', dbErr.message);
     }
