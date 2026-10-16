@@ -35,37 +35,20 @@ const DEFAULT_PUBLIC_URL = 'https://tools.cerilas.com';
 })();
 
 const MESSAGES = {
-  en: {
-    invalidEmail: 'Please enter a valid email address.',
-    rateLimited: 'Too many requests. Please wait a few minutes and try again.',
-    requestAccepted: 'If an account exists for this email, a password reset link is on its way. Please check your inbox and spam folder.',
-    invalidToken: 'This reset link is invalid or has expired. Please request a new one.',
-    passwordLength: `Password must be between ${MIN_PASSWORD_LENGTH} and ${MAX_PASSWORD_LENGTH} characters.`,
-    serverError: 'Something went wrong. Please try again.',
-    resetSuccess: 'Your password has been updated.',
-    passwordSet: 'Your password has been set. You can now also sign in with your email address.',
-    currentRequired: 'Please enter your current password.',
-    currentWrong: 'Your current password is incorrect.',
-    sameAsCurrent: 'Your new password must be different from your current password.',
-    tooManyAttempts: 'Too many incorrect attempts. Please wait 15 minutes or reset your password by email.'
-  },
-  tr: {
-    invalidEmail: 'Lütfen geçerli bir e-posta adresi girin.',
-    rateLimited: 'Çok fazla deneme yapıldı. Lütfen birkaç dakika sonra tekrar deneyin.',
-    requestAccepted: 'Bu e-posta ile kayıtlı bir hesap varsa şifre sıfırlama bağlantısı gönderildi. Gelen kutunuzu ve spam klasörünü kontrol edin.',
-    invalidToken: 'Bu sıfırlama bağlantısı geçersiz veya süresi dolmuş. Lütfen yeni bir bağlantı isteyin.',
-    passwordLength: `Şifre ${MIN_PASSWORD_LENGTH} ile ${MAX_PASSWORD_LENGTH} karakter arasında olmalıdır.`,
-    serverError: 'Bir hata oluştu. Lütfen tekrar deneyin.',
-    resetSuccess: 'Şifreniz güncellendi.',
-    passwordSet: 'Şifreniz belirlendi. Artık e-posta adresinizle de giriş yapabilirsiniz.',
-    currentRequired: 'Lütfen mevcut şifrenizi girin.',
-    currentWrong: 'Mevcut şifreniz hatalı.',
-    sameAsCurrent: 'Yeni şifreniz mevcut şifrenizden farklı olmalıdır.',
-    tooManyAttempts: 'Çok fazla hatalı deneme yapıldı. 15 dakika bekleyin veya şifrenizi e-posta ile sıfırlayın.'
-  }
+  invalidEmail: 'Please enter a valid email address.',
+  rateLimited: 'Too many requests. Please wait a few minutes and try again.',
+  requestAccepted: 'If an account exists for this email, a password reset link is on its way. Please check your inbox and spam folder.',
+  invalidToken: 'This reset link is invalid or has expired. Please request a new one.',
+  passwordLength: `Password must be between ${MIN_PASSWORD_LENGTH} and ${MAX_PASSWORD_LENGTH} characters.`,
+  serverError: 'Something went wrong. Please try again.',
+  resetSuccess: 'Your password has been updated.',
+  passwordSet: 'Your password has been set. You can now also sign in with your email address.',
+  currentRequired: 'Please enter your current password.',
+  currentWrong: 'Your current password is incorrect.',
+  sameAsCurrent: 'Your new password must be different from your current password.',
+  tooManyAttempts: 'Too many incorrect attempts. Please wait 15 minutes or reset your password by email.'
 };
 
-const pickLang = (value) => (String(value || '').toLowerCase().startsWith('tr') ? 'tr' : 'en');
 const hashToken = (token) => crypto.createHash('sha256').update(String(token)).digest('hex');
 const isLocalOrigin = (origin) => /^https?:\/\/(localhost|127\.0\.0\.1|\[::1\])(:\d+)?$/i.test(origin || '');
 
@@ -106,28 +89,7 @@ function maskEmail(email) {
   return `${visible}${'*'.repeat(Math.max(local.length - visible.length, 1))}@${domain}`;
 }
 
-function buildResetEmail({ lang, name, resetUrl, isGoogleOnly }) {
-  if (lang === 'tr') {
-    return {
-      subject: 'Cerilas şifre sıfırlama bağlantınız',
-      html: buildEmailTemplate({
-        title: 'Şifrenizi sıfırlayın',
-        paragraphs: [
-          `Merhaba ${name},`,
-          isGoogleOnly
-            ? 'Hesabınıza şu an Google ile giriş yapıyorsunuz. Aşağıdaki bağlantıyla bir şifre belirleyerek e-posta ve şifreyle de giriş yapabilirsiniz.'
-            : 'Hesabınız için bir şifre sıfırlama talebi aldık. Yeni şifrenizi belirlemek için aşağıdaki butona tıklayın.',
-          `Bu bağlantı ${TOKEN_TTL_MINUTES} dakika geçerlidir ve yalnızca bir kez kullanılabilir.`
-        ],
-        buttonText: 'Yeni şifre belirle',
-        buttonUrl: resetUrl,
-        preheader: `Şifre sıfırlama bağlantınız ${TOKEN_TTL_MINUTES} dakika geçerlidir.`,
-        linkHint: 'Buton çalışmazsa bu bağlantıyı tarayıcınıza yapıştırın:',
-        footnote: 'Bu talebi siz yapmadıysanız bu e-postayı yok sayabilirsiniz; şifreniz değişmeyecektir.'
-      }),
-      text: `Merhaba ${name},\n\nYeni şifrenizi belirlemek için bu bağlantıyı açın (${TOKEN_TTL_MINUTES} dakika geçerli):\n${resetUrl}\n\nBu talebi siz yapmadıysanız bu e-postayı yok sayabilirsiniz.`
-    };
-  }
+function buildResetEmail({ name, resetUrl, isGoogleOnly }) {
   return {
     subject: 'Reset your Cerilas password',
     html: buildEmailTemplate({
@@ -148,46 +110,19 @@ function buildResetEmail({ lang, name, resetUrl, isGoogleOnly }) {
   };
 }
 
-function buildChangedEmail({ lang, name, isFirstPassword = false }) {
+function buildChangedEmail({ name, isFirstPassword = false }) {
   if (isFirstPassword) {
-    return lang === 'tr'
-      ? {
-        subject: 'Cerilas hesabınıza şifre eklendi',
-        html: buildEmailTemplate({
-          title: 'Hesabınıza şifre eklendi',
-          paragraphs: [
-            `Merhaba ${name},`,
-            'Cerilas hesabınız için bir şifre belirlendi. Artık Google ile girişe ek olarak e-posta adresiniz ve şifrenizle de giriş yapabilirsiniz.'
-          ],
-          footnote: 'Bu değişikliği siz yapmadıysanız hemen şifrenizi sıfırlayın ve bize info@cerilas.com adresinden ulaşın.'
-        }),
-        text: `Merhaba ${name},\n\nCerilas hesabınız için bir şifre belirlendi. Bu siz değilseniz hemen şifrenizi sıfırlayın ve info@cerilas.com adresine yazın.`
-      }
-      : {
-        subject: 'A password was added to your Cerilas account',
-        html: buildEmailTemplate({
-          title: 'Password added to your account',
-          paragraphs: [
-            `Hi ${name},`,
-            'A password was just set for your Cerilas account. You can now sign in with your email and password in addition to Google.'
-          ],
-          footnote: "If you didn't make this change, reset your password right away and contact us at info@cerilas.com."
-        }),
-        text: `Hi ${name},\n\nA password was just set for your Cerilas account. If this wasn't you, reset your password immediately and contact info@cerilas.com.`
-      };
-  }
-  if (lang === 'tr') {
     return {
-      subject: 'Cerilas şifreniz değiştirildi',
+      subject: 'A password was added to your Cerilas account',
       html: buildEmailTemplate({
-        title: 'Şifreniz değiştirildi',
+        title: 'Password added to your account',
         paragraphs: [
-          `Merhaba ${name},`,
-          'Cerilas hesabınızın şifresi az önce değiştirildi ve diğer cihazlardaki oturumlarınız kapatıldı.'
+          `Hi ${name},`,
+          'A password was just set for your Cerilas account. You can now sign in with your email and password in addition to Google.'
         ],
-        footnote: 'Bu değişikliği siz yapmadıysanız hemen yeni bir şifre sıfırlama isteyin ve bize info@cerilas.com adresinden ulaşın.'
+        footnote: "If you didn't make this change, reset your password right away and contact us at info@cerilas.com."
       }),
-      text: `Merhaba ${name},\n\nCerilas hesabınızın şifresi az önce değiştirildi. Bu siz değilseniz hemen şifrenizi sıfırlayın ve info@cerilas.com adresine yazın.`
+      text: `Hi ${name},\n\nA password was just set for your Cerilas account. If this wasn't you, reset your password immediately and contact info@cerilas.com.`
     };
   }
   return {
@@ -204,9 +139,9 @@ function buildChangedEmail({ lang, name, isFirstPassword = false }) {
   };
 }
 
-const displayName = (user, lang) => user.first_name || (user.email ? user.email.split('@')[0] : (lang === 'tr' ? 'kullanıcı' : 'there'));
+const displayName = (user) => user.first_name || (user.email ? user.email.split('@')[0] : 'there');
 
-async function processResetRequest({ email, lang, ip, baseUrl }) {
+async function processResetRequest({ email, ip, baseUrl }) {
   const userRes = await authPool.query(
     'SELECT id, email, first_name, password_hash, google_id FROM users WHERE LOWER(email) = $1 LIMIT 1',
     [email]
@@ -237,8 +172,7 @@ async function processResetRequest({ email, lang, ip, baseUrl }) {
 
   const resetUrl = `${baseUrl}/reset-password?token=${encodeURIComponent(token)}`;
   const mail = buildResetEmail({
-    lang,
-    name: displayName(user, lang),
+    name: displayName(user),
     resetUrl,
     isGoogleOnly: !user.password_hash && !!user.google_id
   });
@@ -246,10 +180,10 @@ async function processResetRequest({ email, lang, ip, baseUrl }) {
   console.log(`[Password Reset] Reset email sent to user ${user.id}`);
 }
 
+// `language` is accepted for API compatibility; emails are always sent in English.
 export async function sendPasswordResetEmail(req, email, language) {
   await processResetRequest({
     email: String(email || '').trim().toLowerCase(),
-    lang: pickLang(language),
     ip: clientIp(req),
     baseUrl: resolvePublicBaseUrl(req)
   });
@@ -310,8 +244,7 @@ export function createPasswordResetRouter({ issueToken, formatUser, requireAuth 
    * Google-only accounts (no password yet) can set their first password.
    */
   router.post('/change', requireAuth, async (req, res) => {
-    const lang = pickLang(req.body?.language);
-    const t = MESSAGES[lang];
+    const t = MESSAGES;
     const currentPassword = typeof req.body?.current_password === 'string' ? req.body.current_password : '';
     const newPassword = typeof req.body?.new_password === 'string' ? req.body.new_password : '';
     const userKey = String(req.user.id);
@@ -372,13 +305,12 @@ export function createPasswordResetRouter({ issueToken, formatUser, requireAuth 
 
     sendTransactionalMail({
       to: updatedUser.email,
-      ...buildChangedEmail({ lang, name: displayName(updatedUser, lang), isFirstPassword })
+      ...buildChangedEmail({ name: displayName(updatedUser), isFirstPassword })
     }).catch((err) => console.error('[Password Change] Confirmation email failed:', err.message));
   });
 
   router.post('/forgot', async (req, res) => {
-    const lang = pickLang(req.body?.language);
-    const t = MESSAGES[lang];
+    const t = MESSAGES;
     const email = String(req.body?.email || '').trim().toLowerCase();
 
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || email.length > 254) {
@@ -392,12 +324,12 @@ export function createPasswordResetRouter({ issueToken, formatUser, requireAuth 
     // Respond before any lookup so response content and timing never reveal whether the email is registered.
     res.json({ success: true, message: t.requestAccepted });
 
-    processResetRequest({ email, lang, ip, baseUrl: resolvePublicBaseUrl(req) })
+    processResetRequest({ email, ip, baseUrl: resolvePublicBaseUrl(req) })
       .catch((err) => console.error('[Password Reset] Failed to process request:', err.message));
   });
 
   router.post('/validate', async (req, res) => {
-    const t = MESSAGES[pickLang(req.body?.language)];
+    const t = MESSAGES;
     try {
       const row = await findActiveToken(req.body?.token);
       if (!row) return res.status(400).json({ valid: false, error: t.invalidToken });
@@ -409,8 +341,7 @@ export function createPasswordResetRouter({ issueToken, formatUser, requireAuth 
   });
 
   router.post('/reset', async (req, res) => {
-    const lang = pickLang(req.body?.language);
-    const t = MESSAGES[lang];
+    const t = MESSAGES;
     const password = typeof req.body?.password === 'string' ? req.body.password : '';
 
     if (!isValidNewPassword(password)) {
@@ -444,7 +375,7 @@ export function createPasswordResetRouter({ issueToken, formatUser, requireAuth 
       user: formatUser(updatedUser)
     });
 
-    sendTransactionalMail({ to: updatedUser.email, ...buildChangedEmail({ lang, name: displayName(updatedUser, lang) }) })
+    sendTransactionalMail({ to: updatedUser.email, ...buildChangedEmail({ name: displayName(updatedUser) }) })
       .catch((err) => console.error('[Password Reset] Confirmation email failed:', err.message));
   });
 

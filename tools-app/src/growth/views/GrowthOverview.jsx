@@ -228,7 +228,7 @@ export default function GrowthOverview() {
         <AlertTriangle size={32} className="text-danger" />
         <p>{error || 'Failed to load data.'}</p>
         <button type="button" onClick={() => fetchOverview(dateRange)} className="growth-secondary-btn">
-          Yeniden Dene
+          Try Again
         </button>
       </div>
     );
@@ -1311,7 +1311,7 @@ export default function GrowthOverview() {
         </section>
 
         {/* --------------------------------------------------------- */}
-        {/* KART 4: AI OVERVIEW // VISIBILITY & CITATIONS */}
+        {/* CARD 4: AI OVERVIEW // VISIBILITY & CITATIONS */}
         {/* --------------------------------------------------------- */}
         <section className="station-card module-card-full module-ai">
           <div className="station-card-header">
@@ -1536,7 +1536,7 @@ export default function GrowthOverview() {
         </section>
 
         {/* --------------------------------------------------------- */}
-        {/* KART 5: GOOGLE BUSINESS RATING & REVIEWS */}
+        {/* CARD 5: GOOGLE BUSINESS RATING & REVIEWS */}
         {/* --------------------------------------------------------- */}
         <section className="station-card module-card-half module-gbp">
           <div className="station-card-header">
@@ -1721,7 +1721,7 @@ export default function GrowthOverview() {
         </section>
 
         {/* --------------------------------------------------------- */}
-        {/* KART 7: CITATION DIRECTORY NETWORK */}
+        {/* CARD 7: CITATION DIRECTORY NETWORK */}
         {/* --------------------------------------------------------- */}
         <section className="station-card module-card-full module-directories">
           <div className="station-card-header">

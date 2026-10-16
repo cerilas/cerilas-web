@@ -877,14 +877,14 @@ console.log(response.text);`;
             <AlertCircle size={18} style={{ color: '#f59e0b', flexShrink: 0, marginTop: '2px' }} />
             <div>
               <div style={{ fontWeight: 600, color: 'var(--text-main)', marginBottom: '0.2rem' }}>
-                Google Analytics 4 Mülk Listeleme Uyarısı (Admin API)
+                Google Analytics 4 Property Listing Notice (Admin API)
               </div>
               <div style={{ fontSize: '0.84rem', color: 'var(--text-muted)' }}>
-                Google Cloud Console projenizde <strong>Google Analytics Admin API</strong> henüz etkinleştirilmemiş olabilir.{' '}
+                The <strong>Google Analytics Admin API</strong> may not be enabled yet in your Google Cloud Console project.{' '}
                 {ga4Error.includes('disabled') || ga4Error.includes('not been used') ? (
-                  <>Mülklerinizin otomatik listelenmesi için <a href="https://console.cloud.google.com/apis/library/analyticsadmin.googleapis.com" target="_blank" rel="noreferrer">Google Cloud Console'dan Analytics Admin API'yi etkinleştirebilir</a> veya aşağıdaki alana doğrudan <strong>GA4 Sayısal Mülk ID'nizi (Property ID)</strong> girebilirsiniz.</>
+                  <>To list your properties automatically, you can <a href="https://console.cloud.google.com/apis/library/analyticsadmin.googleapis.com" target="_blank" rel="noreferrer">enable the Analytics Admin API in Google Cloud Console</a>, or enter your <strong>numeric GA4 Property ID</strong> directly in the field below.</>
                 ) : (
-                  <>({ga4Error}) — Aşağıdaki alana doğrudan GA4 Mülk ID'nizi yazarak da rapor çekebilirsiniz.</>
+                  <>({ga4Error}) — You can also pull reports by entering your GA4 Property ID directly in the field below.</>
                 )}
               </div>
             </div>

@@ -421,7 +421,7 @@ export default function GrowthSearch() {
   const sortedQueries = [...filteredQueries].sort((a, b) => {
     let cmp = 0;
     if (querySortField === 'query') {
-      cmp = (a.query || '').localeCompare(b.query || '', 'tr', { sensitivity: 'base' });
+      cmp = (a.query || '').localeCompare(b.query || '', 'en', { sensitivity: 'base' });
     } else if (querySortField === 'clicks') {
       cmp = (Number(a.clicks) || 0) - (Number(b.clicks) || 0);
     } else if (querySortField === 'impressions') {
@@ -727,7 +727,7 @@ export default function GrowthSearch() {
 
             <div className="growth-stat-card">
               <div className="stat-card-header">
-                <span className="stat-card-title">Ortalama Position (Rank)</span>
+                <span className="stat-card-title">Average Position (Rank)</span>
                 <TrendingUp size={16} className="stat-card-icon" />
               </div>
               <div className="stat-card-value">
@@ -745,7 +745,7 @@ export default function GrowthSearch() {
               <div className="growth-chart-header">
                 <div className="growth-chart-title-wrap">
                   <Activity size={16} className="text-primary" />
-                  <span className="growth-chart-title">{currentRangeLabel} Performans & Trend Zaman Serisi</span>
+                  <span className="growth-chart-title">{currentRangeLabel} Performance & Trend Time Series</span>
                 </div>
 
                 <div className="growth-chart-legend">

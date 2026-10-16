@@ -11,12 +11,10 @@ import {
   HelpCircle,
   Cpu
 } from 'lucide-react';
-import { useTranslation } from '../i18n';
 import { useRevenueCat } from '../context/RevenueCatContext';
 import './pricing.css';
 
 export default function PricingView({ onBack }) {
-  const { language } = useTranslation();
   const { isPro, presentPaywall, openCustomerCenter } = useRevenueCat();
   const [billingCycle, setBillingCycle] = useState('annual'); // 'monthly' | 'annual'
 
@@ -40,7 +38,7 @@ export default function PricingView({ onBack }) {
             aria-label="Back to tools"
           >
             <ArrowLeft size={14} />
-            <span>{language === 'tr' ? 'Araçlara Dön' : 'Back to Tools'}</span>
+            <span>Back to Tools</span>
           </button>
           <span>/</span>
           <span className="pricing-crumb-current">Pricing &amp; Plans</span>
@@ -200,7 +198,7 @@ export default function PricingView({ onBack }) {
                 onClick={openCustomerCenter}
               >
                 <Check size={16} />
-                <span>{language === 'tr' ? 'Mevcut Plan (Yönet)' : 'Active Plan (Manage)'}</span>
+                <span>Active Plan (Manage)</span>
               </button>
             ) : (
               <button 
@@ -208,7 +206,7 @@ export default function PricingView({ onBack }) {
                 className="pricing-cta-btn"
                 onClick={() => presentPaywall({ defaultPackageId: 'pro', cycle: billingCycle })}
               >
-                <span>{language === 'tr' ? 'Pro\'ya Abone Ol' : 'Subscribe to Pro'}</span>
+                <span>Subscribe to Pro</span>
               </button>
             )}
           </div>
@@ -271,7 +269,7 @@ export default function PricingView({ onBack }) {
               className="pricing-cta-btn"
               onClick={() => presentPaywall({ defaultPackageId: 'unlimited', cycle: billingCycle })}
             >
-              <span>{language === 'tr' ? 'Unlimited Başlat' : 'Get Unlimited'}</span>
+              <span>Get Unlimited</span>
             </button>
           </div>
         </div>

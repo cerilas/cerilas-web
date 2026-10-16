@@ -87,7 +87,6 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
     refreshCustomerInfo
   } = useRevenueCat();
   const { language } = useTranslation();
-  const isTr = language === 'tr';
 
   const [activeTab, setActiveTab] = useState(initialTab); // 'profile' | 'package' | 'billing'
 
@@ -209,7 +208,7 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
     if (!file) return;
 
     if (file.size > 2 * 1024 * 1024) {
-      setProfileErrorMsg(isTr ? 'Görsel boyutu 2 MB\'tan küçük olmalıdır.' : 'Image size must be under 2 MB.');
+      setProfileErrorMsg('Image size must be under 2 MB.');
       return;
     }
 
@@ -236,10 +235,10 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
         avatar_url: avatarUrl,
         phone: phone
       });
-      setProfileSuccessMsg(isTr ? 'Profil bilgileriniz başarıyla güncellendi.' : 'Profile updated successfully.');
+      setProfileSuccessMsg('Profile updated successfully.');
       setTimeout(() => setProfileSuccessMsg(''), 4000);
     } catch (err) {
-      setProfileErrorMsg(err.message || (isTr ? 'Profil güncellenemedi.' : 'Failed to update profile.'));
+      setProfileErrorMsg(err.message || 'Failed to update profile.');
     } finally {
       setSavingProfile(false);
     }
@@ -254,15 +253,15 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
     setPasswordErrorMsg('');
 
     if (hasPassword && !currentPassword) {
-      setPasswordErrorMsg(isTr ? 'Lütfen mevcut şifrenizi girin.' : 'Please enter your current password.');
+      setPasswordErrorMsg('Please enter your current password.');
       return;
     }
     if (newPassword.length < 8) {
-      setPasswordErrorMsg(isTr ? 'Yeni şifre en az 8 karakter olmalıdır.' : 'Your new password must be at least 8 characters.');
+      setPasswordErrorMsg('Your new password must be at least 8 characters.');
       return;
     }
     if (newPassword !== confirmNewPassword) {
-      setPasswordErrorMsg(isTr ? 'Yeni şifreler eşleşmiyor.' : 'New passwords do not match.');
+      setPasswordErrorMsg('New passwords do not match.');
       return;
     }
 
@@ -272,10 +271,10 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
       setCurrentPassword('');
       setNewPassword('');
       setConfirmNewPassword('');
-      setPasswordSuccessMsg(data.message || (isTr ? 'Şifreniz güncellendi.' : 'Your password has been updated.'));
+      setPasswordSuccessMsg(data.message || 'Your password has been updated.');
       setTimeout(() => setPasswordSuccessMsg(''), 6000);
     } catch (err) {
-      setPasswordErrorMsg(err.message || (isTr ? 'Şifre güncellenemedi.' : 'Could not update your password.'));
+      setPasswordErrorMsg(err.message || 'Could not update your password.');
     } finally {
       setPasswordLoading(false);
     }
@@ -288,11 +287,9 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
     setResetLinkLoading(true);
     try {
       await requestPasswordReset(user.email, language);
-      setPasswordSuccessMsg(isTr
-        ? `Şifre sıfırlama bağlantısı ${user.email} adresine gönderildi.`
-        : `A password reset link was sent to ${user.email}.`);
+      setPasswordSuccessMsg(`A password reset link was sent to ${user.email}.`);
     } catch (err) {
-      setPasswordErrorMsg(err.message || (isTr ? 'Bağlantı gönderilemedi.' : 'Could not send the reset link.'));
+      setPasswordErrorMsg(err.message || 'Could not send the reset link.');
     } finally {
       setResetLinkLoading(false);
     }
@@ -305,10 +302,10 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
     setGoogleErrorMsg('');
     try {
       await initiateGoogleAuth({ mode: 'link' });
-      setGoogleSuccessMsg(isTr ? 'Google hesabınız başarıyla bağlandı!' : 'Google account linked successfully!');
+      setGoogleSuccessMsg('Google account linked successfully!');
       setTimeout(() => setGoogleSuccessMsg(''), 4500);
     } catch (err) {
-      setGoogleErrorMsg(err.message || (isTr ? 'Google hesabı bağlanamadı.' : 'Failed to link Google account.'));
+      setGoogleErrorMsg(err.message || 'Failed to link Google account.');
     } finally {
       setGoogleActionLoading(false);
     }
@@ -319,13 +316,11 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
     setDialogModal({
       isOpen: true,
       type: 'warning',
-      badge: isTr ? 'GÜVENLİK' : 'SECURITY',
-      title: isTr ? 'Google Bağlantısını Kaldır' : 'Disconnect Google Account',
-      message: isTr 
-        ? 'Google hesabınızın bağlantısını kaldırmak istediğinize emin misiniz? Şifreniz ile giriş yapmaya devam edebilirsiniz.' 
-        : 'Are you sure you want to disconnect your Google account? You will still be able to sign in with your password.',
-      confirmText: isTr ? 'Bağlantıyı Kaldır' : 'Disconnect',
-      cancelText: isTr ? 'Vazgeç' : 'Cancel',
+      badge: 'SECURITY',
+      title: 'Disconnect Google Account',
+      message: 'Are you sure you want to disconnect your Google account? You will still be able to sign in with your password.',
+      confirmText: 'Disconnect',
+      cancelText: 'Cancel',
       onConfirm: async () => {
         setDialogModal(prev => ({ ...prev, isOpen: false }));
         setGoogleActionLoading(true);
@@ -333,10 +328,10 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
         setGoogleErrorMsg('');
         try {
           await unlinkGoogleAccount();
-          setGoogleSuccessMsg(isTr ? 'Google hesabı bağlantısı başarıyla kaldırıldı.' : 'Google account disconnected successfully.');
+          setGoogleSuccessMsg('Google account disconnected successfully.');
           setTimeout(() => setGoogleSuccessMsg(''), 4500);
         } catch (err) {
-          setGoogleErrorMsg(err.message || (isTr ? 'Google bağlantısı kaldırılamadı.' : 'Failed to disconnect Google.'));
+          setGoogleErrorMsg(err.message || 'Failed to disconnect Google.');
         } finally {
           setGoogleActionLoading(false);
         }
@@ -418,7 +413,7 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
   };
 
   const periodEndDate = getPeriodEndDate();
-  const formattedPeriodEndDate = periodEndDate.toLocaleDateString(isTr ? 'tr-TR' : 'en-US', {
+  const formattedPeriodEndDate = periodEndDate.toLocaleDateString('en-US', {
     day: 'numeric',
     month: 'long',
     year: 'numeric'
@@ -452,12 +447,10 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
           setDialogModal({
             isOpen: true,
             type: 'success',
-            badge: isTr ? 'PRO AKTİF' : 'PRO ACTIVE',
-            title: isTr ? 'Pro Aboneliğiniz Hesabınızla Eşitlendi' : 'Pro Subscription Synced',
-            message: isTr 
-              ? `Hesabınızda ${formattedPeriodEndDate} tarihine kadar geçerli bir Pro aboneliği zaten aktiftir. Tekrar satın alma işlemi yapılmadan Pro yetkileriniz profilinize başarıyla geri yüklendi.` 
-              : `Your account already has an active Pro subscription until ${formattedPeriodEndDate}. Your Pro membership has been synced with no extra charge.`,
-            confirmText: isTr ? 'Tamam, Harika' : 'Got it',
+            badge: 'PRO ACTIVE',
+            title: 'Pro Subscription Synced',
+            message: `Your account already has an active Pro subscription until ${formattedPeriodEndDate}. Your Pro membership has been synced with no extra charge.`,
+            confirmText: 'Got it',
             onConfirm: () => setDialogModal(prev => ({ ...prev, isOpen: false }))
           });
           return;
@@ -480,12 +473,10 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
         setDialogModal({
           isOpen: true,
           type: 'info',
-          badge: isTr ? 'BİLGİ' : 'NOTICE',
-          title: isTr ? 'Downgrade Zaten Planlandı' : 'Downgrade Already Scheduled',
-          message: isTr 
-            ? `Pro üyeliğiniz ${formattedPeriodEndDate} tarihine kadar aktif kalacak ve bu tarihten sonra otomatik olarak Ücretsiz plana geçecektir.` 
-            : `Your Pro membership is already scheduled to end on ${formattedPeriodEndDate}.`,
-          confirmText: isTr ? 'Anladım' : 'Got it',
+          badge: 'NOTICE',
+          title: 'Downgrade Already Scheduled',
+          message: `Your Pro membership is already scheduled to end on ${formattedPeriodEndDate}.`,
+          confirmText: 'Got it',
           onConfirm: () => setDialogModal(prev => ({ ...prev, isOpen: false }))
         });
         return;
@@ -512,18 +503,14 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
       setDialogModal({
         isOpen: true,
         type: 'success',
-        badge: isTr ? 'BAŞARILI' : 'SUCCESS',
-        title: isTr ? 'Downgrade Planlandı' : 'Downgrade Scheduled',
-        message: isTr 
-          ? `Pro üyeliğiniz ${formattedPeriodEndDate} tarihine kadar kesintisiz devam edecektir. Yinelenen ödemenin durdurulması için Paddle Müşteri Portalı yeni sekmede açılmıştır. Bu tarihten sonra hesabınız otomatik olarak Ücretsiz (Free) plana geçecektir.`
-          : `Your Pro membership will remain active until ${formattedPeriodEndDate}. The Paddle Customer Portal has been opened in a new tab to manage auto-renewal. After this date, your account will switch to the Free plan.`,
-        confirmText: isTr ? 'Harika, Anladım' : 'Got it',
+        badge: 'SUCCESS',
+        title: 'Downgrade Scheduled',
+        message: `Your Pro membership will remain active until ${formattedPeriodEndDate}. The Paddle Customer Portal has been opened in a new tab to manage auto-renewal. After this date, your account will switch to the Free plan.`,
+        confirmText: 'Got it',
         onConfirm: () => setDialogModal(prev => ({ ...prev, isOpen: false }))
       });
 
-      const successText = isTr 
-        ? `Pro üyeliğiniz ${formattedPeriodEndDate} tarihine kadar aktif kalacak, sonrasında Ücretsiz plana geçecektir.` 
-        : `Your Pro membership will remain active until ${formattedPeriodEndDate}.`;
+      const successText = `Your Pro membership will remain active until ${formattedPeriodEndDate}.`;
       setPlanSuccessMsg(successText);
       try {
         const updatedInvoices = await getInvoices();
@@ -534,10 +521,10 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
       setDialogModal({
         isOpen: true,
         type: 'danger',
-        badge: isTr ? 'HATA' : 'ERROR',
-        title: isTr ? 'İşlem Başarısız' : 'Action Failed',
-        message: err.message || (isTr ? 'Downgrade işlemi gerçekleştirilemedi.' : 'Failed to schedule downgrade.'),
-        confirmText: isTr ? 'Tamam' : 'Close',
+        badge: 'ERROR',
+        title: 'Action Failed',
+        message: err.message || 'Failed to schedule downgrade.',
+        confirmText: 'Close',
         onConfirm: () => setDialogModal(prev => ({ ...prev, isOpen: false }))
       });
     } finally {
@@ -550,13 +537,11 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
     setDialogModal({
       isOpen: true,
       type: 'warning',
-      badge: isTr ? 'ABONELİK YENİLEME' : 'SUBSCRIPTION RENEWAL',
-      title: isTr ? 'Aboneliği Devam Ettir' : 'Resume Pro Subscription',
-      message: isTr 
-        ? 'Planlanan iptal işlemi geri alınacak ve Pro üyeliğiniz kesintisiz olarak devam edecektir.'
-        : 'The scheduled cancellation will be reverted and your Pro membership will continue renewing.',
-      confirmText: isTr ? 'Aboneliği Sürdür' : 'Resume Subscription',
-      cancelText: isTr ? 'Vazgeç' : 'Cancel',
+      badge: 'SUBSCRIPTION RENEWAL',
+      title: 'Resume Pro Subscription',
+      message: 'The scheduled cancellation will be reverted and your Pro membership will continue renewing.',
+      confirmText: 'Resume Subscription',
+      cancelText: 'Cancel',
       onConfirm: async () => {
         setUpgradingPlan('pro');
         try {
@@ -566,25 +551,23 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
           setDialogModal({
             isOpen: true,
             type: 'success',
-            badge: isTr ? 'BAŞARILI' : 'SUCCESS',
-            title: isTr ? 'Abonelik Sürdürüldü' : 'Subscription Resumed',
-            message: isTr 
-              ? 'Pro üyeliğiniz başarıyla sürdürüldü. Dönem sonunda yenilenmeye devam edecektir.' 
-              : 'Your Pro subscription has been resumed successfully.',
-            confirmText: isTr ? 'Tamam' : 'Close',
+            badge: 'SUCCESS',
+            title: 'Subscription Resumed',
+            message: 'Your Pro subscription has been resumed successfully.',
+            confirmText: 'Close',
             onConfirm: () => setDialogModal(prev => ({ ...prev, isOpen: false }))
           });
-          const successText = isTr ? 'Pro aboneliğiniz başarıyla sürdürüldü.' : 'Pro subscription resumed successfully.';
+          const successText = 'Pro subscription resumed successfully.';
           setPlanSuccessMsg(successText);
           setTimeout(() => setPlanSuccessMsg(''), 5000);
         } catch (err) {
           setDialogModal({
             isOpen: true,
             type: 'danger',
-            badge: isTr ? 'HATA' : 'ERROR',
-            title: isTr ? 'İşlem Başarısız' : 'Action Failed',
-            message: err.message || (isTr ? 'Abonelik sürdürülemedi.' : 'Failed to resume subscription.'),
-            confirmText: isTr ? 'Tamam' : 'Close',
+            badge: 'ERROR',
+            title: 'Action Failed',
+            message: err.message || 'Failed to resume subscription.',
+            confirmText: 'Close',
             onConfirm: () => setDialogModal(prev => ({ ...prev, isOpen: false }))
           });
         } finally {
@@ -612,12 +595,10 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
             <ShieldCheck size={28} style={{ color: 'var(--text-main, #38bdf8)' }} />
           </div>
           <h2 style={{ fontSize: '1.4rem', marginBottom: '0.5rem', color: 'var(--text-main, #ffffff)' }}>
-            {isTr ? 'Giriş Yapmanız Gerekiyor' : 'Authentication Required'}
+            {'Authentication Required'}
           </h2>
           <p style={{ fontSize: '0.875rem', color: 'var(--text-muted, #94a3b8)', marginBottom: '1.75rem', lineHeight: 1.5 }}>
-            {isTr 
-              ? 'Profiliniz ve faturalandırma bilgilerinize erişmek için lütfen giriş yapın veya ücretsiz üye olun.' 
-              : 'Please sign in or create an account to view your profile and billing information.'}
+            {'Please sign in or create an account to view your profile and billing information.'}
           </p>
           <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center' }}>
             <button
@@ -625,14 +606,14 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
               onClick={() => openAuthModal('login')}
               className="account-btn btn-primary btn-lg"
             >
-              {isTr ? 'Giriş Yap' : 'Sign In'}
+              {'Sign In'}
             </button>
             <button
               type="button"
               onClick={() => openAuthModal('register')}
               className="account-btn btn-secondary btn-lg"
             >
-              {isTr ? 'Kayıt Ol' : 'Sign Up'}
+              {'Sign Up'}
             </button>
           </div>
         </div>
@@ -650,10 +631,10 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
           className="account-back-btn"
         >
           <ArrowLeft size={15} />
-          <span>{isTr ? 'Araçlara Dön' : 'Back to Tools'}</span>
+          <span>{'Back to Tools'}</span>
         </button>
         <span className="account-top-divider">/</span>
-        <span className="account-top-current">{isTr ? 'Hesap Portalı' : 'Account Portal'}</span>
+        <span className="account-top-current">{'Account Portal'}</span>
       </div>
 
       {/* User Header Profile Card */}
@@ -674,7 +655,7 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
               <span className={`account-plan-badge badge-${currentPlan}`}>
                 <Crown size={12} />
                 <span>
-                  {currentPlan === 'pro' ? 'Pro' : (currentPlan === 'enterprise' || currentPlan === 'unlimited') ? 'Unlimited' : (isTr ? 'Ücretsiz Plan' : 'Free Starter')}
+                  {currentPlan === 'pro' ? 'Pro' : (currentPlan === 'enterprise' || currentPlan === 'unlimited') ? 'Unlimited' : 'Free Starter'}
                 </span>
               </span>
             </div>
@@ -705,13 +686,13 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
           type="button" 
           onClick={logout} 
           className="account-logout-btn"
-          title={isTr ? 'Oturumu Kapat' : 'Log out'}
+          title={'Log out'}
         >
-          {isTr ? 'Çıkış Yap' : 'Log Out'}
+          {'Log Out'}
         </button>
       </div>
 
-      {/* Navigation Tabs (Ordered: Profil, Plan, Billing) */}
+      {/* Navigation Tabs (Ordered: Profile, Plan, Billing) */}
       <div className="account-tabs-bar" role="tablist">
         <button
           type="button"
@@ -721,7 +702,7 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
           onClick={() => switchTab('profile')}
         >
           <User size={17} />
-          <span>{isTr ? 'Profil' : 'Profile'}</span>
+          <span>{'Profile'}</span>
         </button>
         <button
           type="button"
@@ -731,7 +712,7 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
           onClick={() => switchTab('package')}
         >
           <Package size={17} />
-          <span>{isTr ? 'Plan' : 'Plan'}</span>
+          <span>{'Plan'}</span>
         </button>
         <button
           type="button"
@@ -741,7 +722,7 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
           onClick={() => switchTab('billing')}
         >
           <CreditCard size={17} />
-          <span>{isTr ? 'Fatura & Ödeme' : 'Billing'}</span>
+          <span>{'Billing'}</span>
         </button>
       </div>
 
@@ -768,12 +749,10 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
                   </div>
                   <div>
                     <h4 className="account-scheduled-banner-title">
-                      {isTr ? 'Abonelik İptali Planlandı (Dönem Sonunda Sona Erecek)' : 'Subscription Cancels at Period End'}
+                      {'Subscription Cancels at Period End'}
                     </h4>
                     <p className="account-scheduled-banner-desc">
-                      {isTr 
-                        ? `Pro üyeliğiniz ${formattedPeriodEndDate} tarihine kadar kesintisiz aktiftir. Bu tarihten sonra otomatik olarak Ücretsiz plana geçeceksiniz (Kartınızdan yeni ücret çekilmeyecektir).`
-                        : `Your Pro membership is active until ${formattedPeriodEndDate}. After this date, your account will switch to Free with no renewal charges.`}
+                      {`Your Pro membership is active until ${formattedPeriodEndDate}. After this date, your account will switch to Free with no renewal charges.`}
                     </p>
                   </div>
                 </div>
@@ -784,7 +763,7 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
                   className="account-scheduled-resume-btn"
                 >
                   <RotateCcw size={14} />
-                  <span>{isTr ? 'Aboneliği Sürdür (İptali Geri Al)' : 'Resume Subscription'}</span>
+                  <span>{'Resume Subscription'}</span>
                 </button>
               </div>
             )}
@@ -798,12 +777,10 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
                   </div>
                   <div>
                     <h3 className="guest-banner-title">
-                      {isTr ? 'Şeffaf Planlar & %100 Gizlilik' : 'Transparent Plans & 100% Privacy'}
+                      {'Transparent Plans & 100% Privacy'}
                     </h3>
                     <p className="guest-banner-desc">
-                      {isTr 
-                        ? 'Tüm temel araçlar ömür boyu ücretsizdir. Yüksek hacimli AI ve token kullanımı için paketinizi seçebilirsiniz.' 
-                        : 'All core utilities are free forever. Select a plan below for expanded AI token quotas and concurrency.'}
+                      {'All core utilities are free forever. Select a plan below for expanded AI token quotas and concurrency.'}
                     </p>
                   </div>
                 </div>
@@ -813,14 +790,14 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
                     onClick={() => openAuthModal('login')} 
                     className="guest-auth-btn btn-login"
                   >
-                    {isTr ? 'Giriş Yap' : 'Sign In'}
+                    {'Sign In'}
                   </button>
                   <button 
                     type="button" 
                     onClick={() => openAuthModal('register')} 
                     className="guest-auth-btn btn-register"
                   >
-                    {isTr ? 'Ücretsiz Kayıt Ol' : 'Create Free Account'}
+                    {'Create Free Account'}
                   </button>
                 </div>
               </div>
@@ -832,13 +809,11 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
                 <div>
                   <div className="account-panel-pill">
                     <Crown size={13} />
-                    <span>{isTr ? 'ÜYELİK DURUMU' : 'MEMBERSHIP STATUS'}</span>
+                    <span>{'MEMBERSHIP STATUS'}</span>
                   </div>
-                  <h2 className="account-panel-title">{isTr ? 'Mevcut Abonelik Paketiniz' : 'Current Subscription'}</h2>
+                  <h2 className="account-panel-title">{'Current Subscription'}</h2>
                   <p className="account-panel-desc">
-                    {isTr 
-                      ? 'Hesabınıza tanımlı paket limitleri, aktif token tahsisi ve kullanım hakları.' 
-                      : 'Your active plan limits, quotas, and feature entitlements.'}
+                    {'Your active plan limits, quotas, and feature entitlements.'}
                   </p>
                 </div>
                 <div className="account-header-actions-row">
@@ -850,16 +825,16 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
                   )}
                   <span className="account-active-status-tag tag-emerald">
                     <span className="status-indicator-dot" />
-                    <span>{isTr ? 'Aktif Üyelik' : 'Active Account'}</span>
+                    <span>{'Active Account'}</span>
                   </span>
                   <button
                     type="button"
                     onClick={() => openCustomerCenter()}
                     className="account-pricing-link-btn"
-                    title={isTr ? 'Fatura & Abonelik Yönetim Portalı' : 'Subscription & Billing Portal'}
+                    title={'Subscription & Billing Portal'}
                   >
                     <CreditCard size={14} />
-                    <span>{isTr ? 'Abonelik Portalı' : 'Customer Center'}</span>
+                    <span>{'Customer Center'}</span>
                   </button>
                 </div>
               </div>
@@ -867,7 +842,7 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
               <div className="account-plan-overview-grid">
                 <div className="account-metric-box">
                   <div className="account-metric-top">
-                    <span className="account-metric-label">{isTr ? 'Plan Adı' : 'Plan Name'}</span>
+                    <span className="account-metric-label">{'Plan Name'}</span>
                     <Crown size={15} className="metric-icon text-amber" />
                   </div>
                   <span className="account-metric-val">
@@ -876,33 +851,33 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
                 </div>
                 <div className="account-metric-box">
                   <div className="account-metric-top">
-                    <span className="account-metric-label">{isTr ? 'Ücretsiz Araçlar' : 'Free Tools'}</span>
+                    <span className="account-metric-label">{'Free Tools'}</span>
                     <Sparkles size={15} className="metric-icon text-cyan" />
                   </div>
                   <span className="account-metric-val">
-                    {isTr ? 'Ömür Boyu Sınırsız' : 'Unlimited Free'}
+                    {'Unlimited Free'}
                   </span>
                 </div>
                 <div className="account-metric-box">
                   <div className="account-metric-top">
-                    <span className="account-metric-label">{isTr ? 'Premium Araçlar' : 'Premium Tools'}</span>
+                    <span className="account-metric-label">{'Premium Tools'}</span>
                     <Zap size={15} className="metric-icon text-indigo" />
                   </div>
                   <span className="account-metric-val">
                     {currentPlan === 'free' 
-                      ? (isTr ? 'Tokenli (Ücretsiz Kota)' : 'Token (Free Quota)')
+                      ? 'Token (Free Quota)'
                       : currentPlan === 'pro'
-                      ? (isTr ? 'Genişletilmiş Token' : 'Expanded Token Allowance')
-                      : (isTr ? 'Maksimum Tahsis' : 'Maximum Token Allowance')}
+                      ? 'Expanded Token Allowance'
+                      : 'Maximum Token Allowance'}
                   </span>
                 </div>
                 <div className="account-metric-box">
                   <div className="account-metric-top">
-                    <span className="account-metric-label">{isTr ? 'Gizlilik & Depolama' : 'Privacy & Storage'}</span>
+                    <span className="account-metric-label">{'Privacy & Storage'}</span>
                     <ShieldCheck size={15} className="metric-icon text-emerald" />
                   </div>
                   <span className="account-metric-val">
-                    {isTr ? '%100 İstemci Taraflı' : '100% Client-Side'}
+                    {'100% Client-Side'}
                   </span>
                 </div>
               </div>
@@ -910,15 +885,15 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
               <div className="account-plan-perks-list">
                 <div className="account-perk-item">
                   <div className="account-perk-icon-circle"><Check size={13} /></div>
-                  <span><strong>{isTr ? 'Temel Araçlar Sınırsız:' : 'Free tools free forever:'}</strong> {isTr ? 'Tüm ücretsiz araçlar sınırsız ve ömür boyu bedava' : 'All free utility tools are free forever'}</span>
+                  <span><strong>{'Free tools free forever:'}</strong> {'All free utility tools are free forever'}</span>
                 </div>
                 <div className="account-perk-item">
                   <div className="account-perk-icon-circle"><Check size={13} /></div>
-                  <span><strong>{isTr ? 'Premium Araçlar:' : 'Premium tools uses tokens:'}</strong> {isTr ? 'Premium araçlar token kullanır, sınırlı ücretsiz kullanım hakkı içerir' : 'Premium tools use tokens with a limited free tier allowance'}</span>
+                  <span><strong>{'Premium tools uses tokens:'}</strong> {'Premium tools use tokens with a limited free tier allowance'}</span>
                 </div>
                 <div className="account-perk-item">
                   <div className="account-perk-icon-circle"><Check size={13} /></div>
-                  <span><strong>{isTr ? '%100 Tarayıcı İçi Gizlilik:' : '100% In-Browser Privacy:'}</strong> {isTr ? 'Sıfır sunucu depolaması, dosyalarınız asla cihazınızdan çıkmaz' : 'Zero server file uploads, files never leave your device'}</span>
+                  <span><strong>{'100% In-Browser Privacy:'}</strong> {'Zero server file uploads, files never leave your device'}</span>
                 </div>
               </div>
             </div>
@@ -929,13 +904,11 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
                 <div>
                   <div className="account-panel-pill pill-cyan">
                     <Sparkles size={13} />
-                    <span>{isTr ? 'FİYATLANDIRMA & YÜKSELTME' : 'PRICING & UPGRADE'}</span>
+                    <span>{'PRICING & UPGRADE'}</span>
                   </div>
-                  <h2 className="account-panel-title">{isTr ? 'Paketinizi Seçin veya Yükseltin' : 'Select or Upgrade Your Plan'}</h2>
+                  <h2 className="account-panel-title">{'Select or Upgrade Your Plan'}</h2>
                   <p className="account-panel-desc">
-                    {isTr 
-                      ? 'İhtiyacınıza uygun paketi seçerek limitlerinizi ve işlem hızınızı anında genişletin.' 
-                      : 'Choose the plan tailored to your team or daily workflow.'}
+                    {'Choose the plan tailored to your team or daily workflow.'}
                   </p>
                 </div>
                 <button
@@ -943,7 +916,7 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
                   onClick={() => { window.location.hash = '#/pricing'; }}
                   className="account-pricing-link-btn"
                 >
-                  <span>{isTr ? 'Detaylı Kıyaslama' : 'Compare Plans'}</span>
+                  <span>{'Compare Plans'}</span>
                   <ExternalLink size={14} />
                 </button>
               </div>
@@ -955,16 +928,16 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
                   className={`account-billing-toggle-tab ${packageBillingCycle === 'monthly' ? 'is-active' : ''}`}
                   onClick={() => setPackageBillingCycle('monthly')}
                 >
-                  {isTr ? 'Aylık Ödeme' : 'Monthly Billing'}
+                  {'Monthly Billing'}
                 </button>
                 <button
                   type="button"
                   className={`account-billing-toggle-tab ${packageBillingCycle === 'annual' ? 'is-active' : ''}`}
                   onClick={() => setPackageBillingCycle('annual')}
                 >
-                  <span>{isTr ? 'Yıllık Ödeme' : 'Annual Billing'}</span>
+                  <span>{'Annual Billing'}</span>
                   <span className="account-billing-discount-badge">
-                    {isTr ? '🎁 2 Ay Bedava' : '🎁 2 Months Free'}
+                    {'🎁 2 Months Free'}
                   </span>
                 </button>
               </div>
@@ -982,44 +955,44 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
                   <div className="account-upgrade-card-head">
                     <h3 className="account-upgrade-card-name">Forever Free</h3>
                     <p className="account-upgrade-card-desc">
-                      {isTr ? 'Tüm ücretsiz araçlar sınırsız, premium araçlar için sınırlı kota.' : 'Free tools free forever, with limited free allowance for premium tools.'}
+                      {'Free tools free forever, with limited free allowance for premium tools.'}
                     </p>
                     <div className="account-upgrade-price-wrap">
                       <span className="account-upgrade-currency">$</span>
                       <span className="account-upgrade-amount">0</span>
-                      <span className="account-upgrade-period">/ {isTr ? 'ömür boyu' : 'forever'}</span>
+                      <span className="account-upgrade-period">/ {'forever'}</span>
                     </div>
                     <div className="account-upgrade-price-detail">
-                      {isTr ? 'Kredi kartı gerekmez &bull; Herkese açık' : 'No credit card required &bull; Free forever'}
+                      {'No credit card required • Free forever'}
                     </div>
                   </div>
 
                   <ul className="account-upgrade-features-list">
                     <li className="account-upgrade-feature-item">
                       <div className="account-feature-check-icon"><Check size={13} /></div>
-                      <span><strong>{isTr ? 'Temel Araçlar Sınırsız:' : 'Free tools free forever:'}</strong> {isTr ? 'Tüm ücretsiz araçlar sınırsız' : 'Unlimited free tools'}</span>
+                      <span><strong>{'Free tools free forever:'}</strong> {'Unlimited free tools'}</span>
                     </li>
                     <li className="account-upgrade-feature-item">
                       <div className="account-feature-check-icon"><Check size={13} /></div>
-                      <span><strong>{isTr ? 'Premium Araçlar:' : 'Premium tools:'}</strong> {isTr ? 'Sınırlı ücretsiz token hakkı' : 'Limited free allowance'}</span>
+                      <span><strong>{'Premium tools:'}</strong> {'Limited free allowance'}</span>
                     </li>
                     <li className="account-upgrade-feature-item">
                       <div className="account-feature-check-icon"><Check size={13} /></div>
-                      <span><strong>{isTr ? '%100 Tarayıcı Gizliliği:' : '100% In-Browser Privacy:'}</strong> {isTr ? 'Sıfır sunucu depolaması' : 'Zero server file uploads'}</span>
+                      <span><strong>{'100% In-Browser Privacy:'}</strong> {'Zero server file uploads'}</span>
                     </li>
                     <li className="account-upgrade-feature-item">
                       <div className="account-feature-check-icon"><Check size={13} /></div>
-                      <span>{isTr ? 'Standart WebAssembly işlem hızı' : 'Standard WebAssembly speed'}</span>
+                      <span>{'Standard WebAssembly speed'}</span>
                     </li>
                   </ul>
 
                   <div className="account-upgrade-card-footer">
                     {currentPlan === 'free' ? (
-                      <div className="account-current-plan-pill">{isTr ? 'Mevcut Planınız' : 'Current Plan'}</div>
+                      <div className="account-current-plan-pill">{'Current Plan'}</div>
                     ) : user?.cancel_at_period_end ? (
                       <div className="account-scheduled-plan-pill">
                         <Clock size={13} />
-                        <span>{isTr ? 'Dönem Sonunda Aktif' : 'Active at Period End'}</span>
+                        <span>{'Active at Period End'}</span>
                       </div>
                     ) : (
                       <button
@@ -1028,7 +1001,7 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
                         onClick={() => handleUpgradePlan('free')}
                         className="account-plan-action-btn btn-secondary-sub"
                       >
-                        {upgradingPlan === 'free' ? <Loader2 size={15} className="auth-spinner" /> : (isTr ? 'Ücretsiz Plana Geç' : 'Downgrade to Free')}
+                        {upgradingPlan === 'free' ? <Loader2 size={15} className="auth-spinner" /> : 'Downgrade to Free'}
                       </button>
                     )}
                   </div>
@@ -1038,13 +1011,13 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
                 <div className={`account-upgrade-card is-featured ${currentPlan === 'pro' ? 'is-current-card is-active-featured' : ''}`}>
                   <div className="account-card-top-tag tag-featured">
                     <Sparkles size={12} />
-                    <span>{isTr ? 'POPÜLER SEÇİM' : 'POPULAR CHOICE'}</span>
+                    <span>{'POPULAR CHOICE'}</span>
                   </div>
 
                   <div className="account-upgrade-card-head">
                     <h3 className="account-upgrade-card-name">Pro</h3>
                     <p className="account-upgrade-card-desc">
-                      {isTr ? 'Genişletilmiş token kotası ve öncelikli istemci işlem hızı.' : 'Expanded token allowance with priority client-side execution.'}
+                      {'Expanded token allowance with priority client-side execution.'}
                     </p>
                     <div className="account-upgrade-price-wrap">
                       <span className="account-upgrade-currency">$</span>
@@ -1052,36 +1025,36 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
                         {packageBillingCycle === 'annual' ? '99.90' : '9.99'}
                       </span>
                       <span className="account-upgrade-period">
-                        {packageBillingCycle === 'annual' ? (isTr ? '/ yıl' : '/ year') : (isTr ? '/ ay' : '/ month')}
+                        {packageBillingCycle === 'annual' ? '/ year' : '/ month'}
                       </span>
                     </div>
                     <div className="account-upgrade-price-detail is-highlight">
                       {packageBillingCycle === 'annual' 
-                        ? (isTr ? '🎁 2 Ay Bedava (Aylık ~$8.33)' : '🎁 2 Months Free (~$8.33/mo)')
-                        : (isTr ? 'Aylık faturalandırılır ($9.99/ay)' : 'Billed monthly at $9.99/mo')}
+                        ? '🎁 2 Months Free (~$8.33/mo)'
+                        : 'Billed monthly at $9.99/mo'}
                     </div>
                   </div>
 
                   <ul className="account-upgrade-features-list">
                     <li className="account-upgrade-feature-item">
                       <div className="account-feature-check-icon icon-cyan"><Check size={13} /></div>
-                      <span><strong>{isTr ? 'Temel Araçlar Sınırsız:' : 'Free tools free forever:'}</strong> {isTr ? 'Tüm ücretsiz araçlar sınırsız' : 'Unlimited free tools'}</span>
+                      <span><strong>{'Free tools free forever:'}</strong> {'Unlimited free tools'}</span>
                     </li>
                     <li className="account-upgrade-feature-item">
                       <div className="account-feature-check-icon icon-cyan"><Check size={13} /></div>
-                      <span><strong>{isTr ? 'Premium Araçlar:' : 'Premium tools:'}</strong> {isTr ? 'Genişletilmiş yüksek token kotası' : 'Expanded token allowance'}</span>
+                      <span><strong>{'Premium tools:'}</strong> {'Expanded token allowance'}</span>
                     </li>
                     <li className="account-upgrade-feature-item">
                       <div className="account-feature-check-icon icon-cyan"><Check size={13} /></div>
-                      <span><strong>{isTr ? 'Öncelikli Concurrency:' : 'Priority Concurrency:'}</strong> {isTr ? 'Daha hızlı WebAssembly motoru' : 'Faster multi-threaded WASM'}</span>
+                      <span><strong>{'Priority Concurrency:'}</strong> {'Faster multi-threaded WASM'}</span>
                     </li>
                     <li className="account-upgrade-feature-item">
                       <div className="account-feature-check-icon icon-cyan"><Check size={13} /></div>
-                      <span><strong>{isTr ? 'Reklamsız çalışma alanı' : 'Ad-free workspace'}</strong></span>
+                      <span><strong>{'Ad-free workspace'}</strong></span>
                     </li>
                     <li className="account-upgrade-feature-item">
                       <div className="account-feature-check-icon icon-cyan"><Check size={13} /></div>
-                      <span>{isTr ? 'Öncelikli destek & ticari kullanım' : 'Priority support & commercial rights'}</span>
+                      <span>{'Priority support & commercial rights'}</span>
                     </li>
                   </ul>
 
@@ -1092,10 +1065,10 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
                           type="button"
                           onClick={handleResumeSubscription}
                           className="account-plan-action-btn btn-primary-featured"
-                          title={isTr ? 'Aboneliği Sürdür' : 'Resume Subscription'}
+                          title={'Resume Subscription'}
                         >
                           <RotateCcw size={14} />
-                          <span>{isTr ? 'Aboneliği Sürdür' : 'Resume Plan'}</span>
+                          <span>{'Resume Plan'}</span>
                         </button>
                       ) : (
                         <button
@@ -1104,7 +1077,7 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
                           className="account-current-plan-pill is-manage-btn"
                         >
                           <Check size={14} />
-                          <span>{isTr ? 'Mevcut Planınız (Yönet)' : 'Active Plan (Manage)'}</span>
+                          <span>{'Active Plan (Manage)'}</span>
                         </button>
                       )
                     ) : (
@@ -1120,11 +1093,11 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
                           ) : isRevenueCatPro || checkProEntitlement(rcCustomerInfo) ? (
                             <>
                               <RotateCcw size={14} />
-                              <span>{isTr ? "Pro'yu Geri Yükle" : 'Restore Pro Plan'}</span>
+                              <span>{'Restore Pro Plan'}</span>
                             </>
                           ) : (
                             <>
-                              <span>{isTr ? "Pro'ya Abone Ol" : 'Subscribe to Pro'}</span>
+                              <span>{'Subscribe to Pro'}</span>
                               <Sparkles size={14} />
                             </>
                           )}
@@ -1147,7 +1120,7 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
                             }}
                           >
                             <ExternalLink size={12} />
-                            <span>{isTr ? 'Paddle Portalında Yönet' : 'Manage on Paddle'}</span>
+                            <span>{'Manage on Paddle'}</span>
                           </button>
                         )}
                       </div>
@@ -1159,13 +1132,13 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
                 <div className={`account-upgrade-card is-turbo ${currentPlan === 'enterprise' || currentPlan === 'unlimited' ? 'is-current-card is-active-turbo' : ''}`}>
                   <div className="account-card-top-tag tag-turbo">
                     <Zap size={12} />
-                    <span>{isTr ? 'MAKSİMUM GÜÇ' : 'POWER USER'}</span>
+                    <span>{'POWER USER'}</span>
                   </div>
 
                   <div className="account-upgrade-card-head">
                     <h3 className="account-upgrade-card-name">Unlimited</h3>
                     <p className="account-upgrade-card-desc">
-                      {isTr ? 'Ağır kullanım ve profesyoneller için maksimum token kotası.' : 'Maximum token allowance and turbo execution speed.'}
+                      {'Maximum token allowance and turbo execution speed.'}
                     </p>
                     <div className="account-upgrade-price-wrap">
                       <span className="account-upgrade-currency">$</span>
@@ -1173,36 +1146,36 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
                         {packageBillingCycle === 'annual' ? '149.90' : '14.99'}
                       </span>
                       <span className="account-upgrade-period">
-                        {packageBillingCycle === 'annual' ? (isTr ? '/ yıl' : '/ year') : (isTr ? '/ ay' : '/ month')}
+                        {packageBillingCycle === 'annual' ? '/ year' : '/ month'}
                       </span>
                     </div>
                     <div className="account-upgrade-price-detail is-highlight-purple">
                       {packageBillingCycle === 'annual' 
-                        ? (isTr ? '🎁 2 Ay Bedava (Aylık ~$12.49)' : '🎁 2 Months Free (~$12.49/mo)')
-                        : (isTr ? 'Aylık faturalandırılır ($14.99/ay)' : 'Billed monthly at $14.99/mo')}
+                        ? '🎁 2 Months Free (~$12.49/mo)'
+                        : 'Billed monthly at $14.99/mo'}
                     </div>
                   </div>
 
                   <ul className="account-upgrade-features-list">
                     <li className="account-upgrade-feature-item">
                       <div className="account-feature-check-icon icon-purple"><Check size={13} /></div>
-                      <span><strong>{isTr ? 'Temel Araçlar Sınırsız:' : 'Free tools free forever:'}</strong> {isTr ? 'Tüm ücretsiz araçlar sınırsız' : 'Unlimited free tools'}</span>
+                      <span><strong>{'Free tools free forever:'}</strong> {'Unlimited free tools'}</span>
                     </li>
                     <li className="account-upgrade-feature-item">
                       <div className="account-feature-check-icon icon-purple"><Check size={13} /></div>
-                      <span><strong>{isTr ? 'Maksimum Token Kotası:' : 'Maximum Token Quota:'}</strong> {isTr ? 'Tüm premium araçlarda tam güç' : 'Maximum token quota'}</span>
+                      <span><strong>{'Maximum Token Quota:'}</strong> {'Maximum token quota'}</span>
                     </li>
                     <li className="account-upgrade-feature-item">
                       <div className="account-feature-check-icon icon-purple"><Check size={13} /></div>
-                      <span><strong>{isTr ? 'Turbo WASM & WebGPU:' : 'Turbo WASM & WebGPU:'}</strong> {isTr ? 'En yüksek donanım ivmesi' : 'Hardware-accelerated processing'}</span>
+                      <span><strong>{'Turbo WASM & WebGPU:'}</strong> {'Hardware-accelerated processing'}</span>
                     </li>
                     <li className="account-upgrade-feature-item">
                       <div className="account-feature-check-icon icon-purple"><Check size={13} /></div>
-                      <span><strong>{isTr ? 'VIP Destek:' : 'VIP Support:'}</strong> {isTr ? '7/24 öncelikli kanal' : '24/7 priority support'}</span>
+                      <span><strong>{'VIP Support:'}</strong> {'24/7 priority support'}</span>
                     </li>
                     <li className="account-upgrade-feature-item">
                       <div className="account-feature-check-icon icon-purple"><Check size={13} /></div>
-                      <span>{isTr ? 'Yeni araçlara erken erişim' : 'Early access to upcoming tools'}</span>
+                      <span>{'Early access to upcoming tools'}</span>
                     </li>
                   </ul>
 
@@ -1214,7 +1187,7 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
                         className="account-current-plan-pill is-manage-btn"
                       >
                         <Check size={14} />
-                        <span>{isTr ? 'Mevcut Planınız (Yönet)' : 'Active Plan (Manage)'}</span>
+                        <span>{'Active Plan (Manage)'}</span>
                       </button>
                     ) : (
                       <>
@@ -1230,8 +1203,8 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
                             <>
                               <span>
                                 {currentPlan === 'pro'
-                                  ? (isTr ? "Unlimited'a Yükselt" : 'Upgrade to Unlimited')
-                                  : (isTr ? "Unlimited'a Abone Ol" : 'Subscribe to Unlimited')}
+                                  ? 'Upgrade to Unlimited'
+                                  : 'Subscribe to Unlimited'}
                               </span>
                               <Zap size={14} />
                             </>
@@ -1259,7 +1232,7 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
                             }}
                           >
                             <ExternalLink size={12} />
-                            <span>{isTr ? 'Paddle portalından prorated yükselt' : 'Upgrade via Paddle Portal (Prorated)'}</span>
+                            <span>{'Upgrade via Paddle Portal (Prorated)'}</span>
                           </button>
                         )}
                       </>
@@ -1272,7 +1245,7 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
         )}
 
         {/* ========================================================
-            TAB: PROFİL (My Profile, Avatar, Name, Email, SMS)
+            TAB: PROFILE (My Profile, Avatar, Name, Email, SMS)
            ======================================================== */}
         {activeTab === 'profile' && (
           <div className="account-tab-pane animate-fade">
@@ -1299,12 +1272,10 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
                       <div className="avatar-header-icon-wrap">
                         <ImageIcon size={18} />
                       </div>
-                      <h2 className="account-panel-title">{isTr ? 'Profil Fotoğrafı & Avatar Stüdyosu' : 'Profile Photo & Avatar Studio'}</h2>
+                      <h2 className="account-panel-title">{'Profile Photo & Avatar Studio'}</h2>
                     </div>
                     <p className="account-panel-desc">
-                      {isTr 
-                        ? 'Profilinizi kişiselleştirin; dilediğiniz hazır avatarı seçin veya bilgisayarınızdan kendi fotoğrafınızı yükleyin.' 
-                        : 'Personalize your identity with modern vector avatars or upload your custom photo.'}
+                      {'Personalize your identity with modern vector avatars or upload your custom photo.'}
                     </p>
                   </div>
 
@@ -1318,13 +1289,13 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
                       ) : (
                         <>
                           <CheckCircle2 size={13} className="text-success" />
-                          <span>{isTr ? 'Özel Fotoğraf' : 'Custom Photo'}</span>
+                          <span>{'Custom Photo'}</span>
                         </>
                       )
                     ) : (
                       <>
                         <User size={13} />
-                        <span>{isTr ? 'Varsayılan İnisiyal' : 'Default Initials'}</span>
+                        <span>{'Default Initials'}</span>
                       </>
                     )}
                   </span>
@@ -1336,7 +1307,7 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
                     <div 
                       className="avatar-preview-interactive" 
                       onClick={() => fileInputRef.current?.click()}
-                      title={isTr ? 'Fotoğrafı değiştirmek için tıklayın' : 'Click to change photo'}
+                      title={'Click to change photo'}
                     >
                       <div className="avatar-preview-ring">
                         {avatarUrl ? (
@@ -1346,7 +1317,7 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
                         )}
                         <div className="avatar-hover-overlay">
                           <Camera size={22} />
-                          <span>{isTr ? 'Değiştir' : 'Change'}</span>
+                          <span>{'Change'}</span>
                         </div>
                       </div>
                     </div>
@@ -1354,7 +1325,7 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
                     <div className="avatar-spotlight-meta">
                       <span className="spotlight-user-name">{user?.name || user?.email}</span>
                       <span className="spotlight-user-role">
-                        {currentPlan === 'pro' ? 'Pro' : (currentPlan === 'enterprise' || currentPlan === 'unlimited') ? 'Unlimited' : (isTr ? 'Cerilas Kullanıcısı' : 'Cerilas Member')}
+                        {currentPlan === 'pro' ? 'Pro' : (currentPlan === 'enterprise' || currentPlan === 'unlimited') ? 'Unlimited' : 'Cerilas Member'}
                       </span>
                     </div>
 
@@ -1373,7 +1344,7 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
                         className="account-btn btn-secondary btn-sm avatar-upload-btn"
                       >
                         <Upload size={14} />
-                        <span>{isTr ? 'Fotoğraf Yükle' : 'Upload File'}</span>
+                        <span>{'Upload File'}</span>
                       </button>
 
                       {avatarUrl && (
@@ -1381,10 +1352,10 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
                           type="button"
                           onClick={() => setAvatarUrl('')}
                           className="account-btn btn-ghost text-danger btn-sm"
-                          title={isTr ? 'Avatarı Kaldır' : 'Remove Avatar'}
+                          title={'Remove Avatar'}
                         >
                           <Trash2 size={14} />
-                          <span>{isTr ? 'Kaldır' : 'Remove'}</span>
+                          <span>{'Remove'}</span>
                         </button>
                       )}
                     </div>
@@ -1399,8 +1370,8 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
                     <div className="avatar-gallery-top">
                       <div className="gallery-title-wrap">
                         <Sparkles size={15} className="gallery-sparkle-icon" />
-                        <span className="gallery-title">{isTr ? 'Hazır Avatar Koleksiyonu' : 'Preset Avatar Collection'}</span>
-                        <span className="gallery-count-pill">10 {isTr ? 'Seçenek' : 'Styles'}</span>
+                        <span className="gallery-title">{'Preset Avatar Collection'}</span>
+                        <span className="gallery-count-pill">10 {'Styles'}</span>
                       </div>
 
                       {avatarUrl && (
@@ -1408,10 +1379,10 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
                           type="button"
                           onClick={() => setAvatarUrl('')}
                           className="gallery-reset-link"
-                          title={isTr ? 'İnisiyal avatara dön' : 'Reset to initials'}
+                          title={'Reset to initials'}
                         >
                           <RotateCcw size={12} />
-                          <span>{isTr ? 'İnisiyale Dön' : 'Reset'}</span>
+                          <span>{'Reset'}</span>
                         </button>
                       )}
                     </div>
@@ -1446,29 +1417,29 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
 
               {/* Personal Details (First Name, Last Name, Email) */}
               <div className="account-panel-card">
-                <h2 className="account-panel-title">{isTr ? 'Kişisel Bilgiler' : 'Personal Details'}</h2>
+                <h2 className="account-panel-title">{'Personal Details'}</h2>
                 <p className="account-panel-desc">
-                  {isTr ? 'Adınız, soyadınız ve kayıtlı e-posta adresiniz.' : 'Your official name and verified login email.'}
+                  {'Your official name and verified login email.'}
                 </p>
 
                 <div className="account-form-grid">
                   <div className="account-field-group">
-                    <label className="account-field-label">{isTr ? 'İsim' : 'First Name'}</label>
+                    <label className="account-field-label">{'First Name'}</label>
                     <input
                       type="text"
                       className="account-field-input"
-                      placeholder={isTr ? 'Adınız' : 'First name'}
+                      placeholder={'First name'}
                       value={firstName}
                       onChange={(e) => setFirstName(e.target.value)}
                     />
                   </div>
 
                   <div className="account-field-group">
-                    <label className="account-field-label">{isTr ? 'Soyisim' : 'Last Name'}</label>
+                    <label className="account-field-label">{'Last Name'}</label>
                     <input
                       type="text"
                       className="account-field-input"
-                      placeholder={isTr ? 'Soyadınız' : 'Last name'}
+                      placeholder={'Last name'}
                       value={lastName}
                       onChange={(e) => setLastName(e.target.value)}
                     />
@@ -1476,10 +1447,10 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
 
                   <div className="account-field-group field-span-2">
                     <div className="field-label-row">
-                      <label className="account-field-label">{isTr ? 'E-posta Adresi' : 'Email Address'}</label>
+                      <label className="account-field-label">{'Email Address'}</label>
                       <span className="field-badge-verified">
                         <CheckCircle2 size={12} />
-                        <span>{isTr ? 'Hesap E-postası' : 'Account Email'}</span>
+                        <span>{'Account Email'}</span>
                       </span>
                     </div>
                     <input
@@ -1489,7 +1460,7 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
                       value={user?.email || ''}
                     />
                     <span className="account-field-helper">
-                      {isTr ? 'E-posta adresi güvenliğiniz için hesap bazında kilitlenmiştir.' : 'Email address is locked for account security.'}
+                      {'Email address is locked for account security.'}
                     </span>
                   </div>
                 </div>
@@ -1500,23 +1471,21 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
                 <div className="account-panel-header">
                   <div>
                     <h2 className="account-panel-title">
-                      {isTr ? 'Google Hesabı Bağlantısı' : 'Google Account Connection'}
+                      {'Google Account Connection'}
                     </h2>
                     <p className="account-panel-desc">
-                      {isTr 
-                        ? 'Google hesabınızı eşleştirerek tek tıkla şifresiz giriş yapabilir ve profilinizi otomatik senkronize edebilirsiniz.' 
-                        : 'Connect your Google account for seamless one-click sign-in and profile synchronization.'}
+                      {'Connect your Google account for seamless one-click sign-in and profile synchronization.'}
                     </p>
                   </div>
                   {user?.google_id ? (
                     <span className="account-verified-tag">
                       <CheckCircle2 size={14} />
-                      <span>{isTr ? 'Google Bağlı' : 'Google Connected'}</span>
+                      <span>{'Google Connected'}</span>
                     </span>
                   ) : (
                     <span className="account-unverified-tag">
                       <AlertCircle size={14} />
-                      <span>{isTr ? 'Bağlantı Yok' : 'Not Connected'}</span>
+                      <span>{'Not Connected'}</span>
                     </span>
                   )}
                 </div>
@@ -1548,8 +1517,8 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
                       <span className="google-conn-title">Google SSO</span>
                       <span className="google-conn-desc">
                         {user?.google_id 
-                          ? (isTr ? 'Google hesabınız Cerilas üyeliğinize başarıyla bağlanmıştır.' : 'Your Google account is actively linked to your profile.') 
-                          : (isTr ? 'Hesabınızı Google ile eşleştirerek anında giriş yapın.' : 'Link your Google account for faster logins.')}
+                          ? 'Your Google account is actively linked to your profile.' 
+                          : 'Link your Google account for faster logins.'}
                       </span>
                     </div>
                   </div>
@@ -1567,7 +1536,7 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
                         ) : (
                           <Trash2 size={14} />
                         )}
-                        <span>{isTr ? 'Bağlantıyı Kaldır' : 'Disconnect'}</span>
+                        <span>{'Disconnect'}</span>
                       </button>
                     ) : (
                       <button
@@ -1581,7 +1550,7 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
                         ) : (
                           <Sparkles size={14} />
                         )}
-                        <span>{isTr ? 'Google ile Bağla' : 'Connect Google'}</span>
+                        <span>{'Connect Google'}</span>
                       </button>
                     )}
                   </div>
@@ -1743,12 +1712,12 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
                   {savingProfile ? (
                     <>
                       <Loader2 size={16} className="auth-spinner" />
-                      <span>{isTr ? 'Kaydediliyor...' : 'Saving Changes...'}</span>
+                      <span>{'Saving Changes...'}</span>
                     </>
                   ) : (
                     <>
                       <Check size={16} />
-                      <span>{isTr ? 'Profil Değişikliklerini Kaydet' : 'Save Profile Changes'}</span>
+                      <span>{'Save Profile Changes'}</span>
                     </>
                   )}
                 </button>
@@ -1759,30 +1728,24 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
             <form onSubmit={handleChangePassword} className="account-panel-card" autoComplete="on">
               <div className="account-panel-header">
                 <div>
-                  <h2 className="account-panel-title">{isTr ? 'Şifre & Güvenlik' : 'Password & Security'}</h2>
+                  <h2 className="account-panel-title">{'Password & Security'}</h2>
                   <p className="account-panel-desc">
                     {!hasPassword
-                      ? (isTr
-                        ? 'Hesabınıza şu an yalnızca Google ile giriş yapıyorsunuz. Bir şifre belirleyerek e-posta adresiniz ve şifrenizle de giriş yapabilirsiniz.'
-                        : 'You currently sign in with Google only. Set a password to also sign in with your email address.')
+                      ? 'You currently sign in with Google only. Set a password to also sign in with your email address.'
                       : user?.google_id
-                        ? (isTr
-                          ? 'Hem Google hem de e-posta ve şifrenizle giriş yapabilirsiniz. Şifrenizi buradan değiştirebilirsiniz.'
-                          : 'You can sign in with Google or with your email and password. Change your password here.')
-                        : (isTr
-                          ? 'E-posta ile girişte kullandığınız şifreyi değiştirin.'
-                          : 'Change the password you use to sign in with your email address.')}
+                        ? 'You can sign in with Google or with your email and password. Change your password here.'
+                        : 'Change the password you use to sign in with your email address.'}
                   </p>
                 </div>
                 {hasPassword ? (
                   <span className="account-verified-tag">
                     <Lock size={14} />
-                    <span>{user?.google_id ? (isTr ? 'Şifre + Google' : 'Password + Google') : (isTr ? 'Şifre Aktif' : 'Password Set')}</span>
+                    <span>{user?.google_id ? 'Password + Google' : 'Password Set'}</span>
                   </span>
                 ) : (
                   <span className="account-unverified-tag">
                     <AlertCircle size={14} />
-                    <span>{isTr ? 'Yalnızca Google' : 'Google Only'}</span>
+                    <span>{'Google Only'}</span>
                   </span>
                 )}
               </div>
@@ -1808,7 +1771,7 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
                   <div className="account-field-group field-span-2">
                     <div className="field-label-row">
                       <label className="account-field-label" htmlFor="account-current-password">
-                        {isTr ? 'Mevcut Şifre' : 'Current Password'}
+                        {'Current Password'}
                       </label>
                       <button
                         type="button"
@@ -1817,8 +1780,8 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
                         disabled={resetLinkLoading}
                       >
                         {resetLinkLoading
-                          ? (isTr ? 'Gönderiliyor...' : 'Sending...')
-                          : (isTr ? 'Mevcut şifremi unuttum' : 'Forgot current password?')}
+                          ? 'Sending...'
+                          : 'Forgot current password?'}
                       </button>
                     </div>
                     <input
@@ -1835,7 +1798,7 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
 
                 <div className="account-field-group">
                   <label className="account-field-label" htmlFor="account-new-password">
-                    {isTr ? 'Yeni Şifre' : 'New Password'}
+                    {'New Password'}
                   </label>
                   <input
                     id="account-new-password"
@@ -1847,12 +1810,12 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
                     autoComplete="new-password"
                     minLength={8}
                   />
-                  <span className="account-field-helper">{isTr ? 'En az 8 karakter.' : 'At least 8 characters.'}</span>
+                  <span className="account-field-helper">{'At least 8 characters.'}</span>
                 </div>
 
                 <div className="account-field-group">
                   <label className="account-field-label" htmlFor="account-confirm-password">
-                    {isTr ? 'Yeni Şifre (Tekrar)' : 'Confirm New Password'}
+                    {'Confirm New Password'}
                   </label>
                   <input
                     id="account-confirm-password"
@@ -1873,28 +1836,26 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
                   onClick={() => setShowPasswords((v) => !v)}
                 >
                   {showPasswords ? <EyeOff size={14} /> : <Eye size={14} />}
-                  <span>{showPasswords ? (isTr ? 'Şifreleri gizle' : 'Hide passwords') : (isTr ? 'Şifreleri göster' : 'Show passwords')}</span>
+                  <span>{showPasswords ? 'Hide passwords' : 'Show passwords'}</span>
                 </button>
                 <button type="submit" disabled={passwordLoading} className="account-btn btn-primary">
                   {passwordLoading ? <Loader2 size={16} className="auth-spinner" /> : <KeyRound size={16} />}
                   <span>
                     {hasPassword
-                      ? (isTr ? 'Şifreyi Güncelle' : 'Update Password')
-                      : (isTr ? 'Şifre Belirle' : 'Set Password')}
+                      ? 'Update Password'
+                      : 'Set Password'}
                   </span>
                 </button>
               </div>
               <p className="account-field-helper" style={{ marginTop: '0.75rem' }}>
-                {isTr
-                  ? 'Güvenliğiniz için şifre değiştiğinde diğer cihazlardaki oturumlarınız kapatılır ve size bilgilendirme e-postası gönderilir.'
-                  : 'For your security, changing your password signs you out on other devices and sends you a confirmation email.'}
+                {'For your security, changing your password signs you out on other devices and sends you a confirmation email.'}
               </p>
             </form>
           </div>
         )}
 
         {/* ========================================================
-            TAB 3: BILLING (Faturalandırma & Ödeme)
+            TAB 3: BILLING (Invoices & Payments)
            ======================================================== */}
         {activeTab === 'billing' && (
           <div className="account-tab-pane animate-fade">
@@ -1905,13 +1866,11 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
                     <CreditCard size={18} className="text-primary" />
                     <h2 className="account-panel-title">
-                      {isTr ? 'Paddle Güvenli Ödeme & Faturalandırma Portalı' : 'Paddle Billing & Customer Portal'}
+                      {'Paddle Billing & Customer Portal'}
                     </h2>
                   </div>
                   <p className="account-panel-desc">
-                    {isTr 
-                      ? 'Ödemeleriniz, faturalandırma ve abonelik yönetiminiz yetkili Merchant of Record ortağımız Paddle üzerinden gerçekleşmektedir. Kayıtlı kartınızı güncellemek, resmi PDF e-faturalarınızı indirmek ve fatura adresinizi yönetmek için güvenli Paddle portalını kullanabilirsiniz.' 
-                      : 'All payments, tax compliance, and subscription billing are processed securely via Paddle (Merchant of Record). Manage your payment method, view tax receipts, and edit billing address in the Paddle Customer Portal.'}
+                    {'All payments, tax compliance, and subscription billing are processed securely via Paddle (Merchant of Record). Manage your payment method, view tax receipts, and edit billing address in the Paddle Customer Portal.'}
                   </p>
                 </div>
 
@@ -1929,13 +1888,13 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
 
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid var(--border-subtle, rgba(255, 255, 255, 0.08))', flexWrap: 'wrap' }}>
                 <div style={{ fontSize: '0.875rem', color: 'var(--text-muted, #94a3b8)' }}>
-                  {isTr ? 'Abonelik & Ödeme Durumu:' : 'Subscription & Payment Status:'}{' '}
+                  {'Subscription & Payment Status:'}{' '}
                   <strong style={{ color: currentPlan === 'pro' || currentPlan === 'unlimited' ? '#10b981' : 'inherit' }}>
                     {currentPlan === 'pro' ? 'Cerilas Pro' : currentPlan === 'unlimited' ? 'Cerilas Unlimited' : 'Free Plan'}
                   </strong>
                   {formattedPeriodEndDate && (currentPlan === 'pro' || currentPlan === 'unlimited') && (
                     <span style={{ marginLeft: '8px', opacity: 0.8 }}>
-                      • {user?.cancel_at_period_end ? (isTr ? `Bitiş: ${formattedPeriodEndDate}` : `Expires: ${formattedPeriodEndDate}`) : (isTr ? `Yenilenme: ${formattedPeriodEndDate}` : `Renews: ${formattedPeriodEndDate}`)}
+                      • {user?.cancel_at_period_end ? `Expires: ${formattedPeriodEndDate}` : `Renews: ${formattedPeriodEndDate}`}
                     </span>
                   )}
                 </div>
@@ -1947,7 +1906,7 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
                   style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}
                 >
                   <ExternalLink size={15} />
-                  <span>{isTr ? 'Paddle Müşteri Portalı’nı Aç (Kart & Fatura Yönetimi)' : 'Open Paddle Customer Portal'}</span>
+                  <span>{'Open Paddle Customer Portal'}</span>
                 </button>
               </div>
             </div>
@@ -1956,11 +1915,9 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
             <div className="account-panel-card">
               <div className="account-panel-header" style={{ marginBottom: '1rem' }}>
                 <div>
-                  <h2 className="account-panel-title">{isTr ? 'Fatura & Makbuz Geçmişi' : 'Invoices & Receipts'}</h2>
+                  <h2 className="account-panel-title">{'Invoices & Receipts'}</h2>
                   <p className="account-panel-desc">
-                    {isTr 
-                      ? 'Paddle ve RevenueCat üzerinden gerçekleştirilen resmi ödeme işlemleriniz ve indirilebilir makbuzlar.' 
-                      : 'Your official payment transactions and downloadable tax receipts from Paddle.'}
+                    {'Your official payment transactions and downloadable tax receipts from Paddle.'}
                   </p>
                 </div>
                 {invoices.length > 0 && (
@@ -1981,7 +1938,7 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
                     }}
                   >
                     <ExternalLink size={13} />
-                    <span>{isTr ? 'Tüm Makbuzları Paddle’da Gör' : 'View all receipts in Paddle'}</span>
+                    <span>{'View all receipts in Paddle'}</span>
                   </button>
                 )}
               </div>
@@ -1990,12 +1947,12 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
                 <table className="account-invoices-table">
                   <thead>
                     <tr>
-                      <th>{isTr ? 'İşlem / Fatura No' : 'Transaction ID'}</th>
-                      <th>{isTr ? 'Tarih' : 'Date'}</th>
-                      <th>{isTr ? 'Paket / Açıklama' : 'Plan / Description'}</th>
-                      <th>{isTr ? 'Tutar' : 'Amount'}</th>
-                      <th>{isTr ? 'Durum' : 'Status'}</th>
-                      <th style={{ textAlign: 'right' }}>{isTr ? 'Resmi Belge' : 'Receipt'}</th>
+                      <th>{'Transaction ID'}</th>
+                      <th>{'Date'}</th>
+                      <th>{'Plan / Description'}</th>
+                      <th>{'Amount'}</th>
+                      <th>{'Status'}</th>
+                      <th style={{ textAlign: 'right' }}>{'Receipt'}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -2003,7 +1960,7 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
                       invoices.map((inv) => (
                         <tr key={inv.id}>
                           <td className="font-mono" style={{ fontSize: '0.85rem' }}>{inv.invoice_number}</td>
-                          <td>{new Date(inv.invoice_date).toLocaleDateString(isTr ? 'tr-TR' : 'en-US')}</td>
+                          <td>{new Date(inv.invoice_date).toLocaleDateString('en-US')}</td>
                           <td className="font-medium">{inv.plan_name}</td>
                           <td className="font-semibold">
                             {inv.is_discounted || (inv.original_amount != null && Number(inv.original_amount) > Number(inv.amount)) ? (
@@ -2018,8 +1975,8 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
                                 </div>
                                 <span style={{ fontSize: '0.72rem', color: '#10b981', fontWeight: 500 }}>
                                   {Number(inv.amount) === 0 
-                                    ? (isTr ? 'İndirimli (0.00 USD Ödendi)' : '100% Promo Discount ($0 Paid)') 
-                                    : (isTr ? 'İndirimli Tutar' : 'Discounted Price')}
+                                    ? '100% Promo Discount ($0 Paid)' 
+                                    : 'Discounted Price'}
                                 </span>
                               </div>
                             ) : (
@@ -2029,7 +1986,7 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
                           <td>
                             <span className="invoice-status-paid">
                               <CheckCircle2 size={12} />
-                              <span>{inv.status === 'paid' ? (isTr ? 'Ödendi' : 'Paid') : inv.status}</span>
+                              <span>{inv.status === 'paid' ? 'Paid' : inv.status}</span>
                             </span>
                           </td>
                           <td style={{ textAlign: 'right' }}>
@@ -2044,11 +2001,11 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
                                 }
                               }}
                               className="invoice-download-btn"
-                              title={isTr ? 'Paddle Fatura & Makbuz Görüntüle' : 'View Paddle Invoice'}
+                              title={'View Paddle Invoice'}
                               style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}
                             >
                               <ExternalLink size={13} />
-                              <span>{isTr ? 'Görüntüle' : 'View'}</span>
+                              <span>{'View'}</span>
                             </button>
                           </td>
                         </tr>
@@ -2056,7 +2013,7 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
                     ) : (
                       <tr>
                         <td colSpan={6} className="table-empty-cell">
-                          {isTr ? 'Henüz düzenlenmiş bir fatura veya ödeme kaydı bulunmuyor.' : 'No invoices or transactions found.'}
+                          {'No invoices or transactions found.'}
                         </td>
                       </tr>
                     )}
@@ -2094,17 +2051,15 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
             </div>
 
             <div className="account-dialog-badge badge-amber">
-              <span>{isTr ? 'Plan Değişikliği' : 'Subscription Update'}</span>
+              <span>{'Subscription Update'}</span>
             </div>
 
             <h3 className="account-dialog-title">
-              {isTr ? 'Ücretsiz Plana Geçiş (Downgrade)' : 'Downgrade to Free Plan'}
+              {'Downgrade to Free Plan'}
             </h3>
 
             <p className="account-dialog-desc">
-              {isTr 
-                ? 'Aboneliğinizi ücretsiz plana düşürmek üzeresiniz. Mevcut ödeme döneminiz korunacaktır.'
-                : 'You are about to downgrade to the free plan. Your active paid period will be preserved.'}
+              {'You are about to downgrade to the free plan. Your active paid period will be preserved.'}
             </p>
 
             {/* Highlighted Period End Box */}
@@ -2112,9 +2067,7 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
               <div className="account-dialog-period-headline">
                 <Clock size={17} />
                 <span>
-                  {isTr 
-                    ? `Pro Üyeliğiniz ${formattedPeriodEndDate} Tarihine Kadar Devam Edecektir`
-                    : `Your Pro Membership Will Continue Until ${formattedPeriodEndDate}`}
+                  {`Your Pro Membership Will Continue Until ${formattedPeriodEndDate}`}
                 </span>
               </div>
 
@@ -2122,23 +2075,23 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
                 <div className="account-dialog-period-row">
                   <span className="row-label">
                     <Calendar size={13} />
-                    <span>{isTr ? 'Geçerlilik Bitiş Tarihi:' : 'Access Valid Until:'}</span>
+                    <span>{'Access Valid Until:'}</span>
                   </span>
                   <span className="row-value val-highlight">{formattedPeriodEndDate}</span>
                 </div>
                 <div className="account-dialog-period-row">
                   <span className="row-label">
                     <CreditCard size={13} />
-                    <span>{isTr ? 'Otomatik Yenileme:' : 'Auto-Renewal:'}</span>
+                    <span>{'Auto-Renewal:'}</span>
                   </span>
-                  <span className="row-value">{isTr ? 'Durdurulacak ($0.00)' : 'Cancelled ($0.00)'}</span>
+                  <span className="row-value">{'Cancelled ($0.00)'}</span>
                 </div>
                 <div className="account-dialog-period-row">
                   <span className="row-label">
                     <ShieldCheck size={13} />
-                    <span>{isTr ? 'Sonraki Plan:' : 'Future Plan:'}</span>
+                    <span>{'Future Plan:'}</span>
                   </span>
-                  <span className="row-value">{isTr ? 'Forever Free (Ücretsiz)' : 'Forever Free'}</span>
+                  <span className="row-value">{'Forever Free'}</span>
                 </div>
               </div>
             </div>
@@ -2146,15 +2099,15 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
             <ul className="account-dialog-perks">
               <li className="account-dialog-perk-item">
                 <div className="account-dialog-perk-icon"><Check size={11} /></div>
-                <span><strong>{formattedPeriodEndDate}</strong> {isTr ? 'tarihine kadar tüm Pro ayrıcalıklarınız ve token limitleriniz kesintisiz aktiftir.' : 'until this date, all Pro features and quotas remain fully active.'}</span>
+                <span><strong>{formattedPeriodEndDate}</strong> {'until this date, all Pro features and quotas remain fully active.'}</span>
               </li>
               <li className="account-dialog-perk-item">
                 <div className="account-dialog-perk-icon"><Check size={11} /></div>
-                <span>{isTr ? 'Belirtilen tarihe kadar kartınızdan herhangi bir ek yenileme ücreti çekilmeyecektir.' : 'No recurring renewal charges will be made to your payment method.'}</span>
+                <span>{'No recurring renewal charges will be made to your payment method.'}</span>
               </li>
               <li className="account-dialog-perk-item">
                 <div className="account-dialog-perk-icon"><Check size={11} /></div>
-                <span>{isTr ? 'Dönem sonunda hesabınız otomatik olarak ücretsiz plana geçecektir.' : 'At period end, your account will smoothly switch to the Free plan.'}</span>
+                <span>{'At period end, your account will smoothly switch to the Free plan.'}</span>
               </li>
             </ul>
 
@@ -2164,7 +2117,7 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
                 onClick={() => setIsDowngradeModalOpen(false)}
                 className="account-dialog-btn btn-cancel"
               >
-                {isTr ? "Vazgeç (Pro'da Kal)" : 'Keep Pro Plan'}
+                {'Keep Pro Plan'}
               </button>
               <button
                 type="button"
@@ -2177,7 +2130,7 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
                 ) : (
                   <>
                     <ExternalLink size={14} />
-                    <span>{isTr ? "Paddle Portalını Aç ve Onayla" : 'Confirm & Open Paddle Portal'}</span>
+                    <span>{'Confirm & Open Paddle Portal'}</span>
                   </>
                 )}
               </button>
@@ -2251,7 +2204,7 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
                 }}
                 className={`account-dialog-btn btn-confirm-${dialogModal.type === 'warning' ? 'warning' : dialogModal.type === 'danger' ? 'danger' : 'primary'}`}
               >
-                {dialogModal.confirmText || (isTr ? 'Tamam' : 'OK')}
+                {dialogModal.confirmText || 'OK'}
               </button>
             </div>
           </div>

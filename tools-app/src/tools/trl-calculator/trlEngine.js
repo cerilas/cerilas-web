@@ -29,9 +29,9 @@ export const TRL_FRAMEWORKS = [
   {
     id: 'tubitak',
     name: 'TÜBİTAK / National R&D',
-    shortName: 'TÜBİTAK Ar-Ge',
-    description: 'TÜBİTAK 1501, 1507, 1001 ve KOSGEB Ar-Ge/İnovasyon değerlendirme kriterleri.',
-    badge: 'TR Ulusal'
+    shortName: 'TÜBİTAK R&D',
+    description: 'TÜBİTAK 1501, 1507, 1001 and KOSGEB R&D/innovation evaluation criteria.',
+    badge: 'Turkey National'
   }
 ];
 
@@ -39,12 +39,9 @@ export const TRL_LEVELS = [
   {
     level: 1,
     title: 'Basic Principles Observed',
-    titleTr: 'Temel Prensiplerin Gözlenmesi',
     phase: 'Discovery',
-    phaseTr: 'Keşif',
     color: '#64748b',
     summary: 'Scientific research begins to be translated into applied research and development.',
-    summaryTr: 'Temel bilimsel ilkelerin gözlemlenmesi ve literatür araştırmasıyla belgelenmesi.',
     deliverables: [
       'Published academic papers or internal scientific whitepapers',
       'Mathematical formulations and theoretical hypotheses',
@@ -55,12 +52,9 @@ export const TRL_LEVELS = [
   {
     level: 2,
     title: 'Technology Concept Formulated',
-    titleTr: 'Teknoloji Konseptinin Formüle Edilmesi',
     phase: 'Concept',
-    phaseTr: 'Kavram',
     color: '#0284c7',
     summary: 'Practical applications can be invented. Analytical studies support the concept.',
-    summaryTr: 'Kullanım alanları belirlenmiş, temel uygulama fikirleri ve teorik modeller oluşturulmuştur.',
     deliverables: [
       'Application requirement specifications and target use cases',
       'Preliminary design equations and computer simulation models',
@@ -71,12 +65,9 @@ export const TRL_LEVELS = [
   {
     level: 3,
     title: 'Experimental Proof of Concept',
-    titleTr: 'Deneysel Kavram Kanıtı (POC)',
     phase: 'Proof of Concept',
-    phaseTr: 'Kavram Kanıtı',
     color: '#06b6d4',
     summary: 'Active R&D initiated. Analytical and laboratory studies confirm physical predictions.',
-    summaryTr: 'Laboratuvar ortamında temel fonksiyonel testler ve analitik modellerle kavram doğrulanmıştır.',
     deliverables: [
       'Laboratory test data proving feasibility of core mechanisms',
       'Synthetic benchmark results or table-top experiment data',
@@ -87,12 +78,9 @@ export const TRL_LEVELS = [
   {
     level: 4,
     title: 'Component Validation in Laboratory',
-    titleTr: 'Laboratuvar Ortamında Bileşen Doğrulaması',
     phase: 'Lab Prototype',
-    phaseTr: 'Laboratuvar Prototipi',
     color: '#10b981',
     summary: 'Basic technological components are integrated and tested in laboratory conditions.',
-    summaryTr: 'Temel bileşenler bir araya getirilerek kontrollü laboratuvar şartlarında test edilmiştir.',
     deliverables: [
       'Functional breadboard or software prototype demonstrating integration',
       'Reproducible laboratory test protocols and error margins',
@@ -103,12 +91,9 @@ export const TRL_LEVELS = [
   {
     level: 5,
     title: 'Validation in Relevant Environment',
-    titleTr: 'İlgili/Temsili Ortamda Doğrulama',
     phase: 'Relevant Environment',
-    phaseTr: 'Temsili Ortam',
     color: '#3b82f6',
     summary: 'Basic components are integrated with reasonably realistic supporting elements.',
-    summaryTr: 'Prototip bileşenler, hedeflenen gerçek çalışma şartlarını simüle eden temsili ortamda doğrulanmıştır.',
     deliverables: [
       'High-fidelity laboratory or industrial test rig validation',
       'Testing under simulated temperature, load, or data variability',
@@ -119,12 +104,9 @@ export const TRL_LEVELS = [
   {
     level: 6,
     title: 'Prototype Demonstration in Relevant Environment',
-    titleTr: 'İlgili Ortamda Prototip Gösterimi',
     phase: 'Engineering Prototype',
-    phaseTr: 'Mühendislik Prototipi',
     color: '#6366f1',
     summary: 'Representative engineering model is tested in a relevant simulated/industrial environment.',
-    summaryTr: 'Tam ölçekli veya mühendislik prototipi, gerçekçi operasyonel ortamda başarıyla çalıştırılmıştır.',
     deliverables: [
       'Engineering prototype operating under near-operational conditions',
       'Comprehensive performance characterization report',
@@ -135,12 +117,9 @@ export const TRL_LEVELS = [
   {
     level: 7,
     title: 'System Prototype in Operational Environment',
-    titleTr: 'Operasyonel Ortamda Sistem Prototipi',
     phase: 'Operational Pilot',
-    phaseTr: 'Operasyonel Pilot',
     color: '#8b5cf6',
     summary: 'Prototype near or at planned operational system demonstrated in real field conditions.',
-    summaryTr: 'Sistem prototipi doğrudan sahada, gerçek kullanıcılarla veya operasyonel test sahasında denenmiştir.',
     deliverables: [
       'Field pilot trial results with actual industrial users or customers',
       'Official safety, CE, EMC, or ISO compliance test reports',
@@ -151,12 +130,9 @@ export const TRL_LEVELS = [
   {
     level: 8,
     title: 'Actual System Completed and Qualified',
-    titleTr: 'Sistem Tamamlandı ve Kalifiye Edildi',
     phase: 'Qualified Product',
-    phaseTr: 'Kalifiye Ürün',
     color: '#d946ef',
     summary: 'Technology in its final form is proven through extensive qualification testing.',
-    summaryTr: 'Nihai ürün formu tamamlanmış, tüm sertifikasyon ve tip testlerinden başarıyla geçmiştir.',
     deliverables: [
       'Certified product documentation, user manuals, and technical specs',
       'Final factory acceptance testing (FAT) and QA procedures',
@@ -167,12 +143,9 @@ export const TRL_LEVELS = [
   {
     level: 9,
     title: 'Actual System Proven in Operational Mission',
-    titleTr: 'Kanıtlanmış Başarılı Ticari Sistem',
     phase: 'Commercialization',
-    phaseTr: 'Ticari Başarı',
     color: '#10b981',
     summary: 'Actual application of the technology in its final form under full mission/commercial conditions.',
-    summaryTr: 'Ürün ticari pazarda tam ölçekli olarak satılmakta ve sahada kesintisiz hizmet vermektedir.',
     deliverables: [
       'Commercial sales revenues and signed enterprise SLAs',
       'Established mass production / continuous cloud deployment pipeline',
@@ -189,9 +162,7 @@ export const ASSESSMENT_QUESTIONS = [
     targetTrl: 1,
     phase: 'Scientific Basis',
     question: 'Have the fundamental scientific principles underlying your technology been observed and documented?',
-    questionTr: 'Teknolojinizin dayandığı temel bilimsel ilkeler gözlemlenmiş ve akademik/teknik olarak belgelenmiş midir?',
     helpText: 'Includes peer-reviewed literature reviews, mathematical equations, or basic physical discoveries.',
-    helpTextTr: 'Akademik makaleler, temel matematiksel formülasyonlar veya fiziksel keşifleri kapsar.',
     weight: 1.0
   },
   {
@@ -199,9 +170,7 @@ export const ASSESSMENT_QUESTIONS = [
     targetTrl: 1,
     phase: 'Scientific Basis',
     question: 'Are theoretical models or initial mathematical formulations established?',
-    questionTr: 'Teorik modeller veya ilk matematiksel formülasyonlar oluşturuldu mu?',
     helpText: 'Calculations or algorithms that describe why the core principle should work in theory.',
-    helpTextTr: 'Prensibin teoride neden çalışması gerektiğini açıklayan temel hesaplamalar ve modeller.',
     weight: 1.0
   },
 
@@ -211,9 +180,7 @@ export const ASSESSMENT_QUESTIONS = [
     targetTrl: 2,
     phase: 'Concept Formulation',
     question: 'Have practical applications and primary use cases for this technology been identified and scoped?',
-    questionTr: 'Bu teknoloji için pratik uygulama alanları ve birincil kullanım senaryoları tanımlandı mı?',
     helpText: 'Clear mapping of how the theoretical discovery can solve a real-world industrial or commercial problem.',
-    helpTextTr: 'Bilimsel bulgunun hangi somut sektörel veya ticari sorunu çözeceğinin haritalandırılması.',
     weight: 1.0
   },
   {
@@ -221,9 +188,7 @@ export const ASSESSMENT_QUESTIONS = [
     targetTrl: 2,
     phase: 'Concept Formulation',
     question: 'Has a preliminary analytical feasibility study or simulation been completed?',
-    questionTr: 'Ön analitik fizibilite çalışması veya bilgisayar destekli simülasyon tamamlandı mı?',
     helpText: 'Simulation data or analytical approximations verifying that physics/logic permit the concept.',
-    helpTextTr: 'Fiziksel veya algoritmik mantığın konsepti desteklediğini gösteren simülasyon verileri.',
     weight: 1.0
   },
 
@@ -233,9 +198,7 @@ export const ASSESSMENT_QUESTIONS = [
     targetTrl: 3,
     phase: 'Laboratory Proof of Concept',
     question: 'Has an experimental Proof-of-Concept (PoC) demonstrated feasibility in a laboratory setup?',
-    questionTr: 'Laboratuvar ortamında temel kavram kanıtı (Proof of Concept - PoC) testi gerçekleştirildi mi?',
     helpText: 'Active bench-scale experiments validating the critical speculative functions.',
-    helpTextTr: 'Kritik fonksiyonların çalıştığını gösteren tezgah üstü veya kontrollü laboratuvar deneyleri.',
     weight: 1.2
   },
   {
@@ -243,9 +206,7 @@ export const ASSESSMENT_QUESTIONS = [
     targetTrl: 3,
     phase: 'Laboratory Proof of Concept',
     question: 'Do the laboratory experimental results correlate with your analytical predictions?',
-    questionTr: 'Deneysel laboratuvar sonuçları analitik/teorik tahminlerinizle tutarlı mı?',
     helpText: 'Empirical data should confirm baseline mathematical models with measurable metrics.',
-    helpTextTr: 'Ölçülebilir ampirik verilerin teorik modelleri doğrulaması beklenir.',
     weight: 1.0
   },
 
@@ -255,9 +216,7 @@ export const ASSESSMENT_QUESTIONS = [
     targetTrl: 4,
     phase: 'Component Integration',
     question: 'Are separate components integrated together into a functional breadboard/prototype in the lab?',
-    questionTr: 'Ayrı bileşenler bir araya getirilerek laboratuvarda çalışan bir prototip/breadboard oluşturuldu mu?',
     helpText: 'Different modules (e.g. sensor + processor + algorithm, or chemistry + container) work together.',
-    helpTextTr: 'Farklı modüllerin (örn. sensör + yazılım + devre) entegre şekilde birlikte çalışması.',
     weight: 1.2
   },
   {
@@ -265,9 +224,7 @@ export const ASSESSMENT_QUESTIONS = [
     targetTrl: 4,
     phase: 'Component Integration',
     question: 'Have tests in laboratory conditions been repeated with consistent and documented results?',
-    questionTr: 'Laboratuvar koşullarındaki testler tekrarlanabilir ve tutarlı sonuçlar veriyor mu?',
     helpText: 'Results must be statistically repeatable rather than a lucky one-off trial.',
-    helpTextTr: 'Test sonuçlarının tesadüfi değil, belgelenmiş ve tekrarlanabilir olması şarttır.',
     weight: 1.0
   },
 
@@ -277,9 +234,7 @@ export const ASSESSMENT_QUESTIONS = [
     targetTrl: 5,
     phase: 'Relevant Environment Validation',
     question: 'Has the integrated system been tested in a simulated relevant environment (not just clean lab conditions)?',
-    questionTr: 'Entegre sistem sadece temiz laboratuvarda değil, simüle edilmiş ilgili/temsili ortamda test edildi mi?',
     helpText: 'Simulating real-world stressors: temperature swings, vibration, industrial noise, or messy real-world datasets.',
-    helpTextTr: 'Sıcaklık, titreşim, kirli veri, şebeke gürültüsü gibi gerçek dünya zorluklarının simülasyonu.',
     weight: 1.3
   },
   {
@@ -287,9 +242,7 @@ export const ASSESSMENT_QUESTIONS = [
     targetTrl: 5,
     phase: 'Relevant Environment Validation',
     question: 'Are sub-systems designed with realistic engineering forms and industrial materials?',
-    questionTr: 'Alt sistemler gerçekçi mühendislik formları ve endüstriyel malzemelerle tasarlandı mı?',
     helpText: 'Moving away from generic evaluation boards/breadboards toward custom PCB, enclosures, or optimized code.',
-    helpTextTr: 'Geliştirme kitlerinden özel PCB, endüstriyel kasa veya optimize edilmiş mimariye geçiş.',
     weight: 1.0
   },
 
@@ -299,9 +252,7 @@ export const ASSESSMENT_QUESTIONS = [
     targetTrl: 6,
     phase: 'Engineering Prototype',
     question: 'Has a fully representative engineering prototype demonstrated core performance in a relevant setting?',
-    questionTr: 'Tam ölçekli mühendislik prototipi, ilgili temsili ortamda hedeflenen ana performansı sergiledi mi?',
     helpText: 'Sweet spot for EIC Accelerator and TÜBİTAK 1501 grants. Prototype looks and behaves close to final product.',
-    helpTextTr: 'EIC Accelerator ve TÜBİTAK 1501 için kritik eşik. Prototip nihai ürüne yakın davranır.',
     weight: 1.4
   },
   {
@@ -309,9 +260,7 @@ export const ASSESSMENT_QUESTIONS = [
     targetTrl: 6,
     phase: 'Engineering Prototype',
     question: 'Have critical engineering bottlenecks and failure modes been systematically characterized?',
-    questionTr: 'Kritik mühendislik darboğazları ve olası hata modları sistematik olarak analiz edildi mi?',
     helpText: 'FMEA (Failure Mode and Effects Analysis) or robust error telemetry collected during stress tests.',
-    helpTextTr: 'Stres testleri esnasında FMEA hata analizlerinin ve telemetri verilerinin toplanması.',
     weight: 1.1
   },
 
@@ -321,9 +270,7 @@ export const ASSESSMENT_QUESTIONS = [
     targetTrl: 7,
     phase: 'Operational Pilot',
     question: 'Has the complete system prototype been demonstrated in an actual operational environment (field trial / pilot client)?',
-    questionTr: 'Sistem prototipi gerçek operasyonel sahada (pilot müşteri sahası veya gerçek çalışma alanı) denendi mi?',
     helpText: 'Field trials with pilot corporate partners, actual field installations, or live end-user environments.',
-    helpTextTr: 'Gerçek kurumsal pilot ortaklarla saha kurulumları veya canlı operasyon denemeleri.',
     weight: 1.4
   },
   {
@@ -331,9 +278,7 @@ export const ASSESSMENT_QUESTIONS = [
     targetTrl: 7,
     phase: 'Operational Pilot',
     question: 'Have pre-certification regulatory, safety, and industry compliance audits been initiated?',
-    questionTr: 'Ön sertifikasyon, mevzuat, iş güvenliği ve CE/EMC/FDA uygunluk testleri başlatıldı mı?',
     helpText: 'Laboratory certification pre-scans, cybersecurity penetration audits, or safety standard verifications.',
-    helpTextTr: 'Akredite laboratuvar ön taramaları, siber güvenlik denetimleri veya güvenlik standartları.',
     weight: 1.2
   },
 
@@ -343,9 +288,7 @@ export const ASSESSMENT_QUESTIONS = [
     targetTrl: 8,
     phase: 'System Qualification',
     question: 'Has the final production-ready system passed all formal qualification and certification tests?',
-    questionTr: 'Nihai üretime hazır sistem tüm resmi kalifikasyon ve sertifikasyon testlerinden geçti mi?',
     helpText: 'Final system is 100% frozen in design and has achieved full formal compliance (CE, ISO, FDA, etc.).',
-    helpTextTr: 'Tasarım dondurulmuş (design freeze), tüm tip testleri ve resmi onaylar alınmıştır.',
     weight: 1.5
   },
   {
@@ -353,9 +296,7 @@ export const ASSESSMENT_QUESTIONS = [
     targetTrl: 8,
     phase: 'System Qualification',
     question: 'Is a pilot manufacturing line, tooling, or repeatable deployment pipeline operational?',
-    questionTr: 'Pilot üretim hattı, kalıplar veya tekrarlanabilir kurumsal devreye alma hattı hazır mı?',
     helpText: 'Manufacturing readiness level (MRL) aligns; supply chain agreements and QA documentation are in place.',
-    helpTextTr: 'Tedarik zinciri sözleşmeleri, kalite kontrol prosedürleri ve montaj/dağıtım süreçleri hazırdır.',
     weight: 1.2
   },
 
@@ -365,9 +306,7 @@ export const ASSESSMENT_QUESTIONS = [
     targetTrl: 9,
     phase: 'Commercial Deployment',
     question: 'Is the system actively deployed in full-scale commercial or operational mission service?',
-    questionTr: 'Sistem pazarda tam ölçekli olarak ticari satışta veya aktif görev hizmetinde mi?',
     helpText: 'Sustained commercial operations, documented customer retention, and serial manufacturing/uptime.',
-    helpTextTr: 'Sürekli ticari satış, müşteri SLA başarıları, seri üretim veya aktif kurumsal kullanım.',
     weight: 1.5
   },
   {
@@ -375,9 +314,7 @@ export const ASSESSMENT_QUESTIONS = [
     targetTrl: 9,
     phase: 'Commercial Deployment',
     question: 'Are supply chain, maintenance support, and mass-scale unit economics stable and profitable?',
-    questionTr: 'Tedarik zinciri, bakım/destek süreçleri ve birim maliyet ekonomisi optimize edildi mi?',
     helpText: 'Competitive manufacturing yields, ongoing maintenance telemetry, and commercial maturity.',
-    helpTextTr: 'Rekabetçi üretim verimliliği, satış sonrası destek ve pazar payı olgunluğu.',
     weight: 1.0
   }
 ];
@@ -396,14 +333,14 @@ export const GRANT_FUNDING_PROGRAMS = [
   },
   {
     id: 'tubitak-1001',
-    name: 'TÜBİTAK 1001 / 1002 Bilimsel Ar-Ge',
+    name: 'TÜBİTAK 1001 / 1002 Scientific R&D',
     provider: 'TÜBİTAK',
     minTrl: 1,
     maxTrl: 3,
-    grantType: 'Hibe Destek',
-    budget: '1.650.000 TL – 2.500.000 TL',
-    description: 'Üniversite ve araştırma kurumlarının temel prensip ve kavram kanıtı aşamasındaki Ar-Ge projeleri.',
-    tags: ['Temel Araştırma', 'Akademik', 'TÜBİTAK']
+    grantType: 'Grant Support',
+    budget: 'TRY 1,650,000 – TRY 2,500,000',
+    description: 'R&D projects by universities and research institutions at the basic principles and proof-of-concept stage.',
+    tags: ['Basic Research', 'Academic', 'TÜBİTAK']
   },
   {
     id: 'eic-pathfinder',
@@ -418,25 +355,25 @@ export const GRANT_FUNDING_PROGRAMS = [
   },
   {
     id: 'tubitak-1507',
-    name: 'TÜBİTAK 1507 KOBİ Ar-Ge Başlangıç',
+    name: 'TÜBİTAK 1507 SME R&D Start-Up',
     provider: 'TÜBİTAK TEYDEB',
     minTrl: 3,
     maxTrl: 6,
-    grantType: '%75 Hibe Destek',
-    budget: '2.400.000 TL',
-    description: 'KOBİ ölçeğindeki şirketlerin kavram kanıtından mühendislik prototipine geçiş projeleri.',
-    tags: ['KOBİ', 'Prototip', 'TEYDEB']
+    grantType: '75% Grant Support',
+    budget: 'TRY 2,400,000',
+    description: 'Projects by SMEs moving from proof of concept to an engineering prototype.',
+    tags: ['SME', 'Prototype', 'TEYDEB']
   },
   {
     id: 'tubitak-1501',
-    name: 'TÜBİTAK 1501 Sanayi Ar-Ge Destek',
+    name: 'TÜBİTAK 1501 Industrial R&D Support',
     provider: 'TÜBİTAK TEYDEB',
     minTrl: 4,
     maxTrl: 7,
-    grantType: '%75 Hibe Destek',
-    budget: 'Bütçe Üst Sınırı Yok',
-    description: 'Sanayi prototipi geliştirme, ilgili ortamda doğrulama ve pilot saha testleri aşaması.',
-    tags: ['Sanayi Ar-Ge', 'Prototip', 'TEYDEB']
+    grantType: '75% Grant Support',
+    budget: 'No Budget Cap',
+    description: 'Industrial prototype development, validation in a relevant environment, and pilot field testing.',
+    tags: ['Industrial R&D', 'Prototype', 'TEYDEB']
   },
   {
     id: 'eurostars-3',
@@ -462,14 +399,14 @@ export const GRANT_FUNDING_PROGRAMS = [
   },
   {
     id: 'tubitak-1707',
-    name: 'TÜBİTAK 1707 Siparişe Dayalı Ar-Ge',
+    name: 'TÜBİTAK 1707 Order-Based R&D',
     provider: 'TÜBİTAK',
     minTrl: 6,
     maxTrl: 8,
-    grantType: 'Müşteri Kuruluş Destekli Hibe',
-    budget: '30.000.000 TL',
-    description: 'Operasyonel sahada pilot testi yapılacak ve müşterisi hazır yüksek teknolojili ürün projeleri.',
-    tags: ['Ticarileşme', 'Müşteri Ortaklı', 'Saha Pilotu']
+    grantType: 'Customer-Backed Grant',
+    budget: 'TRY 30,000,000',
+    description: 'High-tech product projects with a committed customer, to be pilot-tested in an operational field environment.',
+    tags: ['Commercialization', 'Customer Partnership', 'Field Pilot']
   },
   {
     id: 'commercial-growth',
@@ -633,9 +570,7 @@ export function calculateTrlAssessment(answers = {}, frameworkId = 'horizon-euro
         level: targetGapLevel,
         phase: q.phase,
         question: q.question,
-        questionTr: q.questionTr,
         helpText: q.helpText,
-        helpTextTr: q.helpTextTr,
         currentStatus: val === 1 ? 'Partially Fulfilled' : 'Not Started',
         actionRequired: val === 1 
           ? `Finalize complete testing and official documentation for: ${q.question}`

@@ -14,7 +14,7 @@ export function buildQrPayload(type, formData) {
       return raw;
     }
     case 'text':
-      return formData.text || 'Cerilas Yüksek Teknoloji';
+      return formData.text || 'Cerilas High Technology';
 
     case 'wifi': {
       const ssid = (formData.ssid || '').trim();

@@ -19,7 +19,6 @@ import { useRevenueCat } from '../context/RevenueCatContext';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { REVENUECAT_CONFIG, cleanupOrphanedPaywallElements, checkProEntitlement } from '../revenuecat/revenueCatService';
-import { useTranslation } from '../i18n';
 import './RevenueCatPaywallModal.css';
 
 export default function RevenueCatPaywallModal({ 
@@ -40,8 +39,6 @@ export default function RevenueCatPaywallModal({
   const { user, syncPlan } = useAuth();
 
   const { theme, isDark } = useTheme();
-  const { language } = useTranslation();
-  const isTr = language === 'tr';
 
   // State: selected plan ('free' | 'pro' | 'unlimited')
   const [selectedPlanId, setSelectedPlanId] = useState('pro');
@@ -171,64 +168,64 @@ export default function RevenueCatPaywallModal({
       name: 'Free',
       badge: null,
       price: '$0',
-      period: isTr ? '/ ömür boyu' : '/ forever',
+      period: '/ forever',
       ctaPriceDetail: '$0',
-      subDetail: isTr ? 'Kredi kartı gerekmez' : 'No credit card needed',
+      subDetail: 'No credit card needed',
       features: [
-        isTr ? '1 Workspace (Web sitesi / Marka)' : '1 Workspace (Website / Brand)',
-        isTr ? '3 GEO / AEO Arama İstemi (Prompt)' : '3 GEO / AEO Search Prompts',
-        isTr ? 'Temel token kotası & ücretsiz araçlar' : 'Basic token allowance & free tools',
-        isTr ? 'Günlük 1 AI Aksiyon & Rakip Keşfi' : '1 Daily AI Action & Competitor Discovery',
-        isTr ? 'Standart işlem ve yanıt hızı' : 'Standard execution speed'
+        '1 Workspace (Website / Brand)',
+        '3 GEO / AEO Search Prompts',
+        'Basic token allowance & free tools',
+        '1 Daily AI Action & Competitor Discovery',
+        'Standard execution speed'
       ]
     },
     {
       id: 'pro',
       name: 'Pro',
-      badge: isTr ? 'Popüler' : 'Popular',
+      badge: 'Popular',
       badgeType: 'featured',
       price: billingCycle === 'annual' ? '$99.90' : '$9.99',
-      period: billingCycle === 'annual' ? (isTr ? '/ yıl' : '/ yr') : (isTr ? '/ ay' : '/ mo'),
-      ctaPriceDetail: billingCycle === 'annual' ? (isTr ? '$99.90 / yıl ($8.33/ay)' : '$99.90 / yr ($8.33/mo)') : (isTr ? '$9.99 / ay' : '$9.99 / mo'),
-      savingsPill: billingCycle === 'annual' ? (isTr ? '2 Ay Bedava' : '2 Months Free') : null,
+      period: billingCycle === 'annual' ? '/ yr' : '/ mo',
+      ctaPriceDetail: billingCycle === 'annual' ? '$99.90 / yr ($8.33/mo)' : '$9.99 / mo',
+      savingsPill: billingCycle === 'annual' ? '2 Months Free' : null,
       subDetail: billingCycle === 'annual'
-        ? (isTr ? 'Yıllık çekim ($8.33/ay)' : 'Billed annually ($8.33/mo)')
-        : (isTr ? 'Aylık çekim' : 'Billed monthly'),
+        ? 'Billed annually ($8.33/mo)'
+        : 'Billed monthly',
       matchedPkg: billingCycle === 'annual' ? (proAnnualPkg || proMonthlyPkg || availablePackages[0]) : (proMonthlyPkg || availablePackages[0]),
       features: [
-        isTr ? '3 Workspace (Web sitesi / Marka)' : '3 Workspaces (Websites / Brands)',
-        isTr ? '15 Takip Edilebilir GEO / AEO İstemi' : '15 Trackable GEO / AEO Prompts',
-        isTr ? '3 Rakip Takip Radarı' : '3 Competitor Tracking Radar',
-        isTr ? 'Sınırsız Teknik Site Denetimi (Audit)' : 'Unlimited Technical Site Audit & Issues',
-        isTr ? 'Günlük Yönetici E-Posta Özeti (Digest)' : 'Daily Executive Email Digest Reports',
-        isTr ? 'Günlük 3 AI Aksiyon & Rakip Keşfi' : '3 Daily AI Priority Actions & Discovery',
-        isTr ? '5x Token Kotası & Ticari Lisans' : '5x Token Allowance & Commercial Rights'
+        '3 Workspaces (Websites / Brands)',
+        '15 Trackable GEO / AEO Prompts',
+        '3 Competitor Tracking Radar',
+        'Unlimited Technical Site Audit & Issues',
+        'Daily Executive Email Digest Reports',
+        '3 Daily AI Priority Actions & Discovery',
+        '5x Token Allowance & Commercial Rights'
       ]
     },
     {
       id: 'unlimited',
       name: 'Unlimited',
-      badge: isTr ? 'Turbo' : 'Turbo',
+      badge: 'Turbo',
       badgeType: 'turbo',
       price: billingCycle === 'annual' ? '$149.90' : '$14.99',
-      period: billingCycle === 'annual' ? (isTr ? '/ yıl' : '/ yr') : (isTr ? '/ ay' : '/ mo'),
-      ctaPriceDetail: billingCycle === 'annual' ? (isTr ? '$149.90 / yıl ($12.49/ay)' : '$149.90 / yr ($12.49/mo)') : (isTr ? '$14.99 / ay' : '$14.99 / mo'),
-      savingsPill: billingCycle === 'annual' ? (isTr ? '2 Ay Bedava' : '2 Months Free') : null,
+      period: billingCycle === 'annual' ? '/ yr' : '/ mo',
+      ctaPriceDetail: billingCycle === 'annual' ? '$149.90 / yr ($12.49/mo)' : '$14.99 / mo',
+      savingsPill: billingCycle === 'annual' ? '2 Months Free' : null,
       subDetail: billingCycle === 'annual'
-        ? (isTr ? 'Yıllık çekim ($12.49/ay)' : 'Billed annually ($12.49/mo)')
-        : (isTr ? 'Aylık çekim' : 'Billed monthly'),
+        ? 'Billed annually ($12.49/mo)'
+        : 'Billed monthly',
       matchedPkg: unlimitedMonthlyPkg || unlimitedAnnualPkg || availablePackages.find(p => {
         const id = String(p.product?.identifier || p.identifier || '').toLowerCase();
         return id.includes('unlimited') || id === 'pri_01m41vmta5xebbmwt1k46xbfsf';
       }),
       features: [
-        isTr ? 'Sınırsız Workspace (Tüm markalarınız)' : 'Unlimited Workspaces (All brands)',
-        isTr ? '30 Takip Edilebilir GEO / AEO İstemi' : '30 Trackable GEO / AEO Prompts',
-        isTr ? 'Sınırsız Rakip Takip Radarı' : 'Unlimited Competitor Tracking Radar',
-        isTr ? 'Tam Kapsamlı Teknik Denetim & Raporlar' : 'Full Technical Site Audit & Reports',
-        isTr ? 'Sınırsız AI Aksiyon & Rakip Keşfi' : 'Unlimited AI Actions & Discovery Runs',
-        isTr ? 'Maksimum Token Kotası & Turbo Hız' : 'Maximum Token Allowance & Turbo Speed',
-        isTr ? '7/24 VIP Öncelikli Teknik Destek' : '24/7 Dedicated VIP Priority Support'
+        'Unlimited Workspaces (All brands)',
+        '30 Trackable GEO / AEO Prompts',
+        'Unlimited Competitor Tracking Radar',
+        'Full Technical Site Audit & Reports',
+        'Unlimited AI Actions & Discovery Runs',
+        'Maximum Token Allowance & Turbo Speed',
+        '24/7 Dedicated VIP Priority Support'
       ]
     }
   ];
@@ -372,14 +369,10 @@ export default function RevenueCatPaywallModal({
     if (!pkgToPurchase) {
       if (planToProcess.id === 'unlimited') {
         openCustomerCenter('overview');
-        setErrorMessage(isTr 
-          ? 'Paddle Müşteri Portalı açıldı. Mevcut aboneliğinizi Unlimited planına yükseltmek için açılan sekmeden devam edebilirsiniz.' 
-          : 'Paddle Customer Portal opened to complete your Unlimited upgrade.');
+        setErrorMessage('Paddle Customer Portal opened to complete your Unlimited upgrade.');
         return;
       }
-      setErrorMessage(isTr 
-        ? 'Abonelik paketi hazırlanamadı. Lütfen sayfayı yenileyip tekrar deneyiniz.' 
-        : 'Subscription package not available. Please refresh and try again.');
+      setErrorMessage('Subscription package not available. Please refresh and try again.');
       return;
     }
 
@@ -416,9 +409,7 @@ export default function RevenueCatPaywallModal({
         ) {
           if (planToProcess.id === 'unlimited') {
             openCustomerCenter('overview');
-            setErrorMessage(isTr 
-              ? 'Paddle, mevcut bir Pro aboneliğiniz bulunduğu için mükerrer fatura kesilmesini önlemek amacıyla plan yükseltmesini doğrudan Paddle Müşteri Portalı üzerinden onaylamanızı istemektedir. Portal yeni sekmede açılmıştır; kullanılmayan Pro günleriniz otomatik mahsup edilecektir.'
-              : 'Paddle requires upgrading active subscriptions directly via the Customer Portal to avoid double billing. The portal has been opened in a new tab.');
+            setErrorMessage('Paddle requires upgrading active subscriptions directly via the Customer Portal to avoid double billing. The portal has been opened in a new tab.');
             return;
           }
           try {
@@ -438,13 +429,9 @@ export default function RevenueCatPaywallModal({
           rawMsg.includes('not_enabled') || 
           rawMsg.includes('onboarding')
         ) {
-          userMsg = isTr 
-            ? 'Paddle canlı ödeme onayı henüz tamamlanmamış (Onboarding incelemede). Paddle panelinizdeki hesap onay adımlarını tamamlayınız.'
-            : 'Checkouts are not yet enabled for this Paddle account (Onboarding in review). Please complete verification in your Paddle dashboard.';
+          userMsg = 'Checkouts are not yet enabled for this Paddle account (Onboarding in review). Please complete verification in your Paddle dashboard.';
         } else {
-          userMsg = rawMsg || (isTr 
-            ? 'Ödeme tamamlanamadı. Lütfen kart bilgilerinizi kontrol ediniz.' 
-            : 'Payment could not be completed. Please try again.');
+          userMsg = rawMsg || 'Payment could not be completed. Please try again.';
         }
         setErrorMessage(userMsg);
       }
@@ -477,8 +464,8 @@ export default function RevenueCatPaywallModal({
             type="button" 
             className="rc-paywall-close-btn"
             onClick={isPurchasing ? handleCancelCheckout : onClose}
-            aria-label={isTr ? 'Kapat' : 'Close'}
-            title={isPurchasing ? (isTr ? 'İptal Et' : 'Cancel') : (isTr ? 'Kapat' : 'Close')}
+            aria-label="Close"
+            title={isPurchasing ? 'Cancel' : 'Close'}
           >
             <X size={17} />
           </button>
@@ -486,7 +473,7 @@ export default function RevenueCatPaywallModal({
           {!purchaseSuccess && (
             <>
               <h2 id="rc-paywall-main-title" className="rc-paywall-title">
-                {isTr ? 'Paket Seçin' : 'Choose Plan'}
+                Choose Plan
               </h2>
 
               {/* Master Billing Switcher */}
@@ -496,16 +483,16 @@ export default function RevenueCatPaywallModal({
                   className={`rc-toggle-tab ${billingCycle === 'monthly' ? 'is-active' : ''}`}
                   onClick={() => handleMasterCycleChange('monthly')}
                 >
-                  {isTr ? 'Aylık' : 'Monthly'}
+                  Monthly
                 </button>
                 <button
                   type="button"
                   className={`rc-toggle-tab ${billingCycle === 'annual' ? 'is-active' : ''}`}
                   onClick={() => handleMasterCycleChange('annual')}
                 >
-                  <span>{isTr ? 'Yıllık' : 'Annual'}</span>
+                  <span>Annual</span>
                   <span className="rc-discount-pill">
-                    {isTr ? '2 Ay Bedava' : '2 Months Free'}
+                    2 Months Free
                   </span>
                 </button>
               </div>
@@ -521,9 +508,7 @@ export default function RevenueCatPaywallModal({
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                 <CheckCircle2 size={16} color="#10b981" />
                 <span className="rc-active-pro-banner-text">
-                  {isTr 
-                    ? 'Zaten aktif bir aboneliğiniz bulunmaktadır.' 
-                    : 'You already have a subscription.'}
+                  You already have a subscription.
                 </span>
               </div>
               <button 
@@ -531,7 +516,7 @@ export default function RevenueCatPaywallModal({
                 onClick={openCustomerCenter}
                 className="rc-manage-sub-link-btn"
               >
-                {isTr ? 'Yönet' : 'Manage'}
+                Manage
               </button>
             </div>
           )}
@@ -547,42 +532,38 @@ export default function RevenueCatPaywallModal({
                 <Sparkles size={13} />
                 <span>
                   {isRestoredPro 
-                    ? (isTr ? 'Pro Aboneliğiniz Doğrulandı' : 'Pro Subscription Verified')
+                    ? 'Pro Subscription Verified'
                     : selectedPlan.name === 'Unlimited' 
-                    ? (isTr ? 'Unlimited Plan Aktifleştirildi' : 'Unlimited Plan Activated') 
-                    : (isTr ? 'Pro Plan Aktifleştirildi' : 'Pro Plan Activated')}
+                    ? 'Unlimited Plan Activated' 
+                    : 'Pro Plan Activated'}
                 </span>
               </div>
 
               <h3 className="rc-success-title">
                 {isRestoredPro 
-                  ? (isTr ? 'Pro Aboneliğiniz Hesabınızla Eşitlendi!' : 'Pro Subscription Restored!') 
+                  ? 'Pro Subscription Restored!' 
                   : selectedPlan.name === 'Unlimited'
-                  ? (isTr ? 'Cerilas Unlimited’a Hoş Geldiniz!' : 'Welcome to Cerilas Unlimited!')
-                  : (isTr ? 'Cerilas Pro’ya Hoş Geldiniz!' : 'Welcome to Cerilas Pro!')}
+                  ? 'Welcome to Cerilas Unlimited!'
+                  : 'Welcome to Cerilas Pro!'}
               </h3>
               <p className="rc-success-desc">
                 {isRestoredPro 
-                  ? (isTr 
-                    ? 'Paddle ve RevenueCat altyapısında aktif Pro aboneliğiniz doğrulandı. Mükerrer bir ücret alınmadan Pro ayrıcalıklarınız profilinize eksiksiz geri tanımlandı.' 
-                    : 'Your active Pro subscription was verified with Paddle & RevenueCat. All Pro benefits have been restored with zero extra charges.')
-                  : (isTr 
-                    ? 'Ödemeniz başarıyla tamamlandı. Tüm araçlar, analizler ve genişletilmiş kotalar hesabınıza anında tanımlandı.' 
-                    : 'Your payment was successful. All tools, advanced features, and priority speed are now unlocked.')}
+                  ? 'Your active Pro subscription was verified with Paddle & RevenueCat. All Pro benefits have been restored with zero extra charges.'
+                  : 'Your payment was successful. All tools, advanced features, and priority speed are now unlocked.'}
               </p>
 
               <div className="rc-success-perks">
                 <div className="rc-success-perk-item">
                   <CheckCircle2 size={16} className="rc-success-perk-icon" />
-                  <span>{isTr ? 'Tüm Araçlara Sınırsız Erişim' : 'Full Unlimited Access to All Tools'}</span>
+                  <span>Full Unlimited Access to All Tools</span>
                 </div>
                 <div className="rc-success-perk-item">
                   <CheckCircle2 size={16} className="rc-success-perk-icon" />
-                  <span>{isTr ? 'Yüksek İşlem & Yanıt Hızı' : 'High Priority Execution Speed'}</span>
+                  <span>High Priority Execution Speed</span>
                 </div>
                 <div className="rc-success-perk-item">
                   <CheckCircle2 size={16} className="rc-success-perk-icon" />
-                  <span>{isTr ? 'Otomatik Aktif Hesap Hakları' : 'Instant Account Provisioning'}</span>
+                  <span>Instant Account Provisioning</span>
                 </div>
               </div>
 
@@ -593,7 +574,7 @@ export default function RevenueCatPaywallModal({
                   style={{ flex: 1, minWidth: '160px' }}
                   onClick={onClose}
                 >
-                  <span>{isTr ? 'Kullanmaya Başla' : 'Get Started'}</span>
+                  <span>Get Started</span>
                   <ArrowRight size={16} />
                 </button>
                 <button 
@@ -611,7 +592,7 @@ export default function RevenueCatPaywallModal({
                   }}
                   onClick={() => openCustomerCenter('overview')}
                 >
-                  {isTr ? 'Paddle Aboneliğini Yönet' : 'Manage on Paddle'}
+                  Manage on Paddle
                 </button>
               </div>
             </div>
@@ -697,20 +678,18 @@ export default function RevenueCatPaywallModal({
               {isPurchasing ? (
                 <>
                   <Loader2 size={18} className="spin" />
-                  <span>{isTr ? 'Lütfen bekleyin...' : 'Processing...'}</span>
+                  <span>Processing...</span>
                 </>
               ) : selectedPlan.id === 'free' ? (
                 <>
-                  <span>{isTr ? 'Ücretsiz Plan ile Devam Et' : 'Continue with Free Plan'}</span>
+                  <span>Continue with Free Plan</span>
                   <ArrowRight size={16} />
                 </>
               ) : (
                 <>
                   <Lock size={15} />
                   <span>
-                    {isTr 
-                      ? `${selectedPlan.name} ile Devam Et — ${selectedPlan.ctaPriceDetail}` 
-                      : `Continue with ${selectedPlan.name} — ${selectedPlan.ctaPriceDetail}`}
+                    {`Continue with ${selectedPlan.name} — ${selectedPlan.ctaPriceDetail}`}
                   </span>
                   <ArrowRight size={16} />
                 </>
@@ -735,7 +714,7 @@ export default function RevenueCatPaywallModal({
                 }}
               >
                 <ExternalLink size={13} />
-                <span>{isTr ? 'Veya Paddle Portalında Yükselt (Prorated Mahsup)' : 'Or upgrade in Paddle Portal (Prorated)'}</span>
+                <span>Or upgrade in Paddle Portal (Prorated)</span>
               </button>
             )}
 
@@ -745,12 +724,12 @@ export default function RevenueCatPaywallModal({
                 onClick={handleCancelCheckout}
                 className="rc-cancel-checkout-link"
               >
-                {isTr ? 'İptal Et' : 'Cancel'}
+                Cancel
               </button>
             )}
 
             <div className="rc-security-note">
-              <span>🔒 {isTr ? '256-bit SSL güvenli ödeme • İstediğiniz an iptal edin' : '256-bit SSL secured • Cancel anytime'}</span>
+              <span>🔒 256-bit SSL secured • Cancel anytime</span>
             </div>
           </div>
         )}

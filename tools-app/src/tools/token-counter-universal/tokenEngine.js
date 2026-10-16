@@ -701,12 +701,12 @@ export const TokenAnalyticsDashboard: React.FC<{ prompt: string }> = ({ prompt }
   },
   {
     id: 'multilingual-article',
-    label: 'Multilingual Essay (Turkish & English)',
-    text: `Yapay zekâ modellerinde tokenizasyon, girdi metinlerinin sayısal vektörlere dönüştürülmesindeki ilk ve en kritik adımdır. İngilizce kelimeler çoğunlukla tek bir token ile temsil edilirken, Türkçe gibi sondan eklemeli dillerde ekler ve karakter yapıları nedeniyle aynı kelime 2 veya 3 farklı token'a bölünebilmektedir.
+    label: 'Multilingual Essay (German & English)',
+    text: `Die Tokenisierung ist bei KI-Sprachmodellen der erste und entscheidende Schritt, um Eingabetexte in numerische Vektoren umzuwandeln. Während englische Wörter meist durch ein einzelnes Token dargestellt werden, zerlegen Tokenizer lange deutsche Komposita häufig in mehrere Teilwörter.
 
-For example, the word "understanding" corresponds to a single token in the OpenAI o200k vocabulary, whereas its Turkish translation "anlayabilmek" may be split into multiple sub-word chunks.
+For example, the word "understanding" corresponds to a single token in the OpenAI o200k vocabulary, whereas a German compound such as "Verständnisschwierigkeiten" may be split into multiple sub-word chunks.
 
-Bu durum, çok dilli yapay zekâ uygulamalarında bağlam penceresi (context window) optimizasyonunu ve API maliyet yönetimini doğrudan etkilemektedir. Doğru model seçimi ve prompt tasarımı, aylık yapay zekâ bütçenizde %80'e varan tasarruf sağlayabilir.`
+Das wirkt sich direkt auf die Optimierung des Kontextfensters (context window) und die API-Kostenplanung mehrsprachiger KI-Anwendungen aus. Die richtige Modellwahl und ein durchdachtes Prompt-Design können die monatlichen KI-Infrastrukturkosten deutlich senken.`
   },
   {
     id: 'json-payload',

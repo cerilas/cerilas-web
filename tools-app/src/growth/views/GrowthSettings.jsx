@@ -28,9 +28,6 @@ export default function GrowthSettings() {
   const { activeWorkspace, refreshWorkspaces, switchWorkspace, workspaces } = useGrowth();
   const { token } = useAuth();
 
-  // GrowthControl is strictly in English
-  const isTr = false;
-
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [successMsg, setSuccessMsg] = useState('');
@@ -540,7 +537,7 @@ export default function GrowthSettings() {
           onClick={handleOpenDeleteModal}
           className="growth-danger-btn"
         >
-          <span>{isTr ? 'Çalışma Alanını Kalıcı Olarak Sil' : 'Permanently Delete Workspace'}</span>
+          <span>Permanently Delete Workspace</span>
         </button>
       </div>
 
@@ -576,7 +573,7 @@ export default function GrowthSettings() {
                     <Unlink size={19} />
                   </div>
                   <span className="growth-delete-pill" style={{ background: 'rgba(234, 179, 8, 0.12)', borderColor: 'rgba(234, 179, 8, 0.28)', color: '#facc15' }}>
-                    {isTr ? 'Bağlantı Kaldırma' : 'Disconnect Integration'}
+                    Disconnect Integration
                   </span>
                 </div>
                 <button
@@ -590,12 +587,10 @@ export default function GrowthSettings() {
               </div>
 
               <h2 id="growth-disconnect-google-title" className="growth-delete-modal-title">
-                {isTr ? 'Google Entegrasyonunu Kaldır?' : 'Disconnect Google Integration?'}
+                Disconnect Google Integration?
               </h2>
               <p className="growth-delete-modal-subtitle">
-                {isTr
-                  ? 'Google Search Console ve GA4 bağlantısı kesilecek. Canlı arama sorguları ve organik trafik telemetrisi artık güncellenmeyecek.'
-                  : 'Google Search Console and GA4 will be unlinked from this workspace. Live telemetry feeds will be removed.'}
+                Google Search Console and GA4 will be unlinked from this workspace. Live telemetry feeds will be removed.
               </p>
             </div>
 
@@ -606,7 +601,7 @@ export default function GrowthSettings() {
                 onClick={() => setIsDisconnectGoogleModalOpen(false)}
                 disabled={disconnectingGoogle}
               >
-                {isTr ? 'Vazgeç' : 'Cancel'}
+                Cancel
               </button>
               <button
                 type="button"
@@ -618,12 +613,12 @@ export default function GrowthSettings() {
                 {disconnectingGoogle ? (
                   <>
                     <Loader2 size={15} className="spin" />
-                    <span>{isTr ? 'Bağlantı Kesiliyor...' : 'Disconnecting...'}</span>
+                    <span>Disconnecting...</span>
                   </>
                 ) : (
                   <>
                     <Unlink size={15} />
-                    <span>{isTr ? 'Evet, Bağlantıyı Kaldır' : 'Yes, Disconnect Google'}</span>
+                    <span>Yes, Disconnect Google</span>
                   </>
                 )}
               </button>

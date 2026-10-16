@@ -21,12 +21,7 @@ export default function AiVisibilityGrowthModal({
 }) {
   if (!isOpen) return null;
 
-  const isTr = typeof window !== 'undefined' && (
-    localStorage.getItem('preferred_language') === 'tr' ||
-    navigator.language?.startsWith('tr')
-  );
-
-  const cleanDomain = domain ? domain.replace(/^https?:\/\//, '').replace(/\/.*$/, '') : 'Siteniz';
+  const cleanDomain = domain ? domain.replace(/^https?:\/\//, '').replace(/\/.*$/, '') : 'your site';
 
   const handleLaunchGrowth = () => {
     if (onNavigateGrowth) {
@@ -51,7 +46,7 @@ export default function AiVisibilityGrowthModal({
           type="button" 
           className="aivc-growth-modal-close" 
           onClick={onClose}
-          aria-label={isTr ? 'Kapat' : 'Close'}
+          aria-label="Close"
         >
           <X size={18} />
         </button>
@@ -73,23 +68,11 @@ export default function AiVisibilityGrowthModal({
         {/* Modal Header */}
         <div className="aivc-growth-modal-header">
           <h3 className="aivc-growth-modal-title">
-            {isTr ? (
-              <>
-                İlk Tarama Tamamlandı!<br />
-                <span className="gradient-text">{cleanDomain}</span> Verilerini Sürekli Takip Edin
-              </>
-            ) : (
-              <>
-                Initial Audit Complete!<br />
-                Supercharge <span className="gradient-text">{cleanDomain}</span> with GrowthControl
-              </>
-            )}
+            Initial Audit Complete!<br />
+            Supercharge <span className="gradient-text">{cleanDomain}</span> with GrowthControl
           </h3>
           <p className="aivc-growth-modal-sub">
-            {isTr 
-              ? 'Tek seferlik tarama buzdağının sadece görünen kısmı. GrowthControl platformu ile yapay zeka arama motorlarındaki alıntılarınızı her hafta otomatik ölçün, Google Search Console verilerinizi bağlayın ve öncelikli aksiyon akışını başlatın.'
-              : 'This single-page audit is just the tip of the iceberg. With GrowthControl, automate continuous weekly AI citation testing across Gemini & ChatGPT, connect Google Search Console, and unlock weekly prioritized action items.'
-            }
+            This single-page audit is just the tip of the iceberg. With GrowthControl, automate continuous weekly AI citation testing across Gemini & ChatGPT, connect Google Search Console, and unlock weekly prioritized action items.
           </p>
         </div>
 
@@ -100,12 +83,9 @@ export default function AiVisibilityGrowthModal({
               <Bot size={16} className="text-primary" />
             </div>
             <div className="aivc-feature-text">
-              <strong>{isTr ? 'Otomatik Haftalık GEO Radarı' : 'Automated Weekly GEO Testing'}</strong>
+              <strong>Automated Weekly GEO Testing</strong>
               <span>
-                {isTr 
-                  ? 'Gemini, ChatGPT ve Perplexity alıntı payınızı her hafta otomatik tarayın ve rakip farklarını yakalayın.'
-                  : 'Weekly citation tracking across Gemini, Perplexity and ChatGPT with competitor voice share.'
-                }
+                Weekly citation tracking across Gemini, Perplexity and ChatGPT with competitor voice share.
               </span>
             </div>
           </div>
@@ -115,12 +95,9 @@ export default function AiVisibilityGrowthModal({
               <BarChart3 size={16} className="text-emerald" />
             </div>
             <div className="aivc-feature-text">
-              <strong>{isTr ? 'Google Search Console Entegrasyonu' : 'Verified Google Search Console Sync'}</strong>
+              <strong>Verified Google Search Console Sync</strong>
               <span>
-                {isTr 
-                  ? '1. parti arama gösterimleri, tıklamalar ve gerçek kullanıcı anahtar kelimelerini tek tıkla bağlayın.'
-                  : 'Sync live search console clicks, impressions, and exact keywords with zero third-party exposure.'
-                }
+                Sync live search console clicks, impressions, and exact keywords with zero third-party exposure.
               </span>
             </div>
           </div>
@@ -130,12 +107,9 @@ export default function AiVisibilityGrowthModal({
               <Sparkles size={16} className="text-amber" />
             </div>
             <div className="aivc-feature-text">
-              <strong>{isTr ? 'Haftalık Öncelikli Aksiyon Akışı' : 'Weekly Prioritized Action Feed'}</strong>
+              <strong>Weekly Prioritized Action Feed</strong>
               <span>
-                {isTr 
-                  ? 'Karmaşık grafikler yerine, bu hafta organik trafiğinizi artıracak somut adımları teslim alın.'
-                  : 'Clear weekly to-do list telling you exactly which technical and content fixes will yield top ROI.'
-                }
+                Clear weekly to-do list telling you exactly which technical and content fixes will yield top ROI.
               </span>
             </div>
           </div>
@@ -149,7 +123,7 @@ export default function AiVisibilityGrowthModal({
             onClick={handleLaunchGrowth}
           >
             <TrendingUp size={16} />
-            <span>{isTr ? 'GrowthControl\'de Aç (Ücretsiz)' : 'Open in GrowthControl (Free)'}</span>
+            <span>Open in GrowthControl (Free)</span>
             <ArrowRight size={15} />
           </button>
 
@@ -158,7 +132,7 @@ export default function AiVisibilityGrowthModal({
             className="aivc-growth-modal-secondary-btn"
             onClick={onClose}
           >
-            <span>{isTr ? 'Sonuçları İncelemeye Devam Et' : 'Continue Viewing Audit Results'}</span>
+            <span>Continue Viewing Audit Results</span>
           </button>
         </div>
       </div>

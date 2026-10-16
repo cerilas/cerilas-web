@@ -744,8 +744,8 @@ function buildOverviewTelemetry(workspace, range = '30d', extra = {}) {
     }
     const isoDate = d.toISOString().split('T')[0];
     const label = isMonthly 
-      ? d.toLocaleDateString('tr-TR', { month: 'short', year: '2-digit' })
-      : d.toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' });
+      ? d.toLocaleDateString('en-US', { month: 'short', year: '2-digit' })
+      : d.toLocaleDateString('en-US', { day: 'numeric', month: 'short' });
     timelineDates.push({ date: isoDate, label, idx: numPoints - 1 - i });
   }
 
@@ -786,13 +786,13 @@ function buildOverviewTelemetry(workspace, range = '30d', extra = {}) {
       const avgSec = parseFloat(gaPerf.average_session_duration);
       const mins = Math.floor(avgSec / 60);
       const secs = Math.round(avgSec % 60);
-      avgDurationStr = `${mins}dk ${secs}sn`;
+      avgDurationStr = `${mins}m ${secs}s`;
     }
 
     let gaTimeline = (Array.isArray(gaPerf?.daily_trend) && gaPerf.daily_trend.length > 0)
       ? gaPerf.daily_trend.map(d => {
           const dateObj = new Date(d.date);
-          const label = isNaN(dateObj.getTime()) ? d.date : dateObj.toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' });
+          const label = isNaN(dateObj.getTime()) ? d.date : dateObj.toLocaleDateString('en-US', { day: 'numeric', month: 'short' });
           return {
             date: d.date,
             label,
@@ -816,13 +816,13 @@ function buildOverviewTelemetry(workspace, range = '30d', extra = {}) {
         'Cross-network': '#ec4899'
       };
       const channelLabels = {
-        'Organic Search': 'Organik Arama (SEO)',
-        'Direct': 'Doğrudan Trafik',
-        'Organic Social': 'Sosyal Medya',
-        'Referral': 'Yönlendirme (Backlinks)',
-        'Paid Search': 'Ücretli Arama (Ads)',
-        'Unassigned': 'Tanımlanmamış',
-        'Cross-network': 'Çapraz Ağ'
+        'Organic Search': 'Organic Search (SEO)',
+        'Direct': 'Direct',
+        'Organic Social': 'Organic Social',
+        'Referral': 'Referral (Backlinks)',
+        'Paid Search': 'Paid Search (Ads)',
+        'Unassigned': 'Unassigned',
+        'Cross-network': 'Cross-network'
       };
       const totalChanSessions = gaPerf.traffic_channels.reduce((sum, c) => sum + Number(c.sessions || 0), 0) || totalSessions;
       gaChannels = gaPerf.traffic_channels.map(c => {
@@ -857,7 +857,7 @@ function buildOverviewTelemetry(workspace, range = '30d', extra = {}) {
         return {
           country: c.country,
           nameTr: c.country,
-          code: c.country === 'Türkiye' ? 'TR' : c.country === 'United States' ? 'US' : c.country === 'India' ? 'IN' : c.country === 'Qatar' ? 'QA' : 'GLOBAL',
+          code: (c.country === 'Türkiye' || c.country === 'Turkey') ? 'TR' : c.country === 'United States' ? 'US' : c.country === 'India' ? 'IN' : c.country === 'Qatar' ? 'QA' : 'GLOBAL',
           flag: flagMap[c.country] || '🌐',
           sessions: sess,
           visitors: Number(c.activeUsers || sess),
@@ -1010,7 +1010,7 @@ function buildOverviewTelemetry(workspace, range = '30d', extra = {}) {
     if (Array.isArray(gscPerf?.daily_trend) && gscPerf.daily_trend.length > 0) {
       searchTimeline = gscPerf.daily_trend.map(d => {
         const dateObj = new Date(d.date);
-        const label = isNaN(dateObj.getTime()) ? d.date : dateObj.toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' });
+        const label = isNaN(dateObj.getTime()) ? d.date : dateObj.toLocaleDateString('en-US', { day: 'numeric', month: 'short' });
         return {
           date: d.date,
           label,
@@ -1035,7 +1035,7 @@ function buildOverviewTelemetry(workspace, range = '30d', extra = {}) {
     };
   }
 
-  // 3. Satış Rakamları & B2B Dönüşüm Telemetrisi (Google Analytics 4)
+  // 3. Sales & B2B conversion telemetry (Google Analytics 4)
   const isB2B = (workspace.business_model || '').toUpperCase() === 'B2B' || !workspace.business_model;
   
   let sales;
@@ -1095,7 +1095,7 @@ function buildOverviewTelemetry(workspace, range = '30d', extra = {}) {
     const salesTimeline = (gaPerf?.daily_trend && Array.isArray(gaPerf.daily_trend) && gaPerf.daily_trend.length > 0)
       ? gaPerf.daily_trend.map(d => {
           const dateObj = new Date(d.date);
-          const label = isNaN(dateObj.getTime()) ? d.date : dateObj.toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' });
+          const label = isNaN(dateObj.getTime()) ? d.date : dateObj.toLocaleDateString('en-US', { day: 'numeric', month: 'short' });
           const sess = Number(d.sessions || 0);
           return {
             date: d.date,
@@ -1139,7 +1139,7 @@ function buildOverviewTelemetry(workspace, range = '30d', extra = {}) {
   }
 
 
-  // 4. Yapay Zeka Overview (GEO & Real AI Prompts & Citations)
+  // 4. AI Overview (GEO & Real AI Prompts & Citations)
   const trackedPromptsList = Array.isArray(prompts) 
     ? prompts.filter(p => p && p.prompt && p.prompt.trim().length > 3) 
     : [];
@@ -1166,18 +1166,18 @@ function buildOverviewTelemetry(workspace, range = '30d', extra = {}) {
       const citationsArr = Array.isArray(p.last_citations) ? p.last_citations : [];
       const engines = hasRun ? [(p.last_provider || 'gemini').toLowerCase()] : [];
       
-      let lastCheckedStr = 'Henüz Taranmadı';
+      let lastCheckedStr = 'Not scanned yet';
       if (p.last_checked_at) {
         try {
           const d = new Date(p.last_checked_at);
-          lastCheckedStr = d.toLocaleDateString('tr-TR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+          lastCheckedStr = d.toLocaleDateString('en-US', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
         } catch (e) {}
       }
 
       return {
         id: p.id,
         prompt: p.prompt,
-        topic: p.topic || 'Genel Marka ve Sektör Bilinirliği',
+        topic: p.topic || 'Brand & Industry Awareness',
         isCited,
         citationScore: isCited ? (citationsArr.length > 0 ? 90 : 80) : 0,
         citationsCount: citationsArr.length,
@@ -1190,9 +1190,9 @@ function buildOverviewTelemetry(workspace, range = '30d', extra = {}) {
     });
   } else {
     const defaultPrompts = [
-      { prompt: `${workspace.name} nedir, ne işe yarar?`, topic: 'Marka Tanınırlığı' },
-      { prompt: `${workspace.primary_domain || workspace.name} güvenilir mi, kullanıcı yorumları nasıl?`, topic: 'Güvenilirlik & İtibar' },
-      { prompt: `En iyi ${workspace.industry || 'Teknoloji'} çözümleri nelerdir?`, topic: 'Sektörel Bilinirlik' }
+      { prompt: `What is ${workspace.name} and what does it do?`, topic: 'Brand Awareness' },
+      { prompt: `Is ${workspace.primary_domain || workspace.name} trustworthy, and what do users say about it?`, topic: 'Trust & Reputation' },
+      { prompt: `What are the best ${workspace.industry || 'technology'} solutions?`, topic: 'Industry Awareness' }
     ];
     finalPrompts = defaultPrompts.map((defP, idx) => ({
       id: idx + 1,
@@ -1204,7 +1204,7 @@ function buildOverviewTelemetry(workspace, range = '30d', extra = {}) {
       engines: [],
       model: 'gemini-3.8-flash',
       status: 'not_scanned',
-      lastChecked: 'Taranmayı Bekliyor',
+      lastChecked: 'Awaiting scan',
       responseSnippet: null
     }));
     totalPromptsCount = finalPrompts.length;
@@ -1215,7 +1215,7 @@ function buildOverviewTelemetry(workspace, range = '30d', extra = {}) {
   if (Array.isArray(allAiBatches) && allAiBatches.length > 0) {
     aiTimeline = allAiBatches.map(b => {
       const d = new Date(b.created_at);
-      const label = d.toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' });
+      const label = d.toLocaleDateString('en-US', { day: 'numeric', month: 'short' });
       const rate = Math.round((Number(b.mentioned_count || 0) / (Number(b.total_prompts || 1))) * 100);
       return {
         date: d.toISOString().split('T')[0],
@@ -1282,13 +1282,13 @@ function buildOverviewTelemetry(workspace, range = '30d', extra = {}) {
     totalPrompts: totalPromptsCount,
     citedPromptsCount,
     activeModel: latestAiBatch?.model || 'Google Gemini (gemini-3.8-flash)',
-    riskLevel: 'DÜŞÜK RİSK',
+    riskLevel: 'LOW RISK',
     timeline: aiTimeline,
     engineBreakdown,
     prompts: finalPrompts
   };
 
-  // 5. Google İşletme Puanı ve Puan Sayısı (GBP)
+  // 5. Google Business rating and review count (GBP)
   const gbpVerified = Boolean(businessProfile)
     && isGooglePlaceId(businessProfile.place_id)
     && businessProfile.ai_summary?.data_source === GOOGLE_PLACES_SOURCE;
@@ -1306,7 +1306,7 @@ function buildOverviewTelemetry(workspace, range = '30d', extra = {}) {
     lastSyncedAt: gbpVerified ? businessProfile.last_synced_at : null
   };
 
-  // 6. Site Hatası Var mı Kritik (Teknik Denetim)
+  // 6. Critical site errors (technical audit)
   const criticalCount = issuesBreakdown.critical || 0;
   const highCount = issuesBreakdown.high || 0;
   const mediumCount = issuesBreakdown.medium || 0;
@@ -1333,7 +1333,7 @@ function buildOverviewTelemetry(workspace, range = '30d', extra = {}) {
     highIssuesCount: highCount,
     mediumIssuesCount: mediumCount,
     criticalIssues: criticalIssuesList || [],
-    statusText: criticalCount === 0 ? 'SİSTEM NORMAL // 0 KRİTİK HATA' : `${criticalCount} KRİTİK HATA TESPİT EDİLDİ`,
+    statusText: criticalCount === 0 ? 'SYSTEM NORMAL // 0 CRITICAL ERRORS' : `${criticalCount} CRITICAL ERRORS DETECTED`,
     vitals: {
       lcp: '1.2s',
       lcpStatus: 'good',
@@ -1349,7 +1349,7 @@ function buildOverviewTelemetry(workspace, range = '30d', extra = {}) {
     timeline: techTimeline
   };
 
-  // 7. Dizinler Dağıtım Durumu (Directory Network & Submissions)
+  // 7. Directory distribution status (Directory Network & Submissions)
   const totalDirs = dirs.length;
   const subMap = {};
   for (const s of submissions) {
@@ -1449,7 +1449,7 @@ router.get('/workspaces/:slugOrId/overview', requireAuth, async (req, res) => {
   try {
     const authData = await resolveAndAuthorizeWorkspace(req, req.params.slugOrId);
     if (!authData) {
-      return res.status(404).json({ error: 'Çalışma alanı bulunamadı veya erişim yetkiniz yok.' });
+      return res.status(404).json({ error: 'Workspace not found or you do not have access.' });
     }
     const { workspace, organization } = authData;
     const range = req.query.range || '30d';
@@ -1622,7 +1622,7 @@ router.get('/workspaces/:slugOrId/overview', requireAuth, async (req, res) => {
     });
   } catch (err) {
     console.error('[Growth Overview Error]:', err);
-    res.status(500).json({ error: 'Genel bakış verileri yüklenemedi.' });
+    res.status(500).json({ error: 'Could not load overview data.' });
   }
 });
 
@@ -1633,7 +1633,7 @@ router.get('/workspaces/:slugOrId/overview', requireAuth, async (req, res) => {
 router.get('/workspaces/:slugOrId/audit', requireAuth, async (req, res) => {
   try {
     const authData = await resolveAndAuthorizeWorkspace(req, req.params.slugOrId);
-    if (!authData) return res.status(404).json({ error: 'Çalışma alanı bulunamadı.' });
+    if (!authData) return res.status(404).json({ error: 'Workspace not found.' });
 
     // Plan Limit Check: Free: 0 (Locked), Pro & Unlimited: Allowed
     const userPlan = getUserPlan(req.user, authData.organization);
@@ -1681,7 +1681,7 @@ router.get('/workspaces/:slugOrId/audit', requireAuth, async (req, res) => {
     });
   } catch (err) {
     console.error('[Growth Audit Error]:', err);
-    res.status(500).json({ error: 'Denetim verileri alınamadı.' });
+    res.status(500).json({ error: 'Could not load audit data.' });
   }
 });
 
@@ -1692,7 +1692,7 @@ router.get('/workspaces/:slugOrId/audit', requireAuth, async (req, res) => {
 router.post('/workspaces/:slugOrId/recalculate-scores', requireAuth, async (req, res) => {
   try {
     const authData = await resolveAndAuthorizeWorkspace(req, req.params.slugOrId);
-    if (!authData) return res.status(404).json({ error: 'Çalışma alanı bulunamadı.' });
+    if (!authData) return res.status(404).json({ error: 'Workspace not found.' });
 
     const result = await calculateWorkspaceScores(authPool, authData.workspace.id, authData.workspace);
     res.json({
@@ -1701,7 +1701,7 @@ router.post('/workspaces/:slugOrId/recalculate-scores', requireAuth, async (req,
     });
   } catch (err) {
     console.error('[Recalculate Scores Error]:', err);
-    res.status(500).json({ error: 'Skorlar hesaplanamadı.' });
+    res.status(500).json({ error: 'Could not calculate scores.' });
   }
 });
 
@@ -1712,7 +1712,7 @@ router.post('/workspaces/:slugOrId/recalculate-scores', requireAuth, async (req,
 router.post('/workspaces/:slugOrId/audit/rescan', requireAuth, async (req, res) => {
   try {
     const authData = await resolveAndAuthorizeWorkspace(req, req.params.slugOrId);
-    if (!authData) return res.status(404).json({ error: 'Çalışma alanı bulunamadı.' });
+    if (!authData) return res.status(404).json({ error: 'Workspace not found.' });
     
     // Plan Limit Check: Free: 0 (Locked), Pro & Unlimited: Allowed
     const userPlan = getUserPlan(req.user, authData.organization);
@@ -1733,7 +1733,7 @@ router.post('/workspaces/:slugOrId/audit/rescan', requireAuth, async (req, res) 
 
     const check = validatePublicUrl(url);
     if (!check.valid) {
-      return res.status(400).json({ error: 'Geçersiz çalışma alanı adresi.' });
+      return res.status(400).json({ error: 'Invalid workspace address.' });
     }
 
     // Run the live scan with sitemap crawler
@@ -1855,7 +1855,7 @@ router.post('/workspaces/:slugOrId/audit/rescan', requireAuth, async (req, res) 
 
   } catch (err) {
     console.error('[Growth Audit Rescan Error]:', err);
-    res.status(500).json({ error: 'Yeniden tarama sırasında hata oluştu.' });
+    res.status(500).json({ error: 'Something went wrong during the rescan.' });
   }
 });
 
@@ -1866,7 +1866,7 @@ router.post('/workspaces/:slugOrId/audit/rescan', requireAuth, async (req, res) 
 router.patch('/workspaces/:slugOrId/opportunities/:oppId', requireAuth, async (req, res) => {
   try {
     const authData = await resolveAndAuthorizeWorkspace(req, req.params.slugOrId);
-    if (!authData) return res.status(404).json({ error: 'Çalışma alanı bulunamadı.' });
+    if (!authData) return res.status(404).json({ error: 'Workspace not found.' });
 
     const { status, action_steps, evidence } = req.body;
     const updates = [];
@@ -1874,7 +1874,7 @@ router.patch('/workspaces/:slugOrId/opportunities/:oppId', requireAuth, async (r
 
     if (status) {
       if (!['open', 'in_progress', 'completed', 'dismissed'].includes(status)) {
-        return res.status(400).json({ error: 'Geçersiz durum.' });
+        return res.status(400).json({ error: 'Invalid status.' });
       }
       params.push(status);
       updates.push(`status = $${params.length}`);
@@ -1891,7 +1891,7 @@ router.patch('/workspaces/:slugOrId/opportunities/:oppId', requireAuth, async (r
     }
 
     if (updates.length === 0) {
-      return res.status(400).json({ error: 'Güncellenecek alan belirtilmedi.' });
+      return res.status(400).json({ error: 'No fields to update were provided.' });
     }
 
     params.push(req.params.oppId);
@@ -1906,7 +1906,7 @@ router.patch('/workspaces/:slugOrId/opportunities/:oppId', requireAuth, async (r
     );
 
     if (updateRes.rows.length === 0) {
-      return res.status(404).json({ error: 'Fırsat bulunamadı.' });
+      return res.status(404).json({ error: 'Opportunity not found.' });
     }
 
     res.json({
@@ -1915,7 +1915,7 @@ router.patch('/workspaces/:slugOrId/opportunities/:oppId', requireAuth, async (r
     });
   } catch (err) {
     console.error('[Growth Opportunity Update Error]:', err);
-    res.status(500).json({ error: 'Fırsat güncellenemedi.' });
+    res.status(500).json({ error: 'Could not update the opportunity.' });
   }
 });
 
@@ -1927,7 +1927,7 @@ router.patch('/workspaces/:slugOrId/opportunities/:oppId', requireAuth, async (r
 router.get('/workspaces/:slugOrId/prompts', requireAuth, async (req, res) => {
   try {
     const authData = await resolveAndAuthorizeWorkspace(req, req.params.slugOrId);
-    if (!authData) return res.status(404).json({ error: 'Çalışma alanı bulunamadı.' });
+    if (!authData) return res.status(404).json({ error: 'Workspace not found.' });
 
     const promptsRes = await authPool.query(
       `SELECT p.*,
@@ -1944,14 +1944,14 @@ router.get('/workspaces/:slugOrId/prompts', requireAuth, async (req, res) => {
       data: promptsRes.rows
     });
   } catch (err) {
-    res.status(500).json({ error: 'Promptlar yüklenemedi.' });
+    res.status(500).json({ error: 'Could not load prompts.' });
   }
 });
 
 router.post('/workspaces/:slugOrId/prompts', requireAuth, async (req, res) => {
   try {
     const authData = await resolveAndAuthorizeWorkspace(req, req.params.slugOrId);
-    if (!authData) return res.status(404).json({ error: 'Çalışma alanı bulunamadı.' });
+    if (!authData) return res.status(404).json({ error: 'Workspace not found.' });
 
     // Plan Limit Check: Free: 3, Pro: 5, Unlimited: 10
     const userPlan = getUserPlan(req.user, authData.organization);
@@ -1968,7 +1968,7 @@ router.post('/workspaces/:slugOrId/prompts', requireAuth, async (req, res) => {
 
     const { prompt, topic, country, language } = req.body;
     if (!prompt || !prompt.trim()) {
-      return res.status(400).json({ error: 'Lütfen takip edilecek soruyu (prompt) yazın.' });
+      return res.status(400).json({ error: 'Please enter the question (prompt) to track.' });
     }
 
     const targetCountry = country ? String(country).toUpperCase().trim() : (authData.workspace?.country || 'US');
@@ -1987,7 +1987,7 @@ router.post('/workspaces/:slugOrId/prompts', requireAuth, async (req, res) => {
     });
   } catch (err) {
     console.error('[Add Tracked Prompt Error]:', err);
-    res.status(500).json({ error: 'Prompt eklenemedi.' });
+    res.status(500).json({ error: 'Could not add the prompt.' });
   }
 });
 
@@ -1998,7 +1998,7 @@ router.post('/workspaces/:slugOrId/prompts', requireAuth, async (req, res) => {
 router.delete('/workspaces/:slugOrId/prompts/:promptId', requireAuth, async (req, res) => {
   try {
     const authData = await resolveAndAuthorizeWorkspace(req, req.params.slugOrId);
-    if (!authData) return res.status(404).json({ error: 'Çalışma alanı bulunamadı.' });
+    if (!authData) return res.status(404).json({ error: 'Workspace not found.' });
 
     const delRes = await authPool.query(
       'DELETE FROM growth_tracked_prompts WHERE id = $1 AND workspace_id = $2 RETURNING id',
@@ -2006,16 +2006,16 @@ router.delete('/workspaces/:slugOrId/prompts/:promptId', requireAuth, async (req
     );
 
     if (delRes.rows.length === 0) {
-      return res.status(404).json({ error: 'Prompt bulunamadı.' });
+      return res.status(404).json({ error: 'Prompt not found.' });
     }
 
     res.json({
       success: true,
-      message: 'Takip edilen prompt silindi.'
+      message: 'Tracked prompt deleted.'
     });
   } catch (err) {
     console.error('[Delete Tracked Prompt Error]:', err);
-    res.status(500).json({ error: 'Prompt silinemedi.' });
+    res.status(500).json({ error: 'Could not delete the prompt.' });
   }
 });
 
@@ -2026,11 +2026,11 @@ router.delete('/workspaces/:slugOrId/prompts/:promptId', requireAuth, async (req
 router.post('/workspaces/:slugOrId/prompts/batch', requireAuth, async (req, res) => {
   try {
     const authData = await resolveAndAuthorizeWorkspace(req, req.params.slugOrId);
-    if (!authData) return res.status(404).json({ error: 'Çalışma alanı bulunamadı.' });
+    if (!authData) return res.status(404).json({ error: 'Workspace not found.' });
 
     const { prompts: newItems, country, language } = req.body;
     if (!Array.isArray(newItems) || newItems.length === 0) {
-      return res.status(400).json({ error: 'Eklenecek prompt listesi boş.' });
+      return res.status(400).json({ error: 'The list of prompts to add is empty.' });
     }
 
     // Plan Limit Check: Free: 3, Pro: 5, Unlimited: 10
@@ -2072,11 +2072,11 @@ router.post('/workspaces/:slugOrId/prompts/batch', requireAuth, async (req, res)
       success: true,
       data: inserted,
       totalCount: (promptLimit.current || 0) + inserted.length,
-      message: `${inserted.length} adet prompt başarıyla takibe alındı.`
+      message: `${inserted.length} prompts are now being tracked.`
     });
   } catch (err) {
     console.error('[Batch Add Prompts Error]:', err);
-    res.status(500).json({ error: 'Promptlar eklenemedi.' });
+    res.status(500).json({ error: 'Could not add prompts.' });
   }
 });
 
@@ -2087,7 +2087,7 @@ router.post('/workspaces/:slugOrId/prompts/batch', requireAuth, async (req, res)
 router.post('/workspaces/:slugOrId/prompts/generate-ai', requireAuth, async (req, res) => {
   try {
     const authData = await resolveAndAuthorizeWorkspace(req, req.params.slugOrId);
-    if (!authData) return res.status(404).json({ error: 'Çalışma alanı bulunamadı.' });
+    if (!authData) return res.status(404).json({ error: 'Workspace not found.' });
 
     const userPlan = getUserPlan(req.user, authData.organization);
     const planLimits = getPlanLimits(userPlan);
@@ -2102,7 +2102,7 @@ router.post('/workspaces/:slugOrId/prompts/generate-ai', requireAuth, async (req
 
     if (remaining <= 0) {
       return res.status(403).json({
-        error: `Maksimum ${maxAllowed} prompt takip limitine ulaşıldı (${currentCount}/${maxAllowed}). Yeni soru üretmek için lütfen mevcut sorulardan bazılarını silin veya paketinizi yükseltin.`,
+        error: `You've reached the limit of ${maxAllowed} tracked prompts (${currentCount}/${maxAllowed}). Delete some existing prompts or upgrade your plan to generate new ones.`,
         code: 'LIMIT_EXCEEDED',
         plan: userPlan,
         limit: maxAllowed,
@@ -2133,7 +2133,7 @@ Brand Name: ${brandName}
 Website: ${domain}
 Industry / Vertical: ${industry}
 Target Country: ${targetCountry}
-Query Language: ${targetLanguage}
+Query Language: English
 Existing Monitored Queries: ${existingPromptsText || 'None added yet'}
 
 Requirements:
@@ -2146,7 +2146,7 @@ Requirements:
    - Cost & performance: "What are the most cost-effective solutions for ...?"
 3. You do NOT have to explicitly mention the brand name in every query. Testing whether the AI assistant mentions the brand in general industry queries is essential for measuring GEO visibility.
 4. Assign an appropriate topic category to each query (e.g., Industry Leadership, Tool Recommendation, Competitor Comparison, Solution Selection, Growth & GEO, Value & Performance).
-5. All queries and topics must be in ${targetLanguage === 'tr' ? 'Turkish' : 'English'}.
+5. All queries and topics must be in English.
 
 STRICTLY return a valid JSON array without codeblocks or explanations:
 [
@@ -2181,18 +2181,7 @@ STRICTLY return a valid JSON array without codeblocks or explanations:
       const cleanDom = domain || 'cerilas.com';
       const sector = industry || 'SEO and Digital Growth';
 
-      const templates = targetLanguage === 'tr' ? [
-        { prompt: `Türkiye'de ${sector} alanında en çok tercih edilen profesyonel platformlar hangileridir?`, topic: 'Sektörel Liderlik' },
-        { prompt: `En iyi ${sector} ve dijital büyüme araçları nelerdir?`, topic: 'Araç Tavsiyesi' },
-        { prompt: `B2B şirketler için ${sector} çözümü seçerken nelere dikkat edilmeli?`, topic: 'Hizmet Seçimi' },
-        { prompt: `${cleanDom} benzeri en etkili büyüme ve optimizasyon araçları hangileridir?`, topic: 'Karşılaştırma' },
-        { prompt: `Yapay zeka çağında ${sector} stratejisi nasıl kurulur ve hangi platformlar önerilir?`, topic: 'Yapay Zeka & Büyüme' },
-        { prompt: `KOBİ'ler ve girişimler için en uygun maliyetli ${sector} çözümleri hangileridir?`, topic: 'Fiyat/Performans' },
-        { prompt: `${brand} ve rakipleri arasındaki temel farklar nelerdir?`, topic: 'Rakip Karşılaştırma' },
-        { prompt: `Modern web siteleri için arama motoru görünürlüğünü artıran en iyi platform hangisi?`, topic: 'Görünürlük & GEO' },
-        { prompt: `${sector} süreçlerini otomatikleştiren en başarılı yerli ve global yazılımlar hangileridir?`, topic: 'Otomasyon' },
-        { prompt: `Hızlı büyüyen markaların kullandığı en popüler ${sector} araçları neler?`, topic: 'Büyüme Stratejisi' }
-      ] : [
+      const templates = [
         { prompt: `What are the most recommended professional platforms for ${sector}?`, topic: 'Industry Leadership' },
         { prompt: `What are the best ${sector} tools and software in 2026?`, topic: 'Tool Recommendation' },
         { prompt: `What should B2B companies look for when choosing a ${sector} solution?`, topic: 'Solution Selection' },
@@ -2227,7 +2216,7 @@ STRICTLY return a valid JSON array without codeblocks or explanations:
         success: true,
         data: inserted,
         totalCount: currentCount + inserted.length,
-        message: `${inserted.length} adet arama sorusu yapay zeka ile otomatik oluşturuldu ve takibe alındı.`
+        message: `${inserted.length} search prompts were generated with AI and are now being tracked.`
       });
     }
 
@@ -2242,7 +2231,7 @@ STRICTLY return a valid JSON array without codeblocks or explanations:
     });
   } catch (err) {
     console.error('[AI Generate Prompts Error]:', err);
-    res.status(500).json({ error: 'Yapay zeka ile promptlar oluşturulamadı.' });
+    res.status(500).json({ error: 'Could not generate prompts with AI.' });
   }
 });
 
@@ -2253,7 +2242,7 @@ STRICTLY return a valid JSON array without codeblocks or explanations:
 router.post('/workspaces/:slugOrId/prompts/:promptId/run', requireAuth, async (req, res) => {
   try {
     const authData = await resolveAndAuthorizeWorkspace(req, req.params.slugOrId);
-    if (!authData) return res.status(404).json({ error: 'Çalışma alanı bulunamadı.' });
+    if (!authData) return res.status(404).json({ error: 'Workspace not found.' });
 
     // Plan Limit Check: Trackable GEO prompts (Free: 0, Pro: 15, Unlimited: 30)
     const userPlan = getUserPlan(req.user, authData.organization);
@@ -2274,7 +2263,7 @@ router.post('/workspaces/:slugOrId/prompts/:promptId/run', requireAuth, async (r
     );
 
     if (promptRes.rows.length === 0) {
-      return res.status(404).json({ error: 'Prompt bulunamadı.' });
+      return res.status(404).json({ error: 'Prompt not found.' });
     }
 
     const trackedPrompt = promptRes.rows[0];
@@ -2448,7 +2437,7 @@ Cite real brands, websites, and sources if relevant.`;
 router.get('/workspaces/:slugOrId/ai-reports', requireAuth, async (req, res) => {
   try {
     const authData = await resolveAndAuthorizeWorkspace(req, req.params.slugOrId);
-    if (!authData) return res.status(404).json({ error: 'Çalışma alanı bulunamadı.' });
+    if (!authData) return res.status(404).json({ error: 'Workspace not found.' });
 
     const { workspace } = authData;
     const reportsRes = await authPool.query(
@@ -2466,7 +2455,7 @@ router.get('/workspaces/:slugOrId/ai-reports', requireAuth, async (req, res) => 
     });
   } catch (err) {
     console.error('List AI reports error:', err);
-    res.status(500).json({ error: 'AI raporları alınamadı.' });
+    res.status(500).json({ error: 'Could not load AI reports.' });
   }
 });
 
@@ -2477,7 +2466,7 @@ router.get('/workspaces/:slugOrId/ai-reports', requireAuth, async (req, res) => 
 router.get('/workspaces/:slugOrId/ai-reports/:reportId', requireAuth, async (req, res) => {
   try {
     const authData = await resolveAndAuthorizeWorkspace(req, req.params.slugOrId);
-    if (!authData) return res.status(404).json({ error: 'Çalışma alanı bulunamadı.' });
+    if (!authData) return res.status(404).json({ error: 'Workspace not found.' });
 
     const { workspace } = authData;
     const reportRes = await authPool.query(
@@ -2487,7 +2476,7 @@ router.get('/workspaces/:slugOrId/ai-reports/:reportId', requireAuth, async (req
     );
 
     if (reportRes.rows.length === 0) {
-      return res.status(404).json({ error: 'Rapor bulunamadı.' });
+      return res.status(404).json({ error: 'Report not found.' });
     }
 
     res.json({
@@ -2496,7 +2485,7 @@ router.get('/workspaces/:slugOrId/ai-reports/:reportId', requireAuth, async (req
     });
   } catch (err) {
     console.error('Get AI report error:', err);
-    res.status(500).json({ error: 'AI raporu alınamadı.' });
+    res.status(500).json({ error: 'Could not load the AI report.' });
   }
 });
 
@@ -2507,7 +2496,7 @@ router.get('/workspaces/:slugOrId/ai-reports/:reportId', requireAuth, async (req
 router.post('/workspaces/:slugOrId/ai-reports', requireAuth, async (req, res) => {
   try {
     const authData = await resolveAndAuthorizeWorkspace(req, req.params.slugOrId);
-    if (!authData) return res.status(404).json({ error: 'Çalışma alanı bulunamadı.' });
+    if (!authData) return res.status(404).json({ error: 'Workspace not found.' });
 
     const { workspace } = authData;
     const {
@@ -2552,7 +2541,7 @@ router.post('/workspaces/:slugOrId/ai-reports', requireAuth, async (req, res) =>
     });
   } catch (err) {
     console.error('Save AI report error:', err);
-    res.status(500).json({ error: 'AI raporu kaydedilemedi.' });
+    res.status(500).json({ error: 'Could not save the AI report.' });
   }
 });
 
@@ -2563,7 +2552,7 @@ router.post('/workspaces/:slugOrId/ai-reports', requireAuth, async (req, res) =>
 router.delete('/workspaces/:slugOrId/ai-reports/:reportId', requireAuth, async (req, res) => {
   try {
     const authData = await resolveAndAuthorizeWorkspace(req, req.params.slugOrId);
-    if (!authData) return res.status(404).json({ error: 'Çalışma alanı bulunamadı.' });
+    if (!authData) return res.status(404).json({ error: 'Workspace not found.' });
 
     const { workspace } = authData;
     await authPool.query(
@@ -2574,7 +2563,7 @@ router.delete('/workspaces/:slugOrId/ai-reports/:reportId', requireAuth, async (
     res.json({ success: true });
   } catch (err) {
     console.error('Delete AI report error:', err);
-    res.status(500).json({ error: 'Rapor silinemedi.' });
+    res.status(500).json({ error: 'Could not delete the report.' });
   }
 });
 
@@ -2585,7 +2574,7 @@ router.delete('/workspaces/:slugOrId/ai-reports/:reportId', requireAuth, async (
 router.get('/workspaces/:slugOrId/geo-readiness', requireAuth, async (req, res) => {
   try {
     const authData = await resolveAndAuthorizeWorkspace(req, req.params.slugOrId);
-    if (!authData) return res.status(404).json({ error: 'Çalışma alanı bulunamadı.' });
+    if (!authData) return res.status(404).json({ error: 'Workspace not found.' });
 
     const { workspace } = authData;
     const targetDomain = workspace.primary_domain;
@@ -2594,7 +2583,7 @@ router.get('/workspaces/:slugOrId/geo-readiness', requireAuth, async (req, res) 
       return res.json({
         success: true,
         data: null,
-        message: 'Çalışma alanına ait bir birincil alan adı (domain) tanımlı değil.'
+        message: 'No primary domain is set for this workspace.'
       });
     }
 
@@ -2664,7 +2653,7 @@ router.get('/workspaces/:slugOrId/geo-readiness', requireAuth, async (req, res) 
     });
   } catch (err) {
     console.error('[GET GEO Readiness Error]:', err);
-    res.status(500).json({ error: err.message || 'GEO hazırbulunuşluk verisi alınamadı.' });
+    res.status(500).json({ error: err.message || 'Could not load GEO readiness data.' });
   }
 });
 
@@ -2675,13 +2664,13 @@ router.get('/workspaces/:slugOrId/geo-readiness', requireAuth, async (req, res) 
 router.post('/workspaces/:slugOrId/geo-readiness/scan', requireAuth, async (req, res) => {
   try {
     const authData = await resolveAndAuthorizeWorkspace(req, req.params.slugOrId);
-    if (!authData) return res.status(404).json({ error: 'Çalışma alanı bulunamadı.' });
+    if (!authData) return res.status(404).json({ error: 'Workspace not found.' });
 
     const { workspace } = authData;
     const targetDomain = workspace.primary_domain;
 
     if (!targetDomain) {
-      return res.status(400).json({ error: 'Bu çalışma alanına ait bir alan adı (domain) bulunamadı.' });
+      return res.status(400).json({ error: 'No domain found for this workspace.' });
     }
 
     const auditData = await auditGeoReadiness(targetDomain);
@@ -2726,7 +2715,7 @@ router.post('/workspaces/:slugOrId/geo-readiness/scan', requireAuth, async (req,
     });
   } catch (err) {
     console.error('[POST GEO Readiness Scan Error]:', err);
-    res.status(500).json({ error: err.message || 'Canlı GEO taraması yapılamadı.' });
+    res.status(500).json({ error: err.message || 'Could not run the live GEO scan.' });
   }
 });
 
@@ -2977,6 +2966,7 @@ async function syncWorkspaceOpportunities(workspace) {
            OR (type = 'gsc_quick_wins' AND title ILIKE '%bağlantı%')
            OR title ILIKE '%Search Console bağlantı%'
            OR title ILIKE '%Search Console bağlayın%'
+           OR title ILIKE '%connect Search Console%'
            OR description ILIKE '%Search Console''un bağlı olmaması%'
          )`,
       [workspace.id]
@@ -3096,7 +3086,7 @@ Return ONLY a valid JSON array. Do not include markdown codeblocks or extra conv
       if (Array.isArray(parsed) && parsed.length > 0) {
         // Enforce safety filter: discard any opportunity that says "connect GSC" if GSC is connected
         generatedOpps = parsed.filter(o => {
-          if (hasGsc && (o.type === 'connect_search_console' || (o.title && o.title.toLowerCase().includes('search console bağlantı')))) {
+          if (hasGsc && (o.type === 'connect_search_console' || (o.title && (o.title.toLowerCase().includes('search console bağlantı') || o.title.toLowerCase().includes('connect search console'))))) {
             return false;
           }
           return true;
@@ -3117,7 +3107,7 @@ Return ONLY a valid JSON array. Do not include markdown codeblocks or extra conv
     if (!opp.type || !opp.title) continue;
 
     // Safety: don't upsert GSC connect recommendation if GSC is connected
-    if (hasGsc && (opp.type === 'connect_search_console' || (opp.title && opp.title.toLowerCase().includes('search console bağlantı')))) {
+    if (hasGsc && (opp.type === 'connect_search_console' || (opp.title && (opp.title.toLowerCase().includes('search console bağlantı') || opp.title.toLowerCase().includes('connect search console'))))) {
       continue;
     }
 
@@ -3144,7 +3134,7 @@ Return ONLY a valid JSON array. Do not include markdown codeblocks or extra conv
           opp.impact_score || 80,
           opp.effort_score || 30,
           opp.priority_score || 85,
-          opp.estimated_traffic_upside || '+%15–30 Büyüme',
+          opp.estimated_traffic_upside || '+15–30% growth',
           evidenceJson,
           stepsJson,
           opp.code_snippet || null,
@@ -3198,7 +3188,7 @@ Return ONLY a valid JSON array. Do not include markdown codeblocks or extra conv
 router.get('/workspaces/:slugOrId/opportunities', requireAuth, async (req, res) => {
   try {
     const authData = await resolveAndAuthorizeWorkspace(req, req.params.slugOrId);
-    if (!authData) return res.status(404).json({ error: 'Çalışma alanı bulunamadı.' });
+    if (!authData) return res.status(404).json({ error: 'Workspace not found.' });
 
     const { category, status, auto_seed } = req.query;
     let query = 'SELECT * FROM growth_opportunities WHERE workspace_id = $1';
@@ -3227,7 +3217,7 @@ router.get('/workspaces/:slugOrId/opportunities', requireAuth, async (req, res) 
     res.json({ success: true, data: oppsRes.rows });
   } catch (err) {
     console.error('[Opportunities Error]:', err);
-    res.status(500).json({ error: 'Aksiyon listesi alınamadı.' });
+    res.status(500).json({ error: 'Could not load the action list.' });
   }
 });
 
@@ -3278,7 +3268,7 @@ router.post('/workspaces/:slugOrId/opportunities/sync', requireAuth, async (req,
 router.post('/workspaces/:slugOrId/opportunities', requireAuth, async (req, res) => {
   try {
     const authData = await resolveAndAuthorizeWorkspace(req, req.params.slugOrId);
-    if (!authData) return res.status(404).json({ error: 'Çalışma alanı bulunamadı.' });
+    if (!authData) return res.status(404).json({ error: 'Workspace not found.' });
 
     const {
       title,
@@ -3295,12 +3285,12 @@ router.post('/workspaces/:slugOrId/opportunities', requireAuth, async (req, res)
     } = req.body;
 
     if (!title || typeof title !== 'string' || !title.trim()) {
-      return res.status(400).json({ error: 'Aksiyon başlığı zorunludur.' });
+      return res.status(400).json({ error: 'Action title is required.' });
     }
 
     const calculatedPriority = priority_score || Math.round((impact_score * 0.7) + ((100 - effort_score) * 0.3));
     const uniqueType = `custom_${Date.now()}`;
-    const evidenceJson = JSON.stringify({ reason: 'Kullanıcı tarafından manuel eklendi.', createdAt: new Date().toISOString() });
+    const evidenceJson = JSON.stringify({ reason: 'Added manually by the user.', createdAt: new Date().toISOString() });
     const stepsJson = JSON.stringify(Array.isArray(action_steps) ? action_steps : [action_steps].filter(Boolean));
 
     const insRes = await authPool.query(
@@ -3320,7 +3310,7 @@ router.post('/workspaces/:slugOrId/opportunities', requireAuth, async (req, res)
         impact_score,
         effort_score,
         calculatedPriority,
-        estimated_traffic_upside || '+%15 Potansiyel Artış',
+        estimated_traffic_upside || '+15% potential growth',
         evidenceJson,
         stepsJson,
         code_snippet || null,
@@ -3331,7 +3321,7 @@ router.post('/workspaces/:slugOrId/opportunities', requireAuth, async (req, res)
     res.json({ success: true, data: insRes.rows[0] });
   } catch (err) {
     console.error('[Create Opportunity Error]:', err);
-    res.status(500).json({ error: 'Yeni aksiyon oluşturulamadı.' });
+    res.status(500).json({ error: 'Could not create the action.' });
   }
 });
 
@@ -3342,7 +3332,7 @@ router.post('/workspaces/:slugOrId/opportunities', requireAuth, async (req, res)
 router.delete('/workspaces/:slugOrId/opportunities/:oppId', requireAuth, async (req, res) => {
   try {
     const authData = await resolveAndAuthorizeWorkspace(req, req.params.slugOrId);
-    if (!authData) return res.status(404).json({ error: 'Çalışma alanı bulunamadı.' });
+    if (!authData) return res.status(404).json({ error: 'Workspace not found.' });
 
     const delRes = await authPool.query(
       `DELETE FROM growth_opportunities WHERE id = $1 AND workspace_id = $2 RETURNING id`,
@@ -3350,13 +3340,13 @@ router.delete('/workspaces/:slugOrId/opportunities/:oppId', requireAuth, async (
     );
 
     if (delRes.rows.length === 0) {
-      return res.status(404).json({ error: 'Aksiyon bulunamadı.' });
+      return res.status(404).json({ error: 'Action not found.' });
     }
 
-    res.json({ success: true, message: 'Aksiyon başarıyla silindi.' });
+    res.json({ success: true, message: 'Action deleted.' });
   } catch (err) {
     console.error('[Opportunity Delete Error]:', err);
-    res.status(500).json({ error: 'Aksiyon silinemedi.' });
+    res.status(500).json({ error: 'Could not delete the action.' });
   }
 });
 
@@ -3367,7 +3357,7 @@ router.delete('/workspaces/:slugOrId/opportunities/:oppId', requireAuth, async (
 router.get('/workspaces/:slugOrId/competitors', requireAuth, async (req, res) => {
   try {
     const authData = await resolveAndAuthorizeWorkspace(req, req.params.slugOrId);
-    if (!authData) return res.status(404).json({ error: 'Çalışma alanı bulunamadı.' });
+    if (!authData) return res.status(404).json({ error: 'Workspace not found.' });
 
     const compRes = await authPool.query(
       `SELECT * FROM growth_competitors WHERE workspace_id = $1 ORDER BY id ASC`,
@@ -3459,7 +3449,7 @@ router.delete('/workspaces/:slugOrId/competitors/:compId', requireAuth, async (r
 router.post('/workspaces/:slugOrId/competitors/discover', requireAuth, async (req, res) => {
   try {
     const authData = await resolveAndAuthorizeWorkspace(req, req.params.slugOrId);
-    if (!authData) return res.status(404).json({ error: 'Çalışma alanı bulunamadı.' });
+    if (!authData) return res.status(404).json({ error: 'Workspace not found.' });
 
     // Plan Limit Check: Discover Competitors AI Button Usage (Free: 1/day, Pro: 3/day, Unlimited: Unlimited)
     const userPlan = getUserPlan(req.user, authData.organization);
@@ -3619,7 +3609,7 @@ Only return pure JSON, no markdown codeblocks, no extra explanations.`;
 router.get('/workspaces/:slugOrId/keywords', requireAuth, async (req, res) => {
   try {
     const authData = await resolveAndAuthorizeWorkspace(req, req.params.slugOrId);
-    if (!authData) return res.status(404).json({ error: 'Çalışma alanı bulunamadı.' });
+    if (!authData) return res.status(404).json({ error: 'Workspace not found.' });
 
     const ws = authData.workspace;
     let rawKeywords = [];
@@ -3647,11 +3637,11 @@ router.get('/workspaces/:slugOrId/keywords', requireAuth, async (req, res) => {
       const brandLower = (ws.name || '').toLowerCase();
       rawKeywords = [
         brandLower,
-        `${brandLower} çözümleri`,
-        'özel yazılım geliştirme',
-        'yapay zeka çözümleri',
-        'mobil uygulama geliştirme',
-        'b2b teknoloji platformu'
+        `${brandLower} solutions`,
+        'custom software development',
+        'ai solutions',
+        'mobile app development',
+        'b2b technology platform'
       ];
       await authPool.query(
         `UPDATE workspaces SET target_keywords = $1, updated_at = NOW() WHERE id = $2`,
@@ -3681,18 +3671,18 @@ router.get('/workspaces/:slugOrId/keywords', requireAuth, async (req, res) => {
       brand: ws.name
     });
   } catch (err) {
-    res.status(500).json({ error: 'Anahtar kelimeler alınamadı.' });
+    res.status(500).json({ error: 'Could not load keywords.' });
   }
 });
 
 router.post('/workspaces/:slugOrId/keywords', requireAuth, async (req, res) => {
   try {
     const authData = await resolveAndAuthorizeWorkspace(req, req.params.slugOrId);
-    if (!authData) return res.status(404).json({ error: 'Çalışma alanı bulunamadı.' });
+    if (!authData) return res.status(404).json({ error: 'Workspace not found.' });
 
     const { keyword } = req.body;
     if (!keyword || !keyword.trim()) {
-      return res.status(400).json({ error: 'Anahtar kelime boş olamaz.' });
+      return res.status(400).json({ error: 'Keyword cannot be empty.' });
     }
 
     const ws = authData.workspace;
@@ -3725,14 +3715,14 @@ router.post('/workspaces/:slugOrId/keywords', requireAuth, async (req, res) => {
 
     res.json({ success: true, data: enriched, rawKeywords: currentKeywords });
   } catch (err) {
-    res.status(500).json({ error: 'Anahtar kelime eklenemedi.' });
+    res.status(500).json({ error: 'Could not add the keyword.' });
   }
 });
 
 router.delete('/workspaces/:slugOrId/keywords/:keyword', requireAuth, async (req, res) => {
   try {
     const authData = await resolveAndAuthorizeWorkspace(req, req.params.slugOrId);
-    if (!authData) return res.status(404).json({ error: 'Çalışma alanı bulunamadı.' });
+    if (!authData) return res.status(404).json({ error: 'Workspace not found.' });
 
     const targetKeyword = decodeURIComponent(req.params.keyword).trim().toLowerCase();
     const ws = authData.workspace;
@@ -3765,7 +3755,7 @@ router.delete('/workspaces/:slugOrId/keywords/:keyword', requireAuth, async (req
 
     res.json({ success: true, data: enriched, rawKeywords: filtered });
   } catch (err) {
-    res.status(500).json({ error: 'Anahtar kelime silinemedi.' });
+    res.status(500).json({ error: 'Could not delete the keyword.' });
   }
 });
 
@@ -3777,7 +3767,7 @@ router.delete('/workspaces/:slugOrId/keywords/:keyword', requireAuth, async (req
 router.get('/workspaces/:slugOrId/directories', requireAuth, async (req, res) => {
   try {
     const authData = await resolveAndAuthorizeWorkspace(req, req.params.slugOrId);
-    if (!authData) return res.status(404).json({ error: 'Çalışma alanı bulunamadı.' });
+    if (!authData) return res.status(404).json({ error: 'Workspace not found.' });
 
     const wsId = authData.workspace.id;
 
@@ -3809,7 +3799,7 @@ router.get('/workspaces/:slugOrId/directories', requireAuth, async (req, res) =>
       category: d.category || 'saas',
       authority: d.authority_score || 70,
       submissionUrl: d.submission_url || `https://${d.domain}`,
-      geoWeight: d.geo_potential || 'Yüksek',
+      geoWeight: d.geo_potential === 'Yüksek' ? 'High' : (d.geo_potential || 'High'), // legacy rows stored Turkish 'Yüksek'
       isCustom: Boolean(d.is_custom),
       status: subMap[d.id]?.status || 'missing', // Pure DB-backed status, defaults to missing
       submittedUrl: subMap[d.id]?.submission_url || ''
@@ -3820,20 +3810,20 @@ router.get('/workspaces/:slugOrId/directories', requireAuth, async (req, res) =>
     res.json({ success: true, data, hiddenCount });
   } catch (err) {
     console.error('Directories fetch error:', err);
-    res.status(500).json({ error: 'Dizinler alınamadı.' });
+    res.status(500).json({ error: 'Could not load directories.' });
   }
 });
 
 router.post('/workspaces/:slugOrId/directories', requireAuth, async (req, res) => {
   try {
     const authData = await resolveAndAuthorizeWorkspace(req, req.params.slugOrId);
-    if (!authData) return res.status(404).json({ error: 'Çalışma alanı bulunamadı.' });
+    if (!authData) return res.status(404).json({ error: 'Workspace not found.' });
 
     const wsId = authData.workspace.id;
     const { name, url, category, status } = req.body;
 
     if (!url || !url.trim()) {
-      return res.status(400).json({ error: 'Dizin veya profil URL adresi zorunludur.' });
+      return res.status(400).json({ error: 'Directory or profile URL is required.' });
     }
 
     const rawUrl = url.trim();
@@ -3845,7 +3835,7 @@ router.post('/workspaces/:slugOrId/directories', requireAuth, async (req, res) =
       .toLowerCase();
 
     if (!cleanDomain) {
-      return res.status(400).json({ error: 'Geçersiz web adresi.' });
+      return res.status(400).json({ error: 'Invalid web address.' });
     }
 
     const dirName = (name && name.trim()) || cleanDomain;
@@ -3856,7 +3846,7 @@ router.post('/workspaces/:slugOrId/directories', requireAuth, async (req, res) =
     const insDir = await authPool.query(
       `INSERT INTO growth_directories (
         workspace_id, name, domain, category, submission_url, authority_score, geo_potential, is_custom, created_at
-      ) VALUES ($1, $2, $3, $4, $5, 75, 'Yüksek', true, NOW())
+      ) VALUES ($1, $2, $3, $4, $5, 75, 'High', true, NOW())
       RETURNING *`,
       [wsId, dirName, cleanDomain, dirCategory, submissionUrl]
     );
@@ -3892,14 +3882,14 @@ router.post('/workspaces/:slugOrId/directories', requireAuth, async (req, res) =
     });
   } catch (err) {
     console.error('Create directory error:', err);
-    res.status(500).json({ error: 'Dizin eklenemedi.' });
+    res.status(500).json({ error: 'Could not add the directory.' });
   }
 });
 
 router.patch('/workspaces/:slugOrId/directories/:dirId', requireAuth, async (req, res) => {
   try {
     const authData = await resolveAndAuthorizeWorkspace(req, req.params.slugOrId);
-    if (!authData) return res.status(404).json({ error: 'Çalışma alanı bulunamadı.' });
+    if (!authData) return res.status(404).json({ error: 'Workspace not found.' });
 
     const { status, submission_url } = req.body;
     const dirId = parseInt(req.params.dirId, 10);
@@ -3924,17 +3914,17 @@ router.patch('/workspaces/:slugOrId/directories/:dirId', requireAuth, async (req
       console.warn('[Directory Status Score Calc Error]:', e.message);
     }
 
-    res.json({ success: true, message: 'Dizin durumu güncellendi.', status: newStatus, scores: updatedScores });
+    res.json({ success: true, message: 'Directory status updated.', status: newStatus, scores: updatedScores });
   } catch (err) {
     console.error('Patch directory status error:', err);
-    res.status(500).json({ error: 'Dizin güncellenemedi.' });
+    res.status(500).json({ error: 'Could not update the directory.' });
   }
 });
 
 router.delete('/workspaces/:slugOrId/directories/:dirId', requireAuth, async (req, res) => {
   try {
     const authData = await resolveAndAuthorizeWorkspace(req, req.params.slugOrId);
-    if (!authData) return res.status(404).json({ error: 'Çalışma alanı bulunamadı.' });
+    if (!authData) return res.status(404).json({ error: 'Workspace not found.' });
 
     const dirId = parseInt(req.params.dirId, 10);
     if (!Number.isInteger(dirId)) {
@@ -3978,7 +3968,7 @@ router.delete('/workspaces/:slugOrId/directories/:dirId', requireAuth, async (re
     res.json({ success: true, message: 'Directory removed.', scores: updatedScores });
   } catch (err) {
     console.error('Delete directory error:', err);
-    res.status(500).json({ error: 'Dizin silinemedi.' });
+    res.status(500).json({ error: 'Could not delete the directory.' });
   }
 });
 
@@ -3989,7 +3979,7 @@ router.delete('/workspaces/:slugOrId/directories/:dirId', requireAuth, async (re
 router.post('/workspaces/:slugOrId/directories/restore-hidden', requireAuth, async (req, res) => {
   try {
     const authData = await resolveAndAuthorizeWorkspace(req, req.params.slugOrId);
-    if (!authData) return res.status(404).json({ error: 'Çalışma alanı bulunamadı.' });
+    if (!authData) return res.status(404).json({ error: 'Workspace not found.' });
 
     const delRes = await authPool.query(
       `DELETE FROM growth_directory_submissions WHERE workspace_id = $1 AND status = 'hidden'`,
@@ -4015,48 +4005,48 @@ router.post('/workspaces/:slugOrId/directories/restore-hidden', requireAuth, asy
 router.get('/workspaces/:slugOrId/reports', requireAuth, async (req, res) => {
   try {
     const authData = await resolveAndAuthorizeWorkspace(req, req.params.slugOrId);
-    if (!authData) return res.status(404).json({ error: 'Çalışma alanı bulunamadı.' });
+    if (!authData) return res.status(404).json({ error: 'Workspace not found.' });
 
     const ws = authData.workspace;
 
     const reports = [
       {
         id: 1,
-        title: 'Haftalık Büyüme & AI Görünürlük Raporu',
-        period: 'Son 7 Gün (Hafta 39)',
-        date: new Date().toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' }),
+        title: 'Weekly Growth & AI Visibility Report',
+        period: 'Last 7 Days (Week 39)',
+        date: new Date().toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' }),
         type: 'weekly',
-        scoreChange: '+4 puan',
+        scoreChange: '+4 pts',
         growthScore: ws.growth_score || 74,
         highlights: [
-          'Teknik SEO puanı %85 seviyesine ulaştı.',
-          'Yapay Zeka (GEO) alıntılanma oranı %14 artış gösterdi.',
-          '3 adet kritik teknik ve içerik aksiyonu tamamlandı.'
+          'Technical SEO score reached 85%.',
+          'AI (GEO) citation rate increased by 14%.',
+          '3 critical technical and content actions completed.'
         ]
       },
       {
         id: 2,
-        title: 'Aylık Organik Arama ve Rakip Kıyaslama Raporu',
-        period: 'Eylül 2026',
-        date: '15 Eylül 2026',
+        title: 'Monthly Organic Search & Competitor Benchmark Report',
+        period: 'September 2026',
+        date: 'September 15, 2026',
         type: 'monthly',
-        scoreChange: '+8 puan',
+        scoreChange: '+8 pts',
         growthScore: (ws.growth_score || 74) - 4,
         highlights: [
-          'Search Console mülkünde gösterim trendi pozitif ivme kazandı.',
-          'Rakip karşılaştırmasında GEO hazır bulunuşluğunda ilk sıraya yerleşildi.'
+          'Impressions trend in Search Console gained positive momentum.',
+          'Ranked first in GEO readiness in the competitor benchmark.'
         ]
       }
     ];
 
     res.json({ success: true, data: reports });
   } catch (err) {
-    res.status(500).json({ error: 'Raporlar alınamadı.' });
+    res.status(500).json({ error: 'Could not load reports.' });
   }
 });
 
 /**
- * CRON-JOB.ORG WEBHOOK // GÜNLÜK E-POSTA RAPORU TETİKLEYİCİSİ
+ * CRON-JOB.ORG WEBHOOK // DAILY EMAIL REPORT TRIGGER
  * GET or POST /api/growth/webhooks/daily-report
  * Query param: ?token=cerilas_growth_cron_2026_x89a or ?key=... or Header x-cron-secret
  */
@@ -4275,7 +4265,7 @@ router.post('/workspaces/:slugOrId/reports/send-test', requireAuth, async (req, 
 router.get('/workspaces/:slugOrId/reports/logs', requireAuth, async (req, res) => {
   try {
     const authData = await resolveAndAuthorizeWorkspace(req, req.params.slugOrId);
-    if (!authData) return res.status(404).json({ error: 'Çalışma alanı bulunamadı.' });
+    if (!authData) return res.status(404).json({ error: 'Workspace not found.' });
 
     const logsRes = await authPool.query(
       'SELECT * FROM growth_report_logs WHERE workspace_id = $1 ORDER BY sent_at DESC LIMIT 20',
@@ -4287,7 +4277,7 @@ router.get('/workspaces/:slugOrId/reports/logs', requireAuth, async (req, res) =
       data: logsRes.rows
     });
   } catch (err) {
-    res.status(500).json({ error: 'Rapor günlükleri alınamadı.' });
+    res.status(500).json({ error: 'Could not load report logs.' });
   }
 });
 
@@ -4298,16 +4288,16 @@ router.get('/workspaces/:slugOrId/reports/logs', requireAuth, async (req, res) =
 router.delete('/workspaces/:slugOrId', requireAuth, async (req, res) => {
   try {
     const authData = await resolveAndAuthorizeWorkspace(req, req.params.slugOrId);
-    if (!authData) return res.status(404).json({ error: 'Çalışma alanı bulunamadı.' });
+    if (!authData) return res.status(404).json({ error: 'Workspace not found.' });
 
     await authPool.query('DELETE FROM workspaces WHERE id = $1', [authData.workspace.id]);
 
     res.json({
       success: true,
-      message: 'Çalışma alanı başarıyla silindi.'
+      message: 'Workspace deleted.'
     });
   } catch (err) {
-    res.status(500).json({ error: 'Çalışma alanı silinemedi.' });
+    res.status(500).json({ error: 'Could not delete the workspace.' });
   }
 });
 
@@ -4318,13 +4308,13 @@ router.delete('/workspaces/:slugOrId', requireAuth, async (req, res) => {
 router.get('/workspaces/:slugOrId/integrations', requireAuth, async (req, res) => {
   try {
     const authData = await resolveAndAuthorizeWorkspace(req, req.params.slugOrId);
-    if (!authData) return res.status(404).json({ error: 'Çalışma alanı bulunamadı.' });
+    if (!authData) return res.status(404).json({ error: 'Workspace not found.' });
 
     const integrations = await getGrowthIntegrationsOverview(authData.workspace.id);
     res.json({ success: true, data: integrations });
   } catch (err) {
     console.error('[Get Integrations Error]:', err);
-    res.status(500).json({ error: 'Entegrasyon durumları alınamadı.' });
+    res.status(500).json({ error: 'Could not load integration statuses.' });
   }
 });
 
@@ -4335,13 +4325,13 @@ router.get('/workspaces/:slugOrId/integrations', requireAuth, async (req, res) =
 router.get('/workspaces/:slugOrId/integrations/google/url', requireAuth, async (req, res) => {
   try {
     const authData = await resolveAndAuthorizeWorkspace(req, req.params.slugOrId);
-    if (!authData) return res.status(404).json({ error: 'Çalışma alanı bulunamadı.' });
+    if (!authData) return res.status(404).json({ error: 'Workspace not found.' });
 
     const url = getGrowthGoogleAuthUrl(authData.workspace.id, req.user.id, resolveGoogleRedirectUri(req));
     res.json({ success: true, url });
   } catch (err) {
     console.error('[Google Auth URL Error]:', err);
-    res.status(500).json({ error: err.message || 'Google yetkilendirme linki oluşturulamadı.' });
+    res.status(500).json({ error: err.message || 'Could not create the Google authorization link.' });
   }
 });
 
@@ -4352,11 +4342,11 @@ router.get('/workspaces/:slugOrId/integrations/google/url', requireAuth, async (
 router.post('/workspaces/:slugOrId/integrations/google/select-property', requireAuth, async (req, res) => {
   try {
     const authData = await resolveAndAuthorizeWorkspace(req, req.params.slugOrId);
-    if (!authData) return res.status(404).json({ error: 'Çalışma alanı bulunamadı.' });
+    if (!authData) return res.status(404).json({ error: 'Workspace not found.' });
 
     const { type, propertyId, propertyName } = req.body;
     if (!type || !propertyId) {
-      return res.status(400).json({ error: 'Mülk tipi ve ID zorunludur.' });
+      return res.status(400).json({ error: 'Property type and ID are required.' });
     }
 
     const integrationType = type === 'analytics' || type === 'ga4' ? 'analytics' : 'search_console';
@@ -4382,7 +4372,7 @@ router.post('/workspaces/:slugOrId/integrations/google/select-property', require
     res.json({ success: true, data: updated });
   } catch (err) {
     console.error('[Select Property Error]:', err);
-    res.status(500).json({ error: err.message || 'Mülk seçilemedi.' });
+    res.status(500).json({ error: err.message || 'Could not select the property.' });
   }
 });
 
@@ -4393,7 +4383,7 @@ router.post('/workspaces/:slugOrId/integrations/google/select-property', require
 router.post('/workspaces/:slugOrId/integrations/google/sync', requireAuth, async (req, res) => {
   try {
     const authData = await resolveAndAuthorizeWorkspace(req, req.params.slugOrId);
-    if (!authData) return res.status(404).json({ error: 'Çalışma alanı bulunamadı.' });
+    if (!authData) return res.status(404).json({ error: 'Workspace not found.' });
 
     const { dateRange, startDate, endDate } = req.body || {};
     const syncResult = await syncGrowthSearchConsole(authData.workspace.id, null, null, {
@@ -4412,7 +4402,7 @@ router.post('/workspaces/:slugOrId/integrations/google/sync', requireAuth, async
     });
   } catch (err) {
     console.error('[GSC Manual Sync Error]:', err);
-    res.status(500).json({ error: err.message || 'Search Console senkronizasyonu başarısız oldu.' });
+    res.status(500).json({ error: err.message || 'Search Console sync failed.' });
   }
 });
 
@@ -4423,19 +4413,19 @@ router.post('/workspaces/:slugOrId/integrations/google/sync', requireAuth, async
 router.post('/workspaces/:slugOrId/integrations/google/disconnect', requireAuth, async (req, res) => {
   try {
     const authData = await resolveAndAuthorizeWorkspace(req, req.params.slugOrId);
-    if (!authData) return res.status(404).json({ error: 'Çalışma alanı bulunamadı.' });
+    if (!authData) return res.status(404).json({ error: 'Workspace not found.' });
 
     await disconnectGrowthGoogle(authData.workspace.id);
     const updated = await getGrowthIntegrationsOverview(authData.workspace.id);
 
     res.json({
       success: true,
-      message: 'Google entegrasyonu başarıyla kaldırıldı.',
+      message: 'Google integration removed.',
       data: updated
     });
   } catch (err) {
     console.error('[Google Disconnect Error]:', err);
-    res.status(500).json({ error: 'Bağlantı kesilemedi.' });
+    res.status(500).json({ error: 'Could not disconnect.' });
   }
 });
 
@@ -4446,7 +4436,7 @@ router.post('/workspaces/:slugOrId/integrations/google/disconnect', requireAuth,
 router.get('/workspaces/:slugOrId/search-performance', requireAuth, async (req, res) => {
   try {
     const authData = await resolveAndAuthorizeWorkspace(req, req.params.slugOrId);
-    if (!authData) return res.status(404).json({ error: 'Çalışma alanı bulunamadı.' });
+    if (!authData) return res.status(404).json({ error: 'Workspace not found.' });
 
     const workspaceId = authData.workspace.id;
 
@@ -4464,7 +4454,7 @@ router.get('/workspaces/:slugOrId/search-performance', requireAuth, async (req, 
       return res.json({
         success: true,
         connected: false,
-        message: 'Google Search Console mülkü henüz bağlanmadı.',
+        message: 'No Google Search Console property is connected yet.',
         totals: {
           clicks: 0,
           impressions: 0,
@@ -4573,7 +4563,7 @@ router.get('/workspaces/:slugOrId/search-performance', requireAuth, async (req, 
     });
   } catch (err) {
     console.error('[Search Performance Error]:', err);
-    res.status(500).json({ error: err.message || 'Arama verileri alınamadı.' });
+    res.status(500).json({ error: err.message || 'Could not load search data.' });
   }
 });
 
@@ -4584,11 +4574,11 @@ router.get('/workspaces/:slugOrId/search-performance', requireAuth, async (req, 
 router.post('/workspaces/:slugOrId/inspect-url', requireAuth, async (req, res) => {
   try {
     const authData = await resolveAndAuthorizeWorkspace(req, req.params.slugOrId);
-    if (!authData) return res.status(404).json({ error: 'Çalışma alanı bulunamadı.' });
+    if (!authData) return res.status(404).json({ error: 'Workspace not found.' });
 
     const { url } = req.body;
     if (!url || typeof url !== 'string') {
-      return res.status(400).json({ error: 'Lütfen geçerli bir URL belirtin.' });
+      return res.status(400).json({ error: 'Please enter a valid URL.' });
     }
 
     const workspaceId = authData.workspace.id;
@@ -4599,7 +4589,7 @@ router.post('/workspaces/:slugOrId/inspect-url', requireAuth, async (req, res) =
     );
 
     if (connRes.rows.length === 0 || connRes.rows[0].status !== 'active') {
-      return res.status(400).json({ error: 'Google Search Console mülkü bağlı değil.' });
+      return res.status(400).json({ error: 'No Google Search Console property is connected.' });
     }
 
     const connection = connRes.rows[0];
@@ -4614,7 +4604,7 @@ router.post('/workspaces/:slugOrId/inspect-url', requireAuth, async (req, res) =
       inspection: {
         url: url.trim(),
         verdict: idx.verdict || 'NEUTRAL',
-        coverageState: idx.coverageState || 'Bilinmiyor',
+        coverageState: idx.coverageState || 'Unknown',
         lastCrawlTime: idx.lastCrawlTime || null,
         crawledAs: idx.crawledAs || 'GOOGLEBOT_SMARTPHONE',
         googleCanonical: idx.googleCanonical || url.trim(),
@@ -4626,7 +4616,7 @@ router.post('/workspaces/:slugOrId/inspect-url', requireAuth, async (req, res) =
     });
   } catch (err) {
     console.error('[GSC Inspect URL Error]:', err);
-    res.status(500).json({ error: err.message || 'URL denetimi başarısız oldu.' });
+    res.status(500).json({ error: err.message || 'URL inspection failed.' });
   }
 });
 
@@ -4637,7 +4627,7 @@ router.post('/workspaces/:slugOrId/inspect-url', requireAuth, async (req, res) =
 router.get('/workspaces/:slugOrId/analytics-performance', requireAuth, async (req, res) => {
   try {
     const authData = await resolveAndAuthorizeWorkspace(req, req.params.slugOrId);
-    if (!authData) return res.status(404).json({ error: 'Çalışma alanı bulunamadı.' });
+    if (!authData) return res.status(404).json({ error: 'Workspace not found.' });
 
     const workspaceId = authData.workspace.id;
 
@@ -4652,7 +4642,7 @@ router.get('/workspaces/:slugOrId/analytics-performance', requireAuth, async (re
       return res.json({
         success: true,
         connected: false,
-        message: 'Google Analytics 4 mülkü henüz bağlanmadı.',
+        message: 'No Google Analytics 4 property is connected yet.',
         totals: {
           totalUsers: 0,
           activeUsers: 0,
@@ -4790,7 +4780,7 @@ router.get('/workspaces/:slugOrId/analytics-performance', requireAuth, async (re
     });
   } catch (err) {
     console.error('[Analytics Performance Route Error]:', err);
-    res.status(500).json({ error: err.message || 'Analytics verileri alınamadı.' });
+    res.status(500).json({ error: err.message || 'Could not load analytics data.' });
   }
 });
 
@@ -4801,14 +4791,14 @@ router.get('/workspaces/:slugOrId/analytics-performance', requireAuth, async (re
 router.get('/workspaces/:slugOrId/analytics-realtime', requireAuth, async (req, res) => {
   try {
     const authData = await resolveAndAuthorizeWorkspace(req, req.params.slugOrId);
-    if (!authData) return res.status(404).json({ error: 'Çalışma alanı bulunamadı.' });
+    if (!authData) return res.status(404).json({ error: 'Workspace not found.' });
 
     const workspaceId = authData.workspace.id;
     const realtime = await getGrowthAnalyticsRealtime(workspaceId);
     return res.json({ success: true, realtime });
   } catch (err) {
     console.error('[GA4 Realtime Error]:', err);
-    res.status(500).json({ error: err.message || 'Canlı veriler alınamadı.' });
+    res.status(500).json({ error: err.message || 'Could not load live data.' });
   }
 });
 
@@ -4819,7 +4809,7 @@ router.get('/workspaces/:slugOrId/analytics-realtime', requireAuth, async (req, 
 router.post('/workspaces/:slugOrId/sync-analytics', requireAuth, async (req, res) => {
   try {
     const authData = await resolveAndAuthorizeWorkspace(req, req.params.slugOrId);
-    if (!authData) return res.status(404).json({ error: 'Çalışma alanı bulunamadı.' });
+    if (!authData) return res.status(404).json({ error: 'Workspace not found.' });
 
     const workspaceId = authData.workspace.id;
     const { dateRange, startDate, endDate, propertyId } = req.body || {};
@@ -4833,7 +4823,7 @@ router.post('/workspaces/:slugOrId/sync-analytics', requireAuth, async (req, res
     return res.json({ success: true, data: synced });
   } catch (err) {
     console.error('[GA4 Manual Sync Error]:', err);
-    res.status(500).json({ error: err.message || 'Senkronizasyon başarısız oldu.' });
+    res.status(500).json({ error: err.message || 'Sync failed.' });
   }
 });
 
@@ -4850,7 +4840,7 @@ router.post('/workspaces/:slugOrId/sync-analytics', requireAuth, async (req, res
 router.get('/workspaces/:slugOrId/google-business', requireAuth, async (req, res) => {
   try {
     const authData = await resolveAndAuthorizeWorkspace(req, req.params.slugOrId);
-    if (!authData) return res.status(404).json({ error: 'Çalışma alanı bulunamadı.' });
+    if (!authData) return res.status(404).json({ error: 'Workspace not found.' });
 
     const workspace = authData.workspace;
     const profileRes = await authPool.query(
@@ -4865,7 +4855,7 @@ router.get('/workspaces/:slugOrId/google-business', requireAuth, async (req, res
     return res.json({ connected: true, profile: decorateBusinessProfile(profileRes.rows[0]) });
   } catch (err) {
     console.error('[Google Business Get Error]:', err);
-    res.status(500).json({ error: 'Google İşletme Profili getirilemedi.' });
+    res.status(500).json({ error: 'Could not load the Google Business Profile.' });
   }
 });
 
@@ -4876,7 +4866,7 @@ router.get('/workspaces/:slugOrId/google-business', requireAuth, async (req, res
 router.post('/workspaces/:slugOrId/google-business/search', requireAuth, async (req, res) => {
   try {
     const authData = await resolveAndAuthorizeWorkspace(req, req.params.slugOrId);
-    if (!authData) return res.status(404).json({ error: 'Çalışma alanı bulunamadı.' });
+    if (!authData) return res.status(404).json({ error: 'Workspace not found.' });
 
     const workspace = authData.workspace;
     const query = req.body?.query || workspace.name;
@@ -4892,7 +4882,7 @@ router.post('/workspaces/:slugOrId/google-business/search', requireAuth, async (
       return res.status(err.status).json({ error: err.message, code: err.code });
     }
     console.error('[Google Business Search Error]:', err);
-    res.status(500).json({ error: 'Arama yapılırken hata oluştu.' });
+    res.status(500).json({ error: 'Something went wrong while searching.' });
   }
 });
 
@@ -4942,7 +4932,7 @@ async function runBusinessProfileEnrichment(workspaceId, placeId, profile, previ
 router.post('/workspaces/:slugOrId/google-business/connect', requireAuth, async (req, res) => {
   try {
     const authData = await resolveAndAuthorizeWorkspace(req, req.params.slugOrId);
-    if (!authData) return res.status(404).json({ error: 'Çalışma alanı bulunamadı.' });
+    if (!authData) return res.status(404).json({ error: 'Workspace not found.' });
 
     const workspace = authData.workspace;
     const { placeId } = req.body || {};
@@ -4959,7 +4949,7 @@ router.post('/workspaces/:slugOrId/google-business/connect', requireAuth, async 
       return res.status(err.status).json({ error: err.message, code: err.code });
     }
     console.error('[Google Business Connect Error]:', err);
-    res.status(500).json({ error: 'İşletme profili bağlanamadı.' });
+    res.status(500).json({ error: 'Could not connect the business profile.' });
   }
 });
 
@@ -5032,7 +5022,7 @@ async function saveBusinessProfile(workspaceId, detailed) {
 router.post('/workspaces/:slugOrId/google-business/sync', requireAuth, async (req, res) => {
   try {
     const authData = await resolveAndAuthorizeWorkspace(req, req.params.slugOrId);
-    if (!authData) return res.status(404).json({ error: 'Çalışma alanı bulunamadı.' });
+    if (!authData) return res.status(404).json({ error: 'Workspace not found.' });
 
     const workspace = authData.workspace;
     const existing = await authPool.query(
@@ -5041,7 +5031,7 @@ router.post('/workspaces/:slugOrId/google-business/sync', requireAuth, async (re
     );
 
     if (existing.rows.length === 0) {
-      return res.status(404).json({ error: 'Bağlı bir Google İşletme Profili bulunamadı.' });
+      return res.status(404).json({ error: 'No connected Google Business Profile found.' });
     }
 
     const current = existing.rows[0];
@@ -5050,7 +5040,7 @@ router.post('/workspaces/:slugOrId/google-business/sync', requireAuth, async (re
     }
     if (!isGooglePlaceId(current.place_id)) {
       return res.status(409).json({
-        error: 'Bu profil Google Maps ile doğrulanmamış. Lütfen işletmenizi Google Maps üzerinden yeniden bağlayın.',
+        error: 'This profile is not verified with Google Maps. Please reconnect your business through Google Maps.',
         code: 'LEGACY_PROFILE'
       });
     }
@@ -5067,7 +5057,7 @@ router.post('/workspaces/:slugOrId/google-business/sync', requireAuth, async (re
       return res.status(err.status).json({ error: err.message, code: err.code });
     }
     console.error('[Google Business Sync Error]:', err);
-    res.status(500).json({ error: 'Yorumlar güncellenirken hata oluştu.' });
+    res.status(500).json({ error: 'Something went wrong while refreshing reviews.' });
   }
 });
 
@@ -5078,7 +5068,7 @@ router.post('/workspaces/:slugOrId/google-business/sync', requireAuth, async (re
 router.post('/workspaces/:slugOrId/google-business/generate-reply', requireAuth, async (req, res) => {
   try {
     const authData = await resolveAndAuthorizeWorkspace(req, req.params.slugOrId);
-    if (!authData) return res.status(404).json({ error: 'Çalışma alanı bulunamadı.' });
+    if (!authData) return res.status(404).json({ error: 'Workspace not found.' });
 
     const workspace = authData.workspace;
     const { reviewerName, rating, reviewText, issueTheme, businessName } = req.body || {};
@@ -5094,7 +5084,7 @@ router.post('/workspaces/:slugOrId/google-business/generate-reply', requireAuth,
     return res.json({ reply });
   } catch (err) {
     console.error('[Generate Review Reply Error]:', err);
-    res.status(500).json({ error: 'AI yanıtı üretilirken hata oluştu.' });
+    res.status(500).json({ error: 'Something went wrong while generating the AI reply.' });
   }
 });
 
@@ -5105,7 +5095,7 @@ router.post('/workspaces/:slugOrId/google-business/generate-reply', requireAuth,
 router.delete('/workspaces/:slugOrId/google-business', requireAuth, async (req, res) => {
   try {
     const authData = await resolveAndAuthorizeWorkspace(req, req.params.slugOrId);
-    if (!authData) return res.status(404).json({ error: 'Çalışma alanı bulunamadı.' });
+    if (!authData) return res.status(404).json({ error: 'Workspace not found.' });
 
     await authPool.query(
       'DELETE FROM growth_business_profiles WHERE workspace_id = $1',
@@ -5115,7 +5105,7 @@ router.delete('/workspaces/:slugOrId/google-business', requireAuth, async (req, 
     return res.json({ success: true });
   } catch (err) {
     console.error('[Delete Google Business Error]:', err);
-    res.status(500).json({ error: 'Bağlantı kaldırılamadı.' });
+    res.status(500).json({ error: 'Could not remove the connection.' });
   }
 });
 
@@ -5126,7 +5116,7 @@ router.delete('/workspaces/:slugOrId/google-business', requireAuth, async (req, 
 router.get('/workspaces/:slugOrId/limits', requireAuth, async (req, res) => {
   try {
     const authData = await resolveAndAuthorizeWorkspace(req, req.params.slugOrId);
-    if (!authData) return res.status(404).json({ error: 'Çalışma alanı bulunamadı.' });
+    if (!authData) return res.status(404).json({ error: 'Workspace not found.' });
 
     const userPlan = getUserPlan(req.user, authData.organization);
     const summary = await getGrowthLimitsSummary(
@@ -5142,7 +5132,7 @@ router.get('/workspaces/:slugOrId/limits', requireAuth, async (req, res) => {
     });
   } catch (err) {
     console.error('[Growth Limits Error]:', err);
-    res.status(500).json({ error: 'Limit bilgisi alınamadı.' });
+    res.status(500).json({ error: 'Could not load limit details.' });
   }
 });
 

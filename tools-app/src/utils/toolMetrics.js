@@ -1,6 +1,6 @@
 /**
  * Enterprise Conversion Metrics System for Cerilas Tools
- * Maps each tool to its genuine conversion action and localized badge text.
+ * Maps each tool to its genuine conversion action and badge text.
  */
 
 export const TOOL_CONVERSION_METRICS = {
@@ -8,51 +8,43 @@ export const TOOL_CONVERSION_METRICS = {
   'eu-funding-opportunities': {
     actionKey: 'explored',
     getConversionCount: (tool) => tool?.use_count || 0,
-    en: { action: 'explored', badge: 'grants explored', singular: 'grant explored', short: 'searches' },
-    tr: { action: 'incelendi', badge: 'çağrı incelendi', singular: 'çağrı incelendi', short: 'inceleme' }
+    en: { action: 'explored', badge: 'grants explored', singular: 'grant explored', short: 'searches' }
   },
 
   'arr-calculator': {
     actionKey: 'calculated',
     getConversionCount: (tool) => (tool?.use_count || 0) + (tool?.copy_count || 0),
-    en: { action: 'calculated', badge: 'calculations made', singular: 'calculation made', short: 'calculations' },
-    tr: { action: 'hesaplandı', badge: 'hesaplama yapıldı', singular: 'hesaplama yapıldı', short: 'hesaplama' }
+    en: { action: 'calculated', badge: 'calculations made', singular: 'calculation made', short: 'calculations' }
   },
   'cac-calculator': {
     actionKey: 'calculated',
     getConversionCount: (tool) => (tool?.use_count || 0) + (tool?.copy_count || 0),
-    en: { action: 'calculated', badge: 'calculations made', singular: 'calculation made', short: 'calculations' },
-    tr: { action: 'hesaplandı', badge: 'hesaplama yapıldı', singular: 'hesaplama yapıldı', short: 'hesaplama' }
+    en: { action: 'calculated', badge: 'calculations made', singular: 'calculation made', short: 'calculations' }
   },
   'churn-calculator': {
     actionKey: 'calculated',
     getConversionCount: (tool) => (tool?.use_count || 0) + (tool?.copy_count || 0),
-    en: { action: 'calculated', badge: 'calculations made', singular: 'calculation made', short: 'calculations' },
-    tr: { action: 'hesaplandı', badge: 'hesaplama yapıldı', singular: 'hesaplama yapıldı', short: 'hesaplama' }
+    en: { action: 'calculated', badge: 'calculations made', singular: 'calculation made', short: 'calculations' }
   },
   'ltv-cac-calculator': {
     actionKey: 'calculated',
     getConversionCount: (tool) => (tool?.use_count || 0) + (tool?.copy_count || 0),
-    en: { action: 'calculated', badge: 'calculations made', singular: 'calculation made', short: 'calculations' },
-    tr: { action: 'hesaplandı', badge: 'hesaplama yapıldı', singular: 'hesaplama yapıldı', short: 'hesaplama' }
+    en: { action: 'calculated', badge: 'calculations made', singular: 'calculation made', short: 'calculations' }
   },
   'ltv-calculator': {
     actionKey: 'calculated',
     getConversionCount: (tool) => (tool?.use_count || 0) + (tool?.copy_count || 0),
-    en: { action: 'calculated', badge: 'calculations made', singular: 'calculation made', short: 'calculations' },
-    tr: { action: 'hesaplandı', badge: 'hesaplama yapıldı', singular: 'hesaplama yapıldı', short: 'hesaplama' }
+    en: { action: 'calculated', badge: 'calculations made', singular: 'calculation made', short: 'calculations' }
   },
   'mrr-calculator': {
     actionKey: 'calculated',
     getConversionCount: (tool) => (tool?.use_count || 0) + (tool?.copy_count || 0),
-    en: { action: 'calculated', badge: 'calculations made', singular: 'calculation made', short: 'calculations' },
-    tr: { action: 'hesaplandı', badge: 'hesaplama yapıldı', singular: 'hesaplama yapıldı', short: 'hesaplama' }
+    en: { action: 'calculated', badge: 'calculations made', singular: 'calculation made', short: 'calculations' }
   },
   'startup-runway-calculator': {
     actionKey: 'calculated',
     getConversionCount: (tool) => (tool?.use_count || 0) + (tool?.copy_count || 0),
-    en: { action: 'calculated', badge: 'calculations made', singular: 'calculation made', short: 'calculations' },
-    tr: { action: 'hesaplandı', badge: 'hesaplama yapıldı', singular: 'hesaplama yapıldı', short: 'hesaplama' }
+    en: { action: 'calculated', badge: 'calculations made', singular: 'calculation made', short: 'calculations' }
   },
 
   'qr-code-generator': {
@@ -69,12 +61,6 @@ export const TOOL_CONVERSION_METRICS = {
       badge: 'QR codes generated',
       singular: 'QR code generated',
       short: 'QR codes'
-    },
-    tr: {
-      action: 'oluşturuldu',
-      badge: 'QR kod oluşturuldu',
-      singular: 'QR kod oluşturuldu',
-      short: 'QR kod'
     }
   },
   'image-compressor': {
@@ -88,12 +74,6 @@ export const TOOL_CONVERSION_METRICS = {
       badge: 'images compressed',
       singular: 'image compressed',
       short: 'compressed'
-    },
-    tr: {
-      action: 'sıkıştırıldı',
-      badge: 'görsel sıkıştırıldı',
-      singular: 'görsel sıkıştırıldı',
-      short: 'sıkıştırma'
     }
   },
   'pomodoro-timer': {
@@ -107,12 +87,6 @@ export const TOOL_CONVERSION_METRICS = {
       badge: 'sessions completed',
       singular: 'session completed',
       short: 'sessions'
-    },
-    tr: {
-      action: 'tamamlandı',
-      badge: 'seans tamamlandı',
-      singular: 'seans tamamlandı',
-      short: 'seans'
     }
   },
   'pdf-compressor': {
@@ -126,12 +100,6 @@ export const TOOL_CONVERSION_METRICS = {
       badge: 'PDFs compressed',
       singular: 'PDF compressed',
       short: 'compressed'
-    },
-    tr: {
-      action: 'sıkıştırıldı',
-      badge: 'PDF sıkıştırıldı',
-      singular: 'PDF sıkıştırıldı',
-      short: 'sıkıştırma'
     }
   },
   'pdf-merger': {
@@ -145,12 +113,6 @@ export const TOOL_CONVERSION_METRICS = {
       badge: 'PDFs merged',
       singular: 'PDF merged',
       short: 'merged'
-    },
-    tr: {
-      action: 'birleştirildi',
-      badge: 'PDF birleştirildi',
-      singular: 'PDF birleştirildi',
-      short: 'birleştirme'
     }
   },
   'pdf-splitter': {
@@ -164,12 +126,6 @@ export const TOOL_CONVERSION_METRICS = {
       badge: 'PDFs split',
       singular: 'PDF split',
       short: 'split'
-    },
-    tr: {
-      action: 'bölündü',
-      badge: 'PDF bölündü',
-      singular: 'PDF bölündü',
-      short: 'bölme'
     }
   },
   'ats-resume-checker': {
@@ -183,12 +139,6 @@ export const TOOL_CONVERSION_METRICS = {
       badge: 'resumes scanned',
       singular: 'resume scanned',
       short: 'scanned'
-    },
-    tr: {
-      action: 'tarandı',
-      badge: 'özgeçmiş tarandı',
-      singular: 'özgeçmiş tarandı',
-      short: 'tarama'
     }
   },
   'background-remover': {
@@ -202,12 +152,6 @@ export const TOOL_CONVERSION_METRICS = {
       badge: 'backgrounds removed',
       singular: 'background removed',
       short: 'cutouts'
-    },
-    tr: {
-      action: 'temizlendi',
-      badge: 'arka plan temizlendi',
-      singular: 'arka plan temizlendi',
-      short: 'silindi'
     }
   },
   'pdf-rag-cleaner': {
@@ -224,12 +168,6 @@ export const TOOL_CONVERSION_METRICS = {
       badge: 'documents cleaned',
       singular: 'document cleaned',
       short: 'cleaned'
-    },
-    tr: {
-      action: 'temizlendi',
-      badge: 'döküman temizlendi',
-      singular: 'döküman temizlendi',
-      short: 'temizlendi'
     }
   },
   'ai-content-detector': {
@@ -243,12 +181,6 @@ export const TOOL_CONVERSION_METRICS = {
       badge: 'texts analyzed',
       singular: 'text analyzed',
       short: 'analyzed'
-    },
-    tr: {
-      action: 'analiz edildi',
-      badge: 'metin analiz edildi',
-      singular: 'metin analiz edildi',
-      short: 'analiz'
     }
   },
   'pdf-editor': {
@@ -262,12 +194,6 @@ export const TOOL_CONVERSION_METRICS = {
       badge: 'PDFs edited',
       singular: 'PDF edited',
       short: 'edited'
-    },
-    tr: {
-      action: 'düzenlendi',
-      badge: 'PDF düzenlendi',
-      singular: 'PDF düzenlendi',
-      short: 'düzenleme'
     }
   },
   'video-compressor': {
@@ -281,12 +207,6 @@ export const TOOL_CONVERSION_METRICS = {
       badge: 'videos compressed',
       singular: 'video compressed',
       short: 'compressed'
-    },
-    tr: {
-      action: 'sıkıştırıldı',
-      badge: 'video sıkıştırıldı',
-      singular: 'video sıkıştırıldı',
-      short: 'sıkıştırma'
     }
   },
   'webhook-tester': {
@@ -300,12 +220,6 @@ export const TOOL_CONVERSION_METRICS = {
       badge: 'webhooks sent',
       singular: 'webhook sent',
       short: 'sent'
-    },
-    tr: {
-      action: 'gönderildi',
-      badge: 'istek gönderildi',
-      singular: 'istek gönderildi',
-      short: 'istek'
     }
   },
   'json-beautifier': {
@@ -321,12 +235,6 @@ export const TOOL_CONVERSION_METRICS = {
       badge: 'JSONs formatted',
       singular: 'JSON formatted',
       short: 'formatted'
-    },
-    tr: {
-      action: 'formatlandı',
-      badge: 'JSON formatlandı',
-      singular: 'JSON formatlandı',
-      short: 'format'
     }
   },
   'email-signature-generator': {
@@ -343,12 +251,6 @@ export const TOOL_CONVERSION_METRICS = {
       badge: 'signatures created',
       singular: 'signature created',
       short: 'signatures'
-    },
-    tr: {
-      action: 'oluşturuldu',
-      badge: 'imza oluşturuldu',
-      singular: 'imza oluşturuldu',
-      short: 'imza'
     }
   },
   'ai-crawler-checker': {
@@ -362,12 +264,6 @@ export const TOOL_CONVERSION_METRICS = {
       badge: 'websites audited',
       singular: 'website audited',
       short: 'audits'
-    },
-    tr: {
-      action: 'denetlendi',
-      badge: 'site denetlendi',
-      singular: 'site denetlendi',
-      short: 'denetim'
     }
   },
   'ai-link-hallucination-checker': {
@@ -381,12 +277,6 @@ export const TOOL_CONVERSION_METRICS = {
       badge: 'audits completed',
       singular: 'audit completed',
       short: 'audits'
-    },
-    tr: {
-      action: 'doğrulandı',
-      badge: 'metin doğrulandı',
-      singular: 'metin doğrulandı',
-      short: 'doğrulama'
     }
   },
   'llms-txt': {
@@ -403,12 +293,6 @@ export const TOOL_CONVERSION_METRICS = {
       badge: 'guides generated',
       singular: 'guide generated',
       short: 'guides'
-    },
-    tr: {
-      action: 'oluşturuldu',
-      badge: 'rehber oluşturuldu',
-      singular: 'rehber oluşturuldu',
-      short: 'rehber'
     }
   },
   'html-to-llm-markdown': {
@@ -425,12 +309,6 @@ export const TOOL_CONVERSION_METRICS = {
       badge: 'pages converted',
       singular: 'page converted',
       short: 'pages'
-    },
-    tr: {
-      action: 'dönüştürüldü',
-      badge: 'sayfa dönüştürüldü',
-      singular: 'sayfa dönüştürüldü',
-      short: 'sayfa'
     }
   },
   'html-to-markdown': {
@@ -447,12 +325,6 @@ export const TOOL_CONVERSION_METRICS = {
       badge: 'pages converted',
       singular: 'page converted',
       short: 'pages'
-    },
-    tr: {
-      action: 'dönüştürüldü',
-      badge: 'sayfa dönüştürüldü',
-      singular: 'sayfa dönüştürüldü',
-      short: 'sayfa'
     }
   },
   'token-counter-universal': {
@@ -469,19 +341,12 @@ export const TOOL_CONVERSION_METRICS = {
       badge: 'texts audited',
       singular: 'text audited',
       short: 'audits'
-    },
-    tr: {
-      action: 'sayıldı',
-      badge: 'metin incelendi',
-      singular: 'metin incelendi',
-      short: 'analiz'
     }
   },
   'token-counter': {
     actionKey: 'counted',
     getConversionCount: (tool) => tool?.use_count || 0,
-    en: { action: 'counted', badge: 'texts audited', singular: 'text audited', short: 'audits' },
-    tr: { action: 'sayıldı', badge: 'metin incelendi', singular: 'metin incelendi', short: 'analiz' }
+    en: { action: 'counted', badge: 'texts audited', singular: 'text audited', short: 'audits' }
   },
   'trl-calculator': {
     actionKey: 'assessed',
@@ -497,12 +362,6 @@ export const TOOL_CONVERSION_METRICS = {
       badge: 'evaluations completed',
       singular: 'evaluation completed',
       short: 'assessments'
-    },
-    tr: {
-      action: 'değerlendirildi',
-      badge: 'TRL analizi yapıldı',
-      singular: 'TRL analizi yapıldı',
-      short: 'analiz'
     }
   },
   'sample-size-calculator': {
@@ -519,12 +378,6 @@ export const TOOL_CONVERSION_METRICS = {
       badge: 'sample sizes calculated',
       singular: 'sample size calculated',
       short: 'calculated'
-    },
-    tr: {
-      action: 'hesaplandı',
-      badge: 'örneklem büyüklüğü hesaplandı',
-      singular: 'örneklem büyüklüğü hesaplandı',
-      short: 'hesaplama'
     }
   }
 };
@@ -544,12 +397,6 @@ export function getToolConversionMetric(slug) {
       badge: 'times used',
       singular: 'time used',
       short: 'used'
-    },
-    tr: {
-      action: 'kullanıldı',
-      badge: 'kez kullanıldı',
-      singular: 'kez kullanıldı',
-      short: 'kullanım'
     }
   };
 }
@@ -573,7 +420,7 @@ export function getConversionLabel(slug, count, lang = 'en') {
 }
 
 /**
- * Get short 1-word action or noun for tight single-line UI display (e.g., "sessions", "compressed", "QR kod").
+ * Get short 1-word action or noun for tight single-line UI display (e.g., "sessions", "compressed", "QR codes").
  */
 export function getShortConversionLabel(slug, lang = 'en') {
   const metric = getToolConversionMetric(slug);

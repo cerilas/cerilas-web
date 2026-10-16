@@ -510,12 +510,12 @@ export default function GrowthAiVisibility() {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Prompt silinemedi.');
+      if (!res.ok) throw new Error(data.error || 'Failed to delete prompt.');
       setDeleteTargetPrompt(null);
       fetchPrompts();
     } catch (err) {
       console.error('Delete prompt error:', err);
-      alert(err.message || 'Prompt silinemedi.');
+      alert(err.message || 'Failed to delete prompt.');
     } finally {
       setDeletingPromptId(null);
     }
@@ -921,7 +921,7 @@ export default function GrowthAiVisibility() {
         </div>
       )}
 
-      {/* 2. AI Visibility Summary Report (Minik Rapor) */}
+      {/* 2. AI Visibility Summary Report (Mini Report) */}
       {activeReport && !isBatchScanning && (
         <div ref={reportPanelRef} className="ai-report-panel animate-fade">
           <div className="ai-report-topbar">

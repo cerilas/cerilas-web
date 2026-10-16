@@ -13,10 +13,8 @@ import {
   ExternalLink
 } from 'lucide-react';
 import { COMPANY_INFO, LEGAL_DOCS } from './legalContent';
-import { useTranslation } from '../i18n';
 
 export default function LegalView({ initialSlug = 'terms', onBack }) {
-  const { language } = useTranslation();
   const [activeSlug, setActiveSlug] = useState(initialSlug);
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -91,7 +89,7 @@ export default function LegalView({ initialSlug = 'terms', onBack }) {
             }}
           >
             <ArrowLeft size={14} />
-            <span>{language === 'tr' ? 'Ana Sayfaya Dön' : 'Back to Tools'}</span>
+            <span>Back to Tools</span>
           </button>
           <span>/</span>
           <span>Legal &amp; Compliance</span>
@@ -116,7 +114,7 @@ export default function LegalView({ initialSlug = 'terms', onBack }) {
           }}
         >
           <Printer size={14} />
-          <span>{language === 'tr' ? 'Yazdır / PDF Kaydet' : 'Print / Save PDF'}</span>
+          <span>Print / Save PDF</span>
         </button>
       </div>
 
@@ -221,7 +219,7 @@ export default function LegalView({ initialSlug = 'terms', onBack }) {
             <Search size={14} style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted, #94a3b8)' }} />
             <input
               type="text"
-              placeholder={language === 'tr' ? 'Madde ara...' : 'Filter sections...'}
+              placeholder="Filter sections..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               style={{

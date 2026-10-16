@@ -8,7 +8,7 @@ export const trlCalculatorManifest = {
   isAi: false,
   targetUrl: '/tool/trl-calculator',
   features: [
-    'Standardized Multi-Framework Assessment: Support for Horizon Europe (EC), NASA / Aerospace (ISO 16290), Software SRL, and TÜBİTAK Ar-Ge frameworks',
+    'Standardized Multi-Framework Assessment: Support for Horizon Europe (EC), NASA / Aerospace (ISO 16290), Software SRL, and TÜBİTAK R&D frameworks',
     'Deterministic TRL 1–9 Evaluation: Strict milestone gating algorithms and overall percentage readiness scoring',
     'Interactive Guided & Matrix Modes: Choose between step-by-step diagnostic questionnaire or quick 9-level criteria matrix',
     'Actionable Gap Analysis & Roadmap: Pinpoints exact missing test protocols, environmental validations, and deliverables needed to reach the next TRL',

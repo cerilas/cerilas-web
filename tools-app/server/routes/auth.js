@@ -9,7 +9,7 @@ import { createPasswordResetRouter } from './passwordReset.js';
 import { recordLoginEvent, getRequestContext, ensureUserActivitySchema } from '../utils/userActivity.js';
 
 const router = Router();
-const SUSPENDED_MESSAGE = 'Bu hesap askıya alınmıştır. Destek için info@cerilas.com adresine yazın.';
+const SUSPENDED_MESSAGE = 'This account has been suspended. Contact info@cerilas.com for support.';
 const JWT_SECRET = process.env.JWT_SECRET || 'cerilas_admin_jwt_secret_2026';
 
 export const requireAuth = async (req, res, next) => {
@@ -75,7 +75,7 @@ async function isUserSuspended(userId) {
 const formatUser = (row) => {
   const firstName = row.first_name || '';
   const lastName = row.last_name || '';
-  const fullName = [firstName, lastName].filter(Boolean).join(' ') || (row.email ? row.email.split('@')[0] : 'Kullanıcı');
+  const fullName = [firstName, lastName].filter(Boolean).join(' ') || (row.email ? row.email.split('@')[0] : 'User');
   
   return {
     id: row.id,
@@ -99,7 +99,7 @@ const formatUser = (row) => {
     billing_tax_office: row.billing_tax_office || '',
     billing_address: row.billing_address || '',
     billing_city: row.billing_city || '',
-    billing_country: row.billing_country || 'Türkiye',
+    billing_country: row.billing_country || 'Turkey',
     created_at: row.created_at
   };
 };
@@ -110,7 +110,7 @@ const formatUser = (row) => {
  */
 export async function findOrCreateOrLinkGoogleUser({ googleId, email, firstName, lastName, avatarUrl }) {
   if (!email && !googleId) {
-    throw new Error('Google hesabı geçerli bir e-posta veya kimlik içermiyor.');
+    throw new Error('The Google account does not include a valid email or ID.');
   }
 
   const cleanEmail = (email || '').toLowerCase().trim();
@@ -218,16 +218,16 @@ router.post('/register', async (req, res) => {
   try {
     const { email, password, first_name, last_name, phone } = req.body;
     if (!email || !password) {
-      return res.status(400).json({ error: 'E-posta ve şifre zorunludur.' });
+      return res.status(400).json({ error: 'Email and password are required.' });
     }
 
     const cleanEmail = email.trim().toLowerCase();
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)) {
-      return res.status(400).json({ error: 'Lütfen geçerli bir e-posta adresi girin.' });
+      return res.status(400).json({ error: 'Please enter a valid email address.' });
     }
 
     if (password.length < 6) {
-      return res.status(400).json({ error: 'Şifreniz en az 6 karakter olmalıdır.' });
+      return res.status(400).json({ error: 'Your password must be at least 6 characters.' });
     }
 
     const existing = await authPool.query(
@@ -236,7 +236,7 @@ router.post('/register', async (req, res) => {
     );
 
     if (existing.rows.length > 0) {
-      return res.status(400).json({ error: 'Bu e-posta adresi ile zaten kayıtlı bir hesap var.' });
+      return res.status(400).json({ error: 'An account with this email address already exists.' });
     }
 
     const salt = await bcrypt.genSalt(10);
@@ -265,7 +265,7 @@ router.post('/register', async (req, res) => {
     });
   } catch (err) {
     console.error('Auth register error:', err);
-    res.status(500).json({ error: 'Kayıt işlemi sırasında bir hata oluştu.' });
+    res.status(500).json({ error: 'Something went wrong during sign-up.' });
   }
 });
 
@@ -277,7 +277,7 @@ router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
     if (!email || !password) {
-      return res.status(400).json({ error: 'E-posta ve şifre gereklidir.' });
+      return res.status(400).json({ error: 'Email and password are required.' });
     }
 
     const cleanEmail = email.trim().toLowerCase();
@@ -287,17 +287,17 @@ router.post('/login', async (req, res) => {
     );
 
     if (result.rows.length === 0) {
-      return res.status(401).json({ error: 'Geçersiz e-posta veya şifre.' });
+      return res.status(401).json({ error: 'Invalid email or password.' });
     }
 
     const user = result.rows[0];
     if (!user.password_hash && user.google_id) {
-      return res.status(400).json({ error: 'Bu hesaba Google ile kayıt olunmuş. "Google ile Giriş Yap" seçeneğini kullanın ya da "Şifremi unuttum" ile bir şifre belirleyin.' });
+      return res.status(400).json({ error: 'This account was created with Google. Use "Sign in with Google", or set a password via "Forgot password".' });
     }
 
     const isValid = await bcrypt.compare(password, user.password_hash);
     if (!isValid) {
-      return res.status(401).json({ error: 'Geçersiz e-posta veya şifre.' });
+      return res.status(401).json({ error: 'Invalid email or password.' });
     }
 
     if (user.suspended_at) {
@@ -318,7 +318,7 @@ router.post('/login', async (req, res) => {
     });
   } catch (err) {
     console.error('Auth login error:', err);
-    res.status(500).json({ error: 'Sunucu kimlik doğrulama hatası.' });
+    res.status(500).json({ error: 'Server authentication error.' });
   }
 });
 
@@ -338,7 +338,7 @@ router.post('/google/signin', async (req, res) => {
 
       if (!verifyRes.ok || payload.error) {
         console.error('Google tokeninfo verification failed:', payload);
-        return res.status(400).json({ error: 'Geçersiz Google kimlik belirteci.' });
+        return res.status(400).json({ error: 'Invalid Google ID token.' });
       }
 
       googleId = payload.sub;
@@ -365,7 +365,7 @@ router.post('/google/signin', async (req, res) => {
 
       const tokenData = await tokenRes.json();
       if (!tokenRes.ok || tokenData.error) {
-        return res.status(400).json({ error: `Google oturumu doğrulanamadı: ${tokenData.error_description || tokenData.error}` });
+        return res.status(400).json({ error: `Could not verify the Google session: ${tokenData.error_description || tokenData.error}` });
       }
 
       const userinfoRes = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
@@ -379,11 +379,11 @@ router.post('/google/signin', async (req, res) => {
       lastName = profile.family_name || (profile.name ? profile.name.split(' ').slice(1).join(' ') : '');
       avatarUrl = profile.picture || '';
     } else {
-      return res.status(400).json({ error: 'Google kimlik belirteci (credential) veya kod gereklidir.' });
+      return res.status(400).json({ error: 'A Google credential or authorization code is required.' });
     }
 
     if (!googleId || !email) {
-      return res.status(400).json({ error: 'Google profilinden gerekli bilgiler (kimlik ve e-posta) alınamadı.' });
+      return res.status(400).json({ error: 'Could not get the required ID and email from the Google profile.' });
     }
 
     // Auto-match existing accounts by email and link Google
@@ -407,7 +407,7 @@ router.post('/google/signin', async (req, res) => {
     });
   } catch (err) {
     console.error('Google signin error:', err);
-    res.status(500).json({ error: err.message || 'Google ile giriş sırasında bir hata oluştu.' });
+    res.status(500).json({ error: err.message || 'Something went wrong while signing in with Google.' });
   }
 });
 
@@ -474,7 +474,7 @@ router.get('/google/callback', async (req, res, next) => {
         <!DOCTYPE html>
         <html>
         <head>
-          <title>Google Bağlantısı Başarılı</title>
+          <title>Google Connected</title>
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
         </head>
         <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; background: #09090b; color: #fff;">
@@ -482,8 +482,8 @@ router.get('/google/callback', async (req, res, next) => {
             <div style="width: 44px; height: 44px; margin: 0 auto 12px; background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
             </div>
-            <h3 style="margin: 0 0 8px; font-size: 17px; font-weight: 600;">Google Başarıyla Bağlandı</h3>
-            <p style="color: #a1a1aa; font-size: 13px; line-height: 1.5; margin: 0 0 12px;">Search Console ve GA4 mülkleriniz çalışma alanınıza entegre edildi. Bu pencere otomatik kapatılıyor...</p>
+            <h3 style="margin: 0 0 8px; font-size: 17px; font-weight: 600;">Google Connected Successfully</h3>
+            <p style="color: #a1a1aa; font-size: 13px; line-height: 1.5; margin: 0 0 12px;">Your Search Console and GA4 properties have been connected to your workspace. This window will close automatically...</p>
             <div style="font-size: 12px; color: #71717a; font-family: monospace;">${growthResult.email}</div>
           </div>
           <script>
@@ -608,13 +608,13 @@ router.get('/google/callback', async (req, res, next) => {
       <!DOCTYPE html>
       <html>
       <head>
-        <title>Google ile Giriş Başarılı</title>
+        <title>Signed in with Google</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
       </head>
       <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; background: #09090b; color: #fff;">
         <div style="text-align: center; padding: 20px;">
-          <h3 style="margin-bottom: 8px;">Giriş Başarılı</h3>
-          <p style="color: #a1a1aa; font-size: 14px;">Oturumunuz açılıyor, lütfen bekleyin...</p>
+          <h3 style="margin-bottom: 8px;">Signed In</h3>
+          <p style="color: #a1a1aa; font-size: 14px;">Signing you in, please wait...</p>
         </div>
         <script>
           try {
@@ -671,7 +671,7 @@ router.post('/google/link', requireAuth, async (req, res) => {
       const verifyRes = await fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${encodeURIComponent(credential)}`);
       const payload = await verifyRes.json();
       if (!verifyRes.ok || payload.error) {
-        return res.status(400).json({ error: 'Geçersiz Google kimliği.' });
+        return res.status(400).json({ error: 'Invalid Google ID.' });
       }
       googleId = payload.sub;
       email = payload.email;
@@ -701,7 +701,7 @@ router.post('/google/link', requireAuth, async (req, res) => {
     }
 
     if (!googleId) {
-      return res.status(400).json({ error: 'Google hesap bilgisi alınamadı.' });
+      return res.status(400).json({ error: 'Could not get Google account details.' });
     }
 
     // Check if this googleId is already linked to another user
@@ -710,7 +710,7 @@ router.post('/google/link', requireAuth, async (req, res) => {
       [googleId, req.user.id]
     );
     if (checkRes.rows.length > 0) {
-      return res.status(400).json({ error: 'Bu Google hesabı zaten başka bir kullanıcıya bağlı.' });
+      return res.status(400).json({ error: 'This Google account is already linked to another user.' });
     }
 
     const updated = await authPool.query(
@@ -720,12 +720,12 @@ router.post('/google/link', requireAuth, async (req, res) => {
 
     res.json({
       success: true,
-      message: 'Google hesabınız başarıyla bağlandı!',
+      message: 'Your Google account has been connected.',
       user: formatUser(updated.rows[0])
     });
   } catch (err) {
     console.error('Google link error:', err);
-    res.status(500).json({ error: 'Google hesabı bağlanırken bir hata oluştu.' });
+    res.status(500).json({ error: 'Something went wrong while connecting your Google account.' });
   }
 });
 
@@ -741,17 +741,17 @@ router.post('/google/unlink', requireAuth, async (req, res) => {
     );
 
     if (userRes.rows.length === 0) {
-      return res.status(404).json({ error: 'Kullanıcı bulunamadı.' });
+      return res.status(404).json({ error: 'User not found.' });
     }
 
     const currentUser = userRes.rows[0];
     if (!currentUser.google_id) {
-      return res.status(400).json({ error: 'Hesabınız zaten Google ile bağlı değil.' });
+      return res.status(400).json({ error: 'Your account is not connected to Google.' });
     }
 
     if (!currentUser.password_hash) {
       return res.status(400).json({ 
-        error: 'Şifreniz bulunmadığı için Google bağlantısını kaldıramazsınız. Hesabınıza giriş yapabilmek için Google bağlantısı gereklidir.' 
+        error: "You can't disconnect Google because your account has no password. Google is required to sign in to your account." 
       });
     }
 
@@ -762,12 +762,12 @@ router.post('/google/unlink', requireAuth, async (req, res) => {
 
     res.json({
       success: true,
-      message: 'Google hesabı bağlantısı kaldırıldı.',
+      message: 'Your Google account has been disconnected.',
       user: formatUser(updated.rows[0])
     });
   } catch (err) {
     console.error('Google unlink error:', err);
-    res.status(500).json({ error: 'Google bağlantısı kaldırılırken hata oluştu.' });
+    res.status(500).json({ error: 'Something went wrong while disconnecting Google.' });
   }
 });
 
@@ -783,7 +783,7 @@ router.get('/me', requireAuth, async (req, res) => {
     );
 
     if (result.rows.length === 0) {
-      return res.status(401).json({ error: 'Kullanıcı hesabı bulunamadı.' });
+      return res.status(401).json({ error: 'User account not found.' });
     }
 
     const row = result.rows[0];
@@ -810,7 +810,7 @@ router.get('/me', requireAuth, async (req, res) => {
     });
   } catch (err) {
     console.error('Auth me error:', err);
-    res.status(401).json({ error: 'Geçersiz veya süresi dolmuş oturum.' });
+    res.status(401).json({ error: 'Invalid or expired session.' });
   }
 });
 
@@ -824,7 +824,7 @@ router.put('/profile', requireAuth, async (req, res) => {
     
     const current = await authPool.query('SELECT phone, phone_verified FROM users WHERE id = $1', [req.user.id]);
     if (current.rows.length === 0) {
-      return res.status(404).json({ error: 'Kullanıcı bulunamadı.' });
+      return res.status(404).json({ error: 'User not found.' });
     }
 
     let phoneVerified = current.rows[0].phone_verified;
@@ -856,12 +856,12 @@ router.put('/profile', requireAuth, async (req, res) => {
 
     res.json({
       success: true,
-      message: 'Profiliniz başarıyla güncellendi.',
+      message: 'Your profile has been updated.',
       user: formatUser(result.rows[0])
     });
   } catch (err) {
     console.error('Update profile error:', err);
-    res.status(500).json({ error: 'Profil güncellenirken bir hata meydana geldi.' });
+    res.status(500).json({ error: 'Something went wrong while updating your profile.' });
   }
 });
 
@@ -1045,19 +1045,19 @@ router.put('/billing', requireAuth, async (req, res) => {
         billing_tax_office || null,
         billing_address || null,
         billing_city || null,
-        billing_country || 'Türkiye',
+        billing_country || 'Turkey',
         req.user.id
       ]
     );
 
     res.json({
       success: true,
-      message: 'Fatura bilgileri başarıyla kaydedildi.',
+      message: 'Billing details saved.',
       user: formatUser(result.rows[0])
     });
   } catch (err) {
     console.error('Update billing error:', err);
-    res.status(500).json({ error: 'Fatura bilgileri kaydedilemedi.' });
+    res.status(500).json({ error: 'Could not save billing details.' });
   }
 });
 
@@ -1141,7 +1141,7 @@ router.get('/invoices', requireAuth, async (req, res) => {
     });
   } catch (err) {
     console.error('Get invoices error:', err);
-    res.status(500).json({ error: 'Faturalar alınamadı.' });
+    res.status(500).json({ error: 'Could not load invoices.' });
   }
 });
 
@@ -1154,10 +1154,10 @@ router.post('/upgrade-plan', requireAuth, async (req, res) => {
     let { plan } = req.body;
     if (plan === 'enterprise') plan = 'unlimited';
     if (!['free', 'pro', 'unlimited'].includes(plan)) {
-      return res.status(400).json({ error: 'Geçersiz plan seçimi.' });
+      return res.status(400).json({ error: 'Invalid plan selection.' });
     }
     if (plan !== 'free') {
-      return res.status(402).json({ error: 'Ücretli planlar yalnızca ödeme sayfası üzerinden etkinleştirilebilir.' });
+      return res.status(402).json({ error: 'Paid plans can only be activated through the checkout page.' });
     }
 
     const updated = await authPool.query(
@@ -1190,12 +1190,12 @@ router.post('/upgrade-plan', requireAuth, async (req, res) => {
 
     res.json({
       success: true,
-      message: `Planınız başarıyla ${planTitle} olarak güncellendi.`,
+      message: `Your plan has been updated to ${planTitle}.`,
       user: formatUser(updated.rows[0])
     });
   } catch (err) {
     console.error('Upgrade plan error:', err);
-    res.status(500).json({ error: 'Plan güncellenemedi.' });
+    res.status(500).json({ error: 'Could not update your plan.' });
   }
 });
 
@@ -1231,7 +1231,7 @@ router.get('/subscription-status', requireAuth, async (req, res) => {
   try {
     const userRes = await authPool.query('SELECT * FROM users WHERE id = $1', [req.user.id]);
     if (userRes.rows.length === 0) {
-      return res.status(404).json({ error: 'Kullanıcı bulunamadı.' });
+      return res.status(404).json({ error: 'User not found.' });
     }
     const userRow = userRes.rows[0];
 
@@ -1266,7 +1266,7 @@ router.get('/subscription-status', requireAuth, async (req, res) => {
     });
   } catch (err) {
     console.error('Subscription status error:', err);
-    res.status(500).json({ error: 'Abonelik durumu alınamadı.' });
+    res.status(500).json({ error: 'Could not load subscription status.' });
   }
 });
 
@@ -1287,7 +1287,7 @@ router.get('/management-portal', requireAuth, async (req, res) => {
     });
   } catch (err) {
     console.error('Management portal error:', err);
-    res.status(500).json({ error: 'Yönetim portalı alınamadı.' });
+    res.status(500).json({ error: 'Could not open the billing portal.' });
   }
 });
 
@@ -1319,7 +1319,7 @@ router.post('/schedule-downgrade', requireAuth, async (req, res) => {
     );
 
     if (updated.rows.length === 0) {
-      return res.status(404).json({ error: 'Kullanıcı bulunamadı.' });
+      return res.status(404).json({ error: 'User not found.' });
     }
 
     res.json({
@@ -1328,12 +1328,12 @@ router.post('/schedule-downgrade', requireAuth, async (req, res) => {
       plan_expires_at: expiryDate.toISOString(),
       management_url: managementUrl,
       cancel_url: cancelUrl,
-      message: 'Downgrade işlemi planlandı. Üyeliğiniz dönem sonuna kadar kesintisiz devam edecektir.',
+      message: 'Downgrade scheduled. Your membership will continue uninterrupted until the end of the billing period.',
       user: formatUser(updated.rows[0])
     });
   } catch (err) {
     console.error('Schedule downgrade error:', err);
-    res.status(500).json({ error: 'Downgrade işlemi planlanamadı.' });
+    res.status(500).json({ error: 'Could not schedule the downgrade.' });
   }
 });
 
@@ -1358,18 +1358,18 @@ router.post('/resume-subscription', requireAuth, async (req, res) => {
     );
 
     if (updated.rows.length === 0) {
-      return res.status(404).json({ error: 'Kullanıcı bulunamadı.' });
+      return res.status(404).json({ error: 'User not found.' });
     }
 
     res.json({
       success: true,
       management_url: managementUrl,
-      message: 'Aboneliğiniz başarıyla sürdürüldü.',
+      message: 'Your subscription has been resumed.',
       user: formatUser(updated.rows[0])
     });
   } catch (err) {
     console.error('Resume subscription error:', err);
-    res.status(500).json({ error: 'Abonelik sürdürülemedi.' });
+    res.status(500).json({ error: 'Could not resume your subscription.' });
   }
 });
 

@@ -1,10 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { X as CloseIcon } from 'lucide-react';
-import { useTranslation } from '../i18n';
 import './StatsModal.css';
 
 export default function StatsModal({ isOpen, onClose }) {
-  const { language } = useTranslation();
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -67,33 +65,16 @@ export default function StatsModal({ isOpen, onClose }) {
         ) : (
           <div className="stats-single-wrapper">
             <p className="stats-single-sentence">
-              {language === 'tr' ? (
-                <>
-                  Bugüne kadar{' '}
-                  <span className="stats-stat-highlight">{formatNumber(totalVisitorsX)}</span>{' '}
-                  girişimci, araştırmacı, serbest çalışan ve öğrencinin{' '}
-                  <span className="stats-stat-highlight">{formatNumber(totalWorkflowsY)}</span>{' '}
-                  günlük iş akışını basitleştirmesine yardımcı olduk — şu anda canlı{' '}
-                  <span className="stats-live-inline-badge">
-                    <span className="stats-beacon-indicator" />
-                    <strong>{formatNumber(liveVisitorsZ)}</strong> ziyaretçi
-                  </span>{' '}
-                  araçları kullanıyor.
-                </>
-              ) : (
-                <>
-                  We helped{' '}
-                  <span className="stats-stat-highlight">{formatNumber(totalVisitorsX)}</span>{' '}
-                  engineers, researchers, founders, and students simplify{' '}
-                  <span className="stats-stat-highlight">{formatNumber(totalWorkflowsY)}</span>{' '}
-                  everyday tasks — currently with{' '}
-                  <span className="stats-live-inline-badge">
-                    <span className="stats-beacon-indicator" />
-                    <strong>{formatNumber(liveVisitorsZ)}</strong> live visitors
-                  </span>{' '}
-                  online right now.
-                </>
-              )}
+              We helped{' '}
+              <span className="stats-stat-highlight">{formatNumber(totalVisitorsX)}</span>{' '}
+              engineers, researchers, founders, and students simplify{' '}
+              <span className="stats-stat-highlight">{formatNumber(totalWorkflowsY)}</span>{' '}
+              everyday tasks — currently with{' '}
+              <span className="stats-live-inline-badge">
+                <span className="stats-beacon-indicator" />
+                <strong>{formatNumber(liveVisitorsZ)}</strong> live visitors
+              </span>{' '}
+              online right now.
             </p>
           </div>
         )}

@@ -17,7 +17,6 @@ function readTokenFromUrl() {
 export default function ResetPasswordPage() {
   const { validateResetToken, resetPassword } = useAuth();
   const { language } = useTranslation();
-  const isTr = language === 'tr';
 
   const [resetToken] = useState(readTokenFromUrl);
   const [status, setStatus] = useState(resetToken ? 'checking' : 'invalid');
@@ -29,7 +28,7 @@ export default function ResetPasswordPage() {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    document.title = isTr ? 'Şifre Sıfırla | Cerilas' : 'Reset Password | Cerilas';
+    document.title = 'Reset Password | Cerilas';
     let robots = document.querySelector('meta[name="robots"]');
     if (!robots) {
       robots = document.createElement('meta');
@@ -37,7 +36,7 @@ export default function ResetPasswordPage() {
       document.head.appendChild(robots);
     }
     robots.setAttribute('content', 'noindex, nofollow');
-  }, [isTr]);
+  }, []);
 
   useEffect(() => {
     // Keep the one-time token out of browser history and Referer headers.
@@ -66,11 +65,11 @@ export default function ResetPasswordPage() {
     e.preventDefault();
     setError('');
     if (password.length < MIN_PASSWORD_LENGTH) {
-      setError(isTr ? `Şifre en az ${MIN_PASSWORD_LENGTH} karakter olmalıdır.` : `Password must be at least ${MIN_PASSWORD_LENGTH} characters.`);
+      setError(`Password must be at least ${MIN_PASSWORD_LENGTH} characters.`);
       return;
     }
     if (password !== confirmPassword) {
-      setError(isTr ? 'Şifreler eşleşmiyor.' : 'Passwords do not match.');
+      setError('Passwords do not match.');
       return;
     }
     setLoading(true);
@@ -78,7 +77,7 @@ export default function ResetPasswordPage() {
       await resetPassword(resetToken, password, language);
       setStatus('done');
     } catch (err) {
-      setError(err.message || (isTr ? 'Şifre güncellenemedi.' : 'Could not update your password.'));
+      setError(err.message || 'Could not update your password.');
     } finally {
       setLoading(false);
     }
@@ -89,10 +88,10 @@ export default function ResetPasswordPage() {
   };
 
   const titles = {
-    checking: isTr ? 'Bağlantı kontrol ediliyor' : 'Checking your link',
-    invalid: isTr ? 'Bağlantı geçersiz' : 'Link expired or invalid',
-    form: isTr ? 'Yeni şifre belirleyin' : 'Choose a new password',
-    done: isTr ? 'Şifreniz güncellendi' : 'Password updated'
+    checking: 'Checking your link',
+    invalid: 'Link expired or invalid',
+    form: 'Choose a new password',
+    done: 'Password updated'
   };
 
   return (
@@ -113,7 +112,7 @@ export default function ResetPasswordPage() {
           <h1 className="auth-modal-title">{titles[status]}</h1>
           {status === 'form' && maskedEmail && (
             <p className="auth-modal-subtitle">
-              {isTr ? `${maskedEmail} hesabı için yeni şifrenizi girin.` : `Enter a new password for ${maskedEmail}.`}
+              {`Enter a new password for ${maskedEmail}.`}
             </p>
           )}
         </div>
@@ -128,13 +127,13 @@ export default function ResetPasswordPage() {
         {status === 'checking' && (
           <div className="auth-reset-notice" role="status">
             <Loader2 size={20} className="auth-spinner" />
-            <p>{isTr ? 'Lütfen bekleyin...' : 'Please wait...'}</p>
+            <p>Please wait...</p>
           </div>
         )}
 
         {status === 'invalid' && (
           <button type="button" className="auth-submit-btn" onClick={requestNewLink}>
-            <span>{isTr ? 'Yeni Bağlantı İste' : 'Request a New Link'}</span>
+            <span>Request a New Link</span>
             <ArrowRight size={16} />
           </button>
         )}
@@ -142,7 +141,7 @@ export default function ResetPasswordPage() {
         {status === 'form' && (
           <form onSubmit={handleSubmit} className="auth-modal-form">
             <div className="auth-input-group">
-              <label className="auth-input-label">{isTr ? 'Yeni Şifre' : 'New Password'}</label>
+              <label className="auth-input-label">New Password</label>
               <div className="auth-input-wrapper">
                 <Lock size={16} className="auth-field-icon" />
                 <input
@@ -168,7 +167,7 @@ export default function ResetPasswordPage() {
               </div>
             </div>
             <div className="auth-input-group">
-              <label className="auth-input-label">{isTr ? 'Yeni Şifre (Tekrar)' : 'Confirm New Password'}</label>
+              <label className="auth-input-label">Confirm New Password</label>
               <div className="auth-input-wrapper">
                 <Lock size={16} className="auth-field-icon" />
                 <input
@@ -186,11 +185,11 @@ export default function ResetPasswordPage() {
               {loading ? (
                 <>
                   <Loader2 size={16} className="auth-spinner" />
-                  <span>{isTr ? 'Kaydediliyor...' : 'Saving...'}</span>
+                  <span>Saving...</span>
                 </>
               ) : (
                 <>
-                  <span>{isTr ? 'Şifreyi Güncelle' : 'Update Password'}</span>
+                  <span>Update Password</span>
                   <ArrowRight size={16} />
                 </>
               )}
@@ -203,17 +202,15 @@ export default function ResetPasswordPage() {
             <div className="auth-reset-notice" role="status">
               <CheckCircle2 size={20} className="auth-reset-notice-icon" />
               <p>
-                {isTr
-                  ? 'Yeni şifrenizle giriş yaptınız. Diğer cihazlardaki oturumlarınız güvenlik için kapatıldı.'
-                  : "You're now signed in with your new password. Sessions on your other devices were signed out for security."}
+                You're now signed in with your new password. Sessions on your other devices were signed out for security.
               </p>
             </div>
             <button type="button" className="auth-submit-btn" style={{ marginTop: '1rem' }} onClick={() => { window.location.href = '/growth'; }}>
-              <span>{isTr ? 'GrowthControl’e Devam Et' : 'Continue to GrowthControl'}</span>
+              <span>Continue to GrowthControl</span>
               <ArrowRight size={16} />
             </button>
             <p className="auth-switch-text" style={{ textAlign: 'center', marginTop: '0.75rem' }}>
-              <a className="auth-inline-switch-btn" href="/">{isTr ? 'Ücretsiz araçlara git' : 'Go to free tools'}</a>
+              <a className="auth-inline-switch-btn" href="/">Go to free tools</a>
             </p>
           </>
         )}

@@ -31,9 +31,6 @@ export default function GrowthDeleteWorkspaceModal({
   const [copied, setCopied] = useState(false);
   const inputRef = useRef(null);
 
-  // GrowthControl is strictly in English
-  const isTr = false;
-
   const workspaceName = workspace?.name || 'Workspace';
   const targetDomain = workspace?.primary_domain || workspace?.canonical_url || '';
   const confirmationTarget = workspaceName;
@@ -103,7 +100,7 @@ export default function GrowthDeleteWorkspaceModal({
       const data = await res.json().catch(() => ({}));
 
       if (!res.ok) {
-        throw new Error(data.error || (isTr ? 'Çalışma alanı silinemedi.' : 'Failed to delete workspace.'));
+        throw new Error(data.error || 'Failed to delete workspace.');
       }
 
       if (onSuccess) {
@@ -111,7 +108,7 @@ export default function GrowthDeleteWorkspaceModal({
       }
       onClose();
     } catch (err) {
-      setErrorMsg(err.message || (isTr ? 'Bilinmeyen bir hata oluştu.' : 'An unexpected error occurred.'));
+      setErrorMsg(err.message || 'An unexpected error occurred.');
       setIsDeleting(false);
     }
   };
@@ -137,7 +134,7 @@ export default function GrowthDeleteWorkspaceModal({
               </div>
               <span className="growth-delete-pill">
                 <ShieldAlert size={12} />
-                <span>{isTr ? 'Kalıcı İşlem' : 'Permanent Action'}</span>
+                <span>Permanent Action</span>
               </span>
             </div>
 
@@ -146,19 +143,17 @@ export default function GrowthDeleteWorkspaceModal({
               className="growth-delete-modal-close-btn"
               onClick={onClose}
               disabled={isDeleting}
-              aria-label={isTr ? 'Kapat' : 'Close'}
+              aria-label="Close"
             >
               <X size={16} />
             </button>
           </div>
 
           <h2 id="growth-delete-modal-title" className="growth-delete-modal-title">
-            {isTr ? 'Çalışma Alanını Kalıcı Olarak Sil' : 'Permanently Delete Workspace'}
+            Permanently Delete Workspace
           </h2>
           <p className="growth-delete-modal-subtitle">
-            {isTr 
-              ? 'Bu işlem geri alınamaz. Bu markaya ve web sitesine ait tüm analizler, geçmiş veriler ve telemetri bağlantıları anında silinir.'
-              : 'This action is irreversible. All crawl data, GEO AI rankings, and telemetry feeds for this website will be permanently purged.'}
+            This action is irreversible. All crawl data, GEO AI rankings, and telemetry feeds for this website will be permanently purged.
           </p>
         </div>
 
@@ -179,13 +174,13 @@ export default function GrowthDeleteWorkspaceModal({
                 <span className="growth-delete-target-name">{workspaceName}</span>
                 <span className="growth-delete-target-domain">
                   <Globe size={11} />
-                  <span>{targetDomain || (isTr ? 'Alan adı belirtilmedi' : 'No domain specified')}</span>
+                  <span>{targetDomain || 'No domain specified'}</span>
                 </span>
               </div>
             </div>
 
             <span className="growth-delete-target-tag">
-              {workspace?.growth_score ? `Score: ${workspace.growth_score}` : (isTr ? 'Aktif Marka' : 'Active Brand')}
+              {workspace?.growth_score ? `Score: ${workspace.growth_score}` : 'Active Brand'}
             </span>
           </div>
 
@@ -193,35 +188,35 @@ export default function GrowthDeleteWorkspaceModal({
           <div className="growth-delete-impact-card">
             <h4 className="growth-delete-impact-title">
               <AlertTriangle size={14} className="growth-delete-impact-icon" />
-              <span>{isTr ? 'Kalıcı Olarak Yok Edilecek Veriler:' : 'The following records will be permanently erased:'}</span>
+              <span>The following records will be permanently erased:</span>
             </h4>
             <ul className="growth-delete-impact-list">
               <li className="growth-delete-impact-item">
                 <FileText size={14} className="growth-delete-impact-icon" />
                 <span>
-                  <strong>{isTr ? 'SEO & Teknik Denetim:' : 'SEO & Technical Audits:'}</strong>{' '}
-                  {isTr ? 'Taranmış tüm URL kayıtları, sayfa sorunları ve sağlık geçmişi' : 'All crawled URL status logs, issue trackers, and audit scores'}
+                  <strong>SEO & Technical Audits:</strong>{' '}
+                  All crawled URL status logs, issue trackers, and audit scores
                 </span>
               </li>
               <li className="growth-delete-impact-item">
                 <Sparkles size={14} className="growth-delete-impact-icon" />
                 <span>
-                  <strong>{isTr ? 'AI Arama Görünürlüğü (GEO):' : 'AI Visibility (GEO):'}</strong>{' '}
-                  {isTr ? 'Tüm takip edilen sorgular, yapay zeka model yanıtları ve atıf skorları' : 'Tracked search prompts, synthetic engine answers, and citation telemetry'}
+                  <strong>AI Visibility (GEO):</strong>{' '}
+                  Tracked search prompts, synthetic engine answers, and citation telemetry
                 </span>
               </li>
               <li className="growth-delete-impact-item">
                 <Link2 size={14} className="growth-delete-impact-icon" />
                 <span>
-                  <strong>{isTr ? 'Google Entegrasyonları:' : 'Google Telemetry Feeds:'}</strong>{' '}
-                  {isTr ? 'Search Console, Google Analytics 4 ve Google İşletme bağlantıları' : 'Connected Search Console, GA4, and Google Business Profile links'}
+                  <strong>Google Telemetry Feeds:</strong>{' '}
+                  Connected Search Console, GA4, and Google Business Profile links
                 </span>
               </li>
               <li className="growth-delete-impact-item">
                 <TrendingUp size={14} className="growth-delete-impact-icon" />
                 <span>
-                  <strong>{isTr ? 'Aksiyon Akışı & Rakipler:' : 'Action Feed & Competitors:'}</strong>{' '}
-                  {isTr ? 'Büyüme önerileri, görev geçmişi, rakip takibi ve rehber dizinleri' : 'Optimisation roadmaps, competitor benchmarks, and directory citations'}
+                  <strong>Action Feed & Competitors:</strong>{' '}
+                  Optimisation roadmaps, competitor benchmarks, and directory citations
                 </span>
               </li>
             </ul>
@@ -238,17 +233,17 @@ export default function GrowthDeleteWorkspaceModal({
           {/* Confirmation Input Field */}
           <div className="growth-delete-confirmation-box">
             <p className="growth-delete-confirm-label">
-              {isTr ? 'Silme işlemini onaylamak için lütfen aşağıya ' : 'To confirm deletion, please type '}
+              {'To confirm deletion, please type '}
               <button
                 type="button"
                 className="growth-delete-target-chip"
                 onClick={handleCopyAndFill}
-                title={isTr ? 'Kopyalamak ve doldurmak için tıklayın' : 'Click to copy and fill'}
+                title="Click to copy and fill"
               >
                 <span>{confirmationTarget}</span>
                 {copied ? <Check size={11} className="text-success" /> : <Copy size={11} />}
               </button>
-              {isTr ? ' yazın:' : ' below:'}
+              {' below:'}
             </p>
 
             <div className="growth-delete-input-wrap">
@@ -258,7 +253,7 @@ export default function GrowthDeleteWorkspaceModal({
                 className={`growth-delete-confirm-input ${isMatch ? 'is-confirmed' : ''}`}
                 value={confirmInput}
                 onChange={(e) => setConfirmInput(e.target.value)}
-                placeholder={isTr ? `"${confirmationTarget}" yazın` : `Type "${confirmationTarget}"`}
+                placeholder={`Type "${confirmationTarget}"`}
                 disabled={isDeleting}
                 autoComplete="off"
                 spellCheck="false"
@@ -277,7 +272,7 @@ export default function GrowthDeleteWorkspaceModal({
               onClick={onClose}
               disabled={isDeleting}
             >
-              {isTr ? 'Vazgeç' : 'Cancel'}
+              Cancel
             </button>
 
             <button
@@ -288,12 +283,12 @@ export default function GrowthDeleteWorkspaceModal({
               {isDeleting ? (
                 <>
                   <Loader2 size={15} className="spin" />
-                  <span>{isTr ? 'Siliniyor...' : 'Deleting Workspace...'}</span>
+                  <span>Deleting Workspace...</span>
                 </>
               ) : (
                 <>
                   <Trash2 size={15} />
-                  <span>{isTr ? 'Çalışma Alanını Kalıcı Olarak Sil' : 'Permanently Delete Workspace'}</span>
+                  <span>Permanently Delete Workspace</span>
                 </>
               )}
             </button>

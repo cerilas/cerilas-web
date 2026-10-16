@@ -1218,8 +1218,8 @@ export default function PdfEditorTool({ onBack, toolMeta }) {
               <div className="pdf-export-success-info">
                 <CheckCircle2 size={18} className="icon-emerald" />
                 <div>
-                  <div className="pdf-export-success-title">{exportSuccess.filename} hazır!</div>
-                  <div className="pdf-export-success-sub">Otomatik indirme başlamadıysa lütfen aşağıdaki butona tıklayın.</div>
+                  <div className="pdf-export-success-title">{exportSuccess.filename} is ready!</div>
+                  <div className="pdf-export-success-sub">If the download didn't start automatically, click the button below.</div>
                 </div>
               </div>
               <div className="pdf-export-success-actions">
@@ -1231,22 +1231,22 @@ export default function PdfEditorTool({ onBack, toolMeta }) {
                   rel="noopener noreferrer"
                 >
                   <Download size={14} />
-                  <span>Hemen İndir</span>
+                  <span>Download Now</span>
                 </a>
                 <button
                   type="button"
                   className="pdf-view-btn-direct"
                   onClick={() => window.open(exportSuccess.url, '_blank')}
-                  title="Yeni sekmede aç"
+                  title="Open in new tab"
                 >
                   <Eye size={14} />
-                  <span>Görüntüle</span>
+                  <span>View</span>
                 </button>
                 <button
                   type="button"
                   className="pdf-dismiss-btn-direct"
                   onClick={() => setExportSuccess(null)}
-                  title="Kapat"
+                  title="Close"
                 >
                   <X size={14} />
                 </button>

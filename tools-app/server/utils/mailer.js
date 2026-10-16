@@ -153,7 +153,7 @@ export function buildEmailTemplate({
             <a class="em-footer-link" href="${baseUrl}" style="color:#3f3f46;font-weight:600;text-decoration:none;">Cerilas' Tools</a>
             &nbsp;·&nbsp;
             <a class="em-footer-link" href="${baseUrl}/growth" style="color:#3f3f46;font-weight:600;text-decoration:none;">GrowthControl</a>
-            <br>© ${new Date().getFullYear()} CERİLAS Yüksek Teknoloji San. ve Tic. AŞ
+            <br>© ${new Date().getFullYear()} Cerilas. All rights reserved.
           </p>
         </td></tr>
       </table>

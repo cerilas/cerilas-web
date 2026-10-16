@@ -213,7 +213,7 @@ const SEMANTIC_KEYWORDS = [
   'NASA TRL ISO 16290 Assessment Tool',
   'Software Readiness Level (SRL) Scale',
   'DeepTech R&D Maturity Checklist',
-  'TÜBİTAK 1501 TRL Değerlendirme',
+  'TÜBİTAK 1501 TRL Assessment',
   'EIC Pathfinder Entry TRL 1 to 4',
   'TRL Gap Analysis Roadmap Generator',
   'MRL vs TRL Manufacturing Readiness',
@@ -286,7 +286,7 @@ export default function TrlCalculatorSeo() {
         'price': '0',
         'priceCurrency': 'USD'
       },
-      'description': 'Free online Technology Readiness Level (TRL 1-9) calculator for Horizon Europe, EIC Accelerator, NASA ISO 16290, Software SRL, and TÜBİTAK Ar-Ge projects. Evaluates sequential prerequisite gating, development gaps, and grant eligibility with 100% in-browser privacy.'
+      'description': 'Free online Technology Readiness Level (TRL 1-9) calculator for Horizon Europe, EIC Accelerator, NASA ISO 16290, Software SRL, and TÜBİTAK R&D projects. Evaluates sequential prerequisite gating, development gaps, and grant eligibility with 100% in-browser privacy.'
     };
 
     // 3. HowTo Schema
@@ -299,7 +299,7 @@ export default function TrlCalculatorSeo() {
         {
           '@type': 'HowToStep',
           'name': 'Select Standard Framework',
-          'text': 'Choose the applicable evaluation standard: Horizon Europe (EC/EIC), NASA Aerospace (ISO 16290), Software/AI (SRL), or TÜBİTAK Ar-Ge.'
+          'text': 'Choose the applicable evaluation standard: Horizon Europe (EC/EIC), NASA Aerospace (ISO 16290), Software/AI (SRL), or TÜBİTAK R&D.'
         },
         {
           '@type': 'HowToStep',

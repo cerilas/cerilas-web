@@ -318,6 +318,8 @@ export async function purchasePackage(rcPackage, customerEmail = null, htmlTarge
   try {
     const result = await purchases.purchase({
       rcPackage,
+      selectedLocale: 'en',
+      defaultLocale: 'en',
       customerEmail: customerEmail || undefined,
       htmlTarget: htmlTarget || undefined
     });
@@ -347,8 +349,8 @@ export async function purchasePackage(rcPackage, customerEmail = null, htmlTarge
       err?.errorCode === 6 ||
       rawMsg.includes('already purchased') ||
       rawMsg.includes('already has an active subscription') ||
-      rawMsg.includes('zaten bunu satın') ||
-      rawMsg.includes('zaten satın alınmış');
+      // Paddle/RevenueCat may return localized errors ("zaten" = "already")
+      rawMsg.includes('zaten');
 
     if (isAlreadyPurchased) {
       const alreadyPurchasedErr = new Error(err?.message || 'Product already purchased');
@@ -413,6 +415,8 @@ export async function presentPaywall(options = {}) {
     }
 
     const paywallParams = {
+      selectedLocale: 'en',
+      defaultLocale: 'en',
       htmlTarget: options.htmlTarget || undefined,
       offering: options.offering || undefined,
       customerEmail: options.customerEmail || undefined,

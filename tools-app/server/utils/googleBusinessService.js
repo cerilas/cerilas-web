@@ -32,7 +32,7 @@ function requirePlacesApiKey() {
   if (!apiKey) {
     throw new GoogleBusinessError(
       'GOOGLE_MAPS_NOT_CONFIGURED',
-      'Google Maps API anahtarı (GOOGLE_MAPS_API_KEY) yapılandırılmamış. Gerçek Google verisi alınamıyor.',
+      'Google Maps API key (GOOGLE_MAPS_API_KEY) is not configured. Live Google data is unavailable.',
       503
     );
   }
@@ -188,7 +188,7 @@ async function placesTextSearch(apiKey, textQuery, { language, country, lat, lng
   if (!res.ok) {
     const detail = await res.text().catch(() => '');
     console.warn('[Google Places search HTTP]:', res.status, detail.slice(0, 300));
-    throw new GoogleBusinessError('GOOGLE_PLACES_ERROR', 'Google Maps araması başarısız oldu.', 502);
+    throw new GoogleBusinessError('GOOGLE_PLACES_ERROR', 'Google Maps search failed.', 502);
   }
   const data = await res.json();
   return (data.places || []).map(mapSearchResult);
@@ -207,7 +207,7 @@ async function placesDetails(apiKey, placeId, language) {
   if (!res.ok) {
     const detail = await res.text().catch(() => '');
     console.warn('[Google Places details HTTP]:', res.status, detail.slice(0, 300));
-    throw new GoogleBusinessError('GOOGLE_PLACES_ERROR', 'Google Maps işletme detayları alınamadı.', 502);
+    throw new GoogleBusinessError('GOOGLE_PLACES_ERROR', 'Could not load business details from Google Maps.', 502);
   }
   return res.json();
 }
@@ -217,7 +217,7 @@ async function placesDetails(apiKey, placeId, language) {
  */
 export async function searchGoogleBusiness(query, options = {}) {
   const apiKey = requirePlacesApiKey();
-  const { country = 'TR', language = 'tr' } = options;
+  const { country = 'US', language = 'en' } = options;
   const rawQuery = String(query || '').trim();
   if (!rawQuery) return [];
 
@@ -255,15 +255,15 @@ export async function searchGoogleBusiness(query, options = {}) {
  */
 export async function fetchGoogleBusinessProfile(placeId, options = {}) {
   const apiKey = requirePlacesApiKey();
-  const { language = 'tr' } = options;
+  const { language = 'en' } = options;
 
   if (!isGooglePlaceId(placeId)) {
-    throw new GoogleBusinessError('INVALID_PLACE_ID', 'Geçerli bir Google Maps işletmesi seçilmedi.', 400);
+    throw new GoogleBusinessError('INVALID_PLACE_ID', 'No valid Google Maps business was selected.', 400);
   }
 
   const d = await placesDetails(apiKey, placeId, language);
   if (!d) {
-    throw new GoogleBusinessError('PLACE_NOT_FOUND', 'İşletme Google Maps üzerinde bulunamadı.', 404);
+    throw new GoogleBusinessError('PLACE_NOT_FOUND', 'Business not found on Google Maps.', 404);
   }
 
   const reviews = (Array.isArray(d.reviews) ? d.reviews : []).map(r => ({
@@ -292,8 +292,8 @@ export async function fetchGoogleBusinessProfile(placeId, options = {}) {
 }
 
 function riskFromRating(rating, totalReviews) {
-  if (!totalReviews) return 'Orta Risk';
-  return rating >= 4.3 ? 'Düşük Risk' : rating >= 3.8 ? 'Orta Risk' : 'Yüksek Risk';
+  if (!totalReviews) return 'Medium Risk';
+  return rating >= 4.3 ? 'Low Risk' : rating >= 3.8 ? 'Medium Risk' : 'High Risk';
 }
 
 /**
@@ -338,12 +338,12 @@ Google rating: ${profile.rating} / 5 from ${profile.total_reviews} ratings
 Reviews returned by Google (${reviews.length}):
 ${reviewLines}
 
-Return JSON in this exact structure (write the text fields in Turkish):
+Return JSON in this exact structure (write all text fields in English):
 {
   "chronic_complaint_themes": [
     { "theme": "Short complaint title", "count": 1, "severity": "high/medium/low", "description": "What customers complain about" }
   ],
-  "ai_recommendation_risk": "Düşük Risk" | "Orta Risk" | "Yüksek Risk",
+  "ai_recommendation_risk": "Low Risk" | "Medium Risk" | "High Risk",
   "ai_risk_explanation": "Would AI answer engines recommend this business based on this rating and these reviews? Why?",
   "sentiment_summary": "Two-sentence summary of customer perception in these reviews.",
   "actionable_recommendations": ["..."]
@@ -374,7 +374,7 @@ Only list complaint themes that actually appear in the reviews above; "count" is
 export async function generateGoogleReviewReply({ businessName, reviewerName, rating, reviewText, issueTheme }) {
   const geminiKey = process.env.GEMINI_API_KEY;
   if (!geminiKey) {
-    throw new Error('Gemini API anahtarı yapılandırılmamış.');
+    throw new Error('Gemini API key is not configured.');
   }
 
   const ai = new GoogleGenAI({ apiKey: geminiKey });

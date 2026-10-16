@@ -28,7 +28,7 @@ export function getGrowthGoogleAuthUrl(workspaceId, userId, redirectUri = proces
   const clientId = process.env.GOOGLE_CLIENT_ID;
 
   if (!clientId || !redirectUri) {
-    throw new Error('Google OAuth kimlik bilgileri (.env GOOGLE_CLIENT_ID / GOOGLE_REDIRECT_URI) yapılandırılmamış.');
+    throw new Error('Google OAuth credentials (.env GOOGLE_CLIENT_ID / GOOGLE_REDIRECT_URI) are not configured.');
   }
 
   const state = `growth_${workspaceId}_${userId}_${Date.now()}`;
@@ -64,7 +64,7 @@ export async function getValidGrowthAccessToken(connection) {
   }
 
   if (!connection.encrypted_refresh_token) {
-    throw new Error('Google oturum yenileme anahtarı (refresh token) bulunamadı. Lütfen Google hesabınızı tekrar bağlayın.');
+    throw new Error('Google refresh token not found. Please reconnect your Google account.');
   }
 
   const refreshToken = decryptText(connection.encrypted_refresh_token);
@@ -86,7 +86,7 @@ export async function getValidGrowthAccessToken(connection) {
 
   if (!response.ok) {
     const errText = await response.text();
-    throw new Error(`Google token yenileme hatası (${response.status}): ${errText}`);
+    throw new Error(`Google token refresh failed (${response.status}): ${errText}`);
   }
 
   const tokenData = await response.json();
@@ -115,7 +115,7 @@ export async function handleGrowthOAuthCallback({ code, state, redirectUri }) {
   const userId = parts[2] ? parseInt(parts[2], 10) : null;
 
   if (!workspaceId || isNaN(workspaceId)) {
-    throw new Error('Geçersiz veya eksik çalışma alanı kimliği.');
+    throw new Error('Invalid or missing workspace ID.');
   }
 
   // 1. Fetch workspace & organization
@@ -124,7 +124,7 @@ export async function handleGrowthOAuthCallback({ code, state, redirectUri }) {
     [workspaceId]
   );
   if (wsRes.rows.length === 0) {
-    throw new Error(`Çalışma alanı (ID: ${workspaceId}) bulunamadı.`);
+    throw new Error(`Workspace (ID: ${workspaceId}) not found.`);
   }
   const workspace = wsRes.rows[0];
   const orgId = workspace.organization_id;
@@ -345,44 +345,44 @@ export async function handleGrowthOAuthCallback({ code, state, redirectUri }) {
 }
 
 const COUNTRY_MAP = {
-  tur: { name: 'Türkiye', flag: '🇹🇷' },
-  usa: { name: 'Amerika Birleşik Devletleri', flag: '🇺🇸' },
-  deu: { name: 'Almanya', flag: '🇩🇪' },
-  gbr: { name: 'Birleşik Krallık', flag: '🇬🇧' },
-  fra: { name: 'Fransa', flag: '🇫🇷' },
-  nld: { name: 'Hollanda', flag: '🇳🇱' },
-  aze: { name: 'Azerbaycan', flag: '🇦🇿' },
-  ita: { name: 'İtalya', flag: '🇮🇹' },
-  esp: { name: 'İspanya', flag: '🇪🇸' },
-  rus: { name: 'Rusya', flag: '🇷🇺' },
-  can: { name: 'Kanada', flag: '🇨🇦' },
-  aus: { name: 'Avustralya', flag: '🇦🇺' },
-  ind: { name: 'Hindistan', flag: '🇮🇳' },
-  bra: { name: 'Brezilya', flag: '🇧🇷' },
-  bel: { name: 'Belçika', flag: '🇧🇪' },
-  che: { name: 'İsviçre', flag: '🇨🇭' },
-  aut: { name: 'Avusturya', flag: '🇦🇹' },
-  swe: { name: 'İsveç', flag: '🇸🇪' },
-  nor: { name: 'Norveç', flag: '🇳🇴' },
-  dnk: { name: 'Danimarka', flag: '🇩🇰' },
-  pol: { name: 'Polonya', flag: '🇵🇱' },
-  ukr: { name: 'Ukrayna', flag: '🇺🇦' },
-  grc: { name: 'Yunanistan', flag: '🇬🇷' },
-  sau: { name: 'Suudi Arabistan', flag: '🇸🇦' },
-  are: { name: 'Birleşik Arap Emirlikleri', flag: '🇦🇪' },
-  qat: { name: 'Katar', flag: '🇶🇦' },
-  irn: { name: 'İran', flag: '🇮🇷' },
-  irq: { name: 'Irak', flag: '🇮🇶' },
-  kaz: { name: 'Kazakistan', flag: '🇰🇿' },
-  uzb: { name: 'Özbekistan', flag: '🇺🇿' },
-  chn: { name: 'Çin', flag: '🇨🇳' },
-  jpn: { name: 'Japonya', flag: '🇯🇵' },
-  kor: { name: 'Güney Kore', flag: '🇰🇷' }
+  tur: { name: 'Turkey', flag: '🇹🇷' },
+  usa: { name: 'United States', flag: '🇺🇸' },
+  deu: { name: 'Germany', flag: '🇩🇪' },
+  gbr: { name: 'United Kingdom', flag: '🇬🇧' },
+  fra: { name: 'France', flag: '🇫🇷' },
+  nld: { name: 'Netherlands', flag: '🇳🇱' },
+  aze: { name: 'Azerbaijan', flag: '🇦🇿' },
+  ita: { name: 'Italy', flag: '🇮🇹' },
+  esp: { name: 'Spain', flag: '🇪🇸' },
+  rus: { name: 'Russia', flag: '🇷🇺' },
+  can: { name: 'Canada', flag: '🇨🇦' },
+  aus: { name: 'Australia', flag: '🇦🇺' },
+  ind: { name: 'India', flag: '🇮🇳' },
+  bra: { name: 'Brazil', flag: '🇧🇷' },
+  bel: { name: 'Belgium', flag: '🇧🇪' },
+  che: { name: 'Switzerland', flag: '🇨🇭' },
+  aut: { name: 'Austria', flag: '🇦🇹' },
+  swe: { name: 'Sweden', flag: '🇸🇪' },
+  nor: { name: 'Norway', flag: '🇳🇴' },
+  dnk: { name: 'Denmark', flag: '🇩🇰' },
+  pol: { name: 'Poland', flag: '🇵🇱' },
+  ukr: { name: 'Ukraine', flag: '🇺🇦' },
+  grc: { name: 'Greece', flag: '🇬🇷' },
+  sau: { name: 'Saudi Arabia', flag: '🇸🇦' },
+  are: { name: 'United Arab Emirates', flag: '🇦🇪' },
+  qat: { name: 'Qatar', flag: '🇶🇦' },
+  irn: { name: 'Iran', flag: '🇮🇷' },
+  irq: { name: 'Iraq', flag: '🇮🇶' },
+  kaz: { name: 'Kazakhstan', flag: '🇰🇿' },
+  uzb: { name: 'Uzbekistan', flag: '🇺🇿' },
+  chn: { name: 'China', flag: '🇨🇳' },
+  jpn: { name: 'Japan', flag: '🇯🇵' },
+  kor: { name: 'South Korea', flag: '🇰🇷' }
 };
 
 const DEVICE_MAP = {
-  DESKTOP: 'Masaüstü',
-  MOBILE: 'Mobil',
+  DESKTOP: 'Desktop',
+  MOBILE: 'Mobile',
   TABLET: 'Tablet'
 };
 
@@ -398,14 +398,14 @@ export async function syncGrowthSearchConsole(workspaceId, explicitAccessToken =
   );
 
   if (connRes.rows.length === 0) {
-    throw new Error('Bu çalışma alanı için Google Search Console entegrasyonu bulunamadı.');
+    throw new Error('No Google Search Console integration found for this workspace.');
   }
 
   const connection = connRes.rows[0];
   const siteUrl = explicitSiteUrl || connection.external_property_id;
 
   if (!siteUrl) {
-    throw new Error('Lütfen önce Search Console için bir mülk (siteUrl) seçin.');
+    throw new Error('Please select a Search Console property (siteUrl) first.');
   }
 
   // 2. Obtain valid access token
@@ -500,8 +500,8 @@ export async function syncGrowthSearchConsole(workspaceId, explicitAccessToken =
     const clk = Number(r.clicks) || 0;
     const ctrVal = Number(r.ctr) || 0;
 
-    // Dayanak: Google organik SERP benchmarkında ilk 3 sıranın ortalama TO'su %14'tür (Advanced Web Ranking).
-    // 4.0 - 15.0 arası sıralamada olup en az 30 gösterim alan kelimeler gerçek vuruş mesafesindedir.
+    // Basis: average CTR of the top 3 organic results is ~14% (Advanced Web Ranking benchmark).
+    // Queries ranking 4.0–15.0 with at least 30 impressions are within striking distance.
     const isStriking = pos >= 4.0 && pos <= 15.0 && imp >= 30;
     let potential = null;
     let potentialHint = null;
@@ -510,13 +510,13 @@ export async function syncGrowthSearchConsole(workspaceId, explicitAccessToken =
       const benchmarkTop3Clicks = Math.round(imp * 0.14);
       const gain = Math.max(0, benchmarkTop3Clicks - clk);
       if (gain >= 3) {
-        potential = `+${gain} tık`;
+        potential = `+${gain} clicks`;
         if (ctrVal < 0.02 && pos <= 10.0) {
-          potentialHint = 'Düşük TO: Başlık (title) & snippet optimize et';
+          potentialHint = 'Low CTR: optimize the title and snippet';
         } else if (pos > 10.0) {
-          potentialHint = '2. Sayfa: İçerik güncellemesiyle 1. sayfaya taşı';
+          potentialHint = 'Page 2: refresh the content to reach page 1';
         } else {
-          potentialHint = 'İlk 3 fırsatı: İç link ver & içeriği zenginleştir';
+          potentialHint = 'Top 3 opportunity: add internal links and enrich the content';
         }
       }
     }
@@ -617,7 +617,7 @@ export async function syncGrowthSearchConsole(workspaceId, explicitAccessToken =
       if (totalImp >= 10) {
         pList.sort((a, b) => b.impressions - a.impressions);
         const topShare = Math.round((pList[0].impressions / totalImp) * 100);
-        const severity = topShare < 70 ? 'Yüksek' : 'Orta';
+        const severity = topShare < 70 ? 'High' : 'Medium';
         cannibalization.push({
           query,
           totalImpressions: totalImp,
@@ -704,7 +704,7 @@ export async function syncGrowthSearchConsole(workspaceId, explicitAccessToken =
       const idx = inspectRes.inspectionResult.indexStatusResult;
       urlInspection = {
         verdict: idx.verdict || 'PASS',
-        coverageState: idx.coverageState || 'Dizine Eklendi',
+        coverageState: idx.coverageState || 'Indexed',
         lastCrawlTime: idx.lastCrawlTime || null,
         crawledAs: idx.crawledAs || 'GOOGLEBOT_SMARTPHONE',
         googleCanonical: idx.googleCanonical || inspectTarget,
@@ -871,14 +871,14 @@ export async function syncGrowthAnalytics(workspaceId, explicitAccessToken = nul
   );
 
   if (connRes.rows.length === 0) {
-    throw new Error('Bu çalışma alanı için Google Analytics 4 entegrasyonu bulunamadı.');
+    throw new Error('No Google Analytics 4 integration found for this workspace.');
   }
 
   const connection = connRes.rows[0];
   const propertyId = explicitPropertyId || connection.external_property_id;
 
   if (!propertyId) {
-    throw new Error('Lütfen önce Google Analytics 4 için bir mülk (Property ID) seçin.');
+    throw new Error('Please select a Google Analytics 4 property (Property ID) first.');
   }
 
   const cleanPropId = String(propertyId).replace('properties/', '').trim();

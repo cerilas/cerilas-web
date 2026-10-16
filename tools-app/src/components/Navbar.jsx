@@ -21,7 +21,7 @@ import PersonaMenu from './PersonaMenu/PersonaMenu';
 import './NavbarAuth.css';
 
 export default function Navbar({ activeTool, onNavigateHome, onOpenStats, onSelectTool }) {
-  const { t, language } = useTranslation();
+  const { t } = useTranslation();
   const { toggleTheme, isDark } = useTheme();
   const { user, isAuthenticated, logout, openAuthModal } = useAuth();
   const [userMenuOpen, setUserMenuOpen] = useState(false);
@@ -29,7 +29,6 @@ export default function Navbar({ activeTool, onNavigateHome, onOpenStats, onSele
   const userMenuTimeoutRef = useRef(null);
 
   const isAi = activeTool && (activeTool.isAi || activeTool.badge === 'AI Assisted' || activeTool.badge === 'AI Powered' || activeTool.slug === 'ats-resume-checker');
-  const isTr = language === 'tr';
 
   const handleUserMenuMouseEnter = () => {
     if (userMenuTimeoutRef.current) clearTimeout(userMenuTimeoutRef.current);
@@ -161,7 +160,7 @@ export default function Navbar({ activeTool, onNavigateHome, onOpenStats, onSele
                   <span className="nav-avatar-online-dot" />
                 </div>
                 <span className="nav-user-display-name">
-                  {user.first_name || user.name || (user.email ? user.email.split('@')[0] : 'Kullanıcı')}
+                  {user.first_name || user.name || (user.email ? user.email.split('@')[0] : 'User')}
                 </span>
                 <ChevronDown size={14} className={`nav-user-chevron ${userMenuOpen ? 'rotate-180' : ''}`} />
               </button>
@@ -196,7 +195,7 @@ export default function Navbar({ activeTool, onNavigateHome, onOpenStats, onSele
                           GrowthControl
                           <span className="nav-growth-pill-sm">PREMIUM</span>
                         </span>
-                        <span className="nav-item-sub">{isTr ? 'Büyüme & AI Arama Paneli' : 'AI Visibility & SEO Suite'}</span>
+                        <span className="nav-item-sub">AI Visibility & SEO Suite</span>
                       </div>
                     </a>
 
@@ -207,7 +206,7 @@ export default function Navbar({ activeTool, onNavigateHome, onOpenStats, onSele
                     >
                       <User size={16} className="nav-item-icon" />
                       <div className="nav-item-text-wrap">
-                        <span className="nav-item-title">{isTr ? 'Profil' : 'Profile'}</span>
+                        <span className="nav-item-title">Profile</span>
                         <span className="nav-item-sub">
                           {user.phone_verified ? (
                             <span className="verified-text">
@@ -217,7 +216,7 @@ export default function Navbar({ activeTool, onNavigateHome, onOpenStats, onSele
                           ) : (
                             <span className="unverified-text">
                               <AlertCircle size={11} />
-                              <span>{isTr ? 'Telefon Doğrula' : 'Verify Phone'}</span>
+                              <span>Verify Phone</span>
                             </span>
                           )}
                         </span>
@@ -231,9 +230,9 @@ export default function Navbar({ activeTool, onNavigateHome, onOpenStats, onSele
                     >
                       <Package size={16} className="nav-item-icon" />
                       <div className="nav-item-text-wrap">
-                        <span className="nav-item-title">{isTr ? 'Plan' : 'Plan'}</span>
+                        <span className="nav-item-title">Plan</span>
                         <span className="nav-item-sub">
-                          {currentPlan === 'pro' ? 'Pro' : (currentPlan === 'enterprise' || currentPlan === 'unlimited') ? 'Unlimited' : (isTr ? 'Ücretsiz Başlangıç' : 'Free Starter')}
+                          {currentPlan === 'pro' ? 'Pro' : (currentPlan === 'enterprise' || currentPlan === 'unlimited') ? 'Unlimited' : 'Free Starter'}
                         </span>
                       </div>
                     </button>
@@ -246,7 +245,7 @@ export default function Navbar({ activeTool, onNavigateHome, onOpenStats, onSele
                       <CreditCard size={16} className="nav-item-icon" />
                       <div className="nav-item-text-wrap">
                         <span className="nav-item-title">Billing</span>
-                        <span className="nav-item-sub">{isTr ? 'Fatura & Ödeme' : 'Invoices & Tax Info'}</span>
+                        <span className="nav-item-sub">Invoices & Tax Info</span>
                       </div>
                     </button>
                   </div>
@@ -263,7 +262,7 @@ export default function Navbar({ activeTool, onNavigateHome, onOpenStats, onSele
                     }}
                   >
                     <LogOut size={15} />
-                    <span>{isTr ? 'Çıkış Yap' : 'Log Out'}</span>
+                    <span>Log Out</span>
                   </button>
                 </div>
               )}
@@ -273,17 +272,17 @@ export default function Navbar({ activeTool, onNavigateHome, onOpenStats, onSele
               type="button"
               onClick={() => openAuthModal('login')}
               className="nav-login-btn"
-              title={isTr ? 'Giriş Yap / Kayıt Ol' : 'Sign In / Register'}
+              title="Sign In / Register"
             >
               <User size={14} />
-              <span>{isTr ? 'Giriş Yap' : 'Sign In'}</span>
+              <span>Sign In</span>
             </button>
           )}
 
           <button
             onClick={toggleTheme}
             className="nav-theme-toggle-btn"
-            title={isDark ? (language === 'tr' ? 'Açık Tema' : 'Switch to Light Mode') : (language === 'tr' ? 'Koyu Tema' : 'Switch to Dark Mode')}
+            title={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
             aria-label={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
           >
             {isDark ? <Sun size={16} /> : <Moon size={16} />}

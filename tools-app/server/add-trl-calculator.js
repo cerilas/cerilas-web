@@ -8,9 +8,9 @@ async function registerTrlCalculatorTool() {
       await pool.query(`
         UPDATE cerilas_tools
         SET title = 'TRL Calculator (Technology Readiness Level)',
-            short_description = 'Interactive TRL Calculator for R&D projects and researchers. Assess Technology Readiness Level (TRL 1-9) across Horizon Europe, NASA, DeepTech SRL, and TÜBİTAK with gap analysis and grant matching.',
+            short_description = 'Interactive TRL Calculator for R&D projects and researchers. Assess Technology Readiness Level (TRL 1-9) across Horizon Europe, NASA, DeepTech SRL, and TUBITAK with gap analysis and grant matching.',
             seo_title = 'Free TRL Calculator (1-9) – Technology Readiness Level Assessment for R&D & Grants | Cerilas Tools',
-            seo_description = 'Calculate your R&D project Technology Readiness Level (TRL 1 to 9) accurately. Interactive diagnostic questionnaire for Horizon Europe, NASA ISO 16290, Software SRL, and TÜBİTAK Ar-Ge programs with grant eligibility and gap analysis roadmap.',
+            seo_description = 'Calculate your R&D project Technology Readiness Level (TRL 1 to 9) accurately. Interactive diagnostic questionnaire for Horizon Europe, NASA ISO 16290, Software SRL, and TUBITAK R&D programs with grant eligibility and gap analysis roadmap.',
             category = 'R&D & Engineering',
             icon_name = 'Gauge',
             cover_image_url = '/tool-icons/trl-calculator.png',
@@ -38,12 +38,12 @@ async function registerTrlCalculatorTool() {
     `, [
       'TRL Calculator (Technology Readiness Level)',
       'trl-calculator',
-      'Interactive TRL Calculator for R&D projects and researchers. Assess Technology Readiness Level (TRL 1-9) across Horizon Europe, NASA, DeepTech SRL, and TÜBİTAK with gap analysis and grant matching.',
+      'Interactive TRL Calculator for R&D projects and researchers. Assess Technology Readiness Level (TRL 1-9) across Horizon Europe, NASA, DeepTech SRL, and TUBITAK with gap analysis and grant matching.',
       'Gauge',
       '/tool-icons/trl-calculator.png',
       '#/tool/trl-calculator',
       'Free TRL Calculator (1-9) – Technology Readiness Level Assessment for R&D & Grants | Cerilas Tools',
-      'Calculate your R&D project Technology Readiness Level (TRL 1 to 9) accurately. Interactive diagnostic questionnaire for Horizon Europe, NASA ISO 16290, Software SRL, and TÜBİTAK Ar-Ge programs with grant eligibility and gap analysis roadmap.',
+      'Calculate your R&D project Technology Readiness Level (TRL 1 to 9) accurately. Interactive diagnostic questionnaire for Horizon Europe, NASA ISO 16290, Software SRL, and TUBITAK R&D programs with grant eligibility and gap analysis roadmap.',
       true,
       sortOrder,
       'R&D & Engineering',

@@ -122,7 +122,7 @@ export function AuthProvider({ children }) {
 
     const data = await res.json();
     if (!res.ok) {
-      throw new Error(data.error || 'Giriş yapılamadı.');
+      throw new Error(data.error || 'Sign in failed.');
     }
 
     if (data.token) {
@@ -137,7 +137,7 @@ export function AuthProvider({ children }) {
       setIsAuthModalOpen(false);
       return data.user;
     } else {
-      throw new Error('Geçersiz sunucu yanıtı.');
+      throw new Error('Invalid server response.');
     }
   };
 
@@ -220,7 +220,7 @@ export function AuthProvider({ children }) {
 
     const data = await res.json();
     if (!res.ok) {
-      throw new Error(data.error || 'Kayıt işlemi başarısız.');
+      throw new Error(data.error || 'Registration failed.');
     }
 
     if (data.token) {
@@ -235,7 +235,7 @@ export function AuthProvider({ children }) {
       setIsAuthModalOpen(false);
       return data.user;
     } else {
-      throw new Error('Geçersiz sunucu yanıtı.');
+      throw new Error('Invalid server response.');
     }
   };
 
@@ -249,7 +249,7 @@ export function AuthProvider({ children }) {
 
     const data = await res.json();
     if (!res.ok) {
-      throw new Error(data.error || 'Google ile giriş başarısız oldu.');
+      throw new Error(data.error || 'Google sign-in failed.');
     }
 
     if (data.token) {
@@ -264,7 +264,7 @@ export function AuthProvider({ children }) {
       setIsAuthModalOpen(false);
       return data.user;
     } else {
-      throw new Error('Geçersiz sunucu yanıtı.');
+      throw new Error('Invalid server response.');
     }
   };
 
@@ -275,7 +275,7 @@ export function AuthProvider({ children }) {
       const res = await fetch(`/api/auth/google/url?state=${encodeURIComponent(stateParam)}`);
       const data = await res.json();
       if (!res.ok || !data.url) {
-        throw new Error(data.error || 'Google yetkilendirme adresi alınamadı.');
+        throw new Error(data.error || 'Could not get the Google authorization URL.');
       }
 
       const width = 520;
@@ -318,7 +318,7 @@ export function AuthProvider({ children }) {
           } else if (event.data?.type === 'GOOGLE_AUTH_ERROR') {
             window.removeEventListener('message', messageListener);
             if (cleanupTimer) clearInterval(cleanupTimer);
-            reject(new Error(decodeURIComponent(event.data.error || 'Google ile işlem tamamlanamadı.')));
+            reject(new Error(decodeURIComponent(event.data.error || 'Google sign-in could not be completed.')));
           }
         };
 
@@ -347,7 +347,7 @@ export function AuthProvider({ children }) {
 
   // Unlink Google account
   const unlinkGoogleAccount = async () => {
-    if (!token) throw new Error('Oturum açılmamış.');
+    if (!token) throw new Error('Not signed in.');
     const res = await fetch('/api/auth/google/unlink', {
       method: 'POST',
       headers: {
@@ -358,7 +358,7 @@ export function AuthProvider({ children }) {
 
     const data = await res.json();
     if (!res.ok) {
-      throw new Error(data.error || 'Google hesabı bağlantısı kaldırılamadı.');
+      throw new Error(data.error || 'Could not unlink Google account.');
     }
 
     setUser(data.user);
@@ -407,7 +407,7 @@ export function AuthProvider({ children }) {
 
   // Update profile
   const updateProfile = async (profileData) => {
-    if (!token) throw new Error('Oturum açılmamış.');
+    if (!token) throw new Error('Not signed in.');
 
     const res = await fetch('/api/auth/profile', {
       method: 'PUT',
@@ -420,7 +420,7 @@ export function AuthProvider({ children }) {
 
     const data = await res.json();
     if (!res.ok) {
-      throw new Error(data.error || 'Profil güncellenemedi.');
+      throw new Error(data.error || 'Could not update profile.');
     }
 
     setUser(data.user);
@@ -472,7 +472,7 @@ export function AuthProvider({ children }) {
 
   // Update billing details
   const updateBilling = async (billingData) => {
-    if (!token) throw new Error('Oturum açılmamış.');
+    if (!token) throw new Error('Not signed in.');
 
     const res = await fetch('/api/auth/billing', {
       method: 'PUT',
@@ -485,7 +485,7 @@ export function AuthProvider({ children }) {
 
     const data = await res.json();
     if (!res.ok) {
-      throw new Error(data.error || 'Fatura bilgileri güncellenemedi.');
+      throw new Error(data.error || 'Could not update billing details.');
     }
 
     setUser(data.user);
@@ -494,7 +494,7 @@ export function AuthProvider({ children }) {
 
   // Upgrade Plan
   const upgradePlan = async (plan) => {
-    if (!token) throw new Error('Oturum açılmamış.');
+    if (!token) throw new Error('Not signed in.');
 
     const res = await fetch('/api/auth/upgrade-plan', {
       method: 'POST',
@@ -507,7 +507,7 @@ export function AuthProvider({ children }) {
 
     const data = await res.json();
     if (!res.ok) {
-      throw new Error(data.error || 'Plan yükseltilemedi.');
+      throw new Error(data.error || 'Could not upgrade plan.');
     }
 
     setUser(data.user);
@@ -516,7 +516,7 @@ export function AuthProvider({ children }) {
 
   // Schedule Downgrade (Retain Pro until period end date, then auto-switch to Free)
   const scheduleDowngrade = async (periodEndDate) => {
-    if (!token) throw new Error('Oturum açılmamış.');
+    if (!token) throw new Error('Not signed in.');
 
     const res = await fetch('/api/auth/schedule-downgrade', {
       method: 'POST',
@@ -529,7 +529,7 @@ export function AuthProvider({ children }) {
 
     const data = await res.json();
     if (!res.ok) {
-      throw new Error(data.error || 'Downgrade işlemi gerçekleştirilemedi.');
+      throw new Error(data.error || 'Could not downgrade plan.');
     }
 
     setUser(data.user);
@@ -538,7 +538,7 @@ export function AuthProvider({ children }) {
 
   // Resume Subscription (cancel scheduled downgrade)
   const resumeSubscription = async () => {
-    if (!token) throw new Error('Oturum açılmamış.');
+    if (!token) throw new Error('Not signed in.');
 
     const res = await fetch('/api/auth/resume-subscription', {
       method: 'POST',
@@ -550,7 +550,7 @@ export function AuthProvider({ children }) {
 
     const data = await res.json();
     if (!res.ok) {
-      throw new Error(data.error || 'Abonelik sürdürülemedi.');
+      throw new Error(data.error || 'Could not resume subscription.');
     }
 
     setUser(data.user);
@@ -607,7 +607,7 @@ export function AuthProvider({ children }) {
 
     const data = await res.json();
     if (!res.ok) {
-      throw new Error(data.error || 'Faturalar alınamadı.');
+      throw new Error(data.error || 'Could not load invoices.');
     }
 
     return data.invoices || [];

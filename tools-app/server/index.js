@@ -918,11 +918,11 @@ app.listen(PORT, async () => {
       ) VALUES (
         'TRL Calculator (Technology Readiness Level)',
         'trl-calculator',
-        'Interactive TRL Calculator for R&D projects and researchers. Assess Technology Readiness Level (TRL 1-9) across Horizon Europe, NASA, DeepTech SRL, and TÜBİTAK with gap analysis and grant matching.',
+        'Interactive TRL Calculator for R&D projects and researchers. Assess Technology Readiness Level (TRL 1-9) across Horizon Europe, NASA, DeepTech SRL, and TUBITAK with gap analysis and grant matching.',
         'Gauge',
         '#/tool/trl-calculator',
         'Free TRL Calculator (1-9) – Technology Readiness Level Assessment for R&D & Grants | Cerilas Tools',
-        'Calculate your R&D project Technology Readiness Level (TRL 1 to 9) accurately. Interactive diagnostic questionnaire for Horizon Europe, NASA ISO 16290, Software SRL, and TÜBİTAK Ar-Ge programs with grant eligibility and gap analysis roadmap.',
+        'Calculate your R&D project Technology Readiness Level (TRL 1 to 9) accurately. Interactive diagnostic questionnaire for Horizon Europe, NASA ISO 16290, Software SRL, and TUBITAK R&D programs with grant eligibility and gap analysis roadmap.',
         'R&D & Engineering',
         16,
         true

@@ -130,8 +130,8 @@ const ToolCard = ({ tool, onSelect }) => {
   const visitorCount = tool.unique_visitors_count || 0;
 
   const visitorText = visitorCount > 0 
-    ? `${visitorCount.toLocaleString()} ${language === 'tr' ? 'ziyaretçi' : 'visitors'}` 
-    : (language === 'tr' ? 'Yeni araç' : 'New tool');
+    ? `${visitorCount.toLocaleString()} visitors` 
+    : 'New tool';
 
   return (
     <div 

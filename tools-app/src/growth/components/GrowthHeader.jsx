@@ -52,9 +52,6 @@ export default function GrowthHeader({ onBackToTools }) {
   const userMenuRef = useRef(null);
   const userMenuTimeoutRef = useRef(null);
 
-  // GrowthControl is strictly in English
-  const isTr = false;
-
   const handleUserMenuMouseEnter = () => {
     if (userMenuTimeoutRef.current) clearTimeout(userMenuTimeoutRef.current);
     setUserMenuOpen(true);
@@ -176,7 +173,7 @@ export default function GrowthHeader({ onBackToTools }) {
                         <button
                           type="button"
                           className="growth-ws-delete-quick-btn"
-                          title={isTr ? `${ws.name} çalışma alanını sil` : `Delete ${ws.name}`}
+                          title={`Delete ${ws.name}`}
                           onClick={(e) => {
                             e.stopPropagation();
                             setDeleteTargetWs(ws);
@@ -311,7 +308,7 @@ export default function GrowthHeader({ onBackToTools }) {
                 <span className="nav-avatar-online-dot" />
               </div>
               <span className="nav-user-display-name">
-                {user.first_name || user.name || (user.email ? user.email.split('@')[0] : 'Kullanıcı')}
+                {user.first_name || user.name || (user.email ? user.email.split('@')[0] : 'User')}
               </span>
               <ChevronDown size={14} className={`nav-user-chevron ${userMenuOpen ? 'rotate-180' : ''}`} />
             </button>
@@ -349,7 +346,7 @@ export default function GrowthHeader({ onBackToTools }) {
                       <span className="nav-item-title" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                         Cerilas Tools
                       </span>
-                      <span className="nav-item-sub">{isTr ? 'Araçlar Kataloğuna Dön' : 'All Tools Catalog'}</span>
+                      <span className="nav-item-sub">All Tools Catalog</span>
                     </div>
                   </button>
 
@@ -360,7 +357,7 @@ export default function GrowthHeader({ onBackToTools }) {
                   >
                     <User size={16} className="nav-item-icon" />
                     <div className="nav-item-text-wrap">
-                      <span className="nav-item-title">{isTr ? 'Profil' : 'Profile'}</span>
+                      <span className="nav-item-title">Profile</span>
                       <span className="nav-item-sub">
                         {user.phone_verified ? (
                           <span className="verified-text">
@@ -370,7 +367,7 @@ export default function GrowthHeader({ onBackToTools }) {
                         ) : (
                           <span className="unverified-text">
                             <AlertCircle size={11} />
-                            <span>{isTr ? 'Telefon Doğrula' : 'Verify Phone'}</span>
+                            <span>Verify Phone</span>
                           </span>
                         )}
                       </span>
@@ -399,7 +396,7 @@ export default function GrowthHeader({ onBackToTools }) {
                     <CreditCard size={16} className="nav-item-icon" />
                     <div className="nav-item-text-wrap">
                       <span className="nav-item-title">Billing</span>
-                      <span className="nav-item-sub">{isTr ? 'Fatura & Ödeme' : 'Invoices & Tax Info'}</span>
+                      <span className="nav-item-sub">Invoices & Tax Info</span>
                     </div>
                   </button>
                 </div>
@@ -416,7 +413,7 @@ export default function GrowthHeader({ onBackToTools }) {
                   }}
                 >
                   <LogOut size={15} />
-                  <span>{isTr ? 'Çıkış Yap' : 'Log Out'}</span>
+                  <span>Log Out</span>
                 </button>
               </div>
             )}
@@ -428,7 +425,7 @@ export default function GrowthHeader({ onBackToTools }) {
             onClick={openAuthModal}
           >
             <User size={15} />
-            <span>{isTr ? 'Giriş Yap' : 'Sign In'}</span>
+            <span>Sign In</span>
           </button>
         )}
       </div>
