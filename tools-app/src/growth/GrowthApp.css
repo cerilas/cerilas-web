@@ -4016,6 +4016,258 @@ html.light .comp-visit-link:hover {
   color: #fbbf24;
 }
 
+.dir-restore-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  height: 34px;
+  padding: 0 0.8rem;
+  border-radius: 9px;
+  border: 1px dashed rgba(148, 163, 184, 0.35);
+  background: transparent;
+  color: #cbd5e1;
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s, background 0.15s;
+}
+
+.dir-restore-btn:hover:not(:disabled) {
+  border-color: #38bdf8;
+  color: #38bdf8;
+  background: rgba(56, 189, 248, 0.08);
+}
+
+.dir-restore-btn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+/* Directory delete confirmation */
+.dir-delete-modal {
+  position: relative;
+  width: min(420px, calc(100vw - 2rem));
+  padding: 1.75rem 1.5rem 1.4rem;
+  border-radius: 18px;
+  background: linear-gradient(180deg, rgba(239, 68, 68, 0.07) 0%, rgba(239, 68, 68, 0) 38%), #0b101d;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  box-shadow: 0 30px 70px -20px rgba(0, 0, 0, 0.8);
+  text-align: center;
+  color: #e2e8f0;
+}
+
+.dir-delete-close {
+  position: absolute;
+  top: 0.8rem;
+  right: 0.8rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  color: #64748b;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.dir-delete-close:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.06);
+  color: #e2e8f0;
+}
+
+.dir-delete-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 54px;
+  height: 54px;
+  margin: 0 auto 0.9rem;
+  border-radius: 16px;
+  color: #f87171;
+  background: rgba(239, 68, 68, 0.12);
+  box-shadow: 0 0 0 6px rgba(239, 68, 68, 0.06), inset 0 0 0 1px rgba(239, 68, 68, 0.28);
+}
+
+.dir-delete-title {
+  margin: 0 0 1rem;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #f8fafc;
+}
+
+.dir-delete-target {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.7rem 0.85rem;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  text-align: left;
+}
+
+.dir-delete-target-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1;
+}
+
+.dir-delete-target-text strong {
+  font-size: 0.9rem;
+  color: #f1f5f9;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dir-delete-target-text span {
+  font-size: 0.75rem;
+  color: #94a3b8;
+}
+
+.dir-delete-desc {
+  margin: 1rem 0 0;
+  font-size: 0.84rem;
+  line-height: 1.55;
+  color: #94a3b8;
+}
+
+.dir-delete-error {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin-top: 0.9rem;
+  padding: 0.55rem 0.75rem;
+  border-radius: 9px;
+  background: rgba(239, 68, 68, 0.1);
+  color: #fca5a5;
+  font-size: 0.8rem;
+  text-align: left;
+}
+
+.dir-delete-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.6rem;
+  margin-top: 1.4rem;
+}
+
+.dir-delete-cancel,
+.dir-delete-confirm {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  height: 42px;
+  border-radius: 11px;
+  font: inherit;
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, transform 0.1s, box-shadow 0.15s;
+}
+
+.dir-delete-cancel {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+  color: #e2e8f0;
+}
+
+.dir-delete-cancel:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.dir-delete-confirm {
+  border: 1px solid #ef4444;
+  background: #ef4444;
+  color: #fff;
+  box-shadow: 0 8px 22px -10px rgba(239, 68, 68, 0.9);
+}
+
+.dir-delete-confirm:hover:not(:disabled) {
+  background: #dc2626;
+  border-color: #dc2626;
+}
+
+.dir-delete-cancel:active:not(:disabled),
+.dir-delete-confirm:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.dir-delete-cancel:disabled,
+.dir-delete-confirm:disabled,
+.dir-delete-close:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+[data-theme="light"] .dir-restore-btn,
+html.light .dir-restore-btn {
+  color: #475569;
+  border-color: #cbd5e1;
+}
+
+[data-theme="light"] .dir-delete-modal,
+html.light .dir-delete-modal {
+  background: linear-gradient(180deg, rgba(239, 68, 68, 0.06) 0%, rgba(239, 68, 68, 0) 38%), #ffffff;
+  border-color: #e2e8f0;
+  box-shadow: 0 30px 70px -24px rgba(15, 23, 42, 0.35);
+  color: #0f172a;
+}
+
+[data-theme="light"] .dir-delete-title,
+html.light .dir-delete-title,
+[data-theme="light"] .dir-delete-target-text strong,
+html.light .dir-delete-target-text strong {
+  color: #0f172a;
+}
+
+[data-theme="light"] .dir-delete-desc,
+html.light .dir-delete-desc,
+[data-theme="light"] .dir-delete-target-text span,
+html.light .dir-delete-target-text span {
+  color: #64748b;
+}
+
+[data-theme="light"] .dir-delete-target,
+html.light .dir-delete-target {
+  background: #f8fafc;
+  border-color: #e2e8f0;
+}
+
+[data-theme="light"] .dir-delete-icon,
+html.light .dir-delete-icon {
+  color: #dc2626;
+}
+
+[data-theme="light"] .dir-delete-close:hover:not(:disabled),
+html.light .dir-delete-close:hover:not(:disabled) {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+[data-theme="light"] .dir-delete-cancel,
+html.light .dir-delete-cancel {
+  background: #fff;
+  border-color: #e2e8f0;
+  color: #0f172a;
+}
+
+[data-theme="light"] .dir-delete-cancel:hover:not(:disabled),
+html.light .dir-delete-cancel:hover:not(:disabled) {
+  background: #f1f5f9;
+}
+
+[data-theme="light"] .dir-delete-error,
+html.light .dir-delete-error {
+  color: #b91c1c;
+}
+
 .dir-metrics-row {
   display: flex;
   align-items: center;

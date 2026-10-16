@@ -15,6 +15,7 @@ import {
 import { inspectSearchConsoleUrl } from '../utils/googleAuth.js';
 import { resolveGoogleRedirectUri } from '../utils/googleRedirect.js';
 import { isTokenRevoked } from '../utils/sessionRevocation.js';
+import { NOT_HIDDEN_DIRECTORY_SQL } from '../utils/growthDirectoryVisibility.js';
 import {
   searchGoogleBusiness,
   fetchGoogleBusinessProfile,
@@ -1551,7 +1552,9 @@ router.get('/workspaces/:slugOrId/overview', requireAuth, async (req, res) => {
 
     // 8. Directories & Submissions
     const dirsRes = await authPool.query(
-      `SELECT * FROM growth_directories WHERE workspace_id IS NULL OR workspace_id = $1 ORDER BY authority_score DESC`,
+      `SELECT * FROM growth_directories
+       WHERE (workspace_id IS NULL OR workspace_id = $1) AND ${NOT_HIDDEN_DIRECTORY_SQL('growth_directories')}
+       ORDER BY authority_score DESC`,
       [workspace.id]
     );
     const subsRes = await authPool.query(
@@ -2065,7 +2068,7 @@ router.post('/workspaces/:slugOrId/prompts/batch', requireAuth, async (req, res)
     res.status(201).json({
       success: true,
       data: inserted,
-      totalCount: currentCount + inserted.length,
+      totalCount: (promptLimit.current || 0) + inserted.length,
       message: `${inserted.length} adet prompt başarıyla takibe alındı.`
     });
   } catch (err) {
@@ -2910,7 +2913,7 @@ async function syncWorkspaceOpportunities(workspace) {
               count(*) filter (where s.status = 'pending') as pending_dirs
        FROM growth_directories d
        LEFT JOIN growth_directory_submissions s ON s.directory_id = d.id AND s.workspace_id = $1
-       WHERE d.workspace_id IS NULL OR d.workspace_id = $1`,
+       WHERE (d.workspace_id IS NULL OR d.workspace_id = $1) AND s.status IS DISTINCT FROM 'hidden'`,
       [workspace.id]
     ),
     authPool.query(
@@ -3779,7 +3782,8 @@ router.get('/workspaces/:slugOrId/directories', requireAuth, async (req, res) =>
     const dirRes = await authPool.query(
       `SELECT id, name, domain, category, authority_score, submission_url, geo_potential, is_custom, created_at
        FROM growth_directories
-       WHERE workspace_id IS NULL OR workspace_id = $1
+       WHERE (workspace_id IS NULL OR workspace_id = $1)
+         AND ${NOT_HIDDEN_DIRECTORY_SQL('growth_directories')}
        ORDER BY is_custom ASC, authority_score DESC, id ASC`,
       [wsId]
     );
@@ -3808,7 +3812,9 @@ router.get('/workspaces/:slugOrId/directories', requireAuth, async (req, res) =>
       submittedUrl: subMap[d.id]?.submission_url || ''
     }));
 
-    res.json({ success: true, data });
+    const hiddenCount = subRes.rows.filter(s => s.status === 'hidden').length;
+
+    res.json({ success: true, data, hiddenCount });
   } catch (err) {
     console.error('Directories fetch error:', err);
     res.status(500).json({ error: 'Dizinler alınamadı.' });
@@ -3928,23 +3934,75 @@ router.delete('/workspaces/:slugOrId/directories/:dirId', requireAuth, async (re
     if (!authData) return res.status(404).json({ error: 'Çalışma alanı bulunamadı.' });
 
     const dirId = parseInt(req.params.dirId, 10);
+    if (!Number.isInteger(dirId)) {
+      return res.status(400).json({ error: 'Invalid directory.' });
+    }
+    const wsId = authData.workspace.id;
 
-    // Only custom directories belonging to this workspace can be deleted
-    const delRes = await authPool.query(
-      `DELETE FROM growth_directories 
-       WHERE id = $1 AND workspace_id = $2 AND is_custom = true
-       RETURNING id`,
-      [dirId, authData.workspace.id]
+    const dirRes = await authPool.query(
+      `SELECT id, workspace_id, is_custom FROM growth_directories
+       WHERE id = $1 AND (workspace_id IS NULL OR workspace_id = $2)`,
+      [dirId, wsId]
     );
-
-    if (delRes.rowCount === 0) {
-      return res.status(400).json({ error: 'Bu dizin silinemez veya özel bir kayıt değil.' });
+    const dir = dirRes.rows[0];
+    if (!dir) {
+      return res.status(404).json({ error: 'Directory not found.' });
     }
 
-    res.json({ success: true, message: 'Özel dizin başarıyla silindi.' });
+    if (dir.workspace_id) {
+      await authPool.query(
+        'DELETE FROM growth_directories WHERE id = $1 AND workspace_id = $2',
+        [dirId, wsId]
+      );
+    } else {
+      // Global directories are shared across workspaces, so they are only hidden for this one.
+      await authPool.query(
+        `INSERT INTO growth_directory_submissions (workspace_id, directory_id, status, submission_url, submitted_at)
+         VALUES ($1, $2, 'hidden', NULL, NOW())
+         ON CONFLICT (workspace_id, directory_id)
+         DO UPDATE SET status = 'hidden', submission_url = NULL, submitted_at = NOW()`,
+        [wsId, dirId]
+      );
+    }
+
+    let updatedScores = null;
+    try {
+      updatedScores = await calculateWorkspaceScores(authPool, wsId);
+    } catch (e) {
+      console.warn('[Directory Delete Score Calc Error]:', e.message);
+    }
+
+    res.json({ success: true, message: 'Directory removed.', scores: updatedScores });
   } catch (err) {
     console.error('Delete directory error:', err);
     res.status(500).json({ error: 'Dizin silinemedi.' });
+  }
+});
+
+/**
+ * POST /api/growth/workspaces/:slugOrId/directories/restore-hidden
+ * Bring back core directories previously removed from this workspace
+ */
+router.post('/workspaces/:slugOrId/directories/restore-hidden', requireAuth, async (req, res) => {
+  try {
+    const authData = await resolveAndAuthorizeWorkspace(req, req.params.slugOrId);
+    if (!authData) return res.status(404).json({ error: 'Çalışma alanı bulunamadı.' });
+
+    const delRes = await authPool.query(
+      `DELETE FROM growth_directory_submissions WHERE workspace_id = $1 AND status = 'hidden'`,
+      [authData.workspace.id]
+    );
+
+    try {
+      await calculateWorkspaceScores(authPool, authData.workspace.id);
+    } catch (e) {
+      console.warn('[Directory Restore Score Calc Error]:', e.message);
+    }
+
+    res.json({ success: true, restored: delRes.rowCount });
+  } catch (err) {
+    console.error('Restore directories error:', err);
+    res.status(500).json({ error: 'Directories could not be restored.' });
   }
 });
 

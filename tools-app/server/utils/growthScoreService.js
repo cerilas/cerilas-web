@@ -3,6 +3,7 @@
  * Computes deterministic subscores (technical, AI/GEO, search, authority, content)
  * and composite overall growth authority score (growth_score).
  */
+import { NOT_HIDDEN_DIRECTORY_SQL } from './growthDirectoryVisibility.js';
 
 /**
  * Calculates dynamic live subscores and composite growth score for a workspace,
@@ -134,7 +135,8 @@ export async function calculateWorkspaceScores(pool, workspaceId, existingWorksp
   // 4. Directory & Authority Network Subscore (0 - 100)
   // Evaluates claimed business listings and ecosystem authority average
   const dirsRes = await pool.query(
-    'SELECT COUNT(*)::int as total, AVG(authority_score)::numeric as avg_auth FROM growth_directories WHERE workspace_id IS NULL OR workspace_id = $1',
+    `SELECT COUNT(*)::int as total, AVG(authority_score)::numeric as avg_auth FROM growth_directories
+     WHERE (workspace_id IS NULL OR workspace_id = $1) AND ${NOT_HIDDEN_DIRECTORY_SQL('growth_directories')}`,
     [workspaceId]
   );
   const subsRes = await pool.query(

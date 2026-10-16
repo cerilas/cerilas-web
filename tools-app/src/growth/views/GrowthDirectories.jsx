@@ -21,7 +21,9 @@ import {
   Clock,
   ChevronLeft,
   ChevronRight,
-  Search
+  Search,
+  RotateCcw,
+  AlertTriangle
 } from 'lucide-react';
 import { useGrowth } from '../GrowthContext';
 import { useAuth } from '../../context/AuthContext';
@@ -52,9 +54,12 @@ export default function GrowthDirectories() {
   const [addIsClaimed, setAddIsClaimed] = useState(false);
   const [adding, setAdding] = useState(false);
 
-  // Delete Custom Directory Modal States
+  // Delete Directory Modal States
   const [deleteTargetDir, setDeleteTargetDir] = useState(null);
   const [deletingId, setDeletingId] = useState(null);
+  const [deleteError, setDeleteError] = useState('');
+  const [hiddenCount, setHiddenCount] = useState(0);
+  const [restoring, setRestoring] = useState(false);
 
   const fetchDirectories = async () => {
     if (!activeWorkspace?.id || !token) return;
@@ -66,6 +71,7 @@ export default function GrowthDirectories() {
       const json = await res.json();
       if (res.ok) {
         setDirectories(json.data || []);
+        setHiddenCount(json.hiddenCount || 0);
       }
     } catch (err) {
       console.error('Fetch directories error:', err);
@@ -84,7 +90,7 @@ export default function GrowthDirectories() {
     const handleKeyDown = (e) => {
       if (e.key === 'Escape') {
         setIsAddOpen(false);
-        setDeleteTargetDir(null);
+        if (!deletingId) setDeleteTargetDir(null);
       }
     };
     document.addEventListener('keydown', handleKeyDown);
@@ -95,7 +101,7 @@ export default function GrowthDirectories() {
       document.removeEventListener('keydown', handleKeyDown);
       document.body.style.overflow = originalOverflow;
     };
-  }, [isAddOpen, deleteTargetDir]);
+  }, [isAddOpen, deleteTargetDir, deletingId]);
 
   const handleToggleStatus = async (dirId, currentStatus) => {
     const newStatus = currentStatus === 'claimed' ? 'missing' : 'claimed';
@@ -157,20 +163,45 @@ export default function GrowthDirectories() {
   const handleConfirmDelete = async () => {
     if (!deleteTargetDir || !activeWorkspace?.id || !token) return;
     const targetId = deleteTargetDir.id;
+    const wasCore = !deleteTargetDir.isCustom;
     setDeletingId(targetId);
+    setDeleteError('');
     try {
       const res = await fetch(`/api/growth/workspaces/${activeWorkspace.id}/directories/${targetId}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       });
-      if (res.ok) {
-        setDirectories(prev => prev.filter(d => d.id !== targetId));
-        setDeleteTargetDir(null);
-      }
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(json.error || 'This platform could not be removed.');
+      setDirectories(prev => prev.filter(d => d.id !== targetId));
+      if (wasCore) setHiddenCount(prev => prev + 1);
+      setDeleteTargetDir(null);
     } catch (err) {
       console.error('Delete directory error:', err);
+      setDeleteError(err.message || 'This platform could not be removed.');
     } finally {
       setDeletingId(null);
+    }
+  };
+
+  const openDeleteModal = (dir) => {
+    setDeleteError('');
+    setDeleteTargetDir(dir);
+  };
+
+  const handleRestoreHidden = async () => {
+    if (!activeWorkspace?.id || !token || restoring) return;
+    setRestoring(true);
+    try {
+      const res = await fetch(`/api/growth/workspaces/${activeWorkspace.id}/directories/restore-hidden`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (res.ok) await fetchDirectories();
+    } catch (err) {
+      console.error('Restore directories error:', err);
+    } finally {
+      setRestoring(false);
     }
   };
 
@@ -186,6 +217,7 @@ export default function GrowthDirectories() {
   const claimedCount = directories.filter(d => d.status === 'claimed').length;
   const missingCount = totalCount - claimedCount;
   const customCount = directories.filter(d => d.isCustom).length;
+  const coreCount = totalCount - customCount;
   const authorityScore = totalCount > 0 ? Math.round((claimedCount / totalCount) * 100) : 0;
 
   const filtered = directories.filter(d => {
@@ -226,7 +258,7 @@ export default function GrowthDirectories() {
         subtitle="ChatGPT, Google Gemini, and Perplexity crawl these authoritative directories to discover and cite brands. Track your live profiles and add industry-specific sources."
         coverImage="/growth-covers/geo-cover.jpg"
         stats={[
-          { label: 'Target Platforms', value: `${totalCount} Sites`, sub: customCount > 0 ? `12 Core + ${customCount} Custom` : '12 Primary platforms' },
+          { label: 'Target Platforms', value: `${totalCount} Sites`, sub: customCount > 0 ? `${coreCount} Core + ${customCount} Custom` : `${coreCount} Primary platforms` },
           { label: 'Claimed Profiles', value: `${claimedCount} Active`, sub: claimedCount > 0 ? `${claimedCount} profiles verified` : 'No profiles claimed yet' },
           { label: 'Completion Rate', value: `${authorityScore}%`, sub: `${claimedCount}/${totalCount} profiles ready` }
         ]}
@@ -255,7 +287,7 @@ export default function GrowthDirectories() {
           </div>
           <div className="stat-card-value">{totalCount} Sites</div>
           <div className="stat-card-sub text-muted">
-            12 Core Platforms{customCount > 0 ? ` + ${customCount} Custom Sources` : ''}
+            {coreCount} Core Platforms{customCount > 0 ? ` + ${customCount} Custom Sources` : ''}
           </div>
         </div>
 
@@ -330,6 +362,19 @@ export default function GrowthDirectories() {
           )}
         </div>
 
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
+          {hiddenCount > 0 && (
+            <button
+              type="button"
+              className="dir-restore-btn"
+              onClick={handleRestoreHidden}
+              disabled={restoring}
+              title="Bring back the core platforms you removed"
+            >
+              {restoring ? <Loader2 size={13} className="spin" /> : <RotateCcw size={13} />}
+              <span>Restore removed ({hiddenCount})</span>
+            </button>
+          )}
         <div className="growth-search-input-wrap">
           <Search size={14} className="search-input-icon" />
           <input
@@ -339,6 +384,7 @@ export default function GrowthDirectories() {
             onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(1); }}
             className="growth-search-input"
           />
+        </div>
         </div>
       </div>
 
@@ -437,17 +483,16 @@ export default function GrowthDirectories() {
                       )}
                     </span>
 
-                    {dir.isCustom && (
-                      <button
-                        type="button"
-                        className="comp-delete-btn"
-                        onClick={() => setDeleteTargetDir(dir)}
-                        title="Delete Custom Source"
-                        style={{ padding: '0.25rem' }}
-                      >
-                        <Trash2 size={13} />
-                      </button>
-                    )}
+                    <button
+                      type="button"
+                      className="comp-delete-btn"
+                      onClick={() => openDeleteModal(dir)}
+                      title={`Remove ${dir.name}`}
+                      aria-label={`Remove ${dir.name}`}
+                      style={{ padding: '0.25rem' }}
+                    >
+                      <Trash2 size={13} />
+                    </button>
                   </div>
                 </div>
 
@@ -736,69 +781,87 @@ export default function GrowthDirectories() {
 
       {/* Delete Custom Directory Modal */}
       {deleteTargetDir && typeof document !== 'undefined' && createPortal(
-        <div 
-          className="growth-modal-backdrop" 
+        <div
+          className="growth-modal-backdrop"
           onClick={() => !deletingId && setDeleteTargetDir(null)}
-          role="dialog"
-          aria-modal="true"
         >
-          <div className="growth-guide-modal modal-sm animate-scale" onClick={e => e.stopPropagation()} style={{ maxWidth: 440 }}>
-            <div className="growth-modal-header" style={{ borderBottom: 'none', paddingBottom: 0 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
-                <div style={{
-                  width: 36,
-                  height: 36,
-                  borderRadius: 10,
-                  background: 'rgba(239, 68, 68, 0.12)',
-                  border: '1px solid rgba(239, 68, 68, 0.25)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: '#ef4444'
-                }}>
-                  <Trash2 size={18} />
-                </div>
-                <h2 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 600 }}>Delete Custom Directory</h2>
+          <div
+            className="dir-delete-modal animate-scale"
+            onClick={e => e.stopPropagation()}
+            role="alertdialog"
+            aria-modal="true"
+            aria-labelledby="dir-delete-title"
+            aria-describedby="dir-delete-desc"
+          >
+            <button
+              type="button"
+              className="dir-delete-close"
+              onClick={() => setDeleteTargetDir(null)}
+              disabled={Boolean(deletingId)}
+              aria-label="Close"
+            >
+              <X size={16} />
+            </button>
+
+            <div className="dir-delete-icon" aria-hidden="true">
+              <Trash2 size={22} />
+            </div>
+
+            <h2 id="dir-delete-title" className="dir-delete-title">
+              Remove this platform?
+            </h2>
+
+            <div className="dir-delete-target">
+              <GrowthFavicon
+                src={`https://www.google.com/s2/favicons?domain=${deleteTargetDir.domain}&sz=64`}
+                domain={deleteTargetDir.domain}
+                name={deleteTargetDir.name}
+                size={22}
+                className="dir-fav"
+              />
+              <div className="dir-delete-target-text">
+                <strong>{deleteTargetDir.name}</strong>
+                <span>{deleteTargetDir.domain}</span>
               </div>
-              <button 
-                type="button" 
-                className="growth-modal-close" 
-                onClick={() => setDeleteTargetDir(null)}
-                disabled={Boolean(deletingId)}
-                aria-label="Close"
-              >
-                <X size={18} />
-              </button>
+              {deleteTargetDir.status === 'claimed' && (
+                <span className="dir-status-pill claimed">
+                  <CheckCircle2 size={12} />
+                  <span>Claimed</span>
+                </span>
+              )}
             </div>
 
-            <div className="growth-modal-body" style={{ paddingTop: '0.75rem', paddingBottom: '0.5rem' }}>
-              <p style={{ margin: '0 0 1rem 0', fontSize: '0.88rem', color: 'var(--text-muted, #94a3b8)', lineHeight: 1.55 }}>
-                Are you sure you want to remove <strong style={{ color: 'var(--text-main, #f8fafc)' }}>{deleteTargetDir.name}</strong> ({deleteTargetDir.domain}) from your directory list?
-              </p>
-            </div>
+            <p id="dir-delete-desc" className="dir-delete-desc">
+              {deleteTargetDir.isCustom
+                ? 'This custom source and its tracking status will be permanently deleted from this workspace.'
+                : 'This core platform will be hidden from this workspace and excluded from your authority score. You can bring it back anytime with “Restore removed”.'}
+            </p>
 
-            <div className="growth-modal-footer" style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.65rem', padding: '1rem 1.25rem' }}>
+            {deleteError && (
+              <div className="dir-delete-error" role="alert">
+                <AlertTriangle size={14} />
+                <span>{deleteError}</span>
+              </div>
+            )}
+
+            <div className="dir-delete-actions">
               <button
                 type="button"
-                className="growth-secondary-btn"
+                className="dir-delete-cancel"
                 onClick={() => setDeleteTargetDir(null)}
                 disabled={Boolean(deletingId)}
+                autoFocus
               >
                 Cancel
               </button>
               <button
                 type="button"
-                className="growth-primary-btn"
+                className="dir-delete-confirm"
                 onClick={handleConfirmDelete}
                 disabled={Boolean(deletingId)}
-                style={{
-                  background: '#ef4444',
-                  borderColor: '#ef4444',
-                  color: '#ffffff'
-                }}
               >
                 {deletingId ? <Loader2 size={14} className="spin" /> : <Trash2 size={14} />}
-                <span>Yes, Delete</span>
+                <span>{deletingId ? 'Removing…' : 'Yes, remove'}</span>
               </button>
             </div>
           </div>
