@@ -246,6 +246,15 @@ async function processResetRequest({ email, lang, ip, baseUrl }) {
   console.log(`[Password Reset] Reset email sent to user ${user.id}`);
 }
 
+export async function sendPasswordResetEmail(req, email, language) {
+  await processResetRequest({
+    email: String(email || '').trim().toLowerCase(),
+    lang: pickLang(language),
+    ip: clientIp(req),
+    baseUrl: resolvePublicBaseUrl(req)
+  });
+}
+
 async function findActiveToken(token, client = authPool, { lock = false } = {}) {
   if (!token || typeof token !== 'string' || token.length < 20 || token.length > 200) return null;
   const res = await client.query(

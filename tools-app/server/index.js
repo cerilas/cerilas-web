@@ -16,6 +16,7 @@ import crawlerCheckerRouter from './routes/crawlerChecker.js';
 import llmsTxtRouter from './routes/llmsTxt.js';
 import htmlToMarkdownRouter from './routes/htmlToMarkdown.js';
 import scrapersRouter from './routes/scrapers.js';
+import adminRouter from './routes/admin.js';
 import authRouter from './routes/auth.js';
 import { detectBot } from './utils/botDetector.js';
 import { initScrapersDb } from './migrations/init-scrapers-db.js';
@@ -151,6 +152,9 @@ app.use('/tool-icons', express.static(path.join(publicPath, 'tool-icons')));
 
 // Mount auth router
 app.use('/api/auth', authRouter);
+
+// Mount admin router (is_admin only)
+app.use('/api/admin', adminRouter);
 
 // Mount Cerilas Growth SaaS router
 app.use('/api/growth', growthRouter);

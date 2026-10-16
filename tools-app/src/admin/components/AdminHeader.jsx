@@ -28,6 +28,8 @@ export default function AdminHeader({
         return 'System & API Health';
       case 'scrapers':
         return 'Funding & Matcher Scrappers';
+      case 'users':
+        return 'Users & Memberships';
       default:
         return 'Admin Suite';
     }

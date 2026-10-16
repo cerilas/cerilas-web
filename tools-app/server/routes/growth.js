@@ -66,7 +66,7 @@ export const requireAuth = async (req, res, next) => {
     const decoded = jwt.verify(token, JWT_SECRET);
 
     const userRes = await authPool.query(
-      'SELECT id, email, first_name, last_name, plan, password_changed_at FROM users WHERE id = $1',
+      'SELECT id, email, first_name, last_name, plan, password_changed_at, suspended_at FROM users WHERE id = $1',
       [decoded.id]
     );
 
@@ -74,9 +74,12 @@ export const requireAuth = async (req, res, next) => {
       return res.status(401).json({ error: 'User not found.' });
     }
 
-    const { password_changed_at: passwordChangedAt, ...userRow } = userRes.rows[0];
+    const { password_changed_at: passwordChangedAt, suspended_at: suspendedAt, ...userRow } = userRes.rows[0];
     if (isTokenRevoked(decoded, passwordChangedAt)) {
       return res.status(401).json({ error: 'Session expired or invalid.' });
+    }
+    if (suspendedAt) {
+      return res.status(401).json({ error: 'This account has been suspended.', code: 'ACCOUNT_SUSPENDED' });
     }
 
     req.user = userRow;

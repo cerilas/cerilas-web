@@ -42,6 +42,7 @@ import ResetPasswordPage from './components/auth/ResetPasswordPage';
 import AccountDashboard from './components/account/AccountDashboard';
 import GrowthApp from './growth/GrowthApp';
 import { useAuth } from './context/AuthContext';
+import useUserActivityTracking from './hooks/useUserActivityTracking';
 import { useRevenueCat } from './context/RevenueCatContext';
 import RevenueCatPaywallModal from './components/RevenueCatPaywallModal';
 import RevenueCatCustomerCenterModal from './components/RevenueCatCustomerCenterModal';
@@ -287,7 +288,8 @@ export default function App() {
     const h = window.location.hash;
     return p === '/growth' || p.startsWith('/growth/') || h === '#/growth' || h.startsWith('#/growth');
   });
-  const { openAuthModal } = useAuth();
+  const { openAuthModal, token: authToken } = useAuth();
+  useUserActivityTracking(isAdmin || isResetPassword ? null : authToken);
   const [isAccountView, setIsAccountView] = useState(() => {
     if (typeof window === 'undefined') return false;
     const p = window.location.pathname;

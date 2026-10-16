@@ -39,6 +39,15 @@ export default function AdminLogin({ onLoginSuccess }) {
       }
 
       if (data.token) {
+        const sessionRes = await fetch('/api/admin/session', {
+          headers: { Authorization: `Bearer ${data.token}` }
+        });
+        if (sessionRes.status === 403) {
+          throw new Error('This account does not have admin access.');
+        }
+        if (!sessionRes.ok) {
+          throw new Error('Could not verify admin access. Please try again.');
+        }
         localStorage.setItem('admin_token', data.token);
         if (onLoginSuccess) {
           onLoginSuccess(data.user);

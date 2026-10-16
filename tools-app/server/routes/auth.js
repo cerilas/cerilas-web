@@ -6,8 +6,10 @@ import { handleGrowthOAuthCallback } from '../utils/googleGrowthIntegration.js';
 import { resolveGoogleRedirectUri } from '../utils/googleRedirect.js';
 import { isTokenRevoked } from '../utils/sessionRevocation.js';
 import { createPasswordResetRouter } from './passwordReset.js';
+import { recordLoginEvent, getRequestContext, ensureUserActivitySchema } from '../utils/userActivity.js';
 
 const router = Router();
+const SUSPENDED_MESSAGE = 'Bu hesap askıya alınmıştır. Destek için info@cerilas.com adresine yazın.';
 const JWT_SECRET = process.env.JWT_SECRET || 'cerilas_admin_jwt_secret_2026';
 
 export const requireAuth = async (req, res, next) => {
@@ -24,11 +26,14 @@ export const requireAuth = async (req, res, next) => {
     // Attach fresh user plan from database
     try {
       const uRes = await authPool.query(
-        'SELECT plan, subscription_status, first_name, last_name, password_changed_at FROM users WHERE id = $1',
+        'SELECT plan, subscription_status, first_name, last_name, password_changed_at, suspended_at FROM users WHERE id = $1',
         [decoded.id]
       );
       if (uRes.rows.length > 0 && isTokenRevoked(decoded, uRes.rows[0].password_changed_at)) {
         return res.status(401).json({ error: 'Unauthorized: Session expired after password change' });
+      }
+      if (uRes.rows.length > 0 && uRes.rows[0].suspended_at) {
+        return res.status(401).json({ error: SUSPENDED_MESSAGE, code: 'ACCOUNT_SUSPENDED' });
       }
       if (uRes.rows.length > 0) {
         req.user.plan = uRes.rows[0].plan || (decoded.email === 'deniz@cerilas.com' ? 'pro' : 'free');
@@ -59,7 +64,13 @@ export const requireAuth = async (req, res, next) => {
   } catch (e) {
     // Migration already applied or logged
   }
+  await ensureUserActivitySchema();
 })();
+
+async function isUserSuspended(userId) {
+  const r = await authPool.query('SELECT suspended_at FROM users WHERE id = $1', [userId]);
+  return Boolean(r.rows[0]?.suspended_at);
+}
 
 const formatUser = (row) => {
   const firstName = row.first_name || '';
@@ -240,6 +251,7 @@ router.post('/register', async (req, res) => {
     );
 
     const newUser = result.rows[0];
+    await recordLoginEvent(req, newUser.id, 'register');
     const token = jwt.sign(
       { id: newUser.id, email: newUser.email },
       JWT_SECRET,
@@ -287,6 +299,11 @@ router.post('/login', async (req, res) => {
     if (!isValid) {
       return res.status(401).json({ error: 'Geçersiz e-posta veya şifre.' });
     }
+
+    if (user.suspended_at) {
+      return res.status(403).json({ error: SUSPENDED_MESSAGE, code: 'ACCOUNT_SUSPENDED' });
+    }
+    await recordLoginEvent(req, user.id, 'password');
 
     const token = jwt.sign(
       { id: user.id, email: user.email },
@@ -377,6 +394,11 @@ router.post('/google/signin', async (req, res) => {
       lastName,
       avatarUrl
     });
+
+    if (await isUserSuspended(authResult.user.id)) {
+      return res.status(403).json({ error: SUSPENDED_MESSAGE, code: 'ACCOUNT_SUSPENDED' });
+    }
+    await recordLoginEvent(req, authResult.user.id, 'google');
 
     res.json({
       success: true,
@@ -576,6 +598,11 @@ router.get('/google/callback', async (req, res, next) => {
         avatarUrl: profile.picture || ''
       });
     }
+
+    if (await isUserSuspended(authResult.user.id)) {
+      throw new Error(SUSPENDED_MESSAGE);
+    }
+    await recordLoginEvent(req, authResult.user.id, 'google');
 
     res.send(`
       <!DOCTYPE html>
@@ -1430,6 +1457,74 @@ router.post('/sync-plan', requireAuth, async (req, res) => {
   } catch (err) {
     console.error('Sync plan error:', err);
     res.status(500).json({ error: 'Failed to synchronize plan.' });
+  }
+});
+
+const MAX_PAGE_VIEW_DURATION_MS = 6 * 60 * 60 * 1000;
+const cleanText = (value, max) => (typeof value === 'string' ? value.trim().slice(0, max) : '') || null;
+
+/**
+ * POST /api/auth/activity/pageview
+ * Records a page view for the signed-in user
+ */
+router.post('/activity/pageview', requireAuth, async (req, res) => {
+  try {
+    const path = cleanText(req.body?.path, 500);
+    if (!path || !path.startsWith('/')) {
+      return res.status(400).json({ error: 'Invalid path.' });
+    }
+    await ensureUserActivitySchema();
+    const ctx = getRequestContext(req);
+    const result = await authPool.query(
+      `INSERT INTO user_page_views (user_id, session_id, path, title, referrer, country, device_type, os, browser)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+       RETURNING id`,
+      [
+        req.user.id,
+        cleanText(req.body?.sessionId, 64),
+        path,
+        cleanText(req.body?.title, 300),
+        cleanText(req.body?.referrer, 500),
+        ctx.country,
+        ctx.deviceType,
+        ctx.os,
+        ctx.browser
+      ]
+    );
+    await authPool.query('UPDATE users SET last_seen_at = NOW() WHERE id = $1', [req.user.id]);
+    res.status(201).json({ success: true, id: String(result.rows[0].id) });
+  } catch (err) {
+    console.error('Record page view error:', err.message);
+    res.status(500).json({ error: 'Page view not recorded.' });
+  }
+});
+
+/**
+ * POST /api/auth/activity/pageview/:id/duration
+ * Updates the active time spent on a page view (monotonic, capped)
+ */
+router.post('/activity/pageview/:id/duration', requireAuth, async (req, res) => {
+  try {
+    if (!/^\d+$/.test(req.params.id)) {
+      return res.status(400).json({ error: 'Invalid page view.' });
+    }
+    const durationMs = Math.min(Math.max(Math.round(Number(req.body?.durationMs) || 0), 0), MAX_PAGE_VIEW_DURATION_MS);
+    const updated = await authPool.query(
+      `UPDATE user_page_views
+       SET duration_ms = GREATEST(duration_ms, $1),
+           title = COALESCE($2, title),
+           updated_at = NOW()
+       WHERE id = $3 AND user_id = $4`,
+      [durationMs, cleanText(req.body?.title, 300), req.params.id, req.user.id]
+    );
+    if (updated.rowCount === 0) {
+      return res.status(404).json({ error: 'Page view not found.' });
+    }
+    await authPool.query('UPDATE users SET last_seen_at = NOW() WHERE id = $1', [req.user.id]);
+    res.json({ success: true });
+  } catch (err) {
+    console.error('Update page view duration error:', err.message);
+    res.status(500).json({ error: 'Duration not recorded.' });
   }
 });
 

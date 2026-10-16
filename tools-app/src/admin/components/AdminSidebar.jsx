@@ -9,6 +9,7 @@ import {
   ShieldCheck,
   Zap,
   Globe,
+  Users,
   X
 } from 'lucide-react';
 
@@ -26,6 +27,11 @@ export default function AdminSidebar({
       label: 'Tools',
       icon: Box,
       badge: totalToolsCount
+    },
+    {
+      id: 'users',
+      label: 'Users',
+      icon: Users
     },
     {
       id: 'overview',

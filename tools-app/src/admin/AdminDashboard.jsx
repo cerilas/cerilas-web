@@ -8,6 +8,8 @@ import OverviewView from './views/OverviewView';
 import AnalyticsView from './views/AnalyticsView';
 import SystemHealthView from './views/SystemHealthView';
 import ScrapersView from './views/ScrapersView';
+import UsersView from './views/users/UsersView';
+import UserDetailView from './views/users/UserDetailView';
 import AdminLogin from './AdminLogin';
 import { getAllRegisteredTools } from '../tools/registry';
 import './AdminDashboard.css';
@@ -20,6 +22,7 @@ export default function AdminDashboard() {
   // Default tab is 'tools' as requested: "First item in the sidebar is Tools, showing the tools catalog on load"
   const [currentTab, setCurrentTab] = useState('tools');
   const [selectedToolSlug, setSelectedToolSlug] = useState(null);
+  const [selectedUserId, setSelectedUserId] = useState(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [tools, setTools] = useState(() => getAllRegisteredTools());
   const [statsOverview, setStatsOverview] = useState(null);
@@ -37,14 +40,24 @@ export default function AdminDashboard() {
       const toolMatch = hash.match(/#(?:(?:\/admin)?\/tools\/)([^/?#]+)/);
       if (toolMatch && toolMatch[1]) {
         setSelectedToolSlug(toolMatch[1]);
+        setSelectedUserId(null);
         setCurrentTab('tools');
         return;
       }
+
+      const userMatch = hash.match(/#(?:(?:\/admin)?\/users\/)(\d+)/);
+      if (userMatch && userMatch[1]) {
+        setSelectedUserId(Number(userMatch[1]));
+        setSelectedToolSlug(null);
+        setCurrentTab('users');
+        return;
+      }
       
-      const tabMatch = hash.match(/#(?:(?:\/admin)?\/)(overview|analytics|system|tools|scrapers)/);
+      const tabMatch = hash.match(/#(?:(?:\/admin)?\/)(overview|analytics|system|tools|scrapers|users)/);
       if (tabMatch && tabMatch[1]) {
         setCurrentTab(tabMatch[1]);
         setSelectedToolSlug(null);
+        setSelectedUserId(null);
       }
     };
 
@@ -67,14 +80,14 @@ export default function AdminDashboard() {
       }
 
       try {
-        const res = await fetch('/api/auth/me', {
+        const res = await fetch('/api/admin/session', {
           headers: {
             Authorization: `Bearer ${token}`
           }
         });
         const json = await res.json();
         if (isMounted) {
-          if (res.ok && json.authenticated && json.user) {
+          if (res.ok && json.user) {
             setAuthUser(json.user);
           } else {
             localStorage.removeItem('admin_token');
@@ -202,10 +215,12 @@ export default function AdminDashboard() {
   useEffect(() => {
     if (selectedTool) {
       document.title = `${selectedTool.title} | Admin - Cerilas Tools`;
+    } else if (currentTab === 'users') {
+      document.title = selectedUserId ? `Member #${selectedUserId} | Admin - Cerilas Tools` : 'Users | Admin - Cerilas Tools';
     } else {
       document.title = 'Cerilas Tools - Admin Suite';
     }
-  }, [selectedTool, currentTab]);
+  }, [selectedTool, currentTab, selectedUserId]);
 
   const liveVisitors = statsOverview?.liveVisitors || 1;
 
@@ -224,9 +239,23 @@ export default function AdminDashboard() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const handleSelectUser = (id) => {
+    setSelectedUserId(id);
+    setCurrentTab('users');
+    window.location.hash = `#/users/${id}`;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleBackToUsers = () => {
+    setSelectedUserId(null);
+    window.location.hash = '#/users';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   const handleSelectTab = (tab) => {
     setCurrentTab(tab);
     setSelectedToolSlug(null);
+    setSelectedUserId(null);
     setIsSidebarOpen(false);
     window.location.hash = `#/${tab}`;
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -272,6 +301,10 @@ export default function AdminDashboard() {
         return <SystemHealthView />;
       case 'scrapers':
         return <ScrapersView />;
+      case 'users':
+        return selectedUserId
+          ? <UserDetailView userId={selectedUserId} onBack={handleBackToUsers} />
+          : <UsersView onSelectUser={handleSelectUser} />;
       default:
         return (
           <ToolsView 

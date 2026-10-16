@@ -2,7 +2,7 @@ import express from 'express';
 import pool from '../db.js';
 import { scrapeCascadeFunding } from '../scrapers/cascadefunding.js';
 import { scrapeEcFunding } from '../scrapers/ec_funding.js';
-import { requireAuth } from './auth.js';
+import { requireAdmin } from './admin.js';
 
 const router = express.Router();
 
@@ -359,7 +359,7 @@ router.get('/sitemap.xml', async (req, res) => {
 /**
  * 4. Run Scraper Manually (Admin Button - Protected)
  */
-router.post('/:sourceKey/run', requireAuth, async (req, res) => {
+router.post('/:sourceKey/run', requireAdmin, async (req, res) => {
   try {
     const { sourceKey } = req.params;
     let result = null;
