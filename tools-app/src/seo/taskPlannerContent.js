@@ -52,7 +52,7 @@ export const PLANNER_HOW_TO = {
     },
     {
       name: 'Review, lock and export the schedule',
-      text: 'Check utilization and the feasibility list, switch between daily, weekly, monthly and timeline views, lock blocks you want to keep, and export to your calendar as an .ics file or to a spreadsheet as CSV.'
+      text: 'Check utilization and the feasibility list, switch between daily, weekly, monthly and timeline views, lock blocks you want to keep, then download the plan as a PDF report or export it to your calendar as an .ics file or to a spreadsheet as CSV.'
     }
   ]
 };
@@ -112,8 +112,8 @@ export const PLANNER_FAQ = [
     a: 'Locked blocks are never moved or deleted by recalculation. If a schedule change puts a locked block on a non-working day, outside working hours or outside the planning period, it stays where you placed it and appears as a warning so you can decide what to do.'
   },
   {
-    q: 'Can I export the plan to Google Calendar or Outlook?',
-    a: 'Yes. Export the schedule as an .ics file and import it into Google Calendar, Outlook or Apple Calendar. You can also export the schedule or the prioritized task list as CSV for Excel or Google Sheets, or save the whole plan as JSON.'
+    q: 'Can I download the plan as a PDF or export it to Google Calendar?',
+    a: 'Yes. Download PDF creates a print-ready report with the capacity summary, the priority ranking, the day-by-day schedule and the feasibility check. You can also export the schedule as an .ics file and import it into Google Calendar, Outlook or Apple Calendar, export the schedule or the prioritized task list as CSV for Excel or Google Sheets, or save the whole plan as JSON.'
   },
   {
     q: 'Is my task data private?',

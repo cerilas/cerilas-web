@@ -1,5 +1,5 @@
 import React, { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from 'react';
-import { Users, Activity, ShieldCheck, CalendarDays, Download, Upload, RotateCcw, Copy, FileSpreadsheet, Eraser } from 'lucide-react';
+import { Users, Activity, ShieldCheck, CalendarDays, Download, Upload, RotateCcw, Copy, FileSpreadsheet, FileText, Eraser } from 'lucide-react';
 import { useToolAnalytics } from '../../hooks/useToolAnalytics';
 import { Badge, ToolHeader } from '../../components/ui';
 import ToolSeoDivider from '../../components/ui/ToolSeoDivider';
@@ -26,6 +26,7 @@ export default function TaskPrioritizationPlanner({ onBack, toolMeta }) {
   const [plan, setPlan] = useState(loadState);
   const [selectedBlockId, setSelectedBlockId] = useState(null);
   const [notice, setNotice] = useState('');
+  const [pdfBusy, setPdfBusy] = useState(false);
   const usedRef = useRef(false);
   const fileRef = useRef(null);
 
@@ -130,6 +131,32 @@ export default function TaskPrioritizationPlanner({ onBack, toolMeta }) {
   const exportIcs = () => {
     downloadFile(`${exportName}.ics`, scheduleToIcs(schedule.blocks, tasksById, scoring.scores), 'text/calendar;charset=utf-8');
     trackDownload({ format: 'ics', blocks: schedule.blocks.length });
+  };
+  const exportPdf = async () => {
+    if (pdfBusy) return;
+    setPdfBusy(true);
+    try {
+      const { buildPlanPdf } = await import('./lib/pdfReport');
+      const bytes = await buildPlanPdf({
+        period,
+        summary,
+        tasks: deferredPlan.tasks,
+        scores: scoring.scores,
+        results: schedule.taskResults,
+        blocks: schedule.blocks,
+        days,
+        dayStats: schedule.dayStats,
+        conflicts: schedule.conflicts,
+        referenceDate: scoring.referenceDate
+      });
+      downloadFile(`${exportName}.pdf`, bytes, 'application/pdf');
+      trackDownload({ format: 'pdf', tasks: deferredPlan.tasks.length, blocks: schedule.blocks.length });
+      setNotice('PDF plan downloaded.');
+    } catch {
+      setNotice('Could not create the PDF. Please try again.');
+    } finally {
+      setPdfBusy(false);
+    }
   };
   const exportScheduleCsv = () => {
     downloadFile(`${exportName}-schedule.csv`, scheduleToCsv(schedule.blocks, tasksById, scoring.scores), 'text/csv;charset=utf-8');
@@ -236,7 +263,8 @@ export default function TaskPrioritizationPlanner({ onBack, toolMeta }) {
           <h2 id="tpp-plan-title">5. Schedule</h2>
           {isStale && <span className="tpp-tag">recalculating…</span>}
           <div className="tpp-head-actions tpp-export">
-            <button type="button" className="tpp-btn primary" onClick={exportIcs} disabled={!schedule.blocks.length}><Download size={14} /> Calendar (.ics)</button>
+            <button type="button" className="tpp-btn primary" onClick={exportPdf} disabled={!tasks.length || pdfBusy || !!periodError}><FileText size={14} /> {pdfBusy ? 'Creating PDF…' : 'Download PDF'}</button>
+            <button type="button" className="tpp-btn" onClick={exportIcs} disabled={!schedule.blocks.length}><Download size={14} /> Calendar (.ics)</button>
             <button type="button" className="tpp-btn" onClick={exportScheduleCsv} disabled={!schedule.blocks.length}><FileSpreadsheet size={14} /> Schedule CSV</button>
             <button type="button" className="tpp-btn" onClick={exportTasksCsv} disabled={!tasks.length}><FileSpreadsheet size={14} /> Tasks CSV</button>
             <button type="button" className="tpp-btn" onClick={copySummary} disabled={!tasks.length}><Copy size={14} /> Copy summary</button>

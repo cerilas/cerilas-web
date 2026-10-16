@@ -14,6 +14,6 @@ export const taskPrioritizationPlannerManifest = {
     'Weighted multi-criteria priority scores (0–100) with custom criteria and presets',
     'Automatic scheduling around deadlines, dependencies, minimum session length and locked blocks',
     'Daily, weekly, monthly and timeline (Gantt-style) views',
-    'Export to Google Calendar, Outlook or Apple Calendar (.ics), CSV and JSON; data stays in your browser'
+    'Download the finished plan as a branded PDF report, or export to Google Calendar, Outlook or Apple Calendar (.ics), CSV and JSON; data stays in your browser'
   ]
 };
