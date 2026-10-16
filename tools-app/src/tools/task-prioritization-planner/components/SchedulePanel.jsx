@@ -48,7 +48,7 @@ export default function SchedulePanel({ settings, onChange, onWeekChange, period
     <section className="tpp-panel" aria-labelledby="tpp-schedule-title">
       <header className="tpp-panel-head">
         <Clock size={18} aria-hidden="true" />
-        <h2 id="tpp-schedule-title">2. Working schedule</h2>
+        <h2 id="tpp-schedule-title">Working hours</h2>
         <label className="tpp-template-select">
           <span className="tpp-sr-only">Schedule template</span>
           <select
@@ -65,6 +65,7 @@ export default function SchedulePanel({ settings, onChange, onWeekChange, period
           </select>
         </label>
       </header>
+      <p className="tpp-panel-lead">Set the hours you actually work on each day. Type hours directly or adjust start, end and break.</p>
 
       <div className="tpp-table-wrap">
         <table className="tpp-week-table">
@@ -130,14 +131,17 @@ export default function SchedulePanel({ settings, onChange, onWeekChange, period
             value={settings.maxDailyHours ?? ''}
             onChange={(e) => onChange({ maxDailyHours: e.target.value === '' || Number(e.target.value) <= 0 ? null : Math.min(24, Number(e.target.value)) })}
           />
+          <small className="tpp-field-help">Upper limit for planned work on any single day.</small>
         </label>
         <label className="tpp-field">
           <span>Buffer (%)</span>
           <input type="number" min="0" max="95" step="1" value={settings.bufferPercent} onChange={(e) => onChange({ bufferPercent: Math.max(0, Math.min(95, Number(e.target.value) || 0)) })} />
+          <small className="tpp-field-help">Time kept free for meetings, email and surprises.</small>
         </label>
         <label className="tpp-field">
           <span>Min. session (min)</span>
           <input type="number" min="5" max="480" step="5" value={settings.minSessionMinutes} onChange={(e) => onChange({ minSessionMinutes: Math.max(5, Math.min(480, Number(e.target.value) || 5)) })} />
+          <small className="tpp-field-help">Shorter gaps are left free instead of filled.</small>
         </label>
       </div>
 

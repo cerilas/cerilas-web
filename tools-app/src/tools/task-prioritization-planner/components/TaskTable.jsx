@@ -1,5 +1,5 @@
-import React, { useMemo, useState } from 'react';
-import { ListChecks, Plus, Trash2, ChevronDown, ChevronRight, AlertTriangle, CheckCircle2, Lock } from 'lucide-react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { Plus, Trash2, ChevronDown, ChevronRight, AlertTriangle, CheckCircle2, Lock, Sparkles } from 'lucide-react';
 import { formatDate, formatHours, isIsoDate } from '../lib/dates';
 
 const RATING_OPTIONS = [1, 2, 3, 4, 5];
@@ -23,8 +23,43 @@ function StatusCell({ result, task }) {
   );
 }
 
-export default function TaskTable({ tasks, criteria, scores, results, onAdd, onUpdate, onRemove, referenceDate }) {
+function QuickAdd({ onAdd }) {
+  const [draft, setDraft] = useState({ title: '', hours: '2', deadline: '' });
+  const titleRef = useRef(null);
+  const submit = (e) => {
+    e.preventDefault();
+    const title = draft.title.trim();
+    if (!title) {
+      titleRef.current?.focus();
+      return;
+    }
+    onAdd({ title: title.slice(0, 140), hours: Math.max(0.25, Number(draft.hours) || 2), deadline: isIsoDate(draft.deadline) ? draft.deadline : '' });
+    setDraft((d) => ({ ...d, title: '', deadline: '' }));
+    titleRef.current?.focus();
+  };
+  return (
+    <form className="tpp-quick-add" onSubmit={submit}>
+      <label className="tpp-quick-title">
+        <span className="tpp-sr-only">New task title</span>
+        <Plus size={16} aria-hidden="true" />
+        <input ref={titleRef} type="text" placeholder="New task, e.g. “Write Q4 report”" maxLength={140} value={draft.title} onChange={(e) => setDraft((d) => ({ ...d, title: e.target.value }))} />
+      </label>
+      <label className="tpp-quick-field">
+        <span>Hours</span>
+        <input type="number" min="0.25" step="0.25" value={draft.hours} onChange={(e) => setDraft((d) => ({ ...d, hours: e.target.value }))} />
+      </label>
+      <label className="tpp-quick-field">
+        <span>Deadline <em>(optional)</em></span>
+        <input type="date" value={draft.deadline} onChange={(e) => setDraft((d) => ({ ...d, deadline: e.target.value }))} />
+      </label>
+      <button type="submit" className="tpp-btn primary">Add task</button>
+    </form>
+  );
+}
+
+export default function TaskTable({ tasks, criteria, scores, results, onAdd, onUpdate, onRemove, onLoadExample, referenceDate, capacity }) {
   const [expanded, setExpanded] = useState(() => new Set());
+  const [recentId, setRecentId] = useState(null);
   const [sortBy, setSortBy] = useState('priority');
   const ratingCriteria = criteria.filter((c) => c.type === 'rating' || c.type === 'urgency');
   const byId = useMemo(() => new Map(tasks.map((t) => [t.id, t])), [tasks]);
@@ -43,44 +78,71 @@ export default function TaskTable({ tasks, criteria, scores, results, onAdd, onU
     return next;
   });
 
-  const totalHours = tasks.filter((t) => !t.done).reduce((sum, t) => sum + (Number(t.hours) || 0), 0);
-  const colSpan = 6 + ratingCriteria.length;
+  const tableRef = useRef(null);
+  useEffect(() => {
+    if (!recentId) return undefined;
+    tableRef.current?.querySelector(`[data-task-id="${recentId}"]`)?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    const id = setTimeout(() => setRecentId(null), 1800);
+    return () => clearTimeout(id);
+  }, [recentId]);
+
+  const handleAdd = (draft) => setRecentId(onAdd(draft));
+
+  const openTasks = tasks.filter((t) => !t.done);
+  const totalHours = openTasks.reduce((sum, t) => sum + (Number(t.hours) || 0), 0);
+  const fits = totalHours <= capacity.usableHours + 1e-6;
+  const colSpan = 7 + ratingCriteria.length;
 
   return (
     <section className="tpp-panel tpp-panel-wide" aria-labelledby="tpp-tasks-title">
       <header className="tpp-panel-head">
-        <ListChecks size={18} aria-hidden="true" />
-        <h2 id="tpp-tasks-title">4. Tasks &amp; priority scores</h2>
+        <span className="tpp-step" aria-hidden="true">2</span>
+        <h2 id="tpp-tasks-title">Tasks &amp; priorities</h2>
         <div className="tpp-head-actions">
-          <label className="tpp-template-select">
-            <span className="tpp-sr-only">Sort tasks</span>
-            <select value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
-              <option value="priority">Sort: priority score</option>
-              <option value="deadline">Sort: deadline</option>
-              <option value="manual">Sort: order added</option>
-            </select>
-          </label>
-          <button type="button" className="tpp-btn primary" onClick={onAdd}><Plus size={14} /> Add task</button>
+          {tasks.length > 0 && (
+            <span className={`tpp-demand ${fits ? 'is-ok' : 'is-over'}`} title="Open work compared with usable capacity">
+              <strong>{Number(totalHours.toFixed(1))}h</strong> of work · {Number(capacity.usableHours.toFixed(1))}h available
+            </span>
+          )}
+          {tasks.length > 1 && (
+            <label className="tpp-template-select">
+              <span className="tpp-sr-only">Sort tasks</span>
+              <select value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
+                <option value="priority">Sort: priority score</option>
+                <option value="deadline">Sort: deadline</option>
+                <option value="manual">Sort: order added</option>
+              </select>
+            </label>
+          )}
         </div>
       </header>
-      <p className="tpp-panel-lead">{tasks.length} tasks · {Number(totalHours.toFixed(2))}h of open work. Rate each criterion from 1 (lowest) to 5 (highest). Expand a row for deadlines, dependencies and restrictions.</p>
+      <p className="tpp-panel-lead">Rate each task from 1 (low) to 5 (high). Urgency is calculated automatically when a task has a deadline. Open a row with the arrow for dependencies, deadline type and other options.</p>
+
+      <QuickAdd onAdd={handleAdd} />
 
       <div className="tpp-table-wrap">
-        <table className="tpp-task-table">
+        <table className="tpp-task-table" ref={tableRef}>
           <thead>
             <tr>
-              <th scope="col" aria-label="Details" />
+              <th scope="col"><span className="tpp-sr-only">Details</span></th>
               <th scope="col">Task</th>
               <th scope="col">Hours</th>
               <th scope="col">Deadline</th>
-              {ratingCriteria.map((c) => <th scope="col" key={c.id} title={c.help}>{c.name}</th>)}
+              {ratingCriteria.map((c) => <th scope="col" key={c.id} title={c.help || `${c.name}: 1 = low, 5 = high`}>{c.name}</th>)}
               <th scope="col">Priority</th>
               <th scope="col">Schedule</th>
+              <th scope="col"><span className="tpp-sr-only">Delete</span></th>
             </tr>
           </thead>
           <tbody>
             {sorted.length === 0 && (
-              <tr><td colSpan={colSpan} className="tpp-empty">No tasks yet. Add your first task to build a schedule.</td></tr>
+              <tr>
+                <td colSpan={colSpan} className="tpp-empty">
+                  <strong>No tasks yet</strong>
+                  <span>Type a task above and press Enter. The planner scores it and fits it into your working hours.</span>
+                  {onLoadExample && <button type="button" className="tpp-btn" onClick={onLoadExample}><Sparkles size={14} /> Try the example plan</button>}
+                </td>
+              </tr>
             )}
             {sorted.map((task) => {
               const score = scores[task.id];
@@ -88,7 +150,7 @@ export default function TaskTable({ tasks, criteria, scores, results, onAdd, onU
               const isOpen = expanded.has(task.id);
               return (
                 <React.Fragment key={task.id}>
-                  <tr className={`${task.done ? 'is-done' : ''} ${isOpen ? 'is-open' : ''}`}>
+                  <tr data-task-id={task.id} className={`${task.done ? 'is-done' : ''} ${isOpen ? 'is-open' : ''} ${recentId === task.id ? 'is-new' : ''}`}>
                     <td>
                       <button type="button" className="tpp-icon-btn" aria-expanded={isOpen} aria-label={`${isOpen ? 'Collapse' : 'Expand'} ${task.title}`} onClick={() => toggle(task.id)}>
                         {isOpen ? <ChevronDown size={15} /> : <ChevronRight size={15} />}
@@ -124,6 +186,11 @@ export default function TaskTable({ tasks, criteria, scores, results, onAdd, onU
                       )}
                     </td>
                     <td><StatusCell result={result} task={task} /></td>
+                    <td>
+                      <button type="button" className="tpp-icon-btn tpp-row-delete" aria-label={`Delete ${task.title}`} title="Delete task" onClick={() => onRemove(task.id)}>
+                        <Trash2 size={14} />
+                      </button>
+                    </td>
                   </tr>
                   {isOpen && (
                     <tr className="tpp-detail-row">
@@ -199,7 +266,6 @@ export default function TaskTable({ tasks, criteria, scores, results, onAdd, onU
                           {(task.dependsOn || []).filter((d) => !byId.has(d)).length > 0 && (
                             <p className="tpp-hint">Some dependencies point to deleted tasks and are ignored.</p>
                           )}
-                          <button type="button" className="tpp-btn danger" onClick={() => onRemove(task.id)}><Trash2 size={14} /> Delete task</button>
                         </div>
                       </td>
                     </tr>

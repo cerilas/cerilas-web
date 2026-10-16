@@ -9,6 +9,8 @@ export default function CriteriaPanel({ criteria, scoring, referenceDate, onCrit
   const [draftDirection, setDraftDirection] = useState('benefit');
   const totalWeight = criteria.reduce((sum, c) => sum + (Number(c.weight) || 0), 0);
 
+  const activePreset = Object.entries(WEIGHT_PRESETS).find(([, p]) => criteria.every((c) => (p.weights[c.id] ?? 0) === (Number(c.weight) || 0)))?.[0];
+
   const update = (id, patch) => onCriteriaChange(criteria.map((c) => (c.id === id ? { ...c, ...patch } : c)));
 
   const addCriterion = () => {
@@ -22,13 +24,13 @@ export default function CriteriaPanel({ criteria, scoring, referenceDate, onCrit
     <section className="tpp-panel" aria-labelledby="tpp-criteria-title">
       <header className="tpp-panel-head">
         <SlidersHorizontal size={18} aria-hidden="true" />
-        <h2 id="tpp-criteria-title">3. Priority criteria &amp; weights</h2>
+        <h2 id="tpp-criteria-title">Priority criteria &amp; weights</h2>
       </header>
-      <p className="tpp-panel-lead">Priority scores (0–100) update as soon as a weight or rating changes. Weights are relative; their share is shown on the right.</p>
+      <p className="tpp-panel-lead">Start from a preset or drag the sliders. Weights are relative, so only their share (shown on the right) matters. Scores update instantly.</p>
 
       <div className="tpp-chip-row" role="group" aria-label="Weight presets">
         {Object.entries(WEIGHT_PRESETS).map(([id, p]) => (
-          <button key={id} type="button" className="tpp-chip" onClick={() => onApplyPreset(id)}>{p.label}</button>
+          <button key={id} type="button" className={`tpp-chip ${activePreset === id ? 'active' : ''}`} aria-pressed={activePreset === id} onClick={() => onApplyPreset(id)}>{p.label}</button>
         ))}
       </div>
 

@@ -87,9 +87,11 @@ function TimeGrid({ dates, dayMap, blocksByDate, tasksById, scores, selectedBloc
 
 function MonthGrid({ cursor, dayMap, blocksByDate, dayStatsMap, tasksById, period, onPickDay }) {
   const first = startOfMonth(cursor);
-  const gridStart = startOfWeek(first);
   const last = endOfMonth(cursor);
-  const weeks = Math.ceil((diffDays(gridStart, last) + 1) / 7);
+  const visibleStart = first > period.start ? first : period.start;
+  const visibleEnd = last < period.end ? last : period.end;
+  const gridStart = startOfWeek(visibleStart);
+  const weeks = Math.ceil((diffDays(gridStart, visibleEnd) + 1) / 7);
   const cells = eachDay(gridStart, addDays(gridStart, weeks * 7 - 1));
 
   return (
@@ -101,6 +103,17 @@ function MonthGrid({ cursor, dayMap, blocksByDate, dayStatsMap, tasksById, perio
         const inPeriod = date >= period.start && date <= period.end;
         const stats = dayStatsMap.get(date);
         const list = blocksByDate.get(date) || [];
+        const items = [];
+        for (const blk of list) {
+          const key = blk.taskId || `blocked-${blk.title}`;
+          const existing = items.find((it) => it.key === key);
+          if (existing) {
+            existing.minutes += blk.minutes;
+            existing.locked = existing.locked || blk.locked;
+          } else {
+            items.push({ key, blk, minutes: blk.minutes, locked: blk.locked });
+          }
+        }
         const util = day && day.usableMinutes > 0 ? Math.min(100, ((stats?.taskMinutes || 0) / day.usableMinutes) * 100) : 0;
         return (
           <button
@@ -109,7 +122,7 @@ function MonthGrid({ cursor, dayMap, blocksByDate, dayStatsMap, tasksById, perio
             className={`tpp-month-cell ${inMonth ? '' : 'is-other'} ${inPeriod ? '' : 'is-outside'} ${day && !day.isWorking ? 'is-off' : ''}`}
             onClick={() => inPeriod && onPickDay(date)}
             disabled={!inPeriod}
-            aria-label={`${formatDate(date, { weekday: true })}: ${list.length} blocks`}
+            aria-label={`${formatDate(date, { weekday: true })}: ${items.length} item${items.length === 1 ? '' : 's'}. Open day view`}
           >
             <span className="tpp-month-date">{Number(date.slice(8))}</span>
             {day && inPeriod && (
@@ -118,12 +131,14 @@ function MonthGrid({ cursor, dayMap, blocksByDate, dayStatsMap, tasksById, perio
               </span>
             )}
             <span className="tpp-month-items">
-              {list.slice(0, 3).map((blk) => (
-                <span key={blk.id} className="tpp-month-item" style={{ '--tpp-block': blockColor(blk, tasksById) }}>
-                  {blk.locked && <Lock size={9} />}{tasksById.get(blk.taskId)?.title || blk.title}
+              {items.slice(0, 3).map(({ key, blk, minutes, locked }) => (
+                <span key={key} className="tpp-month-item" style={{ '--tpp-block': blockColor(blk, tasksById) }}>
+                  {locked && <Lock size={9} />}
+                  <span className="tpp-month-item-title">{tasksById.get(blk.taskId)?.title || blk.title}</span>
+                  <span className="tpp-month-item-hours">{formatHours(minutes)}</span>
                 </span>
               ))}
-              {list.length > 3 && <span className="tpp-month-more">+{list.length - 3} more</span>}
+              {items.length > 3 && <span className="tpp-month-more">+{items.length - 3} more</span>}
             </span>
           </button>
         );

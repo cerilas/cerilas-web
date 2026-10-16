@@ -1,5 +1,5 @@
 import React, { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from 'react';
-import { Users, Activity, ShieldCheck, CalendarDays, Download, Upload, RotateCcw, Copy, FileSpreadsheet, FileText, Eraser } from 'lucide-react';
+import { Users, Activity, ShieldCheck, Download, Upload, RotateCcw, Copy, FileSpreadsheet, FileText, Eraser, ChevronDown, CalendarPlus } from 'lucide-react';
 import { useToolAnalytics } from '../../hooks/useToolAnalytics';
 import { Badge, ToolHeader } from '../../components/ui';
 import ToolSeoDivider from '../../components/ui/ToolSeoDivider';
@@ -13,6 +13,7 @@ import ScheduleViews from './components/ScheduleViews';
 import { defaultViewFor } from './lib/views';
 import LockedBlocksPanel, { SelectedBlockBar } from './components/LockedBlocksPanel';
 import PlannerSeo from './components/PlannerSeo';
+import SetupBar from './components/SetupBar';
 import { buildCalendar, summarizeCapacity, validatePeriod } from './lib/capacity';
 import { scoreTasks, applyPreset } from './lib/scoring';
 import { buildSchedule } from './lib/scheduler';
@@ -27,6 +28,9 @@ export default function TaskPrioritizationPlanner({ onBack, toolMeta }) {
   const [selectedBlockId, setSelectedBlockId] = useState(null);
   const [notice, setNotice] = useState('');
   const [pdfBusy, setPdfBusy] = useState(false);
+  const [setupOpen, setSetupOpen] = useState(null);
+  const [undo, setUndo] = useState(null);
+  const exportMenuRef = useRef(null);
   const usedRef = useRef(false);
   const fileRef = useRef(null);
 
@@ -54,6 +58,21 @@ export default function TaskPrioritizationPlanner({ onBack, toolMeta }) {
     const id = setTimeout(() => setNotice(''), 3500);
     return () => clearTimeout(id);
   }, [notice]);
+
+  useEffect(() => {
+    if (!undo) return undefined;
+    const id = setTimeout(() => setUndo(null), 7000);
+    return () => clearTimeout(id);
+  }, [undo]);
+
+  useEffect(() => {
+    const close = (e) => {
+      const menu = exportMenuRef.current;
+      if (menu?.open && !menu.contains(e.target)) menu.open = false;
+    };
+    document.addEventListener('pointerdown', close);
+    return () => document.removeEventListener('pointerdown', close);
+  }, []);
 
   const commit = useCallback((updater, action) => {
     setPlan(updater);
@@ -103,9 +122,17 @@ export default function TaskPrioritizationPlanner({ onBack, toolMeta }) {
   const updateSettings = (patch, action = 'settings') => commit((p) => ({ ...p, settings: { ...p.settings, ...patch } }), action);
   const updateTask = (id, patch) => commit((p) => ({ ...p, tasks: p.tasks.map((t) => (t.id === id ? { ...t, ...patch } : t)) }), 'edit_task');
 
+  const addTask = (draft) => {
+    const task = createTask(draft, tasks.length);
+    commit((p) => ({ ...p, tasks: [...p.tasks, task] }), 'add_task');
+    return task.id;
+  };
+
   const removeTask = (id) => {
-    const owned = lockedBlocks.filter((b) => b.taskId === id).length;
-    if (owned && !window.confirm(`This task has ${owned} locked block(s). Delete the task and its locked blocks?`)) return;
+    const snapshot = { tasks: plan.tasks, lockedBlocks: plan.lockedBlocks };
+    const title = tasksById.get(id)?.title || 'Task';
+    setUndo({ label: `Deleted “${title}”`, snapshot });
+    if (selectedBlock?.taskId === id) setSelectedBlockId(null);
     commit((p) => ({
       ...p,
       tasks: p.tasks.filter((t) => t.id !== id).map((t) => ({ ...t, dependsOn: (t.dependsOn || []).filter((d) => d !== id) })),
@@ -125,6 +152,20 @@ export default function TaskPrioritizationPlanner({ onBack, toolMeta }) {
   const removeLocked = (id) => {
     commit((p) => ({ ...p, lockedBlocks: p.lockedBlocks.filter((b) => b.id !== id) }), 'unlock_block');
     if (selectedBlockId === id) setSelectedBlockId(null);
+  };
+
+  const restoreUndo = () => {
+    if (!undo) return;
+    setPlan((p) => ({ ...p, ...undo.snapshot }));
+    setUndo(null);
+  };
+
+  const closeExportMenu = () => { if (exportMenuRef.current) exportMenuRef.current.open = false; };
+
+  const loadExample = () => {
+    if (tasks.length && !window.confirm('Replace your current plan with the example plan?')) return;
+    setPlan(createDefaultState());
+    setSelectedBlockId(null);
   };
 
   const exportName = `task-plan-${period.start}-to-${period.end}`;
@@ -224,27 +265,46 @@ export default function TaskPrioritizationPlanner({ onBack, toolMeta }) {
 
       <CapacityKpis summary={summary} blockedHours={schedule.blockedMinutes / 60} taskCounts={taskCounts} demandHours={demandHours} />
 
-      <div className="tpp-layout">
-        <div className="tpp-col">
-          <PeriodPanel period={period} onChange={(next) => updateSettings({ period: next }, 'period')} summary={summary} error={periodError} />
-          <SchedulePanel
-            settings={settings}
-            periodStart={period.start}
-            onChange={(patch) => updateSettings(patch, 'schedule')}
-            onWeekChange={(week) => updateSettings({ week }, 'schedule')}
-          />
-        </div>
-        <div className="tpp-col">
-          <CriteriaPanel
-            criteria={criteria}
-            scoring={settings.scoring}
-            referenceDate={scoring.referenceDate}
-            onCriteriaChange={(next) => commit((p) => ({ ...p, criteria: next }), 'criteria')}
-            onApplyPreset={(id) => commit((p) => ({ ...p, criteria: applyPreset(p.criteria, id) }), 'preset')}
-            onScoringChange={(patch) => updateSettings({ scoring: { ...settings.scoring, ...patch } }, 'scoring')}
-          />
-        </div>
-      </div>
+      <section className="tpp-panel tpp-setup" aria-labelledby="tpp-setup-title">
+        <header className="tpp-panel-head">
+          <span className="tpp-step" aria-hidden="true">1</span>
+          <h2 id="tpp-setup-title">Plan setup</h2>
+          <span className="tpp-head-note">Defaults work out of the box. Change them any time; everything recalculates instantly.</span>
+        </header>
+        <SetupBar
+          settings={settings}
+          criteria={criteria}
+          summary={summary}
+          open={setupOpen}
+          onToggle={setSetupOpen}
+          periodError={periodError}
+        />
+        {setupOpen && (
+          <div id="tpp-setup-body" className={`tpp-setup-body is-${setupOpen}`}>
+            {setupOpen === 'period' && (
+              <PeriodPanel period={period} onChange={(next) => updateSettings({ period: next }, 'period')} summary={summary} error={periodError} />
+            )}
+            {setupOpen === 'schedule' && (
+              <SchedulePanel
+                settings={settings}
+                periodStart={period.start}
+                onChange={(patch) => updateSettings(patch, 'schedule')}
+                onWeekChange={(week) => updateSettings({ week }, 'schedule')}
+              />
+            )}
+            {setupOpen === 'criteria' && (
+              <CriteriaPanel
+                criteria={criteria}
+                scoring={settings.scoring}
+                referenceDate={scoring.referenceDate}
+                onCriteriaChange={(next) => commit((p) => ({ ...p, criteria: next }), 'criteria')}
+                onApplyPreset={(id) => commit((p) => ({ ...p, criteria: applyPreset(p.criteria, id) }), 'preset')}
+                onScoringChange={(patch) => updateSettings({ scoring: { ...settings.scoring, ...patch } }, 'scoring')}
+              />
+            )}
+          </div>
+        )}
+      </section>
 
       <TaskTable
         tasks={tasks}
@@ -252,25 +312,40 @@ export default function TaskPrioritizationPlanner({ onBack, toolMeta }) {
         scores={scoring.scores}
         results={schedule.taskResults}
         referenceDate={scoring.referenceDate}
-        onAdd={() => commit((p) => ({ ...p, tasks: [...p.tasks, createTask({ title: `Task ${p.tasks.length + 1}` }, p.tasks.length)] }), 'add_task')}
+        capacity={{ usableHours: summary.usableCapacityHours }}
+        onAdd={addTask}
         onUpdate={updateTask}
         onRemove={removeTask}
+        onLoadExample={loadExample}
       />
 
       <section className="tpp-panel tpp-panel-wide" aria-labelledby="tpp-plan-title">
         <header className="tpp-panel-head">
-          <CalendarDays size={18} aria-hidden="true" />
-          <h2 id="tpp-plan-title">5. Schedule</h2>
+          <span className="tpp-step" aria-hidden="true">3</span>
+          <h2 id="tpp-plan-title">Schedule</h2>
           {isStale && <span className="tpp-tag">recalculating…</span>}
           <div className="tpp-head-actions tpp-export">
             <button type="button" className="tpp-btn primary" onClick={exportPdf} disabled={!tasks.length || pdfBusy || !!periodError}><FileText size={14} /> {pdfBusy ? 'Creating PDF…' : 'Download PDF'}</button>
-            <button type="button" className="tpp-btn" onClick={exportIcs} disabled={!schedule.blocks.length}><Download size={14} /> Calendar (.ics)</button>
-            <button type="button" className="tpp-btn" onClick={exportScheduleCsv} disabled={!schedule.blocks.length}><FileSpreadsheet size={14} /> Schedule CSV</button>
-            <button type="button" className="tpp-btn" onClick={exportTasksCsv} disabled={!tasks.length}><FileSpreadsheet size={14} /> Tasks CSV</button>
-            <button type="button" className="tpp-btn" onClick={copySummary} disabled={!tasks.length}><Copy size={14} /> Copy summary</button>
+            <details className="tpp-menu" ref={exportMenuRef}>
+              <summary className="tpp-btn">Export <ChevronDown size={14} aria-hidden="true" /></summary>
+              <div className="tpp-menu-list" role="menu">
+                <button type="button" role="menuitem" onClick={() => { closeExportMenu(); exportIcs(); }} disabled={!schedule.blocks.length}>
+                  <CalendarPlus size={15} /> <span>Add to calendar<small>Google, Outlook, Apple (.ics)</small></span>
+                </button>
+                <button type="button" role="menuitem" onClick={() => { closeExportMenu(); exportScheduleCsv(); }} disabled={!schedule.blocks.length}>
+                  <FileSpreadsheet size={15} /> <span>Schedule as CSV<small>One row per time block</small></span>
+                </button>
+                <button type="button" role="menuitem" onClick={() => { closeExportMenu(); exportTasksCsv(); }} disabled={!tasks.length}>
+                  <FileSpreadsheet size={15} /> <span>Tasks as CSV<small>Ranked list with scores</small></span>
+                </button>
+                <button type="button" role="menuitem" onClick={() => { closeExportMenu(); copySummary(); }} disabled={!tasks.length}>
+                  <Copy size={15} /> <span>Copy text summary<small>For Slack, email or notes</small></span>
+                </button>
+              </div>
+            </details>
           </div>
         </header>
-        <p className="tpp-panel-lead">The schedule recalculates whenever dates, working hours, tasks or weights change. Click a block to lock it in place; locked blocks are never moved.</p>
+        <p className="tpp-panel-lead">Tasks are placed into your free working time by priority, deadlines and dependencies. Click any block to lock it in place; locked blocks never move when the plan recalculates.</p>
         <ScheduleViews
           view={view}
           onViewChange={setView}
@@ -310,22 +385,15 @@ export default function TaskPrioritizationPlanner({ onBack, toolMeta }) {
         <button type="button" className="tpp-btn" onClick={exportJson}><Download size={14} /> Save plan (.json)</button>
         <button type="button" className="tpp-btn" onClick={() => fileRef.current?.click()}><Upload size={14} /> Open plan</button>
         <input ref={fileRef} type="file" accept="application/json,.json" hidden onChange={(e) => { importJson(e.target.files?.[0]); e.target.value = ''; }} />
-        <button
-          type="button"
-          className="tpp-btn"
-          onClick={() => {
-            if (!window.confirm('Replace your current plan with the example plan?')) return;
-            setPlan(createDefaultState());
-            setSelectedBlockId(null);
-          }}
-        >
+        <button type="button" className="tpp-btn" onClick={loadExample}>
           <RotateCcw size={14} /> Load example
         </button>
         <button
           type="button"
           className="tpp-btn danger"
+          disabled={!tasks.length && !lockedBlocks.length}
           onClick={() => {
-            if (!window.confirm('Remove all tasks and locked blocks? Your working schedule is kept.')) return;
+            setUndo({ label: `Cleared ${tasks.length} task${tasks.length === 1 ? '' : 's'}`, snapshot: { tasks: plan.tasks, lockedBlocks: plan.lockedBlocks } });
             setPlan((p) => ({ ...p, tasks: [], lockedBlocks: [] }));
             setSelectedBlockId(null);
           }}
@@ -335,7 +403,12 @@ export default function TaskPrioritizationPlanner({ onBack, toolMeta }) {
         <span className="tpp-hint">Your plan is saved automatically in this browser only. Today is {formatDate(todayIso(), { weekday: true, year: true })}.</span>
       </div>
 
-      {notice && <div className="tpp-toast" role="status">{notice}</div>}
+      {(undo || notice) && (
+        <div className="tpp-toast" role="status">
+          <span>{undo ? undo.label : notice}</span>
+          {undo && <button type="button" onClick={restoreUndo}>Undo</button>}
+        </div>
+      )}
 
       <ToolSeoDivider label="Prioritization & Capacity Planning Guide" />
       <PlannerSeo />

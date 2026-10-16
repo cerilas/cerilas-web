@@ -15,7 +15,7 @@ export default function PeriodPanel({ period, onChange, summary, error }) {
     <section className="tpp-panel" aria-labelledby="tpp-period-title">
       <header className="tpp-panel-head">
         <CalendarRange size={18} aria-hidden="true" />
-        <h2 id="tpp-period-title">1. Planning period</h2>
+        <h2 id="tpp-period-title">Planning period</h2>
       </header>
       <p className="tpp-panel-lead">Shortcuts are optional. Pick any start and end date; capacity is recalculated instantly.</p>
 
