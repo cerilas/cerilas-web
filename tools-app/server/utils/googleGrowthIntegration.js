@@ -487,10 +487,14 @@ export async function syncGrowthSearchConsole(workspaceId, explicitAccessToken =
   const rows = queryData.rows || [];
   const pageRows = pageData.rows || [];
 
-  const totalClicks = rows.reduce((acc, r) => acc + (Number(r.clicks) || 0), 0);
-  const totalImpressions = rows.reduce((acc, r) => acc + (Number(r.impressions) || 0), 0);
+  const pctCtr = (value, digits = 2) => `${((Number(value) || 0) * 100).toFixed(digits)}%`;
+
+  // Query rows are capped and exclude anonymized queries, so property totals come from the date dimension.
+  const totalsSource = (trendData.rows || []).length > 0 ? trendData.rows : rows;
+  const totalClicks = totalsSource.reduce((acc, r) => acc + (Number(r.clicks) || 0), 0);
+  const totalImpressions = totalsSource.reduce((acc, r) => acc + (Number(r.impressions) || 0), 0);
   const avgCtr = totalImpressions > 0 ? ((totalClicks / totalImpressions) * 100).toFixed(2) : '0.00';
-  const weightedPositionSum = rows.reduce((acc, r) => acc + (Number(r.position) || 0) * (Number(r.impressions) || 0), 0);
+  const weightedPositionSum = totalsSource.reduce((acc, r) => acc + (Number(r.position) || 0) * (Number(r.impressions) || 0), 0);
   const avgPosition = totalImpressions > 0 ? (weightedPositionSum / totalImpressions).toFixed(1) : '0.0';
 
   // Process striking distance queries (positions 4 to 15, minimum 30 impressions for statistical validity)
@@ -535,14 +539,30 @@ export async function syncGrowthSearchConsole(workspaceId, explicitAccessToken =
 
   const strikingQueries = topQueries.filter(q => q.isStriking).sort((a, b) => b.impressions - a.impressions);
 
-  // Process top pages
-  const topPages = pageRows.map(p => ({
-    url: p.keys?.[0] || '',
-    clicks: Number(p.clicks) || 0,
-    impressions: Number(p.impressions) || 0,
-    ctr: p.ctr || '0%',
-    topQuery: ''
-  }));
+  // Process top pages; the best query per page comes from the query+page rows
+  const bestQueryByPage = {};
+  for (const r of (cannibalData.rows || [])) {
+    const q = r.keys?.[0];
+    const page = r.keys?.[1];
+    if (!q || !page) continue;
+    const clicks = Number(r.clicks) || 0;
+    const impressions = Number(r.impressions) || 0;
+    const prev = bestQueryByPage[page];
+    if (!prev || clicks > prev.clicks || (clicks === prev.clicks && impressions > prev.impressions)) {
+      bestQueryByPage[page] = { query: q, clicks, impressions };
+    }
+  }
+
+  const topPages = pageRows.map(p => {
+    const url = p.keys?.[0] || '';
+    return {
+      url,
+      clicks: Number(p.clicks) || 0,
+      impressions: Number(p.impressions) || 0,
+      ctr: pctCtr(p.ctr),
+      topQuery: bestQueryByPage[url]?.query || ''
+    };
+  });
 
   // Process daily trend
   const dailyTrend = (trendData.rows || [])
@@ -550,7 +570,7 @@ export async function syncGrowthSearchConsole(workspaceId, explicitAccessToken =
       date: r.keys?.[0] || '',
       clicks: Number(r.clicks) || 0,
       impressions: Number(r.impressions) || 0,
-      ctr: r.ctr || '0%',
+      ctr: pctCtr(r.ctr),
       position: Number(r.position || 0).toFixed(1)
     }))
     .sort((a, b) => (a.date > b.date ? 1 : -1));
@@ -567,7 +587,7 @@ export async function syncGrowthSearchConsole(workspaceId, explicitAccessToken =
       label: DEVICE_MAP[rawKey] || rawKey,
       clicks: clx,
       impressions: imp,
-      ctr: r.ctr || '0%',
+      ctr: pctCtr(r.ctr),
       position: Number(r.position || 0).toFixed(1),
       share
     };
@@ -587,7 +607,7 @@ export async function syncGrowthSearchConsole(workspaceId, explicitAccessToken =
       flag: info.flag,
       clicks: clx,
       impressions: imp,
-      ctr: r.ctr || '0%',
+      ctr: pctCtr(r.ctr),
       position: Number(r.position || 0).toFixed(1),
       share
     };
@@ -604,7 +624,7 @@ export async function syncGrowthSearchConsole(workspaceId, explicitAccessToken =
       url: p,
       clicks: Number(r.clicks) || 0,
       impressions: Number(r.impressions) || 0,
-      ctr: r.ctr || '0%',
+      ctr: pctCtr(r.ctr),
       position: Number(r.position || 0).toFixed(1)
     });
   }
@@ -703,15 +723,16 @@ export async function syncGrowthSearchConsole(workspaceId, explicitAccessToken =
     if (inspectRes?.inspectionResult?.indexStatusResult) {
       const idx = inspectRes.inspectionResult.indexStatusResult;
       urlInspection = {
-        verdict: idx.verdict || 'PASS',
-        coverageState: idx.coverageState || 'Indexed',
+        url: inspectTarget,
+        verdict: idx.verdict || null,
+        coverageState: idx.coverageState || null,
         lastCrawlTime: idx.lastCrawlTime || null,
-        crawledAs: idx.crawledAs || 'GOOGLEBOT_SMARTPHONE',
-        googleCanonical: idx.googleCanonical || inspectTarget,
-        userCanonical: idx.userCanonical || inspectTarget,
-        robotsTxtState: idx.robotsTxtState || 'ALLOWED',
-        indexingState: idx.indexingState || 'INDEXING_ALLOWED',
-        pageFetchState: idx.pageFetchState || 'SUCCESSFUL'
+        crawledAs: idx.crawledAs || null,
+        googleCanonical: idx.googleCanonical || null,
+        userCanonical: idx.userCanonical || null,
+        robotsTxtState: idx.robotsTxtState || null,
+        indexingState: idx.indexingState || null,
+        pageFetchState: idx.pageFetchState || null
       };
     }
   } catch (inspectErr) {

@@ -50,6 +50,18 @@ import {
 } from '../utils/growthScoreService.js';
 
 const router = express.Router();
+
+/**
+ * GSC CTR values are stored in mixed formats: "3.4%" strings, raw ratios (0.034)
+ * and the percent number in growth_search_performance.average_ctr (3.4).
+ */
+function formatGscCtr(value, numberIsRatio) {
+  if (value === null || value === undefined || value === '') return '0%';
+  if (typeof value === 'string' && value.trim().endsWith('%')) return value.trim();
+  const num = Number(value);
+  if (!Number.isFinite(num)) return '0%';
+  return `${(numberIsRatio ? num * 100 : num).toFixed(2)}%`;
+}
 const JWT_SECRET = process.env.JWT_SECRET || 'cerilas_admin_jwt_secret_2026';
 
 /**
@@ -982,7 +994,7 @@ function buildOverviewTelemetry(workspace, range = '30d', extra = {}) {
           change: 0,
           clicks: Number(gscMatch.clicks || 0),
           impressions: Number(gscMatch.impressions || 0),
-          ctr: gscMatch.ctr != null ? `${(Number(gscMatch.ctr) * 100).toFixed(2)}%` : '0%',
+          ctr: formatGscCtr(gscMatch.ctr, true),
           difficulty: 45,
           searchVolume: Number(gscMatch.impressions || 0) * 8,
           status: 'ranked'
@@ -1004,7 +1016,7 @@ function buildOverviewTelemetry(workspace, range = '30d', extra = {}) {
     const baseClicks = Number(gscPerf?.total_clicks || 0);
     const baseImpressions = Number(gscPerf?.total_impressions || 0);
     const averagePosition = gscPerf?.average_position != null ? parseFloat(Number(gscPerf.average_position).toFixed(1)) : null;
-    const ctr = gscPerf?.average_ctr != null ? `${(Number(gscPerf.average_ctr) * 100).toFixed(2)}%` : (baseImpressions > 0 ? `${((baseClicks / baseImpressions) * 100).toFixed(2)}%` : '0.00%');
+    const ctr = gscPerf?.average_ctr != null ? formatGscCtr(gscPerf.average_ctr, false) : (baseImpressions > 0 ? `${((baseClicks / baseImpressions) * 100).toFixed(2)}%` : '0.00%');
 
     let searchTimeline = [];
     if (Array.isArray(gscPerf?.daily_trend) && gscPerf.daily_trend.length > 0) {
@@ -1017,7 +1029,7 @@ function buildOverviewTelemetry(workspace, range = '30d', extra = {}) {
           position: d.position != null ? parseFloat(Number(d.position).toFixed(1)) : averagePosition,
           clicks: Number(d.clicks || 0),
           impressions: Number(d.impressions || 0),
-          ctr: d.ctr != null ? `${(Number(d.ctr) * 100).toFixed(2)}%` : '0%'
+          ctr: formatGscCtr(d.ctr, true)
         };
       });
     }
@@ -4487,7 +4499,9 @@ router.get('/workspaces/:slugOrId/search-performance', requireAuth, async (req, 
     );
 
     // If custom range requested, check if the start_date and end_date match
-    let shouldSync = perfRes.rows.length === 0;
+    const STALE_AFTER_MS = 12 * 60 * 60 * 1000;
+    const cachedAt = perfRes.rows[0]?.synced_at ? new Date(perfRes.rows[0].synced_at).getTime() : 0;
+    let shouldSync = perfRes.rows.length === 0 || Date.now() - cachedAt > STALE_AFTER_MS;
     if (targetRangeKey === 'custom' && perfRes.rows.length > 0 && customStart && customEnd) {
       const p = perfRes.rows[0];
       const pStart = p.start_date ? new Date(p.start_date).toISOString().split('T')[0] : '';
@@ -4603,15 +4617,15 @@ router.post('/workspaces/:slugOrId/inspect-url', requireAuth, async (req, res) =
       success: true,
       inspection: {
         url: url.trim(),
-        verdict: idx.verdict || 'NEUTRAL',
-        coverageState: idx.coverageState || 'Unknown',
+        verdict: idx.verdict || null,
+        coverageState: idx.coverageState || null,
         lastCrawlTime: idx.lastCrawlTime || null,
-        crawledAs: idx.crawledAs || 'GOOGLEBOT_SMARTPHONE',
-        googleCanonical: idx.googleCanonical || url.trim(),
-        userCanonical: idx.userCanonical || url.trim(),
-        robotsTxtState: idx.robotsTxtState || 'ALLOWED',
-        indexingState: idx.indexingState || 'INDEXING_ALLOWED',
-        pageFetchState: idx.pageFetchState || 'SUCCESSFUL'
+        crawledAs: idx.crawledAs || null,
+        googleCanonical: idx.googleCanonical || null,
+        userCanonical: idx.userCanonical || null,
+        robotsTxtState: idx.robotsTxtState || null,
+        indexingState: idx.indexingState || null,
+        pageFetchState: idx.pageFetchState || null
       }
     });
   } catch (err) {

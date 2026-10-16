@@ -100,6 +100,18 @@ const computeQueryOpportunity = (item) => {
   };
 };
 
+const formatCtr = (value) => {
+  if (value === null || value === undefined || value === '') return '0%';
+  if (typeof value === 'string' && value.trim().endsWith('%')) return value;
+  const num = Number(value);
+  if (!Number.isFinite(num)) return '0%';
+  return `${(num <= 1 ? num * 100 : num).toFixed(2)}%`;
+};
+
+const isoDaysAgo = (days) => new Date(Date.now() - days * 86400000).toISOString().split('T')[0];
+
+const humanizeEnum = (value) => (value ? String(value).replace(/_/g, ' ').toLowerCase().replace(/^./, (c) => c.toUpperCase()) : '');
+
 function generateSmoothCurve(pts, minY, maxY) {
   if (!pts || pts.length === 0) return '';
   if (pts.length === 1) return `M ${pts[0].x.toFixed(1)} ${pts[0].y.toFixed(1)}`;
@@ -128,10 +140,12 @@ function generateSmoothCurve(pts, minY, maxY) {
 }
 
 export default function GrowthSearch() {
-  const { activeWorkspace, setActiveTab } = useGrowth();
+  const { activeWorkspace } = useGrowth();
   const { token } = useAuth();
 
-  const [loading, setLoading] = useState(true);
+  const workspaceId = activeWorkspace?.id;
+  const [loadedWorkspaceId, setLoadedWorkspaceId] = useState(null);
+  const loading = !!workspaceId && !!token && loadedWorkspaceId !== workspaceId;
   const [syncing, setSyncing] = useState(false);
   const [connectingGoogle, setConnectingGoogle] = useState(false);
   const [activeTabSub, setActiveTabSub] = useState('queries'); // queries, striking, pages, cannibalization, breakdown, health
@@ -173,6 +187,14 @@ export default function GrowthSearch() {
   const [isDateMenuOpen, setIsDateMenuOpen] = useState(false);
   const [rangeSyncing, setRangeSyncing] = useState(false);
   const dateDropdownRef = useRef(null);
+  const [loadError, setLoadError] = useState('');
+  const [syncError, setSyncError] = useState('');
+  const requestIdRef = useRef(0);
+  const inspectInputRef = useRef('');
+
+  useEffect(() => {
+    inspectInputRef.current = inspectInputUrl;
+  }, [inspectInputUrl]);
 
   // Close date menu on click outside
   useEffect(() => {
@@ -200,56 +222,66 @@ export default function GrowthSearch() {
     return found ? found.label : 'Last 28 Days';
   }, [dateRange, customStartDate, customEndDate]);
 
-  const fetchPerformance = useCallback(async (targetRange = dateRange, cStart = customStartDate, cEnd = customEndDate) => {
-    if (!activeWorkspace?.id || !token) return;
+  const loadPerformance = useCallback(async (targetRange, cStart, cEnd, requestId) => {
     try {
-      setRangeSyncing(true);
-      let url = `/api/growth/workspaces/${activeWorkspace.id}/search-performance?range=${encodeURIComponent(targetRange)}`;
+      let url = `/api/growth/workspaces/${workspaceId}/search-performance?range=${encodeURIComponent(targetRange)}`;
       if (targetRange === 'custom' && cStart && cEnd) {
         url += `&startDate=${encodeURIComponent(cStart)}&endDate=${encodeURIComponent(cEnd)}`;
       }
       const res = await fetch(url, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
-      const data = await res.json();
-      if (data.success) {
-        setSearchData(data);
-        if (data.dateRange) setDateRange(data.dateRange.startsWith('custom') ? 'custom' : data.dateRange);
-        if (data.startDate && typeof data.startDate === 'string' && !cStart) setCustomStartDate(data.startDate.split('T')[0]);
-        if (data.endDate && typeof data.endDate === 'string' && !cEnd) setCustomEndDate(data.endDate.split('T')[0]);
-        if (data.siteUrl && !inspectInputUrl) {
-          const defaultInspect = data.siteUrl.startsWith('sc-domain:')
-            ? 'https://' + data.siteUrl.replace('sc-domain:', '')
-            : data.siteUrl;
-          setInspectInputUrl(defaultInspect);
-        }
+      const data = await res.json().catch(() => ({}));
+      if (requestId !== requestIdRef.current) return;
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || 'Could not load Search Console data.');
+      }
+      setLoadError('');
+      setSearchData(data);
+      if (data.dateRange) setDateRange(data.dateRange.startsWith('custom') ? 'custom' : data.dateRange);
+      if (data.startDate && typeof data.startDate === 'string' && !cStart) setCustomStartDate(data.startDate.split('T')[0]);
+      if (data.endDate && typeof data.endDate === 'string' && !cEnd) setCustomEndDate(data.endDate.split('T')[0]);
+      if (data.siteUrl && !inspectInputRef.current) {
+        const defaultInspect = data.siteUrl.startsWith('sc-domain:')
+          ? 'https://' + data.siteUrl.replace('sc-domain:', '')
+          : data.siteUrl;
+        setInspectInputUrl(defaultInspect);
       }
     } catch (err) {
+      if (requestId !== requestIdRef.current) return;
       console.error('Search performance fetch error:', err);
+      setLoadError(err.message || 'Could not load Search Console data.');
     } finally {
-      setRangeSyncing(false);
+      if (requestId === requestIdRef.current) {
+        setRangeSyncing(false);
+        setLoadedWorkspaceId(workspaceId);
+      }
     }
-  }, [activeWorkspace?.id, token, dateRange, customStartDate, customEndDate, inspectInputUrl]);
+  }, [workspaceId, token]);
+
+  // The initial load shows the skeleton, so it does not toggle the inline range spinner.
+  const fetchPerformance = useCallback((targetRange = '28d', cStart = '', cEnd = '') => {
+    if (!workspaceId || !token) return Promise.resolve();
+    setRangeSyncing(true);
+    return loadPerformance(targetRange, cStart, cEnd, ++requestIdRef.current);
+  }, [workspaceId, token, loadPerformance]);
 
   useEffect(() => {
-    setLoading(true);
-    fetchPerformance().finally(() => {
-      setLoading(false);
-    });
-  }, [activeWorkspace?.id, fetchPerformance]);
+    if (!workspaceId || !token) return;
+    loadPerformance('28d', '', '', ++requestIdRef.current);
+  }, [workspaceId, token, loadPerformance]);
 
-  useEffect(() => {
+  const selectSubTab = (tabId) => {
+    setActiveTabSub(tabId);
     setQueryPage(1);
-  }, [searchFilter, activeTabSub]);
+  };
 
   const handleSelectRange = (optId) => {
     if (optId === 'custom') {
       setDateRange('custom');
       if (!customStartDate || !customEndDate) {
-        const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
-        const twoWeeksAgo = new Date(Date.now() - 14 * 86400000).toISOString().split('T')[0];
-        setCustomStartDate(twoWeeksAgo);
-        setCustomEndDate(yesterday);
+        setCustomStartDate(isoDaysAgo(14));
+        setCustomEndDate(isoDaysAgo(1));
       }
       return;
     }
@@ -268,6 +300,7 @@ export default function GrowthSearch() {
   const handleManualSync = async () => {
     if (!activeWorkspace?.id || !token) return;
     setSyncing(true);
+    setSyncError('');
     try {
       const res = await fetch(`/api/growth/workspaces/${activeWorkspace.id}/integrations/google/sync`, {
         method: 'POST',
@@ -281,12 +314,14 @@ export default function GrowthSearch() {
           endDate: dateRange === 'custom' ? customEndDate : undefined
         })
       });
-      const data = await res.json();
-      if (data.success) {
-        await fetchPerformance(dateRange, customStartDate, customEndDate);
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || 'Search Console sync failed.');
       }
+      await fetchPerformance(dateRange, customStartDate, customEndDate);
     } catch (err) {
       console.error('Sync failed:', err);
+      setSyncError(err.message || 'Search Console sync failed. Please try again.');
     } finally {
       setSyncing(false);
     }
@@ -312,6 +347,9 @@ export default function GrowthSearch() {
         'GoogleIntegrationAuth',
         `width=${width},height=${height},left=${left},top=${top},scrollbars=yes,resizable=yes`
       );
+      if (!popup) {
+        throw new Error('Your browser blocked the Google sign-in window. Allow pop-ups for this site and try again.');
+      }
 
       const handleMessage = async (event) => {
         if (event.origin !== window.location.origin) return;
@@ -336,6 +374,7 @@ export default function GrowthSearch() {
       }, 1000);
     } catch (err) {
       console.error('Google connect error:', err);
+      setLoadError(err.message || 'Could not start the Google connection.');
       setConnectingGoogle(false);
     }
   };
@@ -513,6 +552,21 @@ export default function GrowthSearch() {
     ? `${pathLine} L ${chartPoints[chartPoints.length - 1].x.toFixed(1)} ${chartH - padY} L ${chartPoints[0].x.toFixed(1)} ${chartH - padY} Z`
     : '';
 
+  const handleChartPointer = (e) => {
+    if (chartPoints.length === 0) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    if (!rect.width) return;
+    const svgX = ((e.clientX - rect.left) / rect.width) * chartW;
+    let nearest = chartPoints[0];
+    for (const pt of chartPoints) {
+      if (Math.abs(pt.x - svgX) < Math.abs(nearest.x - svgX)) nearest = pt;
+    }
+    if (hoveredTrendPoint?.data?.date !== nearest.data?.date) setHoveredTrendPoint(nearest);
+  };
+
+  const brandShare = Math.min(100, Math.max(0, Number(brandSplit.brandClicksShare) || 0));
+  const hasBrandClicks = (Number(brandSplit.brandClicks) || 0) + (Number(brandSplit.nonBrandClicks) || 0) > 0;
+
   return (
     <div className="growth-page-container animate-fade">
       {/* Hero Cover Banner */}
@@ -580,7 +634,7 @@ export default function GrowthSearch() {
                           <input
                             type="date"
                             value={customStartDate}
-                            max={customEndDate || new Date(Date.now() - 86400000).toISOString().split('T')[0]}
+                            max={customEndDate || isoDaysAgo(1)}
                             onChange={(e) => setCustomStartDate(e.target.value)}
                             className="custom-date-input"
                             required
@@ -592,7 +646,7 @@ export default function GrowthSearch() {
                             type="date"
                             value={customEndDate}
                             min={customStartDate}
-                            max={new Date(Date.now() - 86400000).toISOString().split('T')[0]}
+                            max={isoDaysAgo(1)}
                             onChange={(e) => setCustomEndDate(e.target.value)}
                             className="custom-date-input"
                             required
@@ -641,8 +695,28 @@ export default function GrowthSearch() {
         }
       />
 
+      {(loadError || syncError) && (
+        <div className="growth-panel-card" role="alert" style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '14px 18px', marginBottom: '16px', border: '1px solid rgba(239, 68, 68, 0.3)', background: 'rgba(239, 68, 68, 0.08)' }}>
+          <AlertCircle size={18} color="#f87171" style={{ flexShrink: 0 }} />
+          <div style={{ flex: 1, minWidth: 0, fontSize: '0.86rem', lineHeight: 1.5 }}>
+            <strong style={{ display: 'block', color: 'var(--text-main, #ffffff)' }}>
+              {loadError ? 'Search Console data could not be loaded' : 'Refresh failed'}
+            </strong>
+            <span style={{ color: '#94a3b8' }}>{loadError || syncError}</span>
+          </div>
+          {loadError ? (
+            <button type="button" className="growth-secondary-btn" disabled={rangeSyncing} onClick={() => fetchPerformance(dateRange, customStartDate, customEndDate)}>
+              <RefreshCw size={13} className={rangeSyncing ? 'auth-spinner' : ''} />
+              <span>Try again</span>
+            </button>
+          ) : (
+            <button type="button" className="growth-secondary-btn" onClick={() => setSyncError('')}>Dismiss</button>
+          )}
+        </div>
+      )}
+
       {/* Main Content: If Unconnected show ONLY Connection CTA Card; If Connected show 4 Metric Cards + real tables & charts */}
-      {!isConnected ? (
+      {loadError && !isConnected ? null : !isConnected ? (
         <div className="growth-panel-card" style={{ padding: '64px 24px', textAlign: 'center' }}>
           <div style={{
             width: 64,
@@ -768,7 +842,11 @@ export default function GrowthSearch() {
                 </div>
               </div>
 
-              <div className="growth-chart-svg-container">
+              <div
+                className="growth-chart-svg-container"
+                onMouseMove={handleChartPointer}
+                onMouseLeave={() => setHoveredTrendPoint(null)}
+              >
                 <svg viewBox={`0 0 ${chartW} ${chartH}`} className="growth-chart-svg" preserveAspectRatio="none">
                   <defs>
                     <linearGradient id="chartGradClicks" x1="0" y1="0" x2="0" y2="1">
@@ -833,16 +911,17 @@ export default function GrowthSearch() {
                   <div 
                     className="chart-tooltip"
                     style={{
-                      left: `${(hoveredTrendPoint.x / chartW) * 100}%`,
-                      top: `${(hoveredTrendPoint.y / chartH) * 100}%`
+                      left: `${Math.min(88, Math.max(12, (hoveredTrendPoint.x / chartW) * 100))}%`,
+                      top: `${(hoveredTrendPoint.y / chartH) * 100}%`,
+                      ...(hoveredTrendPoint.y / chartH < 0.45 ? { transform: 'translate(-50%, 18px)', animation: 'none' } : {})
                     }}
                   >
                     <div style={{ fontWeight: 600, color: '#38bdf8', marginBottom: '2px' }}>
                       {hoveredTrendPoint.data.date}
                     </div>
-                    <div>Clicks: <strong>{hoveredTrendPoint.data.clicks}</strong></div>
-                    <div>Impressions: <strong>{hoveredTrendPoint.data.impressions}</strong></div>
-                    <div>CTR: <strong>{hoveredTrendPoint.data.ctr}</strong></div>
+                    <div>Clicks: <strong>{Number(hoveredTrendPoint.data.clicks || 0).toLocaleString('en-US')}</strong></div>
+                    <div>Impressions: <strong>{Number(hoveredTrendPoint.data.impressions || 0).toLocaleString('en-US')}</strong></div>
+                    <div>CTR: <strong>{formatCtr(hoveredTrendPoint.data.ctr)}</strong></div>
                     <div>Avg. Position: <strong>#{hoveredTrendPoint.data.position}</strong></div>
                   </div>
                 )}
@@ -859,20 +938,24 @@ export default function GrowthSearch() {
                   <Target size={15} color="#38bdf8" />
                   <span>Branded vs Generic Search</span>
                 </span>
-                <span className="ctr-badge">{brandSplit.brandClicksShare || 0}% Branded</span>
+                <span className="ctr-badge">{brandShare}% Branded</span>
               </div>
 
               <div className="meta-split-bar">
-                <div 
-                  className="meta-split-fill brand" 
-                  style={{ width: `${Math.min(100, Math.max(5, brandSplit.brandClicksShare || 0))}%` }} 
-                  title={`Brand Searches: ${brandSplit.brandClicksShare || 0}%`}
-                />
-                <div 
-                  className="meta-split-fill non-brand" 
-                  style={{ width: `${Math.max(0, 100 - (brandSplit.brandClicksShare || 0))}%` }} 
-                  title={`Generic SEO Discovery: ${100 - (brandSplit.brandClicksShare || 0)}%`}
-                />
+                {hasBrandClicks && (
+                  <>
+                    <div 
+                      className="meta-split-fill brand" 
+                      style={{ width: `${brandShare}%` }} 
+                      title={`Brand Searches: ${brandShare}%`}
+                    />
+                    <div 
+                      className="meta-split-fill non-brand" 
+                      style={{ width: `${100 - brandShare}%` }} 
+                      title={`Generic SEO Discovery: ${100 - brandShare}%`}
+                    />
+                  </>
+                )}
               </div>
 
               <div className="meta-split-stats">
@@ -916,15 +999,15 @@ export default function GrowthSearch() {
               <button
                 type="button"
                 className={`subnav-pill ${activeTabSub === 'queries' ? 'active' : ''}`}
-                onClick={() => setActiveTabSub('queries')}
+                onClick={() => selectSubTab('queries')}
                 title="All real organic search queries bringing traffic to your site from Google"
               >
-                Organik Querylar ({topQueries.length})
+                Organic Queries ({topQueries.length})
               </button>
               <button
                 type="button"
                 className={`subnav-pill highlight ${activeTabSub === 'striking' ? 'active' : ''}`}
-                onClick={() => setActiveTabSub('striking')}
+                onClick={() => selectSubTab('striking')}
                 title="High-opportunity keywords ranked 4-15 on Google with 30+ impressions, easiest to move into top 3"
               >
                 <Zap size={13} />
@@ -933,7 +1016,7 @@ export default function GrowthSearch() {
               <button
                 type="button"
                 className={`subnav-pill ${activeTabSub === 'pages' ? 'active' : ''}`}
-                onClick={() => setActiveTabSub('pages')}
+                onClick={() => selectSubTab('pages')}
                 title="Landing pages earning the most clicks and impressions from organic search"
               >
                 Top Pages ({topPages.length})
@@ -941,7 +1024,7 @@ export default function GrowthSearch() {
               <button
                 type="button"
                 className={`subnav-pill ${activeTabSub === 'cannibalization' ? 'active' : ''}`}
-                onClick={() => setActiveTabSub('cannibalization')}
+                onClick={() => selectSubTab('cannibalization')}
                 title="Detect pages competing for the same keywords and splitting rankings"
               >
                 <AlertTriangle size={13} color={cannibalization.length > 0 ? '#f59e0b' : '#94a3b8'} />
@@ -950,7 +1033,7 @@ export default function GrowthSearch() {
               <button
                 type="button"
                 className={`subnav-pill ${activeTabSub === 'breakdown' ? 'active' : ''}`}
-                onClick={() => setActiveTabSub('breakdown')}
+                onClick={() => selectSubTab('breakdown')}
                 title="Desktop/mobile ratio and geographic breakdown of users' search countries"
               >
                 <Globe2 size={13} />
@@ -959,7 +1042,7 @@ export default function GrowthSearch() {
               <button
                 type="button"
                 className={`subnav-pill ${activeTabSub === 'health' ? 'active' : ''}`}
-                onClick={() => setActiveTabSub('health')}
+                onClick={() => selectSubTab('health')}
                 title="Googlebot's last crawl date, index status and live URL inspection tool"
               >
                 <ShieldCheck size={13} />
@@ -975,7 +1058,10 @@ export default function GrowthSearch() {
                     type="text"
                     placeholder="Filter queries..."
                     value={searchFilter}
-                    onChange={(e) => setSearchFilter(e.target.value)}
+                    onChange={(e) => {
+                      setSearchFilter(e.target.value);
+                      setQueryPage(1);
+                    }}
                     className="growth-search-input"
                   />
                 </div>
@@ -1011,7 +1097,7 @@ export default function GrowthSearch() {
                     </p>
                     <div className="tab-infobar-action">
                       <Target size={13} color="#818cf8" />
-                      <span><strong>Recommended Action:</strong> Add a <code>rel="canonical"</code> tag from the weaker page to the stronger one, or merge both into a single comprehensive page with a 301 redirect.</span>
+                      <span><strong>Recommended Action:</strong> Pages with many impressions but a low CTR need a sharper title and meta description; link from your top pages to the ones you want to grow.</span>
                     </div>
                   </div>
                 </div>
@@ -1044,7 +1130,7 @@ export default function GrowthSearch() {
                             </td>
                             <td className="font-semibold text-primary">{Number(page.clicks).toLocaleString()}</td>
                             <td>{Number(page.impressions).toLocaleString()}</td>
-                            <td><span className="ctr-badge">{page.ctr}</span></td>
+                            <td><span className="ctr-badge">{formatCtr(page.ctr)}</span></td>
                             <td><span className="query-tag">{page.topQuery || '-'}</span></td>
                           </tr>
                         ))}
@@ -1182,7 +1268,7 @@ export default function GrowthSearch() {
                             </div>
                             <div className="device-stats">
                               <div className="device-clicks">{Number(dev.clicks).toLocaleString()} clicks ({dev.share}%)</div>
-                              <div className="device-ctr">CTR: {dev.ctr}</div>
+                              <div className="device-ctr">CTR: {formatCtr(dev.ctr)}</div>
                             </div>
                           </div>
                         ))
@@ -1219,7 +1305,7 @@ export default function GrowthSearch() {
                                   </td>
                                   <td className="font-semibold text-primary">{Number(c.clicks).toLocaleString()}</td>
                                   <td>{Number(c.impressions).toLocaleString()}</td>
-                                  <td><span className="ctr-badge">{c.ctr}</span></td>
+                                  <td><span className="ctr-badge">{formatCtr(c.ctr)}</span></td>
                                   <td><span className="text-muted text-xs">{c.share}%</span></td>
                                 </tr>
                               ))}
@@ -1305,14 +1391,26 @@ export default function GrowthSearch() {
                   }
 
                   const isPass = targetInspection.verdict === 'PASS';
+                  const robotsState = targetInspection.robotsTxtState;
+                  const robotsAllowed = robotsState === 'ALLOWED';
+                  const robotsLabel = robotsState
+                    ? `${humanizeEnum(robotsState)}${robotsAllowed ? ' (open to crawling)' : robotsState === 'DISALLOWED' ? ' (blocked by robots.txt)' : ''}`
+                    : 'Not reported';
+                  const canonicalMismatch = targetInspection.googleCanonical && targetInspection.userCanonical
+                    && targetInspection.googleCanonical !== targetInspection.userCanonical;
+                  const crawlerLabel = targetInspection.crawledAs === 'MOBILE' || targetInspection.crawledAs === 'GOOGLEBOT_SMARTPHONE'
+                    ? 'Googlebot Smartphone (Mobile)'
+                    : targetInspection.crawledAs === 'DESKTOP'
+                      ? 'Googlebot Desktop'
+                      : (humanizeEnum(targetInspection.crawledAs) || 'Not crawled yet');
 
                   return (
                     <div className="gsc-health-grid">
                       <div className="gsc-health-item">
                         <span className="health-item-label">Google Index Status</span>
-                        <div className="health-item-value" style={{ color: isPass ? '#10b981' : '#f59e0b' }}>
-                          <CheckCircle2 size={16} />
-                          <span>{targetInspection.coverageState || (isPass ? 'Indexed' : 'Under Review')}</span>
+                        <div className="health-item-value" style={{ color: isPass ? '#10b981' : targetInspection.verdict === 'FAIL' ? '#f87171' : '#f59e0b' }}>
+                          {isPass ? <CheckCircle2 size={16} /> : <AlertTriangle size={16} />}
+                          <span>{targetInspection.coverageState || (isPass ? 'Indexed' : 'Not indexed')}</span>
                         </div>
                       </div>
 
@@ -1326,33 +1424,33 @@ export default function GrowthSearch() {
                       <div className="gsc-health-item">
                         <span className="health-item-label">Googlebot Crawler Type</span>
                         <div className="health-item-value">
-                          <Smartphone size={15} color="#38bdf8" />
-                          <span>{targetInspection.crawledAs === 'GOOGLEBOT_SMARTPHONE' ? 'Googlebot Smartphone (Mobile)' : targetInspection.crawledAs}</span>
+                          {targetInspection.crawledAs === 'DESKTOP' ? <Monitor size={15} color="#38bdf8" /> : <Smartphone size={15} color="#38bdf8" />}
+                          <span>{crawlerLabel}</span>
                         </div>
                       </div>
 
                       <div className="gsc-health-item">
                         <span className="health-item-label">Robots.txt Permission</span>
-                        <div className="health-item-value" style={{ color: '#10b981' }}>
-                          <Check size={16} />
-                          <span>{targetInspection.robotsTxtState || 'ALLOWED'} (Open to Crawling)</span>
+                        <div className="health-item-value" style={{ color: robotsAllowed ? '#10b981' : robotsState ? '#f87171' : '#94a3b8' }}>
+                          {robotsAllowed ? <Check size={16} /> : robotsState ? <AlertTriangle size={16} /> : <HelpCircle size={16} />}
+                          <span>{robotsLabel}</span>
                         </div>
                       </div>
 
                       <div className="gsc-health-item">
                         <span className="health-item-label">Google-Selected Canonical URL</span>
-                        <div className="health-item-value font-mono" style={{ fontSize: '0.78rem', color: '#94a3b8' }}>
-                          <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                            {targetInspection.googleCanonical || '-'}
+                        <div className="health-item-value font-mono" style={{ fontSize: '0.78rem', color: canonicalMismatch ? '#f59e0b' : '#94a3b8' }}>
+                          <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={targetInspection.googleCanonical || ''}>
+                            {targetInspection.googleCanonical || 'Not reported'}
                           </span>
                         </div>
                       </div>
 
                       <div className="gsc-health-item">
                         <span className="health-item-label">User-Declared Canonical URL</span>
-                        <div className="health-item-value font-mono" style={{ fontSize: '0.78rem', color: '#94a3b8' }}>
-                          <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                            {targetInspection.userCanonical || '-'}
+                        <div className="health-item-value font-mono" style={{ fontSize: '0.78rem', color: canonicalMismatch ? '#f59e0b' : '#94a3b8' }}>
+                          <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={targetInspection.userCanonical || ''}>
+                            {targetInspection.userCanonical || 'None declared'}
                           </span>
                         </div>
                       </div>
@@ -1502,7 +1600,7 @@ export default function GrowthSearch() {
                               </td>
                               <td className="font-semibold text-primary">{Number(item.clicks).toLocaleString()}</td>
                               <td>{Number(item.impressions).toLocaleString()}</td>
-                              <td><span className="ctr-badge">{item.ctr}</span></td>
+                              <td><span className="ctr-badge">{formatCtr(item.ctr)}</span></td>
                               <td>
                                 <span className={`rank-pill rank-${Math.max(1, Math.min(10, Math.floor(Number(item.position) || 1)))}`}>
                                   #{item.position}
