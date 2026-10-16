@@ -54,8 +54,27 @@ async function getEmailSenderTransporter() {
   return { transporter, sender };
 }
 
+const escapeHtml = (value) => String(value ?? '')
+  .replace(/&/g, '&amp;')
+  .replace(/</g, '&lt;')
+  .replace(/>/g, '&gt;')
+  .replace(/"/g, '&quot;')
+  .replace(/'/g, '&#39;');
+
+const isNum = (value) => value != null && value !== '' && Number.isFinite(Number(value));
+
+const formatNumber = (value) => (Number.isFinite(Number(value)) ? Number(value).toLocaleString('en-US') : '0');
+
+const FONT = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif";
+const INK = '#18181b';
+const BODY = '#3f3f46';
+const MUTED = '#71717a';
+const FAINT = '#a1a1aa';
+const LINE = '#e4e4e7';
+const PAGE = '#f4f4f5';
+
 /**
- * Builds responsive, high-aesthetic HTML email template for daily digest
+ * Builds the minimal, email-client-safe HTML template for the daily digest.
  */
 export function buildDailyReportHtml(workspace, metrics, dateStr) {
   const {
@@ -68,197 +87,149 @@ export function buildDailyReportHtml(workspace, metrics, dateStr) {
 
   const appBaseUrl = process.env.APP_BASE_URL || 'https://cerilas.com';
   const panelUrl = `${appBaseUrl}/growth`;
+  const name = escapeHtml(workspace.name || 'Your workspace');
+  const domain = escapeHtml(workspace.primary_domain || '');
+  const growthScore = isNum(workspace.growth_score) ? Number(workspace.growth_score) : null;
 
-  // Top striking queries
-  const topQueriesHtml = (gsc.strikingQueries || []).slice(0, 3).map(q => `
-    <tr style="border-bottom: 1px solid #1e293b;">
-      <td style="padding: 10px 12px; font-weight: 600; color: #f8fafc; font-size: 13px;">${q.query || q.keyword}</td>
-      <td style="padding: 10px 12px; color: #f59e0b; font-weight: 700; font-size: 13px; text-align: center;">#${q.position != null ? Number(q.position).toFixed(1) : '--'}</td>
-      <td style="padding: 10px 12px; color: #38bdf8; font-weight: 600; font-size: 13px; text-align: right;">${q.clicks || 0} clicks / ${q.impressions || 0} imp</td>
-    </tr>
-  `).join('');
+  const sectionTitle = (title) => `
+    <tr><td style="padding: 28px 32px 10px 32px; font-family: ${FONT}; font-size: 13px; font-weight: 600; color: ${INK};">${title}</td></tr>`;
 
-  // Top priority opportunities
-  const opportunitiesHtml = (opportunities || []).slice(0, 4).map(opp => `
-    <div style="background: #111827; border: 1px solid #1f2937; border-left: 3px solid #38bdf8; border-radius: 8px; padding: 12px 14px; margin-bottom: 10px;">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-        <span style="font-size: 11px; text-transform: uppercase; font-weight: 700; color: #38bdf8; letter-spacing: 0.5px;">${opp.category || 'PRIORITY ACTION'}</span>
-        <span style="font-size: 10px; background: rgba(56, 189, 248, 0.12); color: #38bdf8; padding: 2px 8px; border-radius: 999px; font-weight: 600;">Impact: +${opp.impact_score || 5}</span>
-      </div>
-      <div style="font-size: 13px; font-weight: 600; color: #f3f4f6; margin-bottom: 4px;">${opp.title}</div>
-      <div style="font-size: 12px; color: #9ca3af; line-height: 1.4;">${opp.description || opp.action_summary || ''}</div>
-    </div>
-  `).join('');
+  const kpiCell = (label, value, note, borderRight, borderBottom) => `
+    <td width="50%" valign="top" style="padding: 18px 20px; border-right: ${borderRight ? `1px solid ${LINE}` : '0'}; border-bottom: ${borderBottom ? `1px solid ${LINE}` : '0'}; font-family: ${FONT};">
+      <div style="font-size: 12px; color: ${MUTED}; margin: 0 0 6px 0;">${label}</div>
+      <div style="font-size: 24px; line-height: 1.15; font-weight: 600; color: ${INK}; letter-spacing: -0.4px;">${value}</div>
+      <div style="font-size: 12px; color: ${FAINT}; margin-top: 4px;">${note}</div>
+    </td>`;
 
-  // Competitor benchmarking
-  const competitorsHtml = (metrics.competitors || []).slice(0, 5).map(c => `
-    <span style="display: inline-block; background: #111827; border: 1px solid #1f2937; color: #cbd5e1; padding: 5px 10px; border-radius: 6px; font-size: 11px; margin-right: 6px; margin-bottom: 6px;">
-      <strong style="color: #f3f4f6;">${c.name}</strong> <span style="color: #64748b;">(${c.domain || 'Radar'})</span>
-    </span>
-  `).join('');
+  const queries = (gsc.strikingQueries || []).slice(0, 5);
+  const queriesHtml = queries.map((q, i) => `
+    <tr>
+      <td style="padding: 11px 0; border-top: ${i === 0 ? '0' : `1px solid ${LINE}`}; font-family: ${FONT}; font-size: 14px; color: ${INK};">${escapeHtml(q.query || q.keyword)}</td>
+      <td align="right" style="padding: 11px 0 11px 12px; border-top: ${i === 0 ? '0' : `1px solid ${LINE}`}; font-family: ${FONT}; font-size: 13px; color: ${MUTED}; white-space: nowrap;">#${q.position != null ? Number(q.position).toFixed(1) : '–'}</td>
+      <td align="right" style="padding: 11px 0 11px 16px; border-top: ${i === 0 ? '0' : `1px solid ${LINE}`}; font-family: ${FONT}; font-size: 13px; color: ${MUTED}; white-space: nowrap;">${formatNumber(q.clicks)} clicks · ${formatNumber(q.impressions)} impr.</td>
+    </tr>`).join('');
 
-  return `
-<!DOCTYPE html>
+  const actionsHtml = (opportunities || []).slice(0, 4).map((opp, i) => `
+    <tr>
+      <td valign="top" width="28" style="padding: 14px 0; border-top: ${i === 0 ? '0' : `1px solid ${LINE}`}; font-family: ${FONT}; font-size: 13px; color: ${FAINT};">${i + 1}.</td>
+      <td valign="top" style="padding: 14px 0; border-top: ${i === 0 ? '0' : `1px solid ${LINE}`}; font-family: ${FONT};">
+        <div style="font-size: 14px; font-weight: 600; color: ${INK}; line-height: 1.4;">${escapeHtml(opp.title)}</div>
+        ${opp.description || opp.action_summary ? `<div style="font-size: 13px; color: ${BODY}; line-height: 1.5; margin-top: 3px;">${escapeHtml(opp.description || opp.action_summary)}</div>` : ''}
+        <div style="font-size: 12px; color: ${FAINT}; margin-top: 6px;">${escapeHtml(opp.category || 'Action')}${opp.impact_score != null ? ` · Impact +${escapeHtml(opp.impact_score)}` : ''}</div>
+      </td>
+    </tr>`).join('');
+
+  const competitors = (metrics.competitors || []).slice(0, 5)
+    .map((c) => `${escapeHtml(c.name)}${c.domain ? ` <span style="color: ${FAINT};">(${escapeHtml(c.domain)})</span>` : ''}`)
+    .join(`<span style="color: ${FAINT};"> &nbsp;·&nbsp; </span>`);
+
+  const visitors = ga4.hasData === false ? '–' : formatNumber(ga4.activeUsers);
+  const clicks = gsc.hasData === false ? '–' : formatNumber(gsc.totalClicks);
+  const citation = isNum(geo.citationRate) ? `${Number(geo.citationRate)}%` : '–';
+  const techScore = isNum(technical.score) ? `${Number(technical.score)}` : '–';
+
+  return `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>${workspace.name} Daily Growth Executive Briefing</title>
+  <meta name="color-scheme" content="light">
+  <meta name="supported-color-schemes" content="light">
+  <title>${name} daily growth report</title>
 </head>
-<body style="margin: 0; padding: 0; background-color: #030712; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #f3f4f6;">
-  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color: #030712; padding: 24px 0;">
+<body style="margin: 0; padding: 0; background-color: ${PAGE}; -webkit-text-size-adjust: 100%;">
+  <div style="display: none; max-height: 0; overflow: hidden; opacity: 0;">${visitors} visitors, ${clicks} search clicks and ${citation} AI citation rate for ${name} today.</div>
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color: ${PAGE};">
     <tr>
-      <td align="center">
-        <table role="presentation" width="100%" style="max-width: 620px; background-color: #0b0f19; border: 1px solid #1e293b; border-radius: 16px; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.6);" cellspacing="0" cellpadding="0">
-          
-          <!-- BRAND HEADER -->
+      <td align="center" style="padding: 32px 12px;">
+        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="max-width: 600px; background-color: #ffffff; border: 1px solid ${LINE}; border-radius: 12px;">
+
           <tr>
-            <td style="padding: 28px 32px; background: linear-gradient(135deg, #0b0f19 0%, #0f172a 100%); border-bottom: 1px solid #1e293b;">
-              <table width="100%" cellspacing="0" cellpadding="0">
+            <td style="padding: 28px 32px 24px 32px; border-bottom: 1px solid ${LINE};">
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
                 <tr>
-                  <td>
-                    <div style="font-size: 11px; text-transform: uppercase; font-weight: 800; color: #38bdf8; letter-spacing: 1.5px; margin-bottom: 6px;">
-                      GROWTHCONTROL RADAR // DAILY EXECUTIVE BRIEFING
-                    </div>
-                    <h1 style="margin: 0; font-size: 22px; font-weight: 800; color: #ffffff; letter-spacing: -0.3px;">
-                      ${workspace.name}
-                    </h1>
-                    <div style="font-size: 13px; color: #94a3b8; margin-top: 4px;">
-                      Domain: <span style="color: #cbd5e1; font-weight: 500;">${workspace.primary_domain || 'cerilas.com'}</span> &bull; ${dateStr}
-                    </div>
+                  <td valign="top" style="font-family: ${FONT};">
+                    <div style="font-size: 12px; color: ${MUTED}; margin-bottom: 10px;">Daily growth report</div>
+                    <div style="font-size: 22px; line-height: 1.25; font-weight: 600; color: ${INK}; letter-spacing: -0.4px;">${name}</div>
+                    <div style="font-size: 13px; color: ${MUTED}; margin-top: 4px;">${domain ? `${domain} · ` : ''}${escapeHtml(dateStr)}</div>
                   </td>
-                  <td align="right" valign="top">
-                    <div style="background: rgba(56, 189, 248, 0.1); border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 12px; padding: 8px 14px; text-align: center;">
-                      <div style="font-size: 10px; color: #94a3b8; font-weight: 700; text-transform: uppercase;">Growth Score</div>
-                      <div style="font-size: 24px; font-weight: 900; color: #38bdf8; line-height: 1.1;">${workspace.growth_score || 92}</div>
-                      <div style="font-size: 10px; color: #10b981; font-weight: 600;">/ 100 Pts</div>
-                    </div>
+                  ${growthScore != null ? `
+                  <td valign="top" align="right" style="font-family: ${FONT}; white-space: nowrap;">
+                    <div style="font-size: 12px; color: ${MUTED}; margin-bottom: 4px;">Growth score</div>
+                    <div style="font-size: 30px; line-height: 1; font-weight: 600; color: ${INK}; letter-spacing: -0.6px;">${growthScore}<span style="font-size: 14px; font-weight: 400; color: ${FAINT};">/100</span></div>
+                  </td>` : ''}
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <tr>
+            <td style="padding: 24px 32px 0 32px;">
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="border: 1px solid ${LINE}; border-radius: 10px; border-collapse: separate;">
+                <tr>
+                  ${kpiCell('Visitors', visitors, `${formatNumber(ga4.sessions)} sessions`, true, true)}
+                  ${kpiCell('Search clicks', clicks, `${formatNumber(gsc.totalImpressions)} impressions${gsc.avgPosition ? ` · avg. #${escapeHtml(gsc.avgPosition)}` : ''}`, false, true)}
+                </tr>
+                <tr>
+                  ${kpiCell('AI citation rate', citation, `${formatNumber(geo.citedCount)} of ${formatNumber(geo.totalPrompts)} prompts`, true, false)}
+                  ${kpiCell('Technical health', techScore, `${formatNumber(technical.pagesCrawled)} pages · ${formatNumber(technical.activeIssuesCount)} open issues`, false, false)}
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          ${queriesHtml ? `
+          ${sectionTitle('Queries close to page one')}
+          <tr>
+            <td style="padding: 0 32px;">
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">${queriesHtml}
+              </table>
+            </td>
+          </tr>` : ''}
+
+          ${sectionTitle('Top actions for today')}
+          <tr>
+            <td style="padding: 0 32px;">
+              ${actionsHtml
+                ? `<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">${actionsHtml}
+              </table>`
+                : `<div style="font-family: ${FONT}; font-size: 14px; color: ${MUTED}; padding: 4px 0;">No open actions. Nice work.</div>`}
+            </td>
+          </tr>
+
+          ${competitors ? `
+          ${sectionTitle('Tracked competitors')}
+          <tr>
+            <td style="padding: 0 32px; font-family: ${FONT}; font-size: 14px; line-height: 1.7; color: ${BODY};">${competitors}</td>
+          </tr>` : ''}
+
+          <tr>
+            <td style="padding: 32px 32px 32px 32px;">
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0">
+                <tr>
+                  <td style="border-radius: 8px; background-color: ${INK};">
+                    <a href="${escapeHtml(panelUrl)}" target="_blank" style="display: inline-block; padding: 12px 22px; font-family: ${FONT}; font-size: 14px; font-weight: 600; color: #ffffff; text-decoration: none; border-radius: 8px;">Open full report</a>
                   </td>
                 </tr>
               </table>
             </td>
           </tr>
 
-          <!-- 4-POD VITAL KPI STRIP -->
+        </table>
+
+        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="max-width: 600px;">
           <tr>
-            <td style="padding: 24px 32px 16px 32px;">
-              <table width="100%" cellspacing="0" cellpadding="0">
-                <tr>
-                  <!-- KPI 1: GA4 Visitors -->
-                  <td width="24%" style="background: #111827; border: 1px solid #1f2937; border-radius: 10px; padding: 12px; vertical-align: top;">
-                    <div style="font-size: 10px; color: #94a3b8; text-transform: uppercase; font-weight: 700;">Unique Visitors</div>
-                    <div style="font-size: 18px; font-weight: 800; color: #38bdf8; margin: 4px 0 2px;">${(ga4.activeUsers || 0).toLocaleString('en-US')}</div>
-                    <div style="font-size: 11px; color: #64748b;">${ga4.sessions || 0} Sessions (GA4)</div>
-                  </td>
-                  <td width="2%"></td>
-                  <!-- KPI 2: GSC Clicks -->
-                  <td width="24%" style="background: #111827; border: 1px solid #1f2937; border-radius: 10px; padding: 12px; vertical-align: top;">
-                    <div style="font-size: 10px; color: #94a3b8; text-transform: uppercase; font-weight: 700;">Organic Search</div>
-                    <div style="font-size: 18px; font-weight: 800; color: #f59e0b; margin: 4px 0 2px;">${gsc.totalClicks || 0} Clicks</div>
-                    <div style="font-size: 11px; color: #64748b;">${gsc.totalImpressions || 0} Imp.</div>
-                  </td>
-                  <td width="2%"></td>
-                  <!-- KPI 3: AI Citations -->
-                  <td width="24%" style="background: #111827; border: 1px solid #1f2937; border-radius: 10px; padding: 12px; vertical-align: top;">
-                    <div style="font-size: 10px; color: #94a3b8; text-transform: uppercase; font-weight: 700;">AI Search (GEO)</div>
-                    <div style="font-size: 18px; font-weight: 800; color: #818cf8; margin: 4px 0 2px;">${geo.citationRate || 67}%</div>
-                    <div style="font-size: 11px; color: #64748b;">${geo.citedCount || 2}/${geo.totalPrompts || 3} Prompts Cited</div>
-                  </td>
-                  <td width="2%"></td>
-                  <!-- KPI 4: Technical Health -->
-                  <td width="24%" style="background: #111827; border: 1px solid #1f2937; border-radius: 10px; padding: 12px; vertical-align: top;">
-                    <div style="font-size: 10px; color: #94a3b8; text-transform: uppercase; font-weight: 700;">Technical Health</div>
-                    <div style="font-size: 18px; font-weight: 800; color: #10b981; margin: 4px 0 2px;">${technical.score || 90}/100</div>
-                    <div style="font-size: 11px; color: #64748b;">${technical.pagesCrawled || 1} Pages Crawled</div>
-                  </td>
-                </tr>
-              </table>
+            <td style="padding: 20px 32px; font-family: ${FONT}; font-size: 12px; line-height: 1.6; color: ${FAINT};">
+              Sent by Cerilas Growth for ${name}. Manage recipients and schedule under Email Reports in your workspace.<br>
+              &copy; ${new Date().getFullYear()} Cerilas
             </td>
           </tr>
-
-          <!-- SECTION 1: SEARCH CONSOLE STRIKING DISTANCE -->
-          ${topQueriesHtml ? `
-          <tr>
-            <td style="padding: 12px 32px 20px 32px;">
-              <div style="background: #0f172a; border: 1px solid #1e293b; border-radius: 12px; padding: 18px;">
-                <div style="font-size: 12px; font-weight: 800; color: #f59e0b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px;">
-                  1. GOOGLE SEARCH CONSOLE: STRIKING DISTANCE OPPORTUNITIES
-                </div>
-                <table width="100%" cellspacing="0" cellpadding="0" style="border-collapse: collapse;">
-                  <thead>
-                    <tr style="border-bottom: 1px solid #334155; text-align: left;">
-                      <th style="padding: 6px 12px; font-size: 11px; color: #94a3b8; font-weight: 600;">Query</th>
-                      <th style="padding: 6px 12px; font-size: 11px; color: #94a3b8; font-weight: 600; text-align: center;">Avg. Rank</th>
-                      <th style="padding: 6px 12px; font-size: 11px; color: #94a3b8; font-weight: 600; text-align: right;">Engagement</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    ${topQueriesHtml}
-                  </tbody>
-                </table>
-              </div>
-            </td>
-          </tr>
-          ` : ''}
-
-          <!-- SECTION 2: TOP PRIORITY OPPORTUNITIES -->
-          <tr>
-            <td style="padding: 12px 32px 24px 32px;">
-              <div style="font-size: 12px; font-weight: 800; color: #38bdf8; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px;">
-                2. TODAY'S HIGHEST-PRIORITY ACTIONS (100% LIVE TELEMETRY)
-              </div>
-              ${opportunitiesHtml || '<div style="color: #94a3b8; font-size: 13px;">All priority growth actions completed.</div>'}
-            </td>
-          </tr>
-
-          <!-- SECTION 3: COMPETITOR RADAR BENCHMARKING -->
-          ${competitorsHtml ? `
-          <tr>
-            <td style="padding: 0 32px 24px 32px;">
-              <div style="background: #0b111e; border: 1px solid #1e293b; border-radius: 12px; padding: 14px 16px;">
-                <div style="font-size: 11px; font-weight: 800; color: #a78bfa; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;">
-                  3. ACTIVE COMPETITOR RADAR (TRACKED MARKET BENCHMARKS)
-                </div>
-                <div style="display: flex; flex-wrap: wrap;">
-                  ${competitorsHtml}
-                </div>
-              </div>
-            </td>
-          </tr>
-          ` : ''}
-
-          <!-- CTA BUTTON -->
-          <tr>
-            <td style="padding: 12px 32px 32px 32px; text-align: center;">
-              <a href="${panelUrl}" target="_blank" style="display: inline-block; background: #0284c7; background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%); color: #ffffff; text-decoration: none; font-weight: 700; font-size: 14px; padding: 14px 32px; border-radius: 10px; box-shadow: 0 4px 15px rgba(2, 132, 199, 0.4);">
-                Open Growth Engine &amp; Review Full Report &rarr;
-              </a>
-              <div style="font-size: 11px; color: #64748b; margin-top: 10px;">
-                Inspect live Google Analytics 4, Search Console, and AI Visibility Engine
-              </div>
-            </td>
-          </tr>
-
-          <!-- FOOTER -->
-          <tr>
-            <td style="padding: 24px 32px; background-color: #070a12; border-top: 1px solid #1e293b; text-align: center;">
-              <p style="margin: 0; font-size: 12px; color: #64748b; line-height: 1.5;">
-                This executive report was generated by Cerilas Automated Growth Intelligence for <strong>${workspace.name}</strong>.<br>
-                Manage email recipients and scheduling from the <strong>"Executive Email Reports"</strong> workspace tab.
-              </p>
-              <p style="margin: 12px 0 0 0; font-size: 11px; color: #475569;">
-                &copy; ${new Date().getFullYear()} Cerilas. All rights reserved.
-              </p>
-            </td>
-          </tr>
-
         </table>
       </td>
     </tr>
   </table>
 </body>
-</html>
-  `;
+</html>`;
 }
 
 /**
@@ -375,13 +346,13 @@ export async function sendWorkspaceDailyReport(workspaceId, triggerType = 'webho
       bounceRate: ga4Row.bounce_rate ? `${parseFloat(ga4Row.bounce_rate).toFixed(1)}%` : null
     },
     geo: {
-      totalPrompts: totalPrompts || 3,
+      totalPrompts,
       citedCount,
       citationRate
     },
     technical: {
-      score: crawlRow.technical_score ?? 85,
-      pagesCrawled: crawlRow.pages_crawled ?? 1,
+      score: crawlRow.technical_score ?? null,
+      pagesCrawled: crawlRow.pages_crawled ?? 0,
       activeIssuesCount: issuesRes.rows[0]?.count || 0
     },
     opportunities: oppsRes.rows,
@@ -394,7 +365,7 @@ export async function sendWorkspaceDailyReport(workspaceId, triggerType = 'webho
     year: 'numeric'
   });
 
-  const subject = `[Cerilas] ${workspace.name} - Daily Growth & Telemetry Report (${dateStr})`;
+  const subject = `[Cerilas] ${workspace.name} - Daily growth report, ${dateStr}`;
   const html = buildDailyReportHtml(workspace, metrics, dateStr);
 
   // 5. Send Email via Active Transporter
