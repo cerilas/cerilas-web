@@ -1812,6 +1812,39 @@ html.light .account-btn.btn-primary {
   font-size: 0.925rem;
 }
 
+.account-password-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-top: 1.25rem;
+}
+
+.account-password-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: transparent;
+  border: none;
+  padding: 0;
+  font-size: 0.75rem;
+  color: var(--text-muted, #a1a1aa);
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+
+.account-password-link:hover:not(:disabled) {
+  color: var(--text-main, #ffffff);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.account-password-link:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
 .account-form-actions {
   display: flex;
   justify-content: flex-end;

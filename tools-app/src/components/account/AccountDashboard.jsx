@@ -27,6 +27,10 @@ import {
   Calendar,
   Clock,
   X,
+  Lock,
+  KeyRound,
+  Eye,
+  EyeOff,
   Image as ImageIcon
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
@@ -66,6 +70,8 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
     getInvoices, 
     initiateGoogleAuth,
     unlinkGoogleAccount,
+    changePassword,
+    requestPasswordReset,
     logout 
   } = useAuth();
   const { 
@@ -106,6 +112,16 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
   const [savingProfile, setSavingProfile] = useState(false);
   const [profileSuccessMsg, setProfileSuccessMsg] = useState('');
   const [profileErrorMsg, setProfileErrorMsg] = useState('');
+
+  // Password & Security State
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmNewPassword, setConfirmNewPassword] = useState('');
+  const [showPasswords, setShowPasswords] = useState(false);
+  const [passwordLoading, setPasswordLoading] = useState(false);
+  const [passwordSuccessMsg, setPasswordSuccessMsg] = useState('');
+  const [passwordErrorMsg, setPasswordErrorMsg] = useState('');
+  const [resetLinkLoading, setResetLinkLoading] = useState(false);
 
   // Google Connection State
   const [googleActionLoading, setGoogleActionLoading] = useState(false);
@@ -226,6 +242,59 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
       setProfileErrorMsg(err.message || (isTr ? 'Profil güncellenemedi.' : 'Failed to update profile.'));
     } finally {
       setSavingProfile(false);
+    }
+  };
+
+  // Older cached profiles lack has_password; Google-linked ones are then assumed passwordless until /me refreshes.
+  const hasPassword = user?.has_password ?? !user?.google_id;
+
+  const handleChangePassword = async (e) => {
+    e.preventDefault();
+    setPasswordSuccessMsg('');
+    setPasswordErrorMsg('');
+
+    if (hasPassword && !currentPassword) {
+      setPasswordErrorMsg(isTr ? 'Lütfen mevcut şifrenizi girin.' : 'Please enter your current password.');
+      return;
+    }
+    if (newPassword.length < 8) {
+      setPasswordErrorMsg(isTr ? 'Yeni şifre en az 8 karakter olmalıdır.' : 'Your new password must be at least 8 characters.');
+      return;
+    }
+    if (newPassword !== confirmNewPassword) {
+      setPasswordErrorMsg(isTr ? 'Yeni şifreler eşleşmiyor.' : 'New passwords do not match.');
+      return;
+    }
+
+    setPasswordLoading(true);
+    try {
+      const data = await changePassword({ currentPassword, newPassword, language });
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmNewPassword('');
+      setPasswordSuccessMsg(data.message || (isTr ? 'Şifreniz güncellendi.' : 'Your password has been updated.'));
+      setTimeout(() => setPasswordSuccessMsg(''), 6000);
+    } catch (err) {
+      setPasswordErrorMsg(err.message || (isTr ? 'Şifre güncellenemedi.' : 'Could not update your password.'));
+    } finally {
+      setPasswordLoading(false);
+    }
+  };
+
+  const handleSendResetLink = async () => {
+    if (!user?.email) return;
+    setPasswordSuccessMsg('');
+    setPasswordErrorMsg('');
+    setResetLinkLoading(true);
+    try {
+      await requestPasswordReset(user.email, language);
+      setPasswordSuccessMsg(isTr
+        ? `Şifre sıfırlama bağlantısı ${user.email} adresine gönderildi.`
+        : `A password reset link was sent to ${user.email}.`);
+    } catch (err) {
+      setPasswordErrorMsg(err.message || (isTr ? 'Bağlantı gönderilemedi.' : 'Could not send the reset link.'));
+    } finally {
+      setResetLinkLoading(false);
     }
   };
 
@@ -1684,6 +1753,142 @@ export default function AccountDashboard({ initialTab = 'profile', onBack }) {
                   )}
                 </button>
               </div>
+            </form>
+
+            {/* Password & Security (separate form: the profile form above must not submit passwords) */}
+            <form onSubmit={handleChangePassword} className="account-panel-card" autoComplete="on">
+              <div className="account-panel-header">
+                <div>
+                  <h2 className="account-panel-title">{isTr ? 'Şifre & Güvenlik' : 'Password & Security'}</h2>
+                  <p className="account-panel-desc">
+                    {!hasPassword
+                      ? (isTr
+                        ? 'Hesabınıza şu an yalnızca Google ile giriş yapıyorsunuz. Bir şifre belirleyerek e-posta adresiniz ve şifrenizle de giriş yapabilirsiniz.'
+                        : 'You currently sign in with Google only. Set a password to also sign in with your email address.')
+                      : user?.google_id
+                        ? (isTr
+                          ? 'Hem Google hem de e-posta ve şifrenizle giriş yapabilirsiniz. Şifrenizi buradan değiştirebilirsiniz.'
+                          : 'You can sign in with Google or with your email and password. Change your password here.')
+                        : (isTr
+                          ? 'E-posta ile girişte kullandığınız şifreyi değiştirin.'
+                          : 'Change the password you use to sign in with your email address.')}
+                  </p>
+                </div>
+                {hasPassword ? (
+                  <span className="account-verified-tag">
+                    <Lock size={14} />
+                    <span>{user?.google_id ? (isTr ? 'Şifre + Google' : 'Password + Google') : (isTr ? 'Şifre Aktif' : 'Password Set')}</span>
+                  </span>
+                ) : (
+                  <span className="account-unverified-tag">
+                    <AlertCircle size={14} />
+                    <span>{isTr ? 'Yalnızca Google' : 'Google Only'}</span>
+                  </span>
+                )}
+              </div>
+
+              {passwordSuccessMsg && (
+                <div className="account-alert-banner alert-success" style={{ marginBottom: '1rem' }}>
+                  <CheckCircle2 size={16} />
+                  <span>{passwordSuccessMsg}</span>
+                </div>
+              )}
+              {passwordErrorMsg && (
+                <div className="account-alert-banner alert-error" style={{ marginBottom: '1rem' }}>
+                  <AlertCircle size={16} />
+                  <span>{passwordErrorMsg}</span>
+                </div>
+              )}
+
+              {/* Lets password managers associate the new password with the account */}
+              <input type="email" name="username" autoComplete="username" value={user?.email || ''} readOnly hidden />
+
+              <div className="account-form-grid">
+                {hasPassword && (
+                  <div className="account-field-group field-span-2">
+                    <div className="field-label-row">
+                      <label className="account-field-label" htmlFor="account-current-password">
+                        {isTr ? 'Mevcut Şifre' : 'Current Password'}
+                      </label>
+                      <button
+                        type="button"
+                        className="account-password-link"
+                        onClick={handleSendResetLink}
+                        disabled={resetLinkLoading}
+                      >
+                        {resetLinkLoading
+                          ? (isTr ? 'Gönderiliyor...' : 'Sending...')
+                          : (isTr ? 'Mevcut şifremi unuttum' : 'Forgot current password?')}
+                      </button>
+                    </div>
+                    <input
+                      id="account-current-password"
+                      type={showPasswords ? 'text' : 'password'}
+                      className="account-field-input"
+                      placeholder="••••••••"
+                      value={currentPassword}
+                      onChange={(e) => setCurrentPassword(e.target.value)}
+                      autoComplete="current-password"
+                    />
+                  </div>
+                )}
+
+                <div className="account-field-group">
+                  <label className="account-field-label" htmlFor="account-new-password">
+                    {isTr ? 'Yeni Şifre' : 'New Password'}
+                  </label>
+                  <input
+                    id="account-new-password"
+                    type={showPasswords ? 'text' : 'password'}
+                    className="account-field-input"
+                    placeholder="••••••••"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    autoComplete="new-password"
+                    minLength={8}
+                  />
+                  <span className="account-field-helper">{isTr ? 'En az 8 karakter.' : 'At least 8 characters.'}</span>
+                </div>
+
+                <div className="account-field-group">
+                  <label className="account-field-label" htmlFor="account-confirm-password">
+                    {isTr ? 'Yeni Şifre (Tekrar)' : 'Confirm New Password'}
+                  </label>
+                  <input
+                    id="account-confirm-password"
+                    type={showPasswords ? 'text' : 'password'}
+                    className="account-field-input"
+                    placeholder="••••••••"
+                    value={confirmNewPassword}
+                    onChange={(e) => setConfirmNewPassword(e.target.value)}
+                    autoComplete="new-password"
+                  />
+                </div>
+              </div>
+
+              <div className="account-password-footer">
+                <button
+                  type="button"
+                  className="account-password-link"
+                  onClick={() => setShowPasswords((v) => !v)}
+                >
+                  {showPasswords ? <EyeOff size={14} /> : <Eye size={14} />}
+                  <span>{showPasswords ? (isTr ? 'Şifreleri gizle' : 'Hide passwords') : (isTr ? 'Şifreleri göster' : 'Show passwords')}</span>
+                </button>
+                <button type="submit" disabled={passwordLoading} className="account-btn btn-primary">
+                  {passwordLoading ? <Loader2 size={16} className="auth-spinner" /> : <KeyRound size={16} />}
+                  <span>
+                    {hasPassword
+                      ? (isTr ? 'Şifreyi Güncelle' : 'Update Password')
+                      : (isTr ? 'Şifre Belirle' : 'Set Password')}
+                  </span>
+                </button>
+              </div>
+              <p className="account-field-helper" style={{ marginTop: '0.75rem' }}>
+                {isTr
+                  ? 'Güvenliğiniz için şifre değiştiğinde diğer cihazlardaki oturumlarınız kapatılır ve size bilgilendirme e-postası gönderilir.'
+                  : 'For your security, changing your password signs you out on other devices and sends you a confirmation email.'}
+              </p>
             </form>
           </div>
         )}

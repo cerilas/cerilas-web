@@ -178,7 +178,29 @@ export function AuthProvider({ children }) {
     if (!res.ok || !data.token) {
       throw new Error(data.error || 'Password reset failed.');
     }
+    storeRotatedSession(data);
+    return data.user;
+  };
 
+  // The server revokes every older JWT on password change, so the returned token must replace the stored one.
+  const changePassword = async ({ currentPassword, newPassword, language = 'en' }) => {
+    const res = await fetch('/api/auth/password/change', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({ current_password: currentPassword, new_password: newPassword, language })
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || !data.token) {
+      throw new Error(data.error || 'Password change failed.');
+    }
+    storeRotatedSession(data);
+    return data;
+  };
+
+  function storeRotatedSession(data) {
     ALL_TOKEN_KEYS.forEach(k => {
       try { localStorage.setItem(k, data.token); } catch (e) {}
     });
@@ -187,8 +209,7 @@ export function AuthProvider({ children }) {
     }
     setToken(data.token);
     setUser(data.user);
-    return data.user;
-  };
+  }
 
   // Register handler
   const register = async ({ email, password, first_name, last_name, phone }) => {
@@ -615,6 +636,7 @@ export function AuthProvider({ children }) {
     requestPasswordReset,
     validateResetToken,
     resetPassword,
+    changePassword,
     loginWithGoogle,
     initiateGoogleAuth,
     unlinkGoogleAccount,

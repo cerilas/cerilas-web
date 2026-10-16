@@ -42,7 +42,12 @@ const MESSAGES = {
     invalidToken: 'This reset link is invalid or has expired. Please request a new one.',
     passwordLength: `Password must be between ${MIN_PASSWORD_LENGTH} and ${MAX_PASSWORD_LENGTH} characters.`,
     serverError: 'Something went wrong. Please try again.',
-    resetSuccess: 'Your password has been updated.'
+    resetSuccess: 'Your password has been updated.',
+    passwordSet: 'Your password has been set. You can now also sign in with your email address.',
+    currentRequired: 'Please enter your current password.',
+    currentWrong: 'Your current password is incorrect.',
+    sameAsCurrent: 'Your new password must be different from your current password.',
+    tooManyAttempts: 'Too many incorrect attempts. Please wait 15 minutes or reset your password by email.'
   },
   tr: {
     invalidEmail: 'Lütfen geçerli bir e-posta adresi girin.',
@@ -51,7 +56,12 @@ const MESSAGES = {
     invalidToken: 'Bu sıfırlama bağlantısı geçersiz veya süresi dolmuş. Lütfen yeni bir bağlantı isteyin.',
     passwordLength: `Şifre ${MIN_PASSWORD_LENGTH} ile ${MAX_PASSWORD_LENGTH} karakter arasında olmalıdır.`,
     serverError: 'Bir hata oluştu. Lütfen tekrar deneyin.',
-    resetSuccess: 'Şifreniz güncellendi.'
+    resetSuccess: 'Şifreniz güncellendi.',
+    passwordSet: 'Şifreniz belirlendi. Artık e-posta adresinizle de giriş yapabilirsiniz.',
+    currentRequired: 'Lütfen mevcut şifrenizi girin.',
+    currentWrong: 'Mevcut şifreniz hatalı.',
+    sameAsCurrent: 'Yeni şifreniz mevcut şifrenizden farklı olmalıdır.',
+    tooManyAttempts: 'Çok fazla hatalı deneme yapıldı. 15 dakika bekleyin veya şifrenizi e-posta ile sıfırlayın.'
   }
 };
 
@@ -138,7 +148,34 @@ function buildResetEmail({ lang, name, resetUrl, isGoogleOnly }) {
   };
 }
 
-function buildChangedEmail({ lang, name }) {
+function buildChangedEmail({ lang, name, isFirstPassword = false }) {
+  if (isFirstPassword) {
+    return lang === 'tr'
+      ? {
+        subject: 'Cerilas hesabınıza şifre eklendi',
+        html: buildEmailTemplate({
+          title: 'Hesabınıza şifre eklendi',
+          paragraphs: [
+            `Merhaba ${name},`,
+            'Cerilas hesabınız için bir şifre belirlendi. Artık Google ile girişe ek olarak e-posta adresiniz ve şifrenizle de giriş yapabilirsiniz.'
+          ],
+          footnote: 'Bu değişikliği siz yapmadıysanız hemen şifrenizi sıfırlayın ve bize info@cerilas.com adresinden ulaşın.'
+        }),
+        text: `Merhaba ${name},\n\nCerilas hesabınız için bir şifre belirlendi. Bu siz değilseniz hemen şifrenizi sıfırlayın ve info@cerilas.com adresine yazın.`
+      }
+      : {
+        subject: 'A password was added to your Cerilas account',
+        html: buildEmailTemplate({
+          title: 'Password added to your account',
+          paragraphs: [
+            `Hi ${name},`,
+            'A password was just set for your Cerilas account. You can now sign in with your email and password in addition to Google.'
+          ],
+          footnote: "If you didn't make this change, reset your password right away and contact us at info@cerilas.com."
+        }),
+        text: `Hi ${name},\n\nA password was just set for your Cerilas account. If this wasn't you, reset your password immediately and contact info@cerilas.com.`
+      };
+  }
   if (lang === 'tr') {
     return {
       subject: 'Cerilas şifreniz değiştirildi',
@@ -223,10 +260,112 @@ async function findActiveToken(token, client = authPool, { lock = false } = {}) 
 }
 
 /**
- * @param {{ issueToken: (user: object) => string, formatUser: (row: object) => object }} deps
+ * Must run inside a transaction on `client`. Revokes existing sessions and pending reset links.
  */
-export function createPasswordResetRouter({ issueToken, formatUser }) {
+async function storeNewPassword(client, userId, password) {
+  const passwordHash = await bcrypt.hash(password, await bcrypt.genSalt(10));
+  // App clock (not DB NOW()) so the JWT issued afterwards is never older than password_changed_at.
+  const changedAt = new Date();
+  const userRes = await client.query(
+    'UPDATE users SET password_hash = $1, password_changed_at = $2 WHERE id::text = $3 RETURNING *',
+    [passwordHash, changedAt, String(userId)]
+  );
+  await client.query(
+    'UPDATE password_reset_tokens SET used_at = NOW() WHERE user_id = $1 AND used_at IS NULL',
+    [String(userId)]
+  );
+  return userRes.rows[0];
+}
+
+const isValidNewPassword = (password) =>
+  password.length >= MIN_PASSWORD_LENGTH && Buffer.byteLength(password, 'utf8') <= MAX_PASSWORD_LENGTH;
+
+const CHANGE_FAIL_WINDOW_MS = 15 * 60 * 1000;
+const MAX_CHANGE_FAILURES = 5;
+const changeFailures = new Map();
+function recentChangeFailures(userId) {
+  const now = Date.now();
+  const list = (changeFailures.get(userId) || []).filter((t) => now - t < CHANGE_FAIL_WINDOW_MS);
+  changeFailures.set(userId, list);
+  return list;
+}
+
+/**
+ * @param {{ issueToken: (user: object) => string, formatUser: (row: object) => object, requireAuth: Function }} deps
+ */
+export function createPasswordResetRouter({ issueToken, formatUser, requireAuth }) {
   const router = Router();
+
+  /**
+   * Signed-in password change. Email/password accounts must confirm the current password;
+   * Google-only accounts (no password yet) can set their first password.
+   */
+  router.post('/change', requireAuth, async (req, res) => {
+    const lang = pickLang(req.body?.language);
+    const t = MESSAGES[lang];
+    const currentPassword = typeof req.body?.current_password === 'string' ? req.body.current_password : '';
+    const newPassword = typeof req.body?.new_password === 'string' ? req.body.new_password : '';
+    const userKey = String(req.user.id);
+
+    if (!isValidNewPassword(newPassword)) {
+      return res.status(400).json({ error: t.passwordLength });
+    }
+    if (recentChangeFailures(userKey).length >= MAX_CHANGE_FAILURES) {
+      return res.status(429).json({ error: t.tooManyAttempts });
+    }
+
+    const client = await authPool.connect();
+    let updatedUser = null;
+    let isFirstPassword = false;
+    try {
+      await client.query('BEGIN');
+      const userRes = await client.query('SELECT id, password_hash FROM users WHERE id = $1 FOR UPDATE', [req.user.id]);
+      const current = userRes.rows[0];
+      if (!current) {
+        await client.query('ROLLBACK');
+        return res.status(404).json({ error: t.serverError });
+      }
+
+      isFirstPassword = !current.password_hash;
+      if (!isFirstPassword) {
+        if (!currentPassword) {
+          await client.query('ROLLBACK');
+          return res.status(400).json({ error: t.currentRequired });
+        }
+        if (!(await bcrypt.compare(currentPassword, current.password_hash))) {
+          await client.query('ROLLBACK');
+          recentChangeFailures(userKey).push(Date.now());
+          return res.status(400).json({ error: t.currentWrong });
+        }
+        if (currentPassword === newPassword) {
+          await client.query('ROLLBACK');
+          return res.status(400).json({ error: t.sameAsCurrent });
+        }
+      }
+
+      updatedUser = await storeNewPassword(client, current.id, newPassword);
+      await client.query('COMMIT');
+    } catch (err) {
+      await client.query('ROLLBACK').catch(() => {});
+      console.error('[Password Change] Error:', err.message);
+      return res.status(500).json({ error: t.serverError });
+    } finally {
+      client.release();
+    }
+
+    changeFailures.delete(userKey);
+    res.json({
+      success: true,
+      message: isFirstPassword ? t.passwordSet : t.resetSuccess,
+      token: issueToken(updatedUser),
+      user: formatUser(updatedUser)
+    });
+
+    sendTransactionalMail({
+      to: updatedUser.email,
+      ...buildChangedEmail({ lang, name: displayName(updatedUser, lang), isFirstPassword })
+    }).catch((err) => console.error('[Password Change] Confirmation email failed:', err.message));
+  });
 
   router.post('/forgot', async (req, res) => {
     const lang = pickLang(req.body?.language);
@@ -265,7 +404,7 @@ export function createPasswordResetRouter({ issueToken, formatUser }) {
     const t = MESSAGES[lang];
     const password = typeof req.body?.password === 'string' ? req.body.password : '';
 
-    if (password.length < MIN_PASSWORD_LENGTH || Buffer.byteLength(password, 'utf8') > MAX_PASSWORD_LENGTH) {
+    if (!isValidNewPassword(password)) {
       return res.status(400).json({ error: t.passwordLength });
     }
 
@@ -279,19 +418,8 @@ export function createPasswordResetRouter({ issueToken, formatUser }) {
         return res.status(400).json({ error: t.invalidToken });
       }
 
-      const passwordHash = await bcrypt.hash(password, await bcrypt.genSalt(10));
-      // App clock (not DB NOW()) so the JWT issued below is never older than password_changed_at.
-      const changedAt = new Date();
-      const userRes = await client.query(
-        'UPDATE users SET password_hash = $1, password_changed_at = $2 WHERE id::text = $3 RETURNING *',
-        [passwordHash, changedAt, row.user_id]
-      );
-      await client.query(
-        'UPDATE password_reset_tokens SET used_at = NOW() WHERE user_id = $1 AND used_at IS NULL',
-        [row.user_id]
-      );
+      updatedUser = await storeNewPassword(client, row.user_id, password);
       await client.query('COMMIT');
-      updatedUser = userRes.rows[0];
     } catch (err) {
       await client.query('ROLLBACK').catch(() => {});
       console.error('[Password Reset] Reset error:', err.message);

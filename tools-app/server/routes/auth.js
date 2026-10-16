@@ -77,6 +77,7 @@ const formatUser = (row) => {
     phone_verified: !!row.phone_verified,
     google_id: row.google_id || null,
     is_google_connected: !!row.google_id,
+    has_password: !!row.password_hash,
     plan: row.plan || 'free',
     cancel_at_period_end: !!row.cancel_at_period_end,
     plan_expires_at: row.plan_expires_at ? new Date(row.plan_expires_at).toISOString() : null,
@@ -194,7 +195,8 @@ export async function findOrCreateOrLinkGoogleUser({ googleId, email, firstName,
  */
 router.use('/password', createPasswordResetRouter({
   issueToken: (user) => jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, { expiresIn: '30d' }),
-  formatUser
+  formatUser,
+  requireAuth
 }));
 
 /**
