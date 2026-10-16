@@ -9079,6 +9079,213 @@ html.light .integration-icon-wrap.img-badge {
   font-weight: 600;
 }
 
+/* Chart hover card (portal, fixed-positioned; see GrowthChartTooltip.jsx) */
+.gtt-card {
+  position: fixed;
+  z-index: 10000;
+  width: 240px;
+  pointer-events: none;
+  padding: 0.8rem 0.95rem 0.75rem;
+  border-radius: 14px;
+  background: rgba(11, 16, 30, 0.96);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow:
+    inset 0 2px 0 0 var(--gtt-accent),
+    0 18px 40px -12px rgba(0, 0, 0, 0.75),
+    0 0 24px -8px var(--gtt-accent);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  color: #e2e8f0;
+  font-family: 'Dosis', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  animation: gttIn 0.14s ease-out;
+}
+
+@keyframes gttIn {
+  from { opacity: 0; transform: translateY(4px) scale(0.98); }
+  to { opacity: 1; transform: none; }
+}
+
+.gtt-below { animation-name: gttInBelow; }
+
+@keyframes gttInBelow {
+  from { opacity: 0; transform: translateY(-4px) scale(0.98); }
+  to { opacity: 1; transform: none; }
+}
+
+.gtt-arrow {
+  position: absolute;
+  left: var(--gtt-arrow-left, 50%);
+  width: 10px;
+  height: 10px;
+  background: inherit;
+  border: inherit;
+  transform: translateX(-50%) rotate(45deg);
+}
+
+.gtt-above .gtt-arrow {
+  bottom: -6px;
+  border-top: none;
+  border-left: none;
+}
+
+.gtt-below .gtt-arrow {
+  top: -6px;
+  border-bottom: none;
+  border-right: none;
+}
+
+.gtt-header {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: #94a3b8;
+  letter-spacing: 0.01em;
+}
+
+.gtt-hero {
+  margin: 0.55rem 0 0.65rem;
+}
+
+.gtt-hero-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.68rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #cbd5e1;
+}
+
+.gtt-hero-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-top: 0.2rem;
+}
+
+.gtt-hero-value {
+  font-size: 1.65rem;
+  font-weight: 700;
+  line-height: 1.1;
+  color: #ffffff;
+  font-variant-numeric: tabular-nums;
+}
+
+.gtt-delta {
+  flex-shrink: 0;
+  padding: 0.15rem 0.45rem;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: #cbd5e1;
+  background: rgba(148, 163, 184, 0.14);
+}
+
+.gtt-delta.is-up {
+  color: #34d399;
+  background: rgba(52, 211, 153, 0.14);
+}
+
+.gtt-delta.is-down {
+  color: #f87171;
+  background: rgba(248, 113, 113, 0.14);
+}
+
+.gtt-hero-caption {
+  display: block;
+  margin-top: 0.15rem;
+  font-size: 0.66rem;
+  color: #64748b;
+  text-align: right;
+}
+
+.gtt-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding-top: 0.6rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.gtt-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  font-size: 0.78rem;
+}
+
+.gtt-row-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  color: #94a3b8;
+}
+
+.gtt-row-value {
+  font-weight: 600;
+  color: #f1f5f9;
+  font-variant-numeric: tabular-nums;
+}
+
+.gtt-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+[data-theme="light"] .gtt-card,
+html.light .gtt-card {
+  background: rgba(255, 255, 255, 0.98);
+  border-color: #e2e8f0;
+  color: #0f172a;
+  box-shadow:
+    inset 0 2px 0 0 var(--gtt-accent),
+    0 18px 40px -14px rgba(15, 23, 42, 0.25);
+}
+
+[data-theme="light"] .gtt-header,
+html.light .gtt-header,
+[data-theme="light"] .gtt-row-label,
+html.light .gtt-row-label {
+  color: #64748b;
+}
+
+[data-theme="light"] .gtt-hero-label,
+html.light .gtt-hero-label {
+  color: #334155;
+}
+
+[data-theme="light"] .gtt-hero-value,
+html.light .gtt-hero-value,
+[data-theme="light"] .gtt-row-value,
+html.light .gtt-row-value {
+  color: #0f172a;
+}
+
+[data-theme="light"] .gtt-rows,
+html.light .gtt-rows {
+  border-top-color: #f1f5f9;
+}
+
+[data-theme="light"] .gtt-delta.is-up,
+html.light .gtt-delta.is-up {
+  color: #059669;
+  background: rgba(16, 185, 129, 0.12);
+}
+
+[data-theme="light"] .gtt-delta.is-down,
+html.light .gtt-delta.is-down {
+  color: #dc2626;
+  background: rgba(239, 68, 68, 0.1);
+}
+
 /* Growth Chart Card Light Mode */
 [data-theme="light"] .growth-chart-card,
 html.light .growth-chart-card {

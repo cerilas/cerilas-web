@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import GrowthChartTooltip from '../components/GrowthChartTooltip';
 import {
   Activity,
   Users,
@@ -133,7 +134,17 @@ const formatChartDate = (dateStr, format = 'short') => {
   if (format === 'short') {
     return dt.toLocaleDateString('en-US', { day: 'numeric', month: 'short' });
   }
+  if (format === 'weekday') {
+    return dt.toLocaleDateString('en-US', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
+  }
   return dt.toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' });
+};
+
+const formatDelta = (current, previous) => {
+  const prev = Number(previous);
+  if (!Number.isFinite(prev) || prev <= 0) return null;
+  const pct = ((Number(current) - prev) / prev) * 100;
+  return { pct, label: `${pct >= 0 ? '+' : ''}${pct.toFixed(1)}%` };
 };
 
 function generateSmoothCurve(pts, minY, maxY) {
@@ -173,6 +184,7 @@ export default function GrowthAnalytics() {
   const [searchFilter, setSearchFilter] = useState('');
   const [activeChartMetric, setActiveChartMetric] = useState('sessions'); // 'sessions' | 'activeUsers' | 'screenPageViews'
   const [hoveredTrendPoint, setHoveredTrendPoint] = useState(null);
+  const chartContainerRef = useRef(null);
   const [selectedCountry, setSelectedCountry] = useState(null);
 
   // Date Range state
@@ -876,6 +888,7 @@ export default function GrowthAnalytics() {
             </div>
 
             <div 
+              ref={chartContainerRef}
               className="growth-chart-svg-container"
               onMouseMove={handleChartMouseMove}
               onMouseLeave={() => setHoveredTrendPoint(null)}
@@ -1009,43 +1022,71 @@ export default function GrowthAnalytics() {
                   </div>
 
                   {/* Hover Floating Tooltip */}
-                  {hoveredTrendPoint && (
-                    <div
-                      className="chart-tooltip"
-                      style={{
-                        left: `${Math.max(12, Math.min(88, hoveredTrendPoint.xPercent)).toFixed(2)}%`,
-                        top: `${hoveredTrendPoint.yPercent.toFixed(2)}%`
-                      }}
-                    >
-                      <div className="chart-tooltip-header">
-                        <Calendar size={12} className="text-muted" />
-                        <span>{formatChartDate(hoveredTrendPoint.data.date, 'long')}</span>
-                      </div>
-                      <div className="chart-tooltip-main-val">
-                        <span className="tooltip-color-indicator" style={{ background: activeMetricCfg.color }} />
-                        <span className="tooltip-metric-name">{activeMetricCfg.label}:</span>
-                        <strong className="tooltip-metric-number" style={{ color: activeMetricCfg.color }}>
-                          {Number(hoveredTrendPoint.val).toLocaleString()}
-                        </strong>
-                      </div>
-                      <div className="chart-tooltip-sub-grid">
-                        <div className="tooltip-sub-item">
-                          <span className="sub-item-lbl">Sessions</span>
-                          <span className="sub-item-val font-mono">{Number(hoveredTrendPoint.data.sessions || 0).toLocaleString()}</span>
+                  {hoveredTrendPoint && (() => {
+                    const pointData = hoveredTrendPoint.data;
+                    const prevData = chartPoints[hoveredTrendPoint.idx - 1]?.data;
+                    const delta = formatDelta(hoveredTrendPoint.val, prevData?.[activeChartMetric]);
+                    const sessionsNum = Number(pointData.sessions) || 0;
+                    const pagesPerSessionPoint = sessionsNum > 0
+                      ? ((Number(pointData.screenPageViews) || 0) / sessionsNum).toFixed(1)
+                      : null;
+
+                    return (
+                      <GrowthChartTooltip
+                        anchorRef={chartContainerRef}
+                        xPercent={hoveredTrendPoint.xPercent}
+                        yPercent={hoveredTrendPoint.yPercent}
+                        accent={activeMetricCfg.color}
+                      >
+                        <div className="gtt-header">
+                          <Calendar size={12} />
+                          <span>{formatChartDate(pointData.date, 'weekday')}</span>
                         </div>
-                        <div className="tooltip-sub-item">
-                          <span className="sub-item-lbl">Users</span>
-                          <span className="sub-item-val font-mono">{Number(hoveredTrendPoint.data.activeUsers || 0).toLocaleString()}</span>
-                        </div>
-                        {hoveredTrendPoint.data.bounceRate && (
-                          <div className="tooltip-sub-item">
-                            <span className="sub-item-lbl">Bounce Rate</span>
-                            <span className="sub-item-val font-mono text-muted">{hoveredTrendPoint.data.bounceRate}</span>
+
+                        <div className="gtt-hero">
+                          <span className="gtt-hero-label">
+                            <span className="gtt-dot" style={{ background: activeMetricCfg.color }} />
+                            {activeMetricCfg.label}
+                          </span>
+                          <div className="gtt-hero-row">
+                            <strong className="gtt-hero-value">{Number(hoveredTrendPoint.val).toLocaleString()}</strong>
+                            {delta && (
+                              <span className={`gtt-delta ${delta.pct > 0 ? 'is-up' : delta.pct < 0 ? 'is-down' : ''}`}>
+                                {delta.pct > 0 ? '▲' : delta.pct < 0 ? '▼' : '•'} {delta.label}
+                              </span>
+                            )}
                           </div>
-                        )}
-                      </div>
-                    </div>
-                  )}
+                          {delta && <span className="gtt-hero-caption">vs. previous day</span>}
+                        </div>
+
+                        <div className="gtt-rows">
+                          {Object.entries(METRIC_CONFIG)
+                            .filter(([key]) => key !== activeChartMetric)
+                            .map(([key, cfg]) => (
+                              <div className="gtt-row" key={key}>
+                                <span className="gtt-row-label">
+                                  <span className="gtt-dot" style={{ background: cfg.color }} />
+                                  {cfg.label}
+                                </span>
+                                <span className="gtt-row-value">{Number(pointData[key] || 0).toLocaleString()}</span>
+                              </div>
+                            ))}
+                          {pagesPerSessionPoint && (
+                            <div className="gtt-row">
+                              <span className="gtt-row-label">Pages / Session</span>
+                              <span className="gtt-row-value">{pagesPerSessionPoint}</span>
+                            </div>
+                          )}
+                          {pointData.bounceRate && (
+                            <div className="gtt-row">
+                              <span className="gtt-row-label">Bounce Rate</span>
+                              <span className="gtt-row-value">{pointData.bounceRate}</span>
+                            </div>
+                          )}
+                        </div>
+                      </GrowthChartTooltip>
+                    );
+                  })()}
                 </div>
               )}
             </div>
