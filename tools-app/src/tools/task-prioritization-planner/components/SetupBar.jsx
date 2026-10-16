@@ -67,7 +67,8 @@ export default function SetupBar({ settings, criteria, summary, open, onToggle, 
 
   return (
     <div className="tpp-setup-tiles" role="group" aria-label="Plan settings">
-      {tiles.map(({ id, icon: Icon, label, value, note, invalid }) => {
+      {tiles.map(({ id, icon, label, value, note, invalid }) => {
+        const Icon = icon;
         const isOpen = open === id;
         return (
           <button

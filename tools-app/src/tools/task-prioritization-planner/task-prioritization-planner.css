@@ -437,6 +437,34 @@ html.dark .tpp-root {
 .tpp-faq summary { cursor: pointer; font-weight: 700; font-size: 0.97rem; }
 .tpp-faq p { margin: 0.55rem 0 0; }
 
+/* Confirm / alert dialog */
+.tpp-btn.danger-solid { background: var(--tpp-bad); border-color: var(--tpp-bad); color: #fff; }
+.tpp-btn.danger-solid:hover:not(:disabled) { filter: brightness(1.08); }
+.tpp-dialog { display: flex; flex-direction: column; align-items: flex-start; gap: 0.6rem; color: var(--tpp-text); }
+.tpp-dialog-icon {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 44px; height: 44px; border-radius: 12px; margin-bottom: 0.25rem;
+}
+.tpp-dialog.is-warning .tpp-dialog-icon { background: rgba(245, 158, 11, 0.14); color: var(--tpp-warn-text); }
+.tpp-dialog.is-danger .tpp-dialog-icon { background: rgba(239, 68, 68, 0.12); color: var(--tpp-bad-text); }
+.tpp-dialog.is-info .tpp-dialog-icon { background: var(--tpp-accent-soft); color: var(--tpp-accent-text); }
+.tpp-dialog h3 { margin: 0; font-size: 1.08rem; font-weight: 650; letter-spacing: -0.01em; line-height: 1.35; overflow-wrap: anywhere; }
+.tpp-dialog p { margin: 0; font-size: 0.9rem; line-height: 1.55; color: var(--tpp-muted); overflow-wrap: anywhere; }
+.tpp-dialog-details {
+  list-style: none; margin: 0.15rem 0 0; padding: 0.6rem 0.8rem; width: 100%;
+  border-radius: 10px; background: var(--tpp-input-bg); border: 1px solid var(--tpp-border);
+  display: grid; gap: 0.3rem; font-size: 0.84rem; color: var(--tpp-text);
+}
+.tpp-dialog-details li { position: relative; padding-left: 0.9rem; }
+.tpp-dialog-details li::before { content: ''; position: absolute; left: 0; top: 0.55em; width: 5px; height: 5px; border-radius: 50%; background: var(--tpp-muted); }
+.tpp-dialog-actions { display: flex; justify-content: flex-end; gap: 0.5rem; width: 100%; margin-top: 0.75rem; }
+.tpp-dialog-actions .tpp-btn { padding: 0.55rem 1rem; }
+.tpp-dialog-actions .tpp-btn:focus-visible { outline: 2px solid var(--tpp-accent); outline-offset: 2px; }
+@media (max-width: 480px) {
+  .tpp-dialog-actions { flex-direction: column-reverse; }
+  .tpp-dialog-actions .tpp-btn { justify-content: center; width: 100%; }
+}
+
 @media (max-width: 1100px) {
   .tpp-kpis { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .tpp-setup-tiles { grid-template-columns: 1fr; }

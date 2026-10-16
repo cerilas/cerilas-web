@@ -14,6 +14,7 @@ import { defaultViewFor } from './lib/views';
 import LockedBlocksPanel, { SelectedBlockBar } from './components/LockedBlocksPanel';
 import PlannerSeo from './components/PlannerSeo';
 import SetupBar from './components/SetupBar';
+import { usePlannerDialog } from './components/usePlannerDialog';
 import { buildCalendar, summarizeCapacity, validatePeriod } from './lib/capacity';
 import { scoreTasks, applyPreset } from './lib/scoring';
 import { buildSchedule } from './lib/scheduler';
@@ -31,6 +32,7 @@ export default function TaskPrioritizationPlanner({ onBack, toolMeta }) {
   const [setupOpen, setSetupOpen] = useState(null);
   const [undo, setUndo] = useState(null);
   const exportMenuRef = useRef(null);
+  const { ask, notify, dialogElement } = usePlannerDialog();
   const usedRef = useRef(false);
   const fileRef = useRef(null);
 
@@ -157,15 +159,30 @@ export default function TaskPrioritizationPlanner({ onBack, toolMeta }) {
   const restoreUndo = () => {
     if (!undo) return;
     setPlan((p) => ({ ...p, ...undo.snapshot }));
+    setSelectedBlockId(null);
     setUndo(null);
   };
 
   const closeExportMenu = () => { if (exportMenuRef.current) exportMenuRef.current.open = false; };
 
-  const loadExample = () => {
-    if (tasks.length && !window.confirm('Replace your current plan with the example plan?')) return;
+  const loadExample = async () => {
+    if (tasks.length || lockedBlocks.length) {
+      const ok = await ask({
+        title: 'Replace your plan with the example?',
+        message: 'The example plan replaces everything you have entered so far.',
+        details: [
+          `${tasks.length} task${tasks.length === 1 ? '' : 's'} and ${lockedBlocks.length} locked block${lockedBlocks.length === 1 ? '' : 's'}`,
+          'Your planning period, working hours and priority weights'
+        ],
+        confirmLabel: 'Load example',
+        tone: 'danger'
+      });
+      if (!ok) return;
+    }
+    const snapshot = plan;
     setPlan(createDefaultState());
     setSelectedBlockId(null);
+    if (tasks.length) setUndo({ label: 'Example plan loaded', snapshot });
   };
 
   const exportName = `task-plan-${period.start}-to-${period.end}`;
@@ -194,7 +211,7 @@ export default function TaskPrioritizationPlanner({ onBack, toolMeta }) {
       trackDownload({ format: 'pdf', tasks: deferredPlan.tasks.length, blocks: schedule.blocks.length });
       setNotice('PDF plan downloaded.');
     } catch {
-      setNotice('Could not create the PDF. Please try again.');
+      notify({ title: 'Could not create the PDF', message: 'Something went wrong while building the PDF. Please try again. Your plan has not changed.' });
     } finally {
       setPdfBusy(false);
     }
@@ -214,15 +231,31 @@ export default function TaskPrioritizationPlanner({ onBack, toolMeta }) {
 
   const importJson = async (file) => {
     if (!file) return;
+    let next;
     try {
-      const text = await file.text();
-      const next = normalizeState(JSON.parse(text));
-      setPlan(next);
-      setSelectedBlockId(null);
-      setNotice(`Imported ${next.tasks.length} tasks.`);
+      next = normalizeState(JSON.parse(await file.text()));
     } catch {
-      setNotice('That file is not a valid planner JSON export.');
+      notify({
+        title: 'This file cannot be opened',
+        message: `“${file.name}” is not a plan saved with this tool. Choose a .json file created with “Save plan”.`
+      });
+      return;
     }
+    if (tasks.length || lockedBlocks.length) {
+      const ok = await ask({
+        title: `Open “${file.name}”?`,
+        message: `The file contains ${next.tasks.length} task${next.tasks.length === 1 ? '' : 's'}. Opening it replaces your current plan.`,
+        details: [`Current plan: ${tasks.length} task${tasks.length === 1 ? '' : 's'}, ${lockedBlocks.length} locked block${lockedBlocks.length === 1 ? '' : 's'}`],
+        confirmLabel: 'Open plan',
+        tone: 'warning'
+      });
+      if (!ok) return;
+    }
+    const snapshot = plan;
+    setPlan(next);
+    setSelectedBlockId(null);
+    if (tasks.length) setUndo({ label: `Opened ${next.tasks.length} tasks from file`, snapshot });
+    else setNotice(`Opened ${next.tasks.length} tasks.`);
   };
 
   const copySummary = async () => {
@@ -242,7 +275,7 @@ export default function TaskPrioritizationPlanner({ onBack, toolMeta }) {
       setNotice('Plan summary copied to clipboard.');
       trackCopy({ format: 'summary' });
     } catch {
-      setNotice('Copy failed. Your browser blocked clipboard access.');
+      notify({ title: 'Could not copy the summary', message: 'Your browser blocked clipboard access. Allow clipboard permissions for this site, or use “Tasks as CSV” instead.', tone: 'warning' });
     }
   };
 
@@ -290,6 +323,7 @@ export default function TaskPrioritizationPlanner({ onBack, toolMeta }) {
                 periodStart={period.start}
                 onChange={(patch) => updateSettings(patch, 'schedule')}
                 onWeekChange={(week) => updateSettings({ week }, 'schedule')}
+                confirm={ask}
               />
             )}
             {setupOpen === 'criteria' && (
@@ -402,6 +436,8 @@ export default function TaskPrioritizationPlanner({ onBack, toolMeta }) {
         </button>
         <span className="tpp-hint">Your plan is saved automatically in this browser only. Today is {formatDate(todayIso(), { weekday: true, year: true })}.</span>
       </div>
+
+      {dialogElement}
 
       {(undo || notice) && (
         <div className="tpp-toast" role="status">

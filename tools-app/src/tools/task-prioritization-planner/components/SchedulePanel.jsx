@@ -10,7 +10,7 @@ function setHoursForRule(rule, hours) {
   return { ...rule, enabled: hours > 0, end: formatTime(end) };
 }
 
-export default function SchedulePanel({ settings, onChange, onWeekChange, periodStart }) {
+export default function SchedulePanel({ settings, onChange, onWeekChange, periodStart, confirm }) {
   const [holidayDraft, setHolidayDraft] = useState({ start: '', end: '', label: '' });
   const [overrideDraft, setOverrideDraft] = useState({ date: '', type: 'custom', start: '09:00', end: '13:00', breakMinutes: 0, label: '' });
 
@@ -53,9 +53,17 @@ export default function SchedulePanel({ settings, onChange, onWeekChange, period
           <span className="tpp-sr-only">Schedule template</span>
           <select
             value=""
-            onChange={(e) => {
+            onChange={async (e) => {
               const tpl = SCHEDULE_TEMPLATES[e.target.value];
-              if (tpl) onWeekChange(tpl.week.map((r) => ({ ...r })));
+              if (!tpl) return;
+              const weekly = tpl.week.reduce((sum, r) => sum + scheduleHoursFor(r), 0);
+              const ok = !confirm || await confirm({
+                title: `Apply “${tpl.label}”?`,
+                message: `Hours for all seven weekdays are replaced with this template (${Number(weekly.toFixed(1))}h per week). Holidays and date-specific changes are kept.`,
+                confirmLabel: 'Apply template',
+                tone: 'warning'
+              });
+              if (ok) onWeekChange(tpl.week.map((r) => ({ ...r })));
             }}
           >
             <option value="">Apply template…</option>
