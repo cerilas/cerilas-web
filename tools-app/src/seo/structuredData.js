@@ -96,14 +96,14 @@ export function buildToolJsonLdBlocks(tool, { includeFaq = true } = {}) {
         '@type': 'HowTo',
         name: tool.howTo.title,
         description: tool.howTo.lead,
-        totalTime: 'PT2M',
+        totalTime: tool.howTo.totalTime || 'PT2M',
         tool: { '@type': 'HowToTool', name: tool.name },
         step: tool.howTo.steps.map((step, idx) => ({
           '@type': 'HowToStep',
           position: idx + 1,
           name: step.name,
           text: step.text,
-          url: `${url}#aivc-howto-heading`
+          url: `${url}#${tool.howTo.anchor || 'aivc-howto-heading'}`
         }))
       }
     });

@@ -1230,6 +1230,15 @@ html.dark .seo-editorial-header {
   }
   .seo-footer-top {
     flex-direction: column;
+    align-items: stretch;
+  }
+  .seo-footer-brand-col,
+  .seo-footer-stats-box {
+    max-width: 100%;
+    min-width: 0;
+  }
+  .seo-footer-brand-desc {
+    white-space: normal;
   }
   .seo-footer-grid {
     grid-template-columns: 1fr;

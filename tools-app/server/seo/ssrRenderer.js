@@ -6,6 +6,7 @@ import {
   CHECKER_RESULTS_GLOSSARY,
   CHECKER_VS_TRACKER
 } from '../../src/seo/aiVisibilityCheckerContent.js';
+import { PLANNER_HOW_TO, PLANNER_DEFINITIONS, PLANNER_METHODS } from '../../src/seo/taskPlannerContent.js';
 import {
   GROWTH_SEO,
   GROWTH_FAQ,
@@ -82,6 +83,30 @@ function renderCheckerExtraSectionsHtml() {
           <p style="${SSR_P}">${escapeHtml(CHECKER_VS_TRACKER.lead)}</p>
           ${renderComparisonTableHtml(CHECKER_VS_TRACKER)}
           <p style="margin: 1rem 0 0;"><a href="${CHECKER_VS_TRACKER.ctaHref}" style="${SSR_LINK} font-weight: 600;">${escapeHtml(CHECKER_VS_TRACKER.ctaLabel)} &rarr;</a></p>
+        </section>`;
+}
+
+function renderPlannerExtraSectionsHtml() {
+  return `
+        <section class="ssr-section" id="${PLANNER_HOW_TO.anchor}">
+          <h2 style="${SSR_H2}">${escapeHtml(PLANNER_HOW_TO.title)}</h2>
+          <p style="${SSR_P}">${escapeHtml(PLANNER_HOW_TO.lead)}</p>
+          <ol style="margin: 0; padding-left: 1.25rem; color: #cbd5e1;">
+            ${PLANNER_HOW_TO.steps.map(s => `<li style="margin-bottom: 0.6rem;"><strong>${escapeHtml(s.name)}.</strong> ${escapeHtml(s.text)}</li>`).join('')}
+          </ol>
+        </section>
+
+        <section class="ssr-section">
+          <h2 style="${SSR_H2}">${escapeHtml(PLANNER_DEFINITIONS.title)}</h2>
+          <dl style="margin: 0; color: #cbd5e1;">
+            ${PLANNER_DEFINITIONS.items.map(i => `<dt style="font-weight: 600; margin-top: 0.75rem;">${escapeHtml(i.term)}</dt><dd style="margin: 0.25rem 0 0; color: #94a3b8;">${escapeHtml(i.definition)}</dd>`).join('')}
+          </dl>
+        </section>
+
+        <section class="ssr-section">
+          <h2 style="${SSR_H2}">${escapeHtml(PLANNER_METHODS.title)}</h2>
+          <p style="${SSR_P}">${escapeHtml(PLANNER_METHODS.lead)}</p>
+          ${renderComparisonTableHtml(PLANNER_METHODS)}
         </section>`;
 }
 
@@ -195,6 +220,7 @@ export function renderToolPageHtml(templateHtml, slug) {
         ` : ''}
 
         ${tool.ssrSections === 'ai-visibility-checker' ? renderCheckerExtraSectionsHtml() : ''}
+        ${tool.ssrSections === 'task-prioritization-planner' ? renderPlannerExtraSectionsHtml() : ''}
 
         <section class="ssr-section ssr-faq">
           <h2 style="font-size: 1.4rem; font-weight: 600; margin: 0 0 1rem 0; color: #f8fafc;">Frequently Asked Questions</h2>

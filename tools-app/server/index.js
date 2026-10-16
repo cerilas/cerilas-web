@@ -952,6 +952,29 @@ app.listen(PORT, async () => {
         seo_title = EXCLUDED.seo_title, 
         seo_description = EXCLUDED.seo_description,
         category = EXCLUDED.category;
+
+      INSERT INTO cerilas_tools (
+        title, slug, short_description, icon_name, cover_image_url, target_url, seo_title, seo_description, category, sort_order, is_active
+      ) VALUES (
+        'Task Prioritization & Capacity Planner',
+        'task-prioritization-planner',
+        'Score tasks with weighted criteria, calculate real working capacity for any date range, and auto-schedule work around deadlines, dependencies and locked calendar blocks.',
+        'CalendarClock',
+        '/tool-icons/task-prioritization-planner.png',
+        '#/tool/task-prioritization-planner',
+        'Task Prioritization & Capacity Planner (Free) | Cerilas Tools',
+        'Prioritize tasks with weighted scoring, calculate available working hours for any date range, and auto-schedule work around deadlines. Free, no sign-up.',
+        'Productivity',
+        18,
+        true
+      ) ON CONFLICT (slug) DO UPDATE SET 
+        title = EXCLUDED.title,
+        short_description = EXCLUDED.short_description,
+        icon_name = EXCLUDED.icon_name,
+        cover_image_url = EXCLUDED.cover_image_url,
+        seo_title = EXCLUDED.seo_title, 
+        seo_description = EXCLUDED.seo_description,
+        category = EXCLUDED.category;
     `);
 
     console.log('Database tables & migrations verified successfully.');

@@ -8,6 +8,15 @@
  * - XML Sitemap generation and Category clustering
  */
 import { CHECKER_SEO, CHECKER_FAQ, CHECKER_HOW_TO } from './aiVisibilityCheckerContent.js';
+import {
+  PLANNER_SEO,
+  PLANNER_FAQ,
+  PLANNER_HOW_TO,
+  PLANNER_HOW_IT_WORKS,
+  PLANNER_FORMULA,
+  PLANNER_WHEN_TO_USE,
+  PLANNER_EXAMPLE
+} from './taskPlannerContent.js';
 
 export const CATEGORIES = {
   'research-tools': {
@@ -75,6 +84,17 @@ export const CATEGORIES = {
     shortDescription: 'Deterministic SaaS unit economics and financial planning calculators. Benchmark your startup metrics against industry standards.',
     keywords: 'startup runway calculator, mrr calculator, arr calculator, churn rate calculator, ltv calculator, cac calculator, ltv cac calculator, saas metrics',
     toolSlugs: ['startup-runway-calculator', 'mrr-calculator', 'arr-calculator', 'churn-calculator', 'ltv-calculator', 'cac-calculator', 'ltv-cac-calculator']
+  },
+  'productivity-tools': {
+    slug: 'productivity-tools',
+    name: 'Productivity Tools',
+    displayName: 'Productivity & Planning Tools',
+    h1: 'Productivity, Planning & Focus Tools',
+    title: 'Free Productivity Tools – Task Planner & Focus Timer | Cerilas Tools',
+    description: 'Free in-browser productivity tools. Prioritize tasks with weighted scoring, plan working capacity for any date range, and stay focused with a Pomodoro timer.',
+    shortDescription: 'Planning and focus utilities that run in your browser: task prioritization, capacity planning, time blocking and focus sessions. No sign-up, no data upload.',
+    keywords: 'productivity tools, task prioritization tool, capacity planner, pomodoro timer, time blocking, work planner, focus timer',
+    toolSlugs: ['task-prioritization-planner', 'pomodoro-timer', 'email-signature-generator']
   }
 };
 
@@ -119,7 +139,13 @@ export const TOOL_CANONICAL_ALIASES = {
   'search-console-mcp': 'google-marketing-mcp',
   'google-ads-mcp': 'google-marketing-mcp',
   'analytics-mcp': 'google-marketing-mcp',
-  'mcp-server': 'google-marketing-mcp'
+  'mcp-server': 'google-marketing-mcp',
+  'task-prioritization': 'task-prioritization-planner',
+  'task-prioritization-tool': 'task-prioritization-planner',
+  'capacity-planner': 'task-prioritization-planner',
+  'capacity-planning-calculator': 'task-prioritization-planner',
+  'task-planner': 'task-prioritization-planner',
+  'priority-planner': 'task-prioritization-planner'
 };
 
 export const TOOLS_SEO_REGISTRY = {
@@ -1051,6 +1077,29 @@ export const TOOLS_SEO_REGISTRY = {
       }
     ],
     keywords: 'pomodoro timer, online pomodoro timer, focus timer, study timer, productivity timer, aesthetic pomodoro, pomodoro technique app, deep work timer'
+  },
+
+  // 26b. Task Prioritization & Capacity Planner
+  'task-prioritization-planner': {
+    slug: PLANNER_SEO.slug,
+    name: PLANNER_SEO.name,
+    h1: PLANNER_SEO.h1,
+    category: 'Productivity Tools',
+    categorySlug: 'productivity-tools',
+    title: PLANNER_SEO.title,
+    description: PLANNER_SEO.description,
+    shortDescription: PLANNER_SEO.shortDescription,
+    howItWorks: PLANNER_HOW_IT_WORKS,
+    formula: PLANNER_FORMULA,
+    whenToUse: PLANNER_WHEN_TO_USE,
+    example: PLANNER_EXAMPLE,
+    relatedTools: ['pomodoro-timer', 'startup-runway-calculator', 'email-signature-generator'],
+    faq: PLANNER_FAQ,
+    howTo: PLANNER_HOW_TO,
+    ssrSections: 'task-prioritization-planner',
+    centralFaqSchema: true,
+    ogImage: 'https://tools.cerilas.com/og/task-prioritization-planner.png',
+    keywords: PLANNER_SEO.keywords
   },
 
   // 27. Startup Runway Calculator

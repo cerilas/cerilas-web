@@ -33,6 +33,7 @@ import { euFundingManifest } from './eu-funding-opportunities/manifest';
 import { websiteEmailExtractorManifest } from './website-email-extractor/manifest';
 import { aiVisibilityCheckerManifest } from './ai-visibility-checker/manifest';
 import { googleMarketingMcpManifest } from './google-marketing-mcp/manifest';
+import { taskPrioritizationPlannerManifest } from './task-prioritization-planner/manifest';
 
 /**
  * Enterprise Scalable Tool Registry.
@@ -166,6 +167,10 @@ export const toolsRegistry = {
     manifest: qrGeneratorManifest,
     component: lazy(() => import('./qr-generator'))
   },
+  [taskPrioritizationPlannerManifest.slug]: {
+    manifest: taskPrioritizationPlannerManifest,
+    component: lazy(() => import('./task-prioritization-planner'))
+  },
   [pomodoroManifest.slug]: {
     manifest: pomodoroManifest,
     component: lazy(() => import('./pomodoro-timer'))
@@ -229,7 +234,13 @@ const toolAliases = {
   'search-console-mcp': 'google-marketing-mcp',
   'google-ads-mcp': 'google-marketing-mcp',
   'analytics-mcp': 'google-marketing-mcp',
-  'mcp-server': 'google-marketing-mcp'
+  'mcp-server': 'google-marketing-mcp',
+  'task-prioritization': 'task-prioritization-planner',
+  'task-prioritization-tool': 'task-prioritization-planner',
+  'capacity-planner': 'task-prioritization-planner',
+  'capacity-planning-calculator': 'task-prioritization-planner',
+  'task-planner': 'task-prioritization-planner',
+  'priority-planner': 'task-prioritization-planner'
 };
 
 export function getRegisteredTool(slug) {

@@ -28,7 +28,8 @@ import {
   Unlink,
   ShieldAlert,
   Layers,
-  Scissors
+  Scissors,
+  CalendarClock
 } from 'lucide-react';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
@@ -117,7 +118,8 @@ const ICON_MAP = {
   Unlink,
   ShieldAlert,
   Layers,
-  Scissors
+  Scissors,
+  CalendarClock
 };
 
 const ToolCard = ({ tool, onSelect }) => {

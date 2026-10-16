@@ -76,6 +76,19 @@ export const TOOL_CONVERSION_METRICS = {
       short: 'compressed'
     }
   },
+  'task-prioritization-planner': {
+    actionKey: 'planned',
+    getConversionCount: (tool) => {
+      if (!tool) return 0;
+      return (tool.download_count || 0) + (tool.copy_count || 0) || tool.use_count || 0;
+    },
+    en: {
+      action: 'planned',
+      badge: 'plans built',
+      singular: 'plan built',
+      short: 'plans'
+    }
+  },
   'pomodoro-timer': {
     actionKey: 'completed',
     getConversionCount: (tool) => {

@@ -121,6 +121,12 @@ export const PERSONA_CONFIGS = [
         badge: 'Productivity'
       },
       {
+        slug: 'task-prioritization-planner',
+        title: 'Task Planner',
+        desc: 'Prioritize tasks & plan weekly capacity',
+        badge: 'Planning'
+      },
+      {
         slug: 'pomodoro-timer',
         title: 'Pomodoro Timer',
         desc: 'Boost focus with ambient productivity audio',
@@ -185,6 +191,12 @@ export const PERSONA_CONFIGS = [
         title: 'Freelance Signature',
         desc: 'High-converting personal brand footer',
         badge: 'Branding'
+      },
+      {
+        slug: 'task-prioritization-planner',
+        title: 'Capacity Planner',
+        desc: 'Fit client work into billable hours',
+        badge: 'Planning'
       },
       {
         slug: 'pomodoro-timer',
@@ -293,6 +305,12 @@ export const PERSONA_CONFIGS = [
         title: 'PDF Splitter',
         desc: 'Split heavy textbooks into chapters',
         badge: '100% Private'
+      },
+      {
+        slug: 'task-prioritization-planner',
+        title: 'Study Planner',
+        desc: 'Plan study hours around exam deadlines',
+        badge: 'Study'
       },
       {
         slug: 'pomodoro-timer',

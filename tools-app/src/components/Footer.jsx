@@ -316,6 +316,12 @@ export default function Footer({ onOpenStats, onNavigatePricing }) {
                 </a>
               </li>
               <li>
+                <a href="#/tool/task-prioritization-planner" onClick={() => handleToolClick('task-prioritization-planner')} title="Task Prioritization & Capacity Planner">
+                  <span className="seo-tool-title">Task Prioritization Planner</span>
+                  <span className="seo-link-tag">Capacity</span>
+                </a>
+              </li>
+              <li>
                 <a href="#/tool/pomodoro-timer" onClick={() => handleToolClick('pomodoro-timer')} title="Pomodoro Focus Timer">
                   <span className="seo-tool-title">Pomodoro Focus Timer</span>
                   <span className="seo-link-tag">Wave Audio</span>
@@ -557,6 +563,7 @@ export default function Footer({ onOpenStats, onNavigatePricing }) {
             <a href="#/tool/pdf-rag-cleaner" onClick={() => handleToolClick('pdf-rag-cleaner')}>PDF to Markdown Vector RAG</a>
             <a href="#/tool/ai-content-detector" onClick={() => handleToolClick('ai-content-detector')}>AI Content Detector 100%</a>
             <a href="#/tool/pomodoro-timer" onClick={() => handleToolClick('pomodoro-timer')}>Pomodoro Timer Online</a>
+            <a href="#/tool/task-prioritization-planner" onClick={() => handleToolClick('task-prioritization-planner')}>Available Working Hours Calculator</a>
             <a href="#/tool/qr-code-generator" onClick={() => handleToolClick('qr-code-generator')}>Vector SVG QR Code</a>
             <a href="#/tool/html-to-llm-markdown" onClick={() => handleToolClick('html-to-llm-markdown')}>HTML to LLM Markdown</a>
           </div>
