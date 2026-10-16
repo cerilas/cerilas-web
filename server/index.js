@@ -738,6 +738,8 @@ app.listen(PORT, async () => {
       CREATE INDEX IF NOT EXISTS idx_pomodoro_user_date ON pomodoro_sessions(user_id, date_string);
       
       ALTER TABLE users ADD COLUMN IF NOT EXISTS pomodoro_sound VARCHAR(50) DEFAULT 'beep1';
+      ALTER TABLE users ADD COLUMN IF NOT EXISTS is_admin BOOLEAN NOT NULL DEFAULT FALSE;
+      ALTER TABLE users ADD COLUMN IF NOT EXISTS password_changed_at TIMESTAMPTZ;
       ALTER TABLE pomodoro_sessions ADD COLUMN IF NOT EXISTS task_label VARCHAR(255);
       ALTER TABLE pomodoro_sessions ADD COLUMN IF NOT EXISTS is_recovered BOOLEAN DEFAULT FALSE;
     `);

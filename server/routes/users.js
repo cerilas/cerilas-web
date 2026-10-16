@@ -1,37 +1,17 @@
 import { Router } from 'express';
 import bcrypt from 'bcryptjs';
 import pool from '../db.js';
-import jwt from 'jsonwebtoken';
+import authMiddleware from '../middleware/auth.js';
 
 const router = Router();
-
-// Middleware to protect routes and ensure requester is an admin (in users table)
-const authMiddleware = async (req, res, next) => {
-  const header = req.headers.authorization;
-  if (!header) return res.status(401).json({ error: 'No token' });
-  try {
-    const token = header.split(' ')[1];
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    
-    const result = await pool.query('SELECT * FROM users WHERE id = $1', [decoded.id]);
-    if (result.rows.length === 0) {
-      return res.status(403).json({ error: 'Unauthorized' });
-    }
-    
-    req.user = result.rows[0];
-    next();
-  } catch (err) {
-    res.status(401).json({ error: 'Invalid token' });
-  }
-};
 
 // Apply middleware to all routes below
 router.use(authMiddleware);
 
-// GET all users
+// GET admin users (tools.cerilas.com customers share this table but are not listed here)
 router.get('/', async (req, res) => {
   try {
-    const result = await pool.query('SELECT id, email, created_at FROM users ORDER BY created_at DESC');
+    const result = await pool.query('SELECT id, email, created_at FROM users WHERE is_admin = true ORDER BY created_at DESC');
     res.json(result.rows);
   } catch (err) {
     console.error('Fetch users error:', err);
@@ -76,14 +56,14 @@ router.post('/', async (req, res) => {
       return res.status(400).json({ error: 'Email and password required' });
     }
 
-    const check = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
+    const check = await pool.query('SELECT id FROM users WHERE LOWER(email) = LOWER($1)', [email]);
     if (check.rows.length > 0) {
       return res.status(400).json({ error: 'Email already exists' });
     }
 
     const hash = await bcrypt.hash(password, 10);
     const result = await pool.query(
-      'INSERT INTO users (email, password_hash) VALUES ($1, $2) RETURNING id, email, created_at',
+      'INSERT INTO users (email, password_hash, is_admin) VALUES ($1, $2, true) RETURNING id, email, created_at',
       [email, hash]
     );
 
@@ -109,11 +89,11 @@ router.put('/:id', async (req, res) => {
 
     if (password) {
       const hash = await bcrypt.hash(password, 10);
-      query += ', password_hash = $3';
+      query += ', password_hash = $3, password_changed_at = NOW()';
       params.push(hash);
     }
 
-    query += ' WHERE id = $2 RETURNING id, email, created_at';
+    query += ' WHERE id = $2 AND is_admin = true RETURNING id, email, created_at';
 
     const result = await pool.query(query, params);
     if (result.rows.length === 0) {
@@ -137,15 +117,15 @@ router.delete('/:id', async (req, res) => {
       return res.status(400).json({ error: 'Kendi hesabınızı silemezsiniz.' });
     }
 
-    // Prevent deleting the last remaining user
-    const countResult = await pool.query('SELECT COUNT(*) FROM users');
+    // Prevent deleting the last remaining admin
+    const countResult = await pool.query('SELECT COUNT(*) FROM users WHERE is_admin = true');
     const userCount = parseInt(countResult.rows[0].count);
     
     if (userCount <= 1) {
       return res.status(400).json({ error: 'Sistemdeki son kullanıcıyı silemezsiniz.' });
     }
 
-    const result = await pool.query('DELETE FROM users WHERE id = $1 RETURNING id', [id]);
+    const result = await pool.query('DELETE FROM users WHERE id = $1 AND is_admin = true RETURNING id', [id]);
     if (result.rows.length === 0) {
       return res.status(404).json({ error: 'User not found' });
     }

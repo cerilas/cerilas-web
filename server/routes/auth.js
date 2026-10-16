@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
 import pool from '../db.js';
+import authMiddleware, { signAdminToken } from '../middleware/auth.js';
 
 const router = Router();
 
@@ -12,23 +12,18 @@ router.post('/login', async (req, res) => {
       return res.status(400).json({ error: 'Email and password required' });
     }
 
-    const result = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
-    if (result.rows.length === 0) {
-      return res.status(401).json({ error: 'Invalid credentials' });
-    }
-
-    const user = result.rows[0];
-    const valid = await bcrypt.compare(password, user.password_hash);
-    if (!valid) {
-      return res.status(401).json({ error: 'Invalid credentials' });
-    }
-
-    const token = jwt.sign(
-      { id: user.id, email: user.email },
-      process.env.JWT_SECRET,
-      { expiresIn: '7d' }
+    const result = await pool.query(
+      'SELECT id, email, password_hash, is_admin FROM users WHERE LOWER(email) = LOWER($1)',
+      [String(email).trim()]
     );
+    const user = result.rows[0];
 
+    const valid = user?.password_hash ? await bcrypt.compare(password, user.password_hash) : false;
+    if (!user || !valid || user.is_admin !== true) {
+      return res.status(401).json({ error: 'Invalid credentials' });
+    }
+
+    const token = signAdminToken(user);
     res.json({ token, user: { id: user.id, email: user.email } });
   } catch (err) {
     console.error('Login error:', err);
@@ -36,16 +31,8 @@ router.post('/login', async (req, res) => {
   }
 });
 
-router.get('/me', async (req, res) => {
-  const header = req.headers.authorization;
-  if (!header) return res.status(401).json({ error: 'No token' });
-  try {
-    const token = header.split(' ')[1];
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    res.json({ user: { id: decoded.id, email: decoded.email } });
-  } catch {
-    res.status(401).json({ error: 'Invalid token' });
-  }
+router.get('/me', authMiddleware, (req, res) => {
+  res.json({ user: { id: req.user.id, email: req.user.email } });
 });
 
 export default router;

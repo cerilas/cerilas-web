@@ -12,6 +12,7 @@ async function seed() {
       password_hash VARCHAR(255) NOT NULL,
       created_at TIMESTAMP DEFAULT NOW()
     );
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS is_admin BOOLEAN NOT NULL DEFAULT FALSE;
 
     CREATE TABLE IF NOT EXISTS projects (
       id SERIAL PRIMARY KEY,
@@ -100,7 +101,7 @@ async function seed() {
   const existingUser = await pool.query('SELECT id FROM users WHERE email = $1', ['deniz@cerilas.com']);
   if (existingUser.rows.length === 0) {
     const hash = await bcrypt.hash('24232423', 12);
-    await pool.query('INSERT INTO users (email, password_hash) VALUES ($1, $2)', ['deniz@cerilas.com', hash]);
+    await pool.query('INSERT INTO users (email, password_hash, is_admin) VALUES ($1, $2, true)', ['deniz@cerilas.com', hash]);
     console.log('Admin user created');
   }
 
