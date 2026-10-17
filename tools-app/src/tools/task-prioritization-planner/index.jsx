@@ -193,8 +193,26 @@ export default function TaskPrioritizationPlanner({ onBack, toolMeta }) {
   const exportPdf = async () => {
     if (pdfBusy) return;
     setPdfBusy(true);
+    let buildPlanPdf;
     try {
-      const { buildPlanPdf } = await import('./lib/pdfReport');
+      ({ buildPlanPdf } = await import('./lib/pdfReport'));
+    } catch (error) {
+      console.error('[planner] PDF module failed to load', error);
+      setPdfBusy(false);
+      const reload = await ask({
+        title: 'A new version of the planner is available',
+        message: 'This tab is running an older version of the tool, so the PDF builder could not be loaded. Reload the page and download the PDF again. Your plan is saved in this browser and stays as it is.',
+        confirmLabel: 'Reload page',
+        cancelLabel: 'Not now',
+        tone: 'info'
+      });
+      if (reload) {
+        saveState(plan);
+        window.location.reload();
+      }
+      return;
+    }
+    try {
       const bytes = await buildPlanPdf({
         period,
         summary,
@@ -210,7 +228,8 @@ export default function TaskPrioritizationPlanner({ onBack, toolMeta }) {
       downloadFile(`${exportName}.pdf`, bytes, 'application/pdf');
       trackDownload({ format: 'pdf', tasks: deferredPlan.tasks.length, blocks: schedule.blocks.length });
       setNotice('PDF plan downloaded.');
-    } catch {
+    } catch (error) {
+      console.error('[planner] PDF export failed', error);
       notify({ title: 'Could not create the PDF', message: 'Something went wrong while building the PDF. Please try again. Your plan has not changed.' });
     } finally {
       setPdfBusy(false);
