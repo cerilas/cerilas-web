@@ -306,6 +306,210 @@ export async function getOfferings() {
 }
 
 /**
+ * Format a numeric amount in major currency units to match RevenueCat/Paddle summary display
+ */
+function formatPaddleCurrency(amount, currencyCode = 'USD') {
+  const num = Number(amount);
+  if (!Number.isFinite(num)) return '';
+  try {
+    const opts = {
+      style: 'currency',
+      currency: currencyCode || 'USD',
+      currencyDisplay: 'narrowSymbol'
+    };
+    if (num === 0) {
+      opts.maximumFractionDigits = 0;
+    }
+    return new Intl.NumberFormat('en-US', opts).format(num);
+  } catch (_) {
+    return `$${num.toFixed(2)}`;
+  }
+}
+
+let lastPaddleEventData = null;
+
+/**
+ * Synchronizes the left-side RevenueCat Paddle order summary (.rcb-paddle-summary)
+ * with live Paddle checkout event data, including applied promo/discount codes.
+ */
+function syncPaddleOrderSummaryDom(eventData) {
+  if (typeof document === 'undefined' || !eventData || !eventData.totals) return;
+  lastPaddleEventData = eventData;
+
+  const applyDomUpdates = () => {
+    const summaryEl = document.querySelector('.rcb-paddle-summary');
+    if (!summaryEl) return;
+
+    const currency = eventData.currency_code || 'USD';
+    const subtotal = Number(eventData.totals.subtotal ?? 0);
+    const discount = Number(eventData.totals.discount ?? 0);
+    const total = Number(eventData.totals.total ?? subtotal);
+    const discountCode = eventData.discount?.code || '';
+    const hasDiscount = discount > 0;
+
+    // 1. Update big top header amount (.rcb-paddle-summary-amount)
+    const topAmountEl = summaryEl.querySelector('.rcb-paddle-summary-amount');
+    if (topAmountEl) {
+      topAmountEl.textContent = formatPaddleCurrency(total, currency);
+    }
+
+    // 2. Update product price in the first card (.rcb-paddle-summary-product-price)
+    // RevenueCat uses recurringTotalAmount ?? totalAmount, which stays at the full price
+    // when a one-time promo code is applied. Show discounted price + strikethrough original.
+    const productPriceContainer = summaryEl.querySelector('.rcb-paddle-summary-product-price');
+    if (productPriceContainer) {
+      const priceSpan = productPriceContainer.querySelector('span:first-child');
+      if (priceSpan) {
+        if (hasDiscount && total < subtotal) {
+          priceSpan.innerHTML = `<span style="text-decoration:line-through;opacity:0.55;font-weight:400;font-size:0.95rem;margin-right:6px;">${formatPaddleCurrency(subtotal, currency)}</span><span>${formatPaddleCurrency(total, currency)}</span>`;
+        } else {
+          priceSpan.textContent = formatPaddleCurrency(subtotal || total, currency);
+        }
+      }
+    }
+
+    // 3. Update breakdown card (Subtotal, Discount row, Total due today)
+    const cards = summaryEl.querySelectorAll('.rcb-paddle-summary-card');
+    const breakdownCard = cards.length > 1 ? cards[1] : null;
+    if (breakdownCard) {
+      const divider = breakdownCard.querySelector('.rcb-paddle-summary-divider');
+      let discountRow = breakdownCard.querySelector('#rcb-custom-discount-row');
+
+      if (hasDiscount && divider) {
+        if (!discountRow) {
+          discountRow = document.createElement('div');
+          discountRow.id = 'rcb-custom-discount-row';
+          discountRow.className = divider.previousElementSibling?.className || 'rcb-paddle-summary-row';
+          discountRow.style.display = 'flex';
+          discountRow.style.justifyContent = 'space-between';
+          discountRow.style.alignItems = 'center';
+          divider.parentNode.insertBefore(discountRow, divider);
+        }
+        const labelText = discountCode ? `Discount (${discountCode})` : 'Discount';
+        discountRow.innerHTML = `
+          <span class="rcb-paddle-summary-muted" style="color:#10b981;font-weight:500;">${labelText}</span>
+          <span style="color:#10b981;font-weight:600;">-${formatPaddleCurrency(discount, currency)}</span>
+        `;
+      } else if (discountRow) {
+        discountRow.remove();
+      }
+
+      // Ensure "Total due today" strong row reflects the discounted total
+      const strongRow = breakdownCard.querySelector('.rcb-paddle-summary-row-strong');
+      if (strongRow) {
+        const strongValueSpan = strongRow.querySelector('span:last-child');
+        if (strongValueSpan) {
+          strongValueSpan.textContent = formatPaddleCurrency(total, currency);
+        }
+      }
+    }
+  };
+
+  applyDomUpdates();
+  if (typeof requestAnimationFrame === 'function') {
+    requestAnimationFrame(applyDomUpdates);
+  }
+  setTimeout(applyDomUpdates, 60);
+  setTimeout(applyDomUpdates, 200);
+}
+
+/**
+ * Installs a runtime bridge on Paddle.js (window.PaddleBillingV1 / window.Paddle)
+ * because @revenuecat/purchases-js only listens to `checkout.loaded` and `checkout.updated`
+ * and ignores `checkout.discount.applied` / `checkout.discount.removed`.
+ */
+function ensurePaddleDiscountSyncBridge() {
+  if (typeof window === 'undefined') return null;
+
+  const patchPaddleObject = (paddleObj) => {
+    if (!paddleObj || paddleObj.__cerilasDiscountBridgeInstalled) return;
+    paddleObj.__cerilasDiscountBridgeInstalled = true;
+
+    const wrapEventCallback = (originalCb) => {
+      if (typeof originalCb !== 'function' || originalCb.__cerilasWrapped) return originalCb;
+      const wrapped = async function (event) {
+        const eventName = event?.name;
+        const eventData = event?.data;
+
+        try {
+          if (
+            eventName === 'checkout.discount.applied' ||
+            eventName === 'checkout.discount.removed' ||
+            eventName === 'checkout.items.updated' ||
+            eventName === 'checkout.customer.updated'
+          ) {
+            await originalCb.call(this, {
+              ...event,
+              name: 'checkout.updated'
+            });
+          } else {
+            await originalCb.call(this, event);
+          }
+        } finally {
+          if (eventData && eventData.totals) {
+            syncPaddleOrderSummaryDom(eventData);
+          }
+        }
+      };
+      wrapped.__cerilasWrapped = true;
+      return wrapped;
+    };
+
+    if (typeof paddleObj.Update === 'function') {
+      const origUpdate = paddleObj.Update.bind(paddleObj);
+      paddleObj.Update = function (opts = {}) {
+        if (opts && typeof opts.eventCallback === 'function') {
+          opts = { ...opts, eventCallback: wrapEventCallback(opts.eventCallback) };
+        }
+        return origUpdate(opts);
+      };
+    }
+
+    if (typeof paddleObj.Initialize === 'function') {
+      const origInit = paddleObj.Initialize.bind(paddleObj);
+      paddleObj.Initialize = function (opts = {}) {
+        if (opts && typeof opts.eventCallback === 'function') {
+          opts = { ...opts, eventCallback: wrapEventCallback(opts.eventCallback) };
+        }
+        return origInit(opts);
+      };
+    }
+
+    if (paddleObj.Checkout && typeof paddleObj.Checkout.open === 'function') {
+      const origOpen = paddleObj.Checkout.open.bind(paddleObj.Checkout);
+      paddleObj.Checkout.open = function (openOpts = {}) {
+        if (openOpts && openOpts.settings) {
+          openOpts = {
+            ...openOpts,
+            settings: {
+              ...openOpts.settings,
+              showAddDiscounts: true,
+              allowDiscountRemoval: true
+            }
+          };
+        }
+        return origOpen(openOpts);
+      };
+    }
+  };
+
+  const checkAndPatch = () => {
+    if (window.PaddleBillingV1) patchPaddleObject(window.PaddleBillingV1);
+    if (window.Paddle) patchPaddleObject(window.Paddle);
+    if (lastPaddleEventData && document.querySelector('.rcb-paddle-summary')) {
+      syncPaddleOrderSummaryDom(lastPaddleEventData);
+    }
+  };
+
+  checkAndPatch();
+  const intervalId = setInterval(checkAndPatch, 150);
+  return () => {
+    clearInterval(intervalId);
+    lastPaddleEventData = null;
+  };
+}
+
+/**
  * Purchase a specific package using RevenueCat Web Billing
  * @param {import('@revenuecat/purchases-js').Package} rcPackage Package object from offerings
  * @param {string} [customerEmail] Optional email address
@@ -314,6 +518,15 @@ export async function getOfferings() {
  */
 export async function purchasePackage(rcPackage, customerEmail = null, htmlTarget = null) {
   const purchases = getPurchases() || initRevenueCat();
+  const stopBridge = ensurePaddleDiscountSyncBridge();
+
+  let urlDiscountCode;
+  if (typeof window !== 'undefined') {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      urlDiscountCode = params.get('discount_code') || params.get('promo') || params.get('coupon') || undefined;
+    } catch (_) {}
+  }
 
   try {
     const result = await purchases.purchase({
@@ -321,7 +534,8 @@ export async function purchasePackage(rcPackage, customerEmail = null, htmlTarge
       selectedLocale: 'en',
       defaultLocale: 'en',
       customerEmail: customerEmail || undefined,
-      htmlTarget: htmlTarget || undefined
+      htmlTarget: htmlTarget || undefined,
+      ...(urlDiscountCode ? { discountCode: urlDiscountCode } : {})
     });
 
     const isPro = checkProEntitlement(result.customerInfo);
@@ -361,6 +575,8 @@ export async function purchasePackage(rcPackage, customerEmail = null, htmlTarge
 
     console.error('[RevenueCat] Purchase failed:', err);
     throw err;
+  } finally {
+    if (stopBridge) stopBridge();
   }
 }
 

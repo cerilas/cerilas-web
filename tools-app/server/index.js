@@ -143,10 +143,10 @@ app.get('/sitemap.xml', (req, res) => {
   res.send(xml);
 });
 
-// Serve static assets from build output
-app.use(express.static(distPath));
+// Serve static assets from build output (index: false so '/' reaches SSR renderHomePageHtml)
+app.use(express.static(distPath, { index: false }));
 if (fs.existsSync(publicPath)) {
-  app.use(express.static(publicPath));
+  app.use(express.static(publicPath, { index: false }));
 }
 
 // Explicit static mounts for tool icons

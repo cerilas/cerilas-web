@@ -234,6 +234,15 @@ export function renderToolPageHtml(templateHtml, slug) {
             ${relatedToolsHtml}
           </div>
         </section>
+
+        <section class="ssr-section ssr-growth-cta" style="border: 1px solid rgba(56, 189, 248, 0.25); border-radius: 12px; padding: 1.25rem; background: rgba(56, 189, 248, 0.04);">
+          <h2 style="font-size: 1.25rem; font-weight: 600; margin: 0 0 0.5rem 0; color: #f8fafc;">
+            <a href="/growth" style="color: #38bdf8; text-decoration: none;">GrowthControl — AI Visibility Tracker &amp; GEO Platform &rarr;</a>
+          </h2>
+          <p style="margin: 0; color: #94a3b8; font-size: 0.92rem; line-height: 1.55;">
+            Track whether ChatGPT, Google Gemini, Perplexity, and Claude mention your brand or cite your website. Connect Google Search Console &amp; GA4, monitor competitors, and run a free <a href="/tool/ai-visibility-checker" style="color: #38bdf8; text-decoration: none;">AI Visibility Check</a>.
+          </p>
+        </section>
       </main>
     </div>
   `;
@@ -442,6 +451,20 @@ export function renderHomePageHtml(templateHtml) {
       </header>
 
       <main>
+        <section style="margin-bottom: 2.5rem; border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 14px; padding: 1.5rem; background: rgba(56, 189, 248, 0.05);">
+          <div style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: #38bdf8; margin-bottom: 0.4rem;">Featured Flagship Platform</div>
+          <h2 style="font-size: 1.5rem; font-weight: 700; margin: 0 0 0.5rem 0; color: #f8fafc;">
+            <a href="/growth" style="color: #38bdf8; text-decoration: none;">GrowthControl: AI Visibility Tracker &amp; GEO Platform &rarr;</a>
+          </h2>
+          <p style="margin: 0 0 0.75rem 0; color: #cbd5e1; font-size: 0.98rem; line-height: 1.55;">
+            Monitor how often ChatGPT, Gemini, Perplexity, and Claude mention your brand and cite your website. Audit AI crawler access, connect Google Search Console, and outrank competitors in AI search answers.
+          </p>
+          <p style="margin: 0; font-size: 0.9rem;">
+            <a href="/growth" style="color: #38bdf8; font-weight: 600; text-decoration: none;">Explore GrowthControl</a>
+            <span style="margin: 0 0.5rem; color: #64748b;">&bull;</span>
+            <a href="/tool/ai-visibility-checker" style="color: #38bdf8; font-weight: 600; text-decoration: none;">Run Free AI Visibility Checker</a>
+          </p>
+        </section>
         ${categoriesHtml}
       </main>
     </div>
