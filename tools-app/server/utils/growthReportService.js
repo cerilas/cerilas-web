@@ -2,31 +2,67 @@ import nodemailer from 'nodemailer';
 import { authPool } from '../db.js';
 import { getUserPlan, normalizeUserPlan } from './growthPlanLimits.js';
 
-export const CRON_SECRET = process.env.CRON_SECRET || 'cerilas_growth_cron_2026_x89a';
+export const DEFAULT_CRON_SECRET = 'cerilas_growth_cron_2026_x89a';
+export const CRON_SECRET = process.env.CRON_SECRET || DEFAULT_CRON_SECRET;
+
+function getAllowedCronSecrets() {
+  const secrets = new Set([DEFAULT_CRON_SECRET]);
+  if (process.env.CRON_SECRET && String(process.env.CRON_SECRET).trim()) {
+    secrets.add(String(process.env.CRON_SECRET).trim());
+  }
+  return secrets;
+}
 
 /**
  * Validates candidate secret against CRON_SECRET
  */
 export function isValidCronSecret(candidate) {
   if (!candidate || typeof candidate !== 'string') return false;
-  return candidate.trim() === CRON_SECRET;
+  return getAllowedCronSecrets().has(candidate.trim());
 }
 
 /**
- * Extracts secret from request headers or query params
+ * Extracts secret from request headers, query params, or body
  */
 export function getRequestCronSecret(req) {
-  const auth = req.get('authorization') || '';
-  const bearer = auth.startsWith('Bearer ') ? auth.slice(7).trim() : '';
-  return String(
-    req.get('x-cron-secret') || 
-    bearer || 
-    req.query.token || 
-    req.query.key || 
-    req.query.secret || 
-    req.query.cron_secret || 
-    ''
-  );
+  const candidates = [];
+
+  const auth = String(req.get('authorization') || '').trim();
+  if (auth) {
+    if (/^bearer\s+/i.test(auth)) {
+      candidates.push(auth.replace(/^bearer\s+/i, '').trim());
+    } else if (/^basic\s+/i.test(auth)) {
+      try {
+        const decoded = Buffer.from(auth.replace(/^basic\s+/i, '').trim(), 'base64').toString('utf8');
+        candidates.push(decoded);
+        const parts = decoded.split(':');
+        if (parts[0]) candidates.push(parts[0].trim());
+        if (parts.slice(1).join(':')) candidates.push(parts.slice(1).join(':').trim());
+      } catch (_) {}
+    } else {
+      candidates.push(auth);
+    }
+  }
+
+  const headerKeys = ['x-cron-secret', 'x-api-key', 'cron-secret', 'api-key'];
+  for (const key of headerKeys) {
+    const val = req.get(key);
+    if (val) candidates.push(String(val).trim());
+  }
+
+  const query = req.query || {};
+  for (const key of ['token', 'key', 'secret', 'cron_secret', 'api_key']) {
+    if (query[key]) candidates.push(String(query[key]).trim());
+  }
+
+  const body = req.body && typeof req.body === 'object' ? req.body : {};
+  for (const key of ['token', 'key', 'secret', 'cron_secret', 'api_key']) {
+    if (body[key]) candidates.push(String(body[key]).trim());
+  }
+
+  const allowed = getAllowedCronSecrets();
+  const matched = candidates.find(c => c && allowed.has(c));
+  return matched || candidates[0] || '';
 }
 
 /**
