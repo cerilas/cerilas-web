@@ -49,7 +49,7 @@ import RevenueCatPaywallModal from './components/RevenueCatPaywallModal';
 import RevenueCatCustomerCenterModal from './components/RevenueCatCustomerCenterModal';
 import { LEGAL_DOCS } from './legal/legalContent';
 import { toolsRegistry, getAllRegisteredTools, getRegisteredTool } from './tools/registry';
-import { getToolSeo } from './seo/toolsSeoRegistry';
+import { getToolSeo, CATEGORIES } from './seo/toolsSeoRegistry';
 import { JSONLD_IDS, buildToolJsonLdBlocks } from './seo/structuredData';
 import { GROWTH_SEO, GROWTH_URL, buildGrowthJsonLd } from './seo/growthControlSeo';
 import { useTranslation } from './i18n';
@@ -136,10 +136,16 @@ const ToolCard = ({ tool, onSelect }) => {
     : 'New tool';
 
   return (
-    <div 
+    <a 
+      href={`/tool/${tool.slug}`}
       className="card" 
-      onClick={() => onSelect(tool.slug)}
-      style={{ cursor: 'pointer' }}
+      onClick={(e) => {
+        if (!e.metaKey && !e.ctrlKey && !e.shiftKey && e.button === 0) {
+          e.preventDefault();
+          onSelect(tool.slug);
+        }
+      }}
+      style={{ cursor: 'pointer', textDecoration: 'none', color: 'inherit' }}
     >
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '0.5rem', flexDirection: 'row', flexWrap: 'nowrap' }}>
         <div className="icon-wrapper tool-logo-container" style={{ flexShrink: 0 }}>
@@ -238,7 +244,7 @@ const ToolCard = ({ tool, onSelect }) => {
           <ArrowRight size={16} strokeWidth={1.5} />
         </div>
       </div>
-    </div>
+    </a>
   );
 };
 
@@ -269,6 +275,7 @@ export default function App() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [currentSlug, setCurrentSlug] = useState(null);
+  const [currentCategorySlug, setCurrentCategorySlug] = useState(null);
   const [currentLegalSlug, setCurrentLegalSlug] = useState(null);
   const [isAdmin, setIsAdmin] = useState(() => {
     if (typeof window === 'undefined') return false;
@@ -482,28 +489,50 @@ export default function App() {
       // 2. Tool routes matching
       const hashMatch = hash.match(/^#\/tools?\/([a-zA-Z0-9_-]+)\/?/);
       if (hashMatch) {
-        setCurrentSlug(hashMatch[1]);
+        const slugVal = hashMatch[1];
+        setCurrentSlug(slugVal);
+        setCurrentCategorySlug(null);
+        try {
+          window.history.replaceState({}, '', `/tool/${slugVal}`);
+        } catch (e) {}
         forceScrollToTop();
         return;
       }
       const pathMatch = window.location.pathname.match(/^\/tools?\/([a-zA-Z0-9_-]+)\/?/);
       if (pathMatch) {
         setCurrentSlug(pathMatch[1]);
+        setCurrentCategorySlug(null);
         forceScrollToTop();
         return;
       }
       const directLlmsMatch = window.location.pathname.match(/^\/(llms-txt(?:-(?:generator|checker|validator))?)\/?/);
       if (directLlmsMatch) {
         setCurrentSlug(directLlmsMatch[1]);
+        setCurrentCategorySlug(null);
         forceScrollToTop();
         return;
       }
       const directHashLlmsMatch = hash.match(/^#\/(llms-txt(?:-(?:generator|checker|validator))?)\/?/);
       if (directHashLlmsMatch) {
         setCurrentSlug(directHashLlmsMatch[1]);
+        setCurrentCategorySlug(null);
+        try {
+          window.history.replaceState({}, '', `/tool/llms-txt`);
+        } catch (e) {}
         forceScrollToTop();
         return;
       }
+
+      // 3. Category hub routes (/ai-tools, /seo-tools, /research-tools, etc.)
+      const cleanCategoryPath = window.location.pathname.replace(/^\/+|\/+$/g, '').toLowerCase();
+      if (CATEGORIES[cleanCategoryPath]) {
+        setCurrentCategorySlug(cleanCategoryPath);
+        setCurrentSlug(null);
+        forceScrollToTop();
+        return;
+      }
+
+      setCurrentCategorySlug(null);
       setCurrentSlug(null);
       forceScrollToTop();
     };
@@ -673,6 +702,16 @@ export default function App() {
       cleanupToolJsonLd();
       return;
     } else if (currentSlug && (toolSeo || manifest)) {
+      // Preserve individual EU grant opportunity canonical & title on /tool/eu-funding-opportunities/:grantSlug
+      const grantSubMatch = window.location.pathname.match(/^\/tools?\/eu-funding-opportunities\/([a-zA-Z0-9_-]+)\/?$/);
+      if (grantSubMatch && grantSubMatch[1] && grantSubMatch[1] !== 'all') {
+        const grantCanonical = `https://tools.cerilas.com/tool/eu-funding-opportunities/${grantSubMatch[1]}`;
+        setCanonical(grantCanonical);
+        setMeta('og:url', 'property', grantCanonical);
+        setMeta('twitter:url', 'name', grantCanonical);
+        return;
+      }
+
       const canonicalSlug = toolSeo?.slug || manifest?.slug || currentSlug;
       const pageTitle = toolSeo?.title || manifest?.seo?.title || `${manifest?.title || 'Tool'} | Cerilas Tools`;
       const pageDesc = toolSeo?.description || manifest?.seo?.description || manifest?.shortDescription || '';
@@ -712,11 +751,29 @@ export default function App() {
         category: toolSeo?.category || manifest?.category || 'Utilities',
         faq: toolSeo?.faq || manifest?.faq || []
       }, { includeFaq: Boolean(toolSeo?.centralFaqSchema) }));
+    } else if (currentCategorySlug && CATEGORIES[currentCategorySlug]) {
+      const cat = CATEGORIES[currentCategorySlug];
+      const catUrl = `https://tools.cerilas.com/${cat.slug}`;
+      const catOgImg = 'https://tools.cerilas.com/og/growthcontrol.png';
+
+      document.title = cat.title;
+      setMeta('description', 'name', cat.description);
+      if (cat.keywords) setMeta('keywords', 'name', cat.keywords);
+      setCanonical(catUrl);
+      setMeta('og:title', 'property', cat.title);
+      setMeta('og:description', 'property', cat.description);
+      setMeta('og:url', 'property', catUrl);
+      setMeta('og:image', 'property', catOgImg);
+      setMeta('twitter:title', 'name', cat.title);
+      setMeta('twitter:description', 'name', cat.description);
+      setMeta('twitter:url', 'name', catUrl);
+      setMeta('twitter:image', 'name', catOgImg);
+      cleanupToolJsonLd();
     } else {
-      const homeTitle = 'Cerilas Tools | Free QR Code Generator & Advanced Utilities';
-      const homeDesc = 'Minimalist, privacy-focused web tools and utilities built by Cerilas High Tech.';
+      const homeTitle = "Cerilas' Tools & GrowthControl | AI Visibility Tracker, GEO & Free Web Utilities";
+      const homeDesc = 'Explore 30+ free, in-browser privacy-focused AI, SEO, developer, and file tools, plus GrowthControl — the AI visibility tracker and GEO platform for ChatGPT, Gemini, Perplexity & Claude.';
       const homeUrl = 'https://tools.cerilas.com/';
-      const homeOgImg = 'https://tools.cerilas.com/og-image.svg';
+      const homeOgImg = 'https://tools.cerilas.com/og/growthcontrol.png';
 
       document.title = homeTitle;
       setMeta('description', 'name', homeDesc);
@@ -727,7 +784,7 @@ export default function App() {
       setMeta('og:image', 'property', homeOgImg);
       setMeta('og:image:width', 'property', '1200');
       setMeta('og:image:height', 'property', '630');
-      setMeta('og:image:type', 'property', 'image/svg+xml');
+      setMeta('og:image:type', 'property', 'image/png');
       setMeta('twitter:title', 'name', homeTitle);
       setMeta('twitter:description', 'name', homeDesc);
       setMeta('twitter:url', 'name', homeUrl);
@@ -744,7 +801,7 @@ export default function App() {
         page_path: window.location.pathname + window.location.hash
       });
     }
-  }, [currentSlug, currentLegalSlug, isPricing, isGrowthView, tools, language]);
+  }, [currentSlug, currentCategorySlug, currentLegalSlug, isPricing, isGrowthView, tools, language]);
 
   // Fetch active tools from database
   useEffect(() => {
@@ -814,8 +871,9 @@ export default function App() {
     setIsGrowthView(false);
     setIsAccountView(false);
     setCurrentLegalSlug(null);
+    setCurrentCategorySlug(null);
     setCurrentSlug(null);
-    window.location.hash = '#/pricing';
+    window.history.pushState({}, '', '/pricing');
     forceScrollToTop();
   };
 
@@ -825,8 +883,9 @@ export default function App() {
     setIsPricing(false);
     setIsAccountView(false);
     setCurrentLegalSlug(null);
+    setCurrentCategorySlug(null);
     setCurrentSlug(null);
-    window.location.hash = '#/growth';
+    window.history.pushState({}, '', '/growth');
     forceScrollToTop();
   };
 
@@ -836,7 +895,9 @@ export default function App() {
     setIsPricing(false);
     setIsAccountView(false);
     setCurrentLegalSlug(null);
-    window.location.hash = `#/tool/${slug}`;
+    setCurrentCategorySlug(null);
+    setCurrentSlug(slug);
+    window.history.pushState({}, '', `/tool/${slug}`);
     forceScrollToTop();
   };
 
@@ -846,8 +907,9 @@ export default function App() {
     setIsPricing(false);
     setIsAccountView(false);
     setCurrentLegalSlug(null);
+    setCurrentCategorySlug(null);
     setCurrentSlug(null);
-    window.location.hash = '#/';
+    window.history.pushState({}, '', '/');
     forceScrollToTop();
   };
 
@@ -884,6 +946,8 @@ export default function App() {
       matchesCategory = tool.isAi || tool.badge?.includes('AI') || tool.slug === 'ats-resume-checker';
     } else if (selectedCategory !== 'All') {
       matchesCategory = tool.category === selectedCategory;
+    } else if (currentCategorySlug && CATEGORIES[currentCategorySlug]) {
+      matchesCategory = CATEGORIES[currentCategorySlug].toolSlugs.includes(tool.slug);
     }
 
     return matchesSearch && matchesCategory;
@@ -972,6 +1036,7 @@ export default function App() {
                   ref={heroImgRef}
                   src="/hero-bg.webp" 
                   alt="" 
+                  fetchPriority="high"
                   className="catalog-hero-img"
                   onError={(e) => {
                     if (!e.target.dataset.triedJpg) {
@@ -998,9 +1063,19 @@ export default function App() {
                         }
                       }}
                     />
-                    <h1 className="hero-brand-title">Cerilas' <span className="brand-bold-word">Tools</span></h1>
+                    <h1 className="hero-brand-title">
+                      {currentCategorySlug && CATEGORIES[currentCategorySlug] ? (
+                        CATEGORIES[currentCategorySlug].h1
+                      ) : (
+                        <>Cerilas' <span className="brand-bold-word">Tools</span></>
+                      )}
+                    </h1>
                   </div>
-                  <p className="hero-brand-subtitle">{t('catalog.subtitle')}</p>
+                  <p className="hero-brand-subtitle">
+                    {currentCategorySlug && CATEGORIES[currentCategorySlug]
+                      ? CATEGORIES[currentCategorySlug].shortDescription
+                      : t('catalog.subtitle')}
+                  </p>
                 </header>
 
                 <div className="search-container hero-search-container">

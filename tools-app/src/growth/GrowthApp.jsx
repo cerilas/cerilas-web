@@ -18,6 +18,7 @@ import { useAuth } from '../context/AuthContext';
 import { GrowthOverviewSkeleton } from './components/GrowthSkeleton';
 import GrowthLandingPage from './components/GrowthLandingPage';
 import GrowthConnectWebsitePrompt from './components/GrowthConnectWebsitePrompt';
+import { GROWTH_SEO } from '../seo/growthControlSeo';
 import './GrowthApp.css';
 
 function GrowthInner({ onBackToTools }) {
@@ -168,6 +169,10 @@ function GrowthInner({ onBackToTools }) {
 
   // Dynamically update document title based on active tab and brand workspace
   useEffect(() => {
+    if (!isAuthenticated && !token) {
+      document.title = GROWTH_SEO.title;
+      return;
+    }
     const tabTitles = {
       overview: 'Overview & Authority Score',
       'action-feed': 'Action Feed & Priorities',
@@ -186,7 +191,7 @@ function GrowthInner({ onBackToTools }) {
       ? `${activeWorkspace?.name || activeWorkspace?.primary_domain} • `
       : '';
     document.title = `${wsPrefix}${currentTabName} | GrowthControl – Cerilas`;
-  }, [activeTab, activeWorkspace]);
+  }, [activeTab, activeWorkspace, isAuthenticated, token]);
 
   // 1. While auth status is loading (verifying existing session token), display clean skeleton, NEVER landing
   if (authLoading && !isAuthenticated && !token) {

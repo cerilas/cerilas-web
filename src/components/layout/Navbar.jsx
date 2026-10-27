@@ -85,9 +85,17 @@ export default function Navbar() {
                 </NavLink>
               ))}
               <a
+                href="https://tools.cerilas.com/growth"
+                target="_blank"
+                rel="noopener"
+                className={`px-2 xl:px-3 py-2 text-[13px] xl:text-sm font-medium rounded-md transition-colors inline-flex items-center gap-1.5 ${navTextClass}`}
+              >
+                <span>GrowthControl</span>
+              </a>
+              <a
                 href="https://tools.cerilas.com"
                 target="_blank"
-                rel="noopener noreferrer"
+                rel="noopener"
                 className={`px-2 xl:px-3 py-2 text-[13px] xl:text-sm font-medium rounded-md transition-colors inline-flex items-center gap-1.5 ${navTextClass}`}
               >
                 <span>Tools</span>

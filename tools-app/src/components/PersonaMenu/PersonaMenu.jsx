@@ -67,7 +67,7 @@ export const PERSONA_CONFIGS = [
         badge: '100% Private'
       },
       {
-        slug: 'qr-generator',
+        slug: 'qr-code-generator',
         title: 'QR Generator',
         desc: 'Dynamic QR codes for events & products',
         badge: 'Marketing'
@@ -175,7 +175,7 @@ export const PERSONA_CONFIGS = [
         badge: 'Media'
       },
       {
-        slug: 'qr-generator',
+        slug: 'qr-code-generator',
         title: 'vCard QR Codes',
         desc: 'Share contact info & portfolio links',
         badge: 'Branding'
@@ -405,7 +405,8 @@ export default function PersonaMenu({ onSelectTool, onNavigateHome }) {
     if (onSelectTool) {
       onSelectTool(slug);
     } else {
-      window.location.hash = `#/tool/${slug}`;
+      window.history.pushState({}, '', `/tool/${slug}`);
+      window.dispatchEvent(new PopStateEvent('popstate'));
     }
   };
 
@@ -515,10 +516,17 @@ export default function PersonaMenu({ onSelectTool, onNavigateHome }) {
 
             <div className="persona-tools-grid">
               {activePersona.tools.map((tool) => (
-                <div
+                <a
                   key={tool.slug}
+                  href={`/tool/${tool.slug}`}
                   className="persona-tool-card"
-                  onClick={() => handleToolClick(tool.slug)}
+                  style={{ textDecoration: 'none' }}
+                  onClick={(e) => {
+                    if (!e.metaKey && !e.ctrlKey && !e.shiftKey && !e.altKey && e.button === 0) {
+                      e.preventDefault();
+                      handleToolClick(tool.slug);
+                    }
+                  }}
                   title={tool.title}
                 >
                   {/* Real Tool Logo */}
@@ -546,7 +554,7 @@ export default function PersonaMenu({ onSelectTool, onNavigateHome }) {
                     </div>
                     <p className="persona-tool-desc">{tool.desc}</p>
                   </div>
-                </div>
+                </a>
               ))}
             </div>
 

@@ -288,7 +288,7 @@ export function renderCategoryPageHtml(templateHtml, categorySlug) {
   if (!category) return null;
 
   const canonicalUrl = `https://tools.cerilas.com/${category.slug}`;
-  const ogImg = 'https://tools.cerilas.com/og-image.svg';
+  const ogImg = 'https://tools.cerilas.com/og/growthcontrol.png';
 
   const categoryTools = category.toolSlugs
     .map(slug => getToolSeo(slug))
@@ -366,12 +366,14 @@ export function renderCategoryPageHtml(templateHtml, categorySlug) {
       <footer style="margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid rgba(255,255,255,0.1);">
         <p style="color: #94a3b8; font-size: 0.9rem;">
           Looking for other categories? Explore 
+          <a href="/growth" style="color: #38bdf8; text-decoration: none;">GrowthControl (AI Visibility &amp; GEO)</a>, 
           <a href="/ai-tools" style="color: #38bdf8; text-decoration: none;">AI Tools</a>, 
           <a href="/research-tools" style="color: #38bdf8; text-decoration: none;">Research Tools</a>, 
           <a href="/seo-tools" style="color: #38bdf8; text-decoration: none;">SEO Tools</a>, 
           <a href="/developer-tools" style="color: #38bdf8; text-decoration: none;">Developer Tools</a>, 
-          <a href="/file-tools" style="color: #38bdf8; text-decoration: none;">File Tools</a>, and 
-          <a href="/finance-tools" style="color: #38bdf8; text-decoration: none;">Finance Tools</a>.
+          <a href="/file-tools" style="color: #38bdf8; text-decoration: none;">File Tools</a>, 
+          <a href="/finance-tools" style="color: #38bdf8; text-decoration: none;">Finance Tools</a>, and 
+          <a href="/productivity-tools" style="color: #38bdf8; text-decoration: none;">Productivity Tools</a>.
         </p>
       </footer>
     </div>
@@ -408,12 +410,59 @@ export function renderCategoryPageHtml(templateHtml, categorySlug) {
  * Pre-renders semantic HTML and crawlable links on the homepage.
  */
 export function renderHomePageHtml(templateHtml) {
-  const homeTitle = 'Cerilas Tools | Free In-Browser Privacy-Focused Utilities';
-  const homeDesc = 'Explore 30+ free, in-browser privacy-focused developer, AI, research, and file tools. Zero sign-up, zero data collection, instant execution.';
+  const homeTitle = "Cerilas' Tools & GrowthControl | AI Visibility Tracker, GEO & Free Web Utilities";
+  const homeDesc = "Track your brand's AI visibility across ChatGPT, Gemini, Perplexity & Claude with GrowthControl, or use 30+ free privacy-first AI, SEO, EU funding, SaaS finance, and PDF web utilities.";
   const canonicalUrl = 'https://tools.cerilas.com/';
-  const ogImg = 'https://tools.cerilas.com/og-image.svg';
+  const ogImg = 'https://tools.cerilas.com/og/growthcontrol.png';
 
   const toolsArray = Object.values(TOOLS_SEO_REGISTRY);
+
+  const homeJsonLd = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'Organization',
+        '@id': 'https://cerilas.com/#organization',
+        name: 'Cerilas',
+        legalName: 'CERİLAS Yüksek Teknoloji San. ve Tic. AŞ',
+        url: 'https://cerilas.com',
+        logo: 'https://tools.cerilas.com/platform-logo.png',
+        sameAs: [
+          'https://cerilas.com',
+          'https://tools.cerilas.com',
+          'https://tools.cerilas.com/growth'
+        ]
+      },
+      {
+        '@type': 'WebSite',
+        '@id': 'https://tools.cerilas.com/#website',
+        name: "Cerilas' Tools & GrowthControl",
+        url: 'https://tools.cerilas.com/',
+        description: homeDesc,
+        publisher: { '@id': 'https://cerilas.com/#organization' }
+      },
+      {
+        '@type': 'ItemList',
+        '@id': 'https://tools.cerilas.com/#tools-list',
+        name: "Cerilas' Tools & GrowthControl Directory",
+        numberOfItems: toolsArray.length + 1,
+        itemListElement: [
+          {
+            '@type': 'ListItem',
+            position: 1,
+            name: 'GrowthControl — AI Visibility Tracker & GEO Platform',
+            url: 'https://tools.cerilas.com/growth'
+          },
+          ...toolsArray.map((t, idx) => ({
+            '@type': 'ListItem',
+            position: idx + 2,
+            name: t.name,
+            url: `https://tools.cerilas.com/tool/${t.slug}`
+          }))
+        ]
+      }
+    ]
+  };
 
   // Group tools by category for structured crawlability
   const categoriesHtml = Object.values(CATEGORIES).map(cat => {
@@ -475,17 +524,22 @@ export function renderHomePageHtml(templateHtml) {
   const metaTags = [
     `<title>${escapeHtml(homeTitle)}</title>`,
     `<meta name="description" content="${escapeHtml(homeDesc)}" />`,
-    `<meta name="robots" content="index, follow" />`,
+    `<meta name="robots" content="${ROBOTS_INDEX}" />`,
     `<link rel="canonical" href="${canonicalUrl}" />`,
     `<meta property="og:type" content="website" />`,
+    `<meta property="og:site_name" content="Cerilas' Tools" />`,
+    `<meta property="og:locale" content="en_US" />`,
     `<meta property="og:title" content="${escapeHtml(homeTitle)}" />`,
     `<meta property="og:description" content="${escapeHtml(homeDesc)}" />`,
     `<meta property="og:url" content="${canonicalUrl}" />`,
     `<meta property="og:image" content="${ogImg}" />`,
+    `<meta property="og:image:width" content="1200" />`,
+    `<meta property="og:image:height" content="630" />`,
     `<meta name="twitter:card" content="summary_large_image" />`,
     `<meta name="twitter:title" content="${escapeHtml(homeTitle)}" />`,
     `<meta name="twitter:description" content="${escapeHtml(homeDesc)}" />`,
-    `<meta name="twitter:image" content="${ogImg}" />`
+    `<meta name="twitter:image" content="${ogImg}" />`,
+    jsonLdScript(homeJsonLd, 'ld-home-graph')
   ].join('\n    ');
 
   html = html.replace('</head>', `    ${metaTags}\n  </head>`);
@@ -501,7 +555,7 @@ export function renderLegalPageHtml(templateHtml, slug) {
   const cleanSlug = slug ? slug.toLowerCase().replace(/^(legal\/|legal-)/, '') : 'terms';
   const doc = LEGAL_DOCS[cleanSlug] || LEGAL_DOCS.terms;
   const canonicalUrl = `https://tools.cerilas.com/${doc.slug}`;
-  const ogImg = 'https://tools.cerilas.com/og-image.svg';
+  const ogImg = 'https://tools.cerilas.com/og/growthcontrol.png';
 
   const sectionsHtml = doc.sections.map(sec => `
     <article style="margin-bottom: 2.25rem; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 1.75rem;">
@@ -583,7 +637,7 @@ export function renderPricingPageHtml(templateHtml) {
   const canonicalUrl = 'https://tools.cerilas.com/pricing';
   const pageTitle = 'Pricing & Plans – Cerilas Tools | Transparent Zero-Surprise Pricing';
   const pageDesc = 'Explore flexible, transparent pricing plans for Cerilas Tools. Free forever tier, Pro with 5x higher limits, and Unlimited plans with 2 months free on annual billing.';
-  const ogImg = 'https://tools.cerilas.com/og-image.svg';
+  const ogImg = 'https://tools.cerilas.com/og/growthcontrol.png';
 
   const pricingSchema = {
     '@context': 'https://schema.org',

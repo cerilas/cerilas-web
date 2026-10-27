@@ -611,15 +611,19 @@ export default function GrowthLandingPage({ onBackToTools, initialDomain = '' })
                 {isDark ? <Sun size={17} /> : <Moon size={17} />}
               </button>
 
-              {onBackToTools && (
-                <button
-                  type="button"
-                  onClick={onBackToTools}
-                  className="cl-btn-secondary cl-header-desktop-btn"
-                >
-                  All Tools
-                </button>
-              )}
+              <a
+                href="/"
+                onClick={(e) => {
+                  if (onBackToTools && !e.metaKey && !e.ctrlKey && !e.shiftKey && !e.altKey && e.button === 0) {
+                    e.preventDefault();
+                    onBackToTools();
+                  }
+                }}
+                className="cl-btn-secondary cl-header-desktop-btn"
+                style={{ textDecoration: 'none' }}
+              >
+                All Tools
+              </a>
 
               {isAuthenticated ? (
                 <button
@@ -2241,15 +2245,20 @@ export default function GrowthLandingPage({ onBackToTools, initialDomain = '' })
             <a href="#benchmarks" onClick={(e) => scrollToSection(e, 'benchmarks')}>Benchmarks</a>
             <a href="#pricing" onClick={(e) => scrollToSection(e, 'pricing')}>Pricing</a>
             <a href="#help" onClick={(e) => scrollToSection(e, 'help')}>FAQ</a>
-            {onBackToTools && (
-              <button
-                type="button"
-                onClick={onBackToTools}
-                style={{ background: 'none', border: 'none', color: 'var(--cl-muted-fg)', cursor: 'pointer', padding: 0, font: 'inherit' }}
-              >
-                Tools Directory
-              </button>
-            )}
+            <a
+              href="/"
+              onClick={(e) => {
+                if (onBackToTools && !e.metaKey && !e.ctrlKey && !e.shiftKey && !e.altKey && e.button === 0) {
+                  e.preventDefault();
+                  onBackToTools();
+                }
+              }}
+            >
+              Tools Directory
+            </a>
+            <a href="/ai-tools">AI Tools Hub</a>
+            <a href="/seo-tools">SEO &amp; GEO Tools</a>
+            <a href="https://cerilas.com" target="_blank" rel="noopener noreferrer">Cerilas.com</a>
           </div>
         </div>
         <nav className="cl-footer-container cl-footer-resources" aria-label="Free AI visibility tools">

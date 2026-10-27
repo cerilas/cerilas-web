@@ -74,11 +74,13 @@ export default function Navbar({ activeTool, onNavigateHome, onOpenStats, onSele
       <div className="navbar-inner">
         <div className={`nav-left-group ${activeTool ? 'nav-has-tool' : ''}`}>
           <a 
-            href="#/" 
+            href="/" 
             className="nav-brand"
             onClick={(e) => {
-              e.preventDefault();
-              onNavigateHome();
+              if (!e.metaKey && !e.ctrlKey && !e.shiftKey && e.button === 0) {
+                e.preventDefault();
+                onNavigateHome();
+              }
             }}
           >
             <img 
@@ -128,6 +130,23 @@ export default function Navbar({ activeTool, onNavigateHome, onOpenStats, onSele
         </div>
 
         <div className="nav-links">
+          <a
+            href="/growth"
+            className="nav-link nav-stats-btn"
+            style={{ textDecoration: 'none' }}
+            title="GrowthControl – AI Visibility Tracker & GEO Platform"
+            onClick={(e) => {
+              if (!e.metaKey && !e.ctrlKey && !e.shiftKey && e.button === 0) {
+                e.preventDefault();
+                window.history.pushState({}, '', '/growth');
+                window.dispatchEvent(new PopStateEvent('popstate'));
+              }
+            }}
+          >
+            <TrendingUp size={15} />
+            <span className="nav-stats-label">GrowthControl</span>
+          </a>
+
           <button
             onClick={onOpenStats}
             className="nav-link nav-stats-btn"
@@ -184,10 +203,17 @@ export default function Navbar({ activeTool, onNavigateHome, onOpenStats, onSele
                   {/* Main Portal Links */}
                   <div className="nav-dropdown-items">
                     <a
-                      href="#/growth"
+                      href="/growth"
                       className="nav-dropdown-item nav-item-growth"
                       style={{ textDecoration: 'none' }}
-                      onClick={() => setUserMenuOpen(false)}
+                      onClick={(e) => {
+                        setUserMenuOpen(false);
+                        if (!e.metaKey && !e.ctrlKey && !e.shiftKey && e.button === 0) {
+                          e.preventDefault();
+                          window.history.pushState({}, '', '/growth');
+                          window.dispatchEvent(new PopStateEvent('popstate'));
+                        }
+                      }}
                     >
                       <TrendingUp size={16} className="nav-item-icon text-primary" />
                       <div className="nav-item-text-wrap">

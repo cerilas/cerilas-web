@@ -1,468 +1,297 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
-        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1"
-        xmlns:xhtml="http://www.w3.org/1999/xhtml">
-
-  <!-- 1. Tools Catalog Homepage -->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://tools.cerilas.com/</loc>
-    <lastmod>2026-09-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>1.00</priority>
-    <image:image>
-      <image:loc>https://tools.cerilas.com/og-image.svg</image:loc>
-      <image:title>Cerilas Free Developer &amp; Privacy Tools Platform</image:title>
-      <image:caption>100% free, client-side, zero-server-upload tools for developers, creators, and professionals.</image:caption>
-    </image:image>
+    <lastmod>2026-10-27</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
   </url>
-
-  <!-- GrowthControl AI Visibility & GEO Platform -->
   <url>
     <loc>https://tools.cerilas.com/growth</loc>
-    <lastmod>2026-10-07</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>1.00</priority>
-    <image:image>
-      <image:loc>https://tools.cerilas.com/og-image.svg</image:loc>
-      <image:title>GrowthControl – AI Search Visibility &amp; Generative Engine Optimization (GEO)</image:title>
-      <image:caption>Audit if your brand is cited in ChatGPT, Perplexity, Claude, and Gemini with actionable GEO intelligence.</image:caption>
-    </image:image>
-  </url>
-  <url>
-    <loc>https://tools.cerilas.com/#/growth</loc>
-    <lastmod>2026-10-07</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.98</priority>
-  </url>
-
-  <!-- 2. Free Online PDF Editor -->
-  <url>
-    <loc>https://tools.cerilas.com/tool/pdf-editor</loc>
-    <lastmod>2026-09-18</lastmod>
+    <lastmod>2026-10-27</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.98</priority>
-    <image:image>
-      <image:loc>https://tools.cerilas.com/og-image.svg</image:loc>
-      <image:title>Free Online PDF Editor – Edit Text, Add Signature &amp; Redact</image:title>
-      <image:caption>100% client-side free PDF editor with permanent redaction, electronic signatures, and page management.</image:caption>
-    </image:image>
+    <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://tools.cerilas.com/#/tool/pdf-editor</loc>
-    <lastmod>2026-09-18</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.90</priority>
-  </url>
-
-  <!-- 3. Free QR Code Generator -->
-  <url>
-    <loc>https://tools.cerilas.com/tool/qr-code-generator</loc>
-    <lastmod>2026-09-18</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.98</priority>
-    <image:image>
-      <image:loc>https://tools.cerilas.com/og-image.svg</image:loc>
-      <image:title>Free Permanent QR Code Generator That Never Expires</image:title>
-      <image:caption>High-resolution vector SVG and Ultra-HD PNG QR codes with zero expiration and unlimited scans.</image:caption>
-    </image:image>
+    <loc>https://tools.cerilas.com/pricing</loc>
+    <lastmod>2026-10-27</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://tools.cerilas.com/#/tool/qr-code-generator</loc>
-    <lastmod>2026-09-18</lastmod>
+    <loc>https://tools.cerilas.com/research-tools</loc>
+    <lastmod>2026-10-27</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.90</priority>
-  </url>
-
-  <!-- 4. Image Compressor & WebP Converter -->
-  <url>
-    <loc>https://tools.cerilas.com/tool/image-compressor</loc>
-    <lastmod>2026-09-18</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.98</priority>
-    <image:image>
-      <image:loc>https://tools.cerilas.com/og-image.svg</image:loc>
-      <image:title>Free In-Browser Image Compressor &amp; WebP Converter</image:title>
-      <image:caption>Lossless and high-efficiency image compression for JPG, PNG, WebP, AVIF, and SVG.</image:caption>
-    </image:image>
+    <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://tools.cerilas.com/#/tool/image-compressor</loc>
-    <lastmod>2026-09-18</lastmod>
+    <loc>https://tools.cerilas.com/ai-tools</loc>
+    <lastmod>2026-10-27</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.90</priority>
-  </url>
-
-  <!-- 5. PDF Compressor -->
-  <url>
-    <loc>https://tools.cerilas.com/tool/pdf-compressor</loc>
-    <lastmod>2026-09-18</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.96</priority>
-    <image:image>
-      <image:loc>https://tools.cerilas.com/og-image.svg</image:loc>
-      <image:title>Free Client-Side PDF Compressor</image:title>
-      <image:caption>Compress PDF documents directly in browser without server upload.</image:caption>
-    </image:image>
+    <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://tools.cerilas.com/#/tool/pdf-compressor</loc>
-    <lastmod>2026-09-18</lastmod>
+    <loc>https://tools.cerilas.com/seo-tools</loc>
+    <lastmod>2026-10-27</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.90</priority>
-  </url>
-
-  <!-- 6. Professional Email Signature Generator -->
-  <url>
-    <loc>https://tools.cerilas.com/tool/email-signature-generator</loc>
-    <lastmod>2026-09-18</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.96</priority>
-    <image:image>
-      <image:loc>https://tools.cerilas.com/og-image.svg</image:loc>
-      <image:title>Free Professional HTML Email Signature Generator</image:title>
-      <image:caption>Create sleek, responsive email signatures for Gmail, Apple Mail, Outlook with live preview.</image:caption>
-    </image:image>
+    <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://tools.cerilas.com/#/tool/email-signature-generator</loc>
-    <lastmod>2026-09-18</lastmod>
+    <loc>https://tools.cerilas.com/developer-tools</loc>
+    <lastmod>2026-10-27</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.90</priority>
-  </url>
-
-  <!-- 7. ATS Resume Checker -->
-  <url>
-    <loc>https://tools.cerilas.com/tool/ats-resume-checker</loc>
-    <lastmod>2026-09-18</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.96</priority>
-    <image:image>
-      <image:loc>https://tools.cerilas.com/og-image.svg</image:loc>
-      <image:title>Free ATS Resume Checker &amp; Job Match AI</image:title>
-      <image:caption>Test CV readability against ATS bots, find missing keywords, and optimize formatting.</image:caption>
-    </image:image>
+    <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://tools.cerilas.com/#/tool/ats-resume-checker</loc>
-    <lastmod>2026-09-18</lastmod>
+    <loc>https://tools.cerilas.com/file-tools</loc>
+    <lastmod>2026-10-27</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.90</priority>
-  </url>
-
-  <!-- 8. AI Background Remover -->
-  <url>
-    <loc>https://tools.cerilas.com/tool/background-remover</loc>
-    <lastmod>2026-09-18</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.96</priority>
-    <image:image>
-      <image:loc>https://tools.cerilas.com/og-image.svg</image:loc>
-      <image:title>100% Free In-Browser AI Background Remover</image:title>
-      <image:caption>Cut out portraits and products with local WebAssembly AI models and transparent HD PNG export.</image:caption>
-    </image:image>
+    <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://tools.cerilas.com/#/tool/background-remover</loc>
-    <lastmod>2026-09-18</lastmod>
+    <loc>https://tools.cerilas.com/finance-tools</loc>
+    <lastmod>2026-10-27</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.90</priority>
-  </url>
-
-  <!-- 9. PDF to RAG Cleaner -->
-  <url>
-    <loc>https://tools.cerilas.com/tool/pdf-rag-cleaner</loc>
-    <lastmod>2026-09-18</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.95</priority>
-    <image:image>
-      <image:loc>https://tools.cerilas.com/og-image.svg</image:loc>
-      <image:title>PDF to RAG Cleaner &amp; Markdown Chunk Generator</image:title>
-      <image:caption>Clean raw PDF documents into LLM-ready markdown chunks for LangChain and vector databases.</image:caption>
-    </image:image>
+    <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://tools.cerilas.com/#/tool/pdf-rag-cleaner</loc>
-    <lastmod>2026-09-18</lastmod>
+    <loc>https://tools.cerilas.com/productivity-tools</loc>
+    <lastmod>2026-10-27</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.90</priority>
-  </url>
-
-  <!-- 10. AI Content Detector -->
-  <url>
-    <loc>https://tools.cerilas.com/tool/ai-content-detector</loc>
-    <lastmod>2026-09-18</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.95</priority>
-    <image:image>
-      <image:loc>https://tools.cerilas.com/og-image.svg</image:loc>
-      <image:title>Free AI Content &amp; Essay Detector</image:title>
-      <image:caption>Scan text and PDF files for ChatGPT, Claude, Gemini markers with 0-100% score breakdown.</image:caption>
-    </image:image>
+    <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://tools.cerilas.com/#/tool/ai-content-detector</loc>
-    <lastmod>2026-09-18</lastmod>
+    <loc>https://tools.cerilas.com/tool/sample-size-calculator</loc>
+    <lastmod>2026-10-27</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.90</priority>
-  </url>
-
-  <!-- 11. Video Compressor -->
-  <url>
-    <loc>https://tools.cerilas.com/tool/video-compressor</loc>
-    <lastmod>2026-09-18</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.95</priority>
-    <image:image>
-      <image:loc>https://tools.cerilas.com/og-image.svg</image:loc>
-      <image:title>Free In-Browser Video Compressor</image:title>
-      <image:caption>Compress MP4, WebM, MOV videos locally with zero uploads and customizable quality presets.</image:caption>
-    </image:image>
+    <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://tools.cerilas.com/#/tool/video-compressor</loc>
-    <lastmod>2026-09-18</lastmod>
+    <loc>https://tools.cerilas.com/tool/trl-calculator</loc>
+    <lastmod>2026-10-27</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.90</priority>
-  </url>
-
-  <!-- 12. Webhook Tester & Debugger -->
-  <url>
-    <loc>https://tools.cerilas.com/tool/webhook-tester</loc>
-    <lastmod>2026-09-18</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.95</priority>
-    <image:image>
-      <image:loc>https://tools.cerilas.com/og-image.svg</image:loc>
-      <image:title>Free Webhook Tester &amp; HTTP Inspector</image:title>
-      <image:caption>Test, inspect and replay HTTP webhooks for Stripe, GitHub, Discord, and Slack.</image:caption>
-    </image:image>
-  </url>
-  <url>
-    <loc>https://tools.cerilas.com/#/tool/webhook-tester</loc>
-    <lastmod>2026-09-18</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.90</priority>
-  </url>
-
-  <!-- 13. JSON Beautifier & Validator -->
-  <url>
-    <loc>https://tools.cerilas.com/tool/json-beautifier</loc>
-    <lastmod>2026-09-18</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.95</priority>
-    <image:image>
-      <image:loc>https://tools.cerilas.com/og-image.svg</image:loc>
-      <image:title>JSON Beautifier, Formatter &amp; Validator</image:title>
-      <image:caption>Format, repair, validate JSON with interactive tree viewer and TypeScript/YAML converters.</image:caption>
-    </image:image>
-  </url>
-  <url>
-    <loc>https://tools.cerilas.com/#/tool/json-beautifier</loc>
-    <lastmod>2026-09-18</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.90</priority>
-  </url>
-
-  <!-- 14. Pomodoro Focus Timer -->
-  <url>
-    <loc>https://tools.cerilas.com/tool/pomodoro-timer</loc>
-    <lastmod>2026-09-18</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.94</priority>
-    <image:image>
-      <image:loc>https://tools.cerilas.com/og-image.svg</image:loc>
-      <image:title>Pomodoro Focus Timer with Fluid Wave Animation</image:title>
-      <image:caption>Minimalist online Pomodoro timer with soothing acoustic sound alerts and session tracking.</image:caption>
-    </image:image>
-  </url>
-  <url>
-    <loc>https://tools.cerilas.com/#/tool/pomodoro-timer</loc>
-    <lastmod>2026-09-18</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.90</priority>
-  </url>
-
-  <!-- 15. YouTube Thumbnail Downloader -->
-  <url>
-    <loc>https://tools.cerilas.com/tool/youtube-thumbnail-downloader</loc>
-    <lastmod>2026-09-18</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.96</priority>
-    <image:image>
-      <image:loc>https://tools.cerilas.com/tool-icons/youtube-thumbnail-downloader.png</image:loc>
-      <image:title>Free YouTube Thumbnail Downloader (4K, 1080p HD &amp; Shorts)</image:title>
-      <image:caption>Download 4K Ultra HD and 1080p YouTube video and Shorts thumbnails instantly.</image:caption>
-    </image:image>
-  </url>
-  <url>
-    <loc>https://tools.cerilas.com/#/tool/youtube-thumbnail-downloader</loc>
-    <lastmod>2026-09-18</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.90</priority>
-  </url>
-
-  <!-- 16. AI Link Hallucination Checker -->
-  <url>
-    <loc>https://tools.cerilas.com/tool/ai-link-hallucination-checker</loc>
-    <lastmod>2026-09-18</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.97</priority>
-    <image:image>
-      <image:loc>https://tools.cerilas.com/tool-icons/ai-link-hallucination-checker.png</image:loc>
-      <image:title>Free AI Link Hallucination Checker (2026) – Detect Fake &amp; 404 URLs</image:title>
-      <image:caption>Scan AI-generated text and Markdown for hallucinated URLs, dead 404 links, and fabricated domains.</image:caption>
-    </image:image>
-  </url>
-  <!-- 17. AI Crawler Checker -->
-  <url>
-    <loc>https://tools.cerilas.com/tool/ai-crawler-checker</loc>
-    <lastmod>2026-09-18</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.98</priority>
-    <image:image>
-      <image:loc>https://tools.cerilas.com/tool-icons/ai-crawler-checker.png</image:loc>
-      <image:title>AI Crawler Checker – Check ChatGPT, Claude &amp; Perplexity Access</image:title>
-      <image:caption>Check whether ChatGPT, Claude, Perplexity, and other AI systems can access your website. Analyze robots.txt, sitemaps, and indexability.</image:caption>
-    </image:image>
-  </url>
-  <url>
-    <loc>https://tools.cerilas.com/#/tool/ai-crawler-checker</loc>
-    <lastmod>2026-09-18</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.95</priority>
-  </url>
-
-  <!-- 18. LLMs.txt Generator, Checker & Validator Suite -->
-  <url>
-    <loc>https://tools.cerilas.com/tool/llms-txt</loc>
-    <lastmod>2026-09-18</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.99</priority>
-    <image:image>
-      <image:loc>https://tools.cerilas.com/tool-icons/llms-txt.png</image:loc>
-      <image:title>LLMs.txt Generator, Checker &amp; Validator – v2 Specification Suite</image:title>
-      <image:caption>Create, check and validate your llms.txt file. Scan websites, audit link health, test rel=describedby and Markdown alternatives.</image:caption>
-    </image:image>
-  </url>
-  <url>
-    <loc>https://tools.cerilas.com/#/tool/llms-txt</loc>
-    <lastmod>2026-09-18</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.95</priority>
-  </url>
-  <!-- 19. HTML to LLM Markdown Converter -->
-  <url>
-    <loc>https://tools.cerilas.com/tool/html-to-llm-markdown</loc>
-    <lastmod>2026-09-18</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.99</priority>
-    <image:image>
-      <image:loc>https://tools.cerilas.com/tool-icons/html-to-llm-markdown.png</image:loc>
-      <image:title>HTML to LLM Markdown Converter – Clean Web Content for ChatGPT, Claude &amp; RAG</image:title>
-      <image:caption>Convert webpages and raw HTML into clean, token-efficient Markdown for LLM prompt context and vector embeddings.</image:caption>
-    </image:image>
-  </url>
-  <url>
-    <loc>https://tools.cerilas.com/#/tool/html-to-llm-markdown</loc>
-    <lastmod>2026-09-18</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.95</priority>
-  </url>
-  <url>
-    <loc>https://tools.cerilas.com/html-to-llm-markdown</loc>
-    <lastmod>2026-09-18</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.98</priority>
-  </url>
-  <!-- 20. Universal Token Counter -->
-  <url>
-    <loc>https://tools.cerilas.com/tool/token-counter-universal</loc>
-    <lastmod>2026-09-19</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.99</priority>
-    <image:image>
-      <image:loc>https://tools.cerilas.com/tool-icons/token-counter-universal.png</image:loc>
-      <image:title>Universal Token Counter – Multi-Model Token Counter, Visualizer &amp; Cost Auditor</image:title>
-      <image:caption>Calculate exact token counts, context window consumption, and API costs for text and files across GPT-4o, Claude 3.7, Gemini 2.0, DeepSeek, and Llama 3.</image:caption>
-    </image:image>
-  </url>
-  <url>
-    <loc>https://tools.cerilas.com/#/tool/token-counter-universal</loc>
-    <lastmod>2026-09-19</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.95</priority>
-  </url>
-  <url>
-    <loc>https://tools.cerilas.com/token-counter-universal</loc>
-    <lastmod>2026-09-19</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.98</priority>
+    <priority>0.8</priority>
   </url>
   <url>
     <loc>https://tools.cerilas.com/tool/eu-funding-opportunities</loc>
-    <lastmod>2026-09-20</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.99</priority>
-    <image:image>
-      <image:loc>https://tools.cerilas.com/tool-icons/eu-funding-opportunities.webp</image:loc>
-      <image:title>EU Funding &amp; Cascade Funding Opportunities – Live Horizon Europe &amp; FSTP Grants</image:title>
-      <image:caption>Search and filter 600+ open European Commission calls, Horizon Europe research grants, and Cascade Funding (FSTP) equity-free lump-sum sub-grants.</image:caption>
-    </image:image>
+    <lastmod>2026-10-27</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://tools.cerilas.com/#/tool/eu-funding-opportunities</loc>
-    <lastmod>2026-09-20</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.95</priority>
+    <loc>https://tools.cerilas.com/tool/qr-code-generator</loc>
+    <lastmod>2026-10-27</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
   </url>
-
-  <!-- 21. AI Visibility Checker -->
+  <url>
+    <loc>https://tools.cerilas.com/tool/image-compressor</loc>
+    <lastmod>2026-10-27</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://tools.cerilas.com/tool/background-remover</loc>
+    <lastmod>2026-10-27</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://tools.cerilas.com/tool/pdf-compressor</loc>
+    <lastmod>2026-10-27</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://tools.cerilas.com/tool/pdf-editor</loc>
+    <lastmod>2026-10-27</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://tools.cerilas.com/tool/pdf-merger</loc>
+    <lastmod>2026-10-27</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://tools.cerilas.com/tool/pdf-splitter</loc>
+    <lastmod>2026-10-27</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://tools.cerilas.com/tool/video-compressor</loc>
+    <lastmod>2026-10-27</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://tools.cerilas.com/tool/ats-resume-checker</loc>
+    <lastmod>2026-10-27</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://tools.cerilas.com/tool/ai-content-detector</loc>
+    <lastmod>2026-10-27</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://tools.cerilas.com/tool/pdf-rag-cleaner</loc>
+    <lastmod>2026-10-27</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://tools.cerilas.com/tool/token-counter-universal</loc>
+    <lastmod>2026-10-27</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://tools.cerilas.com/tool/ai-link-hallucination-checker</loc>
+    <lastmod>2026-10-27</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://tools.cerilas.com/tool/ai-crawler-checker</loc>
+    <lastmod>2026-10-27</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
   <url>
     <loc>https://tools.cerilas.com/tool/ai-visibility-checker</loc>
-    <lastmod>2026-09-25</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.99</priority>
-    <image:image>
-      <image:loc>https://tools.cerilas.com/tool-icons/ai-visibility-checker.webp</image:loc>
-      <image:title>Free AI Visibility Checker – Test Gemini &amp; ChatGPT Citations</image:title>
-      <image:caption>Audit if your website is cited in AI search answers across Google Gemini, ChatGPT, and Perplexity with live Google Search Grounding probing.</image:caption>
-    </image:image>
-  </url>
-  <url>
-    <loc>https://tools.cerilas.com/#/tool/ai-visibility-checker</loc>
-    <lastmod>2026-09-25</lastmod>
+    <lastmod>2026-10-27</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.95</priority>
   </url>
   <url>
-    <loc>https://tools.cerilas.com/ai-visibility-checker</loc>
-    <lastmod>2026-09-25</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.98</priority>
-  </url>
-
-  <!-- 22. Connect ChatGPT to Google Analytics & Search Console (MCP Server) -->
-  <url>
     <loc>https://tools.cerilas.com/tool/google-marketing-mcp</loc>
-    <lastmod>2026-09-28</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>1.00</priority>
-    <image:image>
-      <image:loc>https://tools.cerilas.com/tool-icons/google-marketing-mcp.webp</image:loc>
-      <image:title>Connect ChatGPT to Google Analytics &amp; Search Console (MCP Server)</image:title>
-      <image:caption>Connect your ChatGPT, Claude, and Cursor to Google Analytics 4 (GA4) &amp; Search Console in 60 seconds with 100% read-only OAuth.</image:caption>
-    </image:image>
+    <lastmod>2026-10-27</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://tools.cerilas.com/#/tool/google-marketing-mcp</loc>
-    <lastmod>2026-09-28</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.96</priority>
+    <loc>https://tools.cerilas.com/tool/llms-txt</loc>
+    <lastmod>2026-10-27</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://tools.cerilas.com/google-marketing-mcp</loc>
-    <lastmod>2026-09-28</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.98</priority>
+    <loc>https://tools.cerilas.com/tool/html-to-llm-markdown</loc>
+    <lastmod>2026-10-27</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://tools.cerilas.com/tool/webhook-tester</loc>
+    <lastmod>2026-10-27</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://tools.cerilas.com/tool/json-beautifier</loc>
+    <lastmod>2026-10-27</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://tools.cerilas.com/tool/email-signature-generator</loc>
+    <lastmod>2026-10-27</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://tools.cerilas.com/tool/youtube-thumbnail-downloader</loc>
+    <lastmod>2026-10-27</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://tools.cerilas.com/tool/pomodoro-timer</loc>
+    <lastmod>2026-10-27</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://tools.cerilas.com/tool/task-prioritization-planner</loc>
+    <lastmod>2026-10-27</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://tools.cerilas.com/tool/startup-runway-calculator</loc>
+    <lastmod>2026-10-27</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://tools.cerilas.com/tool/mrr-calculator</loc>
+    <lastmod>2026-10-27</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://tools.cerilas.com/tool/arr-calculator</loc>
+    <lastmod>2026-10-27</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://tools.cerilas.com/tool/churn-calculator</loc>
+    <lastmod>2026-10-27</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://tools.cerilas.com/tool/ltv-calculator</loc>
+    <lastmod>2026-10-27</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://tools.cerilas.com/tool/cac-calculator</loc>
+    <lastmod>2026-10-27</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://tools.cerilas.com/tool/ltv-cac-calculator</loc>
+    <lastmod>2026-10-27</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://tools.cerilas.com/tool/website-email-extractor</loc>
+    <lastmod>2026-10-27</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://tools.cerilas.com/terms</loc>
+    <lastmod>2026-10-27</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+  </url>
+  <url>
+    <loc>https://tools.cerilas.com/privacy</loc>
+    <lastmod>2026-10-27</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+  </url>
+  <url>
+    <loc>https://tools.cerilas.com/refund</loc>
+    <lastmod>2026-10-27</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+  </url>
+  <url>
+    <loc>https://tools.cerilas.com/cookies</loc>
+    <lastmod>2026-10-27</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
   </url>
 </urlset>

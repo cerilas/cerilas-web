@@ -77,9 +77,28 @@ export default function Footer() {
               ))}
               <li>
                 <a
+                  href="https://tools.cerilas.com/growth"
+                  target="_blank"
+                  rel="noopener"
+                  className={`text-sm transition-colors inline-flex items-center gap-1.5 group ${
+                    isLight ? 'text-slate-600 hover:text-blue-600' : 'text-gray-400 hover:text-cyan-400'
+                  }`}
+                >
+                  <span>GrowthControl (AI &amp; GEO)</span>
+                  <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded leading-none ${
+                    isLight
+                      ? 'bg-blue-50 text-blue-600 border border-blue-200'
+                      : 'bg-cyan-950 text-cyan-400 border border-cyan-800/60'
+                  }`}>
+                    AI SEO
+                  </span>
+                </a>
+              </li>
+              <li>
+                <a
                   href="https://tools.cerilas.com"
                   target="_blank"
-                  rel="noopener noreferrer"
+                  rel="noopener"
                   className={`text-sm transition-colors inline-flex items-center gap-1.5 group ${
                     isLight ? 'text-slate-600 hover:text-blue-600' : 'text-gray-400 hover:text-cyan-400'
                   }`}
@@ -97,6 +116,30 @@ export default function Footer() {
                   }`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                   </svg>
+                </a>
+              </li>
+              <li>
+                <a
+                  href="https://tools.cerilas.com/tool/ai-visibility-checker"
+                  target="_blank"
+                  rel="noopener"
+                  className={`text-sm transition-colors inline-flex items-center gap-1.5 ${
+                    isLight ? 'text-slate-600 hover:text-blue-600' : 'text-gray-400 hover:text-cyan-400'
+                  }`}
+                >
+                  <span>AI Visibility Checker</span>
+                </a>
+              </li>
+              <li>
+                <a
+                  href="https://tools.cerilas.com/tool/eu-funding-opportunities"
+                  target="_blank"
+                  rel="noopener"
+                  className={`text-sm transition-colors inline-flex items-center gap-1.5 ${
+                    isLight ? 'text-slate-600 hover:text-blue-600' : 'text-gray-400 hover:text-cyan-400'
+                  }`}
+                >
+                  <span>EU Horizon &amp; Cascade Grants</span>
                 </a>
               </li>
             </ul>

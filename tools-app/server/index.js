@@ -29,7 +29,7 @@ import googleMcpRouter from './routes/googleMcp.js';
 import growthRouter from './routes/growth.js';
 import { checkAiRateLimit, getClientIp } from './utils/aiRateLimit.js';
 import { CATEGORIES, TOOLS_SEO_REGISTRY, getAllToolSlugs, TOOL_CANONICAL_ALIASES } from './seo/toolsSeoRegistry.js';
-import { renderToolPageHtml, renderCategoryPageHtml, renderHomePageHtml, renderLegalPageHtml, renderPricingPageHtml, renderGrowthPageHtml } from './seo/ssrRenderer.js';
+import { renderToolPageHtml, renderCategoryPageHtml, renderHomePageHtml, renderLegalPageHtml, renderPricingPageHtml, renderGrowthPageHtml, stripOldMetaTags } from './seo/ssrRenderer.js';
 
 dotenv.config();
 
@@ -513,25 +513,52 @@ app.get('{*path}', async (req, res) => {
           const pageDesc = opp.meta_description || opp.short_description || `Apply for ${opp.title} on Cerilas Tools.`;
           const pageKeywords = opp.meta_keywords || 'EU funding, Horizon Europe, Cascade funding, grants 2026';
 
-          html = html.replace(/<title>.*?<\/title>/i, `<title>${pageTitle}</title>`);
+          html = stripOldMetaTags(html);
+          const safeTitle = String(pageTitle).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+          const safeDesc = String(pageDesc).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+          const safeKeywords = String(pageKeywords).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+          const safeH1 = String(opp.title || pageTitle).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
           const metaTags = [
-            `<meta name="description" content="${pageDesc.replace(/"/g, '&quot;')}" />`,
-            `<meta name="keywords" content="${pageKeywords.replace(/"/g, '&quot;')}" />`,
-            `<meta name="robots" content="index, follow" />`,
+            `<title>${safeTitle}</title>`,
+            `<meta name="description" content="${safeDesc}" />`,
+            `<meta name="keywords" content="${safeKeywords}" />`,
+            `<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />`,
             `<link rel="canonical" href="${canonicalUrl}" />`,
             `<meta property="og:type" content="article" />`,
-            `<meta property="og:title" content="${pageTitle.replace(/"/g, '&quot;')}" />`,
-            `<meta property="og:description" content="${pageDesc.replace(/"/g, '&quot;')}" />`,
+            `<meta property="og:site_name" content="Cerilas' Tools" />`,
+            `<meta property="og:title" content="${safeTitle}" />`,
+            `<meta property="og:description" content="${safeDesc}" />`,
             `<meta property="og:url" content="${canonicalUrl}" />`,
             `<meta property="og:image" content="${ogImg}" />`,
             `<meta name="twitter:card" content="summary_large_image" />`,
-            `<meta name="twitter:title" content="${pageTitle.replace(/"/g, '&quot;')}" />`,
-            `<meta name="twitter:description" content="${pageDesc.replace(/"/g, '&quot;')}" />`,
+            `<meta name="twitter:title" content="${safeTitle}" />`,
+            `<meta name="twitter:description" content="${safeDesc}" />`,
             `<meta name="twitter:image" content="${ogImg}" />`,
             opp.schema_json ? `<script type="application/ld+json">\n    ${JSON.stringify(opp.schema_json, null, 2)}\n    </script>` : ''
           ].filter(Boolean).join('\n    ');
 
+          const grantSsrBody = `
+            <div id="ssr-grant-content" style="max-width: 960px; margin: 0 auto; padding: 2rem 1.25rem; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: #f1f5f9; line-height: 1.6;">
+              <nav aria-label="Breadcrumb" style="margin-bottom: 1.5rem; font-size: 0.85rem; color: #94a3b8;">
+                <a href="/" style="color: #38bdf8; text-decoration: none;">Cerilas Tools</a>
+                <span style="margin: 0 0.5rem;">/</span>
+                <a href="/research-tools" style="color: #38bdf8; text-decoration: none;">Research Tools</a>
+                <span style="margin: 0 0.5rem;">/</span>
+                <a href="/tool/eu-funding-opportunities" style="color: #38bdf8; text-decoration: none;">EU &amp; Cascade Funding</a>
+                <span style="margin: 0 0.5rem;">/</span>
+                <span aria-current="page" style="color: #cbd5e1;">${safeH1}</span>
+              </nav>
+              <article>
+                <h1 style="font-size: 2rem; font-weight: 700; margin: 0 0 1rem 0;">${safeH1}</h1>
+                <p style="font-size: 1.05rem; color: #cbd5e1; margin: 0 0 1.5rem 0;">${safeDesc}</p>
+                <p><a href="/tool/eu-funding-opportunities" style="color: #38bdf8; text-decoration: none; font-weight: 600;">&larr; Browse all 600+ EU Horizon Europe &amp; Cascade Funding Opportunities</a></p>
+              </article>
+            </div>
+          `;
+
           html = html.replace('</head>', `    ${metaTags}\n  </head>`);
+          html = html.replace('<div id="root"></div>', `<div id="root">${grantSsrBody}</div>`);
           return res.send(html);
         }
       } catch (err) {
