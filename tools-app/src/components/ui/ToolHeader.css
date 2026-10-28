@@ -24,6 +24,14 @@
   margin-bottom: 1.25rem;
 }
 
+.c-tool-nav-left {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
 .c-tool-nav-right {
   display: flex;
   align-items: center;
@@ -41,14 +49,51 @@
   font-family: 'Dosis', -apple-system, BlinkMacSystemFont, sans-serif;
   font-size: 0.85rem;
   font-weight: 500;
+  text-decoration: none;
   cursor: pointer;
   padding: 0.35rem 0.8rem;
   border-radius: 999px;
   height: 34px;
+  box-sizing: border-box;
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03);
+}
+
+.c-tool-breadcrumb {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+  font-family: 'Dosis', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+
+.c-tool-breadcrumb-sep {
+  opacity: 0.45;
+  flex-shrink: 0;
+}
+
+.c-tool-breadcrumb-link {
+  color: var(--text-muted);
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.c-tool-breadcrumb-link:hover {
+  color: var(--text-main);
+  text-decoration: underline;
+}
+
+.c-tool-breadcrumb-current {
+  color: var(--text-main);
+  font-weight: 500;
+  max-width: 260px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .c-tool-back-btn:hover {

@@ -28,8 +28,25 @@ import { initGrowthDb } from './migrations/init-growth-db.js';
 import googleMcpRouter from './routes/googleMcp.js';
 import growthRouter from './routes/growth.js';
 import { checkAiRateLimit, getClientIp } from './utils/aiRateLimit.js';
-import { CATEGORIES, TOOLS_SEO_REGISTRY, getAllToolSlugs, TOOL_CANONICAL_ALIASES } from './seo/toolsSeoRegistry.js';
-import { renderToolPageHtml, renderCategoryPageHtml, renderHomePageHtml, renderLegalPageHtml, renderPricingPageHtml, renderGrowthPageHtml, stripOldMetaTags } from './seo/ssrRenderer.js';
+import {
+  CATEGORIES,
+  TOOLS_SEO_REGISTRY,
+  TOOL_USE_CASES,
+  getToolVariantSeo,
+  getAllToolSlugs,
+  TOOL_CANONICAL_ALIASES
+} from './seo/toolsSeoRegistry.js';
+import {
+  renderToolPageHtml,
+  renderToolVariantPageHtml,
+  renderGrantPageHtml,
+  renderCategoryPageHtml,
+  renderHomePageHtml,
+  renderLegalPageHtml,
+  renderPricingPageHtml,
+  renderGrowthPageHtml,
+  stripOldMetaTags
+} from './seo/ssrRenderer.js';
 
 dotenv.config();
 
@@ -47,11 +64,12 @@ app.use(express.urlencoded({ extended: true }));
 app.use((req, res, next) => {
   const p = req.path;
 
-  // 1. Redirect legacy plural /tools/:slug -> canonical /tool/:slug
+  // 1. Redirect legacy plural /tools/:slug(/:sub) -> canonical /tool/:slug(/:sub)
   if (p.startsWith('/tools/')) {
-    const rawSlug = p.replace(/^\/tools\//, '').replace(/\/+$/, '').toLowerCase();
-    const targetSlug = TOOL_CANONICAL_ALIASES[rawSlug] || rawSlug;
-    return res.redirect(301, `/tool/${targetSlug}`);
+    const segments = p.replace(/^\/tools\//, '').replace(/\/+$/, '').toLowerCase().split('/').filter(Boolean);
+    const first = TOOL_CANONICAL_ALIASES[segments[0]] || segments[0] || '';
+    const rest = segments.slice(1).join('/');
+    return res.redirect(301, `/tool/${first}${rest ? '/' + rest : ''}`);
   }
 
   // 2. Redirect /tool/:slug casing or alias
@@ -129,7 +147,12 @@ app.get('/sitemap.xml', (req, res) => {
     ...Object.values(TOOLS_SEO_REGISTRY).map(tool => ({
       loc: `/tool/${tool.slug}`,
       changefreq: 'weekly',
-      priority: tool.slug === 'ai-visibility-checker' ? '0.95' : '0.8'
+      priority: tool.slug === 'ai-visibility-checker' ? '0.95' : '0.85'
+    })),
+    ...TOOL_USE_CASES.map(v => ({
+      loc: `/tool/${v.toolSlug}/${v.variantSlug}`,
+      changefreq: 'weekly',
+      priority: '0.85'
     })),
     ...['terms', 'privacy', 'refund', 'cookies'].map(slug => ({ loc: `/${slug}`, changefreq: 'yearly', priority: '0.3' }))
   ];
@@ -494,75 +517,59 @@ app.get('{*path}', async (req, res) => {
       return res.send(html);
     }
 
-    // 2. Check if URL matches an individual grant opportunity sub-path
+    // 2. Check if URL matches an individual grant opportunity sub-path (/tool/eu-funding-opportunities/:grantSlug)
     const grantMatch = req.path.match(/^\/tool\/eu-funding-opportunities\/([a-zA-Z0-9_-]+)\/?$/);
     if (grantMatch) {
       const grantSlug = grantMatch[1];
       try {
         const grantRes = await pool.query(
-          `SELECT id, title, slug, seo_title, meta_description, meta_keywords, schema_json, short_description 
-           FROM funding_opportunities 
+          `SELECT id, source_key, external_id, title, slug, seo_title, meta_description, meta_keywords,
+                  schema_json, short_description, long_description, eligible_applicants, deadline_date,
+                  deadline_raw, opening_date, funding_amount, domains, technologies, call_type, permalink, status
+           FROM funding_opportunities
            WHERE slug = $1 OR external_id = $1 LIMIT 1`,
           [grantSlug]
         );
         if (grantRes.rows.length > 0) {
           const opp = grantRes.rows[0];
-          const canonicalUrl = `https://tools.cerilas.com/tool/eu-funding-opportunities/${opp.slug}`;
-          const ogImg = 'https://tools.cerilas.com/tool-icons/eu-funding-opportunities.webp';
-          const pageTitle = opp.seo_title || `${opp.title} | EU Horizon Grants`;
-          const pageDesc = opp.meta_description || opp.short_description || `Apply for ${opp.title} on Cerilas Tools.`;
-          const pageKeywords = opp.meta_keywords || 'EU funding, Horizon Europe, Cascade funding, grants 2026';
+          let relatedRows = [];
+          try {
+            const relRes = await pool.query(
+              `SELECT title, slug, funding_amount, deadline_raw, deadline_date, source_key
+               FROM funding_opportunities
+               WHERE status = 'open' AND slug IS NOT NULL AND slug <> $1
+               ORDER BY (source_key = $2) DESC, deadline_date ASC NULLS LAST, last_scraped_at DESC
+               LIMIT 8`,
+              [opp.slug, opp.source_key]
+            );
+            relatedRows = relRes.rows;
+          } catch (_) {}
 
-          html = stripOldMetaTags(html);
-          const safeTitle = String(pageTitle).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-          const safeDesc = String(pageDesc).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-          const safeKeywords = String(pageKeywords).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-          const safeH1 = String(opp.title || pageTitle).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-
-          const metaTags = [
-            `<title>${safeTitle}</title>`,
-            `<meta name="description" content="${safeDesc}" />`,
-            `<meta name="keywords" content="${safeKeywords}" />`,
-            `<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />`,
-            `<link rel="canonical" href="${canonicalUrl}" />`,
-            `<meta property="og:type" content="article" />`,
-            `<meta property="og:site_name" content="Cerilas' Tools" />`,
-            `<meta property="og:title" content="${safeTitle}" />`,
-            `<meta property="og:description" content="${safeDesc}" />`,
-            `<meta property="og:url" content="${canonicalUrl}" />`,
-            `<meta property="og:image" content="${ogImg}" />`,
-            `<meta name="twitter:card" content="summary_large_image" />`,
-            `<meta name="twitter:title" content="${safeTitle}" />`,
-            `<meta name="twitter:description" content="${safeDesc}" />`,
-            `<meta name="twitter:image" content="${ogImg}" />`,
-            opp.schema_json ? `<script type="application/ld+json">\n    ${JSON.stringify(opp.schema_json, null, 2)}\n    </script>` : ''
-          ].filter(Boolean).join('\n    ');
-
-          const grantSsrBody = `
-            <div id="ssr-grant-content" style="max-width: 960px; margin: 0 auto; padding: 2rem 1.25rem; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: #f1f5f9; line-height: 1.6;">
-              <nav aria-label="Breadcrumb" style="margin-bottom: 1.5rem; font-size: 0.85rem; color: #94a3b8;">
-                <a href="/" style="color: #38bdf8; text-decoration: none;">Cerilas Tools</a>
-                <span style="margin: 0 0.5rem;">/</span>
-                <a href="/research-tools" style="color: #38bdf8; text-decoration: none;">Research Tools</a>
-                <span style="margin: 0 0.5rem;">/</span>
-                <a href="/tool/eu-funding-opportunities" style="color: #38bdf8; text-decoration: none;">EU &amp; Cascade Funding</a>
-                <span style="margin: 0 0.5rem;">/</span>
-                <span aria-current="page" style="color: #cbd5e1;">${safeH1}</span>
-              </nav>
-              <article>
-                <h1 style="font-size: 2rem; font-weight: 700; margin: 0 0 1rem 0;">${safeH1}</h1>
-                <p style="font-size: 1.05rem; color: #cbd5e1; margin: 0 0 1.5rem 0;">${safeDesc}</p>
-                <p><a href="/tool/eu-funding-opportunities" style="color: #38bdf8; text-decoration: none; font-weight: 600;">&larr; Browse all 600+ EU Horizon Europe &amp; Cascade Funding Opportunities</a></p>
-              </article>
-            </div>
-          `;
-
-          html = html.replace('</head>', `    ${metaTags}\n  </head>`);
-          html = html.replace('<div id="root"></div>', `<div id="root">${grantSsrBody}</div>`);
+          html = renderGrantPageHtml(html, opp, relatedRows);
           return res.send(html);
         }
       } catch (err) {
         console.warn('Error fetching grant SEO metadata for SSR:', err.message);
+      }
+    }
+
+    // 2b. Long-Tail Working Tool Variant SSR pre-rendering (/tool/:toolSlug/:variantSlug)
+    const variantMatch = req.path.match(/^\/tool\/([a-zA-Z0-9_-]+)\/([a-zA-Z0-9_-]+)\/?$/);
+    if (variantMatch && variantMatch[1].toLowerCase() !== 'eu-funding-opportunities') {
+      const toolSlug = variantMatch[1].toLowerCase();
+      const variantSlug = variantMatch[2].toLowerCase();
+      if (getToolVariantSeo(toolSlug, variantSlug)) {
+        const botInfo = detectBot(req);
+        if (botInfo.isBot) {
+          pool.query(
+            'UPDATE cerilas_tools SET bot_view_count = COALESCE(bot_view_count, 0) + 1 WHERE slug = $1',
+            [toolSlug]
+          ).catch(() => {});
+        }
+        const renderedVariant = renderToolVariantPageHtml(html, toolSlug, variantSlug);
+        if (renderedVariant) {
+          return res.send(renderedVariant);
+        }
       }
     }
 
@@ -595,8 +602,38 @@ app.get('{*path}', async (req, res) => {
         ).catch(() => {});
       }
 
+      // Inject crawlable HTML links to open EU & Cascade Funding grants on /tool/eu-funding-opportunities
+      let extraSsrHtml = '';
+      if (slug === 'eu-funding-opportunities') {
+        try {
+          const openGrantsRes = await pool.query(
+            `SELECT title, slug, funding_amount, deadline_raw, deadline_date, source_key
+             FROM funding_opportunities
+             WHERE status = 'open' AND slug IS NOT NULL
+             ORDER BY deadline_date ASC NULLS LAST, last_scraped_at DESC
+             LIMIT 60`
+          );
+          if (openGrantsRes.rows.length > 0) {
+            const listItems = openGrantsRes.rows.map(g => {
+              const dl = g.deadline_raw || (g.deadline_date ? new Date(g.deadline_date).toISOString().slice(0, 10) : 'Open');
+              const amt = g.funding_amount ? ` &bull; ${String(g.funding_amount).replace(/&/g, '&amp;').replace(/</g, '&lt;')}` : '';
+              const safeTitle = String(g.title || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+              const safeSlug = String(g.slug || '').replace(/[^a-zA-Z0-9_-]/g, '');
+              return `<li style="margin-bottom: 0.5rem;"><a href="/tool/eu-funding-opportunities/${safeSlug}" style="color: #38bdf8; text-decoration: none; font-weight: 600;">${safeTitle}</a> <span style="color: #94a3b8; font-size: 0.88rem;">(Deadline: ${String(dl).replace(/&/g, '&amp;').replace(/</g, '&lt;')}${amt})</span></li>`;
+            }).join('');
+            extraSsrHtml = `
+              <section class="ssr-section ssr-open-grants">
+                <h2 style="font-size: 1.4rem; font-weight: 600; margin: 0 0 0.85rem 0; color: #f8fafc;">Featured Open Horizon Europe &amp; Cascade Funding Calls</h2>
+                <ul style="margin: 0; padding-left: 1.25rem; color: #cbd5e1;">
+                  ${listItems}
+                </ul>
+              </section>`;
+          }
+        } catch (_) {}
+      }
+
       // Pre-render semantic HTML body and dynamic <head> tags
-      html = renderToolPageHtml(html, slug);
+      html = renderToolPageHtml(html, slug, { extraSsrHtml });
       return res.send(html);
     }
 

@@ -1,6 +1,12 @@
-import { getToolSeo, CATEGORIES, TOOLS_SEO_REGISTRY } from './toolsSeoRegistry.js';
+import {
+  getToolSeo,
+  getToolVariantSeo,
+  getVariantsForTool,
+  CATEGORIES,
+  TOOLS_SEO_REGISTRY
+} from './toolsSeoRegistry.js';
 import { COMPANY_INFO, LEGAL_DOCS } from '../../src/legal/legalContent.js';
-import { buildToolJsonLdBlocks } from '../../src/seo/structuredData.js';
+import { buildToolJsonLdBlocks, buildToolVariantJsonLdBlocks } from '../../src/seo/structuredData.js';
 import {
   CHECKER_HOW_TO,
   CHECKER_RESULTS_GLOSSARY,
@@ -137,11 +143,39 @@ export function stripOldMetaTags(html) {
 /**
  * Pre-renders semantic HTML and dynamic SEO metadata for a tool page.
  */
-export function renderToolPageHtml(templateHtml, slug) {
+export function renderToolPageHtml(templateHtml, slug, { extraSsrHtml = '' } = {}) {
   const tool = getToolSeo(slug);
   const canonicalUrl = `https://tools.cerilas.com/tool/${tool.slug}`;
-  const ogImg = tool.ogImage || `https://tools.cerilas.com/tool-icons/${tool.slug}.webp`;
+  const ogImg = tool.ogImage || `https://tools.cerilas.com/og/${tool.slug}.png`;
   const jsonLdBlocks = buildToolJsonLdBlocks(tool);
+  const variants = getVariantsForTool(tool.slug);
+
+  // Build Popular Workflows / Long-Tail Use Cases semantic links
+  const variantsHtml = variants.length > 0
+    ? `
+        <section class="ssr-section ssr-workflows">
+          <h2 style="${SSR_H2}">Popular ${escapeHtml(tool.name)} Workflows &amp; Specific Use Cases</h2>
+          <ul style="margin: 0; padding-left: 1.25rem; color: #cbd5e1; display: grid; gap: 0.55rem;">
+            ${variants.map(v => `
+              <li>
+                <a href="/tool/${tool.slug}/${v.variantSlug}" style="${SSR_LINK} font-weight: 600;">${escapeHtml(v.name)}</a>
+                — <span style="color: #94a3b8; font-size: 0.92rem;">${escapeHtml(v.description)}</span>
+              </li>`).join('')}
+          </ul>
+        </section>`
+    : '';
+
+  // Step-by-step HowTo section for tools without dedicated custom ssrSections
+  const genericHowToHtml = !tool.ssrSections && tool.howTo?.steps?.length
+    ? `
+        <section class="ssr-section ssr-howto" id="${escapeHtml(tool.howTo.anchor || `${tool.slug}-howto`)}">
+          <h2 style="${SSR_H2}">${escapeHtml(tool.howTo.title)}</h2>
+          ${tool.howTo.lead ? `<p style="${SSR_P}">${escapeHtml(tool.howTo.lead)}</p>` : ''}
+          <ol style="margin: 0; padding-left: 1.25rem; color: #cbd5e1;">
+            ${tool.howTo.steps.map(s => `<li style="margin-bottom: 0.6rem;"><strong>${escapeHtml(s.name)}.</strong> ${escapeHtml(s.text)}</li>`).join('')}
+          </ol>
+        </section>`
+    : '';
 
   // Build Related Tools semantic links
   const relatedToolsHtml = (tool.relatedTools || [])
@@ -193,6 +227,8 @@ export function renderToolPageHtml(templateHtml, slug) {
           </p>
         </section>
 
+        ${genericHowToHtml}
+
         ${tool.formula ? `
         <section class="ssr-section ssr-formula">
           <h2 style="font-size: 1.4rem; font-weight: 600; margin: 0 0 0.75rem 0; color: #f8fafc;">Formula &amp; Technical Methodology</h2>
@@ -222,6 +258,9 @@ export function renderToolPageHtml(templateHtml, slug) {
 
         ${tool.ssrSections === 'ai-visibility-checker' ? renderCheckerExtraSectionsHtml() : ''}
         ${tool.ssrSections === 'task-prioritization-planner' ? renderPlannerExtraSectionsHtml() : ''}
+
+        ${variantsHtml}
+        ${extraSsrHtml}
 
         <section class="ssr-section ssr-faq">
           <h2 style="font-size: 1.4rem; font-weight: 600; margin: 0 0 1rem 0; color: #f8fafc;">Frequently Asked Questions</h2>
@@ -264,6 +303,9 @@ export function renderToolPageHtml(templateHtml, slug) {
     `<meta property="og:description" content="${escapeHtml(tool.description)}" />`,
     `<meta property="og:url" content="${canonicalUrl}" />`,
     `<meta property="og:image" content="${ogImg}" />`,
+    `<meta property="og:image:width" content="1200" />`,
+    `<meta property="og:image:height" content="630" />`,
+    `<meta property="og:image:type" content="image/png" />`,
     `<meta property="og:image:alt" content="${escapeHtml(tool.title)}" />`,
     `<meta name="twitter:card" content="summary_large_image" />`,
     `<meta name="twitter:title" content="${escapeHtml(tool.title)}" />`,
@@ -281,6 +323,285 @@ export function renderToolPageHtml(templateHtml, slug) {
 }
 
 /**
+ * Pre-renders semantic HTML and 4-level JSON-LD for Long-Tail Working Tool Variant pages (/tool/:toolSlug/:variantSlug).
+ */
+export function renderToolVariantPageHtml(templateHtml, toolSlug, variantSlug) {
+  const tool = getToolSeo(toolSlug);
+  if (!tool) return null;
+  const variant = getToolVariantSeo(tool.slug, variantSlug);
+  if (!variant) return null;
+
+  const parentUrl = `https://tools.cerilas.com/tool/${tool.slug}`;
+  const canonicalUrl = `${parentUrl}/${variant.variantSlug}`;
+  const ogImg = tool.ogImage || `https://tools.cerilas.com/og/${tool.slug}.png`;
+  const jsonLdBlocks = buildToolVariantJsonLdBlocks(tool, variant);
+  const siblingVariants = getVariantsForTool(tool.slug).filter(v => v.variantSlug !== variant.variantSlug);
+
+  const relatedToolsHtml = (tool.relatedTools || [])
+    .map(relSlug => {
+      const relTool = getToolSeo(relSlug);
+      return `<li><a href="/tool/${relTool.slug}" style="${SSR_LINK} font-weight: 600;">${escapeHtml(relTool.name)}</a> — ${escapeHtml(relTool.shortDescription)}</li>`;
+    })
+    .join('');
+
+  const ssrBodyHtml = `
+    <div id="ssr-seo-content" class="ssr-seo-wrapper" style="max-width: 960px; margin: 0 auto; padding: 2rem 1.25rem; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #f1f5f9; line-height: 1.6;">
+      <nav aria-label="Breadcrumb" class="ssr-breadcrumb" style="margin-bottom: 1.5rem; font-size: 0.85rem; color: #94a3b8;">
+        <a href="/" style="${SSR_LINK}">Cerilas Tools</a>
+        <span style="margin: 0 0.5rem;">/</span>
+        <a href="/${tool.categorySlug}" style="${SSR_LINK}">${escapeHtml(tool.category)}</a>
+        <span style="margin: 0 0.5rem;">/</span>
+        <a href="/tool/${tool.slug}" style="${SSR_LINK}">${escapeHtml(tool.name)}</a>
+        <span style="margin: 0 0.5rem;">/</span>
+        <span aria-current="page" style="color: #cbd5e1;">${escapeHtml(variant.name)}</span>
+      </nav>
+
+      <header class="ssr-header" style="margin-bottom: 2rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 1.5rem;">
+        <div style="display: inline-block; padding: 0.25rem 0.75rem; border-radius: 999px; background: rgba(56, 189, 248, 0.12); color: #38bdf8; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.75rem;">
+          ${escapeHtml(tool.name)} &bull; Specialized Workflow
+        </div>
+        <h1 style="font-size: 2.25rem; font-weight: 700; margin: 0 0 1rem 0; letter-spacing: -0.025em; line-height: 1.2;">
+          ${escapeHtml(variant.h1)}
+        </h1>
+        <p style="font-size: 1.12rem; color: #cbd5e1; margin: 0; line-height: 1.55;">
+          ${escapeHtml(variant.lead)}
+        </p>
+      </header>
+
+      <main class="ssr-main-article" style="display: grid; gap: 2.25rem;">
+        ${variant.technicalSpec ? `
+        <section class="ssr-section">
+          <h2 style="${SSR_H2}">Technical Specification &amp; Formula</h2>
+          <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 1.15rem;">
+            <code style="font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 0.94rem; color: #38bdf8; white-space: pre-wrap;">${escapeHtml(variant.technicalSpec)}</code>
+          </div>
+        </section>` : ''}
+
+        ${variant.steps?.length ? `
+        <section class="ssr-section" id="variant-howto">
+          <h2 style="${SSR_H2}">Step-by-Step: ${escapeHtml(variant.name)}</h2>
+          <ol style="margin: 0; padding-left: 1.25rem; color: #cbd5e1;">
+            ${variant.steps.map(s => `<li style="margin-bottom: 0.65rem;"><strong>${escapeHtml(s.name)}.</strong> ${escapeHtml(s.text)}</li>`).join('')}
+          </ol>
+        </section>` : ''}
+
+        ${variant.faq?.length ? `
+        <section class="ssr-section">
+          <h2 style="${SSR_H2}">Frequently Asked Questions</h2>
+          ${renderFaqHtml(variant.faq)}
+        </section>` : ''}
+
+        <section class="ssr-section">
+          <h2 style="${SSR_H2}">More ${escapeHtml(tool.name)} Workflows</h2>
+          <ul style="margin: 0; padding-left: 1.25rem; color: #cbd5e1; display: grid; gap: 0.45rem;">
+            <li><a href="/tool/${tool.slug}" style="${SSR_LINK} font-weight: 600;">Full ${escapeHtml(tool.name)} Workspace</a> — ${escapeHtml(tool.shortDescription)}</li>
+            ${siblingVariants.map(sv => `<li><a href="/tool/${tool.slug}/${sv.variantSlug}" style="${SSR_LINK} font-weight: 600;">${escapeHtml(sv.name)}</a> — ${escapeHtml(sv.description)}</li>`).join('')}
+          </ul>
+        </section>
+
+        ${relatedToolsHtml ? `
+        <section class="ssr-section">
+          <h2 style="${SSR_H2}">Related Free ${escapeHtml(tool.category)}</h2>
+          <ul style="margin: 0; padding-left: 1.25rem; color: #cbd5e1; display: grid; gap: 0.45rem;">
+            ${relatedToolsHtml}
+          </ul>
+        </section>` : ''}
+
+        <section class="ssr-section ssr-growth-cta" style="border: 1px solid rgba(56, 189, 248, 0.25); border-radius: 12px; padding: 1.25rem; background: rgba(56, 189, 248, 0.04);">
+          <h2 style="font-size: 1.2rem; font-weight: 600; margin: 0 0 0.45rem 0; color: #f8fafc;">
+            <a href="/growth" style="${SSR_LINK}">GrowthControl — Track AI Visibility in ChatGPT, Gemini, Perplexity &amp; Claude &rarr;</a>
+          </h2>
+          <p style="margin: 0; color: #94a3b8; font-size: 0.92rem;">
+            Audit whether AI search engines mention and cite your brand with our free <a href="/tool/ai-visibility-checker" style="${SSR_LINK}">AI Brand Visibility Checker</a>.
+          </p>
+        </section>
+      </main>
+    </div>
+  `;
+
+  let html = stripOldMetaTags(templateHtml);
+  const keywords = variant.keywords || tool.keywords || '';
+
+  const metaTags = [
+    `<title>${escapeHtml(variant.title)}</title>`,
+    `<meta name="description" content="${escapeHtml(variant.description)}" />`,
+    keywords ? `<meta name="keywords" content="${escapeHtml(keywords)}" />` : '',
+    `<meta name="robots" content="${ROBOTS_INDEX}" />`,
+    `<link rel="canonical" href="${canonicalUrl}" />`,
+    `<meta property="og:type" content="website" />`,
+    `<meta property="og:site_name" content="Cerilas' Tools" />`,
+    `<meta property="og:locale" content="en_US" />`,
+    `<meta property="og:title" content="${escapeHtml(variant.title)}" />`,
+    `<meta property="og:description" content="${escapeHtml(variant.description)}" />`,
+    `<meta property="og:url" content="${canonicalUrl}" />`,
+    `<meta property="og:image" content="${ogImg}" />`,
+    `<meta property="og:image:width" content="1200" />`,
+    `<meta property="og:image:height" content="630" />`,
+    `<meta property="og:image:type" content="image/png" />`,
+    `<meta property="og:image:alt" content="${escapeHtml(variant.title)}" />`,
+    `<meta name="twitter:card" content="summary_large_image" />`,
+    `<meta name="twitter:title" content="${escapeHtml(variant.title)}" />`,
+    `<meta name="twitter:description" content="${escapeHtml(variant.description)}" />`,
+    `<meta name="twitter:image" content="${ogImg}" />`,
+    ...jsonLdBlocks.map(block => jsonLdScript(block.data, block.id))
+  ].filter(Boolean).join('\n    ');
+
+  html = html.replace('</head>', `    ${metaTags}\n  </head>`);
+  html = html.replace('<div id="root"></div>', `<div id="root">${ssrBodyHtml}</div>`);
+  return html;
+}
+
+/**
+ * Pre-renders a rich Grant Call Dossier for individual EU Horizon Europe & Cascade Funding pages
+ * (/tool/eu-funding-opportunities/:grantSlug), eliminating thin-page classification and interlinking related calls.
+ */
+export function renderGrantPageHtml(templateHtml, opp, relatedGrants = []) {
+  const canonicalUrl = `https://tools.cerilas.com/tool/eu-funding-opportunities/${opp.slug}`;
+  const ogImg = 'https://tools.cerilas.com/og/eu-funding-opportunities.png';
+  const sourceLabel = opp.source_key === 'cascade' ? 'Cascade Funding (FSTP)' : 'Horizon Europe (SEDIA)';
+  const deadlineText = opp.deadline_raw || (opp.deadline_date ? new Date(opp.deadline_date).toISOString().slice(0, 10) : 'Open Call');
+  const budgetText = opp.funding_amount || 'See Official Call Budget';
+  const applicants = Array.isArray(opp.eligible_applicants) ? opp.eligible_applicants.filter(Boolean) : [];
+  const domains = Array.isArray(opp.domains) ? opp.domains.filter(Boolean) : [];
+  const technologies = Array.isArray(opp.technologies) ? opp.technologies.filter(Boolean) : [];
+
+  const pageTitle = opp.seo_title || `${opp.title} – ${sourceLabel} Grant | Cerilas Tools`;
+  const pageDesc =
+    opp.meta_description ||
+    opp.short_description ||
+    `${sourceLabel} funding call (${budgetText}, deadline: ${deadlineText}). Review eligibility, scope, and application links on Cerilas Tools.`;
+  const pageKeywords =
+    opp.meta_keywords ||
+    `EU funding, ${sourceLabel}, ${opp.external_id || ''}, ${domains.slice(0, 4).join(', ')}, Horizon Europe grants`;
+
+  const cleanLongDesc = opp.long_description
+    ? String(opp.long_description).replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 2600)
+    : '';
+
+  const breadcrumbSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: "Cerilas' Tools", item: 'https://tools.cerilas.com/' },
+      { '@type': 'ListItem', position: 2, name: 'Research Tools', item: 'https://tools.cerilas.com/research-tools' },
+      { '@type': 'ListItem', position: 3, name: 'EU & Cascade Funding Opportunities', item: 'https://tools.cerilas.com/tool/eu-funding-opportunities' },
+      { '@type': 'ListItem', position: 4, name: opp.title, item: canonicalUrl }
+    ]
+  };
+
+  const grantSchema = opp.schema_json || {
+    '@context': 'https://schema.org',
+    '@type': 'WebPage',
+    name: opp.title,
+    description: pageDesc,
+    url: canonicalUrl,
+    inLanguage: 'en',
+    about: {
+      '@type': 'Thing',
+      name: `${sourceLabel} — ${opp.external_id || opp.title}`
+    }
+  };
+
+  const relatedHtml = relatedGrants.length > 0
+    ? `
+      <section style="margin-top: 2rem;">
+        <h2 style="${SSR_H2}">Related Open EU &amp; Cascade Funding Calls</h2>
+        <ul style="margin: 0; padding-left: 1.25rem; color: #cbd5e1; display: grid; gap: 0.55rem;">
+          ${relatedGrants.map(g => {
+            const gDl = g.deadline_raw || (g.deadline_date ? new Date(g.deadline_date).toISOString().slice(0, 10) : 'Open');
+            const gAmt = g.funding_amount ? ` · ${escapeHtml(g.funding_amount)}` : '';
+            return `<li><a href="/tool/eu-funding-opportunities/${escapeHtml(g.slug)}" style="${SSR_LINK} font-weight: 600;">${escapeHtml(g.title)}</a> <span style="color: #94a3b8; font-size: 0.88rem;">(Deadline: ${escapeHtml(gDl)}${gAmt})</span></li>`;
+          }).join('')}
+        </ul>
+      </section>`
+    : '';
+
+  const grantSsrBody = `
+    <div id="ssr-grant-content" style="max-width: 960px; margin: 0 auto; padding: 2rem 1.25rem; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: #f1f5f9; line-height: 1.65;">
+      <nav aria-label="Breadcrumb" style="margin-bottom: 1.5rem; font-size: 0.85rem; color: #94a3b8;">
+        <a href="/" style="${SSR_LINK}">Cerilas Tools</a>
+        <span style="margin: 0 0.5rem;">/</span>
+        <a href="/research-tools" style="${SSR_LINK}">Research Tools</a>
+        <span style="margin: 0 0.5rem;">/</span>
+        <a href="/tool/eu-funding-opportunities" style="${SSR_LINK}">EU &amp; Cascade Funding</a>
+        <span style="margin: 0 0.5rem;">/</span>
+        <span aria-current="page" style="color: #cbd5e1;">${escapeHtml(opp.title)}</span>
+      </nav>
+
+      <article>
+        <header style="margin-bottom: 1.75rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 1.25rem;">
+          <div style="display: inline-block; padding: 0.25rem 0.75rem; border-radius: 999px; background: rgba(16, 185, 129, 0.14); color: #34d399; font-size: 0.76rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.75rem;">
+            ${escapeHtml(sourceLabel)} &bull; ${escapeHtml((opp.status || 'open').toUpperCase())}
+          </div>
+          <h1 style="font-size: 2.05rem; font-weight: 700; margin: 0 0 0.85rem 0; line-height: 1.25;">${escapeHtml(opp.title)}</h1>
+          ${opp.short_description ? `<p style="font-size: 1.06rem; color: #cbd5e1; margin: 0;">${escapeHtml(opp.short_description)}</p>` : ''}
+        </header>
+
+        <section style="margin-bottom: 2rem;">
+          <h2 style="${SSR_H2}">Grant Key Specifications</h2>
+          <table style="${SSR_TABLE}">
+            <tbody>
+              ${opp.external_id ? `<tr><th scope="row" style="${SSR_CELL}">Call Identifier</th><td style="${SSR_CELL}">${escapeHtml(opp.external_id)}</td></tr>` : ''}
+              <tr><th scope="row" style="${SSR_CELL}">Funding Program</th><td style="${SSR_CELL}">${escapeHtml(sourceLabel)} (${escapeHtml(opp.call_type || 'Proposals')})</td></tr>
+              <tr><th scope="row" style="${SSR_CELL}">Funding Budget / Grant Size</th><td style="${SSR_CELL}">${escapeHtml(budgetText)}</td></tr>
+              <tr><th scope="row" style="${SSR_CELL}">Submission Deadline</th><td style="${SSR_CELL}">${escapeHtml(deadlineText)}</td></tr>
+              ${applicants.length ? `<tr><th scope="row" style="${SSR_CELL}">Eligible Beneficiaries</th><td style="${SSR_CELL}">${escapeHtml(applicants.join(', '))}</td></tr>` : ''}
+              ${domains.length ? `<tr><th scope="row" style="${SSR_CELL}">Target Domains</th><td style="${SSR_CELL}">${escapeHtml(domains.join(', '))}</td></tr>` : ''}
+              ${technologies.length ? `<tr><th scope="row" style="${SSR_CELL}">Key Technologies</th><td style="${SSR_CELL}">${escapeHtml(technologies.join(', '))}</td></tr>` : ''}
+              ${opp.permalink ? `<tr><th scope="row" style="${SSR_CELL}">Official Call Portal</th><td style="${SSR_CELL}"><a href="${escapeHtml(opp.permalink)}" rel="noopener noreferrer" style="${SSR_LINK}">View Official Call Notice &rarr;</a></td></tr>` : ''}
+            </tbody>
+          </table>
+        </section>
+
+        ${cleanLongDesc ? `
+        <section style="margin-bottom: 2rem;">
+          <h2 style="${SSR_H2}">Scope &amp; Call Description</h2>
+          <p style="${SSR_P}">${escapeHtml(cleanLongDesc)}</p>
+        </section>` : ''}
+
+        <section style="margin-bottom: 2rem; border: 1px solid rgba(56, 189, 248, 0.25); border-radius: 12px; padding: 1.15rem; background: rgba(56, 189, 248, 0.04);">
+          <h2 style="font-size: 1.15rem; font-weight: 600; margin: 0 0 0.45rem 0; color: #f8fafc;">Prepare Your EU Proposal</h2>
+          <p style="margin: 0; color: #cbd5e1; font-size: 0.92rem;">
+            Verify your project's expected maturity with our free <a href="/tool/trl-calculator" style="${SSR_LINK} font-weight: 600;">TRL Calculator (Horizon Europe TRL 1–9)</a>, calculate work-package study power with the <a href="/tool/sample-size-calculator" style="${SSR_LINK} font-weight: 600;">Sample Size Calculator</a>, or <a href="/tool/eu-funding-opportunities" style="${SSR_LINK} font-weight: 600;">browse all 660+ open EU &amp; Cascade Funding Opportunities &rarr;</a>
+          </p>
+        </section>
+
+        ${relatedHtml}
+      </article>
+    </div>
+  `;
+
+  let html = stripOldMetaTags(templateHtml);
+  const metaTags = [
+    `<title>${escapeHtml(pageTitle)}</title>`,
+    `<meta name="description" content="${escapeHtml(pageDesc)}" />`,
+    `<meta name="keywords" content="${escapeHtml(pageKeywords)}" />`,
+    `<meta name="robots" content="${ROBOTS_INDEX}" />`,
+    `<link rel="canonical" href="${canonicalUrl}" />`,
+    `<meta property="og:type" content="article" />`,
+    `<meta property="og:site_name" content="Cerilas' Tools" />`,
+    `<meta property="og:locale" content="en_US" />`,
+    `<meta property="og:title" content="${escapeHtml(pageTitle)}" />`,
+    `<meta property="og:description" content="${escapeHtml(pageDesc)}" />`,
+    `<meta property="og:url" content="${canonicalUrl}" />`,
+    `<meta property="og:image" content="${ogImg}" />`,
+    `<meta property="og:image:width" content="1200" />`,
+    `<meta property="og:image:height" content="630" />`,
+    `<meta property="og:image:type" content="image/png" />`,
+    `<meta name="twitter:card" content="summary_large_image" />`,
+    `<meta name="twitter:title" content="${escapeHtml(pageTitle)}" />`,
+    `<meta name="twitter:description" content="${escapeHtml(pageDesc)}" />`,
+    `<meta name="twitter:image" content="${ogImg}" />`,
+    jsonLdScript(breadcrumbSchema, 'grant-breadcrumbs-jsonld'),
+    jsonLdScript(grantSchema, 'grant-entity-jsonld')
+  ].join('\n    ');
+
+  html = html.replace('</head>', `    ${metaTags}\n  </head>`);
+  html = html.replace('<div id="root"></div>', `<div id="root">${grantSsrBody}</div>`);
+  return html;
+}
+
+/**
  * Pre-renders semantic HTML and dynamic SEO metadata for a category page.
  */
 export function renderCategoryPageHtml(templateHtml, categorySlug) {
@@ -288,7 +609,7 @@ export function renderCategoryPageHtml(templateHtml, categorySlug) {
   if (!category) return null;
 
   const canonicalUrl = `https://tools.cerilas.com/${category.slug}`;
-  const ogImg = 'https://tools.cerilas.com/og/growthcontrol.png';
+  const ogImg = category.ogImage || 'https://tools.cerilas.com/og/growthcontrol.png';
 
   const categoryTools = category.toolSlugs
     .map(slug => getToolSeo(slug))
@@ -326,7 +647,14 @@ export function renderCategoryPageHtml(templateHtml, categorySlug) {
     }))
   };
 
-  const toolsListHtml = categoryTools.map(t => `
+  const toolsListHtml = categoryTools.map(t => {
+    const toolVariants = getVariantsForTool(t.slug);
+    const variantsLinksHtml = toolVariants.length > 0
+      ? `<div style="margin-top: 0.65rem; font-size: 0.82rem; color: #94a3b8;">
+           <strong>Workflows:</strong> ${toolVariants.map(v => `<a href="/tool/${t.slug}/${v.variantSlug}" style="color: #38bdf8; text-decoration: none;">${escapeHtml(v.name)}</a>`).join(' &bull; ')}
+         </div>`
+      : '';
+    return `
     <article class="ssr-category-tool-card" style="border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 1.25rem; background: rgba(255,255,255,0.02); margin-bottom: 1rem;">
       <h2 style="font-size: 1.25rem; font-weight: 600; margin: 0 0 0.5rem 0;">
         <a href="/tool/${t.slug}" style="color: #38bdf8; text-decoration: none;">
@@ -339,8 +667,10 @@ export function renderCategoryPageHtml(templateHtml, categorySlug) {
       <a href="/tool/${t.slug}" style="display: inline-block; font-size: 0.85rem; font-weight: 500; color: #38bdf8; text-decoration: none;">
         Launch Tool &rarr;
       </a>
+      ${variantsLinksHtml}
     </article>
-  `).join('');
+  `;
+  }).join('');
 
   const ssrBodyHtml = `
     <div id="ssr-seo-content" class="ssr-seo-wrapper" style="max-width: 960px; margin: 0 auto; padding: 2rem 1.25rem; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #f1f5f9; line-height: 1.6;">
@@ -385,13 +715,18 @@ export function renderCategoryPageHtml(templateHtml, categorySlug) {
     `<title>${escapeHtml(category.title)}</title>`,
     `<meta name="description" content="${escapeHtml(category.description)}" />`,
     `<meta name="keywords" content="${escapeHtml(category.keywords)}" />`,
-    `<meta name="robots" content="index, follow" />`,
+    `<meta name="robots" content="${ROBOTS_INDEX}" />`,
     `<link rel="canonical" href="${canonicalUrl}" />`,
     `<meta property="og:type" content="website" />`,
+    `<meta property="og:site_name" content="Cerilas' Tools" />`,
+    `<meta property="og:locale" content="en_US" />`,
     `<meta property="og:title" content="${escapeHtml(category.title)}" />`,
     `<meta property="og:description" content="${escapeHtml(category.description)}" />`,
     `<meta property="og:url" content="${canonicalUrl}" />`,
     `<meta property="og:image" content="${ogImg}" />`,
+    `<meta property="og:image:width" content="1200" />`,
+    `<meta property="og:image:height" content="630" />`,
+    `<meta property="og:image:type" content="image/png" />`,
     `<meta name="twitter:card" content="summary_large_image" />`,
     `<meta name="twitter:title" content="${escapeHtml(category.title)}" />`,
     `<meta name="twitter:description" content="${escapeHtml(category.description)}" />`,

@@ -1,3 +1,4 @@
+import SearchableHidden, { useSupportsUntilFound } from '../../../components/ui/SearchableHidden';
 import { useState, useEffect } from 'react';
 import { 
   FileText, 
@@ -60,87 +61,12 @@ const RELATED_TOOLS = [
 ];
 
 export default function LlmsTxtSeo() {
+  const supportsUntilFound = useSupportsUntilFound();
   const [openFaq, setOpenFaq] = useState(null);
 
   const toggleFaq = (index) => {
     setOpenFaq(openFaq === index ? null : index);
   };
-
-  useEffect(() => {
-    const webAppSchema = {
-      '@context': 'https://schema.org',
-      '@type': 'WebApplication',
-      name: 'Cerilas LLMs.txt Generator, Checker & Validator',
-      url: 'https://tools.cerilas.com/tool/llms-txt',
-      applicationCategory: 'DeveloperApplication',
-      operatingSystem: 'All',
-      description: 'Free online tool suite to create, inspect, and validate llms.txt files under the latest v2 specification. Test link health, detect rel=describedby discovery, and audit markdown alternatives.',
-      offers: {
-        '@type': 'Offer',
-        price: '0',
-        priceCurrency: 'USD'
-      },
-      featureList: [
-        'Automated sitemap crawling & resource classification for llms.txt',
-        'RFC v2 specification compliance validator',
-        'Link health checker probing 200 OK, 301 redirects, and 404 errors',
-        'rel=describedby discovery and markdown alternative detection',
-        'LLMs.txt Quality Score (0–100) with 1-click Auto-Fix'
-      ]
-    };
-
-    const howToSchema = {
-      '@context': 'https://schema.org',
-      '@type': 'HowTo',
-      name: 'How to Generate and Validate an llms.txt File for AI Agents',
-      step: [
-        {
-          '@type': 'HowToStep',
-          name: 'Scan Your Website',
-          text: 'Enter your website domain in the Generator tab. The crawler inspects your sitemap and prioritizes high-value documentation and product pages.'
-        },
-        {
-          '@type': 'HowToStep',
-          name: 'Curate Recommended Resources',
-          text: 'Review the classified resources across Documentation, Products, API, and Guides. Toggle links, edit descriptions, and adjust sections.'
-        },
-        {
-          '@type': 'HowToStep',
-          name: 'Check Live Implementation',
-          text: 'Use the Checker tab to probe your deployed /llms.txt file, test link HTTP statuses, and verify rel="describedby" discovery tags.'
-        },
-        {
-          '@type': 'HowToStep',
-          name: 'Validate & Auto-Fix',
-          text: 'Run the Validator to check H1 positioning, Markdown link syntax, and conciseness, then apply 1-click Auto-Fix if needed.'
-        }
-      ]
-    };
-
-    const faqSchema = {
-      '@context': 'https://schema.org',
-      '@type': 'FAQPage',
-      mainEntity: FAQ_ITEMS.map((item) => ({
-        '@type': 'Question',
-        name: item.q,
-        acceptedAnswer: {
-          '@type': 'Answer',
-          text: item.a
-        }
-      }))
-    };
-
-    const script = document.createElement('script');
-    script.type = 'application/ld+json';
-    script.id = 'llms-txt-jsonld';
-    script.text = JSON.stringify([webAppSchema, howToSchema, faqSchema]);
-    document.head.appendChild(script);
-
-    return () => {
-      const existing = document.getElementById('llms-txt-jsonld');
-      if (existing) existing.remove();
-    };
-  }, []);
 
   return (
     <div className="llms-seo-wrapper">
@@ -311,16 +237,16 @@ This file provides key resources for understanding Cerilas and its products.
                 <button 
                   className="llms-faq-question"
                   onClick={() => toggleFaq(index)}
-                  aria-expanded={isOpen}
+                  aria-expanded={(isOpen) || !supportsUntilFound}
                 >
                   <span>{item.q}</span>
                   <ChevronDown className={`llms-faq-chevron ${isOpen ? 'open' : ''}`} size={18} />
                 </button>
-                {isOpen && (
+                <SearchableHidden isOpen={isOpen} onReveal={() => setOpenFaq(idx)}>
                   <div className="llms-faq-answer">
                     <p>{item.a}</p>
                   </div>
-                )}
+                </SearchableHidden>
               </div>
             );
           })}

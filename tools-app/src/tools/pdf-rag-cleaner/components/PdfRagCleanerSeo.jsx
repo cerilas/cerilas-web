@@ -1,3 +1,4 @@
+import SearchableHidden, { useSupportsUntilFound } from '../../../components/ui/SearchableHidden';
 import React, { useState, useEffect } from 'react';
 import {
   Database,
@@ -101,120 +102,9 @@ const COMPATIBLE_ECOSYSTEM = [
 ];
 
 export default function PdfRagCleanerSeo() {
+  const supportsUntilFound = useSupportsUntilFound();
   const [openFaq, setOpenFaq] = useState(null);
   const [activeCodeTab, setActiveCodeTab] = useState('langchain');
-
-  useEffect(() => {
-    const jsonLdScript = document.createElement('script');
-    jsonLdScript.type = 'application/ld+json';
-    jsonLdScript.id = 'pdf-rag-cleaner-seo-jsonld';
-
-    const structuredData = {
-      '@context': 'https://schema.org',
-      '@graph': [
-        {
-          '@type': 'WebApplication',
-          '@id': 'https://tools.cerilas.com/tool/pdf-rag-cleaner#webapp',
-          name: 'Cerilas PDF to RAG Cleaner & Markdown Converter',
-          url: 'https://tools.cerilas.com/tool/pdf-rag-cleaner',
-          applicationCategory: 'DeveloperApplication',
-          operatingSystem: 'All modern web browsers (Chrome, Safari, Firefox, Edge)',
-          browserRequirements: 'Requires JavaScript and HTML5 Canvas support',
-          offers: {
-            '@type': 'Offer',
-            price: '0',
-            priceCurrency: 'USD'
-          },
-          featureList: [
-            'Automatic header, footer, and running page number noise removal',
-            'De-hyphenation and paragraph wrap repair for clean LLM vector embeddings',
-            'Typographic heading synthesis (# H1, ## H2, ### H3)',
-            'Vector RAG chunking with configurable sliding window and overlap',
-            'Native LangChain Document and LlamaIndex TextNode JSON output',
-            '100% In-Browser confidential processing with zero server uploads',
-            'Support for SEC 10-K filings, arXiv research papers, and technical manuals',
-            'Zero data retention and HIPAA/GDPR compatible client-side execution'
-          ]
-        },
-        {
-          '@type': 'HowTo',
-          '@id': 'https://tools.cerilas.com/tool/pdf-rag-cleaner#howto',
-          name: 'How to Convert a PDF into Clean RAG Chunks for Vector Embeddings',
-          description: 'Step-by-step guide to transforming raw PDFs into embedding-ready Markdown and JSON chunks with metadata.',
-          step: [
-            {
-              '@type': 'HowToStep',
-              position: 1,
-              name: 'Upload PDF Document',
-              text: 'Drag and drop your PDF whitepaper, manual, or report into the browser dropzone. Processing begins locally in memory.'
-            },
-            {
-              '@type': 'HowToStep',
-              position: 2,
-              name: 'Automatic De-Noising & Markdown Synthesis',
-              text: 'The engine strips running headers/footers, repairs hyphenated line wraps, and formats visual headings into Markdown tags.'
-            },
-            {
-              '@type': 'HowToStep',
-              position: 3,
-              name: 'Select Chunking Strategy',
-              text: 'Choose Semantic Headings (#), 500-Token Sliding Window (10% overlap), 1000-Token Window, or Page-by-Page chunking.'
-            },
-            {
-              '@type': 'HowToStep',
-              position: 4,
-              name: 'Export to LangChain or LlamaIndex',
-              text: 'Download the structured JSON file or clean Markdown (.md) to ingest directly into Pinecone, Chroma, pgvector, or Weaviate.'
-            }
-          ]
-        },
-        {
-          '@type': 'BreadcrumbList',
-          '@id': 'https://tools.cerilas.com/tool/pdf-rag-cleaner#breadcrumbs',
-          itemListElement: [
-            {
-              '@type': 'ListItem',
-              position: 1,
-              name: 'Cerilas Tools',
-              item: 'https://tools.cerilas.com/'
-            },
-            {
-              '@type': 'ListItem',
-              position: 2,
-              name: 'AI & Developer Utilities',
-              item: 'https://tools.cerilas.com/'
-            },
-            {
-              '@type': 'ListItem',
-              position: 3,
-              name: 'PDF to RAG Cleaner',
-              item: 'https://tools.cerilas.com/tool/pdf-rag-cleaner'
-            }
-          ]
-        },
-        {
-          '@type': 'FAQPage',
-          '@id': 'https://tools.cerilas.com/tool/pdf-rag-cleaner#faq',
-          mainEntity: FAQ_ITEMS.map((item) => ({
-            '@type': 'Question',
-            name: item.q,
-            acceptedAnswer: {
-              '@type': 'Answer',
-              text: item.a
-            }
-          }))
-        }
-      ]
-    };
-
-    jsonLdScript.text = JSON.stringify(structuredData);
-    document.head.appendChild(jsonLdScript);
-
-    return () => {
-      const existing = document.getElementById('pdf-rag-cleaner-seo-jsonld');
-      if (existing) existing.remove();
-    };
-  }, []);
 
   return (
     <section className="rag-seo-section" aria-label="Technical Guide and Documentation">
@@ -548,16 +438,16 @@ vectors = [
                   type="button"
                   className="rag-faq-question-btn"
                   onClick={() => setOpenFaq(isOpen ? null : idx)}
-                  aria-expanded={isOpen}
+                  aria-expanded={(isOpen) || !supportsUntilFound}
                 >
                   <span className="rag-faq-question">{item.q}</span>
                   <ChevronDown size={18} className={`rag-faq-icon ${isOpen ? 'rotated' : ''}`} />
                 </button>
-                {isOpen && (
+                <SearchableHidden isOpen={isOpen} onReveal={() => setOpenFaq(idx)}>
                   <div className="rag-faq-answer">
                     <p>{item.a}</p>
                   </div>
-                )}
+                </SearchableHidden>
               </div>
             );
           })}

@@ -388,7 +388,7 @@ export default function PdfSplitterTool({ onBack, toolMeta }) {
         slug={pdfSplitterManifest.slug}
         title={pdfSplitterManifest.title}
         subtitle={pdfSplitterManifest.shortDescription}
-        onBack={onBack || (() => { window.location.hash = '#/'; })}
+        onBack={onBack || (() => { window.history.pushState({}, '', '/'); window.dispatchEvent(new PopStateEvent('popstate')); })}
         backLabel="All Tools"
         badges={
           <>
@@ -932,7 +932,7 @@ export default function PdfSplitterTool({ onBack, toolMeta }) {
             <button
               type="button"
               className="pdfm-tool-btn"
-              onClick={onBack || (() => { window.location.hash = '#/'; })}
+              onClick={onBack || (() => { window.history.pushState({}, '', '/'); window.dispatchEvent(new PopStateEvent('popstate')); })}
             >
               <span>Return to All Tools</span>
             </button>

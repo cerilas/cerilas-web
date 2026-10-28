@@ -1,3 +1,4 @@
+import SearchableHidden, { useSupportsUntilFound } from '../../../components/ui/SearchableHidden';
 import React, { useState, useEffect } from 'react';
 import {
   Sparkles,
@@ -51,98 +52,8 @@ const FAQ_ITEMS = [
 ];
 
 export default function StartupRunwaySeo() {
+  const supportsUntilFound = useSupportsUntilFound();
   const [openFaq, setOpenFaq] = useState(null);
-
-  useEffect(() => {
-    const jsonLdScript = document.createElement('script');
-    jsonLdScript.type = 'application/ld+json';
-    jsonLdScript.id = 'startup-runway-seo-jsonld';
-
-    const structuredData = {
-      '@context': 'https://schema.org',
-      '@graph': [
-        {
-          '@type': 'WebApplication',
-          '@id': 'https://tools.cerilas.com/tool/startup-runway-calculator#software',
-          'name': 'Cerilas Free Startup Runway & Cash Burn Rate Calculator',
-          'alternateName': [
-            'Startup Runway Calculator',
-            'Burn Rate Calculator for SaaS',
-            'Cash Out Date Forecaster',
-            'Venture Capital Runway Estimator',
-            'Default Alive Calculator'
-          ],
-          'operatingSystem': 'All modern browsers (Chrome, Safari, Firefox, Edge)',
-          'applicationCategory': 'BusinessApplication, FinanceApplication',
-          'image': 'https://tools.cerilas.com/og-image.svg',
-          'softwareVersion': '2.0.0',
-          'offers': {
-            '@type': 'Offer',
-            'price': '0',
-            'priceCurrency': 'USD'
-          },
-          'author': {
-            '@type': 'Organization',
-            'name': 'Cerilas High Tech',
-            'url': 'https://cerilas.com'
-          },
-          'description': 'The definitive free startup runway and cash burn calculator. Forecast your exact Zero-Cash Date, compute Net vs Gross Burn, and test Default Alive scenarios with complete in-browser privacy.'
-        },
-        {
-          '@type': 'HowTo',
-          '@id': 'https://tools.cerilas.com/tool/startup-runway-calculator#howto',
-          'name': 'How to Calculate Your Startup Runway and Zero-Cash Date',
-          'description': 'A 4-step framework for founders to forecast survival months and avoid emergency fundraising.',
-          'step': [
-            {
-              '@type': 'HowToStep',
-              'position': 1,
-              'name': 'Determine Cleared Liquid Cash',
-              'text': 'Sum all checking accounts, savings deposits, and liquid cash equivalents currently in your corporate accounts.'
-            },
-            {
-              '@type': 'HowToStep',
-              'position': 2,
-              'name': 'Calculate Monthly Gross Outflows',
-              'text': 'Tally all operating expenses: employee payroll, benefits, SaaS tools, cloud infrastructure, and office overhead.'
-            },
-            {
-              '@type': 'HowToStep',
-              'position': 3,
-              'name': 'Subtract Monthly Collected Revenue',
-              'text': 'Deduct actual collected recurring revenues from gross expenses to establish your true Net Monthly Burn Rate.'
-            },
-            {
-              '@type': 'HowToStep',
-              'position': 4,
-              'name': 'Compute Runway & Zero-Cash Date',
-              'text': 'Divide liquid cash by net monthly burn. Identify your exact Zero-Cash Date and establish a fundraising trigger 6 months prior.'
-            }
-          ]
-        },
-        {
-          '@type': 'FAQPage',
-          '@id': 'https://tools.cerilas.com/tool/startup-runway-calculator#faq',
-          'mainEntity': FAQ_ITEMS.map((item) => ({
-            '@type': 'Question',
-            'name': item.q,
-            'acceptedAnswer': {
-              '@type': 'Answer',
-              'text': item.a
-            }
-          }))
-        }
-      ]
-    };
-
-    jsonLdScript.textContent = JSON.stringify(structuredData);
-    document.head.appendChild(jsonLdScript);
-
-    return () => {
-      const existing = document.getElementById('startup-runway-seo-jsonld');
-      if (existing) existing.remove();
-    };
-  }, []);
 
   const toggleFaq = (index) => {
     setOpenFaq(openFaq === index ? null : index);
@@ -366,16 +277,16 @@ export default function StartupRunwaySeo() {
                 type="button"
                 className="finance-faq-question-btn"
                 onClick={() => toggleFaq(idx)}
-                aria-expanded={openFaq === idx}
+                aria-expanded={(openFaq === idx) || !supportsUntilFound}
               >
                 <span>{item.q}</span>
                 <ChevronDown className="finance-faq-chevron" size={18} />
               </button>
-              {openFaq === idx && (
-                <div className="finance-faq-answer">
+              <SearchableHidden isOpen={openFaq === idx} onReveal={() => setOpenFaq(idx)}>
+                  <div className="finance-faq-answer">
                   <p>{item.a}</p>
                 </div>
-              )}
+                </SearchableHidden>
             </div>
           ))}
         </div>

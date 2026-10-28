@@ -1,3 +1,4 @@
+import SearchableHidden, { useSupportsUntilFound } from '../../../components/ui/SearchableHidden';
 import React, { useState, useEffect } from 'react';
 import {
   Cpu,
@@ -130,119 +131,8 @@ const USE_CASES = [
 ];
 
 export default function AiDetectorSeo() {
+  const supportsUntilFound = useSupportsUntilFound();
   const [openFaq, setOpenFaq] = useState(null);
-
-  useEffect(() => {
-    const jsonLdScript = document.createElement('script');
-    jsonLdScript.type = 'application/ld+json';
-    jsonLdScript.id = 'ai-detector-seo-jsonld';
-
-    const structuredData = {
-      '@context': 'https://schema.org',
-      '@graph': [
-        {
-          '@type': 'WebApplication',
-          '@id': 'https://tools.cerilas.com/tool/ai-content-detector#webapp',
-          name: 'Cerilas Free AI Content Detector & PDF Scanner',
-          url: 'https://tools.cerilas.com/tool/ai-content-detector',
-          applicationCategory: 'ContentAnalysisApplication',
-          applicationSubCategory: 'Plagiarism & AI Detection Tool',
-          operatingSystem: 'All modern web browsers (Chrome, Safari, Firefox, Edge)',
-          browserRequirements: 'Requires JavaScript and HTML5 WebAssembly support',
-          offers: {
-            '@type': 'Offer',
-            price: '0',
-            priceCurrency: 'USD'
-          },
-          featureList: [
-            '0 to 100% AI probability scoring with instant visual verdict',
-            'Pros & Cons rationale breakdown: Organic human markers vs synthetic AI clichés',
-            '100% private in-browser WebAssembly PDF text extraction',
-            'Deep linguistic metrics: Perplexity (surprisal) and Burstiness (cadence)',
-            'Interactive sentence-level highlight inspector',
-            'Zero data retention: Documents never saved, indexed, or shared for model training',
-            'Universal LLM support: ChatGPT-4o, Claude 3.5 Sonnet, Gemini, and DeepSeek'
-          ]
-        },
-        {
-          '@type': 'HowTo',
-          '@id': 'https://tools.cerilas.com/tool/ai-content-detector#howto',
-          name: 'How to Detect AI-Generated Text from a Document or PDF',
-          description: 'Step-by-step guide to scanning text and PDF essays for ChatGPT, Claude, and Gemini content.',
-          step: [
-            {
-              '@type': 'HowToStep',
-              position: 1,
-              name: 'Paste Text or Upload PDF',
-              text: 'Enter your text directly into the scanner or drag and drop a PDF file. Text is extracted locally in browser memory without server upload.'
-            },
-            {
-              '@type': 'HowToStep',
-              position: 2,
-              name: 'Initiate AI Detection Analysis',
-              text: 'Click Analyze Text to evaluate perplexity, burstiness, formulaic patterns, and transition word cadence.'
-            },
-            {
-              '@type': 'HowToStep',
-              position: 3,
-              name: 'Review 0-100 Score and Pros/Cons',
-              text: 'Inspect the overall AI probability score along with itemized human markers (pros) and AI markers (cons).'
-            },
-            {
-              '@type': 'HowToStep',
-              position: 4,
-              name: 'Inspect Sentence Heatmap & Export Report',
-              text: 'Review flagged synthetic sentences on the interactive heatmap and copy the audit report for academic or client compliance.'
-            }
-          ]
-        },
-        {
-          '@type': 'BreadcrumbList',
-          '@id': 'https://tools.cerilas.com/tool/ai-content-detector#breadcrumbs',
-          itemListElement: [
-            {
-              '@type': 'ListItem',
-              position: 1,
-              name: 'Cerilas Tools',
-              item: 'https://tools.cerilas.com/'
-            },
-            {
-              '@type': 'ListItem',
-              position: 2,
-              name: 'AI Assisted Utilities',
-              item: 'https://tools.cerilas.com/'
-            },
-            {
-              '@type': 'ListItem',
-              position: 3,
-              name: 'AI Content Detector',
-              item: 'https://tools.cerilas.com/tool/ai-content-detector'
-            }
-          ]
-        },
-        {
-          '@type': 'FAQPage',
-          '@id': 'https://tools.cerilas.com/tool/ai-content-detector#faq',
-          mainEntity: FAQ_ITEMS.map((item) => ({
-            '@type': 'Question',
-            name: item.q,
-            acceptedAnswer: {
-              '@type': 'Answer',
-              text: item.a
-            }
-          }))
-        }
-      ]
-    };
-
-    jsonLdScript.text = JSON.stringify(structuredData);
-    document.head.appendChild(jsonLdScript);
-
-    return () => {
-      const existing = document.getElementById('ai-detector-seo-jsonld');
-      if (existing) existing.remove();
-    };
-  }, []);
 
   return (
     <section className="det-seo-section" aria-label="Technical Guide and Documentation">
@@ -430,16 +320,16 @@ export default function AiDetectorSeo() {
                   type="button"
                   className="det-faq-question-btn"
                   onClick={() => setOpenFaq(isOpen ? null : idx)}
-                  aria-expanded={isOpen}
+                  aria-expanded={(isOpen) || !supportsUntilFound}
                 >
                   <span className="det-faq-question">{item.q}</span>
                   <ChevronDown size={18} className={`det-faq-icon ${isOpen ? 'rotated' : ''}`} />
                 </button>
-                {isOpen && (
+                <SearchableHidden isOpen={isOpen} onReveal={() => setOpenFaq(idx)}>
                   <div className="det-faq-answer">
                     <p>{item.a}</p>
                   </div>
-                )}
+                </SearchableHidden>
               </div>
             );
           })}

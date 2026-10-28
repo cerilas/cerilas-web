@@ -1,3 +1,4 @@
+import SearchableHidden, { useSupportsUntilFound } from '../../../components/ui/SearchableHidden';
 import React, { useState, useEffect } from 'react';
 import {
   Sparkles,
@@ -51,96 +52,8 @@ const FAQ_ITEMS = [
 ];
 
 export default function LtvCacSeo() {
+  const supportsUntilFound = useSupportsUntilFound();
   const [openFaq, setOpenFaq] = useState(null);
-
-  useEffect(() => {
-    const jsonLdScript = document.createElement('script');
-    jsonLdScript.type = 'application/ld+json';
-    jsonLdScript.id = 'ltv-cac-calculator-seo-jsonld';
-
-    const structuredData = {
-      '@context': 'https://schema.org',
-      '@graph': [
-        {
-          '@type': 'WebApplication',
-          '@id': 'https://tools.cerilas.com/tool/ltv-cac-calculator#software',
-          'name': 'Cerilas Free SaaS LTV:CAC Ratio & Unit Economics Calculator',
-          'alternateName': [
-            'LTV to CAC Calculator',
-            'SaaS Unit Economics Calculator',
-            'Customer Lifetime Value to CAC Ratio Tool',
-            'CAC Payback Velocity Calculator'
-          ],
-          'operatingSystem': 'All modern web browsers',
-          'applicationCategory': 'BusinessApplication, FinanceApplication',
-          'image': 'https://tools.cerilas.com/og-image.svg',
-          'offers': {
-            '@type': 'Offer',
-            'price': '0',
-            'priceCurrency': 'USD'
-          },
-          'author': {
-            '@type': 'Organization',
-            'name': 'Cerilas High Tech',
-            'url': 'https://cerilas.com'
-          },
-          'description': 'Analyze your SaaS unit economics, benchmark your LTV:CAC ratio against top-tier venture standards, and calculate your margin-adjusted payback period.'
-        },
-        {
-          '@type': 'HowTo',
-          '@id': 'https://tools.cerilas.com/tool/ltv-cac-calculator#howto',
-          'name': 'How to Calculate Your SaaS LTV:CAC Ratio & Unit Economics',
-          'description': 'A 4-step framework for founders to evaluate capital efficiency and venture readiness.',
-          'step': [
-            {
-              '@type': 'HowToStep',
-              'position': 1,
-              'name': 'Compute Margin-Adjusted LTV',
-              'text': 'Multiply Average Revenue Per User (ARPU) by Gross Margin percentage, then divide by monthly churn rate.'
-            },
-            {
-              '@type': 'HowToStep',
-              'position': 2,
-              'name': 'Calculate Fully-Loaded CAC',
-              'text': 'Sum all sales and marketing costs (ad spend, salaries, software) and divide by new customers acquired.'
-            },
-            {
-              '@type': 'HowToStep',
-              'position': 3,
-              'name': 'Divide LTV by CAC',
-              'text': 'Calculate the ratio (LTV / CAC) to determine your return on investment per customer account.'
-            },
-            {
-              '@type': 'HowToStep',
-              'position': 4,
-              'name': 'Verify Payback Period Velocity',
-              'text': 'Ensure your CAC Payback Period is under 12 to 18 months to guarantee healthy working capital turnover.'
-            }
-          ]
-        },
-        {
-          '@type': 'FAQPage',
-          '@id': 'https://tools.cerilas.com/tool/ltv-cac-calculator#faq',
-          'mainEntity': FAQ_ITEMS.map((item) => ({
-            '@type': 'Question',
-            'name': item.q,
-            'acceptedAnswer': {
-              '@type': 'Answer',
-              'text': item.a
-            }
-          }))
-        }
-      ]
-    };
-
-    jsonLdScript.textContent = JSON.stringify(structuredData);
-    document.head.appendChild(jsonLdScript);
-
-    return () => {
-      const existing = document.getElementById('ltv-cac-calculator-seo-jsonld');
-      if (existing) existing.remove();
-    };
-  }, []);
 
   const toggleFaq = (index) => {
     setOpenFaq(openFaq === index ? null : index);
@@ -360,16 +273,16 @@ export default function LtvCacSeo() {
                 type="button"
                 className="finance-faq-question-btn"
                 onClick={() => toggleFaq(idx)}
-                aria-expanded={openFaq === idx}
+                aria-expanded={(openFaq === idx) || !supportsUntilFound}
               >
                 <span>{item.q}</span>
                 <ChevronDown className="finance-faq-chevron" size={18} />
               </button>
-              {openFaq === idx && (
-                <div className="finance-faq-answer">
+              <SearchableHidden isOpen={openFaq === idx} onReveal={() => setOpenFaq(idx)}>
+                  <div className="finance-faq-answer">
                   <p>{item.a}</p>
                 </div>
-              )}
+                </SearchableHidden>
             </div>
           ))}
         </div>

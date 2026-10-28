@@ -37,61 +37,6 @@ const FAQ_ITEMS = [
 ];
 
 export default function SampleSizeCalculatorSeo() {
-  useEffect(() => {
-    // Inject JSON-LD structured data
-    const faqSchema = {
-      '@context': 'https://schema.org',
-      '@type': 'FAQPage',
-      'mainEntity': FAQ_ITEMS.map((item) => ({
-        '@type': 'Question',
-        'name': item.q,
-        'acceptedAnswer': {
-          '@type': 'Answer',
-          'text': item.a.replace(/\*\*/g, '')
-        }
-      }))
-    };
-
-    const webAppSchema = {
-      '@context': 'https://schema.org',
-      '@type': 'WebApplication',
-      'name': 'Cerilas Sample Size Calculator',
-      'url': 'https://tools.cerilas.com/tool/sample-size-calculator',
-      'applicationCategory': 'EducationalApplication',
-      'operatingSystem': 'All modern web browsers',
-      'offers': {
-        '@type': 'Offer',
-        'price': '0',
-        'priceCurrency': 'USD'
-      },
-      'description': 'Free online statistical sample size calculator for surveys, experiments, clinical research, A/B testing, and two-group comparisons.'
-    };
-
-    let scriptFaq = document.getElementById('ssc-faq-jsonld');
-    if (!scriptFaq) {
-      scriptFaq = document.createElement('script');
-      scriptFaq.id = 'ssc-faq-jsonld';
-      scriptFaq.type = 'application/ld+json';
-      document.head.appendChild(scriptFaq);
-    }
-    scriptFaq.textContent = JSON.stringify(faqSchema);
-
-    let scriptApp = document.getElementById('ssc-app-jsonld');
-    if (!scriptApp) {
-      scriptApp = document.createElement('script');
-      scriptApp.id = 'ssc-app-jsonld';
-      scriptApp.type = 'application/ld+json';
-      document.head.appendChild(scriptApp);
-    }
-    scriptApp.textContent = JSON.stringify(webAppSchema);
-
-    return () => {
-      const elFaq = document.getElementById('ssc-faq-jsonld');
-      if (elFaq) elFaq.remove();
-      const elApp = document.getElementById('ssc-app-jsonld');
-      if (elApp) elApp.remove();
-    };
-  }, []);
 
   return (
     <section className="ssc-seo-container">

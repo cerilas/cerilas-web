@@ -1,3 +1,4 @@
+import SearchableHidden, { useSupportsUntilFound } from '../../../components/ui/SearchableHidden';
 import React, { useState } from 'react';
 import {
   ChevronDown,
@@ -13,6 +14,7 @@ import {
 } from 'lucide-react';
 
 export default function VideoCompressorSeo() {
+  const supportsUntilFound = useSupportsUntilFound();
   const [openFaqIndex, setOpenFaqIndex] = useState(0);
 
   const toggleFaq = (index) => {
@@ -155,10 +157,6 @@ export default function VideoCompressorSeo() {
 
   return (
     <article className="vc-seo-wrapper" aria-label="Cerilas Video Compressor – Compress MP4, MOV & WebM Detailed Guide">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdData) }}
-      />
 
       {/* SEO Header */}
       <div className="vc-seo-header">
@@ -344,16 +342,16 @@ export default function VideoCompressorSeo() {
                   type="button"
                   className="faq-question-btn"
                   onClick={() => toggleFaq(idx)}
-                  aria-expanded={isOpen}
+                  aria-expanded={(isOpen) || !supportsUntilFound}
                 >
                   <span className="faq-q-text">{item.q}</span>
                   <ChevronDown size={16} className={`faq-chevron ${isOpen ? 'rotate' : ''}`} />
                 </button>
-                {isOpen && (
+                <SearchableHidden isOpen={isOpen} onReveal={() => setOpenFaqIndex(idx)}>
                   <div className="faq-answer-pane">
                     <p>{item.a}</p>
                   </div>
-                )}
+                </SearchableHidden>
               </div>
             );
           })}

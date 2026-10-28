@@ -1,3 +1,4 @@
+import SearchableHidden, { useSupportsUntilFound } from '../../../components/ui/SearchableHidden';
 import { useState, useEffect } from 'react';
 import { 
   Bot, 
@@ -59,89 +60,12 @@ const RELATED_TOOLS = [
 ];
 
 export default function AiCrawlerCheckerSeo() {
+  const supportsUntilFound = useSupportsUntilFound();
   const [openFaq, setOpenFaq] = useState(null);
 
   const toggleFaq = (index) => {
     setOpenFaq(openFaq === index ? null : index);
   };
-
-  useEffect(() => {
-    const webAppSchema = {
-      '@context': 'https://schema.org',
-      '@type': 'WebApplication',
-      name: 'Cerilas AI Crawler Checker',
-      url: 'https://tools.cerilas.com/tool/ai-crawler-checker',
-      applicationCategory: 'UtilitiesApplication',
-      operatingSystem: 'All',
-      description: 'Free online tool to check whether ChatGPT, Claude, Perplexity, Gemini, and other AI systems can access your website. Evaluates robots.txt, sitemaps, indexability, and crawler permissions.',
-      offers: {
-        '@type': 'Offer',
-        price: '0',
-        priceCurrency: 'USD'
-      },
-      featureList: [
-        'Real-time robots.txt parsing under RFC 9309 standards',
-        'Separation of AI search crawlers (OAI-SearchBot, Claude-SearchBot) from training bots (GPTBot, ClaudeBot)',
-        'Google-Extended product token evaluation',
-        'Homepage indexability and <meta name="robots"> diagnostic',
-        'AI Search Accessibility Score (0–100)',
-        '/llms.txt and XML sitemap presence detection',
-        'Deterministic robots.txt rule generator'
-      ]
-    };
-
-    const howToSchema = {
-      '@context': 'https://schema.org',
-      '@type': 'HowTo',
-      name: 'How to Audit and Manage AI Crawler Access on Your Website',
-      step: [
-        {
-          '@type': 'HowToStep',
-          name: 'Enter Domain URL',
-          text: 'Type your website address into the input field (e.g. example.com) and click Check AI Crawlers.'
-        },
-        {
-          '@type': 'HowToStep',
-          name: 'Inspect robots.txt & Header Directives',
-          text: 'The server retrieves your robots.txt, homepage meta tags, and sitemaps through a secure SSRF-protected proxy.'
-        },
-        {
-          '@type': 'HowToStep',
-          name: 'Review AI Search vs. Training Permissions',
-          text: 'Review itemized cards for ChatGPT Search (OAI-SearchBot), Claude Search, Perplexity, GPTBot, and Google-Extended.'
-        },
-        {
-          '@type': 'HowToStep',
-          name: 'Generate AI-Friendly Rules',
-          text: 'Use the robots.txt generator to permit AI search indexing while safeguarding proprietary assets from model training.'
-        }
-      ]
-    };
-
-    const faqSchema = {
-      '@context': 'https://schema.org',
-      '@type': 'FAQPage',
-      mainEntity: FAQ_ITEMS.map((item) => ({
-        '@type': 'Question',
-        name: item.q,
-        acceptedAnswer: {
-          '@type': 'Answer',
-          text: item.a
-        }
-      }))
-    };
-
-    const script = document.createElement('script');
-    script.type = 'application/ld+json';
-    script.id = 'ai-crawler-checker-jsonld';
-    script.text = JSON.stringify([webAppSchema, howToSchema, faqSchema]);
-    document.head.appendChild(script);
-
-    return () => {
-      const existing = document.getElementById('ai-crawler-checker-jsonld');
-      if (existing) existing.remove();
-    };
-  }, []);
 
   return (
     <div className="acc-seo-wrapper">
@@ -370,16 +294,16 @@ Sitemap: https://yourdomain.com/sitemap.xml`}
                 <button 
                   className="acc-faq-question"
                   onClick={() => toggleFaq(index)}
-                  aria-expanded={isOpen}
+                  aria-expanded={(isOpen) || !supportsUntilFound}
                 >
                   <span>{item.q}</span>
                   <ChevronDown className={`acc-faq-chevron ${isOpen ? 'open' : ''}`} size={18} />
                 </button>
-                {isOpen && (
+                <SearchableHidden isOpen={isOpen} onReveal={() => setOpenFaq(idx)}>
                   <div className="acc-faq-answer">
                     <p>{item.a}</p>
                   </div>
-                )}
+                </SearchableHidden>
               </div>
             );
           })}

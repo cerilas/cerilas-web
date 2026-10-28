@@ -1,3 +1,4 @@
+import SearchableHidden, { useSupportsUntilFound } from '../../../components/ui/SearchableHidden';
 import { useState, useEffect } from 'react';
 import { 
   GitCommit, 
@@ -256,110 +257,8 @@ const RELATED_TOOLS = [
 ];
 
 export default function TrlCalculatorSeo() {
+  const supportsUntilFound = useSupportsUntilFound();
   const [openFaq, setOpenFaq] = useState(null);
-
-  useEffect(() => {
-    // 1. FAQ Schema
-    const faqStructuredData = {
-      '@context': 'https://schema.org',
-      '@type': 'FAQPage',
-      'mainEntity': FAQ_ITEMS.map((item) => ({
-        '@type': 'Question',
-        'name': item.q,
-        'acceptedAnswer': {
-          '@type': 'Answer',
-          'text': item.a
-        }
-      }))
-    };
-
-    // 2. WebApplication Schema
-    const appStructuredData = {
-      '@context': 'https://schema.org',
-      '@type': 'WebApplication',
-      'name': 'Cerilas TRL Calculator (Technology Readiness Level Assessment)',
-      'operatingSystem': 'All',
-      'applicationCategory': 'BusinessApplication',
-      'url': 'https://tools.cerilas.com/tool/trl-calculator',
-      'offers': {
-        '@type': 'Offer',
-        'price': '0',
-        'priceCurrency': 'USD'
-      },
-      'description': 'Free online Technology Readiness Level (TRL 1-9) calculator for Horizon Europe, EIC Accelerator, NASA ISO 16290, Software SRL, and TÜBİTAK R&D projects. Evaluates sequential prerequisite gating, development gaps, and grant eligibility with 100% in-browser privacy.'
-    };
-
-    // 3. HowTo Schema
-    const howToStructuredData = {
-      '@context': 'https://schema.org',
-      '@type': 'HowTo',
-      'name': 'How to Assess Your R&D Project Technology Readiness Level (TRL 1 to 9)',
-      'description': 'Step-by-step diagnostic methodology to determine your technology maturity baseline, identify missing validation milestones, and match eligible grant funding.',
-      'step': [
-        {
-          '@type': 'HowToStep',
-          'name': 'Select Standard Framework',
-          'text': 'Choose the applicable evaluation standard: Horizon Europe (EC/EIC), NASA Aerospace (ISO 16290), Software/AI (SRL), or TÜBİTAK R&D.'
-        },
-        {
-          '@type': 'HowToStep',
-          'name': 'Answer 18 Diagnostic Criteria',
-          'text': 'Evaluate your project across the 5 chronological R&D phases (Basic Principles, Lab Validation, Relevant Testing, Operational Trials, and Commercial Mission).'
-        },
-        {
-          '@type': 'HowToStep',
-          'name': 'Review Strict Gated TRL & Gap Roadmap',
-          'text': 'Inspect your sequentially validated TRL score and check the gap analysis list for critical tests preventing milestone progression.'
-        },
-        {
-          '@type': 'HowToStep',
-          'name': 'Match Eligible Grant Funding Calls',
-          'text': 'Review matched non-dilutive grant opportunities such as EIC Pathfinder, EIC Transition, EIC Accelerator, or national research subsidies.'
-        },
-        {
-          '@type': 'HowToStep',
-          'name': 'Export Audit Documentation',
-          'text': 'Copy the formatted markdown audit report or export structured JSON data to paste directly into your grant application annex.'
-        }
-      ]
-    };
-
-    let scriptFaq = document.getElementById('trl-calculator-faq-jsonld');
-    if (!scriptFaq) {
-      scriptFaq = document.createElement('script');
-      scriptFaq.id = 'trl-calculator-faq-jsonld';
-      scriptFaq.type = 'application/ld+json';
-      document.head.appendChild(scriptFaq);
-    }
-    scriptFaq.textContent = JSON.stringify(faqStructuredData);
-
-    let scriptApp = document.getElementById('trl-calculator-app-jsonld');
-    if (!scriptApp) {
-      scriptApp = document.createElement('script');
-      scriptApp.id = 'trl-calculator-app-jsonld';
-      scriptApp.type = 'application/ld+json';
-      document.head.appendChild(scriptApp);
-    }
-    scriptApp.textContent = JSON.stringify(appStructuredData);
-
-    let scriptHowTo = document.getElementById('trl-calculator-howto-jsonld');
-    if (!scriptHowTo) {
-      scriptHowTo = document.createElement('script');
-      scriptHowTo.id = 'trl-calculator-howto-jsonld';
-      scriptHowTo.type = 'application/ld+json';
-      document.head.appendChild(scriptHowTo);
-    }
-    scriptHowTo.textContent = JSON.stringify(howToStructuredData);
-
-    return () => {
-      const elFaq = document.getElementById('trl-calculator-faq-jsonld');
-      if (elFaq) elFaq.remove();
-      const elApp = document.getElementById('trl-calculator-app-jsonld');
-      if (elApp) elApp.remove();
-      const elHowTo = document.getElementById('trl-calculator-howto-jsonld');
-      if (elHowTo) elHowTo.remove();
-    };
-  }, []);
 
   return (
     <div className="trl-seo-container">
@@ -639,11 +538,11 @@ export default function TrlCalculatorSeo() {
                 <span>{item.q}</span>
                 <ChevronDown size={18} className="trl-faq-arrow" />
               </button>
-              {openFaq === idx && (
-                <div className="trl-faq-answer">
+              <SearchableHidden isOpen={openFaq === idx} onReveal={() => setOpenFaq(idx)}>
+                  <div className="trl-faq-answer">
                   <p>{item.a}</p>
                 </div>
-              )}
+                </SearchableHidden>
             </div>
           ))}
         </div>

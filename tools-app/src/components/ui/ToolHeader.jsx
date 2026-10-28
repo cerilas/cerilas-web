@@ -1,6 +1,18 @@
 import React from 'react';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, ChevronRight } from 'lucide-react';
+import { getToolSeo, getToolVariantSeo } from '../../seo/toolsSeoRegistry';
 import './ToolHeader.css';
+
+const spaNavigate = (e, href, fallbackCb) => {
+  if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+  e.preventDefault();
+  if (href === '/' && typeof fallbackCb === 'function') {
+    fallbackCb();
+    return;
+  }
+  window.history.pushState({}, '', href);
+  window.dispatchEvent(new PopStateEvent('popstate'));
+};
 
 export default function ToolHeader({
   title,
@@ -15,24 +27,78 @@ export default function ToolHeader({
   slug = null,
   logo = null
 }) {
-  const displaySubtitle = subtitle || description;
+  // Auto-detect tool slug & optional long-tail variant slug from URL
+  const pathname = typeof window !== 'undefined' ? window.location.pathname : '';
+  const hash = typeof window !== 'undefined' ? window.location.hash : '';
+  const pathMatch = pathname.match(/^\/tools?\/([a-zA-Z0-9_-]+)(?:\/([a-zA-Z0-9_-]+))?\/?$/);
+  const hashMatch = hash.match(/tools?\/([a-zA-Z0-9_-]+)/);
 
-  // Auto-detect tool slug from URL hash/path if not explicitly provided
-  const currentUrlSlug = typeof window !== 'undefined' 
-    ? (window.location.hash.match(/tool\/([a-zA-Z0-9_-]+)/)?.[1] || window.location.pathname.match(/\/tool\/([a-zA-Z0-9_-]+)/)?.[1])
-    : null;
+  const currentUrlSlug = pathMatch?.[1] || hashMatch?.[1] || null;
   const effectiveSlug = slug || currentUrlSlug;
-  const logoSrc = logo || (effectiveSlug ? `/tool-icons/${effectiveSlug}.webp` : null);
+  const toolSeo = effectiveSlug ? getToolSeo(effectiveSlug) : null;
+  const canonicalSlug = toolSeo?.slug || effectiveSlug;
+
+  const candidateVariantSlug = pathMatch?.[2] || null;
+  const activeVariant =
+    canonicalSlug && candidateVariantSlug && canonicalSlug !== 'eu-funding-opportunities'
+      ? getToolVariantSeo(canonicalSlug, candidateVariantSlug)
+      : null;
+
+  const displayTitle = activeVariant ? activeVariant.h1 : title;
+  const displaySubtitle = activeVariant ? activeVariant.lead : (subtitle || description);
+  const logoSrc = logo || (canonicalSlug ? `/tool-icons/${canonicalSlug}.webp` : null);
 
   return (
     <div className={`c-tool-header-wrapper ${className}`}>
       <div className="c-tool-nav">
-        {onBack && (
-          <button className="c-tool-back-btn" onClick={onBack} aria-label={backLabel}>
-            <ArrowLeft size={16} />
+        <div className="c-tool-nav-left">
+          <a
+            href="/"
+            className="c-tool-back-btn"
+            onClick={(e) => spaNavigate(e, '/', onBack)}
+            aria-label={backLabel}
+          >
+            <ArrowLeft size={15} />
             <span>{backLabel}</span>
-          </button>
-        )}
+          </a>
+
+          {toolSeo?.categorySlug && (
+            <nav aria-label="Breadcrumb" className="c-tool-breadcrumb">
+              <ChevronRight size={13} className="c-tool-breadcrumb-sep" aria-hidden="true" />
+              <a
+                href={`/${toolSeo.categorySlug}`}
+                className="c-tool-breadcrumb-link"
+                onClick={(e) => spaNavigate(e, `/${toolSeo.categorySlug}`)}
+              >
+                {toolSeo.category}
+              </a>
+              {activeVariant ? (
+                <>
+                  <ChevronRight size={13} className="c-tool-breadcrumb-sep" aria-hidden="true" />
+                  <a
+                    href={`/tool/${canonicalSlug}`}
+                    className="c-tool-breadcrumb-link"
+                    onClick={(e) => spaNavigate(e, `/tool/${canonicalSlug}`)}
+                  >
+                    {toolSeo.name}
+                  </a>
+                  <ChevronRight size={13} className="c-tool-breadcrumb-sep" aria-hidden="true" />
+                  <span className="c-tool-breadcrumb-current" aria-current="page">
+                    {activeVariant.name}
+                  </span>
+                </>
+              ) : (
+                <>
+                  <ChevronRight size={13} className="c-tool-breadcrumb-sep" aria-hidden="true" />
+                  <span className="c-tool-breadcrumb-current" aria-current="page">
+                    {toolSeo.name}
+                  </span>
+                </>
+              )}
+            </nav>
+          )}
+        </div>
+
         <div className="c-tool-nav-right">
           {badges && <div className="c-tool-header-badges">{badges}</div>}
           {actions && <div className="c-tool-header-actions">{actions}</div>}
@@ -66,16 +132,16 @@ export default function ToolHeader({
                 flexShrink: 0
               }}
               onError={(e) => {
-                if (!e.target.dataset.triedPng && effectiveSlug) {
+                if (!e.target.dataset.triedPng && canonicalSlug) {
                   e.target.dataset.triedPng = 'true';
-                  e.target.src = `/tool-icons/${effectiveSlug}.png`;
+                  e.target.src = `/tool-icons/${canonicalSlug}.png`;
                 } else {
                   e.target.style.display = 'none';
                 }
               }}
             />
           )}
-          <h1 className="c-tool-title" style={{ margin: 0 }}>{title}</h1>
+          <h1 className="c-tool-title" style={{ margin: 0 }}>{displayTitle}</h1>
         </div>
         {displaySubtitle && <p className="c-tool-subtitle">{displaySubtitle}</p>}
       </div>

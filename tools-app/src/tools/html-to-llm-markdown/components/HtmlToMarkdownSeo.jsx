@@ -1,3 +1,4 @@
+import SearchableHidden, { useSupportsUntilFound } from '../../../components/ui/SearchableHidden';
 import { useState, useEffect } from 'react';
 import { 
   FileText, 
@@ -62,33 +63,8 @@ const RELATED_TOOLS = [
 ];
 
 export default function HtmlToMarkdownSeo() {
+  const supportsUntilFound = useSupportsUntilFound();
   const [openFaq, setOpenFaq] = useState(null);
-
-  useEffect(() => {
-    const faqSchema = {
-      '@context': 'https://schema.org',
-      '@type': 'FAQPage',
-      mainEntity: FAQ_ITEMS.map((item) => ({
-        '@type': 'Question',
-        name: item.q,
-        acceptedAnswer: {
-          '@type': 'Answer',
-          text: item.a
-        }
-      }))
-    };
-
-    const script = document.createElement('script');
-    script.type = 'application/ld+json';
-    script.id = 'html-markdown-faq-schema';
-    script.textContent = JSON.stringify(faqSchema);
-    document.head.appendChild(script);
-
-    return () => {
-      const existing = document.getElementById('html-markdown-faq-schema');
-      if (existing) existing.remove();
-    };
-  }, []);
 
   return (
     <div className="htm-seo-wrapper">
@@ -209,16 +185,16 @@ export default function HtmlToMarkdownSeo() {
                 <button
                   type="button"
                   className="htm-faq-question"
-                  aria-expanded={isOpen}
+                  aria-expanded={(isOpen) || !supportsUntilFound}
                 >
                   <span>{item.q}</span>
                   <ChevronDown size={16} className={`htm-chevron ${isOpen ? 'rotated' : ''}`} />
                 </button>
-                {isOpen && (
+                <SearchableHidden isOpen={isOpen} onReveal={() => setOpenFaq(index)}>
                   <div className="htm-faq-answer">
                     <p>{item.a}</p>
                   </div>
-                )}
+                </SearchableHidden>
               </div>
             );
           })}

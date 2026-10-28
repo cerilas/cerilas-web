@@ -1,3 +1,4 @@
+import SearchableHidden, { useSupportsUntilFound } from '../../../components/ui/SearchableHidden';
 import React, { useState, useEffect } from 'react';
 import {
   Sparkles,
@@ -52,96 +53,8 @@ const FAQ_ITEMS = [
 ];
 
 export default function ChurnSeo() {
+  const supportsUntilFound = useSupportsUntilFound();
   const [openFaq, setOpenFaq] = useState(null);
-
-  useEffect(() => {
-    const jsonLdScript = document.createElement('script');
-    jsonLdScript.type = 'application/ld+json';
-    jsonLdScript.id = 'churn-calculator-seo-jsonld';
-
-    const structuredData = {
-      '@context': 'https://schema.org',
-      '@graph': [
-        {
-          '@type': 'WebApplication',
-          '@id': 'https://tools.cerilas.com/tool/churn-calculator#software',
-          'name': 'Cerilas Free SaaS Churn Rate & Net Revenue Retention (NRR) Calculator',
-          'alternateName': [
-            'SaaS Churn Calculator',
-            'Net Revenue Retention Calculator',
-            'Logo vs Revenue Churn Estimator',
-            'Customer Retention Rate Calculator'
-          ],
-          'operatingSystem': 'All modern web browsers',
-          'applicationCategory': 'BusinessApplication, FinanceApplication',
-          'image': 'https://tools.cerilas.com/og-image.svg',
-          'offers': {
-            '@type': 'Offer',
-            'price': '0',
-            'priceCurrency': 'USD'
-          },
-          'author': {
-            '@type': 'Organization',
-            'name': 'Cerilas High Tech',
-            'url': 'https://cerilas.com'
-          },
-          'description': 'Calculate Logo Churn, Gross Revenue Churn, GRR, and Net Revenue Retention (NRR) with benchmark guidance and client-side privacy.'
-        },
-        {
-          '@type': 'HowTo',
-          '@id': 'https://tools.cerilas.com/tool/churn-calculator#howto',
-          'name': 'How to Calculate Customer Churn and Net Revenue Retention (NRR)',
-          'description': 'A 4-step framework for subscription founders to audit customer attrition and cohort health.',
-          'step': [
-            {
-              '@type': 'HowToStep',
-              'position': 1,
-              'name': 'Establish Month Opening Baselines',
-              'text': 'Record active paying customer count and starting Monthly Recurring Revenue (MRR) at the start of the month.'
-            },
-            {
-              '@type': 'HowToStep',
-              'position': 2,
-              'name': 'Calculate Logo Churn Rate',
-              'text': 'Divide customers lost to cancellation by opening customer count to compute logo attrition.'
-            },
-            {
-              '@type': 'HowToStep',
-              'position': 3,
-              'name': 'Determine Gross Revenue Retention (GRR)',
-              'text': 'Deduct churned and contraction MRR from opening MRR to establish core product stickiness.'
-            },
-            {
-              '@type': 'HowToStep',
-              'position': 4,
-              'name': 'Compute Net Revenue Retention (NRR)',
-              'text': 'Factor in expansion MRR from retained accounts to verify if the business achieves Net Negative Churn (> 100%).'
-            }
-          ]
-        },
-        {
-          '@type': 'FAQPage',
-          '@id': 'https://tools.cerilas.com/tool/churn-calculator#faq',
-          'mainEntity': FAQ_ITEMS.map((item) => ({
-            '@type': 'Question',
-            'name': item.q,
-            'acceptedAnswer': {
-              '@type': 'Answer',
-              'text': item.a
-            }
-          }))
-        }
-      ]
-    };
-
-    jsonLdScript.textContent = JSON.stringify(structuredData);
-    document.head.appendChild(jsonLdScript);
-
-    return () => {
-      const existing = document.getElementById('churn-calculator-seo-jsonld');
-      if (existing) existing.remove();
-    };
-  }, []);
 
   const toggleFaq = (index) => {
     setOpenFaq(openFaq === index ? null : index);
@@ -369,16 +282,16 @@ export default function ChurnSeo() {
                 type="button"
                 className="finance-faq-question-btn"
                 onClick={() => toggleFaq(idx)}
-                aria-expanded={openFaq === idx}
+                aria-expanded={(openFaq === idx) || !supportsUntilFound}
               >
                 <span>{item.q}</span>
                 <ChevronDown className="finance-faq-chevron" size={18} />
               </button>
-              {openFaq === idx && (
-                <div className="finance-faq-answer">
+              <SearchableHidden isOpen={openFaq === idx} onReveal={() => setOpenFaq(idx)}>
+                  <div className="finance-faq-answer">
                   <p>{item.a}</p>
                 </div>
-              )}
+                </SearchableHidden>
             </div>
           ))}
         </div>

@@ -32,23 +32,39 @@
 - [Universal Token Counter](https://tools.cerilas.com/tool/token-counter-universal): Count tokens and estimate cost across OpenAI, Anthropic, Google, DeepSeek and Llama models.
 - [AI Content Detector](https://tools.cerilas.com/tool/ai-content-detector): Estimate the probability that text or a PDF was AI-generated, with perplexity and burstiness metrics.
 - [PDF → RAG Cleaner](https://tools.cerilas.com/tool/pdf-rag-cleaner): Turn PDFs into clean Markdown, JSON chunks and metadata for LangChain, LlamaIndex and vector databases.
+- [HTML to LLM Markdown Converter](https://tools.cerilas.com/tool/html-to-llm-markdown): Strip DOM boilerplate and convert live URLs or raw HTML into token-lean Markdown for RAG and LLM prompts.
 
 ## File, media & productivity tools
 
 - [PDF Editor](https://tools.cerilas.com/tool/pdf-editor): Edit PDFs in the browser: add text, sign, redact, rotate and reorder pages, without watermarks.
-- [PDF Compressor](https://tools.cerilas.com/tool/pdf-compressor): Compress PDFs with Extreme, Recommended and High Quality presets, locally in the browser.
-- [Image Compressor](https://tools.cerilas.com/tool/image-compressor): Batch compress JPG, PNG, WebP, AVIF and SVG files in the browser with a comparison slider and ZIP download.
-- [Video Compressor](https://tools.cerilas.com/tool/video-compressor): Compress MP4, WebM and MOV locally with quality presets, trimming and audio muting.
+- [PDF Compressor](https://tools.cerilas.com/tool/pdf-compressor): Compress PDFs to 100KB, 200KB, or under 1MB locally in the browser with zero uploads.
+- [PDF Merger](https://tools.cerilas.com/tool/pdf-merger): Merge and combine multiple PDF documents locally via WebAssembly with visual page reordering.
+- [PDF Splitter](https://tools.cerilas.com/tool/pdf-splitter): Split PDFs or extract custom page ranges locally into single PDFs or a ZIP archive.
+- [Image Compressor](https://tools.cerilas.com/tool/image-compressor): Batch compress JPG, PNG, WebP, AVIF and SVG files in the browser with WebP conversion and ZIP download.
+- [Video Compressor](https://tools.cerilas.com/tool/video-compressor): Compress MP4, WebM and MOV locally via FFmpeg WebAssembly for Discord (10MB/25MB), WhatsApp, and email.
 - [Background Remover](https://tools.cerilas.com/tool/background-remover): Remove image backgrounds in the browser with an on-device model; exports transparent PNG.
 - [QR Code Generator](https://tools.cerilas.com/tool/qr-code-generator): Static QR codes that never expire, exported as SVG or high-resolution PNG, for URLs, Wi-Fi, vCard, text and email.
 - [Email Signature Generator](https://tools.cerilas.com/tool/email-signature-generator): HTML email signatures for Gmail, Apple Mail and Outlook.
 - [ATS Resume Checker](https://tools.cerilas.com/tool/ats-resume-checker): Test resume readability for applicant tracking systems and keyword match against a job description.
 - [Webhook Tester](https://tools.cerilas.com/tool/webhook-tester): Inspect and debug incoming webhooks with unique live URLs.
-- [JSON Beautifier & Formatter](https://tools.cerilas.com/tool/json-beautifier): Format, validate, minify and repair JSON with a tree viewer.
-- [YouTube Thumbnail Downloader](https://tools.cerilas.com/tool/youtube-thumbnail-downloader): Download HD thumbnails from any YouTube video or Shorts URL.
-- [Task Prioritization & Capacity Planner](https://tools.cerilas.com/tool/task-prioritization-planner): Free in-browser planner. Scores tasks 0–100 with weighted criteria (impact, strategic alignment, urgency, deadline risk, effort, custom), calculates total available hours, usable capacity (after a buffer) and utilization for any date range from per-weekday hours, breaks, holidays and date overrides, then auto-schedules tasks around deadlines, dependencies and locked calendar blocks. Daily, weekly, monthly and timeline views; downloadable PDF plan report (capacity KPIs, priority ranking, day-by-day schedule, feasibility check); exports .ics, CSV and JSON. Formulas: Usable Capacity = Total Available Hours × (1 − Buffer % / 100); Utilization = Scheduled Task Hours / Usable Capacity × 100.
-- [Pomodoro Timer](https://tools.cerilas.com/tool/pomodoro-timer): Minimal in-browser Pomodoro timer with customizable intervals.
-- [EU Funding & Cascade Grants](https://tools.cerilas.com/tool/eu-funding-opportunities): Searchable database of Horizon Europe calls and cascade funding (FSTP) sub-grants.
+- [JSON Beautifier & Formatter](https://tools.cerilas.com/tool/json-beautifier): Format, validate, minify, repair JSON and generate TypeScript interfaces in-browser.
+- [Website Email & Department Extractor](https://tools.cerilas.com/tool/website-email-extractor): Deterministically crawl public company pages to extract verified emails grouped by department (Sales, Support, Press, HR, Legal, Executive).
+- [YouTube Thumbnail Downloader](https://tools.cerilas.com/tool/youtube-thumbnail-downloader): Download 4K/1080p MaxRes HD and WebP thumbnails from any YouTube video or Shorts URL.
+- [Task Prioritization & Capacity Planner](https://tools.cerilas.com/tool/task-prioritization-planner): Free in-browser planner. Scores tasks 0–100 with weighted criteria (impact, strategic alignment, urgency, deadline risk, effort, custom), calculates total available hours, usable capacity (after a buffer) and utilization for any date range from per-weekday hours, breaks, holidays and date overrides, then auto-schedules tasks around deadlines, dependencies and locked calendar blocks. Exports PDF plan report, .ics, CSV and JSON.
+- [Pomodoro Timer](https://tools.cerilas.com/tool/pomodoro-timer): Minimal in-browser Pomodoro focus timer with customizable intervals and Web Worker accuracy.
+
+## Research, EU funding & SaaS finance calculators
+
+- [EU Funding & Cascade Grants](https://tools.cerilas.com/tool/eu-funding-opportunities): Searchable database of 660+ open Horizon Europe calls and equity-free Cascade Funding (FSTP) sub-grants (€50k–€300k).
+- [TRL Calculator (Technology Readiness Level 1–9)](https://tools.cerilas.com/tool/trl-calculator): Diagnostic questionnaire for Horizon Europe, EIC Accelerator, NASA ISO 16290, and software SRL assessments.
+- [Sample Size & Power Calculator](https://tools.cerilas.com/tool/sample-size-calculator): Peer-reviewed Cochran survey proportion, Finite Population Correction (FPC), and Cohen two-group power calculator.
+- [Startup Runway Calculator](https://tools.cerilas.com/tool/startup-runway-calculator): Model net burn rate, cash runway in months, zero-cash date, and hiring scenarios.
+- [MRR Calculator](https://tools.cerilas.com/tool/mrr-calculator): Calculate Monthly Recurring Revenue, Net New MRR, expansion, and SaaS Quick Ratio.
+- [ARR Calculator](https://tools.cerilas.com/tool/arr-calculator): Calculate Annual Recurring Revenue, YoY growth velocity, and Rule of 40 benchmarks.
+- [Churn Rate Calculator](https://tools.cerilas.com/tool/churn-calculator): Measure monthly/annual customer logo churn, gross MRR churn, and Net Dollar Retention (NDR).
+- [LTV Calculator](https://tools.cerilas.com/tool/ltv-calculator): Compute gross-margin-adjusted Customer Lifetime Value across SaaS and e-commerce cohorts.
+- [CAC Calculator](https://tools.cerilas.com/tool/cac-calculator): Calculate fully-burdened Customer Acquisition Cost and CAC payback period in months.
+- [LTV:CAC Ratio Calculator](https://tools.cerilas.com/tool/ltv-cac-calculator): Benchmark SaaS unit economics against the 3:1–5:1 venture capital standard.
 
 ## Company & policies
 

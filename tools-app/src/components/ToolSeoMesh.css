@@ -1,0 +1,346 @@
+/* Universal Below-the-Fold Internal Link Mesh & Long-Tail Variant Dossier */
+.c-seo-mesh-wrapper {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1.5rem 4.5rem 1.5rem;
+  box-sizing: border-box;
+  /* Deferred below-the-fold layout/paint per modern-web-guidance (defer-rendering-heavy-content) */
+  content-visibility: auto;
+  contain-intrinsic-size: auto none auto 420px;
+  font-family: 'Dosis', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.c-seo-mesh-inner {
+  border-top: 1px solid var(--card-border);
+  padding-top: 2.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2.25rem;
+}
+
+/* Variant Workflow Dossier */
+.c-variant-dossier {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 18px;
+  padding: 1.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.c-variant-spec-box {
+  background: rgba(99, 102, 241, 0.07);
+  border: 1px solid rgba(99, 102, 241, 0.22);
+  border-radius: 12px;
+  padding: 0.9rem 1.15rem;
+  font-size: 0.9rem;
+  line-height: 1.55;
+  color: var(--text-main);
+}
+
+.c-variant-spec-label {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: #6366f1;
+  margin-right: 0.55rem;
+}
+
+.c-variant-section-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-main);
+  margin: 0 0 0.85rem 0;
+  letter-spacing: -0.01em;
+}
+
+.c-variant-steps-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 0.9rem;
+}
+
+.c-variant-step-card {
+  background: var(--bg-color);
+  border: 1px solid var(--card-border);
+  border-radius: 12px;
+  padding: 1rem 1.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.c-variant-step-num {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #10b981;
+}
+
+.c-variant-step-name {
+  font-size: 0.98rem;
+  font-weight: 600;
+  color: var(--text-main);
+  margin: 0;
+}
+
+.c-variant-step-text {
+  font-size: 0.86rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.c-variant-faq-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.c-variant-faq-item {
+  border: 1px solid var(--card-border);
+  border-radius: 12px;
+  background: var(--bg-color);
+  overflow: hidden;
+}
+
+.c-variant-faq-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  background: transparent;
+  border: none;
+  padding: 0.95rem 1.15rem;
+  text-align: left;
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-main);
+  cursor: pointer;
+}
+
+.c-variant-faq-answer-inner {
+  padding: 0 1.15rem 1rem 1.15rem;
+  font-size: 0.88rem;
+  line-height: 1.6;
+  color: var(--text-muted);
+}
+
+/* Section Headers */
+.c-mesh-section-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.9rem;
+}
+
+.c-mesh-heading {
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--text-main);
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+.c-mesh-cat-link {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  transition: color 0.15s ease;
+}
+
+.c-mesh-cat-link:hover {
+  color: var(--text-main);
+  text-decoration: underline;
+}
+
+/* Specific Workflows / Long-Tail Use-Case Pills & Cards */
+.c-mesh-workflows-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 0.75rem;
+}
+
+.c-mesh-workflow-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.85rem 1.05rem;
+  border-radius: 12px;
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  color: var(--text-main);
+  text-decoration: none;
+  transition: transform 0.16s ease, border-color 0.16s ease, background 0.16s ease;
+}
+
+.c-mesh-workflow-card:hover {
+  transform: translateY(-1px);
+  border-color: rgba(99, 102, 241, 0.4);
+  background: var(--hover-bg);
+}
+
+.c-mesh-workflow-card.is-active {
+  border-color: #6366f1;
+  background: rgba(99, 102, 241, 0.08);
+}
+
+.c-mesh-workflow-title {
+  font-size: 0.9rem;
+  font-weight: 500;
+  line-height: 1.35;
+}
+
+/* Related Free Utilities Grid */
+.c-mesh-related-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 0.9rem;
+}
+
+.c-mesh-related-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.85rem;
+  padding: 1.05rem 1.15rem;
+  border-radius: 14px;
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  text-decoration: none;
+  color: inherit;
+  transition: transform 0.18s ease, border-color 0.18s ease;
+}
+
+.c-mesh-related-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(150, 150, 150, 0.35);
+}
+
+.c-mesh-related-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 9px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.c-mesh-related-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 0;
+}
+
+.c-mesh-related-name {
+  font-size: 0.96rem;
+  font-weight: 600;
+  color: var(--text-main);
+  margin: 0;
+}
+
+.c-mesh-related-desc {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  line-height: 1.45;
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Subtle GrowthControl & AI Visibility Discovery Banner */
+.c-mesh-growth-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+  padding: 1.15rem 1.35rem;
+  border-radius: 14px;
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.08) 0%, rgba(16, 185, 129, 0.07) 100%);
+  border: 1px solid rgba(99, 102, 241, 0.22);
+}
+
+.c-mesh-growth-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  max-width: 680px;
+}
+
+.c-mesh-growth-title {
+  font-size: 0.96rem;
+  font-weight: 600;
+  color: var(--text-main);
+  margin: 0;
+}
+
+.c-mesh-growth-sub {
+  font-size: 0.83rem;
+  color: var(--text-muted);
+  margin: 0;
+  line-height: 1.45;
+}
+
+.c-mesh-growth-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.c-mesh-btn-primary,
+.c-mesh-btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.83rem;
+  font-weight: 600;
+  padding: 0.48rem 0.95rem;
+  border-radius: 999px;
+  text-decoration: none;
+  transition: transform 0.15s ease, opacity 0.15s ease;
+}
+
+.c-mesh-btn-primary {
+  background: var(--text-main);
+  color: var(--bg-color);
+}
+
+.c-mesh-btn-secondary {
+  background: var(--card-bg);
+  color: var(--text-main);
+  border: 1px solid var(--card-border);
+}
+
+.c-mesh-btn-primary:hover,
+.c-mesh-btn-secondary:hover {
+  transform: translateY(-1px);
+}
+
+@media (max-width: 768px) {
+  .c-seo-mesh-wrapper {
+    padding: 0 1rem 3.5rem 1rem;
+  }
+  .c-variant-dossier {
+    padding: 1.25rem;
+  }
+}

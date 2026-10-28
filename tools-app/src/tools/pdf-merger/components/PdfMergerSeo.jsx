@@ -1,3 +1,4 @@
+import SearchableHidden, { useSupportsUntilFound } from '../../../components/ui/SearchableHidden';
 import React, { useState, useEffect } from 'react';
 import { 
   ShieldCheck, 
@@ -15,85 +16,8 @@ import {
 import './PdfMergerSeo.css';
 
 export default function PdfMergerSeo() {
+  const supportsUntilFound = useSupportsUntilFound();
   const [openFaq, setOpenFaq] = useState(null);
-
-  useEffect(() => {
-    const jsonLdScript = document.createElement('script');
-    jsonLdScript.type = 'application/ld+json';
-    jsonLdScript.id = 'pdf-merger-seo-jsonld';
-
-    const structuredData = {
-      "@context": "https://schema.org",
-      "@graph": [
-        {
-          "@type": "WebApplication",
-          "@id": "https://tools.cerilas.com/tool/pdf-merger#software",
-          "name": "Cerilas Free In-Browser PDF Merger",
-          "alternateName": [
-            "Cerilas PDF Merger",
-            "Merge PDF Online Free",
-            "Combine PDF Files with Custom Page Order",
-            "100% Private Client-Side PDF Joiner"
-          ],
-          "operatingSystem": "All modern browsers (Chrome, Safari, Firefox, Edge, Brave)",
-          "applicationCategory": "ProductivityApplication, UtilityApplication",
-          "image": "https://tools.cerilas.com/tool-icons/pdf-merger.png",
-          "description": "Combine multiple PDF files into one clean document with drag-and-drop page reordering and 100% client-side privacy.",
-          "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "USD"
-          }
-        },
-        {
-          "@type": "FAQPage",
-          "@id": "https://tools.cerilas.com/tool/pdf-merger#faq",
-          "mainEntity": [
-            {
-              "@type": "Question",
-              "name": "Is my confidential data safe when merging PDFs here?",
-              "acceptedAnswer": {
-                "@type": "Answer",
-                "text": "Yes, 100%. Unlike conventional online PDF tools that upload your files to remote cloud servers, Cerilas PDF Merger runs completely inside your web browser using WebAssembly and JavaScript. Your documents never leave your computer or phone."
-              }
-            },
-            {
-              "@type": "Question",
-              "name": "Can I change the order of the merged PDF files?",
-              "acceptedAnswer": {
-                "@type": "Answer",
-                "text": "Absolutely. You can drag and drop any file card into your preferred position or use the Move Up (↑) and Move Down (↓) arrow buttons on each card. You can also use 1-click A-Z sort or reverse order shortcuts."
-              }
-            },
-            {
-              "@type": "Question",
-              "name": "Can I merge only specific pages from a document?",
-              "acceptedAnswer": {
-                "@type": "Answer",
-                "text": "Yes! Each file card includes a Page Range input where you can enter specific pages or page ranges, such as '1-3, 5, 8-10', or leave it blank to include all pages."
-              }
-            },
-            {
-              "@type": "Question",
-              "name": "Is there a file count limit or watermark?",
-              "acceptedAnswer": {
-                "@type": "Answer",
-                "text": "No. There are zero file count limits, zero file size restrictions, and absolutely no watermarks added to your output document."
-              }
-            }
-          ]
-        }
-      ]
-    };
-
-    jsonLdScript.textContent = JSON.stringify(structuredData);
-    document.head.appendChild(jsonLdScript);
-
-    return () => {
-      const el = document.getElementById('pdf-merger-seo-jsonld');
-      if (el) el.remove();
-    };
-  }, []);
 
   const toggleFaq = (index) => {
     setOpenFaq(openFaq === index ? null : index);
@@ -263,16 +187,16 @@ export default function PdfMergerSeo() {
                   type="button" 
                   className="pdfm-faq-question" 
                   onClick={() => toggleFaq(idx)}
-                  aria-expanded={isOpen}
+                  aria-expanded={(isOpen) || !supportsUntilFound}
                 >
                   <span>{faq.q}</span>
                   <ChevronDown size={18} className="pdfm-faq-icon" />
                 </button>
-                {isOpen && (
+                <SearchableHidden isOpen={isOpen} onReveal={() => setOpenFaq(idx)}>
                   <div className="pdfm-faq-answer">
                     <p>{faq.a}</p>
                   </div>
-                )}
+                </SearchableHidden>
               </div>
             );
           })}

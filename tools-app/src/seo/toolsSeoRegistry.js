@@ -17,6 +17,8 @@ import {
   PLANNER_WHEN_TO_USE,
   PLANNER_EXAMPLE
 } from './taskPlannerContent.js';
+import { TOOL_EXTENDED_SEO } from './toolExtendedData.js';
+export { TOOL_USE_CASES, getToolVariantSeo, getVariantsForTool } from './toolUseCasesRegistry.js';
 
 export const CATEGORIES = {
   'research-tools': {
@@ -28,6 +30,7 @@ export const CATEGORIES = {
     description: 'Statistically sound, peer-reviewed research utilities. Calculate sample size, statistical power, Technology Readiness Levels (TRL), and find EU grants.',
     shortDescription: 'Free in-browser research tools designed for researchers, PhD candidates, principal investigators, and engineers. Zero sign-up, zero data collection.',
     keywords: 'research tools, sample size calculator, power analysis, trl calculator, technology readiness level, eu funding opportunities, horizon europe grants',
+    ogImage: 'https://tools.cerilas.com/og/cat-research-tools.png',
     toolSlugs: ['sample-size-calculator', 'trl-calculator', 'eu-funding-opportunities']
   },
   'ai-tools': {
@@ -39,6 +42,7 @@ export const CATEGORIES = {
     description: 'Enterprise-grade AI utilities running in your browser. Detect AI text, clean PDFs for RAG vector databases, calculate universal LLM tokens, and audit URLs.',
     shortDescription: 'Modern AI and LLM tools built for engineers, prompt engineers, and AI researchers. High precision, privacy-focused with zero server retention.',
     keywords: 'ai tools, ai content detector, token counter universal, pdf to rag cleaner, llms txt generator, ai crawler checker, ai link hallucination checker',
+    ogImage: 'https://tools.cerilas.com/og/cat-ai-tools.png',
     toolSlugs: ['ai-content-detector', 'token-counter-universal', 'pdf-rag-cleaner', 'ai-link-hallucination-checker', 'ai-crawler-checker', 'llms-txt', 'html-to-llm-markdown', 'ats-resume-checker', 'ai-visibility-checker', 'google-marketing-mcp']
   },
   'seo-tools': {
@@ -50,6 +54,7 @@ export const CATEGORIES = {
     description: 'Modern SEO and web infrastructure utilities. Generate llms.txt files, test AI bot access, inspect meta robots headers, and convert web pages to clean markdown.',
     shortDescription: 'Technical SEO and generative engine optimization (GEO) tools to prepare your web properties for AI search engines, crawlers, and LLM indexing.',
     keywords: 'seo tools, llms txt generator, ai crawler checker, ai link checker, html to markdown, web tools',
+    ogImage: 'https://tools.cerilas.com/og/cat-seo-tools.png',
     toolSlugs: ['llms-txt', 'ai-crawler-checker', 'ai-link-hallucination-checker', 'html-to-llm-markdown', 'website-email-extractor', 'ai-visibility-checker', 'google-marketing-mcp']
   },
   'developer-tools': {
@@ -61,6 +66,7 @@ export const CATEGORIES = {
     description: 'Fast, secure in-browser developer utilities. Inspect real-time webhooks, beautify and validate JSON trees, count universal LLM tokens, and convert HTML to markdown.',
     shortDescription: 'Zero-latency developer tools for debugging HTTP requests, parsing data structures, and prototyping AI agent pipelines without cloud telemetry.',
     keywords: 'developer tools, webhook tester, json beautifier, token counter, html to markdown, api inspector',
+    ogImage: 'https://tools.cerilas.com/og/cat-developer-tools.png',
     toolSlugs: ['webhook-tester', 'json-beautifier', 'token-counter-universal', 'html-to-llm-markdown', 'website-email-extractor']
   },
   'file-tools': {
@@ -71,8 +77,9 @@ export const CATEGORIES = {
     title: 'Free PDF & File Tools – Merge, Split & Compress Online | Cerilas Tools',
     description: '100% private, client-side PDF and image utilities. Merge PDFs, split pages, compress documents and images, remove backgrounds, and edit text without uploads.',
     shortDescription: 'Local in-browser document processing. Your sensitive documents never leave your computer: zero server uploads, zero watermarks, zero size limits.',
-    keywords: 'pdf editor, pdf compressor, pdf merger, pdf splitter, image compressor, video compressor, background remover',
-    toolSlugs: ['pdf-editor', 'pdf-compressor', 'pdf-merger', 'pdf-splitter', 'image-compressor', 'background-remover', 'video-compressor', 'qr-code-generator']
+    keywords: 'pdf editor, pdf compressor, pdf merger, pdf splitter, image compressor, video compressor, background remover, youtube thumbnail downloader',
+    ogImage: 'https://tools.cerilas.com/og/cat-file-tools.png',
+    toolSlugs: ['pdf-editor', 'pdf-compressor', 'pdf-merger', 'pdf-splitter', 'image-compressor', 'background-remover', 'video-compressor', 'qr-code-generator', 'youtube-thumbnail-downloader']
   },
   'finance-tools': {
     slug: 'finance-tools',
@@ -83,6 +90,7 @@ export const CATEGORIES = {
     description: 'Essential financial modeling calculators for founders and SaaS operators. Calculate startup runway, MRR, ARR, customer churn, CAC, LTV, and LTV:CAC ratios.',
     shortDescription: 'Deterministic SaaS unit economics and financial planning calculators. Benchmark your startup metrics against industry standards.',
     keywords: 'startup runway calculator, mrr calculator, arr calculator, churn rate calculator, ltv calculator, cac calculator, ltv cac calculator, saas metrics',
+    ogImage: 'https://tools.cerilas.com/og/cat-finance-tools.png',
     toolSlugs: ['startup-runway-calculator', 'mrr-calculator', 'arr-calculator', 'churn-calculator', 'ltv-calculator', 'cac-calculator', 'ltv-cac-calculator']
   },
   'productivity-tools': {
@@ -93,7 +101,8 @@ export const CATEGORIES = {
     title: 'Free Productivity Tools – Task Planner & Focus Timer | Cerilas Tools',
     description: 'Free in-browser productivity tools. Prioritize tasks with weighted scoring, plan working capacity for any date range, and stay focused with a Pomodoro timer.',
     shortDescription: 'Planning and focus utilities that run in your browser: task prioritization, capacity planning, time blocking and focus sessions. No sign-up, no data upload.',
-    keywords: 'productivity tools, task prioritization tool, capacity planner, pomodoro timer, time blocking, work planner, focus timer',
+    keywords: 'productivity tools, task prioritization tool, capacity planner, pomodoro timer, time blocking, work planner, focus timer, email signature generator',
+    ogImage: 'https://tools.cerilas.com/og/cat-productivity-tools.png',
     toolSlugs: ['task-prioritization-planner', 'pomodoro-timer', 'email-signature-generator']
   }
 };
@@ -976,8 +985,8 @@ export const TOOLS_SEO_REGISTRY = {
     slug: 'email-signature-generator',
     name: 'Email Signature Generator',
     h1: 'Professional HTML Email Signature Generator (Free)',
-    category: 'File Tools',
-    categorySlug: 'file-tools',
+    category: 'Productivity Tools',
+    categorySlug: 'productivity-tools',
     title: 'Professional HTML Email Signature Generator | Cerilas Tools',
     description: 'Create sleek, professional HTML email signatures with company logos, social icons, and disclaimers. 100% compatible with Gmail, Outlook, and Apple Mail.',
     shortDescription: 'Design elegant, responsive HTML email signatures with custom logos, job titles, social icons, and legal disclaimers. 1-click copy for Gmail and Outlook.',
@@ -1390,6 +1399,14 @@ export const TOOLS_SEO_REGISTRY = {
     keywords: 'website email extractor, site email crawler, find emails on website, extract emails from domain, email scraper no ai, department email finder, company email extractor, lead extractor'
   }
 };
+
+// Enrich every tool entry in-place with 1200x630 PNG OG images, centralized FAQPage schema parity,
+// step-by-step HowTo blocks, and high-CTR search titles/descriptions from TOOL_EXTENDED_SEO.
+for (const [slug, ext] of Object.entries(TOOL_EXTENDED_SEO)) {
+  if (TOOLS_SEO_REGISTRY[slug]) {
+    Object.assign(TOOLS_SEO_REGISTRY[slug], ext);
+  }
+}
 
 /**
  * Returns complete SEO entry for a tool slug, with alias support and safe fallback.

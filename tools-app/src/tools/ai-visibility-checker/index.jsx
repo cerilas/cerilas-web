@@ -125,7 +125,8 @@ export default function AiVisibilityChecker({ onBack, toolMeta }) {
         console.warn('Pending scan storage warning:', e);
       }
     }
-    window.location.hash = '#/growth';
+    window.history.pushState({}, '', '/growth');
+    window.dispatchEvent(new PopStateEvent('popstate'));
   };
 
   // Trigger minimalist GrowthControl modal after initial scan

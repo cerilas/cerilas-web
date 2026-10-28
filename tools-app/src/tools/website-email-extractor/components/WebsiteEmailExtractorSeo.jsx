@@ -1,3 +1,4 @@
+import SearchableHidden, { useSupportsUntilFound } from '../../../components/ui/SearchableHidden';
 import React, { useState, useEffect } from 'react';
 import {
   Mail,
@@ -61,33 +62,8 @@ const RELATED_TOOLS = [
 ];
 
 export default function WebsiteEmailExtractorSeo() {
+  const supportsUntilFound = useSupportsUntilFound();
   const [openFaq, setOpenFaq] = useState(null);
-
-  useEffect(() => {
-    const faqSchema = {
-      '@context': 'https://schema.org',
-      '@type': 'FAQPage',
-      mainEntity: FAQ_ITEMS.map((item) => ({
-        '@type': 'Question',
-        name: item.q,
-        acceptedAnswer: {
-          '@type': 'Answer',
-          text: item.a
-        }
-      }))
-    };
-
-    const script = document.createElement('script');
-    script.type = 'application/ld+json';
-    script.id = 'email-extractor-faq-schema';
-    script.textContent = JSON.stringify(faqSchema);
-    document.head.appendChild(script);
-
-    return () => {
-      const existing = document.getElementById('email-extractor-faq-schema');
-      if (existing) existing.remove();
-    };
-  }, []);
 
   return (
     <div className="wee-seo-wrapper">
@@ -214,16 +190,16 @@ export default function WebsiteEmailExtractorSeo() {
                 <button
                   type="button"
                   className="wee-faq-question"
-                  aria-expanded={isOpen}
+                  aria-expanded={(isOpen) || !supportsUntilFound}
                 >
                   <span>{item.q}</span>
                   <ChevronDown size={16} className={`wee-chevron ${isOpen ? 'rotated' : ''}`} />
                 </button>
-                {isOpen && (
+                <SearchableHidden isOpen={isOpen} onReveal={() => setOpenFaq(index)}>
                   <div className="wee-faq-answer">
                     <p>{item.a}</p>
                   </div>
-                )}
+                </SearchableHidden>
               </div>
             );
           })}

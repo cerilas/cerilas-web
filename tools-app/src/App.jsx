@@ -49,9 +49,10 @@ import RevenueCatPaywallModal from './components/RevenueCatPaywallModal';
 import RevenueCatCustomerCenterModal from './components/RevenueCatCustomerCenterModal';
 import { LEGAL_DOCS } from './legal/legalContent';
 import { toolsRegistry, getAllRegisteredTools, getRegisteredTool } from './tools/registry';
-import { getToolSeo, CATEGORIES } from './seo/toolsSeoRegistry';
-import { JSONLD_IDS, buildToolJsonLdBlocks } from './seo/structuredData';
+import { getToolSeo, getToolVariantSeo, CATEGORIES } from './seo/toolsSeoRegistry';
+import { JSONLD_IDS, buildToolJsonLdBlocks, buildToolVariantJsonLdBlocks } from './seo/structuredData';
 import { GROWTH_SEO, GROWTH_URL, buildGrowthJsonLd } from './seo/growthControlSeo';
+import ToolSeoMesh from './components/ToolSeoMesh';
 import { useTranslation } from './i18n';
 import { getConversionCount, getConversionLabel, getShortConversionLabel } from './utils/toolMetrics';
 import './index.css';
@@ -275,6 +276,7 @@ export default function App() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [currentSlug, setCurrentSlug] = useState(null);
+  const [currentVariantSlug, setCurrentVariantSlug] = useState(null);
   const [currentCategorySlug, setCurrentCategorySlug] = useState(null);
   const [currentLegalSlug, setCurrentLegalSlug] = useState(null);
   const [isAdmin, setIsAdmin] = useState(() => {
@@ -374,6 +376,7 @@ export default function App() {
         setIsAdmin(true);
         setIsPricing(false);
         setCurrentSlug(null);
+        setCurrentVariantSlug(null);
         setCurrentLegalSlug(null);
         forceScrollToTop();
         return;
@@ -386,6 +389,7 @@ export default function App() {
         setIsPricing(false);
         setIsAccountView(false);
         setCurrentSlug(null);
+        setCurrentVariantSlug(null);
         setCurrentLegalSlug(null);
         forceScrollToTop();
         return;
@@ -398,6 +402,7 @@ export default function App() {
         setIsGrowthView(false);
         setIsAccountView(false);
         setCurrentSlug(null);
+        setCurrentVariantSlug(null);
         setCurrentLegalSlug(null);
         forceScrollToTop();
         return;
@@ -418,6 +423,7 @@ export default function App() {
         setIsGrowthView(false);
         setIsPricing(false);
         setCurrentSlug(null);
+        setCurrentVariantSlug(null);
         setCurrentLegalSlug(null);
         if (hash.includes('tab=package') || hash.includes('tab=plan') || hash.includes('package') || hash.includes('plan')) {
           setAccountTab('package');
@@ -456,6 +462,7 @@ export default function App() {
       if (legalHashMatch && legalAliasMap[legalHashMatch[1].toLowerCase()]) {
         setCurrentLegalSlug(legalAliasMap[legalHashMatch[1].toLowerCase()]);
         setCurrentSlug(null);
+        setCurrentVariantSlug(null);
         forceScrollToTop();
         return;
       }
@@ -464,6 +471,7 @@ export default function App() {
       if (directHashLegalMatch && legalAliasMap[directHashLegalMatch[1].toLowerCase()]) {
         setCurrentLegalSlug(legalAliasMap[directHashLegalMatch[1].toLowerCase()]);
         setCurrentSlug(null);
+        setCurrentVariantSlug(null);
         forceScrollToTop();
         return;
       }
@@ -472,6 +480,7 @@ export default function App() {
       if (legalPathMatch && legalAliasMap[legalPathMatch[1].toLowerCase()]) {
         setCurrentLegalSlug(legalAliasMap[legalPathMatch[1].toLowerCase()]);
         setCurrentSlug(null);
+        setCurrentVariantSlug(null);
         forceScrollToTop();
         return;
       }
@@ -480,27 +489,47 @@ export default function App() {
       if (directPathLegalMatch && legalAliasMap[directPathLegalMatch[1].toLowerCase()]) {
         setCurrentLegalSlug(legalAliasMap[directPathLegalMatch[1].toLowerCase()]);
         setCurrentSlug(null);
+        setCurrentVariantSlug(null);
         forceScrollToTop();
         return;
       }
 
       setCurrentLegalSlug(null);
 
-      // 2. Tool routes matching
-      const hashMatch = hash.match(/^#\/tools?\/([a-zA-Z0-9_-]+)\/?/);
+      // 2. Tool & Long-Tail Working Tool Variant routes matching (/tool/:slug and /tool/:slug/:variantSlug)
+      const hashMatch = hash.match(/^#\/tools?\/([a-zA-Z0-9_-]+)(?:\/([a-zA-Z0-9_-]+))?\/?/);
       if (hashMatch) {
         const slugVal = hashMatch[1];
+        const subVal = hashMatch[2] || null;
+        const resolvedSeo = getToolSeo(slugVal);
+        const validVariant =
+          subVal && resolvedSeo?.slug !== 'eu-funding-opportunities'
+            ? getToolVariantSeo(resolvedSeo?.slug || slugVal, subVal)
+            : null;
         setCurrentSlug(slugVal);
+        setCurrentVariantSlug(validVariant ? validVariant.variantSlug : null);
         setCurrentCategorySlug(null);
         try {
-          window.history.replaceState({}, '', `/tool/${slugVal}`);
+          window.history.replaceState(
+            {},
+            '',
+            validVariant ? `/tool/${resolvedSeo.slug}/${validVariant.variantSlug}` : `/tool/${slugVal}`
+          );
         } catch (e) {}
         forceScrollToTop();
         return;
       }
-      const pathMatch = window.location.pathname.match(/^\/tools?\/([a-zA-Z0-9_-]+)\/?/);
+      const pathMatch = window.location.pathname.match(/^\/tools?\/([a-zA-Z0-9_-]+)(?:\/([a-zA-Z0-9_-]+))?\/?/);
       if (pathMatch) {
-        setCurrentSlug(pathMatch[1]);
+        const slugVal = pathMatch[1];
+        const subVal = pathMatch[2] || null;
+        const resolvedSeo = getToolSeo(slugVal);
+        const validVariant =
+          subVal && resolvedSeo?.slug !== 'eu-funding-opportunities'
+            ? getToolVariantSeo(resolvedSeo?.slug || slugVal, subVal)
+            : null;
+        setCurrentSlug(slugVal);
+        setCurrentVariantSlug(validVariant ? validVariant.variantSlug : null);
         setCurrentCategorySlug(null);
         forceScrollToTop();
         return;
@@ -508,6 +537,7 @@ export default function App() {
       const directLlmsMatch = window.location.pathname.match(/^\/(llms-txt(?:-(?:generator|checker|validator))?)\/?/);
       if (directLlmsMatch) {
         setCurrentSlug(directLlmsMatch[1]);
+        setCurrentVariantSlug(null);
         setCurrentCategorySlug(null);
         forceScrollToTop();
         return;
@@ -515,6 +545,7 @@ export default function App() {
       const directHashLlmsMatch = hash.match(/^#\/(llms-txt(?:-(?:generator|checker|validator))?)\/?/);
       if (directHashLlmsMatch) {
         setCurrentSlug(directHashLlmsMatch[1]);
+        setCurrentVariantSlug(null);
         setCurrentCategorySlug(null);
         try {
           window.history.replaceState({}, '', `/tool/llms-txt`);
@@ -527,13 +558,16 @@ export default function App() {
       const cleanCategoryPath = window.location.pathname.replace(/^\/+|\/+$/g, '').toLowerCase();
       if (CATEGORIES[cleanCategoryPath]) {
         setCurrentCategorySlug(cleanCategoryPath);
+        setSelectedCategory('All');
         setCurrentSlug(null);
+        setCurrentVariantSlug(null);
         forceScrollToTop();
         return;
       }
 
       setCurrentCategorySlug(null);
       setCurrentSlug(null);
+      setCurrentVariantSlug(null);
       forceScrollToTop();
     };
 
@@ -644,10 +678,8 @@ export default function App() {
     if (isPricing) {
       const pageTitle = 'Pricing & Plans – Cerilas Tools | Transparent Zero-Surprise Pricing';
       const pageDesc = 'Explore flexible, transparent pricing plans for Cerilas Tools. Free forever tier, Pro with 5x higher limits, and Unlimited plans with 2 months free on annual billing.';
-      const pageUrl = window.location.pathname.startsWith('/pricing')
-        ? `https://tools.cerilas.com${window.location.pathname}`
-        : 'https://tools.cerilas.com/#/pricing';
-      const ogImgUrl = 'https://tools.cerilas.com/og-image.svg';
+      const pageUrl = 'https://tools.cerilas.com/pricing';
+      const ogImgUrl = 'https://tools.cerilas.com/og/growthcontrol.png';
 
       document.title = pageTitle;
       setMeta('description', 'name', pageDesc);
@@ -660,6 +692,7 @@ export default function App() {
       setMeta('og:image', 'property', ogImgUrl);
       setMeta('og:image:width', 'property', '1200');
       setMeta('og:image:height', 'property', '630');
+      setMeta('og:image:type', 'property', 'image/png');
       setMeta('og:type', 'property', 'website');
 
       // Twitter Cards
@@ -675,10 +708,8 @@ export default function App() {
       const doc = LEGAL_DOCS[currentLegalSlug];
       const pageTitle = doc.seoTitle;
       const pageDesc = doc.seoDescription;
-      const pageUrl = window.location.pathname.startsWith('/legal/') || window.location.pathname.startsWith('/terms') || window.location.pathname.startsWith('/privacy') || window.location.pathname.startsWith('/refund') || window.location.pathname.startsWith('/cookies')
-        ? `https://tools.cerilas.com${window.location.pathname}`
-        : `https://tools.cerilas.com/#/legal/${currentLegalSlug}`;
-      const ogImgUrl = 'https://tools.cerilas.com/og-image.svg';
+      const pageUrl = `https://tools.cerilas.com/legal/${currentLegalSlug}`;
+      const ogImgUrl = 'https://tools.cerilas.com/og/growthcontrol.png';
 
       document.title = pageTitle;
       setMeta('description', 'name', pageDesc);
@@ -691,7 +722,7 @@ export default function App() {
       setMeta('og:image', 'property', ogImgUrl);
       setMeta('og:image:width', 'property', '1200');
       setMeta('og:image:height', 'property', '630');
-      setMeta('og:image:type', 'property', 'image/svg+xml');
+      setMeta('og:image:type', 'property', 'image/png');
 
       // Twitter Card
       setMeta('twitter:title', 'name', pageTitle);
@@ -713,12 +744,22 @@ export default function App() {
       }
 
       const canonicalSlug = toolSeo?.slug || manifest?.slug || currentSlug;
-      const pageTitle = toolSeo?.title || manifest?.seo?.title || `${manifest?.title || 'Tool'} | Cerilas Tools`;
-      const pageDesc = toolSeo?.description || manifest?.seo?.description || manifest?.shortDescription || '';
-      const pageKeywords = toolSeo?.keywords || manifest?.seo?.keywords || '';
-      const pageUrl = `https://tools.cerilas.com/tool/${canonicalSlug}`;
-      const ogImgUrl = toolSeo?.ogImage || `https://tools.cerilas.com/tool-icons/${canonicalSlug}.webp`;
-      const ogImgAlt = toolSeo?.title || pageTitle;
+      const activeVariant = currentVariantSlug && toolSeo ? getToolVariantSeo(canonicalSlug, currentVariantSlug) : null;
+
+      const pageTitle = activeVariant
+        ? activeVariant.title
+        : (toolSeo?.title || manifest?.seo?.title || `${manifest?.title || 'Tool'} | Cerilas Tools`);
+      const pageDesc = activeVariant
+        ? activeVariant.description
+        : (toolSeo?.description || manifest?.seo?.description || manifest?.shortDescription || '');
+      const pageKeywords = activeVariant
+        ? (activeVariant.keywords || toolSeo?.keywords || '')
+        : (toolSeo?.keywords || manifest?.seo?.keywords || '');
+      const pageUrl = activeVariant
+        ? `https://tools.cerilas.com/tool/${canonicalSlug}/${activeVariant.variantSlug}`
+        : `https://tools.cerilas.com/tool/${canonicalSlug}`;
+      const ogImgUrl = toolSeo?.ogImage || `https://tools.cerilas.com/og/${canonicalSlug}.png`;
+      const ogImgAlt = pageTitle;
 
       document.title = pageTitle;
       setMeta('description', 'name', pageDesc);
@@ -736,25 +777,30 @@ export default function App() {
       setMeta('og:image:alt', 'property', ogImgAlt);
 
       // Twitter Card
+      setMeta('twitter:card', 'name', 'summary_large_image');
       setMeta('twitter:title', 'name', pageTitle);
       setMeta('twitter:description', 'name', pageDesc);
       setMeta('twitter:url', 'name', pageUrl);
       setMeta('twitter:image', 'name', ogImgUrl);
       setMeta('twitter:image:alt', 'name', ogImgAlt);
 
-      upsertJsonLdBlocks(buildToolJsonLdBlocks({
-        ...(toolSeo || {}),
-        slug: canonicalSlug,
-        name: toolSeo?.name || manifest?.title,
-        h1: toolSeo?.h1 || pageTitle,
-        description: pageDesc,
-        category: toolSeo?.category || manifest?.category || 'Utilities',
-        faq: toolSeo?.faq || manifest?.faq || []
-      }, { includeFaq: Boolean(toolSeo?.centralFaqSchema) }));
+      if (activeVariant && toolSeo) {
+        upsertJsonLdBlocks(buildToolVariantJsonLdBlocks(toolSeo, activeVariant));
+      } else {
+        upsertJsonLdBlocks(buildToolJsonLdBlocks({
+          ...(toolSeo || {}),
+          slug: canonicalSlug,
+          name: toolSeo?.name || manifest?.title,
+          h1: toolSeo?.h1 || pageTitle,
+          description: pageDesc,
+          category: toolSeo?.category || manifest?.category || 'Utilities',
+          faq: toolSeo?.faq || manifest?.faq || []
+        }, { includeFaq: Boolean(toolSeo?.centralFaqSchema) }));
+      }
     } else if (currentCategorySlug && CATEGORIES[currentCategorySlug]) {
       const cat = CATEGORIES[currentCategorySlug];
       const catUrl = `https://tools.cerilas.com/${cat.slug}`;
-      const catOgImg = 'https://tools.cerilas.com/og/growthcontrol.png';
+      const catOgImg = cat.ogImage || 'https://tools.cerilas.com/og/growthcontrol.png';
 
       document.title = cat.title;
       setMeta('description', 'name', cat.description);
@@ -764,6 +810,10 @@ export default function App() {
       setMeta('og:description', 'property', cat.description);
       setMeta('og:url', 'property', catUrl);
       setMeta('og:image', 'property', catOgImg);
+      setMeta('og:image:width', 'property', '1200');
+      setMeta('og:image:height', 'property', '630');
+      setMeta('og:image:type', 'property', 'image/png');
+      setMeta('twitter:card', 'name', 'summary_large_image');
       setMeta('twitter:title', 'name', cat.title);
       setMeta('twitter:description', 'name', cat.description);
       setMeta('twitter:url', 'name', catUrl);
@@ -801,7 +851,7 @@ export default function App() {
         page_path: window.location.pathname + window.location.hash
       });
     }
-  }, [currentSlug, currentCategorySlug, currentLegalSlug, isPricing, isGrowthView, tools, language]);
+  }, [currentSlug, currentVariantSlug, currentCategorySlug, currentLegalSlug, isPricing, isGrowthView, tools, language]);
 
   // Fetch active tools from database
   useEffect(() => {
@@ -873,6 +923,7 @@ export default function App() {
     setCurrentLegalSlug(null);
     setCurrentCategorySlug(null);
     setCurrentSlug(null);
+    setCurrentVariantSlug(null);
     window.history.pushState({}, '', '/pricing');
     forceScrollToTop();
   };
@@ -885,6 +936,7 @@ export default function App() {
     setCurrentLegalSlug(null);
     setCurrentCategorySlug(null);
     setCurrentSlug(null);
+    setCurrentVariantSlug(null);
     window.history.pushState({}, '', '/growth');
     forceScrollToTop();
   };
@@ -897,6 +949,7 @@ export default function App() {
     setCurrentLegalSlug(null);
     setCurrentCategorySlug(null);
     setCurrentSlug(slug);
+    setCurrentVariantSlug(null);
     window.history.pushState({}, '', `/tool/${slug}`);
     forceScrollToTop();
   };
@@ -909,6 +962,7 @@ export default function App() {
     setCurrentLegalSlug(null);
     setCurrentCategorySlug(null);
     setCurrentSlug(null);
+    setCurrentVariantSlug(null);
     window.history.pushState({}, '', '/');
     forceScrollToTop();
   };
@@ -921,6 +975,7 @@ export default function App() {
     setAccountTab(tab);
     setCurrentLegalSlug(null);
     setCurrentSlug(null);
+    setCurrentVariantSlug(null);
     window.location.hash = `#/account?tab=${tab}`;
     forceScrollToTop();
   };
@@ -1018,8 +1073,9 @@ export default function App() {
                 <p style={{ fontSize: '0.9rem', margin: 0, fontWeight: 300 }}>Loading workspace...</p>
               </div>
             }>
-              <ToolScrollResetWrapper slug={currentSlug}>
+              <ToolScrollResetWrapper slug={currentVariantSlug ? `${currentSlug}/${currentVariantSlug}` : currentSlug}>
                 <ActiveToolComponent onBack={navigateToHome} toolMeta={activeToolMeta} />
+                <ToolSeoMesh slug={activeRegistered?.manifest?.slug || currentSlug} variantSlug={currentVariantSlug} />
               </ToolScrollResetWrapper>
             </Suspense>
           </ErrorBoundary>

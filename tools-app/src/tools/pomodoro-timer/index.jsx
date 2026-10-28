@@ -564,9 +564,13 @@ export default function PomodoroTimerTool({ onBack, toolMeta }) {
     };
   }, [isRunning, handleTimerCompleted]);
 
-  // Sync document title with active timer
+  // Sync document title only when an active or paused session is in progress
+  const baseSeoTitleRef = useRef(null);
   useEffect(() => {
-    const defaultTitle = 'Free Online Pomodoro Timer with Fluid Wave & Chime | Cerilas Tools';
+    if (!baseSeoTitleRef.current && typeof document !== 'undefined') {
+      baseSeoTitleRef.current = document.title;
+    }
+    const fallbackTitle = baseSeoTitleRef.current || 'Free Online Pomodoro Focus Timer & Streak Tracker | Cerilas Tools';
     if (isRunning) {
       const formatted = formatTime(timeLeft);
       const modeName = mode === 'focus' ? 'Focus' : mode === 'shortBreak' ? 'Short Break' : 'Long Break';
@@ -574,12 +578,14 @@ export default function PomodoroTimerTool({ onBack, toolMeta }) {
     } else if (timeLeft < duration) {
       const formatted = formatTime(timeLeft);
       document.title = `(${formatted}) [Paused] • Cerilas Pomodoro`;
-    } else {
-      document.title = defaultTitle;
+    } else if (typeof document !== 'undefined' && document.title.includes('• Cerilas Pomodoro')) {
+      document.title = fallbackTitle;
     }
 
     return () => {
-      document.title = defaultTitle;
+      if (typeof document !== 'undefined' && document.title.includes('• Cerilas Pomodoro')) {
+        document.title = fallbackTitle;
+      }
     };
   }, [isRunning, timeLeft, duration, mode]);
 

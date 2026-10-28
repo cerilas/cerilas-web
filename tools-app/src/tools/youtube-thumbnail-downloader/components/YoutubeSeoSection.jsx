@@ -1,3 +1,4 @@
+import SearchableHidden, { useSupportsUntilFound } from '../../../components/ui/SearchableHidden';
 import React, { useState } from 'react';
 import {
   ChevronDown,
@@ -12,6 +13,7 @@ import {
 } from 'lucide-react';
 
 export default function YoutubeSeoSection() {
+  const supportsUntilFound = useSupportsUntilFound();
   const [openFaqIndex, setOpenFaqIndex] = useState(0);
 
   const toggleFaq = (index) => {
@@ -82,10 +84,6 @@ export default function YoutubeSeoSection() {
   return (
     <div className="ytd-seo-container">
       {/* Schema.org Structured Data */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdData) }}
-      />
 
       {/* Primary Value Cards */}
       <div className="ytd-seo-grid">
@@ -175,16 +173,16 @@ export default function YoutubeSeoSection() {
                   type="button"
                   className="ytd-faq-trigger"
                   onClick={() => toggleFaq(idx)}
-                  aria-expanded={isOpen}
+                  aria-expanded={(isOpen) || !supportsUntilFound}
                 >
                   <span className="ytd-faq-question">{item.q}</span>
                   <ChevronDown size={18} className={`ytd-faq-icon ${isOpen ? 'rotated' : ''}`} />
                 </button>
-                {isOpen && (
+                <SearchableHidden isOpen={isOpen} onReveal={() => setOpenFaqIndex(idx)}>
                   <div className="ytd-faq-answer">
                     <p>{item.a}</p>
                   </div>
-                )}
+                </SearchableHidden>
               </div>
             );
           })}

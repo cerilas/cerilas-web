@@ -1,3 +1,4 @@
+import SearchableHidden, { useSupportsUntilFound } from '../../../components/ui/SearchableHidden';
 import React, { useState, useEffect } from 'react';
 import {
   Link2,
@@ -54,6 +55,7 @@ const FAQ_ITEMS = [
 ];
 
 export default function AiLinkHallucinationSeo() {
+  const supportsUntilFound = useSupportsUntilFound();
   const [openFaq, setOpenFaq] = useState(null);
 
   const toggleFaq = (index) => {
@@ -61,82 +63,6 @@ export default function AiLinkHallucinationSeo() {
   };
 
   // Inject JSON-LD Structured Data
-  useEffect(() => {
-    const webAppSchema = {
-      '@context': 'https://schema.org',
-      '@type': 'WebApplication',
-      'name': 'Cerilas AI Link Hallucination Checker',
-      'url': 'https://tools.cerilas.com/tool/ai-link-hallucination-checker',
-      'applicationCategory': 'UtilitiesApplication',
-      'operatingSystem': 'All',
-      'description': 'Free online audit tool to detect hallucinated URLs, fake domain names, 404 broken links, and slopsquatting security threats in AI-generated text.',
-      'offers': {
-        '@type': 'Offer',
-        'price': '0',
-        'priceCurrency': 'USD'
-      },
-      'featureList': [
-        'Automated multi-format URL and citation extraction',
-        'Real-time DNS NXDOMAIN and HTTP 404 status verification',
-        'AI Hallucination Risk Score from 0 to 100%',
-        'In-text context preview showing original sentence of each link',
-        'Slopsquatting risk detection for unclaimed and parked domains',
-        '1-click Markdown link sanitizer and report exporter'
-      ]
-    };
-
-    const howToSchema = {
-      '@context': 'https://schema.org',
-      '@type': 'HowTo',
-      'name': 'How to Check and Fix AI Link Hallucinations in Generated Content',
-      'step': [
-        {
-          '@type': 'HowToStep',
-          'name': 'Paste AI Content',
-          'text': 'Copy your AI-generated draft, article, documentation, or Markdown file and paste it into the analysis window.'
-        },
-        {
-          '@type': 'HowToStep',
-          'name': 'Run Verification Scan',
-          'text': 'Click "Scan for Hallucinations". The engine extracts all Markdown links, HTML tags, bare URLs, and DOI citations, then verifies DNS and HTTP availability.'
-        },
-        {
-          '@type': 'HowToStep',
-          'name': 'Review Hallucination Diagnostics',
-          'text': 'Inspect the Hallucination Risk Score, itemized 404 errors, NXDOMAIN fake domains, and in-text context quotations.'
-        },
-        {
-          '@type': 'HowToStep',
-          'name': 'Sanitize and Export',
-          'text': 'Switch to the Sanitized Output tab to copy a clean version of your text with hallucinated URLs stripped or converted to plain text.'
-        }
-      ]
-    };
-
-    const faqSchema = {
-      '@context': 'https://schema.org',
-      '@type': 'FAQPage',
-      'mainEntity': FAQ_ITEMS.map((item) => ({
-        '@type': 'Question',
-        'name': item.q,
-        'acceptedAnswer': {
-          '@type': 'Answer',
-          'text': item.a
-        }
-      }))
-    };
-
-    const script = document.createElement('script');
-    script.type = 'application/ld+json';
-    script.id = 'ai-link-hallucination-jsonld';
-    script.text = JSON.stringify([webAppSchema, howToSchema, faqSchema]);
-    document.head.appendChild(script);
-
-    return () => {
-      const existing = document.getElementById('ai-link-hallucination-jsonld');
-      if (existing) existing.remove();
-    };
-  }, []);
 
   return (
     <div className="lhc-seo-wrapper">
@@ -361,16 +287,16 @@ export default function AiLinkHallucinationSeo() {
                 <button
                   className="lhc-faq-question"
                   onClick={() => toggleFaq(idx)}
-                  aria-expanded={isOpen}
+                  aria-expanded={(isOpen) || !supportsUntilFound}
                 >
                   <span>{item.q}</span>
                   <ChevronDown className={`lhc-faq-chevron ${isOpen ? 'open' : ''}`} size={18} />
                 </button>
-                {isOpen && (
+                <SearchableHidden isOpen={isOpen} onReveal={() => setOpenFaq(idx)}>
                   <div className="lhc-faq-answer">
                     <p>{item.a}</p>
                   </div>
-                )}
+                </SearchableHidden>
               </div>
             );
           })}

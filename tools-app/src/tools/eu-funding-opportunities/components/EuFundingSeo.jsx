@@ -1,3 +1,4 @@
+import SearchableHidden, { useSupportsUntilFound } from '../../../components/ui/SearchableHidden';
 import React, { useState, useEffect } from 'react';
 import { 
   Globe, 
@@ -65,34 +66,8 @@ const FAQ_ITEMS = [
 ];
 
 export default function EuFundingSeo() {
+  const supportsUntilFound = useSupportsUntilFound();
   const [openFaq, setOpenFaq] = useState(null);
-
-  useEffect(() => {
-    // Inject Schema.org FAQPage Structured JSON-LD
-    const faqSchema = {
-      '@context': 'https://schema.org',
-      '@type': 'FAQPage',
-      'mainEntity': FAQ_ITEMS.map((item) => ({
-        '@type': 'Question',
-        'name': item.q,
-        'acceptedAnswer': {
-          '@type': 'Answer',
-          'text': item.a
-        }
-      }))
-    };
-
-    const script = document.createElement('script');
-    script.type = 'application/ld+json';
-    script.id = 'eu-funding-faq-schema';
-    script.innerHTML = JSON.stringify(faqSchema);
-    document.head.appendChild(script);
-
-    return () => {
-      const existing = document.getElementById('eu-funding-faq-schema');
-      if (existing) existing.remove();
-    };
-  }, []);
 
   return (
     <div className="eu-seo-container">
@@ -229,7 +204,7 @@ export default function EuFundingSeo() {
               >
                 <button 
                   className="eu-faq-question" 
-                  aria-expanded={isOpen}
+                  aria-expanded={(isOpen) || !supportsUntilFound}
                   onClick={(e) => {
                     e.stopPropagation();
                     setOpenFaq(isOpen ? null : idx);
@@ -238,11 +213,11 @@ export default function EuFundingSeo() {
                   <span>{item.q}</span>
                   <ChevronDown className={`eu-faq-icon ${isOpen ? 'rotate' : ''}`} size={18} />
                 </button>
-                {isOpen && (
+                <SearchableHidden isOpen={isOpen} onReveal={() => setOpenFaq(idx)}>
                   <div className="eu-faq-answer">
                     <p>{item.a}</p>
                   </div>
-                )}
+                </SearchableHidden>
               </div>
             );
           })}

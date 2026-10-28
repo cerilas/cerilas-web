@@ -299,7 +299,7 @@ export default function PdfMergerTool({ onBack, toolMeta }) {
         slug={pdfMergerManifest.slug}
         title={pdfMergerManifest.title}
         subtitle={pdfMergerManifest.shortDescription}
-        onBack={onBack || (() => { window.location.hash = '#/'; })}
+        onBack={onBack || (() => { window.history.pushState({}, '', '/'); window.dispatchEvent(new PopStateEvent('popstate')); })}
         backLabel="All Tools"
         badges={
           <>

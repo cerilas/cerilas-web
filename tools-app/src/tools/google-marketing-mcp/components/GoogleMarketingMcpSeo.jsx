@@ -1,3 +1,4 @@
+import SearchableHidden, { useSupportsUntilFound } from '../../../components/ui/SearchableHidden';
 import { useState, useEffect } from 'react';
 import {
   Database,
@@ -130,88 +131,9 @@ const COMPARISON_ROWS = [
 ];
 
 export default function GoogleMarketingMcpSeo() {
+  const supportsUntilFound = useSupportsUntilFound();
   const [openFaq, setOpenFaq] = useState(0);
   const [copiedPromptIndex, setCopiedPromptIndex] = useState(null);
-
-  useEffect(() => {
-    let script = document.getElementById('gmcp-structured-data');
-    if (!script) {
-      script = document.createElement('script');
-      script.id = 'gmcp-structured-data';
-      script.type = 'application/ld+json';
-      document.head.appendChild(script);
-    }
-
-    const structuredData = {
-      '@context': 'https://schema.org',
-      '@graph': [
-        {
-          '@type': 'SoftwareApplication',
-          'name': 'Cerilas Google Marketing MCP Server',
-          'alternateName': 'Connect ChatGPT to Google Analytics & Search Console',
-          'applicationCategory': 'BusinessApplication, DeveloperApplication, MarketingApplication',
-          'operatingSystem': 'Any (Cloud SSE, macOS, Windows, Linux)',
-          'offers': {
-            '@type': 'Offer',
-            'price': '0',
-            'priceCurrency': 'USD'
-          },
-          'description': 'Connect your ChatGPT, Claude Desktop, and Cursor to Google Analytics 4, Google Search Console, and Google Ads in 60 seconds via Model Context Protocol (MCP).',
-          'publisher': {
-            '@type': 'Organization',
-            'name': 'Cerilas High Tech',
-            'url': 'https://cerilas.com'
-          }
-        },
-        {
-          '@type': 'HowTo',
-          'name': 'How to Connect Your ChatGPT to Google Analytics & Search Console',
-          'description': 'Step-by-step tutorial to connect ChatGPT, Claude Desktop, or Cursor to Google Analytics 4 and Google Search Console via Model Context Protocol (MCP).',
-          'totalTime': 'PT1M',
-          'step': [
-            {
-              '@type': 'HowToStep',
-              'name': 'Sign In with Google (Read-Only OAuth)',
-              'text': 'Click "Sign in with Google" to grant strict read-only access (analytics.readonly, webmasters.readonly) to your GA4 properties and Search Console websites.'
-            },
-            {
-              '@type': 'HowToStep',
-              'name': 'Copy the 1-Click Setup Prompt or SSE Endpoint',
-              'text': 'Copy your unique AI Agent Setup Prompt or your personal remote Server-Sent Events (SSE) connection URL.'
-            },
-            {
-              '@type': 'HowToStep',
-              'name': 'Add to ChatGPT or Claude Desktop',
-              'text': 'Paste the prompt into your ChatGPT project, or add the SSE endpoint under ChatGPT Settings > Connected Apps > Add MCP Server (or Claude Desktop config).'
-            },
-            {
-              '@type': 'HowToStep',
-              'name': 'Ask Questions in Plain English',
-              'text': 'Start asking ChatGPT about real-time active users, top organic search queries, CTR drops, or conversion performance.'
-            }
-          ]
-        },
-        {
-          '@type': 'FAQPage',
-          'mainEntity': FAQ_ITEMS.map((item) => ({
-            '@type': 'Question',
-            'name': item.q,
-            'acceptedAnswer': {
-              '@type': 'Answer',
-              'text': item.a
-            }
-          }))
-        }
-      ]
-    };
-
-    script.textContent = JSON.stringify(structuredData);
-
-    return () => {
-      const el = document.getElementById('gmcp-structured-data');
-      if (el) el.remove();
-    };
-  }, []);
 
   const handleCopyPrompt = (text, idx) => {
     navigator.clipboard.writeText(text);
@@ -549,7 +471,7 @@ export default function GoogleMarketingMcpSeo() {
                   type="button" 
                   className="gmcp-faq-question" 
                   onClick={() => setOpenFaq(isOpen ? null : index)}
-                  aria-expanded={isOpen}
+                  aria-expanded={(isOpen) || !supportsUntilFound}
                 >
                   <span>{faq.q}</span>
                   <ChevronDown 
@@ -562,11 +484,11 @@ export default function GoogleMarketingMcpSeo() {
                     }} 
                   />
                 </button>
-                {isOpen && (
+                <SearchableHidden isOpen={isOpen} onReveal={() => setOpenFaq(idx)}>
                   <div className="gmcp-faq-answer">
                     <p style={{ margin: 0 }}>{faq.a}</p>
                   </div>
-                )}
+                </SearchableHidden>
               </div>
             );
           })}

@@ -260,7 +260,7 @@ export default function GoogleMarketingMcp({ onBack, toolMeta }) {
         localStorage.setItem('cerilas_mcp_email', decodedEmail);
       }
       // Clean URL cleanly
-      window.history.replaceState({}, document.title, window.location.pathname + '#/tool/google-marketing-mcp');
+      window.history.replaceState({}, document.title, '/tool/google-marketing-mcp');
       fetchStatus(keyParam);
     } else {
       const savedKey = localStorage.getItem('cerilas_mcp_key');

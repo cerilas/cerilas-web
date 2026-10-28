@@ -1,3 +1,4 @@
+import SearchableHidden, { useSupportsUntilFound } from '../../../components/ui/SearchableHidden';
 import React, { useState, useEffect } from 'react';
 import { 
   ShieldCheck, 
@@ -15,86 +16,8 @@ import {
 import './PdfSplitterSeo.css';
 
 export default function PdfSplitterSeo() {
+  const supportsUntilFound = useSupportsUntilFound();
   const [openFaq, setOpenFaq] = useState(null);
-
-  useEffect(() => {
-    const jsonLdScript = document.createElement('script');
-    jsonLdScript.type = 'application/ld+json';
-    jsonLdScript.id = 'pdf-splitter-seo-jsonld';
-
-    const structuredData = {
-      "@context": "https://schema.org",
-      "@graph": [
-        {
-          "@type": "WebApplication",
-          "@id": "https://tools.cerilas.com/tool/pdf-splitter#software",
-          "name": "Cerilas Free In-Browser PDF Splitter",
-          "alternateName": [
-            "Cerilas PDF Splitter",
-            "Split PDF Online Free",
-            "Extract Pages from PDF",
-            "Separate PDF by Custom Page Ranges",
-            "100% Private In-Browser PDF Cutter"
-          ],
-          "operatingSystem": "All modern browsers (Chrome, Safari, Firefox, Edge, Brave)",
-          "applicationCategory": "ProductivityApplication, UtilityApplication",
-          "image": "https://tools.cerilas.com/tool-icons/pdf-splitter.png",
-          "description": "Split PDF documents into custom page ranges, extract specific pages, or separate every page into individual files with 100% in-browser client-side privacy.",
-          "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "USD"
-          }
-        },
-        {
-          "@type": "FAQPage",
-          "@id": "https://tools.cerilas.com/tool/pdf-splitter#faq",
-          "mainEntity": [
-            {
-              "@type": "Question",
-              "name": "Is my confidential document uploaded to any cloud server?",
-              "acceptedAnswer": {
-                "@type": "Answer",
-                "text": "No, never! Cerilas PDF Splitter processes your documents 100% client-side inside your browser sandbox. Files never touch any remote server, ensuring complete confidentiality for contracts, financial audits, medical reports, and identity files."
-              }
-            },
-            {
-              "@type": "Question",
-              "name": "How do I split a PDF into custom page ranges?",
-              "acceptedAnswer": {
-                "@type": "Answer",
-                "text": "Under 'Custom Ranges', you can create as many parts as you like and enter page numbers such as '1-3' for Part 1, '4-6' for Part 2, and '7-10' for Part 3. You can also name each output file."
-              }
-            },
-            {
-              "@type": "Question",
-              "name": "Can I extract every single page as its own PDF?",
-              "acceptedAnswer": {
-                "@type": "Answer",
-                "text": "Yes! Switch to the 'Extract All Pages' tab and click 'Split PDF Now'. Each page will be extracted into a separate 1-page PDF file, and you can download them all bundled in a single ZIP file."
-              }
-            },
-            {
-              "@type": "Question",
-              "name": "Are there limits on page counts or file sizes?",
-              "acceptedAnswer": {
-                "@type": "Answer",
-                "text": "No artificial limits. You can split documents with hundreds of pages without paying a fee or having watermarks added."
-              }
-            }
-          ]
-        }
-      ]
-    };
-
-    jsonLdScript.textContent = JSON.stringify(structuredData);
-    document.head.appendChild(jsonLdScript);
-
-    return () => {
-      const el = document.getElementById('pdf-splitter-seo-jsonld');
-      if (el) el.remove();
-    };
-  }, []);
 
   const toggleFaq = (index) => {
     setOpenFaq(openFaq === index ? null : index);
@@ -264,16 +187,16 @@ export default function PdfSplitterSeo() {
                   type="button" 
                   className="pdfs-faq-question" 
                   onClick={() => toggleFaq(idx)}
-                  aria-expanded={isOpen}
+                  aria-expanded={(isOpen) || !supportsUntilFound}
                 >
                   <span>{faq.q}</span>
                   <ChevronDown size={18} className="pdfs-faq-icon" />
                 </button>
-                {isOpen && (
+                <SearchableHidden isOpen={isOpen} onReveal={() => setOpenFaq(idx)}>
                   <div className="pdfs-faq-answer">
                     <p>{faq.a}</p>
                   </div>
-                )}
+                </SearchableHidden>
               </div>
             );
           })}

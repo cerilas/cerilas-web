@@ -1,3 +1,4 @@
+import SearchableHidden, { useSupportsUntilFound } from '../../../components/ui/SearchableHidden';
 import React, { useState, useEffect } from 'react';
 import {
   Sparkles,
@@ -52,96 +53,8 @@ const FAQ_ITEMS = [
 ];
 
 export default function MrrSeo() {
+  const supportsUntilFound = useSupportsUntilFound();
   const [openFaq, setOpenFaq] = useState(null);
-
-  useEffect(() => {
-    const jsonLdScript = document.createElement('script');
-    jsonLdScript.type = 'application/ld+json';
-    jsonLdScript.id = 'mrr-calculator-seo-jsonld';
-
-    const structuredData = {
-      '@context': 'https://schema.org',
-      '@graph': [
-        {
-          '@type': 'WebApplication',
-          '@id': 'https://tools.cerilas.com/tool/mrr-calculator#software',
-          'name': 'Cerilas Free SaaS Monthly Recurring Revenue (MRR) Calculator',
-          'alternateName': [
-            'MRR Calculator',
-            'SaaS Quick Ratio Calculator',
-            'Net New MRR Estimator',
-            'Subscription Revenue Forecaster'
-          ],
-          'operatingSystem': 'All modern browsers',
-          'applicationCategory': 'BusinessApplication, FinanceApplication',
-          'image': 'https://tools.cerilas.com/og-image.svg',
-          'offers': {
-            '@type': 'Offer',
-            'price': '0',
-            'priceCurrency': 'USD'
-          },
-          'author': {
-            '@type': 'Organization',
-            'name': 'Cerilas High Tech',
-            'url': 'https://cerilas.com'
-          },
-          'description': 'Calculate Net New MRR, evaluate your SaaS Quick Ratio, and model Net Negative Churn with the industry-standard free MRR calculator.'
-        },
-        {
-          '@type': 'HowTo',
-          '@id': 'https://tools.cerilas.com/tool/mrr-calculator#howto',
-          'name': 'How to Calculate Monthly Recurring Revenue (MRR) & Net New Growth',
-          'description': 'A 4-step framework to accurately quantify your subscription cash momentum.',
-          'step': [
-            {
-              '@type': 'HowToStep',
-              'position': 1,
-              'name': 'Aggregate Active Recurring Subscriptions',
-              'text': 'Sum all active monthly subscription accounts, normalizing annual contracts by dividing by 12.'
-            },
-            {
-              '@type': 'HowToStep',
-              'position': 2,
-              'name': 'Calculate New & Expansion MRR',
-              'text': 'Measure revenue added from brand new accounts and upsells from existing customers.'
-            },
-            {
-              '@type': 'HowToStep',
-              'position': 3,
-              'name': 'Deduct Contraction & Churned Revenue',
-              'text': 'Subtract revenue lost to downgrades and outright cancellations to determine Net New MRR.'
-            },
-            {
-              '@type': 'HowToStep',
-              'position': 4,
-              'name': 'Evaluate Your SaaS Quick Ratio',
-              'text': 'Divide total additions by total losses to establish your growth efficiency multiple.'
-            }
-          ]
-        },
-        {
-          '@type': 'FAQPage',
-          '@id': 'https://tools.cerilas.com/tool/mrr-calculator#faq',
-          'mainEntity': FAQ_ITEMS.map((item) => ({
-            '@type': 'Question',
-            'name': item.q,
-            'acceptedAnswer': {
-              '@type': 'Answer',
-              'text': item.a
-            }
-          }))
-        }
-      ]
-    };
-
-    jsonLdScript.textContent = JSON.stringify(structuredData);
-    document.head.appendChild(jsonLdScript);
-
-    return () => {
-      const existing = document.getElementById('mrr-calculator-seo-jsonld');
-      if (existing) existing.remove();
-    };
-  }, []);
 
   const toggleFaq = (index) => {
     setOpenFaq(openFaq === index ? null : index);
@@ -372,16 +285,16 @@ export default function MrrSeo() {
                 type="button"
                 className="finance-faq-question-btn"
                 onClick={() => toggleFaq(idx)}
-                aria-expanded={openFaq === idx}
+                aria-expanded={(openFaq === idx) || !supportsUntilFound}
               >
                 <span>{item.q}</span>
                 <ChevronDown className="finance-faq-chevron" size={18} />
               </button>
-              {openFaq === idx && (
-                <div className="finance-faq-answer">
+              <SearchableHidden isOpen={openFaq === idx} onReveal={() => setOpenFaq(idx)}>
+                  <div className="finance-faq-answer">
                   <p>{item.a}</p>
                 </div>
-              )}
+                </SearchableHidden>
             </div>
           ))}
         </div>

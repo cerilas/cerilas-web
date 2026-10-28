@@ -1,3 +1,4 @@
+import SearchableHidden, { useSupportsUntilFound } from '../../../components/ui/SearchableHidden';
 import { useState, useEffect } from 'react';
 import { 
   Binary, 
@@ -85,64 +86,8 @@ const RELATED_TOOLS = [
 ];
 
 export default function TokenCounterSeo() {
+  const supportsUntilFound = useSupportsUntilFound();
   const [openFaq, setOpenFaq] = useState(null);
-
-  useEffect(() => {
-    // 1. FAQ Schema
-    const faqStructuredData = {
-      '@context': 'https://schema.org',
-      '@type': 'FAQPage',
-      'mainEntity': FAQ_ITEMS.map((item) => ({
-        '@type': 'Question',
-        'name': item.q,
-        'acceptedAnswer': {
-          '@type': 'Answer',
-          'text': item.a
-        }
-      }))
-    };
-
-    // 2. WebApplication Schema
-    const appStructuredData = {
-      '@context': 'https://schema.org',
-      '@type': 'WebApplication',
-      'name': 'Universal Token Counter & LLM Cost Calculator',
-      'operatingSystem': 'All',
-      'applicationCategory': 'DeveloperApplication',
-      'url': 'https://tools.cerilas.com/tool/token-counter-universal',
-      'offers': {
-        '@type': 'Offer',
-        'price': '0',
-        'priceCurrency': 'USD'
-      },
-      'description': 'Free client-side token counter and API cost calculator for GPT-6 Astra, Gemini 3.8 Flash, Claude 3.7 Sonnet, DeepSeek-V3, and Llama 3.3. Interactive color visualizer with zero server uploads.'
-    };
-
-    let scriptFaq = document.getElementById('token-counter-faq-jsonld');
-    if (!scriptFaq) {
-      scriptFaq = document.createElement('script');
-      scriptFaq.id = 'token-counter-faq-jsonld';
-      scriptFaq.type = 'application/ld+json';
-      document.head.appendChild(scriptFaq);
-    }
-    scriptFaq.textContent = JSON.stringify(faqStructuredData);
-
-    let scriptApp = document.getElementById('token-counter-app-jsonld');
-    if (!scriptApp) {
-      scriptApp = document.createElement('script');
-      scriptApp.id = 'token-counter-app-jsonld';
-      scriptApp.type = 'application/ld+json';
-      document.head.appendChild(scriptApp);
-    }
-    scriptApp.textContent = JSON.stringify(appStructuredData);
-
-    return () => {
-      const elFaq = document.getElementById('token-counter-faq-jsonld');
-      if (elFaq) elFaq.remove();
-      const elApp = document.getElementById('token-counter-app-jsonld');
-      if (elApp) elApp.remove();
-    };
-  }, []);
 
   return (
     <div className="tc-seo-container">
@@ -380,16 +325,16 @@ export default function TokenCounterSeo() {
                   type="button"
                   className="tc-faq-question"
                   onClick={() => setOpenFaq(isOpen ? null : idx)}
-                  aria-expanded={isOpen}
+                  aria-expanded={(isOpen) || !supportsUntilFound}
                 >
                   <span>{item.q}</span>
                   <ChevronDown size={18} className={`tc-faq-icon ${isOpen ? 'open' : ''}`} />
                 </button>
-                {isOpen && (
+                <SearchableHidden isOpen={isOpen} onReveal={() => setOpenFaq(idx)}>
                   <div className="tc-faq-answer">
                     <p>{item.a}</p>
                   </div>
-                )}
+                </SearchableHidden>
               </div>
             );
           })}

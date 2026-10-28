@@ -1,3 +1,4 @@
+import SearchableHidden, { useSupportsUntilFound } from '../../../components/ui/SearchableHidden';
 import React, { useState } from 'react';
 import {
   ChevronDown,
@@ -15,6 +16,7 @@ import {
 } from 'lucide-react';
 
 export default function EmailSignatureSeo() {
+  const supportsUntilFound = useSupportsUntilFound();
   const [openFaqIndex, setOpenFaqIndex] = useState(0);
 
   const toggleFaq = (index) => {
@@ -158,10 +160,6 @@ export default function EmailSignatureSeo() {
 
   return (
     <article className="sig-seo-wrapper" aria-label="Email Signature Generator Technical Guide, Features and FAQ">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdData) }}
-      />
 
       {/* SEO Header */}
       <div className="sig-seo-header">
@@ -346,11 +344,11 @@ export default function EmailSignatureSeo() {
                     className={`sig-faq-chevron ${isOpen ? 'rotated' : ''}`}
                   />
                 </div>
-                {isOpen && (
+                <SearchableHidden isOpen={isOpen} onReveal={() => setOpenFaqIndex(index)}>
                   <div className="sig-faq-answer">
                     <p>{item.a}</p>
                   </div>
-                )}
+                </SearchableHidden>
               </div>
             );
           })}

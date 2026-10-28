@@ -1,3 +1,4 @@
+import SearchableHidden, { useSupportsUntilFound } from '../../../components/ui/SearchableHidden';
 import { useState } from 'react';
 import {
   Eye,
@@ -110,6 +111,7 @@ const RELATED_TOOLS = [
 ];
 
 export default function AiVisibilityCheckerSeo() {
+  const supportsUntilFound = useSupportsUntilFound();
   const [openFaq, setOpenFaq] = useState(null);
   const [checkedPillars, setCheckedPillars] = useState([1, 3]);
   const [copiedCode, setCopiedCode] = useState(false);
@@ -774,7 +776,7 @@ export default function AiVisibilityCheckerSeo() {
                   type="button"
                   className="aivc-faq-question"
                   onClick={() => toggleFaq(idx)}
-                  aria-expanded={openFaq === idx}
+                  aria-expanded={openFaq === idx || !supportsUntilFound}
                   aria-controls={`aivc-faq-answer-${idx}`}
                 >
                   <span>{item.q}</span>
@@ -784,9 +786,11 @@ export default function AiVisibilityCheckerSeo() {
                   />
                 </button>
               </h3>
-              <div id={`aivc-faq-answer-${idx}`} className="aivc-faq-answer" hidden={openFaq !== idx}>
-                {item.a}
-              </div>
+              <SearchableHidden id={`aivc-faq-answer-${idx}`} isOpen={openFaq === idx} onReveal={() => setOpenFaq(idx)}>
+                <div className="aivc-faq-answer">
+                  {item.a}
+                </div>
+              </SearchableHidden>
             </div>
           ))}
         </div>

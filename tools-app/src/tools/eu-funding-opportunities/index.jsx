@@ -254,7 +254,7 @@ export default function EuFundingOpportunities({ onBack, toolMeta }) {
     if (window.location.pathname.match(/\/tools?\/eu-funding-opportunities\/[a-zA-Z0-9_-]+/)) {
       window.history.pushState({}, '', '/tool/eu-funding-opportunities');
     }
-    document.title = 'EU Funding & Cascade Funding Opportunities (2026) – Live Horizon Europe & FSTP Grants | Cerilas Tools';
+    document.title = 'EU Funding & Cascade Funding Opportunities 2026 | Cerilas Tools';
   };
 
   const copyShareLink = (opp) => {

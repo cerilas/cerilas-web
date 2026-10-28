@@ -1,3 +1,4 @@
+import SearchableHidden, { useSupportsUntilFound } from '../../../components/ui/SearchableHidden';
 import React, { useState, useEffect } from 'react';
 import {
   Sparkles,
@@ -47,143 +48,8 @@ const FAQ_ITEMS = [
 ];
 
 export default function BackgroundRemoverSeo() {
+  const supportsUntilFound = useSupportsUntilFound();
   const [openFaq, setOpenFaq] = useState(null);
-
-  useEffect(() => {
-    const jsonLdScript = document.createElement('script');
-    jsonLdScript.type = 'application/ld+json';
-    jsonLdScript.id = 'bg-remover-seo-jsonld';
-
-    const structuredData = {
-      '@context': 'https://schema.org',
-      '@graph': [
-        {
-          '@type': 'WebApplication',
-          '@id': 'https://tools.cerilas.com/tool/background-remover#software',
-          'name': 'Cerilas Free AI Background Remover (100% Private In-Browser)',
-          'alternateName': [
-            'Cerilas Background Remover',
-            'Free Online Background Eraser 2026',
-            'Client-Side AI Background Remover',
-            'Transparent PNG Maker Without Sign-Up',
-            'Amazon White Background Product Photo Tool'
-          ],
-          'operatingSystem': 'All modern web browsers (Chrome, Safari, Firefox, Edge, Brave, Opera, macOS, Windows, Linux, iOS, Android)',
-          'applicationCategory': 'MultimediaApplication, DesignApplication, UtilityApplication',
-          'browserRequirements': 'Requires WebAssembly, Web Workers, HTML5 Canvas',
-          'image': 'https://tools.cerilas.com/og-image.svg',
-          'screenshot': 'https://tools.cerilas.com/og-image.svg',
-          'softwareVersion': '2.1.0',
-          'datePublished': '2026-09-01',
-          'dateModified': '2026-09-17',
-          'inLanguage': 'en-US',
-          'offers': {
-            '@type': 'Offer',
-            'price': '0',
-            'priceCurrency': 'USD',
-            'availability': 'https://schema.org/InStock'
-          },
-          'author': {
-            '@type': 'Organization',
-            'name': 'Cerilas High Tech',
-            'url': 'https://cerilas.com'
-          },
-          'publisher': {
-            '@type': 'Organization',
-            'name': 'Cerilas High Tech',
-            'url': 'https://cerilas.com',
-            'logo': {
-              '@type': 'ImageObject',
-              'url': 'https://tools.cerilas.com/favicon.svg'
-            }
-          },
-          'description': 'Free AI background remover operating 100% privately in your web browser. Cut out portraits, products, and graphics with zero server uploads, no watermarks, and instant transparent HD PNG export.',
-          'featureList': [
-            '100% In-Browser Privacy: Deep learning model executes locally via WebAssembly with zero server uploads',
-            'Instant Transparent PNG Export: Lossless alpha channel cutout',
-            'Interactive Split Slider: Inspect before and after cutout in real-time',
-            'E-Commerce White Background Mode: Amazon and Shopify compliance with 1 click',
-            'Studio Gradient & Custom Image Backdrops: Built-in composite studio',
-            'Direct Clipboard Copy: Paste transparent cutouts directly into Figma, Photoshop, or Slack'
-          ]
-        },
-        {
-          '@type': 'BreadcrumbList',
-          '@id': 'https://tools.cerilas.com/tool/background-remover#breadcrumbs',
-          'itemListElement': [
-            {
-              '@type': 'ListItem',
-              'position': 1,
-              'name': 'Cerilas Tools',
-              'item': 'https://tools.cerilas.com/'
-            },
-            {
-              '@type': 'ListItem',
-              'position': 2,
-              'name': 'Image & Design Utilities',
-              'item': 'https://tools.cerilas.com/#/'
-            },
-            {
-              '@type': 'ListItem',
-              'position': 3,
-              'name': 'Free AI Background Remover',
-              'item': 'https://tools.cerilas.com/tool/background-remover'
-            }
-          ]
-        },
-        {
-          '@type': 'HowTo',
-          '@id': 'https://tools.cerilas.com/tool/background-remover#howto',
-          'name': 'How to Remove Background from Any Image Online for Free',
-          'description': 'A fast 3-step guide to removing photo backgrounds and creating transparent PNGs client-side.',
-          'totalTime': 'PT1M',
-          'step': [
-            {
-              '@type': 'HowToStep',
-              'position': 1,
-              'name': 'Upload or Drop Photo',
-              'text': 'Drag and drop any JPG, PNG, WebP, or AVIF image into the dropzone or choose from your device.',
-              'url': 'https://tools.cerilas.com/tool/background-remover'
-            },
-            {
-              '@type': 'HowToStep',
-              'position': 2,
-              'name': 'Automatic AI Segmentation',
-              'text': 'The in-browser neural network automatically isolates the foreground subject and removes background noise in seconds.',
-              'url': 'https://tools.cerilas.com/tool/background-remover'
-            },
-            {
-              '@type': 'HowToStep',
-              'position': 3,
-              'name': 'Customize Backdrop & Download',
-              'text': 'Keep it transparent, apply pure white (#FFF) for e-commerce, or add studio gradients, then click Download HD PNG or Copy to Clipboard.',
-              'url': 'https://tools.cerilas.com/tool/background-remover'
-            }
-          ]
-        },
-        {
-          '@type': 'FAQPage',
-          '@id': 'https://tools.cerilas.com/tool/background-remover#faq',
-          'mainEntity': FAQ_ITEMS.map((item) => ({
-            '@type': 'Question',
-            'name': item.q,
-            'acceptedAnswer': {
-              '@type': 'Answer',
-              'text': item.a
-            }
-          }))
-        }
-      ]
-    };
-
-    jsonLdScript.textContent = JSON.stringify(structuredData);
-    document.head.appendChild(jsonLdScript);
-
-    return () => {
-      const existing = document.getElementById('bg-remover-seo-jsonld');
-      if (existing) existing.remove();
-    };
-  }, []);
 
   const toggleFaq = (idx) => {
     setOpenFaq(openFaq === idx ? null : idx);
@@ -408,16 +274,16 @@ export default function BackgroundRemoverSeo() {
                 type="button"
                 className="bg-faq-question-btn"
                 onClick={() => toggleFaq(idx)}
-                aria-expanded={openFaq === idx}
+                aria-expanded={(openFaq === idx) || !supportsUntilFound}
               >
                 <span>{item.q}</span>
                 <ChevronDown className="bg-faq-chevron" size={18} />
               </button>
-              {openFaq === idx && (
-                <div className="bg-faq-answer">
+              <SearchableHidden isOpen={openFaq === idx} onReveal={() => setOpenFaq(idx)}>
+                  <div className="bg-faq-answer">
                   <p>{item.a}</p>
                 </div>
-              )}
+                </SearchableHidden>
             </div>
           ))}
         </div>

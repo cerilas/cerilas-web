@@ -1,3 +1,4 @@
+import SearchableHidden, { useSupportsUntilFound } from '../../../components/ui/SearchableHidden';
 import React, { useState, useEffect } from 'react';
 import {
   Sparkles,
@@ -54,151 +55,8 @@ const FAQ_ITEMS = [
 ];
 
 export default function AtsResumeCheckerSeo() {
+  const supportsUntilFound = useSupportsUntilFound();
   const [openFaq, setOpenFaq] = useState(null);
-
-  useEffect(() => {
-    const jsonLdScript = document.createElement('script');
-    jsonLdScript.type = 'application/ld+json';
-    jsonLdScript.id = 'ats-resume-checker-seo-jsonld';
-
-    const structuredData = {
-      '@context': 'https://schema.org',
-      '@graph': [
-        {
-          '@type': 'WebApplication',
-          '@id': 'https://tools.cerilas.com/tool/ats-resume-checker#software',
-          'name': 'Cerilas Free AI ATS Resume Checker & Job Match Scanner',
-          'alternateName': [
-            'Cerilas ATS Checker',
-            'Best Free ATS Resume Scanner 2026',
-            'AI CV Job Match Scanner',
-            'Applicant Tracking System Resume Tester',
-            'Resume Keyword Optimization Tool',
-            'Free Bot Readability Scanner for CV'
-          ],
-          'operatingSystem': 'All modern web browsers (Chrome, Safari, Firefox, Edge, Brave, Opera, macOS, Windows, Linux, iOS, Android)',
-          'applicationCategory': 'BusinessApplication, ProductivityApplication, EducationalApplication',
-          'browserRequirements': 'Requires HTML5 Canvas, WebAssembly, Web Workers, LocalStorage',
-          'image': 'https://tools.cerilas.com/og-image.svg',
-          'screenshot': 'https://tools.cerilas.com/og-image.svg',
-          'softwareVersion': '2.1.0',
-          'datePublished': '2026-09-01',
-          'dateModified': '2026-09-17',
-          'inLanguage': 'en-US',
-          'offers': {
-            '@type': 'Offer',
-            'price': '0',
-            'priceCurrency': 'USD',
-            'availability': 'https://schema.org/InStock'
-          },
-          'author': {
-            '@type': 'Organization',
-            'name': 'Cerilas High Tech',
-            'url': 'https://cerilas.com'
-          },
-          'publisher': {
-            '@type': 'Organization',
-            'name': 'Cerilas High Tech',
-            'url': 'https://cerilas.com',
-            'logo': {
-              '@type': 'ImageObject',
-              'url': 'https://tools.cerilas.com/favicon.svg'
-            }
-          },
-          'description': 'The best free online ATS resume checker and CV match scanner. Test your resume PDF against recruiter applicant tracking systems (Workday, Greenhouse, Taleo, Lever) with instant bot readability inspection, AI match scoring, and missing keyword detection.',
-          'featureList': [
-            '100% In-Browser PDF Text Extraction: Tests real machine bot readability without storing files',
-            'Raw Bot View Inspector: Shows exactly how ATS parsers tokenize your resume structure',
-            'AI Job Description Match Scoring: Compares resume against any role requirements',
-            'Missing Hard & Soft Skills Detection: Uncovers critical qualifications missing from your CV',
-            'Structural ATS Audit: Flags tables, multi-columns, and non-standard headings',
-            'Actionable Bullet Point Improvements: Generates tailored suggestions to improve interview callbacks'
-          ]
-        },
-        {
-          '@type': 'BreadcrumbList',
-          '@id': 'https://tools.cerilas.com/tool/ats-resume-checker#breadcrumbs',
-          'itemListElement': [
-            {
-              '@type': 'ListItem',
-              'position': 1,
-              'name': 'Cerilas Tools',
-              'item': 'https://tools.cerilas.com/'
-            },
-            {
-              '@type': 'ListItem',
-              'position': 2,
-              'name': 'Career & HR Utilities',
-              'item': 'https://tools.cerilas.com/#/'
-            },
-            {
-              '@type': 'ListItem',
-              'position': 3,
-              'name': 'Free ATS Resume Checker',
-              'item': 'https://tools.cerilas.com/tool/ats-resume-checker'
-            }
-          ]
-        },
-        {
-          '@type': 'HowTo',
-          '@id': 'https://tools.cerilas.com/tool/ats-resume-checker#howto',
-          'name': 'How to Optimize Your Resume for Applicant Tracking Systems (ATS)',
-          'description': 'A proven 4-step workflow to verify bot readability, align keywords, and achieve an 80%+ ATS match score.',
-          'totalTime': 'PT3M',
-          'step': [
-            {
-              '@type': 'HowToStep',
-              'position': 1,
-              'name': 'Upload Resume PDF & Check Bot Readability',
-              'text': 'Upload your CV in PDF format. Inspect the Raw Bot View to verify that your contact info, experience, and education extract cleanly without scrambled text.',
-              'url': 'https://tools.cerilas.com/tool/ats-resume-checker'
-            },
-            {
-              '@type': 'HowToStep',
-              'position': 2,
-              'name': 'Paste Target Job Description',
-              'text': 'Copy and paste the full job posting requirements and responsibilities for the specific role you are targeting.',
-              'url': 'https://tools.cerilas.com/tool/ats-resume-checker'
-            },
-            {
-              '@type': 'HowToStep',
-              'position': 3,
-              'name': 'Run AI ATS Semantic Match Analysis',
-              'text': 'Execute the scanner to receive an instant compatibility score, identifying missing hard skills, keywords, and structural formatting warnings.',
-              'url': 'https://tools.cerilas.com/tool/ats-resume-checker'
-            },
-            {
-              '@type': 'HowToStep',
-              'position': 4,
-              'name': 'Incorporate Missing Keywords & Re-Scan',
-              'text': 'Update your bullet points with the identified keywords and quantifiable metrics, then re-scan to confirm your score exceeds 80%.',
-              'url': 'https://tools.cerilas.com/tool/ats-resume-checker'
-            }
-          ]
-        },
-        {
-          '@type': 'FAQPage',
-          '@id': 'https://tools.cerilas.com/tool/ats-resume-checker#faq',
-          'mainEntity': FAQ_ITEMS.map((item) => ({
-            '@type': 'Question',
-            'name': item.q,
-            'acceptedAnswer': {
-              '@type': 'Answer',
-              'text': item.a
-            }
-          }))
-        }
-      ]
-    };
-
-    jsonLdScript.textContent = JSON.stringify(structuredData);
-    document.head.appendChild(jsonLdScript);
-
-    return () => {
-      const existing = document.getElementById('ats-resume-checker-seo-jsonld');
-      if (existing) existing.remove();
-    };
-  }, []);
 
   const toggleFaq = (index) => {
     setOpenFaq(openFaq === index ? null : index);
@@ -447,16 +305,16 @@ export default function AtsResumeCheckerSeo() {
                 type="button"
                 className="ats-faq-question-btn"
                 onClick={() => toggleFaq(idx)}
-                aria-expanded={openFaq === idx}
+                aria-expanded={(openFaq === idx) || !supportsUntilFound}
               >
                 <span>{item.q}</span>
                 <ChevronDown className="ats-faq-chevron" size={18} />
               </button>
-              {openFaq === idx && (
-                <div className="ats-faq-answer">
+              <SearchableHidden isOpen={openFaq === idx} onReveal={() => setOpenFaq(idx)}>
+                  <div className="ats-faq-answer">
                   <p>{item.a}</p>
                 </div>
-              )}
+                </SearchableHidden>
             </div>
           ))}
         </div>

@@ -1,3 +1,4 @@
+import SearchableHidden, { useSupportsUntilFound } from '../../../components/ui/SearchableHidden';
 import React, { useState, useEffect } from 'react';
 import {
   Sparkles,
@@ -51,96 +52,8 @@ const FAQ_ITEMS = [
 ];
 
 export default function ArrSeo() {
+  const supportsUntilFound = useSupportsUntilFound();
   const [openFaq, setOpenFaq] = useState(null);
-
-  useEffect(() => {
-    const jsonLdScript = document.createElement('script');
-    jsonLdScript.type = 'application/ld+json';
-    jsonLdScript.id = 'arr-calculator-seo-jsonld';
-
-    const structuredData = {
-      '@context': 'https://schema.org',
-      '@graph': [
-        {
-          '@type': 'WebApplication',
-          '@id': 'https://tools.cerilas.com/tool/arr-calculator#software',
-          'name': 'Cerilas Free SaaS Annual Recurring Revenue (ARR) & Rule of 40 Calculator',
-          'alternateName': [
-            'ARR Calculator',
-            'Rule of 40 Calculator for SaaS',
-            'ARR Per Employee Benchmarker',
-            'SaaS Enterprise Valuation Calculator'
-          ],
-          'operatingSystem': 'All modern web browsers',
-          'applicationCategory': 'BusinessApplication, FinanceApplication',
-          'image': 'https://tools.cerilas.com/og-image.svg',
-          'offers': {
-            '@type': 'Offer',
-            'price': '0',
-            'priceCurrency': 'USD'
-          },
-          'author': {
-            '@type': 'Organization',
-            'name': 'Cerilas High Tech',
-            'url': 'https://cerilas.com'
-          },
-          'description': 'Calculate Annual Recurring Revenue (ARR), measure your Rule of 40 score, and benchmark ARR per employee with complete in-browser confidentiality.'
-        },
-        {
-          '@type': 'HowTo',
-          '@id': 'https://tools.cerilas.com/tool/arr-calculator#howto',
-          'name': 'How to Calculate ARR & the Rule of 40 for Venture Capital Valuation',
-          'description': 'A 4-step financial guide for SaaS founders and CFOs.',
-          'step': [
-            {
-              '@type': 'HowToStep',
-              'position': 1,
-              'name': 'Annualize Monthly Recurring Revenue',
-              'text': 'Multiply current contracted monthly recurring revenue (MRR) by 12 to establish your baseline ARR.'
-            },
-            {
-              '@type': 'HowToStep',
-              'position': 2,
-              'name': 'Establish Year-over-Year Growth Rate',
-              'text': 'Compare your current ARR to the exact figure 12 months prior to calculate your annual growth percentage.'
-            },
-            {
-              '@type': 'HowToStep',
-              'position': 3,
-              'name': 'Compute Free Cash Flow Margin',
-              'text': 'Calculate your trailing 12-month Operating Margin or Free Cash Flow margin as a percentage of revenue.'
-            },
-            {
-              '@type': 'HowToStep',
-              'position': 4,
-              'name': 'Score the Rule of 40 & Employee Productivity',
-              'text': 'Sum growth percentage and margin percentage to evaluate if your startup beats the 40% venture threshold.'
-            }
-          ]
-        },
-        {
-          '@type': 'FAQPage',
-          '@id': 'https://tools.cerilas.com/tool/arr-calculator#faq',
-          'mainEntity': FAQ_ITEMS.map((item) => ({
-            '@type': 'Question',
-            'name': item.q,
-            'acceptedAnswer': {
-              '@type': 'Answer',
-              'text': item.a
-            }
-          }))
-        }
-      ]
-    };
-
-    jsonLdScript.textContent = JSON.stringify(structuredData);
-    document.head.appendChild(jsonLdScript);
-
-    return () => {
-      const existing = document.getElementById('arr-calculator-seo-jsonld');
-      if (existing) existing.remove();
-    };
-  }, []);
 
   const toggleFaq = (index) => {
     setOpenFaq(openFaq === index ? null : index);
@@ -356,16 +269,16 @@ export default function ArrSeo() {
                 type="button"
                 className="finance-faq-question-btn"
                 onClick={() => toggleFaq(idx)}
-                aria-expanded={openFaq === idx}
+                aria-expanded={(openFaq === idx) || !supportsUntilFound}
               >
                 <span>{item.q}</span>
                 <ChevronDown className="finance-faq-chevron" size={18} />
               </button>
-              {openFaq === idx && (
-                <div className="finance-faq-answer">
+              <SearchableHidden isOpen={openFaq === idx} onReveal={() => setOpenFaq(idx)}>
+                  <div className="finance-faq-answer">
                   <p>{item.a}</p>
                 </div>
-              )}
+                </SearchableHidden>
             </div>
           ))}
         </div>

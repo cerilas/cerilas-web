@@ -2,295 +2,547 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://tools.cerilas.com/</loc>
-    <lastmod>2026-10-27</lastmod>
+    <lastmod>2026-10-28</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
     <loc>https://tools.cerilas.com/growth</loc>
-    <lastmod>2026-10-27</lastmod>
+    <lastmod>2026-10-28</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
     <loc>https://tools.cerilas.com/pricing</loc>
-    <lastmod>2026-10-27</lastmod>
+    <lastmod>2026-10-28</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://tools.cerilas.com/research-tools</loc>
-    <lastmod>2026-10-27</lastmod>
+    <lastmod>2026-10-28</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://tools.cerilas.com/ai-tools</loc>
-    <lastmod>2026-10-27</lastmod>
+    <lastmod>2026-10-28</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://tools.cerilas.com/seo-tools</loc>
-    <lastmod>2026-10-27</lastmod>
+    <lastmod>2026-10-28</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://tools.cerilas.com/developer-tools</loc>
-    <lastmod>2026-10-27</lastmod>
+    <lastmod>2026-10-28</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://tools.cerilas.com/file-tools</loc>
-    <lastmod>2026-10-27</lastmod>
+    <lastmod>2026-10-28</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://tools.cerilas.com/finance-tools</loc>
-    <lastmod>2026-10-27</lastmod>
+    <lastmod>2026-10-28</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://tools.cerilas.com/productivity-tools</loc>
-    <lastmod>2026-10-27</lastmod>
+    <lastmod>2026-10-28</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://tools.cerilas.com/tool/sample-size-calculator</loc>
-    <lastmod>2026-10-27</lastmod>
+    <lastmod>2026-10-28</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.85</priority>
   </url>
   <url>
     <loc>https://tools.cerilas.com/tool/trl-calculator</loc>
-    <lastmod>2026-10-27</lastmod>
+    <lastmod>2026-10-28</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.85</priority>
   </url>
   <url>
     <loc>https://tools.cerilas.com/tool/eu-funding-opportunities</loc>
-    <lastmod>2026-10-27</lastmod>
+    <lastmod>2026-10-28</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.85</priority>
   </url>
   <url>
     <loc>https://tools.cerilas.com/tool/qr-code-generator</loc>
-    <lastmod>2026-10-27</lastmod>
+    <lastmod>2026-10-28</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.85</priority>
   </url>
   <url>
     <loc>https://tools.cerilas.com/tool/image-compressor</loc>
-    <lastmod>2026-10-27</lastmod>
+    <lastmod>2026-10-28</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.85</priority>
   </url>
   <url>
     <loc>https://tools.cerilas.com/tool/background-remover</loc>
-    <lastmod>2026-10-27</lastmod>
+    <lastmod>2026-10-28</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.85</priority>
   </url>
   <url>
     <loc>https://tools.cerilas.com/tool/pdf-compressor</loc>
-    <lastmod>2026-10-27</lastmod>
+    <lastmod>2026-10-28</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.85</priority>
   </url>
   <url>
     <loc>https://tools.cerilas.com/tool/pdf-editor</loc>
-    <lastmod>2026-10-27</lastmod>
+    <lastmod>2026-10-28</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.85</priority>
   </url>
   <url>
     <loc>https://tools.cerilas.com/tool/pdf-merger</loc>
-    <lastmod>2026-10-27</lastmod>
+    <lastmod>2026-10-28</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.85</priority>
   </url>
   <url>
     <loc>https://tools.cerilas.com/tool/pdf-splitter</loc>
-    <lastmod>2026-10-27</lastmod>
+    <lastmod>2026-10-28</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.85</priority>
   </url>
   <url>
     <loc>https://tools.cerilas.com/tool/video-compressor</loc>
-    <lastmod>2026-10-27</lastmod>
+    <lastmod>2026-10-28</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.85</priority>
   </url>
   <url>
     <loc>https://tools.cerilas.com/tool/ats-resume-checker</loc>
-    <lastmod>2026-10-27</lastmod>
+    <lastmod>2026-10-28</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.85</priority>
   </url>
   <url>
     <loc>https://tools.cerilas.com/tool/ai-content-detector</loc>
-    <lastmod>2026-10-27</lastmod>
+    <lastmod>2026-10-28</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.85</priority>
   </url>
   <url>
     <loc>https://tools.cerilas.com/tool/pdf-rag-cleaner</loc>
-    <lastmod>2026-10-27</lastmod>
+    <lastmod>2026-10-28</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.85</priority>
   </url>
   <url>
     <loc>https://tools.cerilas.com/tool/token-counter-universal</loc>
-    <lastmod>2026-10-27</lastmod>
+    <lastmod>2026-10-28</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.85</priority>
   </url>
   <url>
     <loc>https://tools.cerilas.com/tool/ai-link-hallucination-checker</loc>
-    <lastmod>2026-10-27</lastmod>
+    <lastmod>2026-10-28</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.85</priority>
   </url>
   <url>
     <loc>https://tools.cerilas.com/tool/ai-crawler-checker</loc>
-    <lastmod>2026-10-27</lastmod>
+    <lastmod>2026-10-28</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.85</priority>
   </url>
   <url>
     <loc>https://tools.cerilas.com/tool/ai-visibility-checker</loc>
-    <lastmod>2026-10-27</lastmod>
+    <lastmod>2026-10-28</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.95</priority>
   </url>
   <url>
     <loc>https://tools.cerilas.com/tool/google-marketing-mcp</loc>
-    <lastmod>2026-10-27</lastmod>
+    <lastmod>2026-10-28</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.85</priority>
   </url>
   <url>
     <loc>https://tools.cerilas.com/tool/llms-txt</loc>
-    <lastmod>2026-10-27</lastmod>
+    <lastmod>2026-10-28</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.85</priority>
   </url>
   <url>
     <loc>https://tools.cerilas.com/tool/html-to-llm-markdown</loc>
-    <lastmod>2026-10-27</lastmod>
+    <lastmod>2026-10-28</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.85</priority>
   </url>
   <url>
     <loc>https://tools.cerilas.com/tool/webhook-tester</loc>
-    <lastmod>2026-10-27</lastmod>
+    <lastmod>2026-10-28</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.85</priority>
   </url>
   <url>
     <loc>https://tools.cerilas.com/tool/json-beautifier</loc>
-    <lastmod>2026-10-27</lastmod>
+    <lastmod>2026-10-28</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.85</priority>
   </url>
   <url>
     <loc>https://tools.cerilas.com/tool/email-signature-generator</loc>
-    <lastmod>2026-10-27</lastmod>
+    <lastmod>2026-10-28</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.85</priority>
   </url>
   <url>
     <loc>https://tools.cerilas.com/tool/youtube-thumbnail-downloader</loc>
-    <lastmod>2026-10-27</lastmod>
+    <lastmod>2026-10-28</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.85</priority>
   </url>
   <url>
     <loc>https://tools.cerilas.com/tool/pomodoro-timer</loc>
-    <lastmod>2026-10-27</lastmod>
+    <lastmod>2026-10-28</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.85</priority>
   </url>
   <url>
     <loc>https://tools.cerilas.com/tool/task-prioritization-planner</loc>
-    <lastmod>2026-10-27</lastmod>
+    <lastmod>2026-10-28</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.85</priority>
   </url>
   <url>
     <loc>https://tools.cerilas.com/tool/startup-runway-calculator</loc>
-    <lastmod>2026-10-27</lastmod>
+    <lastmod>2026-10-28</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.85</priority>
   </url>
   <url>
     <loc>https://tools.cerilas.com/tool/mrr-calculator</loc>
-    <lastmod>2026-10-27</lastmod>
+    <lastmod>2026-10-28</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.85</priority>
   </url>
   <url>
     <loc>https://tools.cerilas.com/tool/arr-calculator</loc>
-    <lastmod>2026-10-27</lastmod>
+    <lastmod>2026-10-28</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.85</priority>
   </url>
   <url>
     <loc>https://tools.cerilas.com/tool/churn-calculator</loc>
-    <lastmod>2026-10-27</lastmod>
+    <lastmod>2026-10-28</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.85</priority>
   </url>
   <url>
     <loc>https://tools.cerilas.com/tool/ltv-calculator</loc>
-    <lastmod>2026-10-27</lastmod>
+    <lastmod>2026-10-28</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.85</priority>
   </url>
   <url>
     <loc>https://tools.cerilas.com/tool/cac-calculator</loc>
-    <lastmod>2026-10-27</lastmod>
+    <lastmod>2026-10-28</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.85</priority>
   </url>
   <url>
     <loc>https://tools.cerilas.com/tool/ltv-cac-calculator</loc>
-    <lastmod>2026-10-27</lastmod>
+    <lastmod>2026-10-28</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.85</priority>
   </url>
   <url>
     <loc>https://tools.cerilas.com/tool/website-email-extractor</loc>
-    <lastmod>2026-10-27</lastmod>
+    <lastmod>2026-10-28</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://tools.cerilas.com/tool/ai-visibility-checker/chatgpt-brand-visibility-checker</loc>
+    <lastmod>2026-10-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://tools.cerilas.com/tool/ai-visibility-checker/perplexity-citation-checker</loc>
+    <lastmod>2026-10-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://tools.cerilas.com/tool/ai-visibility-checker/google-ai-overviews-visibility-checker</loc>
+    <lastmod>2026-10-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://tools.cerilas.com/tool/ai-crawler-checker/gptbot-robots-txt-checker</loc>
+    <lastmod>2026-10-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://tools.cerilas.com/tool/ai-crawler-checker/claudebot-perplexitybot-checker</loc>
+    <lastmod>2026-10-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://tools.cerilas.com/tool/llms-txt/llms-txt-generator</loc>
+    <lastmod>2026-10-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://tools.cerilas.com/tool/llms-txt/llms-txt-validator</loc>
+    <lastmod>2026-10-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://tools.cerilas.com/tool/google-marketing-mcp/google-search-console-mcp-server</loc>
+    <lastmod>2026-10-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://tools.cerilas.com/tool/google-marketing-mcp/google-analytics-ga4-mcp-server</loc>
+    <lastmod>2026-10-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://tools.cerilas.com/tool/ai-link-hallucination-checker/verify-chatgpt-citations</loc>
+    <lastmod>2026-10-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://tools.cerilas.com/tool/token-counter-universal/openai-gpt-token-counter</loc>
+    <lastmod>2026-10-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://tools.cerilas.com/tool/token-counter-universal/claude-token-counter</loc>
+    <lastmod>2026-10-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://tools.cerilas.com/tool/token-counter-universal/gemini-token-counter</loc>
+    <lastmod>2026-10-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://tools.cerilas.com/tool/token-counter-universal/deepseek-token-counter</loc>
+    <lastmod>2026-10-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://tools.cerilas.com/tool/pdf-rag-cleaner/pdf-to-markdown-for-llm</loc>
+    <lastmod>2026-10-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://tools.cerilas.com/tool/html-to-llm-markdown/webpage-to-clean-markdown</loc>
+    <lastmod>2026-10-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://tools.cerilas.com/tool/pdf-compressor/compress-pdf-to-200kb</loc>
+    <lastmod>2026-10-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://tools.cerilas.com/tool/pdf-compressor/compress-pdf-to-100kb</loc>
+    <lastmod>2026-10-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://tools.cerilas.com/tool/pdf-compressor/compress-pdf-under-1mb</loc>
+    <lastmod>2026-10-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://tools.cerilas.com/tool/pdf-editor/sign-pdf-online-free</loc>
+    <lastmod>2026-10-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://tools.cerilas.com/tool/pdf-editor/redact-pdf-online-free</loc>
+    <lastmod>2026-10-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://tools.cerilas.com/tool/pdf-merger/combine-pdf-without-uploading</loc>
+    <lastmod>2026-10-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://tools.cerilas.com/tool/pdf-splitter/extract-pages-from-pdf</loc>
+    <lastmod>2026-10-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://tools.cerilas.com/tool/image-compressor/png-to-webp-converter</loc>
+    <lastmod>2026-10-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://tools.cerilas.com/tool/image-compressor/jpg-to-webp-converter</loc>
+    <lastmod>2026-10-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://tools.cerilas.com/tool/image-compressor/compress-png-lossless</loc>
+    <lastmod>2026-10-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://tools.cerilas.com/tool/video-compressor/compress-video-for-discord</loc>
+    <lastmod>2026-10-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://tools.cerilas.com/tool/video-compressor/compress-mp4-online</loc>
+    <lastmod>2026-10-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://tools.cerilas.com/tool/qr-code-generator/wifi-qr-code-generator</loc>
+    <lastmod>2026-10-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://tools.cerilas.com/tool/qr-code-generator/vcard-qr-code-generator</loc>
+    <lastmod>2026-10-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://tools.cerilas.com/tool/youtube-thumbnail-downloader/youtube-shorts-thumbnail-downloader</loc>
+    <lastmod>2026-10-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://tools.cerilas.com/tool/background-remover/transparent-png-maker</loc>
+    <lastmod>2026-10-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://tools.cerilas.com/tool/trl-calculator/horizon-europe-trl-scale</loc>
+    <lastmod>2026-10-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://tools.cerilas.com/tool/sample-size-calculator/ab-test-sample-size-calculator</loc>
+    <lastmod>2026-10-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://tools.cerilas.com/tool/sample-size-calculator/cochran-survey-sample-size-calculator</loc>
+    <lastmod>2026-10-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://tools.cerilas.com/tool/mrr-calculator/saas-quick-ratio-calculator</loc>
+    <lastmod>2026-10-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://tools.cerilas.com/tool/churn-calculator/net-revenue-retention-nrr-calculator</loc>
+    <lastmod>2026-10-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://tools.cerilas.com/tool/cac-calculator/cac-payback-period-calculator</loc>
+    <lastmod>2026-10-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://tools.cerilas.com/tool/startup-runway-calculator/burn-rate-calculator</loc>
+    <lastmod>2026-10-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://tools.cerilas.com/tool/ats-resume-checker/resume-job-description-matcher</loc>
+    <lastmod>2026-10-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://tools.cerilas.com/tool/json-beautifier/json-to-typescript-converter</loc>
+    <lastmod>2026-10-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://tools.cerilas.com/tool/website-email-extractor/company-domain-email-finder</loc>
+    <lastmod>2026-10-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
   </url>
   <url>
     <loc>https://tools.cerilas.com/terms</loc>
-    <lastmod>2026-10-27</lastmod>
+    <lastmod>2026-10-28</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
     <loc>https://tools.cerilas.com/privacy</loc>
-    <lastmod>2026-10-27</lastmod>
+    <lastmod>2026-10-28</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
     <loc>https://tools.cerilas.com/refund</loc>
-    <lastmod>2026-10-27</lastmod>
+    <lastmod>2026-10-28</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
     <loc>https://tools.cerilas.com/cookies</loc>
-    <lastmod>2026-10-27</lastmod>
+    <lastmod>2026-10-28</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>

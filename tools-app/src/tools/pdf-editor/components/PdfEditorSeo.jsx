@@ -1,3 +1,4 @@
+import SearchableHidden, { useSupportsUntilFound } from '../../../components/ui/SearchableHidden';
 import React, { useState } from 'react';
 import {
   FileText,
@@ -16,6 +17,7 @@ import {
 } from 'lucide-react';
 
 export default function PdfEditorSeo() {
+  const supportsUntilFound = useSupportsUntilFound();
   const [openFaqIndex, setOpenFaqIndex] = useState(0);
 
   const toggleFaq = (index) => {
@@ -176,10 +178,6 @@ export default function PdfEditorSeo() {
   return (
     <section className="pdf-seo-wrapper" aria-label="PDF Editor Educational Guide and Specifications">
       {/* Inject Schema.org JSON-LD */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaData) }}
-      />
 
       {/* Hero Explainer Header */}
       <div className="pdf-seo-header">
@@ -370,16 +368,16 @@ export default function PdfEditorSeo() {
                 <button
                   className="faq-question-btn"
                   onClick={() => toggleFaq(idx)}
-                  aria-expanded={isOpen}
+                  aria-expanded={(isOpen) || !supportsUntilFound}
                 >
                   <span className="faq-q-text">{item.q}</span>
                   <ChevronDown size={18} className={`faq-chevron ${isOpen ? 'rotate' : ''}`} />
                 </button>
-                {isOpen && (
+                <SearchableHidden isOpen={isOpen} onReveal={() => setOpenFaqIndex(idx)}>
                   <div className="faq-answer-pane">
                     <p>{item.a}</p>
                   </div>
-                )}
+                </SearchableHidden>
               </div>
             );
           })}
