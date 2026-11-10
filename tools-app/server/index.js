@@ -451,7 +451,9 @@ app.get('/sitemap-grants.xml', async (req, res) => {
     const result = await pool.query(`
       SELECT slug, last_scraped_at, last_changed_at, first_scraped_at
       FROM funding_opportunities
-      WHERE status = 'open' AND slug IS NOT NULL
+      WHERE status = 'open'
+        AND slug IS NOT NULL
+        AND (deadline_date IS NULL OR deadline_date >= CURRENT_DATE)
       ORDER BY last_scraped_at DESC
     `);
 
@@ -532,12 +534,18 @@ app.get('{*path}', async (req, res) => {
         );
         if (grantRes.rows.length > 0) {
           const opp = grantRes.rows[0];
+          if (opp.slug && opp.slug !== grantSlug) {
+            return res.redirect(301, `/tool/eu-funding-opportunities/${opp.slug}`);
+          }
           let relatedRows = [];
           try {
             const relRes = await pool.query(
               `SELECT title, slug, funding_amount, deadline_raw, deadline_date, source_key
                FROM funding_opportunities
-               WHERE status = 'open' AND slug IS NOT NULL AND slug <> $1
+               WHERE status = 'open'
+                 AND slug IS NOT NULL
+                 AND slug <> $1
+                 AND (deadline_date IS NULL OR deadline_date >= CURRENT_DATE)
                ORDER BY (source_key = $2) DESC, deadline_date ASC NULLS LAST, last_scraped_at DESC
                LIMIT 8`,
               [opp.slug, opp.source_key]
@@ -547,6 +555,13 @@ app.get('{*path}', async (req, res) => {
 
           html = renderGrantPageHtml(html, opp, relatedRows);
           return res.send(html);
+        } else {
+          res.setHeader('X-Robots-Tag', 'noindex, nofollow');
+          html = stripOldMetaTags(html).replace(
+            '</head>',
+            '    <title>Grant Opportunity Not Found | Cerilas Tools</title>\n    <meta name="robots" content="noindex, nofollow" />\n    <link rel="canonical" href="https://tools.cerilas.com/tool/eu-funding-opportunities" />\n  </head>'
+          );
+          return res.status(404).send(html);
         }
       } catch (err) {
         console.warn('Error fetching grant SEO metadata for SSR:', err.message);

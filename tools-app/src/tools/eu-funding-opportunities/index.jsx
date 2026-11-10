@@ -56,13 +56,102 @@ const BENEFICIARIES_LIST = [
   'Mid-Caps'
 ];
 
+function formatClientCallId(externalId) {
+  const raw = String(externalId || '').trim();
+  if (!raw) return '';
+  return raw
+    .replace(/_?TOPICS_?[a-z]{2}$/i, '')
+    .replace(/_?COMPETITIVE[-_]?CALL_?[a-z]{2}$/i, '')
+    .replace(/^cascade_/i, 'FSTP-')
+    .trim();
+}
+
+function cleanClientLongDescHtml(longDescHtml) {
+  const raw = String(longDescHtml || '').trim();
+  if (!raw) return '';
+  const parts = raw.split(/<hr[^>]*>/i);
+  if (parts.length <= 1) return raw;
+  const BOILERPLATE_HEADINGS = [
+    'Destination & Policy Context',
+    'Conditions & Eligibility Criteria',
+    'Support & Documentation Guidance'
+  ];
+  const kept = parts.filter((sectionHtml) => {
+    const plain = sectionHtml.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+    if (!plain) return false;
+    return !BOILERPLATE_HEADINGS.some((h) => plain.startsWith(h));
+  });
+  return kept.length > 0
+    ? kept.join('<hr style="margin: 1.25rem 0; border: 0; border-top: 1px solid rgba(150, 150, 150, 0.15);" />')
+    : parts[0];
+}
+
+function buildClientGrantFaqs(opp) {
+  if (Array.isArray(opp?.faqs) && opp.faqs.length > 0) return opp.faqs;
+  const title = (opp?.title || 'this EU funding call').trim();
+  const cleanId = opp?.clean_call_id || formatClientCallId(opp?.external_id);
+  const isEc = opp?.source_key === 'ec_funding';
+  const programName = isEc
+    ? 'Horizon Europe (European Commission SEDIA)'
+    : 'EU Cascade Funding (Financial Support to Third Parties / FSTP)';
+  const budgetText =
+    opp?.funding_amount && opp.funding_amount !== 'Not specified' && opp.funding_amount !== 'EUR 0'
+      ? opp.funding_amount
+      : isEc
+        ? 'Competitive European Commission topic budget (see official Work Programme table)'
+        : 'Equity-free lump-sum sub-grant (typically €50,000–€200,000 per beneficiary)';
+  const deadlineText = opp?.deadline_date
+    ? new Date(opp.deadline_date).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' })
+    : (opp?.deadline_raw || 'Continuous / Check Official Portal');
+  const applicants =
+    Array.isArray(opp?.eligible_applicants) && opp.eligible_applicants.length > 0
+      ? opp.eligible_applicants.join(', ')
+      : 'SMEs, Startups, Universities, and Research Organizations established in EU Member States or Horizon Europe Associated Countries';
+  const domains =
+    Array.isArray(opp?.domains) && opp.domains.length > 0
+      ? opp.domains.join(', ')
+      : 'Research, Innovation & Technology Deployment';
+
+  return [
+    {
+      q: `What is the grant budget and funding instrument for "${title}"${cleanId ? ` (Call #${cleanId})` : ''}?`,
+      a: `"${title}"${cleanId ? ` (Call Reference: ${cleanId})` : ''} is published under ${programName} as a ${opp?.call_type || 'Grant Call'}. The indicative funding allocation is ${budgetText}. Funding is provided as non-dilutive, equity-free European grant support subject to the call's grant agreement terms.`
+    },
+    {
+      q: `Who is eligible to apply for "${title}"?`,
+      a: `Eligible applicant categories for this call include: ${applicants}. Applicants must be legally established in an eligible European Union Member State or Horizon Europe Associated Country and meet the specific consortium or single-beneficiary admissibility rules detailed on the official submission portal.`
+    },
+    {
+      q: `When is the submission deadline for "${title}" and how do I apply?`,
+      a: `The official submission deadline for "${title}" is ${deadlineText}. Proposals must be submitted electronically before the cutoff time via the official ${isEc ? 'European Commission Funding & Tenders Portal (SEDIA)' : 'managing consortium open-call submission portal'} linked in the Grant Key Specifications table above.`
+    },
+    {
+      q: `What are the core objectives and scope of "${title}"?`,
+      a: `This call targets ${domains}. Specifically: ${opp?.short_description || 'Review the full Expected Outcomes & Scope section above for technical deliverables and work programme requirements.'}`
+    }
+  ];
+}
+
+function getInitialGrantSlugFromLocation() {
+  if (typeof window === 'undefined') return null;
+  const pathMatch = window.location.pathname.match(/^\/tools?\/eu-funding-opportunities\/([a-zA-Z0-9_-]+)\/?$/);
+  const hashMatch =
+    window.location.hash.match(/[?&]call=([a-zA-Z0-9_-]+)/) ||
+    window.location.hash.match(/#\/tools?\/eu-funding-opportunities\/([a-zA-Z0-9_-]+)/);
+  const slug = pathMatch ? pathMatch[1] : hashMatch ? hashMatch[1] : null;
+  return slug && slug !== 'all' ? slug : null;
+}
+
 export default function EuFundingOpportunities({ onBack, toolMeta }) {
   const { trackUse, visitorCount } = useToolAnalytics(euFundingManifest.slug, toolMeta);
+
+  // Synchronously detect if we are on a dedicated Grant Call Dossier URL (/tool/eu-funding-opportunities/:grantSlug)
+  const [activeGrantSlug, setActiveGrantSlug] = useState(() => getInitialGrantSlugFromLocation());
 
   // States
   const [opportunities, setOpportunities] = useState([]);
   const [stats, setStats] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(() => !getInitialGrantSlugFromLocation());
   const [error, setError] = useState(null);
 
   // Filter States
@@ -81,8 +170,22 @@ export default function EuFundingOpportunities({ onBack, toolMeta }) {
   const [totalItems, setTotalItems] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
 
-  // Modal Detail State
-  const [selectedOpp, setSelectedOpp] = useState(null);
+  // Synchronously hydrate Grant Call Dossier from SSR window.__INITIAL_GRANT_DATA__ when available
+  const [selectedOpp, setSelectedOpp] = useState(() => {
+    if (typeof window === 'undefined') return null;
+    const initSlug = getInitialGrantSlugFromLocation();
+    const ssrOpp = window.__INITIAL_GRANT_DATA__?.opp;
+    if (initSlug && ssrOpp && (ssrOpp.slug === initSlug || ssrOpp.external_id === initSlug)) {
+      return ssrOpp;
+    }
+    return null;
+  });
+  const [relatedGrants, setRelatedGrants] = useState(() => {
+    if (typeof window === 'undefined') return [];
+    return Array.isArray(window.__INITIAL_GRANT_DATA__?.relatedGrants)
+      ? window.__INITIAL_GRANT_DATA__.relatedGrants
+      : [];
+  });
   const [loadingDetail, setLoadingDetail] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
 
@@ -126,8 +229,9 @@ export default function EuFundingOpportunities({ onBack, toolMeta }) {
 
   const isBookmarked = useCallback((id) => bookmarks.some((b) => b.id === id), [bookmarks]);
 
-  // Fetch summary KPI stats once
+  // Fetch summary KPI stats once (only when viewing the main directory)
   useEffect(() => {
+    if (activeGrantSlug) return;
     async function fetchStats() {
       try {
         const res = await fetch('/api/scrapers/stats');
@@ -140,12 +244,13 @@ export default function EuFundingOpportunities({ onBack, toolMeta }) {
       }
     }
     fetchStats();
-  }, []);
+  }, [activeGrantSlug]);
 
   const [refreshKey, setRefreshKey] = useState(0);
 
-  // Fetch opportunities whenever filters change (with debounced search)
+  // Fetch directory opportunities whenever filters change (skip when viewing a dedicated grant dossier URL)
   useEffect(() => {
+    if (activeGrantSlug) return;
     let cancelled = false;
     setLoading(true);
     setError(null);
@@ -192,40 +297,58 @@ export default function EuFundingOpportunities({ onBack, toolMeta }) {
       cancelled = true;
       clearTimeout(timer);
     };
-  }, [search, selectedSource, selectedDomain, selectedBeneficiary, selectedCallType, sortOrder, page, limit, refreshKey]);
+  }, [activeGrantSlug, search, selectedSource, selectedDomain, selectedBeneficiary, selectedCallType, sortOrder, page, limit, refreshKey]);
 
   const fetchOpportunities = useCallback(() => {
     setRefreshKey((k) => k + 1);
   }, []);
 
-  // Synchronize browser history and handle deep-linking
-  useEffect(() => {
-    const handlePopState = () => {
-      const match = window.location.pathname.match(/\/tools?\/eu-funding-opportunities\/([a-zA-Z0-9_-]+)/);
-      if (match && match[1]) {
-        openDetail(match[1]);
-      } else if (selectedOpp) {
-        setSelectedOpp(null);
-      }
-    };
-    window.addEventListener('popstate', handlePopState);
-    return () => window.removeEventListener('popstate', handlePopState);
-  }, [selectedOpp]);
+  const syncGrantDocumentMeta = useCallback((oppData) => {
+    if (typeof document === 'undefined' || !oppData) return;
+    const slug = oppData.slug || oppData.id;
+    const canonicalUrl = `https://tools.cerilas.com/tool/eu-funding-opportunities/${slug}`;
+    const pageTitle = oppData.seo_title || `${oppData.title} | Horizon Europe & EU Grant`;
+    const pageDesc = oppData.meta_description || oppData.short_description || '';
 
-  // Initial deep-link check on mount
-  useEffect(() => {
-    const pathMatch = window.location.pathname.match(/\/tools?\/eu-funding-opportunities\/([a-zA-Z0-9_-]+)/);
-    const hashMatch = window.location.hash.match(/[?&]call=([a-zA-Z0-9_-]+)/) ||
-                      window.location.hash.match(/#\/tools?\/eu-funding-opportunities\/([a-zA-Z0-9_-]+)/);
-    const targetSlug = pathMatch ? pathMatch[1] : (hashMatch ? hashMatch[1] : null);
-    if (targetSlug && targetSlug !== 'all') {
-      openDetail(targetSlug);
+    document.title = pageTitle;
+    const setMetaTag = (nameOrProp, attr, val) => {
+      if (!val) return;
+      let el = document.querySelector(`meta[${attr}="${nameOrProp}"]`);
+      if (!el) {
+        el = document.createElement('meta');
+        el.setAttribute(attr, nameOrProp);
+        document.head.appendChild(el);
+      }
+      el.setAttribute('content', val);
+    };
+    let canonicalEl = document.querySelector('link[rel="canonical"]');
+    if (!canonicalEl) {
+      canonicalEl = document.createElement('link');
+      canonicalEl.setAttribute('rel', 'canonical');
+      document.head.appendChild(canonicalEl);
     }
+    canonicalEl.setAttribute('href', canonicalUrl);
+    setMetaTag('description', 'name', pageDesc);
+    setMetaTag('og:title', 'property', pageTitle);
+    setMetaTag('og:description', 'property', pageDesc);
+    setMetaTag('og:url', 'property', canonicalUrl);
+    setMetaTag('twitter:title', 'name', pageTitle);
+    setMetaTag('twitter:description', 'name', pageDesc);
+    setMetaTag('twitter:url', 'name', canonicalUrl);
   }, []);
 
-  // Open Call Detail Modal
-  const openDetail = async (idOrSlug) => {
+  // Open Dedicated Call Dossier View
+  const openDetail = useCallback(async (idOrSlug) => {
+    if (!idOrSlug || idOrSlug === 'all') return;
+    setActiveGrantSlug(String(idOrSlug));
     if (trackUse) trackUse({ callId: idOrSlug });
+
+    // If SSR already hydrated this exact grant, sync meta and skip redundant fetch
+    if (selectedOpp && (selectedOpp.slug === idOrSlug || String(selectedOpp.id) === String(idOrSlug))) {
+      syncGrantDocumentMeta(selectedOpp);
+      return;
+    }
+
     setLoadingDetail(true);
     try {
       const res = await fetch(`/api/scrapers/opportunities/${idOrSlug}`);
@@ -233,29 +356,60 @@ export default function EuFundingOpportunities({ onBack, toolMeta }) {
       if (json.status === 'success' && json.data) {
         setSelectedOpp(json.data);
         const slug = json.data.slug || json.data.id;
+        setActiveGrantSlug(String(slug));
         const targetUrl = `/tool/eu-funding-opportunities/${slug}`;
-        if (window.location.pathname !== targetUrl && !window.location.hash.includes(slug)) {
+        if (window.location.pathname !== targetUrl) {
           window.history.pushState({ grantSlug: slug }, '', targetUrl);
         }
-        if (json.data.seo_title) {
-          document.title = json.data.seo_title;
-        }
+        syncGrantDocumentMeta(json.data);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
       }
     } catch (err) {
       console.error('Failed to load call details:', err);
     } finally {
       setLoadingDetail(false);
     }
-  };
+  }, [selectedOpp, syncGrantDocumentMeta, trackUse]);
 
-  const closeDetail = () => {
+  const closeDetail = useCallback(() => {
+    setActiveGrantSlug(null);
     setSelectedOpp(null);
     setCopiedLink(false);
-    if (window.location.pathname.match(/\/tools?\/eu-funding-opportunities\/[a-zA-Z0-9_-]+/)) {
+    const directoryUrl = 'https://tools.cerilas.com/tool/eu-funding-opportunities';
+    if (window.location.pathname !== '/tool/eu-funding-opportunities') {
       window.history.pushState({}, '', '/tool/eu-funding-opportunities');
     }
-    document.title = 'EU Funding & Cascade Funding Opportunities 2026 | Cerilas Tools';
-  };
+    document.title = 'EU Funding & Cascade Funding Opportunities (2026) — Live Horizon Europe & FSTP Grants';
+    const canonicalEl = document.querySelector('link[rel="canonical"]');
+    if (canonicalEl) canonicalEl.setAttribute('href', directoryUrl);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, []);
+
+  // Synchronize browser history and handle deep-linking
+  useEffect(() => {
+    const handlePopState = () => {
+      const slug = getInitialGrantSlugFromLocation();
+      if (slug) {
+        openDetail(slug);
+      } else {
+        setActiveGrantSlug(null);
+        setSelectedOpp(null);
+      }
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, [openDetail]);
+
+  // Initial deep-link check on mount (only fetches if SSR did not already populate selectedOpp)
+  useEffect(() => {
+    if (activeGrantSlug) {
+      if (selectedOpp && (selectedOpp.slug === activeGrantSlug || selectedOpp.external_id === activeGrantSlug)) {
+        syncGrantDocumentMeta(selectedOpp);
+      } else {
+        openDetail(activeGrantSlug);
+      }
+    }
+  }, []);
 
   const copyShareLink = (opp) => {
     const slug = opp.slug || opp.id;
@@ -329,6 +483,411 @@ export default function EuFundingOpportunities({ onBack, toolMeta }) {
     }
     return `€${num.toLocaleString()}`;
   };
+
+  // Dedicated Full-Page Grant Call Dossier View (/tool/eu-funding-opportunities/:grantSlug)
+  if (activeGrantSlug) {
+    const cleanId = selectedOpp ? (selectedOpp.clean_call_id || formatClientCallId(selectedOpp.external_id)) : '';
+    const isEc = selectedOpp?.source_key === 'ec_funding';
+    const sourceLabel = isEc ? 'Horizon Europe (SEDIA)' : 'Cascade Funding (FSTP)';
+    const deadlineFormatted = selectedOpp?.deadline_date
+      ? new Date(selectedOpp.deadline_date).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' })
+      : (selectedOpp?.deadline_raw || 'Open Call');
+    const budgetFormatted = selectedOpp?.funding_amount || 'See Official Call Budget';
+    const cleanedLongHtml = selectedOpp ? cleanClientLongDescHtml(selectedOpp.long_description) : '';
+    const grantFaqs = selectedOpp ? buildClientGrantFaqs(selectedOpp) : [];
+    const portalHref = selectedOpp?.permalink || (Array.isArray(selectedOpp?.links) ? selectedOpp.links[0] : null);
+
+    return (
+      <div className="c-tool-page-container eu-funding-root">
+        {/* Breadcrumb Navigation matching SSR BreadcrumbList */}
+        <nav
+          aria-label="Breadcrumb"
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            flexWrap: 'wrap',
+            gap: '0.4rem',
+            fontSize: '0.82rem',
+            color: 'var(--text-muted)',
+            marginBottom: '1.25rem'
+          }}
+        >
+          <a href="/" style={{ color: 'var(--text-muted)', textDecoration: 'none' }}>Cerilas Tools</a>
+          <span>/</span>
+          <a href="/research-tools" style={{ color: 'var(--text-muted)', textDecoration: 'none' }}>Research Tools</a>
+          <span>/</span>
+          <a
+            href="/tool/eu-funding-opportunities"
+            onClick={(e) => {
+              e.preventDefault();
+              closeDetail();
+            }}
+            style={{ color: '#3b82f6', textDecoration: 'none', fontWeight: 500 }}
+          >
+            EU &amp; Cascade Funding
+          </a>
+          {selectedOpp && (
+            <>
+              <span>/</span>
+              <span aria-current="page" style={{ color: 'var(--text-main)', fontWeight: 500 }}>
+                {selectedOpp.title}{cleanId ? ` (#${cleanId})` : ''}
+              </span>
+            </>
+          )}
+        </nav>
+
+        {/* Top Action Bar */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem', marginBottom: '1.5rem' }}>
+          <a
+            href="/tool/eu-funding-opportunities"
+            onClick={(e) => {
+              e.preventDefault();
+              closeDetail();
+            }}
+            className="eu-page-btn"
+            style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}
+          >
+            <ChevronLeft size={16} />
+            <span>Browse All Open EU &amp; Cascade Funding Calls</span>
+          </a>
+
+          {selectedOpp && (
+            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
+              <button
+                className={`eu-bookmark-toggle-btn ${isBookmarked(selectedOpp.id) ? 'has-bookmarks' : ''}`}
+                onClick={() => toggleBookmark(selectedOpp)}
+              >
+                <Bookmark size={15} fill={isBookmarked(selectedOpp.id) ? 'currentColor' : 'none'} />
+                <span>{isBookmarked(selectedOpp.id) ? 'Saved to Shortlist' : 'Bookmark Call'}</span>
+              </button>
+
+              <button className="eu-bookmark-toggle-btn" onClick={() => copyShareLink(selectedOpp)}>
+                {copiedLink ? <Check size={15} color="#10b981" /> : <Copy size={15} />}
+                <span>{copiedLink ? 'Link Copied' : 'Share Call URL'}</span>
+              </button>
+
+              {portalHref && (
+                <a
+                  href={portalHref}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="eu-portal-btn"
+                >
+                  <span>Official Submission Portal</span>
+                  <ExternalLink size={15} />
+                </a>
+              )}
+            </div>
+          )}
+        </div>
+
+        {loadingDetail && !selectedOpp ? (
+          <div style={{ padding: '4rem 1rem', textAlign: 'center', color: 'var(--text-muted)' }}>
+            <div
+              style={{
+                width: 44,
+                height: 44,
+                borderRadius: '50%',
+                border: '2px solid rgba(150,150,150,0.2)',
+                borderTopColor: '#3b82f6',
+                animation: 'spin 0.8s linear infinite',
+                margin: '0 auto 1.25rem'
+              }}
+            />
+            <p style={{ margin: 0 }}>Loading EU grant call dossier...</p>
+          </div>
+        ) : !selectedOpp ? (
+          <div className="eu-empty-state">
+            <div className="eu-empty-icon">
+              <AlertCircle size={28} />
+            </div>
+            <h3>Grant Call Not Found</h3>
+            <p>This funding opportunity may have closed or moved.</p>
+            <button className="eu-details-btn" onClick={closeDetail}>
+              View All Active EU &amp; Cascade Calls
+            </button>
+          </div>
+        ) : (
+          <article
+            style={{
+              background: 'var(--card-bg)',
+              border: '1px solid var(--card-border)',
+              borderRadius: '16px',
+              padding: '2rem',
+              display: 'grid',
+              gap: '2rem'
+            }}
+          >
+            {/* Dossier Header with Unique H1 matching SSR 1:1 */}
+            <header style={{ borderBottom: '1px solid var(--card-border)', paddingBottom: '1.5rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap', marginBottom: '0.85rem' }}>
+                <span className={`eu-table-source-badge ${isEc ? 'ec' : 'cascade'}`}>
+                  {sourceLabel}
+                </span>
+                <span
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '0.3rem',
+                    padding: '0.2rem 0.65rem',
+                    borderRadius: '999px',
+                    fontSize: '0.74rem',
+                    fontWeight: 600,
+                    textTransform: 'uppercase',
+                    background: selectedOpp.status === 'open' ? 'rgba(16, 185, 129, 0.14)' : 'rgba(148, 163, 184, 0.16)',
+                    color: selectedOpp.status === 'open' ? '#10b981' : 'var(--text-muted)'
+                  }}
+                >
+                  <CheckCircle2 size={12} />
+                  {(selectedOpp.status || 'open').toUpperCase()}
+                </span>
+                {cleanId && (
+                  <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 600 }}>
+                    Call Reference: #{cleanId}
+                  </span>
+                )}
+              </div>
+
+              <h1 style={{ fontSize: 'clamp(1.45rem, 2.5vw, 2.05rem)', fontWeight: 700, lineHeight: 1.25, margin: '0 0 0.85rem 0', color: 'var(--text-main)' }}>
+                {selectedOpp.title}
+                {cleanId && (
+                  <span style={{ fontSize: '1.05rem', fontWeight: 500, color: '#3b82f6', marginLeft: '0.5rem' }}>
+                    (Call #{cleanId})
+                  </span>
+                )}
+              </h1>
+
+              {selectedOpp.short_description && (
+                <p style={{ fontSize: '1.02rem', lineHeight: 1.65, color: 'var(--text-muted)', margin: 0 }}>
+                  {selectedOpp.short_description}
+                </p>
+              )}
+            </header>
+
+            {/* Key Specifications Table */}
+            <section>
+              <h2 style={{ fontSize: '1.25rem', fontWeight: 700, margin: '0 0 1rem 0', color: 'var(--text-main)' }}>
+                Grant Key Specifications
+              </h2>
+              <div className="eu-table-container">
+                <table className="eu-table">
+                  <tbody>
+                    {cleanId && (
+                      <tr>
+                        <th style={{ width: '240px', fontWeight: 600 }}>Call Reference ID</th>
+                        <td><strong>#{cleanId}</strong> <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>({selectedOpp.external_id})</span></td>
+                      </tr>
+                    )}
+                    <tr>
+                      <th style={{ width: '240px', fontWeight: 600 }}>Funding Program &amp; Instrument</th>
+                      <td>{sourceLabel} — <strong>{selectedOpp.call_type || 'Grant Call'}</strong></td>
+                    </tr>
+                    <tr>
+                      <th style={{ fontWeight: 600 }}>Indicative Grant Budget</th>
+                      <td>
+                        <span style={{ fontWeight: 700, color: '#10b981', fontSize: '1rem' }}>
+                          {budgetFormatted}
+                        </span>
+                      </td>
+                    </tr>
+                    <tr>
+                      <th style={{ fontWeight: 600 }}>Submission Deadline</th>
+                      <td>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
+                          <strong>{deadlineFormatted}</strong>
+                          {selectedOpp.deadline_date && getDeadlineBadge(selectedOpp.deadline_date)}
+                        </div>
+                      </td>
+                    </tr>
+                    {Array.isArray(selectedOpp.eligible_applicants) && selectedOpp.eligible_applicants.length > 0 && (
+                      <tr>
+                        <th style={{ fontWeight: 600 }}>Eligible Beneficiaries</th>
+                        <td>
+                          <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
+                            {selectedOpp.eligible_applicants.map((a, idx) => (
+                              <span key={idx} className="eu-domain-tag" style={{ background: 'rgba(59, 130, 246, 0.12)', color: '#3b82f6' }}>
+                                {a}
+                              </span>
+                            ))}
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+                    {Array.isArray(selectedOpp.domains) && selectedOpp.domains.length > 0 && (
+                      <tr>
+                        <th style={{ fontWeight: 600 }}>Target Domains</th>
+                        <td>
+                          <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
+                            {selectedOpp.domains.map((d, idx) => (
+                              <span key={idx} className="eu-domain-tag">{d}</span>
+                            ))}
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+                    {Array.isArray(selectedOpp.technologies) && selectedOpp.technologies.length > 0 && (
+                      <tr>
+                        <th style={{ fontWeight: 600 }}>Key Technologies</th>
+                        <td>
+                          <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
+                            {selectedOpp.technologies.map((t, idx) => (
+                              <span key={idx} className="eu-domain-tag">{t}</span>
+                            ))}
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+                    {portalHref && (
+                      <tr>
+                        <th style={{ fontWeight: 600 }}>Official Call Portal</th>
+                        <td>
+                          <a
+                            href={portalHref}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{ color: '#3b82f6', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}
+                          >
+                            <span>Open Official European Commission / Consortium Notice</span>
+                            <ExternalLink size={14} />
+                          </a>
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </section>
+
+            {/* Full Cleaned Call Scope & Expected Outcomes */}
+            <section>
+              <h2 style={{ fontSize: '1.25rem', fontWeight: 700, margin: '0 0 1rem 0', color: 'var(--text-main)' }}>
+                Expected Outcomes, Scope &amp; Call Description
+              </h2>
+              <div
+                className="eu-modal-content-area"
+                style={{
+                  background: 'rgba(148, 163, 184, 0.04)',
+                  border: '1px solid var(--card-border)',
+                  borderRadius: '12px',
+                  padding: '1.5rem'
+                }}
+                dangerouslySetInnerHTML={{
+                  __html:
+                    cleanedLongHtml ||
+                    `<p style="color: var(--text-muted); margin: 0;">${selectedOpp.short_description || 'Refer to the official submission portal for complete call work programme annexes.'}</p>`
+                }}
+              />
+            </section>
+
+            {/* Call-Specific Frequently Asked Questions */}
+            <section>
+              <h2 style={{ fontSize: '1.25rem', fontWeight: 700, margin: '0 0 1rem 0', color: 'var(--text-main)' }}>
+                Frequently Asked Questions: {selectedOpp.title}
+              </h2>
+              <div style={{ display: 'grid', gap: '0.85rem' }}>
+                {grantFaqs.map((faq, idx) => (
+                  <div
+                    key={idx}
+                    style={{
+                      border: '1px solid var(--card-border)',
+                      borderRadius: '12px',
+                      padding: '1.15rem 1.25rem',
+                      background: 'rgba(148, 163, 184, 0.03)'
+                    }}
+                  >
+                    <h3 style={{ fontSize: '0.98rem', fontWeight: 600, margin: '0 0 0.45rem 0', color: 'var(--text-main)' }}>
+                      {faq.q}
+                    </h3>
+                    <p style={{ fontSize: '0.9rem', lineHeight: 1.6, margin: 0, color: 'var(--text-muted)' }}>
+                      {faq.a}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            {/* Proposal Preparation Toolkit Banner */}
+            <section
+              style={{
+                border: '1px solid rgba(59, 130, 246, 0.25)',
+                borderRadius: '12px',
+                padding: '1.25rem',
+                background: 'rgba(59, 130, 246, 0.05)'
+              }}
+            >
+              <h2 style={{ fontSize: '1.1rem', fontWeight: 700, margin: '0 0 0.45rem 0', color: 'var(--text-main)' }}>
+                Prepare Your EU Grant Proposal
+              </h2>
+              <p style={{ margin: 0, fontSize: '0.9rem', lineHeight: 1.6, color: 'var(--text-muted)' }}>
+                Verify your project&apos;s expected maturity with our free{' '}
+                <a href="/tool/trl-calculator" style={{ color: '#3b82f6', fontWeight: 600 }}>
+                  TRL Calculator (Horizon Europe TRL 1–9)
+                </a>
+                , calculate work-package statistical power with the{' '}
+                <a href="/tool/sample-size-calculator" style={{ color: '#3b82f6', fontWeight: 600 }}>
+                  Sample Size Calculator
+                </a>
+                , or{' '}
+                <a
+                  href="/tool/eu-funding-opportunities"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    closeDetail();
+                  }}
+                  style={{ color: '#3b82f6', fontWeight: 600 }}
+                >
+                  browse all open EU &amp; Cascade Funding Opportunities &rarr;
+                </a>
+              </p>
+            </section>
+
+            {/* Related Open EU & Cascade Funding Calls */}
+            {relatedGrants.length > 0 && (
+              <section>
+                <h2 style={{ fontSize: '1.25rem', fontWeight: 700, margin: '0 0 1rem 0', color: 'var(--text-main)' }}>
+                  Related Open EU &amp; Cascade Funding Calls
+                </h2>
+                <div style={{ display: 'grid', gap: '0.65rem' }}>
+                  {relatedGrants.map((g, idx) => {
+                    const gDl = g.deadline_date
+                      ? new Date(g.deadline_date).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' })
+                      : (g.deadline_raw || 'Open');
+                    return (
+                      <a
+                        key={g.slug || idx}
+                        href={`/tool/eu-funding-opportunities/${g.slug}`}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          openDetail(g.slug);
+                        }}
+                        style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          gap: '1rem',
+                          padding: '0.85rem 1.1rem',
+                          borderRadius: '10px',
+                          border: '1px solid var(--card-border)',
+                          background: 'rgba(148, 163, 184, 0.03)',
+                          textDecoration: 'none',
+                          color: 'var(--text-main)'
+                        }}
+                      >
+                        <span style={{ fontWeight: 600, fontSize: '0.92rem', color: '#3b82f6' }}>{g.title}</span>
+                        <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>
+                          {g.funding_amount ? `${g.funding_amount} · ` : ''}Deadline: {gDl}
+                        </span>
+                      </a>
+                    );
+                  })}
+                </div>
+              </section>
+            )}
+          </article>
+        )}
+      </div>
+    );
+  }
 
   return (
     <div className="c-tool-page-container eu-funding-root">

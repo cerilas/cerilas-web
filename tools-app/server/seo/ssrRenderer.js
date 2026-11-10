@@ -5,6 +5,12 @@ import {
   CATEGORIES,
   TOOLS_SEO_REGISTRY
 } from './toolsSeoRegistry.js';
+import {
+  formatCleanCallId,
+  cleanGrantLongDescriptionHtml,
+  deriveUniqueShortDescription,
+  buildGrantFaqs
+} from '../utils/seoGenerator.js';
 import { COMPANY_INFO, LEGAL_DOCS } from '../../src/legal/legalContent.js';
 import { buildToolJsonLdBlocks, buildToolVariantJsonLdBlocks } from '../../src/seo/structuredData.js';
 import {
@@ -458,24 +464,32 @@ export function renderToolVariantPageHtml(templateHtml, toolSlug, variantSlug) {
 export function renderGrantPageHtml(templateHtml, opp, relatedGrants = []) {
   const canonicalUrl = `https://tools.cerilas.com/tool/eu-funding-opportunities/${opp.slug}`;
   const ogImg = 'https://tools.cerilas.com/og/eu-funding-opportunities.png';
-  const sourceLabel = opp.source_key === 'cascade' ? 'Cascade Funding (FSTP)' : 'Horizon Europe (SEDIA)';
-  const deadlineText = opp.deadline_raw || (opp.deadline_date ? new Date(opp.deadline_date).toISOString().slice(0, 10) : 'Open Call');
+  const isCascade = opp.source_key === 'cascadefunding' || opp.source_key === 'cascade';
+  const sourceLabel = isCascade ? 'Cascade Funding (FSTP)' : 'Horizon Europe (SEDIA)';
+  const cleanId = formatCleanCallId(opp.external_id);
+  const deadlineText = opp.deadline_date
+    ? new Date(opp.deadline_date).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' })
+    : (opp.deadline_raw || 'Open Call');
   const budgetText = opp.funding_amount || 'See Official Call Budget';
   const applicants = Array.isArray(opp.eligible_applicants) ? opp.eligible_applicants.filter(Boolean) : [];
   const domains = Array.isArray(opp.domains) ? opp.domains.filter(Boolean) : [];
   const technologies = Array.isArray(opp.technologies) ? opp.technologies.filter(Boolean) : [];
 
-  const pageTitle = opp.seo_title || `${opp.title} – ${sourceLabel} Grant | Cerilas Tools`;
+  const cleanedLongHtml = cleanGrantLongDescriptionHtml(opp.long_description);
+  const uniqueShort = deriveUniqueShortDescription({ ...opp, long_description: cleanedLongHtml });
+  const grantFaqs = buildGrantFaqs({ ...opp, long_description: cleanedLongHtml, short_description: uniqueShort });
+
+  const pageTitle = opp.seo_title || `${opp.title}${cleanId ? ` #${cleanId}` : ''} – ${sourceLabel} Grant`;
   const pageDesc =
     opp.meta_description ||
-    opp.short_description ||
+    uniqueShort ||
     `${sourceLabel} funding call (${budgetText}, deadline: ${deadlineText}). Review eligibility, scope, and application links on Cerilas Tools.`;
   const pageKeywords =
     opp.meta_keywords ||
-    `EU funding, ${sourceLabel}, ${opp.external_id || ''}, ${domains.slice(0, 4).join(', ')}, Horizon Europe grants`;
+    `EU funding, ${sourceLabel}, ${cleanId || opp.external_id || ''}, ${domains.slice(0, 4).join(', ')}, Horizon Europe grants`;
 
-  const cleanLongDesc = opp.long_description
-    ? String(opp.long_description).replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 2600)
+  const cleanLongDesc = cleanedLongHtml
+    ? String(cleanedLongHtml).replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 8000)
     : '';
 
   const breadcrumbSchema = {
@@ -485,21 +499,30 @@ export function renderGrantPageHtml(templateHtml, opp, relatedGrants = []) {
       { '@type': 'ListItem', position: 1, name: "Cerilas' Tools", item: 'https://tools.cerilas.com/' },
       { '@type': 'ListItem', position: 2, name: 'Research Tools', item: 'https://tools.cerilas.com/research-tools' },
       { '@type': 'ListItem', position: 3, name: 'EU & Cascade Funding Opportunities', item: 'https://tools.cerilas.com/tool/eu-funding-opportunities' },
-      { '@type': 'ListItem', position: 4, name: opp.title, item: canonicalUrl }
+      { '@type': 'ListItem', position: 4, name: cleanId ? `${opp.title} (Call #${cleanId})` : opp.title, item: canonicalUrl }
     ]
   };
 
   const grantSchema = opp.schema_json || {
     '@context': 'https://schema.org',
-    '@type': 'WebPage',
-    name: opp.title,
-    description: pageDesc,
-    url: canonicalUrl,
-    inLanguage: 'en',
-    about: {
-      '@type': 'Thing',
-      name: `${sourceLabel} — ${opp.external_id || opp.title}`
-    }
+    '@type': 'FinancialProduct',
+    name: cleanId ? `${opp.title} (Call #${cleanId})` : opp.title,
+    identifier: cleanId || opp.external_id || opp.slug,
+    description: uniqueShort || pageDesc,
+    url: canonicalUrl
+  };
+
+  const faqSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: grantFaqs.map((item) => ({
+      '@type': 'Question',
+      name: item.q,
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: item.a
+      }
+    }))
   };
 
   const relatedHtml = relatedGrants.length > 0
@@ -508,7 +531,9 @@ export function renderGrantPageHtml(templateHtml, opp, relatedGrants = []) {
         <h2 style="${SSR_H2}">Related Open EU &amp; Cascade Funding Calls</h2>
         <ul style="margin: 0; padding-left: 1.25rem; color: #cbd5e1; display: grid; gap: 0.55rem;">
           ${relatedGrants.map(g => {
-            const gDl = g.deadline_raw || (g.deadline_date ? new Date(g.deadline_date).toISOString().slice(0, 10) : 'Open');
+            const gDl = g.deadline_date
+              ? new Date(g.deadline_date).toISOString().slice(0, 10)
+              : (g.deadline_raw || 'Open');
             const gAmt = g.funding_amount ? ` · ${escapeHtml(g.funding_amount)}` : '';
             return `<li><a href="/tool/eu-funding-opportunities/${escapeHtml(g.slug)}" style="${SSR_LINK} font-weight: 600;">${escapeHtml(g.title)}</a> <span style="color: #94a3b8; font-size: 0.88rem;">(Deadline: ${escapeHtml(gDl)}${gAmt})</span></li>`;
           }).join('')}
@@ -525,23 +550,23 @@ export function renderGrantPageHtml(templateHtml, opp, relatedGrants = []) {
         <span style="margin: 0 0.5rem;">/</span>
         <a href="/tool/eu-funding-opportunities" style="${SSR_LINK}">EU &amp; Cascade Funding</a>
         <span style="margin: 0 0.5rem;">/</span>
-        <span aria-current="page" style="color: #cbd5e1;">${escapeHtml(opp.title)}</span>
+        <span aria-current="page" style="color: #cbd5e1;">${escapeHtml(opp.title)}${cleanId ? ` (#${escapeHtml(cleanId)})` : ''}</span>
       </nav>
 
       <article>
         <header style="margin-bottom: 1.75rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 1.25rem;">
           <div style="display: inline-block; padding: 0.25rem 0.75rem; border-radius: 999px; background: rgba(16, 185, 129, 0.14); color: #34d399; font-size: 0.76rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.75rem;">
-            ${escapeHtml(sourceLabel)} &bull; ${escapeHtml((opp.status || 'open').toUpperCase())}
+            ${escapeHtml(sourceLabel)} &bull; ${escapeHtml((opp.status || 'open').toUpperCase())}${cleanId ? ` &bull; CALL #${escapeHtml(cleanId)}` : ''}
           </div>
-          <h1 style="font-size: 2.05rem; font-weight: 700; margin: 0 0 0.85rem 0; line-height: 1.25;">${escapeHtml(opp.title)}</h1>
-          ${opp.short_description ? `<p style="font-size: 1.06rem; color: #cbd5e1; margin: 0;">${escapeHtml(opp.short_description)}</p>` : ''}
+          <h1 style="font-size: 2.05rem; font-weight: 700; margin: 0 0 0.85rem 0; line-height: 1.25;">${escapeHtml(opp.title)}${cleanId ? ` <span style="font-size: 1.15rem; font-weight: 500; color: #38bdf8;">(Call #${escapeHtml(cleanId)})</span>` : ''}</h1>
+          ${uniqueShort ? `<p style="font-size: 1.06rem; color: #cbd5e1; margin: 0;">${escapeHtml(uniqueShort)}</p>` : ''}
         </header>
 
         <section style="margin-bottom: 2rem;">
           <h2 style="${SSR_H2}">Grant Key Specifications</h2>
           <table style="${SSR_TABLE}">
             <tbody>
-              ${opp.external_id ? `<tr><th scope="row" style="${SSR_CELL}">Call Identifier</th><td style="${SSR_CELL}">${escapeHtml(opp.external_id)}</td></tr>` : ''}
+              ${cleanId ? `<tr><th scope="row" style="${SSR_CELL}">Call Reference ID</th><td style="${SSR_CELL}">${escapeHtml(cleanId)} (${escapeHtml(opp.external_id)})</td></tr>` : ''}
               <tr><th scope="row" style="${SSR_CELL}">Funding Program</th><td style="${SSR_CELL}">${escapeHtml(sourceLabel)} (${escapeHtml(opp.call_type || 'Proposals')})</td></tr>
               <tr><th scope="row" style="${SSR_CELL}">Funding Budget / Grant Size</th><td style="${SSR_CELL}">${escapeHtml(budgetText)}</td></tr>
               <tr><th scope="row" style="${SSR_CELL}">Submission Deadline</th><td style="${SSR_CELL}">${escapeHtml(deadlineText)}</td></tr>
@@ -555,14 +580,19 @@ export function renderGrantPageHtml(templateHtml, opp, relatedGrants = []) {
 
         ${cleanLongDesc ? `
         <section style="margin-bottom: 2rem;">
-          <h2 style="${SSR_H2}">Scope &amp; Call Description</h2>
+          <h2 style="${SSR_H2}">Expected Outcomes, Scope &amp; Call Description</h2>
           <p style="${SSR_P}">${escapeHtml(cleanLongDesc)}</p>
         </section>` : ''}
+
+        <section style="margin-bottom: 2rem;">
+          <h2 style="${SSR_H2}">Frequently Asked Questions: ${escapeHtml(opp.title)}</h2>
+          ${renderFaqHtml(grantFaqs)}
+        </section>
 
         <section style="margin-bottom: 2rem; border: 1px solid rgba(56, 189, 248, 0.25); border-radius: 12px; padding: 1.15rem; background: rgba(56, 189, 248, 0.04);">
           <h2 style="font-size: 1.15rem; font-weight: 600; margin: 0 0 0.45rem 0; color: #f8fafc;">Prepare Your EU Proposal</h2>
           <p style="margin: 0; color: #cbd5e1; font-size: 0.92rem;">
-            Verify your project's expected maturity with our free <a href="/tool/trl-calculator" style="${SSR_LINK} font-weight: 600;">TRL Calculator (Horizon Europe TRL 1–9)</a>, calculate work-package study power with the <a href="/tool/sample-size-calculator" style="${SSR_LINK} font-weight: 600;">Sample Size Calculator</a>, or <a href="/tool/eu-funding-opportunities" style="${SSR_LINK} font-weight: 600;">browse all 660+ open EU &amp; Cascade Funding Opportunities &rarr;</a>
+            Verify your project's expected maturity with our free <a href="/tool/trl-calculator" style="${SSR_LINK} font-weight: 600;">TRL Calculator (Horizon Europe TRL 1–9)</a>, calculate work-package study power with the <a href="/tool/sample-size-calculator" style="${SSR_LINK} font-weight: 600;">Sample Size Calculator</a>, or <a href="/tool/eu-funding-opportunities" style="${SSR_LINK} font-weight: 600;">browse all open EU &amp; Cascade Funding Opportunities &rarr;</a>
           </p>
         </section>
 
@@ -570,6 +600,21 @@ export function renderGrantPageHtml(templateHtml, opp, relatedGrants = []) {
       </article>
     </div>
   `;
+
+  const initialPayload = {
+    opp: {
+      ...opp,
+      short_description: uniqueShort,
+      long_description: cleanedLongHtml,
+      clean_call_id: cleanId,
+      seo_title: pageTitle,
+      meta_description: pageDesc,
+      meta_keywords: pageKeywords,
+      faqs: grantFaqs
+    },
+    relatedGrants
+  };
+  const initialDataScript = `<script id="ssr-grant-data">window.__INITIAL_GRANT_DATA__ = ${JSON.stringify(initialPayload).replace(/</g, '\\u003c')};</script>`;
 
   let html = stripOldMetaTags(templateHtml);
   const metaTags = [
@@ -593,7 +638,9 @@ export function renderGrantPageHtml(templateHtml, opp, relatedGrants = []) {
     `<meta name="twitter:description" content="${escapeHtml(pageDesc)}" />`,
     `<meta name="twitter:image" content="${ogImg}" />`,
     jsonLdScript(breadcrumbSchema, 'grant-breadcrumbs-jsonld'),
-    jsonLdScript(grantSchema, 'grant-entity-jsonld')
+    jsonLdScript(grantSchema, 'grant-entity-jsonld'),
+    jsonLdScript(faqSchema, 'grant-faq-jsonld'),
+    initialDataScript
   ].join('\n    ');
 
   html = html.replace('</head>', `    ${metaTags}\n  </head>`);

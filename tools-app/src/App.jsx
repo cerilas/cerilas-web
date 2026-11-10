@@ -261,6 +261,83 @@ const SkeletonCard = () => (
   </div>
 );
 
+function resolveInitialRouteState() {
+  if (typeof window === 'undefined') {
+    return { slug: null, variantSlug: null, categorySlug: null, legalSlug: null };
+  }
+  const pathname = window.location.pathname;
+  const hash = window.location.hash;
+
+  const legalAliasMap = {
+    'terms': 'terms',
+    'terms-of-service': 'terms',
+    'privacy': 'privacy',
+    'privacy-policy': 'privacy',
+    'refund': 'refund',
+    'refund-policy': 'refund',
+    'cancellation-refund': 'refund',
+    'cookies': 'cookies',
+    'cookie-policy': 'cookies'
+  };
+
+  const legalHashMatch = hash.match(/^#\/legal\/([a-zA-Z0-9_-]+)\/?/);
+  if (legalHashMatch && legalAliasMap[legalHashMatch[1].toLowerCase()]) {
+    return { slug: null, variantSlug: null, categorySlug: null, legalSlug: legalAliasMap[legalHashMatch[1].toLowerCase()] };
+  }
+  const directHashLegalMatch = hash.match(/^#\/(terms(?:-of-service)?|privacy(?:-policy)?|refund(?:-policy)?|cancellation-refund|cookies(?:-policy)?)\/?$/i);
+  if (directHashLegalMatch && legalAliasMap[directHashLegalMatch[1].toLowerCase()]) {
+    return { slug: null, variantSlug: null, categorySlug: null, legalSlug: legalAliasMap[directHashLegalMatch[1].toLowerCase()] };
+  }
+  const legalPathMatch = pathname.match(/^\/legal\/([a-zA-Z0-9_-]+)\/?/);
+  if (legalPathMatch && legalAliasMap[legalPathMatch[1].toLowerCase()]) {
+    return { slug: null, variantSlug: null, categorySlug: null, legalSlug: legalAliasMap[legalPathMatch[1].toLowerCase()] };
+  }
+  const directPathLegalMatch = pathname.match(/^\/(terms(?:-of-service)?|privacy(?:-policy)?|refund(?:-policy)?|cancellation-refund|cookies(?:-policy)?)\/?$/i);
+  if (directPathLegalMatch && legalAliasMap[directPathLegalMatch[1].toLowerCase()]) {
+    return { slug: null, variantSlug: null, categorySlug: null, legalSlug: legalAliasMap[directPathLegalMatch[1].toLowerCase()] };
+  }
+
+  const hashMatch = hash.match(/^#\/tools?\/([a-zA-Z0-9_-]+)(?:\/([a-zA-Z0-9_-]+))?\/?/);
+  if (hashMatch) {
+    const slugVal = hashMatch[1];
+    const subVal = hashMatch[2] || null;
+    const resolvedSeo = getToolSeo(slugVal);
+    const validVariant =
+      subVal && resolvedSeo?.slug !== 'eu-funding-opportunities'
+        ? getToolVariantSeo(resolvedSeo?.slug || slugVal, subVal)
+        : null;
+    return { slug: slugVal, variantSlug: validVariant ? validVariant.variantSlug : null, categorySlug: null, legalSlug: null };
+  }
+
+  const pathMatch = pathname.match(/^\/tools?\/([a-zA-Z0-9_-]+)(?:\/([a-zA-Z0-9_-]+))?\/?/);
+  if (pathMatch) {
+    const slugVal = pathMatch[1];
+    const subVal = pathMatch[2] || null;
+    const resolvedSeo = getToolSeo(slugVal);
+    const validVariant =
+      subVal && resolvedSeo?.slug !== 'eu-funding-opportunities'
+        ? getToolVariantSeo(resolvedSeo?.slug || slugVal, subVal)
+        : null;
+    return { slug: slugVal, variantSlug: validVariant ? validVariant.variantSlug : null, categorySlug: null, legalSlug: null };
+  }
+
+  const directLlmsMatch = pathname.match(/^\/(llms-txt(?:-(?:generator|checker|validator))?)\/?/);
+  if (directLlmsMatch) {
+    return { slug: directLlmsMatch[1], variantSlug: null, categorySlug: null, legalSlug: null };
+  }
+  const directHashLlmsMatch = hash.match(/^#\/(llms-txt(?:-(?:generator|checker|validator))?)\/?/);
+  if (directHashLlmsMatch) {
+    return { slug: directHashLlmsMatch[1], variantSlug: null, categorySlug: null, legalSlug: null };
+  }
+
+  const cleanCategoryPath = pathname.replace(/^\/+|\/+$/g, '').toLowerCase();
+  if (CATEGORIES[cleanCategoryPath]) {
+    return { slug: null, variantSlug: null, categorySlug: cleanCategoryPath, legalSlug: null };
+  }
+
+  return { slug: null, variantSlug: null, categorySlug: null, legalSlug: null };
+}
+
 export default function App() {
   const { t, language } = useTranslation();
   const { 
@@ -275,10 +352,10 @@ export default function App() {
   const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
-  const [currentSlug, setCurrentSlug] = useState(null);
-  const [currentVariantSlug, setCurrentVariantSlug] = useState(null);
-  const [currentCategorySlug, setCurrentCategorySlug] = useState(null);
-  const [currentLegalSlug, setCurrentLegalSlug] = useState(null);
+  const [currentSlug, setCurrentSlug] = useState(() => resolveInitialRouteState().slug);
+  const [currentVariantSlug, setCurrentVariantSlug] = useState(() => resolveInitialRouteState().variantSlug);
+  const [currentCategorySlug, setCurrentCategorySlug] = useState(() => resolveInitialRouteState().categorySlug);
+  const [currentLegalSlug, setCurrentLegalSlug] = useState(() => resolveInitialRouteState().legalSlug);
   const [isAdmin, setIsAdmin] = useState(() => {
     if (typeof window === 'undefined') return false;
     const p = window.location.pathname;
@@ -620,7 +697,14 @@ export default function App() {
     const manifest = activeRegistered?.manifest;
     const toolSeo = currentSlug ? getToolSeo(currentSlug) : null;
 
-    const ALL_JSONLD_IDS = [...Object.values(JSONLD_IDS), 'growth-jsonld', 'qr-breadcrumbs-jsonld'];
+    const ALL_JSONLD_IDS = [
+      ...Object.values(JSONLD_IDS),
+      'growth-jsonld',
+      'qr-breadcrumbs-jsonld',
+      'grant-breadcrumbs-jsonld',
+      'grant-entity-jsonld',
+      'grant-faq-jsonld'
+    ];
     const removeJsonLd = (keepIds = []) => {
       ALL_JSONLD_IDS.filter(id => !keepIds.includes(id)).forEach(id => {
         document.getElementById(id)?.remove();
@@ -733,13 +817,38 @@ export default function App() {
       cleanupToolJsonLd();
       return;
     } else if (currentSlug && (toolSeo || manifest)) {
-      // Preserve individual EU grant opportunity canonical & title on /tool/eu-funding-opportunities/:grantSlug
+      // Preserve individual EU grant opportunity canonical, title, description & JSON-LD on /tool/eu-funding-opportunities/:grantSlug
       const grantSubMatch = window.location.pathname.match(/^\/tools?\/eu-funding-opportunities\/([a-zA-Z0-9_-]+)\/?$/);
       if (grantSubMatch && grantSubMatch[1] && grantSubMatch[1] !== 'all') {
-        const grantCanonical = `https://tools.cerilas.com/tool/eu-funding-opportunities/${grantSubMatch[1]}`;
+        const grantSlugVal = grantSubMatch[1];
+        const grantCanonical = `https://tools.cerilas.com/tool/eu-funding-opportunities/${grantSlugVal}`;
+        const ssrGrant = typeof window !== 'undefined' && window.__INITIAL_GRANT_DATA__?.opp?.slug === grantSlugVal
+          ? window.__INITIAL_GRANT_DATA__.opp
+          : null;
+
         setCanonical(grantCanonical);
         setMeta('og:url', 'property', grantCanonical);
         setMeta('twitter:url', 'name', grantCanonical);
+
+        if (ssrGrant) {
+          const grantTitle = ssrGrant.seo_title || `${ssrGrant.title} | Horizon Europe & EU Grant`;
+          const grantDesc = ssrGrant.meta_description || ssrGrant.short_description || '';
+          const grantOgImg = 'https://tools.cerilas.com/og/eu-funding-opportunities.png';
+          document.title = grantTitle;
+          if (grantDesc) setMeta('description', 'name', grantDesc);
+          if (ssrGrant.meta_keywords) setMeta('keywords', 'name', ssrGrant.meta_keywords);
+          setMeta('og:type', 'property', 'article');
+          setMeta('og:title', 'property', grantTitle);
+          if (grantDesc) setMeta('og:description', 'property', grantDesc);
+          setMeta('og:image', 'property', grantOgImg);
+          setMeta('twitter:card', 'name', 'summary_large_image');
+          setMeta('twitter:title', 'property', grantTitle);
+          setMeta('twitter:title', 'name', grantTitle);
+          if (grantDesc) setMeta('twitter:description', 'name', grantDesc);
+          setMeta('twitter:image', 'name', grantOgImg);
+        }
+
+        removeJsonLd(['grant-breadcrumbs-jsonld', 'grant-entity-jsonld', 'grant-faq-jsonld']);
         return;
       }
 
@@ -1075,7 +1184,9 @@ export default function App() {
             }>
               <ToolScrollResetWrapper slug={currentVariantSlug ? `${currentSlug}/${currentVariantSlug}` : currentSlug}>
                 <ActiveToolComponent onBack={navigateToHome} toolMeta={activeToolMeta} />
-                <ToolSeoMesh slug={activeRegistered?.manifest?.slug || currentSlug} variantSlug={currentVariantSlug} />
+                {!(typeof window !== 'undefined' && /^\/tools?\/eu-funding-opportunities\/[a-zA-Z0-9_-]+/.test(window.location.pathname)) && (
+                  <ToolSeoMesh slug={activeRegistered?.manifest?.slug || currentSlug} variantSlug={currentVariantSlug} />
+                )}
               </ToolScrollResetWrapper>
             </Suspense>
           </ErrorBoundary>

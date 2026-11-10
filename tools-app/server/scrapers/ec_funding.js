@@ -331,7 +331,9 @@ function assembleRichDescription(m, isCompetitiveCall) {
     }
   } else {
     // Horizon Europe & Direct EU Calls
-    // 1. Objectives and Expected Outcomes (the core technical details)
+    // 1. Objectives and Expected Outcomes (the core topic-specific technical details)
+    // NOTE: We intentionally omit the 25KB repeated General Conditions & Support boilerplate
+    // whenever topic-specific descriptionByte is available so each grant page has 100% unique content.
     if (m.descriptionByte?.[0]) {
       sections.push(`
         <div class="ec-section" style="margin-bottom: 1.25rem;">
@@ -343,10 +345,7 @@ function assembleRichDescription(m, isCompetitiveCall) {
           </div>
         </div>
       `);
-    }
-
-    // 2. Destination Details and Policy Context
-    if (m.destinationDetails?.[0]) {
+    } else if (m.destinationDetails?.[0]) {
       sections.push(`
         <div class="ec-section" style="margin-bottom: 1.25rem;">
           <h4 style="font-size: 0.95rem; font-weight: 700; color: var(--text-main, #1e293b); margin: 0 0 0.5rem;">
@@ -358,54 +357,33 @@ function assembleRichDescription(m, isCompetitiveCall) {
         </div>
       `);
     }
-
-    // 3. Topic Conditions & Eligibility Rules
-    if (m.topicConditions?.[0]) {
-      sections.push(`
-        <div class="ec-section" style="margin-bottom: 1.25rem;">
-          <h4 style="font-size: 0.95rem; font-weight: 700; color: var(--text-main, #1e293b); margin: 0 0 0.5rem;">
-            Conditions & Eligibility Criteria
-          </h4>
-          <div style="font-size: 0.88rem; line-height: 1.6; color: var(--text-muted, #475569);">
-            ${m.topicConditions[0]}
-          </div>
-        </div>
-      `);
-    }
-
-    // 4. Online Manual & Applicant Support
-    if (m.supportInfo?.[0]) {
-      sections.push(`
-        <div class="ec-section" style="margin-bottom: 1.25rem;">
-          <h4 style="font-size: 0.95rem; font-weight: 700; color: var(--text-main, #1e293b); margin: 0 0 0.5rem;">
-            Support & Documentation Guidance
-          </h4>
-          <div style="font-size: 0.88rem; line-height: 1.6; color: var(--text-muted, #475569);">
-            ${m.supportInfo[0]}
-          </div>
-        </div>
-      `);
-    }
   }
 
   if (sections.length > 0) {
     return sections.join('<hr style="margin: 1.25rem 0; border: 0; border-top: 1px solid rgba(150, 150, 150, 0.15);" />');
   }
 
-  return m.topicConditions?.[0] || m.destinationDescription?.[0] || '';
+  return m.descriptionByte?.[0] || m.destinationDescription?.[0] || '';
 }
 
 /**
- * Derive clean short preview text without raw HTML tags
+ * Derive clean short preview text without raw HTML tags (prioritizing topic-specific descriptionByte over generic destination header)
  */
 function deriveShortDescription(m, isCompetitiveCall, summary) {
   let raw = '';
   if (isCompetitiveCall) {
     raw = m.furtherInformation?.[0] || m.description?.[0] || m.callTitle?.[0] || summary || '';
   } else {
-    raw = m.destinationDescription?.[0] || m.descriptionByte?.[0] || m.callTitle?.[0] || summary || '';
+    raw = m.descriptionByte?.[0] || m.destinationDescription?.[0] || m.callTitle?.[0] || summary || '';
   }
-  const clean = raw.replace(/<[^>]*>?/gm, ' ').replace(/\s+/g, ' ').trim();
+  const clean = raw
+    .replace(/<[^>]*>?/gm, ' ')
+    .replace(/\s+/g, ' ')
+    .replace(/^Expected Outcome\s*:?\s*/i, '')
+    .replace(/^Project(?:s)? results are expected to contribute to (?:all|some|at least one) of the following expected outcomes\s*:?\s*/i, '')
+    .replace(/^Proposals are expected to contribute to (?:all|some) of the following expected outcomes\s*:?\s*/i, '')
+    .replace(/^Scope\s*:?\s*/i, '')
+    .trim();
   return clean.length > 280 ? clean.slice(0, 277) + '...' : clean;
 }
 

@@ -329,7 +329,9 @@ router.get('/sitemap.xml', async (req, res) => {
     const result = await pool.query(`
       SELECT slug, last_scraped_at, last_changed_at, first_scraped_at
       FROM funding_opportunities
-      WHERE status = 'open' AND slug IS NOT NULL
+      WHERE status = 'open'
+        AND slug IS NOT NULL
+        AND (deadline_date IS NULL OR deadline_date >= CURRENT_DATE)
       ORDER BY last_scraped_at DESC
     `);
 
